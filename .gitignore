@@ -48,3 +48,7 @@ build/
 ## OS Specific
 
 .DS_Store
+
+## Project settings
+
+repo.properties
