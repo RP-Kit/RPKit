@@ -1,0 +1,9 @@
+include "apis:elysium-core-api"
+include "apis:elysium-player-api"
+include "apis:elysium-character-api"
+include "apis:elysium-chat-api"
+include "bukkit:elysium-core-bukkit"
+include "bukkit:elysium-players-bukkit"
+include "bukkit:elysium-characters-bukkit"
+include "bukkit:elysium-chat-bukkit"
+

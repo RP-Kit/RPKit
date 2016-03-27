@@ -1,0 +1,351 @@
+import org.apache.tools.ant.filters.*
+
+buildscript {
+
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
+    }
+
+}
+
+allprojects {
+    apply plugin: "java"
+    apply plugin: "maven"
+    group = "com.seventh-root"
+    version = "0.1.0"
+}
+
+subprojects {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://hub.spigotmc.org/nexus/content/groups/public/"
+        }
+    }
+}
+
+File propertiesFile = new File("repo.properties")
+Properties properties = new Properties()
+properties.load(new FileInputStream(propertiesFile))
+def repoUserName = properties.getProperty("repo-username")
+def repoPassword = properties.getProperty("repo-password")
+
+// APIs
+
+project(":apis:elysium-core-api") {
+
+    def mysqlConnectorVersion = "5.1.35"
+    def commonsCodecVersion = "1.9"
+    def commonsLangVersion = "2.6"
+    def guavaVersion = "17.0"
+    def gsonVersion = "2.2.4"
+    def ehcacheVersion = "3.0.0.rc2"
+
+    dependencies {
+        compile group: "mysql", name: "mysql-connector-java", version: mysqlConnectorVersion
+        compile group: "commons-codec", name: "commons-codec", version: commonsCodecVersion
+        compile group: "commons-lang", name: "commons-lang", version: commonsLangVersion
+        compile group: "com.google.guava", name: "guava", version: guavaVersion
+        compile group: "com.google.code.gson", name: "gson", version: gsonVersion
+        compile group: "org.ehcache", name: "ehcache", version: ehcacheVersion
+    }
+
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+        classifier = ""
+        from sourceSets.main.output
+    }
+
+    artifacts {
+        archives shadowJar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":apis:elysium-core-api").version
+            pom.artifactId = project(":apis:elysium-core-api").name
+            pom.groupId = project(":apis:elysium-core-api").group
+
+        }
+    }
+
+}
+
+project(":apis:elysium-player-api") {
+
+    dependencies {
+        compile project(":apis:elysium-core-api")
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":apis:elysium-player-api").version
+            pom.artifactId = project(":apis:elysium-player-api").name
+            pom.groupId = project(":apis:elysium-player-api").group
+
+        }
+    }
+
+}
+
+project(":apis:elysium-character-api") {
+
+    dependencies {
+        compile project(":apis:elysium-core-api")
+        compile project(":apis:elysium-player-api")
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+
+                repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                    authentication(userName: repoUserName, password: repoPassword)
+                }
+
+                pom.version = project(":apis:elysium-character-api").version
+                pom.artifactId = project(":apis:elysium-character-api").name
+                pom.groupId = project(":apis:elysium-character-api").group
+
+            }
+        }
+    }
+
+}
+
+project(":apis:elysium-chat-api") {
+
+    dependencies {
+        compile project(":apis:elysium-core-api")
+        compile project(":apis:elysium-player-api")
+        compile project(":apis:elysium-character-api")
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+
+                repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                    authentication(userName: repoUserName, password: repoPassword)
+                }
+
+                pom.version = project(":apis:elysium-chat-api").version
+                pom.artifactId = project(":apis:elysium-chat-api").name
+                pom.groupId = project(":apis:elysium-chat-api").group
+
+            }
+        }
+    }
+
+}
+
+// Bukkit implementations
+
+project(":bukkit:elysium-core-bukkit") {
+
+    dependencies {
+        compile group: "org.bukkit", name: "bukkit", version: "1.9-R0.1-SNAPSHOT"
+        compile project(":apis:elysium-core-api")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(project(":apis:elysium-core-api"))
+        }
+
+        classifier = ""
+        from sourceSets.main.output
+    }
+
+    artifacts {
+        archives shadowJar
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+
+                repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                    authentication(userName: repoUserName, password: repoPassword)
+                }
+
+                pom.version = project(":bukkit:elysium-core-bukkit").version
+                pom.artifactId = project(":bukkit:elysium-core-bukkit").name
+                pom.groupId = project(":bukkit:elysium-core-bukkit").group
+
+            }
+        }
+    }
+
+}
+
+project(":bukkit:elysium-players-bukkit") {
+
+    dependencies {
+        compile group: "org.bukkit", name: "bukkit", version: "1.9-R0.1-SNAPSHOT"
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":apis:elysium-player-api")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(project(":apis:elysium-player-api"))
+        }
+
+        classifier = ""
+        from sourceSets.main.output
+    }
+
+    artifacts {
+        archives shadowJar
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+
+                repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                    authentication(userName: repoUserName, password: repoPassword)
+                }
+
+                pom.version = project(":bukkit:elysium-players-bukkit").version
+                pom.artifactId = project(":bukkit:elysium-players-bukkit").name
+                pom.groupId = project(":bukkit:elysium-players-bukkit").group
+
+            }
+        }
+    }
+
+}
+
+project(":bukkit:elysium-characters-bukkit") {
+
+    dependencies {
+        compile group: "org.bukkit", name: "bukkit", version: "1.8.8-R0.1-SNAPSHOT"
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-players-bukkit")
+        compile project(":apis:elysium-character-api")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(project(":apis:elysium-character-api"))
+        }
+
+        classifier = ""
+        from sourceSets.main.output
+    }
+
+    artifacts {
+        archives shadowJar
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+
+                repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                    authentication(userName: repoUserName, password: repoPassword)
+                }
+
+                pom.version = project(":bukkit:elysium-characters-bukkit").version
+                pom.artifactId = project(":bukkit:elysium-characters-bukkit").name
+                pom.groupId = project(":bukkit:elysium-characters-bukkit").group
+
+            }
+        }
+    }
+
+}
+
+project(":bukkit:elysium-chat-bukkit") {
+
+    dependencies {
+        compile group: "org.bukkit", name: "bukkit", version: "1.8.8-R0.1-SNAPSHOT"
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-players-bukkit")
+        compile project(":bukkit:elysium-characters-bukkit")
+        compile project(":apis:elysium-chat-api")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(project(":apis:elysium-chat-api"))
+        }
+
+        classifier = ""
+        from sourceSets.main.output
+    }
+
+    artifacts {
+        archives shadowJar
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+
+                repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                    authentication(userName: repoUserName, password: repoPassword)
+                }
+
+                pom.version = project(":bukkit:elysium-chat-bukkit").version
+                pom.artifactId = project(":bukkit:elysium-chat-bukkit").name
+                pom.groupId = project(":bukkit:elysium-chat-bukkit").group
+
+            }
+        }
+    }
+
+}

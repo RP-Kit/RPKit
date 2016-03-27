@@ -1,0 +1,6 @@
+name: elysium-players-bukkit
+version: @version@
+main: com.seventh_root.elysium.players.bukkit.ElysiumPlayersBukkit
+author: alyphen
+description: Elysium Players implementation for Bukkit
+depend: [elysium-core-bukkit]
