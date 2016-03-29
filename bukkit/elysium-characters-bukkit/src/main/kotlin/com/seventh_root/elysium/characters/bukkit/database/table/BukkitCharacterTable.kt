@@ -27,35 +27,35 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "CREATE TABLE IF NOT EXISTS bukkit_character (" +
-                                "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                                "player_id INTEGER," +
-                                "name VARCHAR(256)," +
-                                "gender_id INTEGER," +
-                                "age INTEGER," +
-                                "race_id INTEGER," +
-                                "description VARCHAR(1024)," +
-                                "dead BOOLEAN," +
-                                "world VARCHAR(256)," +
-                                "x DOUBLE," +
-                                "y DOUBLE," +
-                                "z DOUBLE," +
-                                "yaw REAL," +
-                                "pitch REAL," +
-                                "helmet BLOB," +
-                                "chestplate BLOB," +
-                                "leggings BLOB," +
-                                "boots BLOB," +
-                                "inventory_contents BLOB," +
-                                "health DOUBLE," +
-                                "max_health DOUBLE," +
-                                "mana INTEGER," +
-                                "max_mana INTEGER," +
-                                "food_level INTEGER," +
-                                "thirst_level INTEGER," +
-                                "FOREIGN KEY(player_id) REFERENCES bukkit_player(id)," +
-                                "FOREIGN KEY(gender_id) REFERENCES bukkit_gender(id)," +
-                                "FOREIGN KEY(race_id) REFERENCES bukkit_race(id)" +
-                                ")").use({ statement -> statement.executeUpdate() })
+                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
+                            "player_id INTEGER," +
+                            "name VARCHAR(256)," +
+                            "gender_id INTEGER," +
+                            "age INTEGER," +
+                            "race_id INTEGER," +
+                            "description VARCHAR(1024)," +
+                            "dead BOOLEAN," +
+                            "world VARCHAR(256)," +
+                            "x DOUBLE," +
+                            "y DOUBLE," +
+                            "z DOUBLE," +
+                            "yaw REAL," +
+                            "pitch REAL," +
+                            "helmet BLOB," +
+                            "chestplate BLOB," +
+                            "leggings BLOB," +
+                            "boots BLOB," +
+                            "inventory_contents BLOB," +
+                            "health DOUBLE," +
+                            "max_health DOUBLE," +
+                            "mana INTEGER," +
+                            "max_mana INTEGER," +
+                            "food_level INTEGER," +
+                            "thirst_level INTEGER," +
+                            "FOREIGN KEY(player_id) REFERENCES bukkit_player(id)," +
+                            "FOREIGN KEY(gender_id) REFERENCES bukkit_gender(id)," +
+                            "FOREIGN KEY(race_id) REFERENCES bukkit_race(id)" +
+                        ")").use({ statement -> statement.executeUpdate() })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
@@ -70,12 +70,15 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
                                 "UNIQUE(player_id)," +
                                 "FOREIGN KEY(player_id) REFERENCES bukkit_player(id)," +
                                 "FOREIGN KEY(character_id) REFERENCES bukkit_character(id)" +
-                                ")").use({ statement -> statement.executeUpdate() })
+                        ")").use({ statement -> statement.executeUpdate() })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
 
+        if (database.getTableVersion(this) == null) {
+            database.setTableVersion(this, "0.1.0")
+        }
     }
 
     override fun insert(`object`: BukkitCharacter): Int {

@@ -15,14 +15,17 @@ constructor(database: Database) : Table<BukkitGender>(database, BukkitGender::cl
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "CREATE TABLE IF NOT EXISTS bukkit_gender(" +
-                                "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                                "name VARCHAR(256)" +
-                                ")").use({ statement -> statement.executeUpdate() })
+                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
+                            "name VARCHAR(256)" +
+                        ")").use({ statement -> statement.executeUpdate() })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
 
+        if (database.getTableVersion(this) == null) {
+            database.setTableVersion(this, "0.1.0")
+        }
     }
 
     override fun insert(`object`: BukkitGender): Int {

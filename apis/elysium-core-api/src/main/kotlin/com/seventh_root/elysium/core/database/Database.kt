@@ -2,6 +2,7 @@ package com.seventh_root.elysium.core.database
 
 import com.google.common.base.CaseFormat.LOWER_UNDERSCORE
 import com.google.common.base.CaseFormat.UPPER_CAMEL
+import com.seventh_root.elysium.core.database.table.TableVersionTable
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
@@ -13,6 +14,7 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
 
     init {
         tables = HashMap<String, Table<*>>()
+        addTable(TableVersionTable(this))
     }
 
     @Throws(SQLException::class)
@@ -26,7 +28,6 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
 
     fun addTable(table: Table<*>) {
         tables.put(table.name, table)
-        table.create()
     }
 
     fun getTable(name: String): Table<*>? {
@@ -38,6 +39,14 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
     fun <T : TableRow> getTable(type: Class<T>): Table<T>? {
         val table = tables[UPPER_CAMEL.to(LOWER_UNDERSCORE, type.simpleName)]
         return table as Table<T>?
+    }
+
+    fun getTableVersion(table: Table<*>): String? {
+        return (getTable(TableVersion::class.java) as TableVersionTable).get(table.name)?.version
+    }
+
+    fun setTableVersion(table: Table<*>, version: String) {
+        getTable(TableVersion::class.java)?.insert(TableVersion(table.name, version))
     }
 
 }
