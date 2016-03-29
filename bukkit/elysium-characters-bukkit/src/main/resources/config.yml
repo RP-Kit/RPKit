@@ -98,6 +98,7 @@ characters:
         description: ''
         dead: false
         inventory-contents: []
+        offhand: null
         helmet: null
         chestplate: null
         leggings: null
