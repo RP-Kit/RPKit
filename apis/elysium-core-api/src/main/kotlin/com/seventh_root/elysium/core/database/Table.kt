@@ -5,11 +5,6 @@ import com.google.common.base.CaseFormat.UPPER_CAMEL
 
 abstract class Table<T : TableRow>(val database: Database, val name: String, val type: Class<T>) {
 
-    init {
-        create()
-        applyMigrations()
-    }
-
     constructor(database: Database, type: Class<T>) : this(database, UPPER_CAMEL.to(LOWER_UNDERSCORE, type.simpleName), type) {
     }
 

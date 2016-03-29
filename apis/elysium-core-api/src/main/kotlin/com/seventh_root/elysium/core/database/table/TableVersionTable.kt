@@ -14,9 +14,9 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
         try {
             database.createConnection().use {
                 connection -> connection.prepareStatement(
-                    "CREATE TABLE table_version(" +
+                    "CREATE TABLE IF NOT EXISTS table_version (" +
                         "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                        "table VARCHAR(256)," +
+                        "table_name VARCHAR(256)," +
                         "version VARCHAR(32)" +
                     ")"
                 ).use {
@@ -33,22 +33,21 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
             var id = 0
             database.createConnection().use {
                 connection -> connection.prepareStatement(
-                    "INSERT INTO table_version(table, version) VALUES(?, ?)",
+                    "INSERT INTO table_version(table_name, version) VALUES(?, ?)",
                     RETURN_GENERATED_KEYS
                 ).use {
-                    statement -> {
+                    statement ->
                         statement.setString(1, `object`.table)
                         statement.setString(2, `object`.version)
                         statement.executeUpdate()
                         val generatedKeys = statement.generatedKeys
                         if (generatedKeys.next()) {
+                            id = generatedKeys.getInt(1)
                             `object`.id = id
-                            id = generatedKeys.getInt(0)
                         }
-                    }
                 }
             }
-            return 0
+            return id
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
@@ -59,15 +58,14 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
         try {
             database.createConnection().use {
                 connection -> connection.prepareStatement(
-                    "UPDATE table_version SET table = ?, version = ? WHERE id = ?"
+                    "UPDATE table_version SET table_name = ?, version = ? WHERE id = ?"
                 ).use {
-                    statement -> {
+                    statement ->
                         statement.setString(1, `object`.table)
                         statement.setString(2, `object`.version)
                         statement.setInt(3, `object`.id)
                         statement.executeUpdate()
                     }
-                }
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
@@ -79,15 +77,14 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
             var tableVersion: TableVersion? = null
             database.createConnection().use {
                 connection -> connection.prepareStatement(
-                    "SELECT id, table, version FROM table_version WHERE id = ?"
+                    "SELECT id, table_name, version FROM table_version WHERE id = ?"
                 ).use {
-                    statement -> {
+                    statement ->
                         statement.setInt(1, id)
                         val resultSet = statement.executeQuery()
                         if (resultSet.next()) {
-                            tableVersion = TableVersion(resultSet.getInt("id"), resultSet.getString("table"), resultSet.getString("version"))
+                            tableVersion = TableVersion(resultSet.getInt("id"), resultSet.getString("table_name"), resultSet.getString("version"))
                         }
-                    }
                 }
             }
             return tableVersion
@@ -102,15 +99,14 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
             var tableVersion: TableVersion? = null
             database.createConnection().use {
                 connection -> connection.prepareStatement(
-                    "SELECT id, table, version FROM table_version WHERE table = ?"
+                    "SELECT id, table_name, version FROM table_version WHERE table_name = ?"
                 ).use {
-                    statement -> {
+                    statement ->
                         statement.setString(1, table)
                         val resultSet = statement.executeQuery()
                         if (resultSet.next()) {
-                            tableVersion = TableVersion(resultSet.getInt("id"), resultSet.getString("table"), resultSet.getString("version"))
+                            tableVersion = TableVersion(resultSet.getInt("id"), resultSet.getString("table_name"), resultSet.getString("version"))
                         }
-                    }
                 }
             }
             return tableVersion

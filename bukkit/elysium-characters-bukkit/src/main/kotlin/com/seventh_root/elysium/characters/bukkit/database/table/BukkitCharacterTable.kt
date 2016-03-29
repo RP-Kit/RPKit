@@ -98,6 +98,7 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
             } catch (exception: SQLException) {
                 exception.printStackTrace()
             }
+            database.setTableVersion(this, "0.1.1")
         }
     }
 
