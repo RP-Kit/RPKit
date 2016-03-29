@@ -43,7 +43,6 @@ class BukkitCharacterProvider(private val plugin: ElysiumCharactersBukkit) : Cha
                 if (offlineBukkitPlayer.isOnline) {
                     val bukkitPlayer = offlineBukkitPlayer.player
                     oldCharacter.inventoryContents = bukkitPlayer.inventory.contents
-                    oldCharacter.offhand = bukkitPlayer.inventory.itemInOffHand
                     oldCharacter.helmet = bukkitPlayer.inventory.helmet
                     oldCharacter.chestplate = bukkitPlayer.inventory.chestplate
                     oldCharacter.leggings = bukkitPlayer.inventory.leggings
@@ -74,7 +73,6 @@ class BukkitCharacterProvider(private val plugin: ElysiumCharactersBukkit) : Cha
                 if (offlineBukkitPlayer.isOnline) {
                     val bukkitPlayer = offlineBukkitPlayer.player
                     bukkitPlayer.inventory.contents = character.inventoryContents
-                    bukkitPlayer.inventory.itemInOffHand = character.offhand
                     bukkitPlayer.inventory.helmet = character.helmet
                     bukkitPlayer.inventory.chestplate = character.chestplate
                     bukkitPlayer.inventory.leggings = character.leggings
