@@ -42,11 +42,12 @@ class BukkitCharacterProvider(private val plugin: ElysiumCharactersBukkit) : Cha
                 val offlineBukkitPlayer = player.bukkitPlayer
                 if (offlineBukkitPlayer.isOnline) {
                     val bukkitPlayer = offlineBukkitPlayer.player
+                    oldCharacter.inventoryContents = bukkitPlayer.inventory.contents
+                    oldCharacter.offhand = bukkitPlayer.inventory.itemInOffHand
                     oldCharacter.helmet = bukkitPlayer.inventory.helmet
                     oldCharacter.chestplate = bukkitPlayer.inventory.chestplate
                     oldCharacter.leggings = bukkitPlayer.inventory.leggings
                     oldCharacter.boots = bukkitPlayer.inventory.boots
-                    oldCharacter.inventoryContents = bukkitPlayer.inventory.contents
                     oldCharacter.location = bukkitPlayer.location
                     oldCharacter.health = bukkitPlayer.health
                     oldCharacter.foodLevel = bukkitPlayer.foodLevel
@@ -72,11 +73,12 @@ class BukkitCharacterProvider(private val plugin: ElysiumCharactersBukkit) : Cha
                 val offlineBukkitPlayer = player.bukkitPlayer
                 if (offlineBukkitPlayer.isOnline) {
                     val bukkitPlayer = offlineBukkitPlayer.player
+                    bukkitPlayer.inventory.contents = character.inventoryContents
+                    bukkitPlayer.inventory.itemInOffHand = character.offhand
                     bukkitPlayer.inventory.helmet = character.helmet
                     bukkitPlayer.inventory.chestplate = character.chestplate
                     bukkitPlayer.inventory.leggings = character.leggings
                     bukkitPlayer.inventory.boots = character.boots
-                    bukkitPlayer.inventory.contents = character.inventoryContents
                     bukkitPlayer.teleport(character.location)
                     bukkitPlayer.health = character.health
                     bukkitPlayer.maxHealth = character.maxHealth
