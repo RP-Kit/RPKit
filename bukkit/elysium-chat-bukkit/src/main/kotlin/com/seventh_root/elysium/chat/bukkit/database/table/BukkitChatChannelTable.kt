@@ -18,20 +18,20 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "CREATE TABLE IF NOT EXISTS bukkit_chat_channel(" +
-                                "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                                "name VARCHAR(256)," +
-                                "color_red INTEGER," +
-                                "color_green INTEGER," +
-                                "color_blue INTEGER," +
-                                "format_string VARCHAR(256)," +
-                                "match_pattern VARCHAR(256)," +
-                                "radius INTEGER," +
-                                "clear_radius INTEGER," +
-                                "irc_enabled BOOLEAN," +
-                                "irc_channel VARCHAR(256)," +
-                                "irc_whitelist BOOLEAN," +
-                                "joined_by_default BOOLEAN" +
-                                ")").use({ statement -> statement.executeUpdate() })
+                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
+                            "name VARCHAR(256)," +
+                            "color_red INTEGER," +
+                            "color_green INTEGER," +
+                            "color_blue INTEGER," +
+                            "format_string VARCHAR(256)," +
+                            "match_pattern VARCHAR(256)," +
+                            "radius INTEGER," +
+                            "clear_radius INTEGER," +
+                            "irc_enabled BOOLEAN," +
+                            "irc_channel VARCHAR(256)," +
+                            "irc_whitelist BOOLEAN," +
+                            "joined_by_default BOOLEAN" +
+                        ")").use({ statement -> statement.executeUpdate() })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
@@ -65,6 +65,9 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
             exception.printStackTrace()
         }
 
+        if (database.getTableVersion(this) == null) {
+            database.setTableVersion(this, "0.1.0")
+        }
     }
 
     override fun insert(`object`: BukkitChatChannel): Int {
