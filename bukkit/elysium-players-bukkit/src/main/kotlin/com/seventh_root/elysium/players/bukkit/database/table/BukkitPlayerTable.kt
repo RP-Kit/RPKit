@@ -20,14 +20,17 @@ constructor(database: Database) : Table<BukkitPlayer>(database, BukkitPlayer::cl
             database.createConnection().use { connection: Connection ->
                 connection.prepareStatement(
                         "CREATE TABLE IF NOT EXISTS bukkit_player(" +
-                                "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                                "minecraft_uuid VARCHAR(36)" +
-                                ")").use({ statement: PreparedStatement -> statement.executeUpdate() })
+                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
+                            "minecraft_uuid VARCHAR(36)" +
+                        ")").use({ statement: PreparedStatement -> statement.executeUpdate() })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
 
+        if (database.getTableVersion(this) == null) {
+            database.setTableVersion(this, "0.1.0")
+        }
     }
 
     override fun insert(`object`: BukkitPlayer): Int {

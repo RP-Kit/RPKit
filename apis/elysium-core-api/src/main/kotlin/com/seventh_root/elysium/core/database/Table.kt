@@ -7,12 +7,17 @@ abstract class Table<T : TableRow>(val database: Database, val name: String, val
 
     init {
         create()
+        applyMigrations()
     }
 
     constructor(database: Database, type: Class<T>) : this(database, UPPER_CAMEL.to(LOWER_UNDERSCORE, type.simpleName), type) {
     }
 
     abstract fun create()
+
+    open fun applyMigrations() {
+
+    }
 
     abstract fun insert(`object`: T): Int
 
