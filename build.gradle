@@ -204,7 +204,6 @@ project(":bukkit:elysium-core-bukkit") {
 project(":bukkit:elysium-players-bukkit") {
 
     dependencies {
-        compile group: "org.bukkit", name: "bukkit", version: "1.9-R0.1-SNAPSHOT"
         compile project(":bukkit:elysium-core-bukkit")
         compile project(":apis:elysium-player-api")
     }
@@ -250,7 +249,6 @@ project(":bukkit:elysium-players-bukkit") {
 project(":bukkit:elysium-characters-bukkit") {
 
     dependencies {
-        compile group: "org.bukkit", name: "bukkit", version: "1.8.8-R0.1-SNAPSHOT"
         compile project(":bukkit:elysium-core-bukkit")
         compile project(":bukkit:elysium-players-bukkit")
         compile project(":apis:elysium-character-api")
@@ -297,7 +295,6 @@ project(":bukkit:elysium-characters-bukkit") {
 project(":bukkit:elysium-chat-bukkit") {
 
     dependencies {
-        compile group: "org.bukkit", name: "bukkit", version: "1.8.8-R0.1-SNAPSHOT"
         compile project(":bukkit:elysium-core-bukkit")
         compile project(":bukkit:elysium-players-bukkit")
         compile project(":bukkit:elysium-characters-bukkit")
