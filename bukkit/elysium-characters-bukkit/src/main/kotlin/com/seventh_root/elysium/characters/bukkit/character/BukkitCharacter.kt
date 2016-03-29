@@ -14,7 +14,7 @@ import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import java.util.*
 
-class BukkitCharacter private constructor(id: Int, player: ElysiumPlayer, name: String, gender: Gender, age: Int, race: Race, description: String, dead: Boolean, location: Location, inventoryContents: Array<ItemStack>, offhand: ItemStack?, helmet: ItemStack?, chestplate: ItemStack?, leggings: ItemStack?, boots: ItemStack?, health: Double, maxHealth: Double, mana: Int, maxMana: Int, foodLevel: Int, thirstLevel: Int) : ElysiumCharacter {
+class BukkitCharacter private constructor(id: Int, player: ElysiumPlayer, name: String, gender: Gender, age: Int, race: Race, description: String, dead: Boolean, location: Location, inventoryContents: Array<ItemStack>, helmet: ItemStack?, chestplate: ItemStack?, leggings: ItemStack?, boots: ItemStack?, health: Double, maxHealth: Double, mana: Int, maxMana: Int, foodLevel: Int, thirstLevel: Int) : ElysiumCharacter {
 
     class Builder
     @Suppress("UNCHECKED_CAST")
@@ -30,7 +30,6 @@ class BukkitCharacter private constructor(id: Int, player: ElysiumPlayer, name: 
         private var dead: Boolean
         private var location: Location
         private var inventoryContents: MutableList<ItemStack>
-        private var offhand: ItemStack? = null
         private var helmet: ItemStack? = null
         private var chestplate: ItemStack? = null
         private var leggings: ItemStack? = null
@@ -63,7 +62,6 @@ class BukkitCharacter private constructor(id: Int, player: ElysiumPlayer, name: 
             dead = plugin.config.getBoolean("characters.defaults.dead")
             location = Bukkit.getWorlds()[0].spawnLocation
             inventoryContents = plugin.config.getList("characters.defaults.inventory-contents") as ArrayList<ItemStack>
-            offhand = plugin.config.getItemStack("characters.defaults.offhand")
             helmet = plugin.config.getItemStack("characters.defaults.helmet")
             chestplate = plugin.config.getItemStack("characters.defaults.chestplate")
             leggings = plugin.config.getItemStack("characters.defaults.leggings")
@@ -126,19 +124,14 @@ class BukkitCharacter private constructor(id: Int, player: ElysiumPlayer, name: 
         }
 
         fun inventoryContents(inventoryContents: Array<ItemStack>?): Builder {
-            Validate.notNull(inventoryContents)
-            Validate.isTrue(inventoryContents!!.size == 36)
-            this.inventoryContents = Arrays.asList(*inventoryContents)
+            if (inventoryContents != null) {
+                this.inventoryContents = Arrays.asList(*inventoryContents)
+            }
             return this
         }
 
         fun inventoryItem(item: ItemStack): Builder {
             inventoryContents.add(item)
-            return this
-        }
-
-        fun offhand(offhand: ItemStack?): Builder {
-            this.offhand = offhand
             return this
         }
 
@@ -204,7 +197,6 @@ class BukkitCharacter private constructor(id: Int, player: ElysiumPlayer, name: 
                     dead,
                     location,
                     inventoryContents.toTypedArray(),
-                    offhand,
                     helmet,
                     chestplate,
                     leggings,
@@ -233,15 +225,14 @@ class BukkitCharacter private constructor(id: Int, player: ElysiumPlayer, name: 
     override var race: Race = race
     override var description: String = description
         set(description) {
-            this.description = description
-            if (this.description.length > 1024) {
-                this.description = this.description.substring(0, 1021) + "..."
+            field = description
+            if (field.length > 1024) {
+                field = field.substring(0, 1021) + "..."
             }
         }
     override var isDead: Boolean = dead
     var location: Location = location
     var inventoryContents: Array<ItemStack> = inventoryContents
-    var offhand: ItemStack? = offhand
     var helmet: ItemStack? = helmet
     var chestplate: ItemStack? = chestplate
     var leggings: ItemStack? = leggings
@@ -276,7 +267,6 @@ class BukkitCharacter private constructor(id: Int, player: ElysiumPlayer, name: 
         if (location != character.location) return false
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         if (!Arrays.equals(inventoryContents, character.inventoryContents)) return false
-        if (if (offhand != null) offhand != character.offhand else character.offhand != null) return false
         if (if (helmet != null) helmet != character.helmet else character.helmet != null) return false
         if (if (chestplate != null) chestplate != character.chestplate else character.chestplate != null) return false
         if (if (leggings != null) leggings != character.leggings else character.leggings != null) return false
@@ -297,7 +287,6 @@ class BukkitCharacter private constructor(id: Int, player: ElysiumPlayer, name: 
         result = 31 * result + if (isDead) 1 else 0
         result = 31 * result + location.hashCode()
         result = 31 * result + Arrays.hashCode(inventoryContents)
-        result = 31 * result + if (offhand != null) offhand!!.hashCode() else 0
         result = 31 * result + if (helmet != null) helmet!!.hashCode() else 0
         result = 31 * result + if (chestplate != null) chestplate!!.hashCode() else 0
         result = 31 * result + if (leggings != null) leggings!!.hashCode() else 0
