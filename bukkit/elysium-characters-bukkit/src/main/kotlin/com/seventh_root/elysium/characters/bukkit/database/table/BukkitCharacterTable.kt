@@ -86,20 +86,6 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
             database.setTableVersion(this, "0.1.1")
         }
         if (database.getTableVersion(this).equals("0.1.1")) {
-            try {
-                database.createConnection().use {
-                    connection -> {
-                        connection.prepareStatement(
-                                "ALTER TABLE bukkit_character ADD offhand BLOB AFTER inventory_contents"
-                        ).use {
-                            statement ->
-                                statement.executeUpdate()
-                        }
-                    }
-                }
-            } catch (exception: SQLException) {
-                exception.printStackTrace()
-            }
             database.setTableVersion(this, "0.1.2")
         }
     }
@@ -109,7 +95,7 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
             var id = 0
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "INSERT INTO bukkit_character(player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, offhand, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        "INSERT INTO bukkit_character(player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         RETURN_GENERATED_KEYS).use({ statement ->
                     statement.setInt(1, `object`.player.id)
                     statement.setString(2, `object`.name)
@@ -125,17 +111,16 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
                     statement.setFloat(12, `object`.location.yaw)
                     statement.setFloat(13, `object`.location.pitch)
                     statement.setBytes(14, serializeInventory(`object`.inventoryContents))
-                    statement.setBytes(15, serializeItemStack(`object`.offhand))
-                    statement.setBytes(16, serializeItemStack(`object`.helmet))
-                    statement.setBytes(17, serializeItemStack(`object`.chestplate))
-                    statement.setBytes(18, serializeItemStack(`object`.leggings))
-                    statement.setBytes(19, serializeItemStack(`object`.boots))
-                    statement.setDouble(20, `object`.health)
-                    statement.setDouble(21, `object`.maxHealth)
-                    statement.setInt(22, `object`.mana)
-                    statement.setInt(23, `object`.maxMana)
-                    statement.setInt(24, `object`.foodLevel)
-                    statement.setInt(25, `object`.thirstLevel)
+                    statement.setBytes(15, serializeItemStack(`object`.helmet))
+                    statement.setBytes(16, serializeItemStack(`object`.chestplate))
+                    statement.setBytes(17, serializeItemStack(`object`.leggings))
+                    statement.setBytes(18, serializeItemStack(`object`.boots))
+                    statement.setDouble(19, `object`.health)
+                    statement.setDouble(20, `object`.maxHealth)
+                    statement.setInt(21, `object`.mana)
+                    statement.setInt(22, `object`.maxMana)
+                    statement.setInt(23, `object`.foodLevel)
+                    statement.setInt(24, `object`.thirstLevel)
                     statement.executeUpdate()
                     val generatedKeys = statement.generatedKeys
                     if (generatedKeys.next()) {
@@ -206,7 +191,7 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
         try {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "UPDATE bukkit_character SET player_id = ?, name = ?, gender_id = ?, age = ?, race_id = ?, description = ?, dead = ?, world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ?, inventory_contents = ?, offhand = ?, helmet = ?, chestplate = ?, leggings = ?, boots = ?, health = ?, max_health = ?, mana = ?, max_mana = ?, food_level = ?, thirst_level = ? WHERE id = ?").use({ statement ->
+                        "UPDATE bukkit_character SET player_id = ?, name = ?, gender_id = ?, age = ?, race_id = ?, description = ?, dead = ?, world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ?, inventory_contents = ?, helmet = ?, chestplate = ?, leggings = ?, boots = ?, health = ?, max_health = ?, mana = ?, max_mana = ?, food_level = ?, thirst_level = ? WHERE id = ?").use({ statement ->
                     statement.setInt(1, `object`.player.id)
                     statement.setString(2, `object`.name)
                     statement.setInt(3, `object`.gender.id)
@@ -221,18 +206,17 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
                     statement.setFloat(12, `object`.location.yaw)
                     statement.setFloat(13, `object`.location.pitch)
                     statement.setBytes(14, serializeInventory(`object`.inventoryContents))
-                    statement.setBytes(15, serializeItemStack(`object`.offhand))
-                    statement.setBytes(16, serializeItemStack(`object`.helmet))
-                    statement.setBytes(17, serializeItemStack(`object`.chestplate))
-                    statement.setBytes(18, serializeItemStack(`object`.leggings))
-                    statement.setBytes(19, serializeItemStack(`object`.boots))
-                    statement.setDouble(20, `object`.health)
-                    statement.setDouble(21, `object`.maxHealth)
-                    statement.setInt(22, `object`.mana)
-                    statement.setInt(23, `object`.maxMana)
-                    statement.setInt(24, `object`.foodLevel)
-                    statement.setInt(25, `object`.thirstLevel)
-                    statement.setInt(26, `object`.id)
+                    statement.setBytes(15, serializeItemStack(`object`.helmet))
+                    statement.setBytes(16, serializeItemStack(`object`.chestplate))
+                    statement.setBytes(17, serializeItemStack(`object`.leggings))
+                    statement.setBytes(18, serializeItemStack(`object`.boots))
+                    statement.setDouble(19, `object`.health)
+                    statement.setDouble(20, `object`.maxHealth)
+                    statement.setInt(21, `object`.mana)
+                    statement.setInt(22, `object`.maxMana)
+                    statement.setInt(23, `object`.foodLevel)
+                    statement.setInt(24, `object`.thirstLevel)
+                    statement.setInt(25, `object`.id)
                     statement.executeUpdate()
                 })
             }
@@ -247,7 +231,7 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
             var character: BukkitCharacter? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, offhand, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level FROM bukkit_character WHERE id = ?").use({ statement ->
+                        "SELECT id, player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level FROM bukkit_character WHERE id = ?").use({ statement ->
                     val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
                     val genderProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitGenderProvider::class.java)
                     val raceProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
@@ -274,7 +258,6 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
                                     )
                                 )
                                 .inventoryContents(deserializeInventory(resultSet.getBytes("inventory_contents")))
-                                .offhand(deserializeItemStack(resultSet.getBytes("offhand")))
                                 .helmet(deserializeItemStack(resultSet.getBytes("helmet")))
                                 .chestplate(deserializeItemStack(resultSet.getBytes("chestplate")))
                                 .leggings(deserializeItemStack(resultSet.getBytes("leggings")))
