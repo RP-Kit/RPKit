@@ -83,22 +83,24 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
 
     override fun applyMigrations() {
         if (database.getTableVersion(this).equals("0.1.0")) {
+            database.setTableVersion(this, "0.1.1")
+        }
+        if (database.getTableVersion(this).equals("0.1.1")) {
             try {
                 database.createConnection().use {
                     connection -> {
                         connection.prepareStatement(
                                 "ALTER TABLE bukkit_character ADD offhand BLOB AFTER inventory_contents"
                         ).use {
-                            statement -> {
+                            statement ->
                                 statement.executeUpdate()
-                            }
                         }
                     }
                 }
             } catch (exception: SQLException) {
                 exception.printStackTrace()
             }
-            database.setTableVersion(this, "0.1.1")
+            database.setTableVersion(this, "0.1.2")
         }
     }
 
