@@ -28,6 +28,8 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
 
     fun addTable(table: Table<*>) {
         tables.put(table.name, table)
+        table.create()
+        table.applyMigrations()
     }
 
     fun getTable(name: String): Table<*>? {
@@ -46,7 +48,16 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
     }
 
     fun setTableVersion(table: Table<*>, version: String) {
-        getTable(TableVersion::class.java)?.insert(TableVersion(table.name, version))
+        val tableVersionTable: TableVersionTable? = getTable(TableVersion::class.java) as TableVersionTable
+        if (tableVersionTable != null) {
+            val tableVersion = tableVersionTable.get(table.name)
+            if (tableVersion == null) {
+                tableVersionTable.insert(TableVersion(table.name, version))
+            } else {
+                tableVersion.version = version
+                tableVersionTable.update(tableVersion)
+            }
+        }
     }
 
 }
