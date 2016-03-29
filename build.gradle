@@ -3,17 +3,19 @@ import org.apache.tools.ant.filters.*
 buildscript {
 
     repositories {
+        mavenCentral()
         jcenter()
     }
 
     dependencies {
         classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.1-2"
     }
 
 }
 
 allprojects {
-    apply plugin: "java"
+    apply plugin: "kotlin"
     apply plugin: "maven"
     group = "com.seventh-root"
     version = "0.1.1-SNAPSHOT"
@@ -44,6 +46,7 @@ project(":apis:elysium-core-api") {
     def guavaVersion = "17.0"
     def gsonVersion = "2.2.4"
     def ehcacheVersion = "3.0.0.rc2"
+    def kotlinVersion = "1.0.1-2"
 
     dependencies {
         compile group: "mysql", name: "mysql-connector-java", version: mysqlConnectorVersion
@@ -52,6 +55,7 @@ project(":apis:elysium-core-api") {
         compile group: "com.google.guava", name: "guava", version: guavaVersion
         compile group: "com.google.code.gson", name: "gson", version: gsonVersion
         compile group: "org.ehcache", name: "ehcache", version: ehcacheVersion
+        compile group: "org.jetbrains.kotlin", name: "kotlin-stdlib", version: kotlinVersion
     }
 
     apply plugin: "com.github.johnrengelman.shadow"
@@ -111,18 +115,16 @@ project(":apis:elysium-character-api") {
     }
 
     uploadArchives {
-        repositories {
-            mavenDeployer {
+        repositories.mavenDeployer {
 
-                repository(url: "https://repo.seventh-root.com/repository/internal/") {
-                    authentication(userName: repoUserName, password: repoPassword)
-                }
-
-                pom.version = project(":apis:elysium-character-api").version
-                pom.artifactId = project(":apis:elysium-character-api").name
-                pom.groupId = project(":apis:elysium-character-api").group
-
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
             }
+
+            pom.version = project(":apis:elysium-character-api").version
+            pom.artifactId = project(":apis:elysium-character-api").name
+            pom.groupId = project(":apis:elysium-character-api").group
+
         }
     }
 
@@ -137,18 +139,16 @@ project(":apis:elysium-chat-api") {
     }
 
     uploadArchives {
-        repositories {
-            mavenDeployer {
+        repositories.mavenDeployer {
 
-                repository(url: "https://repo.seventh-root.com/repository/internal/") {
-                    authentication(userName: repoUserName, password: repoPassword)
-                }
-
-                pom.version = project(":apis:elysium-chat-api").version
-                pom.artifactId = project(":apis:elysium-chat-api").name
-                pom.groupId = project(":apis:elysium-chat-api").group
-
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
             }
+
+            pom.version = project(":apis:elysium-chat-api").version
+            pom.artifactId = project(":apis:elysium-chat-api").name
+            pom.groupId = project(":apis:elysium-chat-api").group
+
         }
     }
 
@@ -186,18 +186,16 @@ project(":bukkit:elysium-core-bukkit") {
     }
 
     uploadArchives {
-        repositories {
-            mavenDeployer {
+        repositories.mavenDeployer {
 
-                repository(url: "https://repo.seventh-root.com/repository/internal/") {
-                    authentication(userName: repoUserName, password: repoPassword)
-                }
-
-                pom.version = project(":bukkit:elysium-core-bukkit").version
-                pom.artifactId = project(":bukkit:elysium-core-bukkit").name
-                pom.groupId = project(":bukkit:elysium-core-bukkit").group
-
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
             }
+
+            pom.version = project(":bukkit:elysium-core-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-core-bukkit").name
+            pom.groupId = project(":bukkit:elysium-core-bukkit").group
+
         }
     }
 
@@ -234,18 +232,16 @@ project(":bukkit:elysium-players-bukkit") {
     }
 
     uploadArchives {
-        repositories {
-            mavenDeployer {
+        repositories.mavenDeployer {
 
-                repository(url: "https://repo.seventh-root.com/repository/internal/") {
-                    authentication(userName: repoUserName, password: repoPassword)
-                }
-
-                pom.version = project(":bukkit:elysium-players-bukkit").version
-                pom.artifactId = project(":bukkit:elysium-players-bukkit").name
-                pom.groupId = project(":bukkit:elysium-players-bukkit").group
-
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
             }
+
+            pom.version = project(":bukkit:elysium-players-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-players-bukkit").name
+            pom.groupId = project(":bukkit:elysium-players-bukkit").group
+
         }
     }
 
@@ -283,18 +279,16 @@ project(":bukkit:elysium-characters-bukkit") {
     }
 
     uploadArchives {
-        repositories {
-            mavenDeployer {
+        repositories.mavenDeployer {
 
-                repository(url: "https://repo.seventh-root.com/repository/internal/") {
-                    authentication(userName: repoUserName, password: repoPassword)
-                }
-
-                pom.version = project(":bukkit:elysium-characters-bukkit").version
-                pom.artifactId = project(":bukkit:elysium-characters-bukkit").name
-                pom.groupId = project(":bukkit:elysium-characters-bukkit").group
-
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
             }
+
+            pom.version = project(":bukkit:elysium-characters-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-characters-bukkit").name
+            pom.groupId = project(":bukkit:elysium-characters-bukkit").group
+
         }
     }
 
@@ -333,18 +327,16 @@ project(":bukkit:elysium-chat-bukkit") {
     }
 
     uploadArchives {
-        repositories {
-            mavenDeployer {
+        repositories.mavenDeployer {
 
-                repository(url: "https://repo.seventh-root.com/repository/internal/") {
-                    authentication(userName: repoUserName, password: repoPassword)
-                }
-
-                pom.version = project(":bukkit:elysium-chat-bukkit").version
-                pom.artifactId = project(":bukkit:elysium-chat-bukkit").name
-                pom.groupId = project(":bukkit:elysium-chat-bukkit").group
-
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
             }
+
+            pom.version = project(":bukkit:elysium-chat-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-chat-bukkit").name
+            pom.groupId = project(":bukkit:elysium-chat-bukkit").group
+
         }
     }
 
