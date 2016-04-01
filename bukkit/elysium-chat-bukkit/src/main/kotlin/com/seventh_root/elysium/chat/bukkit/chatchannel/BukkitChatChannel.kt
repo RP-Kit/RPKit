@@ -46,7 +46,7 @@ class BukkitChatChannel constructor(
         }
     override var radius: Int = radius
         set(radius) {
-            this.radius = radius
+            field = radius
             if (clearRadius > 0 && radius > 0) {
                 pipeline.filter { pipelineComponent -> pipelineComponent is BukkitGarbleChatChannelPipelineComponent }
                         .map { pipelineComponent -> pipelineComponent as BukkitGarbleChatChannelPipelineComponent }
@@ -63,7 +63,7 @@ class BukkitChatChannel constructor(
         }
     override var clearRadius: Int = clearRadius
         set(clearRadius) {
-            this.clearRadius = clearRadius
+            field = clearRadius
             if (clearRadius > 0 && radius > 0) {
                 pipeline.filter { pipelineComponent -> pipelineComponent is BukkitGarbleChatChannelPipelineComponent }
                         .map { pipelineComponent -> pipelineComponent as BukkitGarbleChatChannelPipelineComponent }
@@ -80,7 +80,7 @@ class BukkitChatChannel constructor(
         }
     override var isIRCEnabled: Boolean = ircEnabled
         set(ircEnabled) {
-            this.isIRCEnabled = ircEnabled
+            field = ircEnabled
             if (ircEnabled) {
                 pipeline.add(BukkitIRCChatChannelPipelineComponent(ircChannel, isIRCWhitelist))
                 pipeline.sort()
@@ -96,7 +96,7 @@ class BukkitChatChannel constructor(
         }
     override var ircChannel: String? = ircChannel
         set(ircChannel) {
-            this.ircChannel = ircChannel
+            field = ircChannel
             if (isIRCEnabled) {
                 pipeline.filter { pipelineComponent -> pipelineComponent is BukkitIRCChatChannelPipelineComponent }
                         .map { pipelineComponent -> pipelineComponent as BukkitIRCChatChannelPipelineComponent }
@@ -105,7 +105,7 @@ class BukkitChatChannel constructor(
         }
     override var isIRCWhitelist: Boolean = ircWhitelist
         set(ircWhitelist) {
-            this.isIRCWhitelist = ircWhitelist
+            field = ircWhitelist
             if (isIRCEnabled) {
                 pipeline.filter { pipelineComponent -> pipelineComponent is BukkitIRCChatChannelPipelineComponent }
                         .map { pipelineComponent -> pipelineComponent as BukkitIRCChatChannelPipelineComponent }
