@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
+import java.sql.Types.INTEGER
 
 class BukkitCharacterTable @Throws(SQLException::class)
 constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : Table<BukkitCharacter>(database, BukkitCharacter::class.java) {
@@ -97,11 +98,26 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
                 connection.prepareStatement(
                         "INSERT INTO bukkit_character(player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         RETURN_GENERATED_KEYS).use({ statement ->
-                    statement.setInt(1, `object`.player.id)
+                    val player = `object`.player
+                    if (player != null) {
+                        statement.setInt(1, player.id)
+                    } else {
+                        statement.setNull(2, INTEGER)
+                    }
                     statement.setString(2, `object`.name)
-                    statement.setInt(3, `object`.gender.id)
+                    val gender = `object`.gender
+                    if (gender != null) {
+                        statement.setInt(3, gender.id)
+                    } else {
+                        statement.setNull(3, INTEGER)
+                    }
                     statement.setInt(4, `object`.age)
-                    statement.setInt(5, `object`.race.id)
+                    val race = `object`.race
+                    if (race != null) {
+                        statement.setInt(5, race.id)
+                    } else {
+                        statement.setNull(5, INTEGER)
+                    }
                     statement.setString(6, `object`.description)
                     statement.setBoolean(7, `object`.isDead)
                     statement.setString(8, `object`.location.world.name)
@@ -177,14 +193,15 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun deserializeInventory(bytes: ByteArray): Array<ItemStack>? {
+    private fun deserializeInventory(bytes: ByteArray): Array<ItemStack> {
         try {
-            ByteArrayInputStream(bytes).use { byteArrayInputStream -> BukkitObjectInputStream(byteArrayInputStream).use { bukkitObjectInputStream -> return bukkitObjectInputStream.readObject() as Array<ItemStack>? } }
+            ByteArrayInputStream(bytes)
+                    .use { byteArrayInputStream -> BukkitObjectInputStream(byteArrayInputStream)
+                            .use { bukkitObjectInputStream -> return bukkitObjectInputStream.readObject() as Array<ItemStack> } }
         } catch (exception: Exception) {
             exception.printStackTrace()
         }
-
-        return null
+        return emptyArray()
     }
 
     override fun update(`object`: BukkitCharacter) {
@@ -192,11 +209,26 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "UPDATE bukkit_character SET player_id = ?, name = ?, gender_id = ?, age = ?, race_id = ?, description = ?, dead = ?, world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ?, inventory_contents = ?, helmet = ?, chestplate = ?, leggings = ?, boots = ?, health = ?, max_health = ?, mana = ?, max_mana = ?, food_level = ?, thirst_level = ? WHERE id = ?").use({ statement ->
-                    statement.setInt(1, `object`.player.id)
+                    val player = `object`.player
+                    if (player != null) {
+                        statement.setInt(1, player.id)
+                    } else {
+                        statement.setNull(1, INTEGER)
+                    }
                     statement.setString(2, `object`.name)
-                    statement.setInt(3, `object`.gender.id)
+                    val gender = `object`.gender
+                    if (gender != null) {
+                        statement.setInt(3, gender.id)
+                    } else {
+                        statement.setNull(3, INTEGER)
+                    }
                     statement.setInt(4, `object`.age)
-                    statement.setInt(5, `object`.race.id)
+                    val race = `object`.race
+                    if (race != null) {
+                        statement.setInt(5, race.id)
+                    } else {
+                        statement.setNull(5, INTEGER)
+                    }
                     statement.setString(6, `object`.description)
                     statement.setBoolean(7, `object`.isDead)
                     statement.setString(8, `object`.location.world.name)
@@ -238,37 +270,36 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
                     statement.setInt(1, id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        character = BukkitCharacter.Builder(plugin)
-                                .id(resultSet.getInt("id"))
-                                .player(playerProvider.getPlayer(resultSet.getInt("player_id"))!!)
-                                .name(resultSet.getString("name"))
-                                .gender(genderProvider.getGender(resultSet.getInt("gender_id"))!!)
-                                .age(resultSet.getInt("age"))
-                                .race(raceProvider.getRace(resultSet.getInt("race_id"))!!)
-                                .description(resultSet.getString("description"))
-                                .dead(resultSet.getBoolean("dead"))
-                                .location(
-                                    Location(
-                                            Bukkit.getWorld(resultSet.getString("world")),
-                                            resultSet.getDouble("x"),
-                                            resultSet.getDouble("y"),
-                                            resultSet.getDouble("z"),
-                                            resultSet.getFloat("yaw"),
-                                            resultSet.getFloat("pitch")
-                                    )
-                                )
-                                .inventoryContents(deserializeInventory(resultSet.getBytes("inventory_contents")))
-                                .helmet(deserializeItemStack(resultSet.getBytes("helmet")))
-                                .chestplate(deserializeItemStack(resultSet.getBytes("chestplate")))
-                                .leggings(deserializeItemStack(resultSet.getBytes("leggings")))
-                                .boots(deserializeItemStack(resultSet.getBytes("boots")))
-                                .health(resultSet.getDouble("health"))
-                                .maxHealth(resultSet.getDouble("max_health"))
-                                .mana(resultSet.getInt("mana"))
-                                .maxMana(resultSet.getInt("max_mana"))
-                                .foodLevel(resultSet.getInt("food_level"))
-                                .thirstLevel(resultSet.getInt("thirst_level"))
-                                .build()
+                        character = BukkitCharacter(
+                                plugin = plugin,
+                                id = resultSet.getInt("id"),
+                                player = playerProvider.getPlayer(resultSet.getInt("player_id")),
+                                name = resultSet.getString("name"),
+                                gender = genderProvider.getGender(resultSet.getInt("gender_id")),
+                                age = resultSet.getInt("age"),
+                                race = raceProvider.getRace(resultSet.getInt("race_id")),
+                                description = resultSet.getString("description"),
+                                dead = resultSet.getBoolean("dead"),
+                                location = Location(
+                                        Bukkit.getWorld(resultSet.getString("world")),
+                                        resultSet.getDouble("x"),
+                                        resultSet.getDouble("y"),
+                                        resultSet.getDouble("z"),
+                                        resultSet.getFloat("yaw"),
+                                        resultSet.getFloat("pitch")
+                                ),
+                                inventoryContents = deserializeInventory(resultSet.getBytes("inventory_contents")),
+                                helmet = deserializeItemStack(resultSet.getBytes("helmet")),
+                                chestplate = deserializeItemStack(resultSet.getBytes("chestplate")),
+                                leggings = deserializeItemStack(resultSet.getBytes("leggings")),
+                                boots = deserializeItemStack(resultSet.getBytes("boots")),
+                                health = resultSet.getDouble("health"),
+                                maxHealth = resultSet.getDouble("max_health"),
+                                mana = resultSet.getInt("mana"),
+                                maxMana = resultSet.getInt("max_mana"),
+                                foodLevel = resultSet.getInt("food_level"),
+                                thirstLevel = resultSet.getInt("thirst_level")
+                        )
                     }
                 })
             }

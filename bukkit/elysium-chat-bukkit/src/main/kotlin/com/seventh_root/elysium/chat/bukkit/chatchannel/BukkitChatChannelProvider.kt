@@ -20,25 +20,24 @@ class BukkitChatChannelProvider(private val plugin: ElysiumChatBukkit) : ChatCha
                     connection.prepareStatement("SELECT id, name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default FROM bukkit_chat_channel").use({ statement ->
                         val resultSet = statement.executeQuery()
                         while (resultSet.next()) {
-                            val chatChannel = BukkitChatChannel.Builder(plugin)
-                                    .id(resultSet.getInt("id"))
-                                    .name(resultSet.getString("name"))
-                                    .color(
-                                        Color(
+                            val chatChannel = BukkitChatChannel(
+                                    plugin = plugin,
+                                    id = resultSet.getInt("id"),
+                                    name = resultSet.getString("name"),
+                                    color = Color(
                                                 resultSet.getInt("color_red"),
                                                 resultSet.getInt("color_green"),
                                                 resultSet.getInt("color_blue")
-                                        )
-                                    )
-                                    .formatString(resultSet.getString("format_string"))
-                                    .radius(resultSet.getInt("radius"))
-                                    .clearRadius(resultSet.getInt("clear_radius"))
-                                    .matchPattern(resultSet.getString("match_pattern"))
-                                    .ircEnabled(resultSet.getBoolean("irc_enabled"))
-                                    .ircChannel(resultSet.getString("irc_channel"))
-                                    .ircWhitelist(resultSet.getBoolean("irc_whitelist"))
-                                    .joinedByDefault(resultSet.getBoolean("joined_by_default"))
-                                    .build()
+                                    ),
+                                    formatString = resultSet.getString("format_string"),
+                                    radius = resultSet.getInt("radius"),
+                                    clearRadius = resultSet.getInt("clear_radius"),
+                                    matchPattern = resultSet.getString("match_pattern"),
+                                    isIRCEnabled = resultSet.getBoolean("irc_enabled"),
+                                    ircChannel = resultSet.getString("irc_channel"),
+                                    isIRCWhitelist = resultSet.getBoolean("irc_whitelist"),
+                                    isJoinedByDefault = resultSet.getBoolean("joined_by_default")
+                            )
                             connection.prepareStatement("SELECT player_id FROM chat_channel_listener WHERE chat_channel_id = ?").use({ listenerStatement ->
                                 listenerStatement.setInt(1, chatChannel.id)
                                 val listenerResultSet = listenerStatement.executeQuery()
@@ -77,25 +76,24 @@ class BukkitChatChannelProvider(private val plugin: ElysiumChatBukkit) : ChatCha
                     statement.setString(1, name)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        chatChannel = BukkitChatChannel.Builder(plugin)
-                                .id(resultSet.getInt("id"))
-                                .name(resultSet.getString("name"))
-                                .color(
-                                    Color(
-                                            resultSet.getInt("color_red"),
-                                            resultSet.getInt("color_green"),
-                                            resultSet.getInt("color_blue")
-                                    )
-                                )
-                                .formatString(resultSet.getString("format_string"))
-                                .radius(resultSet.getInt("radius"))
-                                .clearRadius(resultSet.getInt("clear_radius"))
-                                .matchPattern(resultSet.getString("match_pattern"))
-                                .ircEnabled(resultSet.getBoolean("irc_enabled"))
-                                .ircChannel(resultSet.getString("irc_channel"))
-                                .ircWhitelist(resultSet.getBoolean("irc_whitelist"))
-                                .joinedByDefault(resultSet.getBoolean("joined_by_default"))
-                                .build()
+                        chatChannel = BukkitChatChannel(
+                                plugin = plugin,
+                                id = resultSet.getInt("id"),
+                                name = resultSet.getString("name"),
+                                color = Color(
+                                        resultSet.getInt("color_red"),
+                                        resultSet.getInt("color_green"),
+                                        resultSet.getInt("color_blue")
+                                ),
+                                formatString = resultSet.getString("format_string"),
+                                radius = resultSet.getInt("radius"),
+                                clearRadius = resultSet.getInt("clear_radius"),
+                                matchPattern = resultSet.getString("match_pattern"),
+                                isIRCEnabled = resultSet.getBoolean("irc_enabled"),
+                                ircChannel = resultSet.getString("irc_channel"),
+                                isIRCWhitelist = resultSet.getBoolean("irc_whitelist"),
+                                isJoinedByDefault = resultSet.getBoolean("joined_by_default")
+                        )
                         connection.prepareStatement("SELECT player_id FROM chat_channel_listener WHERE chat_channel_id = ?").use({ listenerStatement ->
                             listenerStatement.setInt(1, chatChannel!!.id)
                             val listenerResultSet = listenerStatement.executeQuery()
@@ -141,25 +139,24 @@ class BukkitChatChannelProvider(private val plugin: ElysiumChatBukkit) : ChatCha
                     statement.setInt(1, player.id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        chatChannel = BukkitChatChannel.Builder(plugin)
-                                .id(resultSet.getInt("id"))
-                                .name(resultSet.getString("name"))
-                                .color(
-                                    Color(
-                                            resultSet.getInt("color_red"),
-                                            resultSet.getInt("color_green"),
-                                            resultSet.getInt("color_blue")
-                                    )
-                                )
-                                .formatString(resultSet.getString("format_string"))
-                                .radius(resultSet.getInt("radius"))
-                                .clearRadius(resultSet.getInt("clear_radius"))
-                                .matchPattern(resultSet.getString("match_pattern"))
-                                .ircEnabled(resultSet.getBoolean("irc_enabled"))
-                                .ircChannel(resultSet.getString("irc_channel"))
-                                .ircWhitelist(resultSet.getBoolean("irc_whitelist"))
-                                .joinedByDefault(resultSet.getBoolean("joined_by_default"))
-                                .build()
+                        chatChannel = BukkitChatChannel(
+                                plugin = plugin,
+                                id = resultSet.getInt("id"),
+                                name = resultSet.getString("name"),
+                                color = Color(
+                                        resultSet.getInt("color_red"),
+                                        resultSet.getInt("color_green"),
+                                        resultSet.getInt("color_blue")
+                                ),
+                                formatString = resultSet.getString("format_string"),
+                                radius = resultSet.getInt("radius"),
+                                clearRadius = resultSet.getInt("clear_radius"),
+                                matchPattern = resultSet.getString("match_pattern"),
+                                isIRCEnabled = resultSet.getBoolean("irc_enabled"),
+                                ircChannel = resultSet.getString("irc_channel"),
+                                isIRCWhitelist = resultSet.getBoolean("irc_whitelist"),
+                                isJoinedByDefault = resultSet.getBoolean("joined_by_default")
+                        )
                         connection.prepareStatement("SELECT player_id FROM chat_channel_listener WHERE chat_channel_id = ?").use({ listenerStatement ->
                             listenerStatement.setInt(1, chatChannel!!.id)
                             val listenerResultSet = listenerStatement.executeQuery()

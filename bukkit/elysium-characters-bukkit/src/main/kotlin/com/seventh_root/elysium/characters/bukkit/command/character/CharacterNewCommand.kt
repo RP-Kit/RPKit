@@ -240,7 +240,15 @@ class CharacterNewCommand(private val plugin: ElysiumCharactersBukkit) : Command
                 val characterProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
                 val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
                 val player = playerProvider.getPlayer(conversable)
-                val newCharacter = BukkitCharacter.Builder(plugin).player(player).name(context.getSessionData("name") as String).gender(context.getSessionData("gender") as Gender).age(context.getSessionData("age") as Int).race(context.getSessionData("race") as Race).description(context.getSessionData("description") as String).build()
+                val newCharacter = BukkitCharacter(
+                        plugin = plugin,
+                        player = player,
+                        name = context.getSessionData("name") as String,
+                        gender = context.getSessionData("gender") as Gender,
+                        age = context.getSessionData("age") as Int,
+                        race = context.getSessionData("race") as Race,
+                        description = context.getSessionData("description") as String
+                )
                 characterProvider.addCharacter(newCharacter)
                 characterProvider.setActiveCharacter(player, newCharacter)
             }

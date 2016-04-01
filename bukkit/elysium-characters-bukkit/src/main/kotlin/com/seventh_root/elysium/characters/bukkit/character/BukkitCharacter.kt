@@ -7,242 +7,61 @@ import com.seventh_root.elysium.api.player.ElysiumPlayer
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.gender.BukkitGenderProvider
 import com.seventh_root.elysium.characters.bukkit.race.BukkitRaceProvider
-import com.seventh_root.elysium.players.bukkit.BukkitPlayer
-import org.apache.commons.lang.Validate
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import java.util.*
 
-class BukkitCharacter private constructor(id: Int, player: ElysiumPlayer, name: String, gender: Gender, age: Int, race: Race, description: String, dead: Boolean, location: Location, inventoryContents: Array<ItemStack>, helmet: ItemStack?, chestplate: ItemStack?, leggings: ItemStack?, boots: ItemStack?, health: Double, maxHealth: Double, mana: Int, maxMana: Int, foodLevel: Int, thirstLevel: Int) : ElysiumCharacter {
+class BukkitCharacter constructor(
+        plugin: ElysiumCharactersBukkit,
+        id: Int = 0,
+        player: ElysiumPlayer?,
+        name: String = plugin.config.getString("characters.defaults.name"),
+        gender: Gender? = plugin.core!!.serviceManager.getServiceProvider(BukkitGenderProvider::class.java).getGender(plugin.config.getString("characters.defaults.gender")),
+        age: Int = plugin.config.getInt("characters.defaults.age"),
+        race: Race? = plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java).getRace(plugin.config.getString("characters.defaults.race")),
+        description: String = plugin.config.getString("characters.defaults.description"),
+        dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
+        location: Location = Bukkit.getWorlds()[0].spawnLocation,
+        inventoryContents: Array<ItemStack> = (plugin.config.getList("characters.defaults.inventory-contents") as ArrayList<ItemStack>).toTypedArray(),
+        helmet: ItemStack? = plugin.config.getItemStack("characters.defaults.helmet"),
+        chestplate: ItemStack? = plugin.config.getItemStack("characters.defaults.chestplate"),
+        leggings: ItemStack? = plugin.config.getItemStack("characters.defaults.leggings"),
+        boots: ItemStack? = plugin.config.getItemStack("characters.defaults.boots"),
+        health: Double = plugin.config.getInt("characters.defaults.health").toDouble(),
+        maxHealth: Double = plugin.config.getInt("characters.defaults.max-health").toDouble(),
+        mana: Int = plugin.config.getInt("characters.defaults.mana"),
+        maxMana: Int = plugin.config.getInt("characters.defaults.max-mana"),
+        foodLevel: Int = plugin.config.getInt("characters.defaults.food-level"),
+        thirstLevel: Int = plugin.config.getInt("characters.defaults.thirst-level")
+) : ElysiumCharacter {
 
-    class Builder
-    @Suppress("UNCHECKED_CAST")
-    constructor(private val plugin: ElysiumCharactersBukkit) {
-
-        private var id: Int
-        private var player: ElysiumPlayer?
-        private var name: String
-        private var gender: Gender?
-        private var age: Int
-        private var race: Race?
-        private var description: String
-        private var dead: Boolean
-        private var location: Location
-        private var inventoryContents: MutableList<ItemStack>
-        private var helmet: ItemStack? = null
-        private var chestplate: ItemStack? = null
-        private var leggings: ItemStack? = null
-        private var boots: ItemStack? = null
-        private var health: Double
-        private var maxHealth: Double
-        private var mana: Int
-        private var maxMana: Int
-        private var foodLevel: Int
-        private var thirstLevel: Int
-
-        init {
-            id = 0
-            player = null
-            name = plugin.config.getString("characters.defaults.name")
-            val genderProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitGenderProvider::class.java)
-            if (plugin.config.get("characters.defaults.gender") == null) {
-                gender = null
-            } else {
-                gender = genderProvider.getGender(plugin.config.getString("characters.defaults.gender"))
-            }
-            age = plugin.config.getInt("characters.defaults.age")
-            val raceProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
-            if (plugin.config.get("characters.defaults.race") == null) {
-                race = null
-            } else {
-                race = raceProvider.getRace(plugin.config.getString("characters.defaults.race"))
-            }
-            description = plugin.config.getString("characters.defaults.description")
-            dead = plugin.config.getBoolean("characters.defaults.dead")
-            location = Bukkit.getWorlds()[0].spawnLocation
-            inventoryContents = plugin.config.getList("characters.defaults.inventory-contents") as ArrayList<ItemStack>
-            helmet = plugin.config.getItemStack("characters.defaults.helmet")
-            chestplate = plugin.config.getItemStack("characters.defaults.chestplate")
-            leggings = plugin.config.getItemStack("characters.defaults.leggings")
-            boots = plugin.config.getItemStack("characters.defaults.boots")
-            health = plugin.config.getInt("characters.defaults.health").toDouble()
-            maxHealth = plugin.config.getInt("characters.defaults.max-health").toDouble()
-            mana = plugin.config.getInt("characters.defaults.mana")
-            maxMana = plugin.config.getInt("characters.defaults.max-mana")
-            foodLevel = plugin.config.getInt("characters.defaults.food-level")
-            thirstLevel = plugin.config.getInt("characters.defaults.thirst-level")
-        }
-
-        fun id(id: Int): Builder {
-            this.id = id
-            return this
-        }
-
-        fun player(player: ElysiumPlayer): Builder {
-            if (player is BukkitPlayer) {
-                this.player = player
-                if (name == "")
-                    name = player.name + "'s character"
-            }
-            return this
-        }
-
-        fun name(name: String): Builder {
-            this.name = name
-            return this
-        }
-
-        fun gender(gender: Gender): Builder {
-            this.gender = gender
-            return this
-        }
-
-        fun age(age: Int): Builder {
-            this.age = age
-            return this
-        }
-
-        fun race(race: Race): Builder {
-            this.race = race
-            return this
-        }
-
-        fun description(description: String): Builder {
-            this.description = description
-            return this
-        }
-
-        fun dead(dead: Boolean): Builder {
-            this.dead = dead
-            return this
-        }
-
-        fun location(location: Location): Builder {
-            this.location = location
-            return this
-        }
-
-        fun inventoryContents(inventoryContents: Array<ItemStack>?): Builder {
-            if (inventoryContents != null) {
-                this.inventoryContents = Arrays.asList(*inventoryContents)
-            }
-            return this
-        }
-
-        fun inventoryItem(item: ItemStack): Builder {
-            inventoryContents.add(item)
-            return this
-        }
-
-        fun helmet(helmet: ItemStack?): Builder {
-            this.helmet = helmet
-            return this
-        }
-
-        fun chestplate(chestplate: ItemStack?): Builder {
-            this.chestplate = chestplate
-            return this
-        }
-
-        fun leggings(leggings: ItemStack?): Builder {
-            this.leggings = leggings
-            return this
-        }
-
-        fun boots(boots: ItemStack?): Builder {
-            this.boots = boots
-            return this
-        }
-
-        fun health(health: Double): Builder {
-            this.health = health
-            return this
-        }
-
-        fun maxHealth(maxHealth: Double): Builder {
-            this.maxHealth = maxHealth
-            return this
-        }
-
-        fun mana(mana: Int): Builder {
-            this.mana = mana
-            return this
-        }
-
-        fun maxMana(maxMana: Int): Builder {
-            this.maxMana = maxMana
-            return this
-        }
-
-        fun foodLevel(foodLevel: Int): Builder {
-            this.foodLevel = foodLevel
-            return this
-        }
-
-        fun thirstLevel(thirstLevel: Int): Builder {
-            this.thirstLevel = thirstLevel
-            return this
-        }
-
-        fun build(): BukkitCharacter {
-            val character = BukkitCharacter(
-                    id,
-                    player!!,
-                    name,
-                    gender!!,
-                    age,
-                    race!!,
-                    description,
-                    dead,
-                    location,
-                    inventoryContents.toTypedArray(),
-                    helmet,
-                    chestplate,
-                    leggings,
-                    boots,
-                    health,
-                    maxHealth,
-                    mana,
-                    maxMana,
-                    foodLevel,
-                    thirstLevel
-            )
-            return character
-        }
-
-    }
-
-    override var id: Int = id
-    override var player: ElysiumPlayer = player
-        set(player) {
-            Validate.isTrue(player is BukkitPlayer)
-            this.player = player
-        }
-    override var name: String = name
-    override var gender: Gender = gender
-    override var age: Int = age
-    override var race: Race = race
-    override var description: String = description
+    override var id = id
+    override var player = player
+    override var name = name
+    override var gender = gender
+    override var age = age
+    override var race = race
+    override var description = description
         set(description) {
             field = description
             if (field.length > 1024) {
                 field = field.substring(0, 1021) + "..."
             }
         }
-    override var isDead: Boolean = dead
-    var location: Location = location
-    var inventoryContents: Array<ItemStack> = inventoryContents
-    var helmet: ItemStack? = helmet
-    var chestplate: ItemStack? = chestplate
-    var leggings: ItemStack? = leggings
-    var boots: ItemStack? = boots
-    override var health: Double = health
-    override var maxHealth: Double = maxHealth
-    override var mana: Int = mana
-    override var maxMana: Int = maxMana
-    override var foodLevel: Int = foodLevel
-    override var thirstLevel: Int = thirstLevel
+    override var isDead = dead
+    var location = location
+    var inventoryContents = inventoryContents
+    var helmet = helmet
+    var chestplate = chestplate
+    var leggings = leggings
+    var boots = boots
+    override var health = health
+    override var maxHealth = maxHealth
+    override var mana = mana
+    override var maxMana = maxMana
+    override var foodLevel = foodLevel
+    override var thirstLevel = thirstLevel
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -278,11 +97,11 @@ class BukkitCharacter private constructor(id: Int, player: ElysiumPlayer, name: 
         var result: Int
         var temp: Long
         result = id
-        result = 31 * result + player.hashCode()
+        result = 31 * result + if (player != null) player!!.hashCode() else 0
         result = 31 * result + name.hashCode()
-        result = 31 * result + gender.hashCode()
+        result = 31 * result + if (gender != null) gender!!.hashCode() else 0
         result = 31 * result + age
-        result = 31 * result + race.hashCode()
+        result = 31 * result + if (race != null) race!!.hashCode() else 0
         result = 31 * result + description.hashCode()
         result = 31 * result + if (isDead) 1 else 0
         result = 31 * result + location.hashCode()
