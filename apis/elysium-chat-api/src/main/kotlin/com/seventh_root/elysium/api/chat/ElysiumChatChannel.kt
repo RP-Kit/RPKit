@@ -22,7 +22,7 @@ interface ElysiumChatChannel : TableRow {
     fun processMessage(message: String?, context: ChatMessageContext): String?
     var matchPattern: String
     var isIRCEnabled: Boolean
-    var ircChannel: String?
+    var ircChannel: String
     var isIRCWhitelist: Boolean
     @Throws(IOException::class)
     fun log(message: String)

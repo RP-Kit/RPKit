@@ -225,9 +225,9 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
                                 radius = resultSet.getInt("radius"),
                                 clearRadius = resultSet.getInt("clear_radius"),
                                 matchPattern = resultSet.getString("match_pattern"),
-                                ircEnabled = resultSet.getBoolean("irc_enabled"),
+                                isIRCEnabled = resultSet.getBoolean("irc_enabled"),
                                 ircChannel = resultSet.getString("irc_channel"),
-                                ircWhitelist = resultSet.getBoolean("irc_whitelist"),
+                                isIRCWhitelist = resultSet.getBoolean("irc_whitelist"),
                                 isJoinedByDefault = resultSet.getBoolean("joined_by_default")
                         )
                         connection.prepareStatement("SELECT player_id FROM chat_channel_listener WHERE chat_channel_id = ?").use({ listenerStatement ->

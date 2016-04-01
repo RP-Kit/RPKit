@@ -9,6 +9,7 @@ import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitFormatChatChannelPipelineComponent
 import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitGarbleChatChannelPipelineComponent
 import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitIRCChatChannelPipelineComponent
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitLogChatChannelPipelineComponent
 import com.seventh_root.elysium.players.bukkit.BukkitPlayer
 import java.awt.Color
 import java.awt.Color.WHITE
@@ -19,32 +20,20 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
-class BukkitChatChannel constructor(
-        private val plugin: ElysiumChatBukkit,
-        override var id: Int = 0,
-        override var name: String = "",
-        override var color: Color = WHITE,
-        formatString: String = "&f[\$color\$channel&f] &7\$sender-player&f: \$message",
-        radius: Int = -1,
-        clearRadius: Int = -1,
-        override val speakers: MutableList<ElysiumPlayer> = mutableListOf<ElysiumPlayer>(),
-        override val listeners: MutableList<ElysiumPlayer> = mutableListOf<ElysiumPlayer>(),
-        override val pipeline: MutableList<ChatChannelPipelineComponent> = mutableListOf<ChatChannelPipelineComponent>(),
-        override var matchPattern: String = "",
-        ircEnabled: Boolean = false,
-        ircChannel: String = "",
-        ircWhitelist: Boolean = false,
-        override var isJoinedByDefault: Boolean = true
-) : ElysiumChatChannel {
+class BukkitChatChannel: ElysiumChatChannel {
 
-    override var formatString: String = formatString
+    private val plugin: ElysiumChatBukkit
+    override var id: Int
+    override var name: String
+    override var color: Color
+    override var formatString: String
         set(formatString) {
             field = formatString
             pipeline.filter { pipelineComponent -> pipelineComponent is BukkitFormatChatChannelPipelineComponent }
                     .map { pipelineComponent -> pipelineComponent as BukkitFormatChatChannelPipelineComponent }
                     .forEach { pipelineComponent -> pipelineComponent.formatString = formatString }
         }
-    override var radius: Int = radius
+    override var radius: Int
         set(radius) {
             field = radius
             if (clearRadius > 0 && radius > 0) {
@@ -61,7 +50,7 @@ class BukkitChatChannel constructor(
                 }
             }
         }
-    override var clearRadius: Int = clearRadius
+    override var clearRadius: Int
         set(clearRadius) {
             field = clearRadius
             if (clearRadius > 0 && radius > 0) {
@@ -78,7 +67,11 @@ class BukkitChatChannel constructor(
                 }
             }
         }
-    override var isIRCEnabled: Boolean = ircEnabled
+    override val speakers: MutableList<ElysiumPlayer>
+    override val listeners: MutableList<ElysiumPlayer>
+    override val pipeline: MutableList<ChatChannelPipelineComponent>
+    override var matchPattern: String
+    override var isIRCEnabled: Boolean
         set(ircEnabled) {
             field = ircEnabled
             if (ircEnabled) {
@@ -94,7 +87,7 @@ class BukkitChatChannel constructor(
                 }
             }
         }
-    override var ircChannel: String? = ircChannel
+    override var ircChannel: String
         set(ircChannel) {
             field = ircChannel
             if (isIRCEnabled) {
@@ -103,7 +96,7 @@ class BukkitChatChannel constructor(
                         .forEach { pipelineComponent -> pipelineComponent.ircChannel = ircChannel }
             }
         }
-    override var isIRCWhitelist: Boolean = ircWhitelist
+    override var isIRCWhitelist: Boolean
         set(ircWhitelist) {
             field = ircWhitelist
             if (isIRCEnabled) {
@@ -112,6 +105,49 @@ class BukkitChatChannel constructor(
                         .forEach { pipelineComponent -> pipelineComponent.isWhitelist = ircWhitelist }
             }
         }
+    override var isJoinedByDefault: Boolean
+
+    constructor(
+            plugin: ElysiumChatBukkit,
+            id: Int = 0,
+            name: String = "",
+            color: Color = WHITE,
+            formatString: String = "&f[\$color\$channel&f] &7\$sender-player&f: \$message",
+            radius: Int = -1,
+            clearRadius: Int = -1,
+            speakers: MutableList<ElysiumPlayer> = mutableListOf<ElysiumPlayer>(),
+            listeners: MutableList<ElysiumPlayer> = mutableListOf<ElysiumPlayer>(),
+            pipeline: MutableList<ChatChannelPipelineComponent> = mutableListOf<ChatChannelPipelineComponent>(),
+            matchPattern: String = "",
+            isIRCEnabled: Boolean = false,
+            ircChannel: String = "",
+            isIRCWhitelist: Boolean = false,
+            isJoinedByDefault: Boolean = true
+    ) {
+        this.plugin = plugin
+        this.id = id
+        this.name = name
+        this.color = color
+        this.formatString = formatString
+        this.radius = radius
+        this.clearRadius = clearRadius
+        this.speakers = speakers
+        this.listeners = listeners
+        this.pipeline = pipeline
+        this.matchPattern = matchPattern
+        this.isIRCEnabled = isIRCEnabled
+        this.ircChannel = ircChannel
+        this.isIRCWhitelist = isIRCWhitelist
+        this.isJoinedByDefault = isJoinedByDefault
+        if (radius > 0 && clearRadius > 0) {
+            pipeline.add(BukkitGarbleChatChannelPipelineComponent(clearRadius.toDouble()));
+        }
+        pipeline.add(BukkitFormatChatChannelPipelineComponent(plugin, formatString));
+        if (isIRCEnabled && radius <= 0 && !ircChannel.trim().equals("")) {
+            pipeline.add(BukkitIRCChatChannelPipelineComponent(ircChannel, isIRCWhitelist));
+        }
+        pipeline.add(BukkitLogChatChannelPipelineComponent());
+    }
 
     override fun addSpeaker(speaker: ElysiumPlayer) {
         if (!speakers.contains(speaker))

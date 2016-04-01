@@ -383,9 +383,9 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
                     radius = radius,
                     clearRadius = clearRadius,
                     matchPattern = matchPattern,
-                    ircEnabled = ircEnabled,
+                    isIRCEnabled = ircEnabled,
                     ircChannel = ircChannel,
-                    ircWhitelist = ircWhitelist,
+                    isIRCWhitelist = ircWhitelist,
                     isJoinedByDefault = joinedByDefault
             )
             chatChannelProvider.addChatChannel(chatChannel)
