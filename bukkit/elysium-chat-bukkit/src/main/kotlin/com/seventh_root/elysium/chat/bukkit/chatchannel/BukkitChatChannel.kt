@@ -39,7 +39,7 @@ class BukkitChatChannel constructor(
 
     override var formatString: String = formatString
         set(formatString) {
-            this.formatString = formatString
+            field = formatString
             pipeline.filter { pipelineComponent -> pipelineComponent is BukkitFormatChatChannelPipelineComponent }
                     .map { pipelineComponent -> pipelineComponent as BukkitFormatChatChannelPipelineComponent }
                     .forEach { pipelineComponent -> pipelineComponent.formatString = formatString }
