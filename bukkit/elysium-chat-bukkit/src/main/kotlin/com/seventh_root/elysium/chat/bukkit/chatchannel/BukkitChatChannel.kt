@@ -128,12 +128,12 @@ class BukkitChatChannel: ElysiumChatChannel {
         this.id = id
         this.name = name
         this.color = color
+        this.pipeline = pipeline
         this.formatString = formatString
         this.radius = radius
         this.clearRadius = clearRadius
         this.speakers = speakers
         this.listeners = listeners
-        this.pipeline = pipeline
         this.matchPattern = matchPattern
         this.isIRCEnabled = isIRCEnabled
         this.ircChannel = ircChannel
