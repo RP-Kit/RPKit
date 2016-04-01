@@ -5,11 +5,11 @@ import com.seventh_root.elysium.core.database.TableRow
 
 interface ElysiumCharacter : TableRow {
 
-    var player: ElysiumPlayer
+    var player: ElysiumPlayer?
     var name: String
-    var gender: Gender
+    var gender: Gender?
     var age: Int
-    var race: Race
+    var race: Race?
     var description: String
     var isDead: Boolean
     var health: Double

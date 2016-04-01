@@ -20,13 +20,15 @@ class CharacterCardCommand(private val plugin: ElysiumCharactersBukkit) : Comman
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
                     for (line in plugin.config.getStringList("messages.character-card")) {
+                        val gender = character.gender
+                        val race = character.race
                         sender.sendMessage(
                                 ChatColor.translateAlternateColorCodes('&', line)
                                         .replace("\$name", character.name)
-                                        .replace("\$player", character.player.name)
-                                        .replace("\$gender", character.gender.name)
+                                        .replace("\$player", player.name)
+                                        .replace("\$gender", if (gender != null) gender.name else "unset")
                                         .replace("\$age", Integer.toString(character.age))
-                                        .replace("\$race", character.race.name)
+                                        .replace("\$race", if (race != null) race.name else "unset")
                                         .replace("\$description", character.description)
                                         .replace("\$dead", if (character.isDead) "yes" else "no")
                                         .replace("\$health", java.lang.Double.toString(character.health))

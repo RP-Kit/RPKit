@@ -126,7 +126,9 @@ class BukkitCharacterProvider(private val plugin: ElysiumCharactersBukkit) : Cha
     }
 
     override fun removeCharacter(character: BukkitCharacter) {
-        setActiveCharacter(character.player, null)
+        val player = character.player
+        if (player != null)
+            setActiveCharacter(player, null)
         plugin.core!!.database.getTable(BukkitCharacter::class.java)!!.delete(character)
     }
 
