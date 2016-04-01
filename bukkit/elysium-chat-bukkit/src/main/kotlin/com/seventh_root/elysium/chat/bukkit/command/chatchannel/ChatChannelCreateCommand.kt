@@ -375,18 +375,19 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
             val ircChannel = context.getSessionData("irc_channel") as String
             val ircWhitelist = context.getSessionData("irc_whitelist") as Boolean
             val joinedByDefault = context.getSessionData("joined_by_default") as Boolean
-            val chatChannel = BukkitChatChannel.Builder(plugin)
-                    .name(name)
-                    .color(color)
-                    .formatString(formatString)
-                    .radius(radius)
-                    .clearRadius(clearRadius)
-                    .matchPattern(matchPattern)
-                    .ircEnabled(ircEnabled)
-                    .ircChannel(ircChannel)
-                    .ircWhitelist(ircWhitelist)
-                    .joinedByDefault(joinedByDefault)
-                    .build()
+            val chatChannel = BukkitChatChannel(
+                    plugin = plugin,
+                    name = name,
+                    color = color,
+                    formatString = formatString,
+                    radius = radius,
+                    clearRadius = clearRadius,
+                    matchPattern = matchPattern,
+                    ircEnabled = ircEnabled,
+                    ircChannel = ircChannel,
+                    ircWhitelist = ircWhitelist,
+                    isJoinedByDefault = joinedByDefault
+            )
             chatChannelProvider.addChatChannel(chatChannel)
             return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-create-valid"))
         }
