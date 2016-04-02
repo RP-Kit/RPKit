@@ -78,8 +78,8 @@ class BukkitCharacterProvider(private val plugin: ElysiumCharactersBukkit) : Cha
                     bukkitPlayer.inventory.leggings = character.leggings
                     bukkitPlayer.inventory.boots = character.boots
                     bukkitPlayer.teleport(character.location)
-                    bukkitPlayer.health = character.health
                     bukkitPlayer.maxHealth = character.maxHealth
+                    bukkitPlayer.health = character.health
                     bukkitPlayer.foodLevel = character.foodLevel
                 }
             }
