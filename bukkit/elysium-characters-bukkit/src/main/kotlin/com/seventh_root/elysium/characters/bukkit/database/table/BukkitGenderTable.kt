@@ -1,6 +1,5 @@
 package com.seventh_root.elysium.characters.bukkit.database.table
 
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacter
 import com.seventh_root.elysium.characters.bukkit.gender.BukkitGender
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
@@ -15,32 +14,32 @@ import java.sql.Statement.RETURN_GENERATED_KEYS
 class BukkitGenderTable: Table<BukkitGender> {
 
     private val cacheManager: CacheManager
-    private val preConfigured: Cache<Int, BukkitGender>
-    private val cache: Cache<Int, BukkitGender>
+    private val preConfigured: Cache<Integer, BukkitGender>
+    private val cache: Cache<Integer, BukkitGender>
 
     private val nameCacheManager: CacheManager
-    private val namePreConfigured: Cache<String, Int>
-    private val nameCache: Cache<String, Int>
+    private val namePreConfigured: Cache<String, Integer>
+    private val nameCache: Cache<String, Integer>
 
     constructor(database: Database): super(database, BukkitGender::class.java) {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .withCache(
                         "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitCharacter::class.java)
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitGender::class.java)
                                 .build()
                 )
                 .build(true)
-        preConfigured = cacheManager.getCache("preConfigured", Int::class.java, BukkitGender::class.java)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitGender::class.java).build())
+        preConfigured = cacheManager.getCache("preConfigured", Integer::class.java, BukkitGender::class.java)
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitGender::class.java).build())
         nameCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
             .withCache(
                     "preConfigured",
-                    CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java)
+                    CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java)
                         .build()
             )
             .build(true)
-        namePreConfigured = nameCacheManager.getCache("preConfigured", String::class.java, Int::class.java)
-        nameCache = nameCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java).build())
+        namePreConfigured = nameCacheManager.getCache("preConfigured", String::class.java, Integer::class.java)
+        nameCache = nameCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
     }
 
     override fun create() {
@@ -74,8 +73,8 @@ class BukkitGenderTable: Table<BukkitGender> {
                     if (generatedKeys.next()) {
                         id = generatedKeys.getInt(1)
                         `object`.id = id
-                        cache.put(id, `object`)
-                        nameCache.put(`object`.name, id)
+                        cache.put(id as Integer, `object`)
+                        nameCache.put(`object`.name, id as Integer)
                     }
                 })
             }
@@ -95,8 +94,8 @@ class BukkitGenderTable: Table<BukkitGender> {
                     statement.setString(1, `object`.name)
                     statement.setInt(2, `object`.id)
                     statement.executeUpdate()
-                    cache.put(`object`.id, `object`)
-                    nameCache.put(`object`.name, `object`.id)
+                    cache.put(`object`.id as Integer, `object`)
+                    nameCache.put(`object`.name, `object`.id as Integer)
                 })
             }
         } catch (exception: SQLException) {
@@ -106,8 +105,8 @@ class BukkitGenderTable: Table<BukkitGender> {
     }
 
     override fun get(id: Int): BukkitGender? {
-        if (cache.containsKey(id)) {
-            return cache.get(id)
+        if (cache.containsKey(id as Integer)) {
+            return cache.get(id as Integer)
         } else {
             try {
                 var gender: BukkitGender? = null
@@ -121,7 +120,7 @@ class BukkitGenderTable: Table<BukkitGender> {
                             val name = resultSet.getString("name")
                             gender = BukkitGender(id1, name)
                             cache.put(id, gender)
-                            nameCache.put(name, id1)
+                            nameCache.put(name, id1 as Integer)
                         }
                     })
                 }
@@ -135,7 +134,7 @@ class BukkitGenderTable: Table<BukkitGender> {
 
     operator fun get(name: String): BukkitGender? {
         if (nameCache.containsKey(name)) {
-            return get(nameCache.get(name))
+            return get(nameCache.get(name) as Int)
         } else {
             try {
                 var gender: BukkitGender? = null
@@ -148,7 +147,7 @@ class BukkitGenderTable: Table<BukkitGender> {
                             val id = resultSet.getInt("id")
                             val name1 = resultSet.getString("name")
                             gender = BukkitGender(id, name1)
-                            cache.put(id, gender)
+                            cache.put(id as Integer, gender)
                             nameCache.put(name1, id)
                         }
                     })
@@ -168,7 +167,7 @@ class BukkitGenderTable: Table<BukkitGender> {
                         "DELETE FROM bukkit_gender WHERE id = ?").use({ statement ->
                     statement.setInt(1, `object`.id)
                     statement.executeUpdate()
-                    cache.remove(`object`.id)
+                    cache.remove(`object`.id as Integer)
                     nameCache.remove(`object`.name)
                 })
             }

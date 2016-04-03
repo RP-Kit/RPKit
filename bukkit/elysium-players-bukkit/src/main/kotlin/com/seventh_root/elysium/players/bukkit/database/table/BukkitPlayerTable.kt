@@ -19,31 +19,31 @@ import java.util.*
 class BukkitPlayerTable: Table<BukkitPlayer> {
 
     private val cacheManager: CacheManager
-    private val preConfigured: Cache<Int, BukkitPlayer>
-    private val cache: Cache<Int, BukkitPlayer>
+    private val preConfigured: Cache<Integer, BukkitPlayer>
+    private val cache: Cache<Integer, BukkitPlayer>
     private val playerCacheManager: CacheManager
-    private val playerPreConfigured: Cache<String, Int>
-    private val playerCache: Cache<String, Int>
+    private val playerPreConfigured: Cache<String, Integer>
+    private val playerCache: Cache<String, Integer>
 
     constructor(database: Database): super(database, BukkitPlayer::class.java) {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .withCache(
                         "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitPlayer::class.java)
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitPlayer::class.java)
                                 .build()
                 )
                 .build(true)
-        preConfigured = cacheManager.getCache("preConfigured", Int::class.java, BukkitPlayer::class.java)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitPlayer::class.java).build())
+        preConfigured = cacheManager.getCache("preConfigured", Integer::class.java, BukkitPlayer::class.java)
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitPlayer::class.java).build())
         playerCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
             .withCache(
                     "preConfigured",
-                    CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java)
+                    CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java)
                         .build()
             )
             .build(true)
-        playerPreConfigured = cacheManager.getCache("preConfigured", String::class.java, Int::class.java)
-        playerCache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java).build())
+        playerPreConfigured = playerCacheManager.getCache("preConfigured", String::class.java, Integer::class.java)
+        playerCache = playerCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
     }
 
     override fun create() {
@@ -77,8 +77,8 @@ class BukkitPlayerTable: Table<BukkitPlayer> {
                     if (generatedKeys.next()) {
                         id = generatedKeys.getInt(1)
                         `object`.id = id
-                        cache.put(id, `object`)
-                        playerCache.put(`object`.bukkitPlayer.uniqueId.toString(), id)
+                        cache.put(id as Integer, `object`)
+                        playerCache.put(`object`.bukkitPlayer.uniqueId.toString(), id as Integer)
                     }
                 })
             }
@@ -97,8 +97,8 @@ class BukkitPlayerTable: Table<BukkitPlayer> {
                     statement.setString(1, `object`.bukkitPlayer.uniqueId.toString())
                     statement.setInt(2, `object`.id)
                     statement.executeUpdate()
-                    cache.put(`object`.id, `object`)
-                    playerCache.put(`object`.bukkitPlayer.uniqueId.toString(), `object`.id)
+                    cache.put(`object`.id as Integer, `object`)
+                    playerCache.put(`object`.bukkitPlayer.uniqueId.toString(), `object`.id as Integer)
                 })
             }
         } catch (exception: SQLException) {
@@ -108,7 +108,7 @@ class BukkitPlayerTable: Table<BukkitPlayer> {
     }
 
     override fun get(id: Int): BukkitPlayer? {
-        if (cache.containsKey(id)) {
+        if (cache.containsKey(id as Integer)) {
             return cache.get(id)
         } else {
             try {
@@ -147,7 +147,7 @@ class BukkitPlayerTable: Table<BukkitPlayer> {
                         val id = resultSet.getInt("id")
                         val minecraftUUID = resultSet.getString("minecraft_uuid")
                         player = BukkitPlayer(resultSet.getInt("id"), Bukkit.getOfflinePlayer(UUID.fromString(resultSet.getString("minecraft_uuid"))))
-                        cache.put(id, player)
+                        cache.put(id as Integer, player)
                         playerCache.put(minecraftUUID, id)
                     }
                 })
@@ -167,7 +167,7 @@ class BukkitPlayerTable: Table<BukkitPlayer> {
                         "DELETE FROM bukkit_player WHERE id = ?").use({ statement ->
                     statement.setInt(1, `object`.id)
                     statement.executeUpdate()
-                    cache.remove(`object`.id)
+                    cache.remove(`object`.id as Integer)
                     playerCache.remove(`object`.bukkitPlayer.uniqueId.toString())
                 })
             }

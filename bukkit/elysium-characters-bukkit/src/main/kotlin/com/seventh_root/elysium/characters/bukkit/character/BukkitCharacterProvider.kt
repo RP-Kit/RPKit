@@ -16,20 +16,20 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
 
     private val plugin: ElysiumCharactersBukkit
     private val activeCharacterCacheManager: CacheManager
-    private val activeCharacterPreConfigured: Cache<Int, Int>
-    private val activeCharacterCache: Cache<Int, Int>
+    private val activeCharacterPreConfigured: Cache<Integer, Integer>
+    private val activeCharacterCache: Cache<Integer, Integer>
 
     constructor(plugin: ElysiumCharactersBukkit) {
         this.plugin = plugin
         this.activeCharacterCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .withCache(
                         "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, Int::class.java)
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, Integer::class.java)
                                 .build()
                 )
                 .build(true)
-        activeCharacterPreConfigured = activeCharacterCacheManager.getCache("preConfigured", Int::class.java, Int::class.java)
-        activeCharacterCache = activeCharacterCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, Int::class.java).build())
+        activeCharacterPreConfigured = activeCharacterCacheManager.getCache("preConfigured", Integer::class.java, Integer::class.java)
+        activeCharacterCache = activeCharacterCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, Integer::class.java).build())
     }
 
     override fun getCharacter(id: Int): BukkitCharacter? {
@@ -38,8 +38,8 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
 
     override fun getActiveCharacter(player: ElysiumPlayer): BukkitCharacter? {
         val playerId = player.id
-        if (activeCharacterCache.containsKey(playerId)) {
-            return getCharacter(activeCharacterCache.get(playerId))
+        if (activeCharacterCache.containsKey(playerId as Integer)) {
+            return getCharacter(activeCharacterCache.get(playerId) as Int)
         } else {
             try {
                 var character: BukkitCharacter? = null
@@ -51,7 +51,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
                         if (resultSet.next()) {
                             val characterId = resultSet.getInt("character_id")
                             character = getCharacter(characterId)
-                            activeCharacterCache.put(playerId, characterId)
+                            activeCharacterCache.put(playerId, characterId as Integer)
                         }
                     })
                 }
@@ -111,7 +111,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
                     bukkitPlayer.foodLevel = character.foodLevel
                 }
             }
-            activeCharacterCache.put(player.id, character.id)
+            activeCharacterCache.put(player.id as Integer, character.id as Integer)
         } else if (oldCharacter != null) {
             try {
                 plugin.core!!.database.createConnection().use { connection ->
@@ -125,7 +125,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
             } catch (exception: SQLException) {
                 exception.printStackTrace()
             }
-            activeCharacterCache.remove(player.id)
+            activeCharacterCache.remove(player.id as Integer)
         }
     }
 

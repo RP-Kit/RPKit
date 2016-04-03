@@ -1,7 +1,6 @@
 package com.seventh_root.elysium.chat.bukkit.database.table
 
 import com.seventh_root.elysium.api.player.ElysiumPlayer
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacter
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannel
 import com.seventh_root.elysium.core.database.Database
@@ -21,44 +20,44 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
 
     private val plugin: ElysiumChatBukkit
     private val cacheManager: CacheManager
-    private val preConfigured: Cache<Int, BukkitChatChannel>
-    private val cache: Cache<Int, BukkitChatChannel>
+    private val preConfigured: Cache<Integer, BukkitChatChannel>
+    private val cache: Cache<Integer, BukkitChatChannel>
     private val nameCacheManager: CacheManager
-    private val namePreConfigured: Cache<String, Int>
-    private val nameCache: Cache<String, Int>
+    private val namePreConfigured: Cache<String, Integer>
+    private val nameCache: Cache<String, Integer>
     private val playerCacheManager: CacheManager
-    private val playerPreConfigured: Cache<Int, Int>
-    private val playerCache: Cache<Int, Int>
+    private val playerPreConfigured: Cache<Integer, Integer>
+    private val playerCache: Cache<Integer, Integer>
 
     constructor(plugin: ElysiumChatBukkit, database: Database): super(database, BukkitChatChannel::class.java) {
         this.plugin = plugin
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .withCache(
                         "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitCharacter::class.java)
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitChatChannel::class.java)
                                 .build()
                 )
                 .build(true)
-        preConfigured = cacheManager.getCache("preConfigured", Int::class.java, BukkitChatChannel::class.java)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitChatChannel::class.java).build())
+        preConfigured = cacheManager.getCache("preConfigured", Integer::class.java, BukkitChatChannel::class.java)
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitChatChannel::class.java).build())
         nameCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
             .withCache(
                     "preConfigured",
-                    CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java)
+                    CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java)
                             .build()
             )
             .build(true)
-        namePreConfigured = nameCacheManager.getCache("preConfigured", String::class.java, Int::class.java)
-        nameCache = nameCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java).build())
+        namePreConfigured = nameCacheManager.getCache("preConfigured", String::class.java, Integer::class.java)
+        nameCache = nameCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
         playerCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .withCache(
                         "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, Int::class.java)
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, Integer::class.java)
                                 .build()
                 )
                 .build(true)
-        playerPreConfigured = playerCacheManager.getCache("preConfigured", Int::class.java, Int::class.java)
-        playerCache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, Int::class.java).build())
+        playerPreConfigured = playerCacheManager.getCache("preConfigured", Integer::class.java, Integer::class.java)
+        playerCache = playerCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, Integer::class.java).build())
     }
 
     override fun create() {
@@ -144,9 +143,9 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                         `object`.id = id
                         insertListeners(`object`)
                         insertSpeakers(`object`)
-                        cache.put(id, `object`)
-                        nameCache.put(`object`.name, id)
-                        `object`.speakers.forEach { speaker -> playerCache.put(speaker.id, id) }
+                        cache.put(id as Integer, `object`)
+                        nameCache.put(`object`.name, id as Integer)
+                        `object`.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, id as Integer) }
                     }
                 })
             }
@@ -215,9 +214,9 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                     deleteSpeakers(`object`)
                     insertListeners(`object`)
                     insertSpeakers(`object`)
-                    cache.put(`object`.id, `object`)
-                    nameCache.put(`object`.name, `object`.id)
-                    `object`.speakers.forEach { speaker -> playerCache.put(speaker.id, `object`.id) }
+                    cache.put(`object`.id as Integer, `object`)
+                    nameCache.put(`object`.name, `object`.id as Integer)
+                    `object`.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, `object`.id as Integer) }
                 })
             }
         } catch (exception: SQLException) {
@@ -255,7 +254,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
     }
 
     override fun get(id: Int): BukkitChatChannel? {
-        if (cache.containsKey(id)) {
+        if (cache.containsKey(id as Integer)) {
             return cache.get(id)
         } else {
             try {
@@ -302,7 +301,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                                 })
                                 cache.put(id, finalChatChannel)
                                 nameCache.put(finalChatChannel.name, id)
-                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id, id) }
+                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, id) }
                             }
                         }
                     })
@@ -317,7 +316,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
 
     fun get(name: String): BukkitChatChannel? {
         if (nameCache.containsKey(name)) {
-            return get(nameCache.get(name))
+            return get(nameCache.get(name) as Int)
         } else {
             var chatChannel: BukkitChatChannel? = null
             try {
@@ -360,9 +359,9 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                                         finalChatChannel.addSpeaker(plugin.core!!.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
                                     }
                                 })
-                                cache.put(finalChatChannel.id, chatChannel)
-                                nameCache.put(finalChatChannel.name, finalChatChannel.id)
-                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id, finalChatChannel.id) }
+                                cache.put(finalChatChannel.id as Integer, chatChannel)
+                                nameCache.put(finalChatChannel.name, finalChatChannel.id as Integer)
+                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, finalChatChannel.id as Integer) }
                             }
                         }
                     })
@@ -377,8 +376,8 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
 
     fun get(player: ElysiumPlayer): BukkitChatChannel? {
         val playerId = player.id
-        if (playerCache.containsKey(playerId)) {
-            return get(playerCache.get(playerId))
+        if (playerCache.containsKey(playerId as Integer)) {
+            return get(playerCache.get(playerId) as Int)
         } else {
             try {
                 var chatChannel: BukkitChatChannel? = null
@@ -421,9 +420,9 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                                         finalChatChannel.addSpeaker(plugin.core!!.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
                                     }
                                 })
-                                cache.put(finalChatChannel.id, chatChannel)
-                                nameCache.put(finalChatChannel.name, finalChatChannel.id)
-                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id, finalChatChannel.id) }
+                                cache.put(finalChatChannel.id as Integer, chatChannel)
+                                nameCache.put(finalChatChannel.name, finalChatChannel.id as Integer)
+                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, finalChatChannel.id as Integer) }
                             }
                         }
                     })
@@ -459,9 +458,9 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                                     chatChannel.addSpeaker(plugin.core!!.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
                                 }
                             })
-                            cache.put(chatChannel.id, chatChannel)
-                            nameCache.put(chatChannel.name, chatChannel.id)
-                            chatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id, chatChannel.id) }
+                            cache.put(chatChannel.id as Integer, chatChannel)
+                            nameCache.put(chatChannel.name, chatChannel.id as Integer)
+                            chatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, chatChannel.id as Integer) }
                             chatChannels.add(chatChannel)
                         }
                     }
@@ -481,9 +480,9 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                         "DELETE FROM chat_channel_speaker WHERE chat_channel_id = ?").use({ speakersStatement ->
                     speakersStatement.setInt(1, `object`.id)
                     speakersStatement.executeUpdate()
-                    cache.remove(`object`.id)
+                    cache.remove(`object`.id as Integer)
                     nameCache.remove(`object`.name)
-                    `object`.speakers.forEach { player -> playerCache.remove(player.id) }
+                    `object`.speakers.forEach { player -> playerCache.remove(player.id as Integer) }
                 })
             }
         } catch (exception: SQLException) {

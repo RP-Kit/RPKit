@@ -1,6 +1,5 @@
 package com.seventh_root.elysium.characters.bukkit.database.table
 
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacter
 import com.seventh_root.elysium.characters.bukkit.race.BukkitRace
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
@@ -15,32 +14,32 @@ import java.sql.Statement.RETURN_GENERATED_KEYS
 class BukkitRaceTable: Table<BukkitRace> {
 
     private val cacheManager: CacheManager
-    private val preConfigured: Cache<Int, BukkitRace>
-    private val cache: Cache<Int, BukkitRace>
+    private val preConfigured: Cache<Integer, BukkitRace>
+    private val cache: Cache<Integer, BukkitRace>
 
     private val nameCacheManager: CacheManager
-    private val namePreConfigured: Cache<String, Int>
-    private val nameCache: Cache<String, Int>
+    private val namePreConfigured: Cache<String, Integer>
+    private val nameCache: Cache<String, Integer>
 
     constructor(database: Database): super(database, BukkitRace::class.java) {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .withCache(
                         "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitCharacter::class.java)
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitRace::class.java)
                                 .build()
                 )
                 .build(true)
-        preConfigured = cacheManager.getCache("preConfigured", Int::class.java, BukkitRace::class.java)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitRace::class.java).build())
+        preConfigured = cacheManager.getCache("preConfigured", Integer::class.java, BukkitRace::class.java)
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitRace::class.java).build())
         nameCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .withCache(
                         "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java)
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java)
                                 .build()
                 )
                 .build(true)
-        namePreConfigured = nameCacheManager.getCache("preConfigured", String::class.java, Int::class.java)
-        nameCache = nameCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java).build())
+        namePreConfigured = nameCacheManager.getCache("preConfigured", String::class.java, Integer::class.java)
+        nameCache = nameCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
     }
 
     override fun create() {
@@ -74,8 +73,8 @@ class BukkitRaceTable: Table<BukkitRace> {
                     if (generatedKeys.next()) {
                         id = generatedKeys.getInt(1)
                         `object`.id = id
-                        cache.put(id, `object`)
-                        nameCache.put(`object`.name, id)
+                        cache.put(id as Integer, `object`)
+                        nameCache.put(`object`.name, id as Integer)
                     }
                 })
             }
@@ -94,8 +93,8 @@ class BukkitRaceTable: Table<BukkitRace> {
                     statement.setString(1, `object`.name)
                     statement.setInt(2, `object`.id)
                     statement.executeUpdate()
-                    cache.put(`object`.id, `object`)
-                    nameCache.put(`object`.name, `object`.id)
+                    cache.put(`object`.id as Integer, `object`)
+                    nameCache.put(`object`.name, `object`.id as Integer)
                 })
             }
         } catch (exception: SQLException) {
@@ -104,7 +103,7 @@ class BukkitRaceTable: Table<BukkitRace> {
     }
 
     override fun get(id: Int): BukkitRace? {
-        if (cache.containsKey(id)) {
+        if (cache.containsKey(id as Integer)) {
             return cache.get(id)
         } else {
             try {
@@ -119,7 +118,7 @@ class BukkitRaceTable: Table<BukkitRace> {
                             val name = resultSet.getString("name")
                             race = BukkitRace(id1, name)
                             cache.put(id, race)
-                            nameCache.put(name, id1)
+                            nameCache.put(name, id1 as Integer)
                         }
                     })
                 }
@@ -133,7 +132,7 @@ class BukkitRaceTable: Table<BukkitRace> {
 
     operator fun get(name: String): BukkitRace? {
         if (nameCache.containsKey(name)) {
-            return get(nameCache.get(name))
+            return get(nameCache.get(name) as Int)
         } else {
             try {
                 var race: BukkitRace? = null
@@ -146,7 +145,7 @@ class BukkitRaceTable: Table<BukkitRace> {
                             val id = resultSet.getInt("id")
                             val name1 = resultSet.getString("name")
                             race = BukkitRace(id, name1)
-                            cache.put(id, race)
+                            cache.put(id as Integer, race)
                             nameCache.put(name1, id)
                         }
                     })
@@ -166,7 +165,7 @@ class BukkitRaceTable: Table<BukkitRace> {
                         "DELETE FROM bukkit_race WHERE id = ?").use({ statement ->
                     statement.setInt(1, `object`.id)
                     statement.executeUpdate()
-                    cache.remove(`object`.id)
+                    cache.remove(`object`.id as Integer)
                     nameCache.remove(`object`.name)
                 })
             }

@@ -28,20 +28,20 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
 
     private val plugin: ElysiumCharactersBukkit
     private val cacheManager: CacheManager
-    private val preConfigured: Cache<Int, BukkitCharacter>
-    private val cache: Cache<Int, BukkitCharacter>
+    private val preConfigured: Cache<Integer, BukkitCharacter>
+    private val cache: Cache<Integer, BukkitCharacter>
 
     constructor(database: Database, plugin: ElysiumCharactersBukkit): super(database, BukkitCharacter::class.java) {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .withCache(
                         "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitCharacter::class.java)
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitCharacter::class.java)
                                 .build()
                 )
                 .build(true)
-        preConfigured = cacheManager.getCache("preConfigured", Int::class.java, BukkitCharacter::class.java)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitCharacter::class.java).build())
+        preConfigured = cacheManager.getCache("preConfigured", Integer::class.java, BukkitCharacter::class.java)
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitCharacter::class.java).build())
     }
 
     override fun create() {
@@ -163,7 +163,7 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
                     if (generatedKeys.next()) {
                         id = generatedKeys.getInt(1)
                         `object`.id = id
-                        cache.put(id, `object`)
+                        cache.put(id as Integer, `object`)
                     }
                 })
             }
@@ -271,7 +271,7 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
                     statement.setInt(24, `object`.thirstLevel)
                     statement.setInt(25, `object`.id)
                     statement.executeUpdate()
-                    cache.put(`object`.id, `object`)
+                    cache.put(`object`.id as Integer, `object`)
                 })
             }
         } catch (exception: SQLException) {
@@ -281,7 +281,7 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
     }
 
     override fun get(id: Int): BukkitCharacter? {
-        if (cache.containsKey(id)) {
+        if (cache.containsKey(id as Integer)) {
             return cache.get(id)
         } else {
             try {
@@ -345,8 +345,8 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
                         "DELETE FROM bukkit_character WHERE id = ?").use({ statement ->
                     statement.setInt(1, `object`.id)
                     statement.executeUpdate()
-                    if (cache.containsKey(`object`.id)) {
-                        cache.remove(`object`.id)
+                    if (cache.containsKey(`object`.id as Integer)) {
+                        cache.remove(`object`.id as Integer)
                     }
                 })
             }
