@@ -1,17 +1,39 @@
 package com.seventh_root.elysium.chat.bukkit.database.table
 
+import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacter
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannel
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.players.bukkit.BukkitPlayer
+import org.ehcache.Cache
+import org.ehcache.CacheManager
+import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.CacheManagerBuilder
 import java.awt.Color
 import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
-class BukkitChatChannelTable @Throws(SQLException::class)
-constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<BukkitChatChannel>(database, BukkitChatChannel::class.java) {
+class BukkitChatChannelTable: Table<BukkitChatChannel> {
+
+    private val plugin: ElysiumChatBukkit
+    private val cacheManager: CacheManager
+    private val preConfigured: Cache<Int, BukkitChatChannel>
+    private val cache: Cache<Int, BukkitChatChannel>
+
+    constructor(plugin: ElysiumChatBukkit, database: Database): super(database, BukkitChatChannel::class.java) {
+        this.plugin = plugin
+        cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+                .withCache(
+                        "preConfigured",
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitCharacter::class.java)
+                                .build()
+                )
+                .build(true)
+        preConfigured = cacheManager.getCache("preConfigured", Int::class.java, BukkitChatChannel::class.java)
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitChatChannel::class.java).build())
+    }
 
     override fun create() {
         try {
@@ -45,7 +67,7 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
                                 "player_id INTEGER," +
                                 "FOREIGN KEY(chat_channel_id) REFERENCES bukkit_chat_channel(id)," +
                                 "FOREIGN KEY(player_id) REFERENCES bukkit_player(id)" +
-                                ")").use({ statement -> statement.executeUpdate() })
+                        ")").use({ statement -> statement.executeUpdate() })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
@@ -59,7 +81,7 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
                                 "player_id INTEGER," +
                                 "FOREIGN KEY(chat_channel_id) REFERENCES bukkit_chat_channel(id)," +
                                 "FOREIGN KEY(player_id) REFERENCES bukkit_player(id)" +
-                                ")").use({ statement -> statement.executeUpdate() })
+                        ")").use({ statement -> statement.executeUpdate() })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
@@ -96,6 +118,7 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
                         `object`.id = id
                         insertListeners(`object`)
                         insertSpeakers(`object`)
+                        cache.put(id, `object`)
                     }
                 })
             }
@@ -103,7 +126,6 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
         return 0
     }
 
@@ -122,7 +144,6 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
     }
 
     private fun insertSpeakers(chatChannel: BukkitChatChannel) {
@@ -166,12 +187,12 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
                     deleteSpeakers(`object`)
                     insertListeners(`object`)
                     insertSpeakers(`object`)
+                    cache.put(`object`.id, `object`)
                 })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
     }
 
     private fun deleteListeners(chatChannel: BukkitChatChannel) {
@@ -201,54 +222,58 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
     }
 
     override fun get(id: Int): BukkitChatChannel? {
-        try {
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default FROM bukkit_chat_channel WHERE id = ?").use({ statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val chatChannel = BukkitChatChannel(
-                                plugin = plugin,
-                                id = resultSet.getInt("id"),
-                                name = resultSet.getString("name"),
-                                color = Color(
-                                                resultSet.getInt("color_red"),
-                                                resultSet.getInt("color_green"),
-                                                resultSet.getInt("color_blue")
-                                ),
-                                formatString = resultSet.getString("format_string"),
-                                radius = resultSet.getInt("radius"),
-                                clearRadius = resultSet.getInt("clear_radius"),
-                                matchPattern = resultSet.getString("match_pattern"),
-                                isIRCEnabled = resultSet.getBoolean("irc_enabled"),
-                                ircChannel = resultSet.getString("irc_channel"),
-                                isIRCWhitelist = resultSet.getBoolean("irc_whitelist"),
-                                isJoinedByDefault = resultSet.getBoolean("joined_by_default")
-                        )
-                        connection.prepareStatement("SELECT player_id FROM chat_channel_listener WHERE chat_channel_id = ?").use({ listenerStatement ->
-                            listenerStatement.setInt(1, chatChannel.id)
-                            val listenerResultSet = listenerStatement.executeQuery()
-                            while (listenerResultSet.next()) {
-                                chatChannel.addListener(database.getTable(BukkitPlayer::class.java)!![listenerResultSet.getInt("player_id")]!!)
-                            }
-                        })
-                        connection.prepareStatement("SELECT player_id FROM chat_channel_speaker WHERE chat_channel_id = ?").use({ speakerStatement ->
-                            speakerStatement.setInt(1, chatChannel.id)
-                            val speakerResultSet = speakerStatement.executeQuery()
-                            while (speakerResultSet.next()) {
-                                chatChannel.addSpeaker(database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
-                            }
-                        })
-                    }
-                })
+        if (cache.containsKey(id)) {
+            return cache.get(id)
+        } else {
+            try {
+                database.createConnection().use { connection ->
+                    connection.prepareStatement(
+                            "SELECT id, name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default FROM bukkit_chat_channel WHERE id = ?").use({ statement ->
+                        statement.setInt(1, id)
+                        val resultSet = statement.executeQuery()
+                        if (resultSet.next()) {
+                            val chatChannel = BukkitChatChannel(
+                                    plugin = plugin,
+                                    id = resultSet.getInt("id"),
+                                    name = resultSet.getString("name"),
+                                    color = Color(
+                                            resultSet.getInt("color_red"),
+                                            resultSet.getInt("color_green"),
+                                            resultSet.getInt("color_blue")
+                                    ),
+                                    formatString = resultSet.getString("format_string"),
+                                    radius = resultSet.getInt("radius"),
+                                    clearRadius = resultSet.getInt("clear_radius"),
+                                    matchPattern = resultSet.getString("match_pattern"),
+                                    isIRCEnabled = resultSet.getBoolean("irc_enabled"),
+                                    ircChannel = resultSet.getString("irc_channel"),
+                                    isIRCWhitelist = resultSet.getBoolean("irc_whitelist"),
+                                    isJoinedByDefault = resultSet.getBoolean("joined_by_default")
+                            )
+                            connection.prepareStatement("SELECT player_id FROM chat_channel_listener WHERE chat_channel_id = ?").use({ listenerStatement ->
+                                listenerStatement.setInt(1, chatChannel.id)
+                                val listenerResultSet = listenerStatement.executeQuery()
+                                while (listenerResultSet.next()) {
+                                    chatChannel.addListener(database.getTable(BukkitPlayer::class.java)!![listenerResultSet.getInt("player_id")]!!)
+                                }
+                            })
+                            connection.prepareStatement("SELECT player_id FROM chat_channel_speaker WHERE chat_channel_id = ?").use({ speakerStatement ->
+                                speakerStatement.setInt(1, chatChannel.id)
+                                val speakerResultSet = speakerStatement.executeQuery()
+                                while (speakerResultSet.next()) {
+                                    chatChannel.addSpeaker(database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
+                                }
+                            })
+                            cache.put(id, chatChannel)
+                        }
+                    })
+                }
+            } catch (exception: SQLException) {
+                exception.printStackTrace()
             }
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
         }
         return null
     }
@@ -260,6 +285,7 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
                         "DELETE FROM chat_channel_speaker WHERE chat_channel_id = ?").use({ speakersStatement ->
                     speakersStatement.setInt(1, `object`.id)
                     speakersStatement.executeUpdate()
+                    cache.remove(`object`.id)
                 })
             }
         } catch (exception: SQLException) {
@@ -290,6 +316,5 @@ constructor(private val plugin: ElysiumChatBukkit, database: Database) : Table<B
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
     }
 }
