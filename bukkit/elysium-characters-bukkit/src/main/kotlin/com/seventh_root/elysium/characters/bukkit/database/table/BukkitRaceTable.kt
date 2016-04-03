@@ -39,7 +39,7 @@ class BukkitRaceTable: Table<BukkitRace> {
                                 .build()
                 )
                 .build(true)
-        namePreConfigured = cacheManager.getCache("preConfigured", String::class.java, Int::class.java)
+        namePreConfigured = nameCacheManager.getCache("preConfigured", String::class.java, Int::class.java)
         nameCache = nameCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java).build())
     }
 
