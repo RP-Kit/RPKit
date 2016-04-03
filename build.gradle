@@ -18,7 +18,7 @@ allprojects {
     apply plugin: "kotlin"
     apply plugin: "maven"
     group = "com.seventh-root"
-    version = "0.1.5"
+    version = "0.1.6"
 }
 
 subprojects {
@@ -56,6 +56,7 @@ project(":apis:elysium-core-api") {
         compile group: "com.google.code.gson", name: "gson", version: gsonVersion
         compile group: "org.ehcache", name: "ehcache", version: ehcacheVersion
         compile group: "org.jetbrains.kotlin", name: "kotlin-stdlib", version: kotlinVersion
+        compile group: "org.slf4j", name: "slf4j-jdk14", version: "1.7.20"
     }
 
     apply plugin: "com.github.johnrengelman.shadow"
