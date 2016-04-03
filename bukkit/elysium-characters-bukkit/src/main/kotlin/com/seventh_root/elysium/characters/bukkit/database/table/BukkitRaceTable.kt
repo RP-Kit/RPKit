@@ -1,14 +1,47 @@
 package com.seventh_root.elysium.characters.bukkit.database.table
 
+import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacter
 import com.seventh_root.elysium.characters.bukkit.race.BukkitRace
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
+import org.ehcache.Cache
+import org.ehcache.CacheManager
+import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.CacheManagerBuilder
 import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
-class BukkitRaceTable @Throws(SQLException::class)
-constructor(database: Database) : Table<BukkitRace>(database, BukkitRace::class.java) {
+class BukkitRaceTable: Table<BukkitRace> {
+
+    private val cacheManager: CacheManager
+    private val preConfigured: Cache<Int, BukkitRace>
+    private val cache: Cache<Int, BukkitRace>
+
+    private val nameCacheManager: CacheManager
+    private val namePreConfigured: Cache<String, Int>
+    private val nameCache: Cache<String, Int>
+
+    constructor(database: Database): super(database, BukkitRace::class.java) {
+        cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+                .withCache(
+                        "preConfigured",
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitCharacter::class.java)
+                                .build()
+                )
+                .build(true)
+        preConfigured = cacheManager.getCache("preConfigured", Int::class.java, BukkitRace::class.java)
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitRace::class.java).build())
+        nameCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+                .withCache(
+                        "preConfigured",
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java)
+                                .build()
+                )
+                .build(true)
+        namePreConfigured = cacheManager.getCache("preConfigured", String::class.java, Int::class.java)
+        nameCache = nameCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java).build())
+    }
 
     override fun create() {
         try {
@@ -41,6 +74,8 @@ constructor(database: Database) : Table<BukkitRace>(database, BukkitRace::class.
                     if (generatedKeys.next()) {
                         id = generatedKeys.getInt(1)
                         `object`.id = id
+                        cache.put(id, `object`)
+                        nameCache.put(`object`.name, id)
                     }
                 })
             }
@@ -48,7 +83,6 @@ constructor(database: Database) : Table<BukkitRace>(database, BukkitRace::class.
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
         return 0
     }
 
@@ -60,53 +94,68 @@ constructor(database: Database) : Table<BukkitRace>(database, BukkitRace::class.
                     statement.setString(1, `object`.name)
                     statement.setInt(2, `object`.id)
                     statement.executeUpdate()
+                    cache.put(`object`.id, `object`)
+                    nameCache.put(`object`.name, `object`.id)
                 })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
     }
 
     override fun get(id: Int): BukkitRace? {
-        try {
-            var race: BukkitRace? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, name FROM bukkit_race WHERE id = ?").use({ statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        race = BukkitRace(resultSet.getInt("id"), resultSet.getString("name"))
-                    }
-                })
+        if (cache.containsKey(id)) {
+            return cache.get(id)
+        } else {
+            try {
+                var race: BukkitRace? = null
+                database.createConnection().use { connection ->
+                    connection.prepareStatement(
+                            "SELECT id, name FROM bukkit_race WHERE id = ?").use({ statement ->
+                        statement.setInt(1, id)
+                        val resultSet = statement.executeQuery()
+                        if (resultSet.next()) {
+                            val id1 = resultSet.getInt("id")
+                            val name = resultSet.getString("name")
+                            race = BukkitRace(id1, name)
+                            cache.put(id, race)
+                            nameCache.put(name, id1)
+                        }
+                    })
+                }
+                return race
+            } catch (exception: SQLException) {
+                exception.printStackTrace()
             }
-            return race
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
         }
-
         return null
     }
 
     operator fun get(name: String): BukkitRace? {
-        try {
-            var race: BukkitRace? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, name FROM bukkit_race WHERE name = ?").use({ statement ->
-                    statement.setString(1, name)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        race = BukkitRace(resultSet.getInt("id"), resultSet.getString("name"))
-                    }
-                })
+        if (nameCache.containsKey(name)) {
+            return get(nameCache.get(name))
+        } else {
+            try {
+                var race: BukkitRace? = null
+                database.createConnection().use { connection ->
+                    connection.prepareStatement(
+                            "SELECT id, name FROM bukkit_race WHERE name = ?").use({ statement ->
+                        statement.setString(1, name)
+                        val resultSet = statement.executeQuery()
+                        if (resultSet.next()) {
+                            val id = resultSet.getInt("id")
+                            val name1 = resultSet.getString("name")
+                            race = BukkitRace(id, name1)
+                            cache.put(id, race)
+                            nameCache.put(name1, id)
+                        }
+                    })
+                }
+                return race
+            } catch (exception: SQLException) {
+                exception.printStackTrace()
             }
-            return race
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
         }
-
         return null
     }
 
@@ -117,12 +166,13 @@ constructor(database: Database) : Table<BukkitRace>(database, BukkitRace::class.
                         "DELETE FROM bukkit_race WHERE id = ?").use({ statement ->
                     statement.setInt(1, `object`.id)
                     statement.executeUpdate()
+                    cache.remove(`object`.id)
+                    nameCache.remove(`object`.name)
                 })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
     }
 
 }
