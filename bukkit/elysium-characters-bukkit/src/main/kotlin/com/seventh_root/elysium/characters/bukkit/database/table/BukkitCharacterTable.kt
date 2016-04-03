@@ -13,6 +13,10 @@ import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.io.BukkitObjectInputStream
 import org.bukkit.util.io.BukkitObjectOutputStream
+import org.ehcache.Cache
+import org.ehcache.CacheManager
+import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.CacheManagerBuilder
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -20,8 +24,25 @@ import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.sql.Types.INTEGER
 
-class BukkitCharacterTable @Throws(SQLException::class)
-constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : Table<BukkitCharacter>(database, BukkitCharacter::class.java) {
+class BukkitCharacterTable: Table<BukkitCharacter> {
+
+    private val plugin: ElysiumCharactersBukkit
+    private val cacheManager: CacheManager
+    private val preConfigured: Cache<Integer, BukkitCharacter>
+    private val cache: Cache<Integer, BukkitCharacter>
+
+    constructor(database: Database, plugin: ElysiumCharactersBukkit): super(database, BukkitCharacter::class.java) {
+        this.plugin = plugin;
+        cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+                .withCache(
+                        "preConfigured",
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitCharacter::class.java)
+                                .build()
+                )
+                .build(true)
+        preConfigured = cacheManager.getCache("preConfigured", Integer::class.java, BukkitCharacter::class.java)
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitCharacter::class.java).build())
+    }
 
     override fun create() {
         try {
@@ -142,6 +163,7 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
                     if (generatedKeys.next()) {
                         id = generatedKeys.getInt(1)
                         `object`.id = id
+                        cache.put(id as Integer, `object`)
                     }
                 })
             }
@@ -149,7 +171,6 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
         return 0
     }
 
@@ -250,6 +271,7 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
                     statement.setInt(24, `object`.thirstLevel)
                     statement.setInt(25, `object`.id)
                     statement.executeUpdate()
+                    cache.put(`object`.id as Integer, `object`)
                 })
             }
         } catch (exception: SQLException) {
@@ -259,53 +281,58 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
     }
 
     override fun get(id: Int): BukkitCharacter? {
-        try {
-            var character: BukkitCharacter? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level FROM bukkit_character WHERE id = ?").use({ statement ->
-                    val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                    val genderProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitGenderProvider::class.java)
-                    val raceProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        character = BukkitCharacter(
-                                plugin = plugin,
-                                id = resultSet.getInt("id"),
-                                player = playerProvider.getPlayer(resultSet.getInt("player_id")),
-                                name = resultSet.getString("name"),
-                                gender = genderProvider.getGender(resultSet.getInt("gender_id")),
-                                age = resultSet.getInt("age"),
-                                race = raceProvider.getRace(resultSet.getInt("race_id")),
-                                description = resultSet.getString("description"),
-                                dead = resultSet.getBoolean("dead"),
-                                location = Location(
-                                        Bukkit.getWorld(resultSet.getString("world")),
-                                        resultSet.getDouble("x"),
-                                        resultSet.getDouble("y"),
-                                        resultSet.getDouble("z"),
-                                        resultSet.getFloat("yaw"),
-                                        resultSet.getFloat("pitch")
-                                ),
-                                inventoryContents = deserializeInventory(resultSet.getBytes("inventory_contents")),
-                                helmet = deserializeItemStack(resultSet.getBytes("helmet")),
-                                chestplate = deserializeItemStack(resultSet.getBytes("chestplate")),
-                                leggings = deserializeItemStack(resultSet.getBytes("leggings")),
-                                boots = deserializeItemStack(resultSet.getBytes("boots")),
-                                health = resultSet.getDouble("health"),
-                                maxHealth = resultSet.getDouble("max_health"),
-                                mana = resultSet.getInt("mana"),
-                                maxMana = resultSet.getInt("max_mana"),
-                                foodLevel = resultSet.getInt("food_level"),
-                                thirstLevel = resultSet.getInt("thirst_level")
-                        )
-                    }
-                })
+        if (cache.containsKey(id as Integer)) {
+            return cache.get(id)
+        } else {
+            try {
+                var character: BukkitCharacter? = null
+                database.createConnection().use { connection ->
+                    connection.prepareStatement(
+                            "SELECT id, player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level FROM bukkit_character WHERE id = ?").use({ statement ->
+                        val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                        val genderProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitGenderProvider::class.java)
+                        val raceProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+                        statement.setInt(1, id)
+                        val resultSet = statement.executeQuery()
+                        if (resultSet.next()) {
+                            character = BukkitCharacter(
+                                    plugin = plugin,
+                                    id = resultSet.getInt("id"),
+                                    player = playerProvider.getPlayer(resultSet.getInt("player_id")),
+                                    name = resultSet.getString("name"),
+                                    gender = genderProvider.getGender(resultSet.getInt("gender_id")),
+                                    age = resultSet.getInt("age"),
+                                    race = raceProvider.getRace(resultSet.getInt("race_id")),
+                                    description = resultSet.getString("description"),
+                                    dead = resultSet.getBoolean("dead"),
+                                    location = Location(
+                                            Bukkit.getWorld(resultSet.getString("world")),
+                                            resultSet.getDouble("x"),
+                                            resultSet.getDouble("y"),
+                                            resultSet.getDouble("z"),
+                                            resultSet.getFloat("yaw"),
+                                            resultSet.getFloat("pitch")
+                                    ),
+                                    inventoryContents = deserializeInventory(resultSet.getBytes("inventory_contents")),
+                                    helmet = deserializeItemStack(resultSet.getBytes("helmet")),
+                                    chestplate = deserializeItemStack(resultSet.getBytes("chestplate")),
+                                    leggings = deserializeItemStack(resultSet.getBytes("leggings")),
+                                    boots = deserializeItemStack(resultSet.getBytes("boots")),
+                                    health = resultSet.getDouble("health"),
+                                    maxHealth = resultSet.getDouble("max_health"),
+                                    mana = resultSet.getInt("mana"),
+                                    maxMana = resultSet.getInt("max_mana"),
+                                    foodLevel = resultSet.getInt("food_level"),
+                                    thirstLevel = resultSet.getInt("thirst_level")
+                            )
+                            cache.put(id, character)
+                        }
+                    })
+                }
+                return character
+            } catch (exception: SQLException) {
+                exception.printStackTrace()
             }
-            return character
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
         }
 
         return null
@@ -318,6 +345,9 @@ constructor(database: Database, private val plugin: ElysiumCharactersBukkit) : T
                         "DELETE FROM bukkit_character WHERE id = ?").use({ statement ->
                     statement.setInt(1, `object`.id)
                     statement.executeUpdate()
+                    if (cache.containsKey(`object`.id as Integer)) {
+                        cache.remove(`object`.id as Integer)
+                    }
                 })
             }
         } catch (exception: SQLException) {

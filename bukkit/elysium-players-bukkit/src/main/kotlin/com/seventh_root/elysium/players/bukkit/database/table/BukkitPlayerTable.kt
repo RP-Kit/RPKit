@@ -6,14 +6,45 @@ import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.players.bukkit.BukkitPlayer
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
+import org.ehcache.Cache
+import org.ehcache.CacheManager
+import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.CacheManagerBuilder
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.util.*
 
-class BukkitPlayerTable @Throws(SQLException::class)
-constructor(database: Database) : Table<BukkitPlayer>(database, BukkitPlayer::class.java) {
+class BukkitPlayerTable: Table<BukkitPlayer> {
+
+    private val cacheManager: CacheManager
+    private val preConfigured: Cache<Integer, BukkitPlayer>
+    private val cache: Cache<Integer, BukkitPlayer>
+    private val playerCacheManager: CacheManager
+    private val playerPreConfigured: Cache<String, Integer>
+    private val playerCache: Cache<String, Integer>
+
+    constructor(database: Database): super(database, BukkitPlayer::class.java) {
+        cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+                .withCache(
+                        "preConfigured",
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitPlayer::class.java)
+                                .build()
+                )
+                .build(true)
+        preConfigured = cacheManager.getCache("preConfigured", Integer::class.java, BukkitPlayer::class.java)
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitPlayer::class.java).build())
+        playerCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+            .withCache(
+                    "preConfigured",
+                    CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java)
+                        .build()
+            )
+            .build(true)
+        playerPreConfigured = playerCacheManager.getCache("preConfigured", String::class.java, Integer::class.java)
+        playerCache = playerCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
+    }
 
     override fun create() {
         try {
@@ -46,6 +77,8 @@ constructor(database: Database) : Table<BukkitPlayer>(database, BukkitPlayer::cl
                     if (generatedKeys.next()) {
                         id = generatedKeys.getInt(1)
                         `object`.id = id
+                        cache.put(id as Integer, `object`)
+                        playerCache.put(`object`.bukkitPlayer.uniqueId.toString(), id as Integer)
                     }
                 })
             }
@@ -64,6 +97,8 @@ constructor(database: Database) : Table<BukkitPlayer>(database, BukkitPlayer::cl
                     statement.setString(1, `object`.bukkitPlayer.uniqueId.toString())
                     statement.setInt(2, `object`.id)
                     statement.executeUpdate()
+                    cache.put(`object`.id as Integer, `object`)
+                    playerCache.put(`object`.bukkitPlayer.uniqueId.toString(), `object`.id as Integer)
                 })
             }
         } catch (exception: SQLException) {
@@ -73,23 +108,30 @@ constructor(database: Database) : Table<BukkitPlayer>(database, BukkitPlayer::cl
     }
 
     override fun get(id: Int): BukkitPlayer? {
-        try {
-            var player: BukkitPlayer? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, minecraft_uuid FROM bukkit_player WHERE id = ?").use({ statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        player = BukkitPlayer(resultSet.getInt("id"), Bukkit.getOfflinePlayer(UUID.fromString(resultSet.getString("minecraft_uuid"))))
-                    }
-                })
+        if (cache.containsKey(id as Integer)) {
+            return cache.get(id)
+        } else {
+            try {
+                var player: BukkitPlayer? = null
+                database.createConnection().use { connection ->
+                    connection.prepareStatement(
+                            "SELECT id, minecraft_uuid FROM bukkit_player WHERE id = ?").use({ statement ->
+                        statement.setInt(1, id)
+                        val resultSet = statement.executeQuery()
+                        if (resultSet.next()) {
+                            val id1 = resultSet.getInt("id")
+                            val minecraftUUID = resultSet.getString("minecraft_uuid")
+                            player = BukkitPlayer(id1, Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)))
+                            cache.put(id, player)
+                            playerCache.put(minecraftUUID, id)
+                        }
+                    })
+                }
+                return player
+            } catch (exception: SQLException) {
+                exception.printStackTrace()
             }
-            return player
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
         }
-
         return null
     }
 
@@ -102,7 +144,11 @@ constructor(database: Database) : Table<BukkitPlayer>(database, BukkitPlayer::cl
                     statement.setString(1, bukkitPlayer.uniqueId.toString())
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
+                        val id = resultSet.getInt("id")
+                        val minecraftUUID = resultSet.getString("minecraft_uuid")
                         player = BukkitPlayer(resultSet.getInt("id"), Bukkit.getOfflinePlayer(UUID.fromString(resultSet.getString("minecraft_uuid"))))
+                        cache.put(id as Integer, player)
+                        playerCache.put(minecraftUUID, id)
                     }
                 })
             }
@@ -121,6 +167,8 @@ constructor(database: Database) : Table<BukkitPlayer>(database, BukkitPlayer::cl
                         "DELETE FROM bukkit_player WHERE id = ?").use({ statement ->
                     statement.setInt(1, `object`.id)
                     statement.executeUpdate()
+                    cache.remove(`object`.id as Integer)
+                    playerCache.remove(`object`.bukkitPlayer.uniqueId.toString())
                 })
             }
         } catch (exception: SQLException) {
