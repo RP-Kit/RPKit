@@ -5,33 +5,61 @@ import com.seventh_root.elysium.api.player.ElysiumPlayer
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.players.bukkit.BukkitPlayer
+import org.ehcache.Cache
+import org.ehcache.CacheManager
+import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.CacheManagerBuilder
 import java.sql.SQLException
 import java.util.*
 
-class BukkitCharacterProvider(private val plugin: ElysiumCharactersBukkit) : CharacterProvider<BukkitCharacter> {
+class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
+
+    private val plugin: ElysiumCharactersBukkit
+    private val activeCharacterCacheManager: CacheManager
+    private val activeCharacterPreConfigured: Cache<Integer, Integer>
+    private val activeCharacterCache: Cache<Integer, Integer>
+
+    constructor(plugin: ElysiumCharactersBukkit) {
+        this.plugin = plugin
+        this.activeCharacterCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+                .withCache(
+                        "preConfigured",
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, Integer::class.java)
+                                .build()
+                )
+                .build(true)
+        activeCharacterPreConfigured = activeCharacterCacheManager.getCache("preConfigured", Integer::class.java, Integer::class.java)
+        activeCharacterCache = activeCharacterCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, Integer::class.java).build())
+    }
 
     override fun getCharacter(id: Int): BukkitCharacter? {
         return plugin.core!!.database.getTable(BukkitCharacter::class.java)!![id]
     }
 
     override fun getActiveCharacter(player: ElysiumPlayer): BukkitCharacter? {
-        try {
-            var character: BukkitCharacter? = null
-            plugin.core!!.database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT character_id FROM player_character WHERE player_id = ?").use({ statement ->
-                    statement.setInt(1, player.id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        character = getCharacter(resultSet.getInt("character_id"))
-                    }
-                })
+        val playerId = player.id
+        if (activeCharacterCache.containsKey(playerId as Integer)) {
+            return getCharacter(activeCharacterCache.get(playerId) as Int)
+        } else {
+            try {
+                var character: BukkitCharacter? = null
+                plugin.core!!.database.createConnection().use { connection ->
+                    connection.prepareStatement(
+                            "SELECT character_id FROM player_character WHERE player_id = ?").use({ statement ->
+                        statement.setInt(1, player.id)
+                        val resultSet = statement.executeQuery()
+                        if (resultSet.next()) {
+                            val characterId = resultSet.getInt("character_id")
+                            character = getCharacter(characterId)
+                            activeCharacterCache.put(playerId, characterId as Integer)
+                        }
+                    })
+                }
+                return character
+            } catch (exception: SQLException) {
+                exception.printStackTrace()
             }
-            return character
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
         }
-
         return null
     }
 
@@ -83,6 +111,7 @@ class BukkitCharacterProvider(private val plugin: ElysiumCharactersBukkit) : Cha
                     bukkitPlayer.foodLevel = character.foodLevel
                 }
             }
+            activeCharacterCache.put(player.id as Integer, character.id as Integer)
         } else if (oldCharacter != null) {
             try {
                 plugin.core!!.database.createConnection().use { connection ->
@@ -96,7 +125,7 @@ class BukkitCharacterProvider(private val plugin: ElysiumCharactersBukkit) : Cha
             } catch (exception: SQLException) {
                 exception.printStackTrace()
             }
-
+            activeCharacterCache.remove(player.id as Integer)
         }
     }
 
