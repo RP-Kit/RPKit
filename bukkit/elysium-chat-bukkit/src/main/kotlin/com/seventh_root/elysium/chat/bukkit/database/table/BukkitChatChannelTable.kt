@@ -188,7 +188,6 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
     }
 
     override fun update(`object`: BukkitChatChannel) {
@@ -222,6 +221,10 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
+        deleteListeners(`object`)
+        deleteSpeakers(`object`)
+        insertListeners(`object`)
+        insertSpeakers(`object`)
     }
 
     private fun deleteListeners(chatChannel: BukkitChatChannel) {
@@ -236,7 +239,6 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
     }
 
     private fun deleteSpeakers(chatChannel: BukkitChatChannel) {
