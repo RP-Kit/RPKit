@@ -182,13 +182,13 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                         statement.setInt(1, chatChannel.id)
                         statement.setInt(2, speaker.id)
                         statement.executeUpdate()
+                        playerCache.put(speaker.id as Integer, chatChannel.id as Integer)
                     }
                 })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
     }
 
     override fun update(`object`: BukkitChatChannel) {
@@ -216,12 +216,15 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                     insertSpeakers(`object`)
                     cache.put(`object`.id as Integer, `object`)
                     nameCache.put(`object`.name, `object`.id as Integer)
-                    `object`.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, `object`.id as Integer) }
                 })
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
+        deleteListeners(`object`)
+        deleteSpeakers(`object`)
+        insertListeners(`object`)
+        insertSpeakers(`object`)
     }
 
     private fun deleteListeners(chatChannel: BukkitChatChannel) {
@@ -236,7 +239,6 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
     }
 
     private fun deleteSpeakers(chatChannel: BukkitChatChannel) {
@@ -247,6 +249,10 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                     statement.setInt(1, chatChannel.id)
                     statement.executeUpdate()
                 })
+                val cachedSpeakers = playerCache
+                        .filter { cacheEntry -> cacheEntry.value as Int == chatChannel.id }
+                        .map { cacheEntry -> cacheEntry.key }
+                cachedSpeakers.forEach { playerId -> playerCache.remove(playerId as Integer) }
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
