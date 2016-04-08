@@ -41,6 +41,7 @@ class ChatChannelLeaveCommand(private val plugin: ElysiumChatBukkit) : CommandEx
                         if (chatChannel != null) {
                             if (sender.hasPermission("elysium.chat.command.chatchannel.leave." + chatChannel.name)) {
                                 chatChannel.removeListener(player)
+                                chatChannel.removeSpeaker(player)
                                 chatChannelProvider.updateChatChannel(chatChannel)
                                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-leave-valid")))
                             } else {
@@ -79,8 +80,7 @@ class ChatChannelLeaveCommand(private val plugin: ElysiumChatBukkit) : CommandEx
                 val player = playerProvider.getPlayer(conversable)
                 val channel = chatChannelProvider.getChatChannel(input)!!
                 channel.removeListener(player)
-                if (channel.speakers.contains(player))
-                    channel.removeSpeaker(player)
+                channel.removeSpeaker(player)
                 chatChannelProvider.updateChatChannel(channel)
             }
             return ChatChannelLeftPrompt()
