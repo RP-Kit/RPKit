@@ -1,0 +1,18 @@
+name: elysium-trade-bukkit
+author: alyphen
+version: @version@
+main: com.seventh_root.elysium.trade.bukkit.ElysiumTradeBukkit
+depend: [elysium-core-bukkit, elysium-characters-bukkit, elysium-players-bukkit, elysium-economy-bukkit]
+permissions:
+    elysium.trade.sign.trader.buy:
+        description: Allows buying from trader signs
+        default: true
+    elysium.trade.sign.trader.sell:
+        description: Allows selling to trader signs
+        default: true
+    elysium.trade.sign.trader.create:
+        description: Allows creating trader signs
+        default: op
+    elysium.trade.sign.trader.destroy:
+        description: Allows destroying trader signs
+        default: op
