@@ -28,7 +28,7 @@ class ElysiumCharactersBukkit : ElysiumBukkitPlugin() {
     private var characterProvider: CharacterProvider<BukkitCharacter>? = null
     private var genderProvider: GenderProvider<BukkitGender>? = null
     private var raceProvider: RaceProvider<BukkitRace>? = null
-    override var serviceProviders: Array<ServiceProvider>? = null
+    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()

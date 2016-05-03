@@ -10,7 +10,7 @@ import java.sql.SQLException
 
 class ElysiumCoreBukkit : ElysiumBukkitPlugin() {
 
-    override var serviceProviders: Array<ServiceProvider>? = null
+    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()

@@ -30,6 +30,6 @@ abstract class ElysiumBukkitPlugin : JavaPlugin() {
     open fun createTables(database: Database) {
     }
 
-    abstract var serviceProviders: Array<ServiceProvider>?
+    abstract var serviceProviders: Array<ServiceProvider>
 
 }

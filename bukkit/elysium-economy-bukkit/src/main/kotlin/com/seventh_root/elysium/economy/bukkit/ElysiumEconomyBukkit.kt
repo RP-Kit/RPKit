@@ -21,7 +21,7 @@ class ElysiumEconomyBukkit : ElysiumBukkitPlugin() {
 
     private var currencyProvider: CurrencyProvider<BukkitCurrency>? = null
     private var economyProvider: EconomyProvider? = null
-    override var serviceProviders: Array<ServiceProvider>? = null
+    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()

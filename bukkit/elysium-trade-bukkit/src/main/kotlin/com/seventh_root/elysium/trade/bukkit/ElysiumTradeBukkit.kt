@@ -8,7 +8,7 @@ import com.seventh_root.elysium.trade.bukkit.listener.SignChangeListener
 
 class ElysiumTradeBukkit: ElysiumBukkitPlugin() {
 
-    override var serviceProviders: Array<ServiceProvider>? = null
+    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()

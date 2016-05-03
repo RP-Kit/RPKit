@@ -10,7 +10,7 @@ import java.sql.SQLException
 class ElysiumPlayersBukkit : ElysiumBukkitPlugin() {
 
     private var playerProvider: PlayerProvider<BukkitPlayer>? = null
-    override var serviceProviders: Array<ServiceProvider>? = null
+    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         playerProvider = BukkitPlayerProvider(this)

@@ -15,7 +15,7 @@ import java.sql.SQLException
 class ElysiumChatBukkit : ElysiumBukkitPlugin() {
 
     private var chatChannelProvider: ChatChannelProvider<BukkitChatChannel>? = null
-    override var serviceProviders: Array<ServiceProvider>? = null
+    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()
