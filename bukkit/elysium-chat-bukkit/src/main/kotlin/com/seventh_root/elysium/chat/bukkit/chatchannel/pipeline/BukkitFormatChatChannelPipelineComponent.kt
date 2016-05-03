@@ -16,7 +16,7 @@ class BukkitFormatChatChannelPipelineComponent(private val plugin: ElysiumChatBu
 
     @Throws(ChatChannelMessageFormattingFailureException::class)
     override fun process(message: String, context: ChatMessageContext): String? {
-        val characterProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+        val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
         val sender = context.sender
         val receiver = context.receiver
         val senderCharacter = characterProvider.getActiveCharacter(sender)

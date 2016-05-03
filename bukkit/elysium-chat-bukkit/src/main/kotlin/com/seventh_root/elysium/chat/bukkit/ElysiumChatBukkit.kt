@@ -14,13 +14,13 @@ import java.sql.SQLException
 
 class ElysiumChatBukkit : ElysiumBukkitPlugin() {
 
-    private var chatChannelProvider: ChatChannelProvider<BukkitChatChannel>? = null
-    override var serviceProviders: Array<ServiceProvider>? = null
+    private lateinit var chatChannelProvider: ChatChannelProvider<BukkitChatChannel>
+    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()
         chatChannelProvider = BukkitChatChannelProvider(this)
-        serviceProviders = arrayOf<ServiceProvider>(chatChannelProvider!!)
+        serviceProviders = arrayOf<ServiceProvider>(chatChannelProvider)
     }
 
     override fun registerCommands() {

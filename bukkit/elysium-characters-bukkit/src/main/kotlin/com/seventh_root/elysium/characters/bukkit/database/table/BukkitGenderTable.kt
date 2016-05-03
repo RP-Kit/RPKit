@@ -106,7 +106,7 @@ class BukkitGenderTable: Table<BukkitGender> {
 
     override fun get(id: Int): BukkitGender? {
         if (cache.containsKey(id as Integer)) {
-            return cache.get(id as Integer)
+            return cache.get(id)
         } else {
             try {
                 var gender: BukkitGender? = null

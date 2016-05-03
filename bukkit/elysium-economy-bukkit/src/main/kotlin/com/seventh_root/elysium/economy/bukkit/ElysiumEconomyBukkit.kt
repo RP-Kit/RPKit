@@ -19,17 +19,17 @@ import com.seventh_root.elysium.economy.bukkit.listener.InventoryCloseListener
 
 class ElysiumEconomyBukkit : ElysiumBukkitPlugin() {
 
-    private var currencyProvider: CurrencyProvider<BukkitCurrency>? = null
-    private var economyProvider: EconomyProvider? = null
-    override var serviceProviders: Array<ServiceProvider>? = null
+    private lateinit var currencyProvider: CurrencyProvider<BukkitCurrency>
+    private lateinit var economyProvider: EconomyProvider
+    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()
         currencyProvider = BukkitCurrencyProvider(this)
         economyProvider = BukkitEconomyProvider(this)
         serviceProviders = arrayOf(
-                currencyProvider as CurrencyProvider,
-                economyProvider as EconomyProvider
+                currencyProvider,
+                economyProvider
         )
     }
 

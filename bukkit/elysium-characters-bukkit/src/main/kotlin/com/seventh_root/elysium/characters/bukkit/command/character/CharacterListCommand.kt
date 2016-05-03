@@ -14,8 +14,8 @@ class CharacterListCommand(private val plugin: ElysiumCharactersBukkit) : Comman
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.characters.command.character.list")) {
-                val characterProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
                 val player = playerProvider.getPlayer(sender)
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-list-title")))
                 for (character in characterProvider.getCharacters(player)) {
