@@ -16,7 +16,7 @@ class ElysiumCoreBukkit : ElysiumBukkitPlugin() {
         saveDefaultConfig()
         core = ElysiumCore(logger, Database(config.getString("database.url"), config.getString("database.username"), config.getString("database.password")))
         try {
-            createTables(core!!.database)
+            createTables(core.database)
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
@@ -33,14 +33,14 @@ class ElysiumCoreBukkit : ElysiumBukkitPlugin() {
 
     fun registerServiceProviders(plugin: ElysiumBukkitPlugin) {
         for (provider in plugin.serviceProviders!!) {
-            core!!.serviceManager.registerServiceProvider(provider)
+            core.serviceManager.registerServiceProvider(provider)
         }
     }
 
     fun initializePlugin(elysiumBukkitPlugin: ElysiumBukkitPlugin) {
         elysiumBukkitPlugin.core = core
         try {
-            elysiumBukkitPlugin.createTables(core!!.database)
+            elysiumBukkitPlugin.createTables(core.database)
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }

@@ -10,31 +10,31 @@ class BukkitChatChannelProvider(private val plugin: ElysiumChatBukkit) : ChatCha
 
     override val chatChannels: Collection<BukkitChatChannel>
         get() {
-            return (plugin.core!!.database.getTable(BukkitChatChannel::class.java) as BukkitChatChannelTable).getAll()
+            return (plugin.core.database.getTable(BukkitChatChannel::class.java) as BukkitChatChannelTable).getAll()
         }
 
     override fun getChatChannel(id: Int): BukkitChatChannel? {
-        return plugin.core!!.database.getTable(BukkitChatChannel::class.java)!![id]
+        return plugin.core.database.getTable(BukkitChatChannel::class.java)!![id]
     }
 
     override fun getChatChannel(name: String): BukkitChatChannel? {
-        return (plugin.core!!.database.getTable(BukkitChatChannel::class.java) as BukkitChatChannelTable).get(name)
+        return (plugin.core.database.getTable(BukkitChatChannel::class.java) as BukkitChatChannelTable).get(name)
     }
 
     override fun addChatChannel(chatChannel: BukkitChatChannel) {
-        plugin.core!!.database.getTable(BukkitChatChannel::class.java)!!.insert(chatChannel)
+        plugin.core.database.getTable(BukkitChatChannel::class.java)!!.insert(chatChannel)
     }
 
     override fun removeChatChannel(chatChannel: BukkitChatChannel) {
-        plugin.core!!.database.getTable(BukkitChatChannel::class.java)!!.delete(chatChannel)
+        plugin.core.database.getTable(BukkitChatChannel::class.java)!!.delete(chatChannel)
     }
 
     override fun updateChatChannel(chatChannel: BukkitChatChannel) {
-        plugin.core!!.database.getTable(BukkitChatChannel::class.java)!!.update(chatChannel)
+        plugin.core.database.getTable(BukkitChatChannel::class.java)!!.update(chatChannel)
     }
 
     override fun getPlayerChannel(player: ElysiumPlayer): BukkitChatChannel? {
-        return (plugin.core!!.database.getTable(BukkitChatChannel::class.java) as BukkitChatChannelTable).get(player)
+        return (plugin.core.database.getTable(BukkitChatChannel::class.java) as BukkitChatChannelTable).get(player)
     }
 
     override fun setPlayerChannel(player: ElysiumPlayer, channel: BukkitChatChannel) {

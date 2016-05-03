@@ -10,11 +10,11 @@ import java.util.*
 class BukkitGenderProvider(private val plugin: ElysiumCharactersBukkit) : GenderProvider<BukkitGender> {
 
     override fun getGender(id: Int): BukkitGender? {
-        return plugin.core!!.database.getTable(BukkitGender::class.java)!![id]
+        return plugin.core.database.getTable(BukkitGender::class.java)!![id]
     }
 
     override fun getGender(name: String): BukkitGender? {
-        val table = plugin.core!!.database.getTable(BukkitGender::class.java)
+        val table = plugin.core.database.getTable(BukkitGender::class.java)
         if (table is BukkitGenderTable) {
             return table[name]
         }
@@ -25,7 +25,7 @@ class BukkitGenderProvider(private val plugin: ElysiumCharactersBukkit) : Gender
         get() {
             try {
                 var genders: MutableList<BukkitGender> = ArrayList()
-                plugin.core!!.database.createConnection().use { connection ->
+                plugin.core.database.createConnection().use { connection ->
                     connection.prepareStatement(
                             "SELECT id, name FROM bukkit_gender").use({ statement ->
                         val resultSet = statement.executeQuery()
@@ -42,11 +42,11 @@ class BukkitGenderProvider(private val plugin: ElysiumCharactersBukkit) : Gender
         }
 
     override fun addGender(gender: BukkitGender) {
-        plugin.core!!.database.getTable(BukkitGender::class.java)!!.insert(gender)
+        plugin.core.database.getTable(BukkitGender::class.java)!!.insert(gender)
     }
 
     override fun removeGender(gender: BukkitGender) {
-        plugin.core!!.database.getTable(BukkitGender::class.java)!!.delete(gender)
+        plugin.core.database.getTable(BukkitGender::class.java)!!.delete(gender)
     }
 
 }

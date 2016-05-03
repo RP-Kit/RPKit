@@ -39,7 +39,7 @@ class ChatChannelSetNameCommand(private val plugin: ElysiumChatBukkit) : Command
     private inner class ChatChannelPrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
+            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
@@ -64,7 +64,7 @@ class ChatChannelSetNameCommand(private val plugin: ElysiumChatBukkit) : Command
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val chatChannelProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
             return chatChannelProvider.getChatChannel(input) == null
         }
 
@@ -86,7 +86,7 @@ class ChatChannelSetNameCommand(private val plugin: ElysiumChatBukkit) : Command
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
             val chatChannel = chatChannelProvider.getChatChannel(context.getSessionData("channel") as String)!!
             chatChannel.name = context.getSessionData("name") as String
             chatChannelProvider.updateChatChannel(chatChannel)

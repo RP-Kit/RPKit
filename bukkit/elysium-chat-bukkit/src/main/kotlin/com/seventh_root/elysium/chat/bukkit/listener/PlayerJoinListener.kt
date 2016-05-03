@@ -12,9 +12,9 @@ class PlayerJoinListener(private val plugin: ElysiumChatBukkit) : Listener {
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
         if (!event.player.hasPlayedBefore()) {
-            val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+            val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
             val player = playerProvider.getPlayer(event.player)
-            val chatChannelProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
             chatChannelProvider.chatChannels.filter { it -> it.isJoinedByDefault }.forEach({ chatChannel ->
                 chatChannel.addListener(player)
                 chatChannelProvider.updateChatChannel(chatChannel)

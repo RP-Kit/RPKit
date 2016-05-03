@@ -26,7 +26,7 @@ class ChatChannelSetFormatCommand(private val plugin: ElysiumChatBukkit) : Comma
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.chat.command.chatchannel.set.format")) {
-                val chatChannelProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
                 if (args.size > 0) {
                     val chatChannel = chatChannelProvider.getChatChannel(args[0])
                     if (chatChannel != null) {
@@ -53,7 +53,7 @@ class ChatChannelSetFormatCommand(private val plugin: ElysiumChatBukkit) : Comma
     private inner class ChatChannelPrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
+            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
@@ -91,7 +91,7 @@ class ChatChannelSetFormatCommand(private val plugin: ElysiumChatBukkit) : Comma
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
             val chatChannel = chatChannelProvider.getChatChannel(context.getSessionData("channel") as String)!!
             chatChannel.formatString = context.getSessionData("format_string") as String
             chatChannelProvider.updateChatChannel(chatChannel)

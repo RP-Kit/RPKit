@@ -39,7 +39,7 @@ class ChatChannelSetMatchPatternCommand(private val plugin: ElysiumChatBukkit) :
     private inner class ChatChannelPrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
+            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
@@ -80,7 +80,7 @@ class ChatChannelSetMatchPatternCommand(private val plugin: ElysiumChatBukkit) :
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
             val chatChannel = chatChannelProvider.getChatChannel(context.getSessionData("channel") as String)!!
             chatChannel.matchPattern = context.getSessionData("match_pattern") as String
             chatChannelProvider.updateChatChannel(chatChannel)

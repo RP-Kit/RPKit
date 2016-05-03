@@ -28,8 +28,8 @@ class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit) : Com
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.characters.command.character.set.race")) {
-                val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                val characterProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
                 val player = playerProvider.getPlayer(sender)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
@@ -39,7 +39,7 @@ class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit) : Com
                             raceBuilder.append(args[i]).append(" ")
                         }
                         raceBuilder.append(args[args.size - 1])
-                        val raceProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+                        val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
                         val race = raceProvider.getRace(raceBuilder.toString())
                         if (race != null) {
                             character.race = race
@@ -66,15 +66,15 @@ class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit) : Com
     private inner class RacePrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java).getRace(input) != null
+            return plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java).getRace(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                val characterProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                val raceProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
                 val player = playerProvider.getPlayer(conversable)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
@@ -90,7 +90,7 @@ class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit) : Com
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val raceProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+            val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
             val raceListBuilder = StringBuilder()
             for (race in raceProvider.races) {
                 raceListBuilder.append(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-list-item")
