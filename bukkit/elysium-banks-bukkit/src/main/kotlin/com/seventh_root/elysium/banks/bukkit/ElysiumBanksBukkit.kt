@@ -6,7 +6,7 @@ import com.seventh_root.elysium.core.service.ServiceProvider
 
 class ElysiumBanksBukkit : ElysiumBukkitPlugin() {
 
-    override var serviceProviders: Array<ServiceProvider>? = null
+    override lateinit var serviceProviders: Array<ServiceProvider>
 
 
 }

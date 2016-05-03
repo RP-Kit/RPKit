@@ -32,7 +32,7 @@ class ElysiumCoreBukkit : ElysiumBukkitPlugin() {
     }
 
     fun registerServiceProviders(plugin: ElysiumBukkitPlugin) {
-        for (provider in plugin.serviceProviders!!) {
+        for (provider in plugin.serviceProviders) {
             core.serviceManager.registerServiceProvider(provider)
         }
     }

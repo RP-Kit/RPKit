@@ -9,12 +9,12 @@ import java.sql.SQLException
 
 class ElysiumPlayersBukkit : ElysiumBukkitPlugin() {
 
-    private var playerProvider: PlayerProvider<BukkitPlayer>? = null
+    private lateinit var playerProvider: PlayerProvider<BukkitPlayer>
     override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         playerProvider = BukkitPlayerProvider(this)
-        serviceProviders = arrayOf<ServiceProvider>(playerProvider as PlayerProvider<BukkitPlayer>)
+        serviceProviders = arrayOf<ServiceProvider>(playerProvider)
     }
 
     @Throws(SQLException::class)
