@@ -63,10 +63,10 @@ class CharacterSetDescriptionCommand(private val plugin: ElysiumCharactersBukkit
         }
 
         override fun acceptInput(context: ConversationContext, input: String): Prompt {
+            if (context.getSessionData("description") == null) {
+                context.setSessionData("description", "")
+            }
             if (input.equals("end", ignoreCase = true)) {
-                if (context.getSessionData("description") == null) {
-                    context.setSessionData("description", "")
-                }
                 val conversable = context.forWhom
                 if (conversable is Player) {
                     val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
