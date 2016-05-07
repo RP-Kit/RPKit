@@ -28,7 +28,7 @@ class RaceAddCommand(private val plugin: ElysiumCharactersBukkit) : CommandExecu
         if (sender is Conversable) {
             if (sender.hasPermission("elysium.characters.command.race.add")) {
                 if (args.size > 0) {
-                    val raceProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+                    val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
                     val raceBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
                         raceBuilder.append(args[i]).append(' ')
@@ -57,12 +57,12 @@ class RaceAddCommand(private val plugin: ElysiumCharactersBukkit) : CommandExecu
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val raceProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+            val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
             return raceProvider.getRace(input) == null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val raceProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+            val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
             raceProvider.addRace(BukkitRace(input))
             return RaceAddedPrompt()
         }

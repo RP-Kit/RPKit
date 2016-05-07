@@ -10,11 +10,11 @@ import java.util.*
 class BukkitRaceProvider(private val plugin: ElysiumCharactersBukkit) : RaceProvider<BukkitRace> {
 
     override fun getRace(id: Int): BukkitRace? {
-        return plugin.core!!.database.getTable(BukkitRace::class.java)!![id]
+        return plugin.core.database.getTable(BukkitRace::class.java)!![id]
     }
 
     override fun getRace(name: String): BukkitRace? {
-        val table = plugin.core!!.database.getTable(BukkitRace::class.java)
+        val table = plugin.core.database.getTable(BukkitRace::class.java)
         if (table is BukkitRaceTable) {
             return table[name]
         }
@@ -25,7 +25,7 @@ class BukkitRaceProvider(private val plugin: ElysiumCharactersBukkit) : RaceProv
         get() {
             try {
                 var races: MutableList<BukkitRace> = ArrayList()
-                plugin.core!!.database.createConnection().use { connection ->
+                plugin.core.database.createConnection().use { connection ->
                     connection.prepareStatement(
                             "SELECT id, name FROM bukkit_race").use({ statement ->
                         val resultSet = statement.executeQuery()
@@ -42,11 +42,11 @@ class BukkitRaceProvider(private val plugin: ElysiumCharactersBukkit) : RaceProv
         }
 
     override fun addRace(race: BukkitRace) {
-        plugin.core!!.database.getTable(BukkitRace::class.java)!!.insert(race)
+        plugin.core.database.getTable(BukkitRace::class.java)!!.insert(race)
     }
 
     override fun removeRace(race: BukkitRace) {
-        plugin.core!!.database.getTable(BukkitRace::class.java)!!.delete(race)
+        plugin.core.database.getTable(BukkitRace::class.java)!!.delete(race)
     }
 
 }

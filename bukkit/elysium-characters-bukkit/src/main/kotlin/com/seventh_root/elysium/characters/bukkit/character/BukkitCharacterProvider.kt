@@ -33,7 +33,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
     }
 
     override fun getCharacter(id: Int): BukkitCharacter? {
-        return plugin.core!!.database.getTable(BukkitCharacter::class.java)!![id]
+        return plugin.core.database.getTable(BukkitCharacter::class.java)!![id]
     }
 
     override fun getActiveCharacter(player: ElysiumPlayer): BukkitCharacter? {
@@ -43,7 +43,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
         } else {
             try {
                 var character: BukkitCharacter? = null
-                plugin.core!!.database.createConnection().use { connection ->
+                plugin.core.database.createConnection().use { connection ->
                     connection.prepareStatement(
                             "SELECT character_id FROM player_character WHERE player_id = ?").use({ statement ->
                         statement.setInt(1, player.id)
@@ -84,7 +84,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
         }
         if (character != null) {
             try {
-                plugin.core!!.database.createConnection().use { connection ->
+                plugin.core.database.createConnection().use { connection ->
                     connection.prepareStatement(
                             "INSERT INTO player_character(player_id, character_id) VALUES(?, ?) ON DUPLICATE KEY UPDATE character_id = VALUES(character_id)").use({ statement ->
                         statement.setInt(1, player.id)
@@ -114,7 +114,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
             activeCharacterCache.put(player.id as Integer, character.id as Integer)
         } else if (oldCharacter != null) {
             try {
-                plugin.core!!.database.createConnection().use { connection ->
+                plugin.core.database.createConnection().use { connection ->
                     connection.prepareStatement(
                             "DELETE FROM player_character WHERE player_id = ? AND character_id = ?").use({ statement ->
                         statement.setInt(1, player.id)
@@ -132,7 +132,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
     override fun getCharacters(player: ElysiumPlayer): Collection<BukkitCharacter> {
         try {
             var characters: MutableList<BukkitCharacter> = ArrayList()
-            plugin.core!!.database.createConnection().use { connection ->
+            plugin.core.database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "SELECT id FROM bukkit_character WHERE player_id = ? ORDER BY id").use({ statement ->
                     statement.setInt(1, player.id)
@@ -151,21 +151,21 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
     }
 
     override fun addCharacter(character: BukkitCharacter): Int {
-        return plugin.core!!.database.getTable(BukkitCharacter::class.java)!!.insert(character)
+        return plugin.core.database.getTable(BukkitCharacter::class.java)!!.insert(character)
     }
 
     override fun removeCharacter(character: BukkitCharacter) {
         val player = character.player
         if (player != null)
             setActiveCharacter(player, null)
-        plugin.core!!.database.getTable(BukkitCharacter::class.java)!!.delete(character)
+        plugin.core.database.getTable(BukkitCharacter::class.java)!!.delete(character)
     }
 
     override fun updateCharacter(character: BukkitCharacter) {
         if (plugin.config.getBoolean("characters.delete-character-on-death") && character.isDead) {
             removeCharacter(character)
         } else {
-            plugin.core!!.database.getTable(BukkitCharacter::class.java)!!.update(character)
+            plugin.core.database.getTable(BukkitCharacter::class.java)!!.update(character)
         }
     }
 

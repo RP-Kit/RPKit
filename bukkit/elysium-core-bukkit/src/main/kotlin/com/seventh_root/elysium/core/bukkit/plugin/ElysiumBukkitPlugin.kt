@@ -10,14 +10,7 @@ import java.sql.SQLException
 
 abstract class ElysiumBukkitPlugin : JavaPlugin() {
 
-    open var core: ElysiumCore? = null
-        set(core) {
-            if (this.core != null) {
-                logger.warning("There was an attempt to redefine the ElysiumCore instance.")
-                return
-            }
-            field = core
-        }
+    lateinit open var core: ElysiumCore
 
     open fun registerCommands() {
 
@@ -37,6 +30,6 @@ abstract class ElysiumBukkitPlugin : JavaPlugin() {
     open fun createTables(database: Database) {
     }
 
-    abstract var serviceProviders: Array<ServiceProvider>?
+    abstract var serviceProviders: Array<ServiceProvider>
 
 }
