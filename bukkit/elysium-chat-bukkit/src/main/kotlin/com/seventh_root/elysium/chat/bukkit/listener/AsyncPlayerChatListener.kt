@@ -44,7 +44,10 @@ class AsyncPlayerChatListener(private val plugin: ElysiumChatBukkit) : Listener 
                 if (listener is BukkitPlayer) {
                     val bukkitOfflinePlayer = listener.bukkitPlayer
                     if (bukkitOfflinePlayer.isOnline) {
-                        if (channel.radius <= 0 || bukkitPlayer.location.distanceSquared(bukkitOfflinePlayer.player.location) <= channel.radius * channel.radius) {
+                        if (channel.radius <= 0
+                                || (bukkitOfflinePlayer.player.world == bukkitPlayer.world
+                                    && bukkitPlayer.location.distanceSquared(bukkitOfflinePlayer.player.location) <= channel.radius * channel.radius)
+                        ) {
                             val processedMessage = channel.processMessage(message, BukkitChatMessageContext(channel, player, listener))
                             if (processedMessage != null) {
                                 bukkitOfflinePlayer.player.sendMessage(processedMessage)
