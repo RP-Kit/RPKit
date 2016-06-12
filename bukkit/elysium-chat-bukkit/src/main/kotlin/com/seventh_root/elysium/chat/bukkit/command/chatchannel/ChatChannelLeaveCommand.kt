@@ -9,6 +9,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
+import org.bukkit.permissions.Permissible
 
 class ChatChannelLeaveCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
     private val conversationFactory: ConversationFactory
@@ -69,7 +70,7 @@ class ChatChannelLeaveCommand(private val plugin: ElysiumChatBukkit) : CommandEx
     private inner class ChatChannelPrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
+            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null && (context.forWhom as Permissible).hasPermission("elysium.")
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
@@ -86,8 +87,14 @@ class ChatChannelLeaveCommand(private val plugin: ElysiumChatBukkit) : CommandEx
             return ChatChannelLeftPrompt()
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-leave-invalid-chatchannel"))
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
+            if (plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(invalidInput) == null) {
+                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-leave-invalid-chatchannel"))
+            } else if (!(context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.leave." + invalidInput)) {
+                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel-leave-channel")
+                        .replace("\$channel", invalidInput))
+            }
+            return ""
         }
 
         override fun getPromptText(context: ConversationContext): String {
