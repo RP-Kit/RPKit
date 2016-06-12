@@ -4,6 +4,7 @@ import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannel
 import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
 import com.seventh_root.elysium.chat.bukkit.context.BukkitChatMessageContext
+import com.seventh_root.elysium.chat.bukkit.context.BukkitChatMessagePostProcessContext
 import com.seventh_root.elysium.players.bukkit.BukkitPlayer
 import com.seventh_root.elysium.players.bukkit.BukkitPlayerProvider
 import org.bukkit.ChatColor
@@ -56,6 +57,7 @@ class AsyncPlayerChatListener(private val plugin: ElysiumChatBukkit) : Listener 
                     }
                 }
             }
+            channel.postProcess(message, BukkitChatMessagePostProcessContext(channel, player))
         } else {
             event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-chat-channel")))
         }
