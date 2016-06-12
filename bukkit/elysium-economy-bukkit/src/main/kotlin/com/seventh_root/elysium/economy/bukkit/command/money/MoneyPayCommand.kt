@@ -90,6 +90,7 @@ class MoneyPayCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
                                                             if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
                                                                 economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
                                                                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-valid")))
+                                                                (toCharacter.player as? BukkitPlayer)?.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-paid").replace("\$amount", amount.toString())))
                                                             } else {
                                                                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-limit")))
                                                             }
@@ -254,6 +255,7 @@ class MoneyPayCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
                         if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
                             if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
                                 economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
+                                (toCharacter.player as? BukkitPlayer)?.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-paid").replace("\$amount", amount.toString())))
                                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-valid"))
                             } else {
                                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-limit"))
