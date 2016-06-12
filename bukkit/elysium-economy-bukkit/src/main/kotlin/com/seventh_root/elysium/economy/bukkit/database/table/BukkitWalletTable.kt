@@ -85,6 +85,9 @@ class BukkitWalletTable : Table<BukkitWallet> {
                     id = generatedKeys.getInt(1)
                     `object`.id = id
                     cache.put(id as Integer, `object`)
+                    val currencyWallets = characterCache.get(`object`.character.id as Integer)
+                    (currencyWallets as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
+                    characterCache.put(`object`.character.id as Integer, currencyWallets)
                 }
             }
         }
@@ -102,6 +105,9 @@ class BukkitWalletTable : Table<BukkitWallet> {
                 statement.setInt(4, `object`.id)
                 statement.executeUpdate()
                 cache.put(`object`.id as Integer, `object`)
+                val currencyWallets = characterCache.get(`object`.character.id as Integer)
+                (currencyWallets as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
+                characterCache.put(`object`.character.id as Integer, currencyWallets)
             }
         }
     }
