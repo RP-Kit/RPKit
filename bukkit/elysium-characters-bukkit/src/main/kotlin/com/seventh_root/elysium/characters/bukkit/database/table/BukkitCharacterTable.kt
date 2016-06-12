@@ -28,19 +28,11 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
 
     private val plugin: ElysiumCharactersBukkit
     private val cacheManager: CacheManager
-    private val preConfigured: Cache<Integer, BukkitCharacter>
     private val cache: Cache<Integer, BukkitCharacter>
 
     constructor(database: Database, plugin: ElysiumCharactersBukkit): super(database, BukkitCharacter::class.java) {
         this.plugin = plugin;
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-                .withCache(
-                        "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitCharacter::class.java)
-                                .build()
-                )
-                .build(true)
-        preConfigured = cacheManager.getCache("preConfigured", Integer::class.java, BukkitCharacter::class.java)
+        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitCharacter::class.java).build())
     }
 
