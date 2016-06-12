@@ -18,15 +18,15 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
 
     private val plugin: ElysiumEconomyBukkit
     private val cacheManager: CacheManager
-    private val cache: Cache<Integer, BukkitCurrency>
-    private val nameCache: Cache<String, Integer>
+    private val cache: Cache<Int, BukkitCurrency>
+    private val nameCache: Cache<String, Int>
 
     constructor(database: Database, plugin: ElysiumEconomyBukkit): super(database, BukkitCurrency::class.java) {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitCurrency::class.java).build())
-        nameCache = cacheManager.createCache("nameCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitCurrency::class.java).build())
+        nameCache = cacheManager.createCache("nameCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java).build())
     }
 
     override fun create() {
@@ -68,8 +68,8 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
                 if (generatedKeys.next()) {
                     id = generatedKeys.getInt(1)
                     `object`.id = id
-                    cache.put(id as Integer, `object`)
-                    nameCache.put(`object`.name, id as Integer)
+                    cache.put(id, `object`)
+                    nameCache.put(`object`.name, id)
                 }
             }
         }
@@ -89,14 +89,14 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
                 statement.setString(6, `object`.material.name)
                 statement.setInt(7, `object`.id)
                 statement.executeUpdate()
-                cache.put(`object`.id as Integer, `object`)
-                nameCache.put(`object`.name, `object`.id as Integer)
+                cache.put(`object`.id, `object`)
+                nameCache.put(`object`.name, `object`.id)
             }
         }
     }
 
     override fun get(id: Int): BukkitCurrency? {
-        if (cache.containsKey(id as Integer)) {
+        if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
             var currency: BukkitCurrency? = null
@@ -151,8 +151,8 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
                         )
                         if (currency != null) {
                             val finalCurrency = currency!!
-                            cache.put(finalCurrency.id as Integer, finalCurrency)
-                            nameCache.put(finalCurrency.name, finalCurrency.id as Integer)
+                            cache.put(finalCurrency.id, finalCurrency)
+                            nameCache.put(finalCurrency.name, finalCurrency.id)
                         }
                     }
                 }
@@ -184,8 +184,8 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
             ).use { statement ->
                 statement.setInt(1, `object`.id)
                 statement.executeUpdate()
-                if (cache.containsKey(`object`.id as Integer)) {
-                    cache.remove(`object`.id as Integer)
+                if (cache.containsKey(`object`.id)) {
+                    cache.remove(`object`.id)
                 }
             }
         }

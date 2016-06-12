@@ -53,7 +53,7 @@ class MoneySubtractCommand(val plugin: ElysiumEconomyBukkit): CommandExecutor {
                                     if (currency != null) {
                                         if (args.size > 3) {
                                             try {
-                                                val amount = Integer.parseInt(args[3])
+                                                val amount = args[3].toInt()
                                                 if (amount >= 0) {
                                                     economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - amount)
                                                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-value-valid")))

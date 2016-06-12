@@ -53,7 +53,7 @@ class MoneyAddCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
                                     if (currency != null) {
                                         if (args.size > 3) {
                                             try {
-                                                val amount = Integer.parseInt(args[3])
+                                                val amount = args[3].toInt()
                                                 if (amount >= 0) {
                                                     if (economyProvider.getBalance(character, currency) + amount <= 1728) {
                                                         economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + amount)

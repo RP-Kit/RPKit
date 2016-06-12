@@ -53,7 +53,7 @@ class MoneyPayCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
                                     if (currency != null) {
                                         if (args.size > 2) {
                                             try {
-                                                val amount = Integer.parseInt(args[2])
+                                                val amount = args[2].toInt()
                                                 if (amount >= 0) {
                                                     if (fromBukkitPlayer.location.distanceSquared(toBukkitPlayer.location) <= plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
                                                         if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
@@ -83,7 +83,7 @@ class MoneyPayCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
                                         try {
                                             currency = currencyProvider.defaultCurrency
                                             if (currency != null) {
-                                                val amount = Integer.parseInt(args[1])
+                                                val amount = args[1].toInt()
                                                 if (amount >= 0) {
                                                     if (fromBukkitPlayer.location.distanceSquared(toBukkitPlayer.location) <= plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
                                                         if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
