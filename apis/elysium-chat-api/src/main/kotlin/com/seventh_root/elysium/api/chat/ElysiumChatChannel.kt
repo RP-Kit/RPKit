@@ -20,6 +20,7 @@ interface ElysiumChatChannel : TableRow {
     fun removeListener(listener: ElysiumPlayer)
     val pipeline: List<ChatChannelPipelineComponent>
     fun processMessage(message: String?, context: ChatMessageContext): String?
+    fun postProcess(message: String?, context: ChatMessagePostProcessContext)
     var matchPattern: String
     var isIRCEnabled: Boolean
     var ircChannel: String
