@@ -16,19 +16,11 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
 
     private val plugin: ElysiumCharactersBukkit
     private val activeCharacterCacheManager: CacheManager
-    private val activeCharacterPreConfigured: Cache<Integer, Integer>
     private val activeCharacterCache: Cache<Integer, Integer>
 
     constructor(plugin: ElysiumCharactersBukkit) {
         this.plugin = plugin
-        this.activeCharacterCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-                .withCache(
-                        "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, Integer::class.java)
-                                .build()
-                )
-                .build(true)
-        activeCharacterPreConfigured = activeCharacterCacheManager.getCache("preConfigured", Integer::class.java, Integer::class.java)
+        this.activeCharacterCacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         activeCharacterCache = activeCharacterCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, Integer::class.java).build())
     }
 

@@ -19,31 +19,13 @@ import java.util.*
 class BukkitPlayerTable: Table<BukkitPlayer> {
 
     private val cacheManager: CacheManager
-    private val preConfigured: Cache<Integer, BukkitPlayer>
     private val cache: Cache<Integer, BukkitPlayer>
-    private val playerCacheManager: CacheManager
-    private val playerPreConfigured: Cache<String, Integer>
     private val playerCache: Cache<String, Integer>
 
     constructor(database: Database): super(database, BukkitPlayer::class.java) {
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-                .withCache(
-                        "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitPlayer::class.java)
-                                .build()
-                )
-                .build(true)
-        preConfigured = cacheManager.getCache("preConfigured", Integer::class.java, BukkitPlayer::class.java)
+        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitPlayer::class.java).build())
-        playerCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-            .withCache(
-                    "preConfigured",
-                    CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java)
-                        .build()
-            )
-            .build(true)
-        playerPreConfigured = playerCacheManager.getCache("preConfigured", String::class.java, Integer::class.java)
-        playerCache = playerCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
+        playerCache = cacheManager.createCache("playerCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
     }
 
     override fun create() {
