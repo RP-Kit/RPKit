@@ -10,6 +10,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
+import org.bukkit.permissions.Permissible
 
 class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
     private val conversationFactory: ConversationFactory
@@ -65,7 +66,7 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit) : CommandExe
     private inner class ChatChannelPrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
+            return plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null && (context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.join." + input)
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
@@ -81,8 +82,14 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit) : CommandExe
             return ChatChannelJoinedPrompt()
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-join-invalid-chatchannel"))
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
+            if (plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(invalidInput) == null) {
+                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-join-invalid-chatchannel"))
+            } else if (!(context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.join." + invalidInput)) {
+                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel-join-channel")
+                        .replace("\$channel", invalidInput))
+            }
+            return ""
         }
 
         override fun getPromptText(context: ConversationContext): String {
