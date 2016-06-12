@@ -28,34 +28,38 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit) : CommandExe
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-            if (chatChannelProvider.chatChannels.size > 0) {
-                val player = playerProvider.getPlayer(sender)
-                if (args.size > 0) {
-                    val chatChannelBuilder = StringBuilder()
-                    for (i in 0..args.size - 1 - 1) {
-                        chatChannelBuilder.append(args[i]).append(' ')
-                    }
-                    chatChannelBuilder.append(args[args.size - 1])
-                    val chatChannel = chatChannelProvider.getChatChannel(chatChannelBuilder.toString())
-                    if (chatChannel != null) {
-                        if (sender.hasPermission("elysium.chat.command.chatchannel.join." + chatChannel.name)) {
-                            chatChannel.addListener(player)
-                            chatChannelProvider.updateChatChannel(chatChannel)
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-join-valid")))
+            if (sender.hasPermission("elysium.chat.command.chatchannel.join")) {
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                if (chatChannelProvider.chatChannels.size > 0) {
+                    val player = playerProvider.getPlayer(sender)
+                    if (args.size > 0) {
+                        val chatChannelBuilder = StringBuilder()
+                        for (i in 0..args.size - 1 - 1) {
+                            chatChannelBuilder.append(args[i]).append(' ')
+                        }
+                        chatChannelBuilder.append(args[args.size - 1])
+                        val chatChannel = chatChannelProvider.getChatChannel(chatChannelBuilder.toString())
+                        if (chatChannel != null) {
+                            if (sender.hasPermission("elysium.chat.command.chatchannel.join." + chatChannel.name)) {
+                                chatChannel.addListener(player)
+                                chatChannelProvider.updateChatChannel(chatChannel)
+                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-join-valid")))
+                            } else {
+                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel-join-channel")
+                                        .replace("\$channel", chatChannel.name)))
+                            }
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel-join-channel")
-                                    .replace("\$channel", chatChannel.name)))
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-join-invalid-chatchannel")))
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-join-invalid-chatchannel")))
+                        conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    conversationFactory.buildConversation(sender).begin()
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-chat-channels-available")))
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-chat-channels-available")))
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel-join")))
             }
         } else {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
