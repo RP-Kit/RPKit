@@ -18,32 +18,15 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
 
     private val plugin: ElysiumEconomyBukkit
     private val cacheManager: CacheManager
-    private val preConfigured: Cache<Integer, BukkitCurrency>
     private val cache: Cache<Integer, BukkitCurrency>
-    private val nameCacheManager: CacheManager
-    private val namePreConfigured: Cache<String, Integer>
     private val nameCache: Cache<String, Integer>
 
     constructor(database: Database, plugin: ElysiumEconomyBukkit): super(database, BukkitCurrency::class.java) {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-                .withCache(
-                        "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitCurrency::class.java)
-                                .build()
-                )
                 .build(true)
-        preConfigured = cacheManager.getCache("preConfigured", Integer::class.java, BukkitCurrency::class.java)
         cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitCurrency::class.java).build())
-        nameCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-                .withCache(
-                        "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java)
-                                .build()
-                )
-                .build(true)
-        namePreConfigured = nameCacheManager.getCache("preConfigured", String::class.java, Integer::class.java)
-        nameCache = nameCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
+        nameCache = cacheManager.createCache("nameCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
     }
 
     override fun create() {
