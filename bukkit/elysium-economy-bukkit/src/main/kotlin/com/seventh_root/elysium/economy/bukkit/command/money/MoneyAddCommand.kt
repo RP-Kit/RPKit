@@ -57,7 +57,7 @@ class MoneyAddCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
                                                 if (amount >= 0) {
                                                     if (economyProvider.getBalance(character, currency) + amount <= 1728) {
                                                         economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + amount)
-                                                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-add-value-valid")))
+                                                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-add-amount-valid")))
                                                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-add-valid")))
                                                     } else {
                                                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-add-amount-invalid-amount-limit")))
