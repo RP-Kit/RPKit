@@ -20,16 +20,16 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
 
     private val plugin: ElysiumChatBukkit
     private val cacheManager: CacheManager
-    private val cache: Cache<Integer, BukkitChatChannel>
-    private val nameCache: Cache<String, Integer>
-    private val playerCache: Cache<Integer, Integer>
+    private val cache: Cache<Int, BukkitChatChannel>
+    private val nameCache: Cache<String, Int>
+    private val playerCache: Cache<Int, Int>
 
     constructor(plugin: ElysiumChatBukkit, database: Database): super(database, BukkitChatChannel::class.java) {
         this.plugin = plugin
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitChatChannel::class.java).build())
-        nameCache = cacheManager.createCache("nameCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
-        playerCache = cacheManager.createCache("playerCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, Integer::class.java).build())
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitChatChannel::class.java).build())
+        nameCache = cacheManager.createCache("nameCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType).build())
+        playerCache = cacheManager.createCache("playerCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType).build())
     }
 
     override fun create() {
@@ -115,9 +115,9 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                         `object`.id = id
                         insertListeners(`object`)
                         insertSpeakers(`object`)
-                        cache.put(id as Integer, `object`)
-                        nameCache.put(`object`.name, id as Integer)
-                        `object`.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, id as Integer) }
+                        cache.put(id, `object`)
+                        nameCache.put(`object`.name, id)
+                        `object`.speakers.forEach { speaker -> playerCache.put(speaker.id, id) }
                     }
                 })
             }
@@ -154,7 +154,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                         statement.setInt(1, chatChannel.id)
                         statement.setInt(2, speaker.id)
                         statement.executeUpdate()
-                        playerCache.put(speaker.id as Integer, chatChannel.id as Integer)
+                        playerCache.put(speaker.id, chatChannel.id)
                     }
                 })
             }
@@ -186,8 +186,8 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                     deleteSpeakers(`object`)
                     insertListeners(`object`)
                     insertSpeakers(`object`)
-                    cache.put(`object`.id as Integer, `object`)
-                    nameCache.put(`object`.name, `object`.id as Integer)
+                    cache.put(`object`.id, `object`)
+                    nameCache.put(`object`.name, `object`.id)
                 })
             }
         } catch (exception: SQLException) {
@@ -224,7 +224,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                 val cachedSpeakers = playerCache
                         .filter { cacheEntry -> cacheEntry.value as Int == chatChannel.id }
                         .map { cacheEntry -> cacheEntry.key }
-                cachedSpeakers.forEach { playerId -> playerCache.remove(playerId as Integer) }
+                cachedSpeakers.forEach { playerId -> playerCache.remove(playerId) }
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
@@ -232,7 +232,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
     }
 
     override fun get(id: Int): BukkitChatChannel? {
-        if (cache.containsKey(id as Integer)) {
+        if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
             try {
@@ -279,7 +279,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                                 })
                                 cache.put(id, finalChatChannel)
                                 nameCache.put(finalChatChannel.name, id)
-                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, id) }
+                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id, id) }
                             }
                         }
                     })
@@ -337,9 +337,9 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                                         finalChatChannel.addSpeaker(plugin.core.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
                                     }
                                 })
-                                cache.put(finalChatChannel.id as Integer, chatChannel)
-                                nameCache.put(finalChatChannel.name, finalChatChannel.id as Integer)
-                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, finalChatChannel.id as Integer) }
+                                cache.put(finalChatChannel.id, chatChannel)
+                                nameCache.put(finalChatChannel.name, finalChatChannel.id)
+                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id, finalChatChannel.id) }
                             }
                         }
                     })
@@ -354,7 +354,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
 
     fun get(player: ElysiumPlayer): BukkitChatChannel? {
         val playerId = player.id
-        if (playerCache.containsKey(playerId as Integer)) {
+        if (playerCache.containsKey(playerId)) {
             return get(playerCache.get(playerId) as Int)
         } else {
             try {
@@ -398,9 +398,9 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                                         finalChatChannel.addSpeaker(plugin.core.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
                                     }
                                 })
-                                cache.put(finalChatChannel.id as Integer, chatChannel)
-                                nameCache.put(finalChatChannel.name, finalChatChannel.id as Integer)
-                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, finalChatChannel.id as Integer) }
+                                cache.put(finalChatChannel.id, chatChannel)
+                                nameCache.put(finalChatChannel.name, finalChatChannel.id)
+                                finalChatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id, finalChatChannel.id) }
                             }
                         }
                     })
@@ -436,9 +436,9 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                                     chatChannel.addSpeaker(plugin.core.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
                                 }
                             })
-                            cache.put(chatChannel.id as Integer, chatChannel)
-                            nameCache.put(chatChannel.name, chatChannel.id as Integer)
-                            chatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id as Integer, chatChannel.id as Integer) }
+                            cache.put(chatChannel.id, chatChannel)
+                            nameCache.put(chatChannel.name, chatChannel.id)
+                            chatChannel.speakers.forEach { speaker -> playerCache.put(speaker.id, chatChannel.id) }
                             chatChannels.add(chatChannel)
                         }
                     }
@@ -458,9 +458,9 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                         "DELETE FROM chat_channel_speaker WHERE chat_channel_id = ?").use({ speakersStatement ->
                     speakersStatement.setInt(1, `object`.id)
                     speakersStatement.executeUpdate()
-                    cache.remove(`object`.id as Integer)
+                    cache.remove(`object`.id)
                     nameCache.remove(`object`.name)
-                    `object`.speakers.forEach { player -> playerCache.remove(player.id as Integer) }
+                    `object`.speakers.forEach { player -> playerCache.remove(player.id) }
                 })
             }
         } catch (exception: SQLException) {

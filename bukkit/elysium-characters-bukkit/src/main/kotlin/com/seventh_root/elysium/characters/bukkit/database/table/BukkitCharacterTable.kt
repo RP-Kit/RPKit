@@ -28,12 +28,12 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
 
     private val plugin: ElysiumCharactersBukkit
     private val cacheManager: CacheManager
-    private val cache: Cache<Integer, BukkitCharacter>
+    private val cache: Cache<Int, BukkitCharacter>
 
     constructor(database: Database, plugin: ElysiumCharactersBukkit): super(database, BukkitCharacter::class.java) {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitCharacter::class.java).build())
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitCharacter::class.java).build())
     }
 
     override fun create() {
@@ -155,7 +155,7 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
                     if (generatedKeys.next()) {
                         id = generatedKeys.getInt(1)
                         `object`.id = id
-                        cache.put(id as Integer, `object`)
+                        cache.put(id, `object`)
                     }
                 })
             }
@@ -263,7 +263,7 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
                     statement.setInt(24, `object`.thirstLevel)
                     statement.setInt(25, `object`.id)
                     statement.executeUpdate()
-                    cache.put(`object`.id as Integer, `object`)
+                    cache.put(`object`.id, `object`)
                 })
             }
         } catch (exception: SQLException) {
@@ -273,7 +273,7 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
     }
 
     override fun get(id: Int): BukkitCharacter? {
-        if (cache.containsKey(id as Integer)) {
+        if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
             try {
@@ -337,8 +337,8 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
                         "DELETE FROM bukkit_character WHERE id = ?").use({ statement ->
                     statement.setInt(1, `object`.id)
                     statement.executeUpdate()
-                    if (cache.containsKey(`object`.id as Integer)) {
-                        cache.remove(`object`.id as Integer)
+                    if (cache.containsKey(`object`.id)) {
+                        cache.remove(`object`.id)
                     }
                 })
             }

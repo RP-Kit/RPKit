@@ -34,7 +34,7 @@ class CharacterSetAgeCommand(private val plugin: ElysiumCharactersBukkit) : Comm
                 if (character != null) {
                     if (args.size > 0) {
                         try {
-                            val age = Integer.parseInt(args[0])
+                            val age = args[0].toInt()
                             if (age >= plugin.config.getInt("characters.min-age") && age <= plugin.config.getInt("characters.max-age")) {
                                 character.age = age
                                 characterProvider.updateCharacter(character)
