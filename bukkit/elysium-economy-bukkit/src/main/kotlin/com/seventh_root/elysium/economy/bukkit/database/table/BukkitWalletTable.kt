@@ -21,14 +21,14 @@ class BukkitWalletTable : Table<BukkitWallet> {
 
     private val plugin: ElysiumEconomyBukkit
     private val cacheManager: CacheManager
-    private val cache: Cache<Integer, BukkitWallet>
-    private val characterCache: Cache<Integer, MutableMap<*, *>>
+    private val cache: Cache<Int, BukkitWallet>
+    private val characterCache: Cache<Int, MutableMap<*, *>>
 
     constructor(database: Database, plugin: ElysiumEconomyBukkit): super(database, BukkitWallet::class.java) {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitWallet::class.java).build())
-        characterCache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, MutableMap::class.java).build())
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitWallet::class.java).build())
+        characterCache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, MutableMap::class.java).build())
     }
 
     override fun create() {
@@ -66,7 +66,7 @@ class BukkitWalletTable : Table<BukkitWallet> {
                 if (generatedKeys.next()) {
                     id = generatedKeys.getInt(1)
                     `object`.id = id
-                    cache.put(id as Integer, `object`)
+                    cache.put(id, `object`)
                 }
             }
         }
@@ -83,13 +83,13 @@ class BukkitWalletTable : Table<BukkitWallet> {
                 statement.setInt(3, `object`.balance)
                 statement.setInt(4, `object`.id)
                 statement.executeUpdate()
-                cache.put(`object`.id as Integer, `object`)
+                cache.put(`object`.id, `object`)
             }
         }
     }
 
     override fun get(id: Int): BukkitWallet? {
-        if (cache.containsKey(id as Integer)) {
+        if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
             var wallet: BukkitWallet? = null
@@ -115,8 +115,8 @@ class BukkitWalletTable : Table<BukkitWallet> {
     }
 
     fun get(character: ElysiumCharacter, currency: ElysiumCurrency): BukkitWallet {
-        if (characterCache.containsKey(character.id as Integer)) {
-            return get(characterCache[character.id as Integer][currency.id] as Int)!!
+        if (characterCache.containsKey(character.id)) {
+            return get(characterCache[character.id][currency.id] as Int)!!
         } else {
             var wallet: BukkitWallet? = null
             database.createConnection().use { connection ->
@@ -138,9 +138,9 @@ class BukkitWalletTable : Table<BukkitWallet> {
                                 balance = balance
                         )
                         val finalWallet = wallet!!
-                        cache.put(id as Integer, finalWallet)
-                        var characterWallets: MutableMap<Int, Int>
-                        if (characterCache.containsKey(characterId as Integer)) {
+                        cache.put(id, finalWallet)
+                        val characterWallets: MutableMap<Int, Int>
+                        if (characterCache.containsKey(characterId)) {
                             characterWallets = characterCache[characterId] as MutableMap<Int, Int>
                         } else {
                             characterWallets = HashMap<Int, Int>()
@@ -191,9 +191,9 @@ class BukkitWalletTable : Table<BukkitWallet> {
             ).use { statement ->
                 statement.setInt(1, `object`.id)
                 statement.executeUpdate()
-                cache.remove(`object`.id as Integer)
+                cache.remove(`object`.id)
                 val characterId = `object`.character.id
-                characterCache[characterId as Integer].remove(`object`.currency.id)
+                characterCache[characterId].remove(`object`.currency.id)
                 if (characterCache[characterId].isEmpty()) {
                     characterCache.remove(characterId)
                 }

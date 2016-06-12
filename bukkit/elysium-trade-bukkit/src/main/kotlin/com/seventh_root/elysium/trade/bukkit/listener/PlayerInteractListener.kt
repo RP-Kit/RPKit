@@ -27,8 +27,8 @@ class PlayerInteractListener(private val plugin: ElysiumTradeBukkit): Listener {
                     val sign = event.clickedBlock.state as Sign
                     if (sign.getLine(0).equals(GREEN.toString() + "[trader]")) {
                         val material = Material.matchMaterial(sign.getLine(1))
-                        var buyPrice = Integer.parseInt(sign.getLine(2).split(" | ")[0])
-                        var sellPrice = Integer.parseInt(sign.getLine(2).split(" | ")[1])
+                        var buyPrice = sign.getLine(2).split(" | ")[0].toInt()
+                        var sellPrice = sign.getLine(2).split(" | ")[1].toInt()
                         var actualPrice = arrayOf(buyPrice, sellPrice).average()
                         val currency = plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java).getCurrency(sign.getLine(3))
                         if (currency != null) {
