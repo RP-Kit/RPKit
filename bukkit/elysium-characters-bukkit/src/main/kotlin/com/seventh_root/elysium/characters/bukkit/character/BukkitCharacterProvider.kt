@@ -16,12 +16,12 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
 
     private val plugin: ElysiumCharactersBukkit
     private val activeCharacterCacheManager: CacheManager
-    private val activeCharacterCache: Cache<Integer, Integer>
+    private val activeCharacterCache: Cache<Int, Int>
 
     constructor(plugin: ElysiumCharactersBukkit) {
         this.plugin = plugin
         this.activeCharacterCacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        activeCharacterCache = activeCharacterCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, Integer::class.java).build())
+        activeCharacterCache = activeCharacterCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType).build())
     }
 
     override fun getCharacter(id: Int): BukkitCharacter? {
@@ -30,7 +30,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
 
     override fun getActiveCharacter(player: ElysiumPlayer): BukkitCharacter? {
         val playerId = player.id
-        if (activeCharacterCache.containsKey(playerId as Integer)) {
+        if (activeCharacterCache.containsKey(playerId)) {
             return getCharacter(activeCharacterCache.get(playerId) as Int)
         } else {
             try {
@@ -43,7 +43,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
                         if (resultSet.next()) {
                             val characterId = resultSet.getInt("character_id")
                             character = getCharacter(characterId)
-                            activeCharacterCache.put(playerId, characterId as Integer)
+                            activeCharacterCache.put(playerId, characterId)
                         }
                     })
                 }
@@ -103,7 +103,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
                     bukkitPlayer.foodLevel = character.foodLevel
                 }
             }
-            activeCharacterCache.put(player.id as Integer, character.id as Integer)
+            activeCharacterCache.put(player.id, character.id)
         } else if (oldCharacter != null) {
             try {
                 plugin.core!!.database.createConnection().use { connection ->
@@ -117,13 +117,13 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
             } catch (exception: SQLException) {
                 exception.printStackTrace()
             }
-            activeCharacterCache.remove(player.id as Integer)
+            activeCharacterCache.remove(player.id)
         }
     }
 
     override fun getCharacters(player: ElysiumPlayer): Collection<BukkitCharacter> {
         try {
-            var characters: MutableList<BukkitCharacter> = ArrayList()
+            val characters: MutableList<BukkitCharacter> = ArrayList()
             plugin.core!!.database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "SELECT id FROM bukkit_character WHERE player_id = ? ORDER BY id").use({ statement ->

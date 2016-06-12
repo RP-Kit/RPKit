@@ -14,13 +14,13 @@ import java.sql.Statement.RETURN_GENERATED_KEYS
 class BukkitGenderTable: Table<BukkitGender> {
 
     private val cacheManager: CacheManager
-    private val cache: Cache<Integer, BukkitGender>
-    private val nameCache: Cache<String, Integer>
+    private val cache: Cache<Int, BukkitGender>
+    private val nameCache: Cache<String, Int>
 
     constructor(database: Database): super(database, BukkitGender::class.java) {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitGender::class.java).build())
-        nameCache = cacheManager.createCache("nameCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Integer::class.java).build())
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitGender::class.java).build())
+        nameCache = cacheManager.createCache("nameCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType).build())
     }
 
     override fun create() {
@@ -54,8 +54,8 @@ class BukkitGenderTable: Table<BukkitGender> {
                     if (generatedKeys.next()) {
                         id = generatedKeys.getInt(1)
                         `object`.id = id
-                        cache.put(id as Integer, `object`)
-                        nameCache.put(`object`.name, id as Integer)
+                        cache.put(id, `object`)
+                        nameCache.put(`object`.name, id)
                     }
                 })
             }
@@ -75,8 +75,8 @@ class BukkitGenderTable: Table<BukkitGender> {
                     statement.setString(1, `object`.name)
                     statement.setInt(2, `object`.id)
                     statement.executeUpdate()
-                    cache.put(`object`.id as Integer, `object`)
-                    nameCache.put(`object`.name, `object`.id as Integer)
+                    cache.put(`object`.id, `object`)
+                    nameCache.put(`object`.name, `object`.id)
                 })
             }
         } catch (exception: SQLException) {
@@ -86,8 +86,8 @@ class BukkitGenderTable: Table<BukkitGender> {
     }
 
     override fun get(id: Int): BukkitGender? {
-        if (cache.containsKey(id as Integer)) {
-            return cache.get(id as Integer)
+        if (cache.containsKey(id)) {
+            return cache.get(id)
         } else {
             try {
                 var gender: BukkitGender? = null
@@ -101,7 +101,7 @@ class BukkitGenderTable: Table<BukkitGender> {
                             val name = resultSet.getString("name")
                             gender = BukkitGender(id1, name)
                             cache.put(id, gender)
-                            nameCache.put(name, id1 as Integer)
+                            nameCache.put(name, id1)
                         }
                     })
                 }
@@ -128,7 +128,7 @@ class BukkitGenderTable: Table<BukkitGender> {
                             val id = resultSet.getInt("id")
                             val name1 = resultSet.getString("name")
                             gender = BukkitGender(id, name1)
-                            cache.put(id as Integer, gender)
+                            cache.put(id, gender)
                             nameCache.put(name1, id)
                         }
                     })
@@ -148,7 +148,7 @@ class BukkitGenderTable: Table<BukkitGender> {
                         "DELETE FROM bukkit_gender WHERE id = ?").use({ statement ->
                     statement.setInt(1, `object`.id)
                     statement.executeUpdate()
-                    cache.remove(`object`.id as Integer)
+                    cache.remove(`object`.id)
                     nameCache.remove(`object`.name)
                 })
             }
