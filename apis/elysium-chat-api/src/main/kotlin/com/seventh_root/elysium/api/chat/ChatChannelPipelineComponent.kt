@@ -21,4 +21,7 @@ abstract class ChatChannelPipelineComponent : Comparable<ChatChannelPipelineComp
     @Throws(ChatChannelMessageFormattingFailureException::class)
     abstract fun process(message: String, context: ChatMessageContext): String?
 
+    @Throws(ChatChannelMessageFormattingFailureException::class)
+    abstract fun postProcess(message: String, context: ChatMessagePostProcessContext): String?
+
 }

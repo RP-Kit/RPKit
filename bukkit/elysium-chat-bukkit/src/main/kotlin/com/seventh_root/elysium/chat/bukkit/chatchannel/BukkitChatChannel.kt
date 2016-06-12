@@ -1,7 +1,10 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel
 
 import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent
+import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent.Type.FORMATTER
+import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent.Type.POST_PROCESSOR
 import com.seventh_root.elysium.api.chat.ChatMessageContext
+import com.seventh_root.elysium.api.chat.ChatMessagePostProcessContext
 import com.seventh_root.elysium.api.chat.ElysiumChatChannel
 import com.seventh_root.elysium.api.chat.exception.ChatChannelMessageFormattingFailureException
 import com.seventh_root.elysium.api.player.ElysiumPlayer
@@ -173,7 +176,7 @@ class BukkitChatChannel: ElysiumChatChannel {
 
     override fun processMessage(message: String?, context: ChatMessageContext): String? {
         var processedMessage = message
-        for (pipelineComponent in pipeline) {
+        for (pipelineComponent in pipeline.filter { pipelineComponent -> pipelineComponent.type != POST_PROCESSOR }) {
             if (processedMessage == null) break
             try {
                 processedMessage = pipelineComponent.process(processedMessage, context)
@@ -190,6 +193,24 @@ class BukkitChatChannel: ElysiumChatChannel {
 
         }
         return processedMessage
+    }
+
+    override fun postProcess(message: String?, context: ChatMessagePostProcessContext) {
+        var processedMessage = message
+        for (pipelineComponent in pipeline.filter { pipelineComponent -> pipelineComponent.type == FORMATTER || pipelineComponent.type == POST_PROCESSOR }) {
+            if (processedMessage == null) break
+            try {
+                processedMessage = pipelineComponent.postProcess(processedMessage, context)
+            } catch (exception: ChatChannelMessageFormattingFailureException) {
+                val elysiumPlayer = context.sender
+                if (elysiumPlayer is BukkitPlayer) {
+                    val bukkitPlayer = elysiumPlayer.bukkitPlayer
+                    if (bukkitPlayer.isOnline) {
+                        bukkitPlayer.player.sendMessage(exception.message)
+                    }
+                }
+            }
+        }
     }
 
     @Throws(IOException::class)
