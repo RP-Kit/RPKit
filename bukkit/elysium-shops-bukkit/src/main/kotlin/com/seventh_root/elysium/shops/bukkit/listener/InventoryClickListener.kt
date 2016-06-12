@@ -30,7 +30,7 @@ class InventoryClickListener(val plugin: ElysiumShopsBukkit): Listener {
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
                     val economyProvider = plugin.core.serviceManager.getServiceProvider(BukkitEconomyProvider::class.java)
                     val currencyProvider = plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java)
-                    val sellerCharacter = characterProvider.getCharacter(Integer.parseInt(sign.getLine(3))) ?: return
+                    val sellerCharacter = characterProvider.getCharacter(sign.getLine(3).toInt()) ?: return
                     val buyerBukkitPlayer = event.whoClicked as? Player ?: return
                     val buyerPlayer = playerProvider.getPlayer(buyerBukkitPlayer)
                     val buyerCharacter = characterProvider.getActiveCharacter(buyerPlayer)
@@ -43,8 +43,8 @@ class InventoryClickListener(val plugin: ElysiumShopsBukkit): Listener {
                     }
                     event.isCancelled = true
                     if (sign.getLine(1).startsWith("buy")) {
-                        val amount = Integer.parseInt(sign.getLine(1).split(Regex("\\s+"))[1])
-                        val price = Integer.parseInt(sign.getLine(2).split(Regex("\\s+"))[1])
+                        val amount = sign.getLine(1).split(Regex("\\s+"))[1].toInt()
+                        val price = sign.getLine(2).split(Regex("\\s+"))[1].toInt()
                         val currencyBuilder = StringBuilder()
                         for (i in 2..sign.getLine(2).split(Regex("\\s+")).size - 1) {
                             currencyBuilder.append(sign.getLine(2).split(Regex("\\s+"))[i])
