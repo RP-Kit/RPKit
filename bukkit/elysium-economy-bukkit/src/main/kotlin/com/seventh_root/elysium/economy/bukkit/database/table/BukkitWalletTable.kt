@@ -21,45 +21,27 @@ class BukkitWalletTable : Table<BukkitWallet> {
 
     private val plugin: ElysiumEconomyBukkit
     private val cacheManager: CacheManager
-    private val preConfigured: Cache<Integer, BukkitWallet>
     private val cache: Cache<Integer, BukkitWallet>
-    private val characterCacheManager: CacheManager
-    private val characterPreConfigured: Cache<Integer, MutableMap<*, *>>
     private val characterCache: Cache<Integer, MutableMap<*, *>>
 
     constructor(database: Database, plugin: ElysiumEconomyBukkit): super(database, BukkitWallet::class.java) {
         this.plugin = plugin;
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-                .withCache(
-                        "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitWallet::class.java)
-                                .build()
-                )
-                .build(true)
-        preConfigured = cacheManager.getCache("preConfigured", Integer::class.java, BukkitWallet::class.java)
+        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, BukkitWallet::class.java).build())
-        characterCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-                .withCache(
-                        "preConfigured",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, MutableMap::class.java)
-                            .build()
-                )
-                .build(true)
-        characterPreConfigured = characterCacheManager.getCache("preConfigured", Integer::class.java, MutableMap::class.java)
-        characterCache = characterCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, MutableMap::class.java).build())
+        characterCache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Integer::class.java, MutableMap::class.java).build())
     }
 
     override fun create() {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS bukkit_wallet (" +
-                        "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                        "character_id INTEGER," +
-                        "currency_id INTEGER," +
-                        "balance INTEGER," +
-                        "FOREIGN KEY(character_id) REFERENCES bukkit_character(id) ON DELETE CASCADE ON UPDATE CASCADE," +
-                        "FOREIGN KEY(currency_id) REFERENCES bukkit_currency(id) ON DELETE CASCADE ON UPDATE CASCADE" +
-                    ")"
+                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
+                            "character_id INTEGER," +
+                            "currency_id INTEGER," +
+                            "balance INTEGER," +
+                            "FOREIGN KEY(character_id) REFERENCES bukkit_character(id) ON DELETE CASCADE ON UPDATE CASCADE," +
+                            "FOREIGN KEY(currency_id) REFERENCES bukkit_currency(id) ON DELETE CASCADE ON UPDATE CASCADE" +
+                            ")"
             ).use { statement ->
                 statement.executeUpdate()
             }
