@@ -298,7 +298,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
         } else {
             var chatChannel: BukkitChatChannel? = null
             try {
-                plugin.core!!.database.createConnection().use { connection ->
+                plugin.core.database.createConnection().use { connection ->
                     connection.prepareStatement("SELECT id, name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default FROM bukkit_chat_channel WHERE name = ?").use({ statement ->
                         statement.setString(1, name)
                         val resultSet = statement.executeQuery()
@@ -327,14 +327,14 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                                     listenerStatement.setInt(1, finalChatChannel.id)
                                     val listenerResultSet = listenerStatement.executeQuery()
                                     while (listenerResultSet.next()) {
-                                        finalChatChannel.addListener(plugin.core!!.database.getTable(BukkitPlayer::class.java)!![listenerResultSet.getInt("player_id")]!!)
+                                        finalChatChannel.addListener(plugin.core.database.getTable(BukkitPlayer::class.java)!![listenerResultSet.getInt("player_id")]!!)
                                     }
                                 })
                                 connection.prepareStatement("SELECT player_id FROM chat_channel_speaker WHERE chat_channel_id = ?").use({ speakerStatement ->
                                     speakerStatement.setInt(1, finalChatChannel.id)
                                     val speakerResultSet = speakerStatement.executeQuery()
                                     while (speakerResultSet.next()) {
-                                        finalChatChannel.addSpeaker(plugin.core!!.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
+                                        finalChatChannel.addSpeaker(plugin.core.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
                                     }
                                 })
                                 cache.put(finalChatChannel.id, chatChannel)
@@ -359,7 +359,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
         } else {
             try {
                 var chatChannel: BukkitChatChannel? = null
-                plugin.core!!.database.createConnection().use { connection ->
+                plugin.core.database.createConnection().use { connection ->
                     connection.prepareStatement("SELECT id, name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default FROM bukkit_chat_channel, chat_channel_speaker WHERE chat_channel_speaker.player_id = ? AND chat_channel_speaker.chat_channel_id = bukkit_chat_channel.id").use({ statement ->
                         statement.setInt(1, player.id)
                         val resultSet = statement.executeQuery()
@@ -388,14 +388,14 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                                     listenerStatement.setInt(1, finalChatChannel.id)
                                     val listenerResultSet = listenerStatement.executeQuery()
                                     while (listenerResultSet.next()) {
-                                        finalChatChannel.addListener(plugin.core!!.database.getTable(BukkitPlayer::class.java)!![listenerResultSet.getInt("player_id")]!!)
+                                        finalChatChannel.addListener(plugin.core.database.getTable(BukkitPlayer::class.java)!![listenerResultSet.getInt("player_id")]!!)
                                     }
                                 })
                                 connection.prepareStatement("SELECT player_id FROM chat_channel_speaker WHERE chat_channel_id = ?").use({ speakerStatement ->
                                     speakerStatement.setInt(1, finalChatChannel.id)
                                     val speakerResultSet = speakerStatement.executeQuery()
                                     while (speakerResultSet.next()) {
-                                        finalChatChannel.addSpeaker(plugin.core!!.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
+                                        finalChatChannel.addSpeaker(plugin.core.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
                                     }
                                 })
                                 cache.put(finalChatChannel.id, chatChannel)
@@ -416,7 +416,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
     fun getAll(): Collection<BukkitChatChannel> {
         val chatChannels = ArrayList<BukkitChatChannel>()
         try {
-            plugin.core!!.database.createConnection().use { connection ->
+            plugin.core.database.createConnection().use { connection ->
                 connection.prepareStatement("SELECT id FROM bukkit_chat_channel").use({ statement ->
                     val resultSet = statement.executeQuery()
                     while (resultSet.next()) {
@@ -426,14 +426,14 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                                 listenerStatement.setInt(1, chatChannel.id)
                                 val listenerResultSet = listenerStatement.executeQuery()
                                 while (listenerResultSet.next()) {
-                                    chatChannel.addListener(plugin.core!!.database.getTable(BukkitPlayer::class.java)!![listenerResultSet.getInt("player_id")]!!)
+                                    chatChannel.addListener(plugin.core.database.getTable(BukkitPlayer::class.java)!![listenerResultSet.getInt("player_id")]!!)
                                 }
                             })
                             connection.prepareStatement("SELECT player_id FROM chat_channel_speaker WHERE chat_channel_id = ?").use({ speakerStatement ->
                                 speakerStatement.setInt(1, chatChannel.id)
                                 val speakerResultSet = speakerStatement.executeQuery()
                                 while (speakerResultSet.next()) {
-                                    chatChannel.addSpeaker(plugin.core!!.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
+                                    chatChannel.addSpeaker(plugin.core.database.getTable(BukkitPlayer::class.java)!![speakerResultSet.getInt("player_id")]!!)
                                 }
                             })
                             cache.put(chatChannel.id, chatChannel)

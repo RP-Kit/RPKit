@@ -19,8 +19,8 @@ class PlayerInteractEntityListener(private val plugin: ElysiumCharactersBukkit) 
                 if (event.rightClicked is Player) {
                     if (event.player.hasPermission("elysium.characters.command.character.card.other")) {
                         val bukkitPlayer = event.rightClicked as Player
-                        val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                        val characterProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                        val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                        val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
                         val player = playerProvider.getPlayer(bukkitPlayer)
                         val character = characterProvider.getActiveCharacter(player)
                         if (character != null) {

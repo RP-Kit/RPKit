@@ -10,13 +10,13 @@ import java.sql.SQLException
 
 class ElysiumCoreBukkit : ElysiumBukkitPlugin() {
 
-    override var serviceProviders: Array<ServiceProvider>? = null
+    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()
         core = ElysiumCore(logger, Database(config.getString("database.url"), config.getString("database.username"), config.getString("database.password")))
         try {
-            createTables(core!!.database)
+            createTables(core.database)
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
@@ -32,15 +32,15 @@ class ElysiumCoreBukkit : ElysiumBukkitPlugin() {
     }
 
     fun registerServiceProviders(plugin: ElysiumBukkitPlugin) {
-        for (provider in plugin.serviceProviders!!) {
-            core!!.serviceManager.registerServiceProvider(provider)
+        for (provider in plugin.serviceProviders) {
+            core.serviceManager.registerServiceProvider(provider)
         }
     }
 
     fun initializePlugin(elysiumBukkitPlugin: ElysiumBukkitPlugin) {
         elysiumBukkitPlugin.core = core
         try {
-            elysiumBukkitPlugin.createTables(core!!.database)
+            elysiumBukkitPlugin.createTables(core.database)
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }

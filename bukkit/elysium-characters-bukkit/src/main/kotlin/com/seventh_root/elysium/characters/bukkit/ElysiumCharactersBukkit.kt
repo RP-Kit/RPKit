@@ -25,10 +25,10 @@ import java.sql.SQLException
 
 class ElysiumCharactersBukkit : ElysiumBukkitPlugin() {
 
-    private var characterProvider: CharacterProvider<BukkitCharacter>? = null
-    private var genderProvider: GenderProvider<BukkitGender>? = null
-    private var raceProvider: RaceProvider<BukkitRace>? = null
-    override var serviceProviders: Array<ServiceProvider>? = null
+    private lateinit var characterProvider: CharacterProvider<BukkitCharacter>
+    private lateinit var genderProvider: GenderProvider<BukkitGender>
+    private lateinit var raceProvider: RaceProvider<BukkitRace>
+    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()
@@ -36,9 +36,9 @@ class ElysiumCharactersBukkit : ElysiumBukkitPlugin() {
         genderProvider = BukkitGenderProvider(this)
         raceProvider = BukkitRaceProvider(this)
         serviceProviders = arrayOf(
-                characterProvider as CharacterProvider<BukkitCharacter>,
-                genderProvider as GenderProvider<BukkitGender>,
-                raceProvider as BukkitRaceProvider
+                characterProvider,
+                genderProvider,
+                raceProvider
         )
     }
 

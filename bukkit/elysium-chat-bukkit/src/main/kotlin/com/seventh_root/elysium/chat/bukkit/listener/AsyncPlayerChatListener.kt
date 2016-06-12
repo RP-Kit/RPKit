@@ -18,8 +18,8 @@ class AsyncPlayerChatListener(private val plugin: ElysiumChatBukkit) : Listener 
     fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
         event.isCancelled = true
         val bukkitPlayer = event.player
-        val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-        val chatChannelProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+        val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+        val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
         val player = playerProvider.getPlayer(bukkitPlayer)
         var channel: BukkitChatChannel? = chatChannelProvider.getPlayerChannel(player)
         var message = event.message

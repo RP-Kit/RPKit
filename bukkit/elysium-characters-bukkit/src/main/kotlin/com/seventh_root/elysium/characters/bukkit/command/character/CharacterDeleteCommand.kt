@@ -42,8 +42,8 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : Comm
                         characterNameBuilder.append(args[i]).append(" ")
                     }
                     characterNameBuilder.append(args[args.size - 1])
-                    val characterProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                    val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                    val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                    val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
                     val player = playerProvider.getPlayer(sender)
                     var charFound = false
                     // Prioritise exact matches...
@@ -90,8 +90,8 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : Comm
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val characterProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
                 val player = playerProvider.getPlayer(conversable)
                 for (character in characterProvider.getCharacters(player)) {
                     if (character.name.equals(input, ignoreCase = true)) {
@@ -110,8 +110,8 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : Comm
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val characterProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
                 val player = playerProvider.getPlayer(conversable)
                 var charFound = false
                 // Prioritise exact matches...
@@ -140,9 +140,9 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : Comm
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val playerProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+            val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
             val player = playerProvider.getPlayer(context.forWhom as Player)
-            val characterProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
             val characterListBuilder = StringBuilder()
             for (character in characterProvider.getCharacters(player)) {
                 characterListBuilder.append("\n").append(
@@ -158,7 +158,7 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : Comm
 
         override fun acceptValidatedInput(context: ConversationContext, input: Boolean): Prompt? {
             if (input) {
-                val characterProvider = plugin.core!!.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
                 val character = characterProvider.getCharacter(context.getSessionData("character_id") as Int)
                 characterProvider.removeCharacter(character!!)
                 return CharacterDeletedPrompt()
