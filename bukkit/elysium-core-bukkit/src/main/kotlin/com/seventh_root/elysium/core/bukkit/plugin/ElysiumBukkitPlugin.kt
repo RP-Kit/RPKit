@@ -10,7 +10,7 @@ import java.sql.SQLException
 
 abstract class ElysiumBukkitPlugin : JavaPlugin() {
 
-    lateinit open var core: ElysiumCore
+    lateinit var core: ElysiumCore
 
     open fun registerCommands() {
 
