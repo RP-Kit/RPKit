@@ -7,6 +7,7 @@ import com.seventh_root.elysium.api.player.ElysiumPlayer
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.gender.BukkitGenderProvider
 import com.seventh_root.elysium.characters.bukkit.race.BukkitRaceProvider
+import com.seventh_root.elysium.players.bukkit.BukkitPlayer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
@@ -36,9 +37,15 @@ class BukkitCharacter constructor(
         thirstLevel: Int = plugin.config.getInt("characters.defaults.thirst-level")
 ) : ElysiumCharacter {
 
+    val plugin = plugin
     override var id = id
     override var player = player
     override var name = name
+        set(name) {
+            field = name
+            if (plugin.config.getBoolean("characters.set-player-display-name"))
+            (player as? BukkitPlayer)?.bukkitPlayer?.player?.displayName = name
+        }
     override var gender = gender
     override var age = age
     override var race = race

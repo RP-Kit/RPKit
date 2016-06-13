@@ -101,6 +101,9 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
                     bukkitPlayer.maxHealth = character.maxHealth
                     bukkitPlayer.health = character.health
                     bukkitPlayer.foodLevel = character.foodLevel
+                    if (plugin.config.getBoolean("characters.set-player-display-name")) {
+                        bukkitPlayer.displayName = character.name
+                    }
                 }
             }
             activeCharacterCache.put(player.id, character.id)
