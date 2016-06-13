@@ -44,10 +44,10 @@ class ElysiumCoreBukkit : ElysiumBukkitPlugin() {
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
         registerServiceProviders(elysiumBukkitPlugin)
         elysiumBukkitPlugin.registerCommands()
         elysiumBukkitPlugin.registerListeners()
+        elysiumBukkitPlugin.onPostEnable()
     }
 
 }
