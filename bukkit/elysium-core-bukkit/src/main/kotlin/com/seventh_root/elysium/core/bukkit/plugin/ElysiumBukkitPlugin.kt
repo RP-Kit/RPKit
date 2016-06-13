@@ -12,6 +12,10 @@ abstract class ElysiumBukkitPlugin : JavaPlugin() {
 
     lateinit var core: ElysiumCore
 
+    open fun onPostEnable() {
+
+    }
+
     open fun registerCommands() {
 
     }

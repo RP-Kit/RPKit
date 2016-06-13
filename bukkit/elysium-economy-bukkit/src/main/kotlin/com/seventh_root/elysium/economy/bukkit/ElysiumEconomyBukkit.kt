@@ -2,9 +2,11 @@ package com.seventh_root.elysium.economy.bukkit
 
 import com.seventh_root.elysium.api.economy.CurrencyProvider
 import com.seventh_root.elysium.api.economy.EconomyProvider
+import com.seventh_root.elysium.characters.bukkit.character.field.BukkitCharacterCardFieldProvider
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceProvider
+import com.seventh_root.elysium.economy.bukkit.character.MoneyField
 import com.seventh_root.elysium.economy.bukkit.command.currency.CurrencyCommand
 import com.seventh_root.elysium.economy.bukkit.command.money.MoneyCommand
 import com.seventh_root.elysium.economy.bukkit.command.money.MoneyPayCommand
@@ -31,6 +33,11 @@ class ElysiumEconomyBukkit : ElysiumBukkitPlugin() {
                 currencyProvider,
                 economyProvider
         )
+    }
+
+    override fun onPostEnable() {
+        core.serviceManager.getServiceProvider(BukkitCharacterCardFieldProvider::class.java)
+                .characterCardFields.add(MoneyField(this))
     }
 
     override fun registerCommands() {
