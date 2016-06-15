@@ -1,8 +1,6 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel
 
 import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent
-import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent.Type.FORMATTER
-import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent.Type.POST_PROCESSOR
 import com.seventh_root.elysium.api.chat.ChatMessageContext
 import com.seventh_root.elysium.api.chat.ChatMessagePostProcessContext
 import com.seventh_root.elysium.api.chat.ElysiumChatChannel
@@ -176,7 +174,7 @@ class BukkitChatChannel: ElysiumChatChannel {
 
     override fun processMessage(message: String?, context: ChatMessageContext): String? {
         var processedMessage = message
-        for (pipelineComponent in pipeline.filter { pipelineComponent -> pipelineComponent.type != POST_PROCESSOR }) {
+        for (pipelineComponent in pipeline) {
             if (processedMessage == null) break
             try {
                 processedMessage = pipelineComponent.process(processedMessage, context)
@@ -197,7 +195,7 @@ class BukkitChatChannel: ElysiumChatChannel {
 
     override fun postProcess(message: String?, context: ChatMessagePostProcessContext) {
         var processedMessage = message
-        for (pipelineComponent in pipeline.filter { pipelineComponent -> pipelineComponent.type == FORMATTER || pipelineComponent.type == POST_PROCESSOR }) {
+        for (pipelineComponent in pipeline) {
             if (processedMessage == null) break
             try {
                 processedMessage = pipelineComponent.postProcess(processedMessage, context)
