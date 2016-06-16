@@ -27,8 +27,8 @@ class BukkitWalletTable : Table<BukkitWallet> {
     constructor(database: Database, plugin: ElysiumEconomyBukkit): super(database, BukkitWallet::class.java) {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitWallet::class.java).build())
-        characterCache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, MutableMap::class.java).build())
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitWallet::class.java).build())
+        characterCache = cacheManager.createCache("characterCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableMap::class.java).build())
     }
 
     override fun create() {
@@ -67,6 +67,9 @@ class BukkitWalletTable : Table<BukkitWallet> {
                     id = generatedKeys.getInt(1)
                     `object`.id = id
                     cache.put(id, `object`)
+                    val currencyWallets = characterCache.get(`object`.character.id)
+                    (currencyWallets as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
+                    characterCache.put(`object`.character.id, currencyWallets)
                 }
             }
         }
@@ -84,6 +87,9 @@ class BukkitWalletTable : Table<BukkitWallet> {
                 statement.setInt(4, `object`.id)
                 statement.executeUpdate()
                 cache.put(`object`.id, `object`)
+                val currencyWallets = characterCache.get(`object`.character.id)
+                (currencyWallets as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
+                characterCache.put(`object`.character.id, currencyWallets)
             }
         }
     }
