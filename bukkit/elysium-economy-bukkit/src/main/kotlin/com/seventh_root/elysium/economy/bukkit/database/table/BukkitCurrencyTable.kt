@@ -25,8 +25,8 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitCurrency::class.java).build())
-        nameCache = cacheManager.createCache("nameCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.java).build())
+        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitCurrency::class.java).build())
+        nameCache = cacheManager.createCache("nameCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType).build())
     }
 
     override fun create() {
