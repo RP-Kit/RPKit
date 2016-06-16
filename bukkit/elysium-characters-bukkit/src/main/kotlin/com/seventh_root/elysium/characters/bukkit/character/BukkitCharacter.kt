@@ -1,13 +1,12 @@
 package com.seventh_root.elysium.characters.bukkit.character
 
-import com.seventh_root.elysium.api.character.ElysiumCharacter
-import com.seventh_root.elysium.api.character.Gender
-import com.seventh_root.elysium.api.character.Race
-import com.seventh_root.elysium.api.player.ElysiumPlayer
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.gender.BukkitGenderProvider
+import com.seventh_root.elysium.characters.bukkit.gender.Gender
 import com.seventh_root.elysium.characters.bukkit.race.BukkitRaceProvider
-import com.seventh_root.elysium.players.bukkit.BukkitPlayer
+import com.seventh_root.elysium.characters.bukkit.race.Race
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack

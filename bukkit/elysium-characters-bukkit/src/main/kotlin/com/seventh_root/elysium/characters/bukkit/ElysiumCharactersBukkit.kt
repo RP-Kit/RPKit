@@ -1,11 +1,8 @@
 package com.seventh_root.elysium.characters.bukkit
 
-import com.seventh_root.elysium.api.character.CharacterCardFieldProvider
-import com.seventh_root.elysium.api.character.CharacterProvider
-import com.seventh_root.elysium.api.character.GenderProvider
-import com.seventh_root.elysium.api.character.RaceProvider
 import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacter
 import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
+import com.seventh_root.elysium.characters.bukkit.character.CharacterProvider
 import com.seventh_root.elysium.characters.bukkit.character.field.*
 import com.seventh_root.elysium.characters.bukkit.command.character.CharacterCommand
 import com.seventh_root.elysium.characters.bukkit.command.gender.GenderCommand
@@ -15,11 +12,13 @@ import com.seventh_root.elysium.characters.bukkit.database.table.BukkitGenderTab
 import com.seventh_root.elysium.characters.bukkit.database.table.BukkitRaceTable
 import com.seventh_root.elysium.characters.bukkit.gender.BukkitGender
 import com.seventh_root.elysium.characters.bukkit.gender.BukkitGenderProvider
+import com.seventh_root.elysium.characters.bukkit.gender.GenderProvider
 import com.seventh_root.elysium.characters.bukkit.listener.PlayerDeathListener
 import com.seventh_root.elysium.characters.bukkit.listener.PlayerInteractEntityListener
 import com.seventh_root.elysium.characters.bukkit.listener.PlayerMoveListener
 import com.seventh_root.elysium.characters.bukkit.race.BukkitRace
 import com.seventh_root.elysium.characters.bukkit.race.BukkitRaceProvider
+import com.seventh_root.elysium.characters.bukkit.race.RaceProvider
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceProvider

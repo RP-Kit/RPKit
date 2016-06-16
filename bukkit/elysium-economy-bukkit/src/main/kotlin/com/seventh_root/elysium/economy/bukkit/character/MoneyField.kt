@@ -1,7 +1,7 @@
 package com.seventh_root.elysium.economy.bukkit.character
 
-import com.seventh_root.elysium.api.character.CharacterCardField
-import com.seventh_root.elysium.api.character.ElysiumCharacter
+import com.seventh_root.elysium.characters.bukkit.character.field.CharacterCardField
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
 import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
 import com.seventh_root.elysium.economy.bukkit.economy.BukkitEconomyProvider

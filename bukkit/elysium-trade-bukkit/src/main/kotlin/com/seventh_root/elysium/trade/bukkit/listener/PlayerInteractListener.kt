@@ -3,7 +3,7 @@ package com.seventh_root.elysium.trade.bukkit.listener
 import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
 import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
 import com.seventh_root.elysium.economy.bukkit.economy.BukkitEconomyProvider
-import com.seventh_root.elysium.players.bukkit.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
 import com.seventh_root.elysium.trade.bukkit.ElysiumTradeBukkit
 import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN

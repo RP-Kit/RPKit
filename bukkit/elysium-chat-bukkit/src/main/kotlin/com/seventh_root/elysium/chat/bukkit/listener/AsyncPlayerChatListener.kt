@@ -5,8 +5,8 @@ import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannel
 import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
 import com.seventh_root.elysium.chat.bukkit.context.BukkitChatMessageContext
 import com.seventh_root.elysium.chat.bukkit.context.BukkitChatMessagePostProcessContext
-import com.seventh_root.elysium.players.bukkit.BukkitPlayer
-import com.seventh_root.elysium.players.bukkit.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener

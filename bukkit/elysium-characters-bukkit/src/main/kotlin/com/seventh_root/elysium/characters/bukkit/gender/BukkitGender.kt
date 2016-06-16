@@ -1,6 +1,6 @@
 package com.seventh_root.elysium.characters.bukkit.gender
 
-import com.seventh_root.elysium.api.character.Gender
+import com.seventh_root.elysium.characters.bukkit.gender.Gender
 
 class BukkitGender(override var id: Int, override val name: String) : Gender {
 

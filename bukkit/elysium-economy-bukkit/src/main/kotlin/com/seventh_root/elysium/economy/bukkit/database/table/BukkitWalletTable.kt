@@ -1,7 +1,7 @@
 package com.seventh_root.elysium.economy.bukkit.database.table
 
-import com.seventh_root.elysium.api.character.ElysiumCharacter
-import com.seventh_root.elysium.api.economy.ElysiumCurrency
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table

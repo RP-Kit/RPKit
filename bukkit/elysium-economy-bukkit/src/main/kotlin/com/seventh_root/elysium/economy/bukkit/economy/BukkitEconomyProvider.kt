@@ -1,8 +1,8 @@
 package com.seventh_root.elysium.economy.bukkit.economy
 
-import com.seventh_root.elysium.api.character.ElysiumCharacter
-import com.seventh_root.elysium.api.economy.EconomyProvider
-import com.seventh_root.elysium.api.economy.ElysiumCurrency
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
+import com.seventh_root.elysium.economy.bukkit.economy.EconomyProvider
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
 import com.seventh_root.elysium.economy.bukkit.database.table.BukkitWalletTable
 import com.seventh_root.elysium.economy.bukkit.exception.NegativeBalanceException

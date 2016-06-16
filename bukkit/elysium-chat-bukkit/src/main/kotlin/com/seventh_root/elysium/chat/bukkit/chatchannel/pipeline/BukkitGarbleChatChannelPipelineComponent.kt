@@ -1,11 +1,10 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline
 
-import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent
-import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent.Type.PRE_PROCESSOR
-import com.seventh_root.elysium.api.chat.ChatMessageContext
-import com.seventh_root.elysium.api.chat.ChatMessagePostProcessContext
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipelineComponent.Type.PRE_PROCESSOR
+import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
+import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
 import com.seventh_root.elysium.core.util.MathUtils
-import com.seventh_root.elysium.players.bukkit.BukkitPlayer
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
 import org.bukkit.ChatColor
 import java.util.*
 

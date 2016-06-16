@@ -1,6 +1,5 @@
 package com.seventh_root.elysium.characters.bukkit.gender
 
-import com.seventh_root.elysium.api.character.GenderProvider
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.database.table.BukkitGenderTable
 import com.seventh_root.elysium.core.database.use

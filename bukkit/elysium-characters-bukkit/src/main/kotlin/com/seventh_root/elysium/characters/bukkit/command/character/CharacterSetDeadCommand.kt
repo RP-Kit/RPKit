@@ -2,7 +2,7 @@ package com.seventh_root.elysium.characters.bukkit.command.character
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
-import com.seventh_root.elysium.players.bukkit.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
 import org.apache.commons.lang.BooleanUtils
 import org.bukkit.ChatColor
 import org.bukkit.command.Command

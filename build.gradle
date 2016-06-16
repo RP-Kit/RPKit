@@ -38,7 +38,7 @@ def repoPassword = properties.getProperty("repo-password")
 
 // APIs
 
-project(":apis:elysium-core-api") {
+project(":elysium-core") {
 
     def mysqlConnectorVersion = "5.1.35"
     def commonsCodecVersion = "1.9"
@@ -77,102 +77,9 @@ project(":apis:elysium-core-api") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
-            pom.version = project(":apis:elysium-core-api").version
-            pom.artifactId = project(":apis:elysium-core-api").name
-            pom.groupId = project(":apis:elysium-core-api").group
-
-        }
-    }
-
-}
-
-project(":apis:elysium-player-api") {
-
-    dependencies {
-        compile project(":apis:elysium-core-api")
-    }
-
-    uploadArchives {
-        repositories.mavenDeployer {
-
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
-                authentication(userName: repoUserName, password: repoPassword)
-            }
-
-            pom.version = project(":apis:elysium-player-api").version
-            pom.artifactId = project(":apis:elysium-player-api").name
-            pom.groupId = project(":apis:elysium-player-api").group
-
-        }
-    }
-
-}
-
-project(":apis:elysium-character-api") {
-
-    dependencies {
-        compile project(":apis:elysium-core-api")
-        compile project(":apis:elysium-player-api")
-    }
-
-    uploadArchives {
-        repositories.mavenDeployer {
-
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
-                authentication(userName: repoUserName, password: repoPassword)
-            }
-
-            pom.version = project(":apis:elysium-character-api").version
-            pom.artifactId = project(":apis:elysium-character-api").name
-            pom.groupId = project(":apis:elysium-character-api").group
-
-        }
-    }
-
-}
-
-project(":apis:elysium-chat-api") {
-
-    dependencies {
-        compile project(":apis:elysium-core-api")
-        compile project(":apis:elysium-player-api")
-        compile project(":apis:elysium-character-api")
-    }
-
-    uploadArchives {
-        repositories.mavenDeployer {
-
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
-                authentication(userName: repoUserName, password: repoPassword)
-            }
-
-            pom.version = project(":apis:elysium-chat-api").version
-            pom.artifactId = project(":apis:elysium-chat-api").name
-            pom.groupId = project(":apis:elysium-chat-api").group
-
-        }
-    }
-
-}
-
-project(":apis:elysium-economy-api") {
-
-    dependencies {
-        compile project(":apis:elysium-core-api")
-        compile project(":apis:elysium-player-api")
-        compile project(":apis:elysium-character-api")
-    }
-
-    uploadArchives {
-        repositories.mavenDeployer {
-
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
-                authentication(userName: repoUserName, password: repoPassword)
-            }
-
-            pom.version = project(":apis:elysium-economy-api").version
-            pom.artifactId = project(":apis:elysium-economy-api").name
-            pom.groupId = project(":apis:elysium-economy-api").group
+            pom.version = project(":elysium-core").version
+            pom.artifactId = project(":elysium-core").name
+            pom.groupId = project(":elysium-core").group
 
         }
     }
@@ -185,7 +92,7 @@ project(":bukkit:elysium-core-bukkit") {
 
     dependencies {
         compile group: "org.bukkit", name: "bukkit", version: "1.9-R0.1-SNAPSHOT"
-        compile project(":apis:elysium-core-api")
+        compile project(":elysium-core")
     }
 
     processResources {
@@ -199,7 +106,7 @@ project(":bukkit:elysium-core-bukkit") {
     shadowJar {
 
         dependencies {
-            include(project(":apis:elysium-core-api"))
+            include(project(":elysium-core"))
         }
 
         classifier = ""
@@ -230,7 +137,6 @@ project(":bukkit:elysium-players-bukkit") {
 
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
-        compile project(":apis:elysium-player-api")
     }
 
     processResources {
@@ -239,20 +145,8 @@ project(":bukkit:elysium-players-bukkit") {
         ]
     }
 
-    apply plugin: "com.github.johnrengelman.shadow"
-
-    shadowJar {
-
-        dependencies {
-            include(project(":apis:elysium-player-api"))
-        }
-
-        classifier = ""
-        from sourceSets.main.output
-    }
-
     artifacts {
-        archives shadowJar
+        archives jar
     }
 
     uploadArchives {
@@ -276,7 +170,6 @@ project(":bukkit:elysium-characters-bukkit") {
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
         compile project(":bukkit:elysium-players-bukkit")
-        compile project(":apis:elysium-character-api")
     }
 
     processResources {
@@ -285,20 +178,8 @@ project(":bukkit:elysium-characters-bukkit") {
         ]
     }
 
-    apply plugin: "com.github.johnrengelman.shadow"
-
-    shadowJar {
-
-        dependencies {
-            include(project(":apis:elysium-character-api"))
-        }
-
-        classifier = ""
-        from sourceSets.main.output
-    }
-
     artifacts {
-        archives shadowJar
+        archives jar
     }
 
     uploadArchives {
@@ -323,7 +204,6 @@ project(":bukkit:elysium-chat-bukkit") {
         compile project(":bukkit:elysium-core-bukkit")
         compile project(":bukkit:elysium-players-bukkit")
         compile project(":bukkit:elysium-characters-bukkit")
-        compile project(":apis:elysium-chat-api")
     }
 
     processResources {
@@ -332,20 +212,8 @@ project(":bukkit:elysium-chat-bukkit") {
         ]
     }
 
-    apply plugin: "com.github.johnrengelman.shadow"
-
-    shadowJar {
-
-        dependencies {
-            include(project(":apis:elysium-chat-api"))
-        }
-
-        classifier = ""
-        from sourceSets.main.output
-    }
-
     artifacts {
-        archives shadowJar
+        archives jar
     }
 
     uploadArchives {
@@ -369,7 +237,6 @@ project(":bukkit:elysium-economy-bukkit") {
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
         compile project(":bukkit:elysium-characters-bukkit")
-        compile project(":apis:elysium-economy-api")
     }
 
     processResources {
@@ -378,21 +245,8 @@ project(":bukkit:elysium-economy-bukkit") {
         ]
     }
 
-    apply plugin: "com.github.johnrengelman.shadow"
-
-    shadowJar {
-
-        dependencies {
-            include(project(":apis:elysium-economy-api"))
-        }
-
-        classifier = ""
-        from sourceSets.main.output
-
-    }
-
     artifacts {
-        archives shadowJar
+        archives jar
     }
 
     uploadArchives {

@@ -3,7 +3,7 @@ package com.seventh_root.elysium.players.bukkit.database.table
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
-import com.seventh_root.elysium.players.bukkit.BukkitPlayer
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.ehcache.Cache

@@ -1,10 +1,9 @@
 package com.seventh_root.elysium.characters.bukkit.character
 
-import com.seventh_root.elysium.api.character.CharacterProvider
-import com.seventh_root.elysium.api.player.ElysiumPlayer
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.core.database.use
-import com.seventh_root.elysium.players.bukkit.BukkitPlayer
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder

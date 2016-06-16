@@ -1,17 +1,17 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel
 
-import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent
-import com.seventh_root.elysium.api.chat.ChatMessageContext
-import com.seventh_root.elysium.api.chat.ChatMessagePostProcessContext
-import com.seventh_root.elysium.api.chat.ElysiumChatChannel
-import com.seventh_root.elysium.api.chat.exception.ChatChannelMessageFormattingFailureException
-import com.seventh_root.elysium.api.player.ElysiumPlayer
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipelineComponent
+import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
+import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
+import com.seventh_root.elysium.chat.bukkit.exception.ChatChannelMessageFormattingFailureException
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitFormatChatChannelPipelineComponent
 import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitGarbleChatChannelPipelineComponent
 import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitIRCChatChannelPipelineComponent
 import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitLogChatChannelPipelineComponent
-import com.seventh_root.elysium.players.bukkit.BukkitPlayer
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
 import java.awt.Color
 import java.awt.Color.WHITE
 import java.io.BufferedWriter
