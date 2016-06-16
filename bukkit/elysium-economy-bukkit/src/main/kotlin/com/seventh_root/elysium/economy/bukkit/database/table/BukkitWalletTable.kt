@@ -28,7 +28,7 @@ class BukkitWalletTable : Table<BukkitWallet> {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, BukkitWallet::class.java).build())
-        characterCache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, MutableMap::class.java).build())
+        characterCache = cacheManager.createCache("characterCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.java, MutableMap::class.java).build())
     }
 
     override fun create() {
