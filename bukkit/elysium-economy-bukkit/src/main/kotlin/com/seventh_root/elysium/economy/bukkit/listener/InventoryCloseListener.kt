@@ -4,7 +4,7 @@ import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvi
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
 import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
 import com.seventh_root.elysium.economy.bukkit.economy.BukkitEconomyProvider
-import com.seventh_root.elysium.players.bukkit.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener

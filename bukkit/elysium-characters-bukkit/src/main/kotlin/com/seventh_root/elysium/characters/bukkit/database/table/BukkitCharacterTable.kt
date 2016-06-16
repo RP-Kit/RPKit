@@ -7,7 +7,7 @@ import com.seventh_root.elysium.characters.bukkit.race.BukkitRaceProvider
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
-import com.seventh_root.elysium.players.bukkit.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack

@@ -1,7 +1,7 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel
 
-import com.seventh_root.elysium.api.chat.ChatChannelProvider
-import com.seventh_root.elysium.api.player.ElysiumPlayer
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitIRCChatChannelPipelineComponent
 import com.seventh_root.elysium.chat.bukkit.database.table.BukkitChatChannelTable

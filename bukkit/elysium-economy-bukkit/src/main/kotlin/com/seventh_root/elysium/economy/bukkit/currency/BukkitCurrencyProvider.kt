@@ -1,6 +1,6 @@
 package com.seventh_root.elysium.economy.bukkit.currency
 
-import com.seventh_root.elysium.api.economy.CurrencyProvider
+import com.seventh_root.elysium.economy.bukkit.currency.CurrencyProvider
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
 import com.seventh_root.elysium.economy.bukkit.database.table.BukkitCurrencyTable
 

@@ -1,6 +1,6 @@
 package com.seventh_root.elysium.characters.bukkit.race
 
-import com.seventh_root.elysium.api.character.Race
+import com.seventh_root.elysium.characters.bukkit.race.Race
 
 class BukkitRace : Race {
 

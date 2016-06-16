@@ -1,6 +1,6 @@
 package com.seventh_root.elysium.shops.bukkit.shopcount
 
-import com.seventh_root.elysium.api.character.ElysiumCharacter
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.core.service.ServiceProvider
 import com.seventh_root.elysium.shops.bukkit.ElysiumShopsBukkit
 import com.seventh_root.elysium.shops.bukkit.database.table.BukkitShopCountTable

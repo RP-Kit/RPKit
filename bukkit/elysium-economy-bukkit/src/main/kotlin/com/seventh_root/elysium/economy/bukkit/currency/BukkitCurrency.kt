@@ -1,6 +1,6 @@
 package com.seventh_root.elysium.economy.bukkit.currency
 
-import com.seventh_root.elysium.api.economy.ElysiumCurrency
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 import org.bukkit.Material
 
 

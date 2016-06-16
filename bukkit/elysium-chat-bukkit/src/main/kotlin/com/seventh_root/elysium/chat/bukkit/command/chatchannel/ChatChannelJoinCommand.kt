@@ -3,7 +3,7 @@ package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
 import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
-import com.seventh_root.elysium.players.bukkit.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor

@@ -1,10 +1,10 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline
 
-import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent
-import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent.Type.FORMATTER
-import com.seventh_root.elysium.api.chat.ChatMessageContext
-import com.seventh_root.elysium.api.chat.ChatMessagePostProcessContext
-import com.seventh_root.elysium.api.chat.exception.ChatChannelMessageFormattingFailureException
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipelineComponent
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipelineComponent.Type.FORMATTER
+import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
+import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
+import com.seventh_root.elysium.chat.bukkit.exception.ChatChannelMessageFormattingFailureException
 import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils

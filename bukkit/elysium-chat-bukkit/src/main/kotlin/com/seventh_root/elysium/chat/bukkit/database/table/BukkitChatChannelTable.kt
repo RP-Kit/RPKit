@@ -1,12 +1,12 @@
 package com.seventh_root.elysium.chat.bukkit.database.table
 
-import com.seventh_root.elysium.api.player.ElysiumPlayer
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannel
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
-import com.seventh_root.elysium.players.bukkit.BukkitPlayer
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
 import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder

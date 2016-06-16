@@ -2,7 +2,7 @@ package com.seventh_root.elysium.chat.bukkit.listener
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
-import com.seventh_root.elysium.players.bukkit.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent

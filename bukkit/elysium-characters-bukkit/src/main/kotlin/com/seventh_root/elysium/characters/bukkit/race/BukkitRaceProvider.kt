@@ -1,6 +1,5 @@
 package com.seventh_root.elysium.characters.bukkit.race
 
-import com.seventh_root.elysium.api.character.RaceProvider
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.database.table.BukkitRaceTable
 import com.seventh_root.elysium.core.database.use

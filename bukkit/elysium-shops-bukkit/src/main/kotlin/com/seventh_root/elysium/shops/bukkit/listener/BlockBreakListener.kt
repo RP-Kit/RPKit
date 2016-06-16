@@ -1,7 +1,7 @@
 package com.seventh_root.elysium.shops.bukkit.listener
 
 import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
-import com.seventh_root.elysium.players.bukkit.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
 import com.seventh_root.elysium.shops.bukkit.ElysiumShopsBukkit
 import com.seventh_root.elysium.shops.bukkit.shopcount.BukkitShopCountProvider
 import org.bukkit.ChatColor.GREEN

@@ -1,8 +1,8 @@
 package com.seventh_root.elysium.chat.bukkit.context
 
-import com.seventh_root.elysium.api.chat.ChatMessagePostProcessContext
-import com.seventh_root.elysium.api.chat.ElysiumChatChannel
-import com.seventh_root.elysium.api.player.ElysiumPlayer
+import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
 
 class BukkitChatMessagePostProcessContext(
