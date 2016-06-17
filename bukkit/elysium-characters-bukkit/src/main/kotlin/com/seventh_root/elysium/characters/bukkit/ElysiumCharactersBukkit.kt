@@ -15,6 +15,7 @@ import com.seventh_root.elysium.characters.bukkit.gender.BukkitGenderProvider
 import com.seventh_root.elysium.characters.bukkit.gender.GenderProvider
 import com.seventh_root.elysium.characters.bukkit.listener.PlayerDeathListener
 import com.seventh_root.elysium.characters.bukkit.listener.PlayerInteractEntityListener
+import com.seventh_root.elysium.characters.bukkit.listener.PlayerJoinListener
 import com.seventh_root.elysium.characters.bukkit.listener.PlayerMoveListener
 import com.seventh_root.elysium.characters.bukkit.race.BukkitRace
 import com.seventh_root.elysium.characters.bukkit.race.BukkitRaceProvider
@@ -68,7 +69,7 @@ class ElysiumCharactersBukkit : ElysiumBukkitPlugin() {
     }
 
     override fun registerListeners() {
-        registerListeners(PlayerInteractEntityListener(this), PlayerMoveListener(this))
+        registerListeners(PlayerJoinListener(this), PlayerInteractEntityListener(this), PlayerMoveListener(this))
         if (config.getBoolean("characters.kill-character-on-death")) {
             registerListeners(PlayerDeathListener(this))
         }
