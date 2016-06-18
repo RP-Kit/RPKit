@@ -1,18 +1,19 @@
 package com.seventh_root.elysium.economy.bukkit.database.table
 
-import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
-import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
 import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 import com.seventh_root.elysium.economy.bukkit.wallet.BukkitWallet
 import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.util.*
 
@@ -27,8 +28,12 @@ class BukkitWalletTable : Table<BukkitWallet> {
     constructor(database: Database, plugin: ElysiumEconomyBukkit): super(database, BukkitWallet::class.java) {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitWallet::class.java).build())
-        characterCache = cacheManager.createCache("characterCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableMap::class.java).build())
+        cache = cacheManager.createCache("cache",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitWallet::class.java,
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+        characterCache = cacheManager.createCache("characterCache",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableMap::class.java,
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
     }
 
     override fun create() {

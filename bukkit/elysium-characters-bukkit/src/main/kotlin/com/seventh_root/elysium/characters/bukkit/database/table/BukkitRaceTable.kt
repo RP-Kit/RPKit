@@ -8,6 +8,7 @@ import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
@@ -19,8 +20,12 @@ class BukkitRaceTable: Table<BukkitRace> {
 
     constructor(database: Database): super(database, BukkitRace::class.java) {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitRace::class.java).build())
-        nameCache = cacheManager.createCache("nameCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType).build())
+        cache = cacheManager.createCache("cache",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitRace::class.java,
+                        ResourcePoolsBuilder.heap(20L)).build())
+        nameCache = cacheManager.createCache("nameCache",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(20L)).build())
     }
 
     override fun create() {

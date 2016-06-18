@@ -21,7 +21,7 @@ class ElysiumPlayersBukkit : ElysiumBukkitPlugin() {
 
     @Throws(SQLException::class)
     override fun createTables(database: Database) {
-        database.addTable(BukkitPlayerTable(database))
+        database.addTable(BukkitPlayerTable(this, database))
     }
 
 }

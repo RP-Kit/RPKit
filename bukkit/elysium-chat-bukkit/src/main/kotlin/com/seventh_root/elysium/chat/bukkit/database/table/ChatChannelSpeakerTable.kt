@@ -13,6 +13,7 @@ import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
 
@@ -28,11 +29,14 @@ class ChatChannelSpeakerTable: Table<ChatChannelSpeaker> {
         this.plugin = plugin
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ChatChannelSpeaker::class.java).build())
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ChatChannelSpeaker::class.java,
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
         chatChannelCache = cacheManager.createCache("chatChannelCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.javaObjectType).build())
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(20L)).build())
         playerCache = cacheManager.createCache("playerCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType).build())
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
     }
 
     override fun create() {
