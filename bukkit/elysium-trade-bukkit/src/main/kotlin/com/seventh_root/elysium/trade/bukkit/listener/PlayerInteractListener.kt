@@ -26,7 +26,8 @@ class PlayerInteractListener(private val plugin: ElysiumTradeBukkit): Listener {
                 if (event.clickedBlock.state is Sign) {
                     val sign = event.clickedBlock.state as Sign
                     if (sign.getLine(0).equals(GREEN.toString() + "[trader]")) {
-                        val material = Material.matchMaterial(sign.getLine(1))
+                        val material = Material.matchMaterial(sign.getLine(1))?:Material.matchMaterial(sign.getLine(1).replace(Regex("\\d+\\s+"), ""))
+                        val amount = if (sign.getLine(1).matches(Regex("\\d+\\s+.*"))) sign.getLine(1).split(Regex("\\s+"))[0].toInt() else 1
                         var buyPrice = sign.getLine(2).split(" | ")[0].toInt()
                         var sellPrice = sign.getLine(2).split(" | ")[1].toInt()
                         var actualPrice = arrayOf(buyPrice, sellPrice).average()
@@ -42,10 +43,10 @@ class PlayerInteractListener(private val plugin: ElysiumTradeBukkit): Listener {
                                     if (event.player.hasPermission("elysium.trade.sign.trader.buy")) {
                                         if (economyProvider.getBalance(character, currency) >= buyPrice) {
                                             economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - buyPrice)
-                                            event.player.inventory.addItem(ItemStack(material))
+                                            event.player.inventory.addItem(ItemStack(material, amount))
                                             event.player.sendMessage(
                                                     ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-buy"))
-                                                            .replace("\$quantity", "1")
+                                                            .replace("\$quantity", amount.toString())
                                                             .replace("\$material", material.toString().toLowerCase().replace('_', ' '))
                                                             .replace("\$price", buyPrice.toString() + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
                                             )
@@ -72,13 +73,13 @@ class PlayerInteractListener(private val plugin: ElysiumTradeBukkit): Listener {
                                 val character = characterProvider.getActiveCharacter(player)
                                 if (character != null) {
                                     if (event.player.hasPermission("elysium.trade.sign.trader.sell")) {
-                                        if (event.player.inventory.containsAtLeast(ItemStack(material), 1)) {
+                                        if (event.player.inventory.containsAtLeast(ItemStack(material), amount)) {
                                             if (economyProvider.getBalance(character, currency) + sellPrice <= 1728) {
                                                 economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + sellPrice)
-                                                event.player.inventory.removeItem(ItemStack(material))
+                                                event.player.inventory.removeItem(ItemStack(material, amount))
                                                 event.player.sendMessage(
                                                         ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-sell"))
-                                                                .replace("\$quantity", "1")
+                                                                .replace("\$quantity", amount.toString())
                                                                 .replace("\$material", material.toString().toLowerCase().replace('_', ' '))
                                                                 .replace("\$price", sellPrice.toString() + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
                                                 )
