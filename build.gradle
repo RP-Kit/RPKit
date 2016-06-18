@@ -45,7 +45,7 @@ project(":elysium-core") {
     def commonsLangVersion = "2.6"
     def guavaVersion = "17.0"
     def gsonVersion = "2.2.4"
-    def ehcacheVersion = "3.0.0.rc2"
+    def ehcacheVersion = "3.0.2"
     def kotlinVersion = "1.0.1-2"
 
     dependencies {

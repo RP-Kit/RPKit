@@ -3,6 +3,7 @@ package com.seventh_root.elysium.players.bukkit.database.table
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
+import com.seventh_root.elysium.players.bukkit.ElysiumPlayersBukkit
 import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
@@ -10,6 +11,7 @@ import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.SQLException
@@ -22,10 +24,14 @@ class BukkitPlayerTable: Table<BukkitPlayer> {
     private val cache: Cache<Int, BukkitPlayer>
     private val playerCache: Cache<String, Int>
 
-    constructor(database: Database): super(database, BukkitPlayer::class.java) {
+    constructor(plugin: ElysiumPlayersBukkit, database: Database): super(database, BukkitPlayer::class.java) {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitPlayer::class.java).build())
-        playerCache = cacheManager.createCache("playerCache", CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType).build())
+        cache = cacheManager.createCache("cache",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitPlayer::class.java,
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+        playerCache = cacheManager.createCache("playerCache",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
     }
 
     override fun create() {

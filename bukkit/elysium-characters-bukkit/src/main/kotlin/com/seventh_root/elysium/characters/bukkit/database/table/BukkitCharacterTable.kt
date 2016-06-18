@@ -17,6 +17,7 @@ import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -33,7 +34,9 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
     constructor(database: Database, plugin: ElysiumCharactersBukkit): super(database, BukkitCharacter::class.java) {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitCharacter::class.java).build())
+        cache = cacheManager.createCache("cache",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitCharacter::class.java,
+                        ResourcePoolsBuilder.heap((plugin.server.maxPlayers * 2).toLong())).build())
     }
 
     override fun create() {

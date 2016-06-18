@@ -11,6 +11,7 @@ import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
 
@@ -25,9 +26,11 @@ class BukkitShopCountTable : Table<BukkitShopCount> {
         this.plugin = plugin
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitShopCount::class.java).build())
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitShopCount::class.java,
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
         characterCache = cacheManager.createCache("characterCache", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType).build())
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
     }
 
     override fun create() {

@@ -8,6 +8,7 @@ import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.SQLException
 import java.util.*
 
@@ -20,7 +21,9 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
     constructor(plugin: ElysiumCharactersBukkit) {
         this.plugin = plugin
         this.activeCharacterCacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        activeCharacterCache = activeCharacterCacheManager.createCache("cache", CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType).build())
+        activeCharacterCache = activeCharacterCacheManager.createCache("cache",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
     }
 
     override fun getCharacter(id: Int): BukkitCharacter? {
