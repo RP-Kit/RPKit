@@ -1,10 +1,12 @@
 package com.seventh_root.elysium.chat.bukkit
 
-import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelProvider
 import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannel
 import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelProvider
 import com.seventh_root.elysium.chat.bukkit.command.chatchannel.ChatChannelCommand
 import com.seventh_root.elysium.chat.bukkit.database.table.BukkitChatChannelTable
+import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelListenerTable
+import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelSpeakerTable
 import com.seventh_root.elysium.chat.bukkit.listener.AsyncPlayerChatListener
 import com.seventh_root.elysium.chat.bukkit.listener.PlayerJoinListener
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
@@ -30,11 +32,14 @@ class ElysiumChatBukkit : ElysiumBukkitPlugin() {
     override fun registerListeners() {
         registerListeners(
                 AsyncPlayerChatListener(this),
-                PlayerJoinListener(this))
+                PlayerJoinListener(this)
+        )
     }
 
     @Throws(SQLException::class)
     override fun createTables(database: Database) {
         database.addTable(BukkitChatChannelTable(this, database))
+        database.addTable(ChatChannelListenerTable(this, database))
+        database.addTable(ChatChannelSpeakerTable(this, database))
     }
 }

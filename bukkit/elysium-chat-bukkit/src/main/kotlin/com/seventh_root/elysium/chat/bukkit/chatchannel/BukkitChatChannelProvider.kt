@@ -1,10 +1,10 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel
 
-import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelProvider
-import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitIRCChatChannelPipelineComponent
 import com.seventh_root.elysium.chat.bukkit.database.table.BukkitChatChannelTable
+import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelSpeakerTable
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
 class BukkitChatChannelProvider(private val plugin: ElysiumChatBukkit) : ChatChannelProvider<BukkitChatChannel> {
 
@@ -34,7 +34,7 @@ class BukkitChatChannelProvider(private val plugin: ElysiumChatBukkit) : ChatCha
     }
 
     override fun getPlayerChannel(player: ElysiumPlayer): BukkitChatChannel? {
-        return (plugin.core.database.getTable(BukkitChatChannel::class.java) as BukkitChatChannelTable).get(player)
+        return (plugin.core.database.getTable(ChatChannelSpeaker::class.java) as? ChatChannelSpeakerTable)?.get(player)?.chatChannel as? BukkitChatChannel
     }
 
     override fun setPlayerChannel(player: ElysiumPlayer, channel: BukkitChatChannel) {

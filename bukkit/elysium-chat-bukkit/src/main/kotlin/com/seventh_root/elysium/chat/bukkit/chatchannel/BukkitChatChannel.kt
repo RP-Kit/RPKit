@@ -1,17 +1,14 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel
 
-import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipelineComponent
+import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.*
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
-import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
+import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelListenerTable
+import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelSpeakerTable
 import com.seventh_root.elysium.chat.bukkit.exception.ChatChannelMessageFormattingFailureException
-import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
-import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitFormatChatChannelPipelineComponent
-import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitGarbleChatChannelPipelineComponent
-import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitIRCChatChannelPipelineComponent
-import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.BukkitLogChatChannelPipelineComponent
 import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import java.awt.Color
 import java.awt.Color.WHITE
 import java.io.BufferedWriter
@@ -68,8 +65,12 @@ class BukkitChatChannel: ElysiumChatChannel {
                 }
             }
         }
-    override val speakers: MutableList<ElysiumPlayer>
-    override val listeners: MutableList<ElysiumPlayer>
+    private val speakers0: MutableList<ElysiumPlayer>
+    override val speakers: List<ElysiumPlayer>
+        get() = Collections.unmodifiableList(speakers0)
+    private val listeners0: MutableList<ElysiumPlayer>
+    override val listeners: List<ElysiumPlayer>
+        get() = Collections.unmodifiableList(listeners0)
     override val pipeline: MutableList<ChatChannelPipelineComponent>
     override var matchPattern: String
     override var isIRCEnabled: Boolean
@@ -133,8 +134,8 @@ class BukkitChatChannel: ElysiumChatChannel {
         this.formatString = formatString
         this.radius = radius
         this.clearRadius = clearRadius
-        this.speakers = speakers
-        this.listeners = listeners
+        this.speakers0 = speakers
+        this.listeners0 = listeners
         this.matchPattern = matchPattern
         this.isIRCEnabled = isIRCEnabled
         this.ircChannel = ircChannel
@@ -151,24 +152,68 @@ class BukkitChatChannel: ElysiumChatChannel {
     }
 
     override fun addSpeaker(speaker: ElysiumPlayer) {
-        if (!speakers.contains(speaker))
-            speakers.add(speaker)
+        if (!speakers0.contains(speaker)) {
+            speakers0.add(speaker)
+            plugin.core.database.getTable(ChatChannelSpeaker::class.java)?.insert(ChatChannelSpeaker(0, this, speaker))
+        }
+    }
+
+    fun addSpeaker0(speaker: ElysiumPlayer) {
+        if (!speakers0.contains(speaker)) {
+            speakers0.add(speaker)
+        }
     }
 
     override fun removeSpeaker(speaker: ElysiumPlayer) {
-        while (speakers.contains(speaker)) {
-            speakers.remove(speaker)
+        while (speakers0.contains(speaker)) {
+            speakers0.remove(speaker)
+            val chatChannelSpeakerTable = plugin.core.database.getTable(ChatChannelSpeaker::class.java) as? ChatChannelSpeakerTable
+            if (chatChannelSpeakerTable != null) {
+                val chatChannelSpeaker = chatChannelSpeakerTable.get(speaker)
+                if (chatChannelSpeaker != null) {
+                    if (chatChannelSpeaker.chatChannel == this) {
+                        chatChannelSpeakerTable.delete(chatChannelSpeaker)
+                    }
+                }
+            }
+        }
+    }
+
+    fun removeSpeaker0(speaker: ElysiumPlayer) {
+        while (speakers0.contains(speaker)) {
+            speakers0.remove(speaker)
         }
     }
 
     override fun addListener(listener: ElysiumPlayer) {
-        if (!listeners.contains(listener))
-            listeners.add(listener)
+        if (!listeners0.contains(listener)) {
+            listeners0.add(listener)
+            plugin.core.database.getTable(ChatChannelListener::class.java)?.insert(ChatChannelListener(0, this, listener))
+        }
+    }
+
+    fun addListener0(listener: ElysiumPlayer) {
+        if (!listeners0.contains(listener)) {
+            listeners0.add(listener)
+        }
     }
 
     override fun removeListener(listener: ElysiumPlayer) {
-        while (listeners.contains(listener)) {
-            listeners.remove(listener)
+        while (listeners0.contains(listener)) {
+            listeners0.remove(listener)
+            val chatChannelListenerTable = plugin.core.database.getTable(ChatChannelListener::class.java) as? ChatChannelListenerTable
+            if (chatChannelListenerTable != null) {
+                val chatChannelListeners = chatChannelListenerTable.get(listener)
+                chatChannelListeners
+                    .filter { chatChannelListener -> chatChannelListener.chatChannel == this }
+                    .forEach { chatChannelListener -> chatChannelListenerTable.delete(chatChannelListener) }
+            }
+        }
+    }
+
+    fun removeListener0(listener: ElysiumPlayer) {
+        while (listeners0.contains(listener)) {
+            listeners0.remove(listener)
         }
     }
 
