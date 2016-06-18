@@ -16,7 +16,8 @@ class SignChangeListener(private val plugin: ElysiumTradeBukkit): Listener {
     fun onSignChange(event: SignChangeEvent) {
         if (event.getLine(0).equals("[trader]")) {
             if (event.player.hasPermission("elysium.trade.sign.trader.create")) {
-                if (Material.matchMaterial(event.getLine(1)) == null) {
+                if ((Material.matchMaterial(event.getLine(1)) == null && !event.getLine(1).matches(Regex("\\d+\\s+.*")))
+                        || Material.matchMaterial(event.getLine(1).replace(Regex("\\d+\\s+"), "")) == null) {
                     event.block.breakNaturally()
                     event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-sign-invalid-material")))
                     return
