@@ -2,6 +2,7 @@ package com.seventh_root.elysium.characters.bukkit.listener
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
+import com.seventh_root.elysium.characters.bukkit.character.field.BukkitCharacterCardFieldProvider
 import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
@@ -25,25 +26,10 @@ class PlayerInteractEntityListener(private val plugin: ElysiumCharactersBukkit) 
                         val character = characterProvider.getActiveCharacter(player)
                         if (character != null) {
                             for (line in plugin.config.getStringList("messages.character-card")) {
-                                val gender = character.gender
-                                val race = character.race
-                                event.player.sendMessage(
-                                        ChatColor.translateAlternateColorCodes('&', line)
-                                                .replace("\$name", character.name)
-                                                .replace("\$player", player.name)
-                                                .replace("\$gender", if (gender != null) gender.name else "unset")
-                                                .replace("\$age", character.age.toString())
-                                                .replace("\$race", if (race != null) race.name else "unset")
-                                                .replace("\$description", character.description)
-                                                .replace("\$dead", if (character.isDead) "yes" else "no")
-                                                .replace("\$health", character.health.toString())
-                                                .replace("\$max-health", character.maxHealth.toString())
-                                                .replace("\$mana", character.mana.toString())
-                                                .replace("\$max-mana", character.maxMana.toString())
-                                                .replace("\$food", character.foodLevel.toString())
-                                                .replace("\$max-food", 20.toString())
-                                                .replace("\$thirst", character.thirstLevel.toString())
-                                                .replace("\$max-thirst", 20.toString()))
+                                var filteredLine = ChatColor.translateAlternateColorCodes('&', line)
+                                val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterCardFieldProvider::class.java)
+                                characterCardFieldProvider.characterCardFields.forEach { field -> filteredLine = filteredLine.replace("\$${field.name}", field.get(character)) }
+                                event.player.sendMessage(filteredLine)
                             }
                         } else {
                             event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character-other")))
