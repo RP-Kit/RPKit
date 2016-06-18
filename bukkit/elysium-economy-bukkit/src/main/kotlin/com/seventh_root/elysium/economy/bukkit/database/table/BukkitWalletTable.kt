@@ -1,13 +1,13 @@
 package com.seventh_root.elysium.economy.bukkit.database.table
 
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
-import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
 import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
 import com.seventh_root.elysium.economy.bukkit.wallet.BukkitWallet
 import org.ehcache.Cache
 import org.ehcache.CacheManager
@@ -18,7 +18,7 @@ import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.util.*
 
 
-class BukkitWalletTable : Table<BukkitWallet> {
+class BukkitWalletTable: Table<BukkitWallet> {
 
     private val plugin: ElysiumEconomyBukkit
     private val cacheManager: CacheManager
@@ -39,13 +39,13 @@ class BukkitWalletTable : Table<BukkitWallet> {
     override fun create() {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS bukkit_wallet (" +
+                    "CREATE TABLE IF NOT EXISTS elysium_wallet (" +
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
                             "character_id INTEGER," +
                             "currency_id INTEGER," +
                             "balance INTEGER," +
-                            "FOREIGN KEY(character_id) REFERENCES bukkit_character(id) ON DELETE CASCADE ON UPDATE CASCADE," +
-                            "FOREIGN KEY(currency_id) REFERENCES bukkit_currency(id) ON DELETE CASCADE ON UPDATE CASCADE" +
+                            "FOREIGN KEY(character_id) REFERENCES elysium_character(id) ON DELETE CASCADE ON UPDATE CASCADE," +
+                            "FOREIGN KEY(currency_id) REFERENCES elysium_currency(id) ON DELETE CASCADE ON UPDATE CASCADE" +
                             ")"
             ).use { statement ->
                 statement.executeUpdate()
@@ -60,7 +60,7 @@ class BukkitWalletTable : Table<BukkitWallet> {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "INSERT INTO bukkit_wallet(character_id, currency_id, balance) VALUES(?, ?, ?)",
+                    "INSERT INTO elysium_wallet(character_id, currency_id, balance) VALUES(?, ?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
                 statement.setInt(1, `object`.character.id)
@@ -72,7 +72,7 @@ class BukkitWalletTable : Table<BukkitWallet> {
                     id = generatedKeys.getInt(1)
                     `object`.id = id
                     cache.put(id, `object`)
-                    val currencyWallets = characterCache.get(`object`.character.id)
+                    val currencyWallets = characterCache.get(`object`.character.id)?:mutableMapOf<Int, Int>()
                     (currencyWallets as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
                     characterCache.put(`object`.character.id, currencyWallets)
                 }
@@ -84,7 +84,7 @@ class BukkitWalletTable : Table<BukkitWallet> {
     override fun update(`object`: BukkitWallet) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "UPDATE bukkit_wallet SET character_id = ?, currency_id = ?, balance = ? WHERE id = ?"
+                    "UPDATE elysium_wallet SET character_id = ?, currency_id = ?, balance = ? WHERE id = ?"
             ).use { statement ->
                 statement.setInt(1, `object`.character.id)
                 statement.setInt(2, `object`.currency.id)
@@ -92,7 +92,7 @@ class BukkitWalletTable : Table<BukkitWallet> {
                 statement.setInt(4, `object`.id)
                 statement.executeUpdate()
                 cache.put(`object`.id, `object`)
-                val currencyWallets = characterCache.get(`object`.character.id)
+                val currencyWallets = characterCache.get(`object`.character.id)?:mutableMapOf<Int, Int>()
                 (currencyWallets as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
                 characterCache.put(`object`.character.id, currencyWallets)
             }
@@ -106,15 +106,15 @@ class BukkitWalletTable : Table<BukkitWallet> {
             var wallet: BukkitWallet? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, character_id, currency_id, balance FROM bukkit_wallet WHERE id = ? LIMIT 1"
+                        "SELECT id, character_id, currency_id, balance FROM elysium_wallet WHERE id = ? LIMIT 1"
                 ).use { statement ->
                     statement.setInt(1, id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
                         wallet = BukkitWallet(
                                 id = resultSet.getInt("id"),
-                                character = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java).getCharacter(resultSet.getInt("character_id"))!!,
-                                currency = plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java).getCurrency(resultSet.getInt("currency_id"))!!,
+                                character = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java).getCharacter(resultSet.getInt("character_id"))!!,
+                                currency = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(resultSet.getInt("currency_id"))!!,
                                 balance = resultSet.getInt("balance")
                         )
                         cache.put(id, wallet)
@@ -132,7 +132,7 @@ class BukkitWalletTable : Table<BukkitWallet> {
             var wallet: BukkitWallet? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, character_id, currency_id, balance FROM bukkit_wallet WHERE character_id = ? AND currency_id = ?"
+                        "SELECT id, character_id, currency_id, balance FROM elysium_wallet WHERE character_id = ? AND currency_id = ?"
                 ).use { statement ->
                     statement.setInt(1, character.id)
                     statement.setInt(2, currency.id)
@@ -144,8 +144,8 @@ class BukkitWalletTable : Table<BukkitWallet> {
                         val balance = resultSet.getInt("balance")
                         wallet = BukkitWallet(
                                 id = id,
-                                character = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java).getCharacter(characterId)!!,
-                                currency = plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java).getCurrency(currencyId)!!,
+                                character = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java).getCharacter(characterId)!!,
+                                currency = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(currencyId)!!,
                                 balance = balance
                         )
                         val finalWallet = wallet!!
@@ -179,7 +179,7 @@ class BukkitWalletTable : Table<BukkitWallet> {
         val top = ArrayList<BukkitWallet>()
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "SELECT id FROM bukkit_wallet WHERE currency_id = ? ORDER BY balance LIMIT ?"
+                    "SELECT id FROM elysium_wallet WHERE currency_id = ? ORDER BY balance LIMIT ?"
             ).use { statement ->
                 statement.setInt(1, currency.id)
                 statement.setInt(2, amount)
@@ -198,7 +198,7 @@ class BukkitWalletTable : Table<BukkitWallet> {
     override fun delete(`object`: BukkitWallet) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "DELETE FROM bukkit_wallet WHERE id = ?"
+                    "DELETE FROM elysium_wallet WHERE id = ?"
             ).use { statement ->
                 statement.setInt(1, `object`.id)
                 statement.executeUpdate()

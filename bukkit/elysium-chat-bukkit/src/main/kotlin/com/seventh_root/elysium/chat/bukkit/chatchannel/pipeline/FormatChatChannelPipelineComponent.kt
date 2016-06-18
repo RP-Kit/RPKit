@@ -1,22 +1,21 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline
 
-import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipelineComponent
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
+import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipelineComponent.Type.FORMATTER
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
 import com.seventh_root.elysium.chat.bukkit.exception.ChatChannelMessageFormattingFailureException
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
-import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
 import org.bukkit.ChatColor
 
-class BukkitFormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, var formatString: String?) : ChatChannelPipelineComponent() {
+class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, var formatString: String?): ChatChannelPipelineComponent() {
 
     override val type: ChatChannelPipelineComponent.Type
         get() = FORMATTER
 
     override fun process(message: String, context: ChatMessageContext): String? {
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
         val sender = context.sender
         val receiver = context.receiver
         val senderCharacter = characterProvider.getActiveCharacter(sender)
@@ -57,7 +56,7 @@ class BukkitFormatChatChannelPipelineComponent(private val plugin: ElysiumChatBu
     }
 
     override fun postProcess(message: String, context: ChatMessagePostProcessContext): String? {
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
         val sender = context.sender
         val senderCharacter = characterProvider.getActiveCharacter(sender)
         val chatChannel = context.chatChannel

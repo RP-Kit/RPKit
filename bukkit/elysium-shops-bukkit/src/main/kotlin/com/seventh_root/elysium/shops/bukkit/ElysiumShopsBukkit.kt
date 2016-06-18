@@ -6,7 +6,7 @@ import com.seventh_root.elysium.shops.bukkit.listener.BlockBreakListener
 import com.seventh_root.elysium.shops.bukkit.listener.InventoryClickListener
 import com.seventh_root.elysium.shops.bukkit.listener.PlayerInteractListener
 import com.seventh_root.elysium.shops.bukkit.listener.SignChangeListener
-import com.seventh_root.elysium.shops.bukkit.shopcount.BukkitShopCountProvider
+import com.seventh_root.elysium.shops.bukkit.shopcount.ElysiumShopCountProvider
 
 
 class ElysiumShopsBukkit: ElysiumBukkitPlugin() {
@@ -15,7 +15,7 @@ class ElysiumShopsBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {
         serviceProviders = arrayOf(
-                BukkitShopCountProvider(this)
+                ElysiumShopCountProvider(this)
         )
     }
 

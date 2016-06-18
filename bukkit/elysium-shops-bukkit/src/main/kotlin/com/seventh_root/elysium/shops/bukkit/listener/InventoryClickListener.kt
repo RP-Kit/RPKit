@@ -1,9 +1,9 @@
 package com.seventh_root.elysium.shops.bukkit.listener
 
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
-import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
-import com.seventh_root.elysium.economy.bukkit.economy.BukkitEconomyProvider
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
+import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import com.seventh_root.elysium.shops.bukkit.ElysiumShopsBukkit
 import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
@@ -26,10 +26,10 @@ class InventoryClickListener(val plugin: ElysiumShopsBukkit): Listener {
             val sign = chest.block.getRelative(UP).state
             if (sign is Sign) {
                 if (sign.getLine(0) == GREEN.toString() + "[shop]") {
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                    val economyProvider = plugin.core.serviceManager.getServiceProvider(BukkitEconomyProvider::class.java)
-                    val currencyProvider = plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java)
+                    val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                    val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                    val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
+                    val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
                     val sellerCharacter = characterProvider.getCharacter(sign.getLine(3).toInt()) ?: return
                     val buyerBukkitPlayer = event.whoClicked as? Player ?: return
                     val buyerPlayer = playerProvider.getPlayer(buyerBukkitPlayer)

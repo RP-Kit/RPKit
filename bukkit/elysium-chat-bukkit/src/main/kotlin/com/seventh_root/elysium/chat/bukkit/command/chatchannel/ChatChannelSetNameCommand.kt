@@ -1,7 +1,7 @@
 package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class ChatChannelSetNameCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
+class ChatChannelSetNameCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -36,10 +36,10 @@ class ChatChannelSetNameCommand(private val plugin: ElysiumChatBukkit) : Command
         return true
     }
 
-    private inner class ChatChannelPrompt : ValidatingPrompt() {
+    private inner class ChatChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(input) != null
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
@@ -57,14 +57,14 @@ class ChatChannelSetNameCommand(private val plugin: ElysiumChatBukkit) : Command
 
     }
 
-    private inner class ChatChannelNamePrompt : ValidatingPrompt() {
+    private inner class ChatChannelNamePrompt: ValidatingPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
             return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-create-prompt"))
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
             return chatChannelProvider.getChatChannel(input) == null
         }
 
@@ -79,14 +79,14 @@ class ChatChannelSetNameCommand(private val plugin: ElysiumChatBukkit) : Command
 
     }
 
-    private inner class ChatChannelNameSetPrompt : MessagePrompt() {
+    private inner class ChatChannelNameSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
             val chatChannel = chatChannelProvider.getChatChannel(context.getSessionData("channel") as String)!!
             chatChannel.name = context.getSessionData("name") as String
             chatChannelProvider.updateChatChannel(chatChannel)

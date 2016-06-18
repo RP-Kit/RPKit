@@ -1,12 +1,10 @@
 package com.seventh_root.elysium.chat.bukkit
 
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannel
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
-import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import com.seventh_root.elysium.chat.bukkit.command.chatchannel.ChatChannelCommand
-import com.seventh_root.elysium.chat.bukkit.database.table.BukkitChatChannelTable
 import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelListenerTable
 import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelSpeakerTable
+import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelTable
 import com.seventh_root.elysium.chat.bukkit.listener.AsyncPlayerChatListener
 import com.seventh_root.elysium.chat.bukkit.listener.PlayerJoinListener
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
@@ -14,14 +12,14 @@ import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceProvider
 import java.sql.SQLException
 
-class ElysiumChatBukkit : ElysiumBukkitPlugin() {
+class ElysiumChatBukkit: ElysiumBukkitPlugin() {
 
-    private lateinit var chatChannelProvider: ChatChannelProvider<BukkitChatChannel>
+    private lateinit var chatChannelProvider: ElysiumChatChannelProvider
     override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()
-        chatChannelProvider = BukkitChatChannelProvider(this)
+        chatChannelProvider = ElysiumChatChannelProvider(this)
         serviceProviders = arrayOf<ServiceProvider>(chatChannelProvider)
     }
 
@@ -38,7 +36,7 @@ class ElysiumChatBukkit : ElysiumBukkitPlugin() {
 
     @Throws(SQLException::class)
     override fun createTables(database: Database) {
-        database.addTable(BukkitChatChannelTable(this, database))
+        database.addTable(ElysiumChatChannelTable(this, database))
         database.addTable(ChatChannelListenerTable(this, database))
         database.addTable(ChatChannelSpeakerTable(this, database))
     }

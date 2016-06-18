@@ -1,12 +1,12 @@
 package com.seventh_root.elysium.economy.bukkit.command.money
 
 import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
-import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
-import com.seventh_root.elysium.economy.bukkit.economy.BukkitEconomyProvider
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
+import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -34,10 +34,10 @@ class MoneyPayCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.economy.command.money.pay")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                val economyProvider = plugin.core.serviceManager.getServiceProvider(BukkitEconomyProvider::class.java)
-                val currencyProvider = plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
+                val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
                 val fromBukkitPlayer = sender
                 val fromPlayer = playerProvider.getPlayer(fromBukkitPlayer)
                 val fromCharacter = characterProvider.getActiveCharacter(fromPlayer)
@@ -90,7 +90,7 @@ class MoneyPayCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
                                                             if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
                                                                 economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
                                                                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-valid")))
-                                                                (toCharacter.player as? BukkitPlayer)?.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-paid").replace("\$amount", amount.toString())))
+                                                                (toCharacter.player as? ElysiumPlayer)?.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-paid").replace("\$amount", amount.toString())))
                                                             } else {
                                                                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-limit")))
                                                             }
@@ -137,7 +137,7 @@ class MoneyPayCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
     private inner class PlayerPrompt: PlayerNamePrompt(plugin) {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Player): Prompt {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+            val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
             val player = playerProvider.getPlayer(input)
             context.setSessionData("player", player)
             return PlayerSetPrompt()
@@ -166,17 +166,17 @@ class MoneyPayCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
 
     private inner class CurrencyPrompt: ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java).getCurrency(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("currency", plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java).getCurrency(input))
+            context.setSessionData("currency", plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(input))
             return CurrencySetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
             return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-currency-prompt")) + "\n" +
-                    plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java).currencies
+                    plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).currencies
                             .map { currency -> ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-currency-prompt-list-item")).replace("\$currency", currency.name) }
                             .joinToString("\n")
         }
@@ -233,19 +233,19 @@ class MoneyPayCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
 
     }
 
-    private inner class MoneyPayCompletePrompt : MessagePrompt() {
+    private inner class MoneyPayCompletePrompt: MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-            val economyProvider = plugin.core.serviceManager.getServiceProvider(BukkitEconomyProvider::class.java)
+            val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+            val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
             val fromBukkitPlayer = context.forWhom as Player
             val fromPlayer = playerProvider.getPlayer(fromBukkitPlayer)
             val fromCharacter = characterProvider.getActiveCharacter(fromPlayer)
-            val toPlayer = context.getSessionData("player") as BukkitPlayer
+            val toPlayer = context.getSessionData("player") as ElysiumPlayer
             val toCharacter = characterProvider.getActiveCharacter(toPlayer)
             val currency = context.getSessionData("currency") as ElysiumCurrency
             val amount = context.getSessionData("amount") as Int
@@ -255,7 +255,7 @@ class MoneyPayCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
                         if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
                             if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
                                 economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
-                                (toCharacter.player as? BukkitPlayer)?.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-paid").replace("\$amount", amount.toString())))
+                                (toCharacter.player as? ElysiumPlayer)?.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-paid").replace("\$amount", amount.toString())))
                                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-valid"))
                             } else {
                                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-limit"))

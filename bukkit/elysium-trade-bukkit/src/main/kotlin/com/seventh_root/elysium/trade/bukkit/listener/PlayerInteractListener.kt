@@ -1,9 +1,9 @@
 package com.seventh_root.elysium.trade.bukkit.listener
 
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
-import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
-import com.seventh_root.elysium.economy.bukkit.economy.BukkitEconomyProvider
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
+import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import com.seventh_root.elysium.trade.bukkit.ElysiumTradeBukkit
 import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
@@ -30,12 +30,12 @@ class PlayerInteractListener(private val plugin: ElysiumTradeBukkit): Listener {
                         var buyPrice = sign.getLine(2).split(" | ")[0].toInt()
                         var sellPrice = sign.getLine(2).split(" | ")[1].toInt()
                         var actualPrice = arrayOf(buyPrice, sellPrice).average()
-                        val currency = plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java).getCurrency(sign.getLine(3))
+                        val currency = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(sign.getLine(3))
                         if (currency != null) {
                             if (event.action === RIGHT_CLICK_BLOCK) {
-                                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                                val economyProvider = plugin.core.serviceManager.getServiceProvider(BukkitEconomyProvider::class.java)
+                                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                                val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
                                 val player = playerProvider.getPlayer(event.player)
                                 val character = characterProvider.getActiveCharacter(player)
                                 if (character != null) {
@@ -65,9 +65,9 @@ class PlayerInteractListener(private val plugin: ElysiumTradeBukkit): Listener {
                                     event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                                 }
                             } else if (event.action == LEFT_CLICK_BLOCK) {
-                                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                                val economyProvider = plugin.core.serviceManager.getServiceProvider(BukkitEconomyProvider::class.java)
+                                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                                val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
                                 val player = playerProvider.getPlayer(event.player)
                                 val character = characterProvider.getActiveCharacter(player)
                                 if (character != null) {

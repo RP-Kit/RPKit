@@ -1,7 +1,7 @@
 package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class ChatChannelSetIRCChannelCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
+class ChatChannelSetIRCChannelCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -36,10 +36,10 @@ class ChatChannelSetIRCChannelCommand(private val plugin: ElysiumChatBukkit) : C
         return true
     }
 
-    private inner class ChatChannelPrompt : ValidatingPrompt() {
+    private inner class ChatChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(input) != null
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
@@ -57,7 +57,7 @@ class ChatChannelSetIRCChannelCommand(private val plugin: ElysiumChatBukkit) : C
 
     }
 
-    private inner class ChatChannelIRCChannelPrompt : ValidatingPrompt() {
+    private inner class ChatChannelIRCChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             return input.matches("/([#&][^\\x07\\x2C\\s]{0,200})/".toRegex())
@@ -78,14 +78,14 @@ class ChatChannelSetIRCChannelCommand(private val plugin: ElysiumChatBukkit) : C
 
     }
 
-    private inner class ChatChannelIRCChannelSetPrompt : MessagePrompt() {
+    private inner class ChatChannelIRCChannelSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
             val chatChannel = chatChannelProvider.getChatChannel(context.getSessionData("channel") as String)!!
             chatChannel.ircChannel = context.getSessionData("irc_channel") as String
             chatChannelProvider.updateChatChannel(chatChannel)

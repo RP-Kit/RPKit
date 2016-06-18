@@ -1,8 +1,8 @@
 package com.seventh_root.elysium.economy.bukkit.command.currency
 
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
-import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrency
-import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
 import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.command.Command
@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class CurrencyAddCommand(private val plugin: ElysiumEconomyBukkit) : CommandExecutor {
+class CurrencyAddCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor {
     private val conversationFactory = ConversationFactory(plugin)
             .withModality(true)
             .withFirstPrompt(NamePrompt())
@@ -43,7 +43,7 @@ class CurrencyAddCommand(private val plugin: ElysiumEconomyBukkit) : CommandExec
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java)
+            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
             return currencyProvider.getCurrency(input) == null
         }
 
@@ -58,7 +58,7 @@ class CurrencyAddCommand(private val plugin: ElysiumEconomyBukkit) : CommandExec
 
     }
 
-    private inner class NameSetPrompt : MessagePrompt() {
+    private inner class NameSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return NameSingularPrompt()
@@ -217,9 +217,9 @@ class CurrencyAddCommand(private val plugin: ElysiumEconomyBukkit) : CommandExec
 
     private inner class CurrencyAddedPrompt: MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt? {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java)
+            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
             currencyProvider.addCurrency(
-                    BukkitCurrency(
+                    ElysiumCurrency(
                             name = context.getSessionData("name") as String,
                             nameSingular = context.getSessionData("name_singular") as String,
                             namePlural = context.getSessionData("name_plural") as String,

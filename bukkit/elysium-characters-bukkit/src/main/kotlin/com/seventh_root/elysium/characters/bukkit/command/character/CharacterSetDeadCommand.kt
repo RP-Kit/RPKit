@@ -1,8 +1,8 @@
 package com.seventh_root.elysium.characters.bukkit.command.character
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.apache.commons.lang.BooleanUtils
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class CharacterSetDeadCommand(private val plugin: ElysiumCharactersBukkit) : CommandExecutor {
+class CharacterSetDeadCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     private val conversationFactory: ConversationFactory
 
@@ -29,8 +29,8 @@ class CharacterSetDeadCommand(private val plugin: ElysiumCharactersBukkit) : Com
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.characters.command.character.set.dead")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
                 val player = playerProvider.getPlayer(sender)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
@@ -58,13 +58,13 @@ class CharacterSetDeadCommand(private val plugin: ElysiumCharactersBukkit) : Com
         return true
     }
 
-    private inner class DeadPrompt : BooleanPrompt() {
+    private inner class DeadPrompt: BooleanPrompt() {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Boolean): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
                 val player = playerProvider.getPlayer(conversable)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
@@ -90,7 +90,7 @@ class CharacterSetDeadCommand(private val plugin: ElysiumCharactersBukkit) : Com
 
     }
 
-    private inner class DeadSetPrompt : MessagePrompt() {
+    private inner class DeadSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION
@@ -102,7 +102,7 @@ class CharacterSetDeadCommand(private val plugin: ElysiumCharactersBukkit) : Com
 
     }
 
-    private inner class DeadNotSetNoPermissionPrompt(private val dead: Boolean) : MessagePrompt() {
+    private inner class DeadNotSetNoPermissionPrompt(private val dead: Boolean): MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION

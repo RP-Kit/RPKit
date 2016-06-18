@@ -1,13 +1,13 @@
 package com.seventh_root.elysium.chat.bukkit.database.table
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannel
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelListener
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.ehcache.Cache
 import org.ehcache.CacheManager
@@ -46,8 +46,8 @@ class ChatChannelListenerTable: Table<ChatChannelListener> {
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
                             "player_id INTEGER," +
                             "chat_channel_id INTEGER," +
-                            "FOREIGN KEY(player_id) REFERENCES bukkit_player(id)," +
-                            "FOREIGN KEY(chat_channel_id) REFERENCES bukkit_chat_channel(id)" +
+                            "FOREIGN KEY(player_id) REFERENCES elysium_player(id)," +
+                            "FOREIGN KEY(chat_channel_id) REFERENCES elysium_chat_channel(id)" +
                             ")").use { statement ->
                 statement.executeUpdate()
             }
@@ -129,8 +129,8 @@ class ChatChannelListenerTable: Table<ChatChannelListener> {
                     if (resultSet.next()) {
                         val finalChatChannelListener = ChatChannelListener(
                                 resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
-                                plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java).getPlayer(resultSet.getInt("player_id"))!!
+                                plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
+                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java).getPlayer(resultSet.getInt("player_id"))!!
                         )
                         chatChannelListener = finalChatChannelListener
                         cache.put(id, finalChatChannelListener)
@@ -166,8 +166,8 @@ class ChatChannelListenerTable: Table<ChatChannelListener> {
                         val id = resultSet.getInt("id")
                         val finalChatChannelListener = ChatChannelListener(
                                 id,
-                                plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
-                                plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java).getPlayer(resultSet.getInt("player_id"))!!
+                                plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
+                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java).getPlayer(resultSet.getInt("player_id"))!!
                         )
                         chatChannelListeners.add(finalChatChannelListener)
                         cache.put(id, finalChatChannelListener)
@@ -188,7 +188,7 @@ class ChatChannelListenerTable: Table<ChatChannelListener> {
         }
     }
 
-    fun get(chatChannel: BukkitChatChannel): List<ChatChannelListener> {
+    fun get(chatChannel: ElysiumChatChannel): List<ChatChannelListener> {
         if (chatChannelCache.containsKey(chatChannel.id)) {
             return (chatChannelCache.get(chatChannel.id) as MutableList<Int>).map { listenerId -> get(listenerId)!! }
         } else {

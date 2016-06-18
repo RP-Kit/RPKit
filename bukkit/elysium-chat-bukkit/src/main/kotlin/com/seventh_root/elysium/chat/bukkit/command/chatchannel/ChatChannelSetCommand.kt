@@ -6,7 +6,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-class ChatChannelSetCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
+class ChatChannelSetCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
 
     private val chatChannelSetNameCommand: ChatChannelSetNameCommand
     private val chatChannelSetColorCommand: ChatChannelSetColorCommand

@@ -1,8 +1,6 @@
 package com.seventh_root.elysium.economy.bukkit
 
-import com.seventh_root.elysium.economy.bukkit.currency.CurrencyProvider
-import com.seventh_root.elysium.economy.bukkit.economy.EconomyProvider
-import com.seventh_root.elysium.characters.bukkit.character.field.BukkitCharacterCardFieldProvider
+import com.seventh_root.elysium.characters.bukkit.character.field.ElysiumCharacterCardFieldProvider
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceProvider
@@ -11,24 +9,23 @@ import com.seventh_root.elysium.economy.bukkit.command.currency.CurrencyCommand
 import com.seventh_root.elysium.economy.bukkit.command.money.MoneyCommand
 import com.seventh_root.elysium.economy.bukkit.command.money.MoneyPayCommand
 import com.seventh_root.elysium.economy.bukkit.command.money.MoneyWalletCommand
-import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrency
-import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
-import com.seventh_root.elysium.economy.bukkit.database.table.BukkitCurrencyTable
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
 import com.seventh_root.elysium.economy.bukkit.database.table.BukkitWalletTable
-import com.seventh_root.elysium.economy.bukkit.economy.BukkitEconomyProvider
+import com.seventh_root.elysium.economy.bukkit.database.table.ElysiumCurrencyTable
+import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProvider
 import com.seventh_root.elysium.economy.bukkit.listener.InventoryCloseListener
 
 
-class ElysiumEconomyBukkit : ElysiumBukkitPlugin() {
+class ElysiumEconomyBukkit: ElysiumBukkitPlugin() {
 
-    private lateinit var currencyProvider: CurrencyProvider<BukkitCurrency>
-    private lateinit var economyProvider: EconomyProvider
+    private lateinit var currencyProvider: ElysiumCurrencyProvider
+    private lateinit var economyProvider: ElysiumEconomyProvider
     override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()
-        currencyProvider = BukkitCurrencyProvider(this)
-        economyProvider = BukkitEconomyProvider(this)
+        currencyProvider = ElysiumCurrencyProvider(this)
+        economyProvider = ElysiumEconomyProvider(this)
         serviceProviders = arrayOf(
                 currencyProvider,
                 economyProvider
@@ -36,7 +33,7 @@ class ElysiumEconomyBukkit : ElysiumBukkitPlugin() {
     }
 
     override fun onPostEnable() {
-        core.serviceManager.getServiceProvider(BukkitCharacterCardFieldProvider::class.java)
+        core.serviceManager.getServiceProvider(ElysiumCharacterCardFieldProvider::class.java)
                 .characterCardFields.add(MoneyField(this))
     }
 
@@ -52,7 +49,7 @@ class ElysiumEconomyBukkit : ElysiumBukkitPlugin() {
     }
 
     override fun createTables(database: Database) {
-        database.addTable(BukkitCurrencyTable(database, this))
+        database.addTable(ElysiumCurrencyTable(database, this))
         database.addTable(BukkitWalletTable(database, this))
     }
 }

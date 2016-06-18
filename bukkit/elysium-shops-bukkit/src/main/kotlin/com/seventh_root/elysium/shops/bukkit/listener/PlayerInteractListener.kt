@@ -1,9 +1,9 @@
 package com.seventh_root.elysium.shops.bukkit.listener
 
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
-import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
-import com.seventh_root.elysium.economy.bukkit.economy.BukkitEconomyProvider
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
+import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import com.seventh_root.elysium.shops.bukkit.ElysiumShopsBukkit
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material
@@ -36,7 +36,7 @@ class PlayerInteractListener(val plugin: ElysiumShopsBukkit): Listener {
                         val amount = state.getLine(1).split(Regex("\\s+"))[1].toInt()
                         val material = Material.matchMaterial(state.getLine(1).split(Regex("\\s+"))[2])
                         val price = state.getLine(2).split(Regex("\\s+"))[1].toInt()
-                        val currencyProvider = plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java)
+                        val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
                         val currencyBuilder = StringBuilder()
                         for (i in 2..state.getLine(2).split(Regex("\\s+")).size - 1) {
                             currencyBuilder.append(state.getLine(2).split(Regex("\\s+"))[i]).append(' ')
@@ -44,10 +44,10 @@ class PlayerInteractListener(val plugin: ElysiumShopsBukkit): Listener {
                         currencyBuilder.deleteCharAt(currencyBuilder.lastIndex)
                         val currency = currencyProvider.getCurrency(currencyBuilder.toString())
                         if (currency != null) {
-                            val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                            val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
                             val ownerCharacter = characterProvider.getCharacter(state.getLine(3).toInt())
                             if (ownerCharacter != null) {
-                                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
                                 val customerPlayer = playerProvider.getPlayer(event.player)
                                 val customerCharacter = characterProvider.getActiveCharacter(customerPlayer)
                                 if (customerCharacter != null) {
@@ -57,7 +57,7 @@ class PlayerInteractListener(val plugin: ElysiumShopsBukkit): Listener {
                                         val chestBlock = block.getRelative(DOWN)
                                         val chestState = chestBlock.state as? Chest
                                         if (chestState != null) {
-                                            val economyProvider = plugin.core.serviceManager.getServiceProvider(BukkitEconomyProvider::class.java)
+                                            val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
                                             if (economyProvider.getBalance(ownerCharacter, currency) >= price) {
                                                 event.player.inventory.removeItem(items)
                                                 chestState.blockInventory.addItem(items)

@@ -1,10 +1,10 @@
 package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannel
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -13,7 +13,7 @@ import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 import org.bukkit.permissions.Permissible
 
-class ChatChannelSpeakCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
+class ChatChannelSpeakCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -30,8 +30,8 @@ class ChatChannelSpeakCommand(private val plugin: ElysiumChatBukkit) : CommandEx
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.chat.command.chatchannel.speak")) {
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
                 if (chatChannelProvider.chatChannels.size > 0) {
                     val player = playerProvider.getPlayer(sender)
                     if (args.size > 0) {
@@ -74,17 +74,17 @@ class ChatChannelSpeakCommand(private val plugin: ElysiumChatBukkit) : CommandEx
         return true
     }
 
-    private inner class ChatChannelPrompt : ValidatingPrompt() {
+    private inner class ChatChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null && (context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.speak." + input)
+            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(input) != null && (context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.speak." + input)
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
                 val player = playerProvider.getPlayer(conversable)
                 val channel = chatChannelProvider.getChatChannel(input)!!
                 val oldChannel = chatChannelProvider.getPlayerChannel(player)
@@ -101,7 +101,7 @@ class ChatChannelSpeakCommand(private val plugin: ElysiumChatBukkit) : CommandEx
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            if (plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(invalidInput) == null) {
+            if (plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(invalidInput) == null) {
                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-speak-invalid-chatchannel"))
             } else if (!(context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.speak." + invalidInput)) {
                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel-speak-channel")
@@ -111,7 +111,7 @@ class ChatChannelSpeakCommand(private val plugin: ElysiumChatBukkit) : CommandEx
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
             val channelListBuilder = StringBuilder()
             for (channel in chatChannelProvider.chatChannels) {
                 channelListBuilder.append(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-list-item")
@@ -123,7 +123,7 @@ class ChatChannelSpeakCommand(private val plugin: ElysiumChatBukkit) : CommandEx
 
     }
 
-    private inner class ChatChannelSpeakingPrompt : MessagePrompt() {
+    private inner class ChatChannelSpeakingPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION
@@ -132,7 +132,7 @@ class ChatChannelSpeakCommand(private val plugin: ElysiumChatBukkit) : CommandEx
         override fun getPromptText(context: ConversationContext): String {
             return ChatColor.translateAlternateColorCodes('&',
                     plugin.config.getString("messages.chatchannel-speak-valid")
-                            .replace("\$channel", (context.getSessionData("channel") as BukkitChatChannel).name))
+                            .replace("\$channel", (context.getSessionData("channel") as ElysiumChatChannel).name))
         }
 
     }

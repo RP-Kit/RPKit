@@ -20,7 +20,7 @@ class ServiceManager {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : ServiceProvider> getServiceProvider(type: Class<T>): T {
+    fun <T: ServiceProvider> getServiceProvider(type: Class<T>): T {
         return providers[type] as T
     }
 

@@ -4,7 +4,7 @@ import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
-import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrency
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 import org.bukkit.Material
 import org.ehcache.Cache
 import org.ehcache.CacheManager
@@ -15,19 +15,19 @@ import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.util.*
 
 
-class BukkitCurrencyTable: Table<BukkitCurrency> {
+class ElysiumCurrencyTable: Table<ElysiumCurrency> {
 
     private val plugin: ElysiumEconomyBukkit
     private val cacheManager: CacheManager
-    private val cache: Cache<Int, BukkitCurrency>
+    private val cache: Cache<Int, ElysiumCurrency>
     private val nameCache: Cache<String, Int>
 
-    constructor(database: Database, plugin: ElysiumEconomyBukkit): super(database, BukkitCurrency::class.java) {
+    constructor(database: Database, plugin: ElysiumEconomyBukkit): super(database, ElysiumCurrency::class.java) {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .build(true)
         cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitCurrency::class.java,
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ElysiumCurrency::class.java,
                         ResourcePoolsBuilder.heap(5L)).build())
         nameCache = cacheManager.createCache("nameCache",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
@@ -37,7 +37,7 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
     override fun create() {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS bukkit_currency(" +
+                    "CREATE TABLE IF NOT EXISTS elysium_currency(" +
                         "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
                         "name VARCHAR(256)," +
                         "name_singular VARCHAR(256)," +
@@ -55,11 +55,11 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
         }
     }
 
-    override fun insert(`object`: BukkitCurrency): Int {
+    override fun insert(`object`: ElysiumCurrency): Int {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "INSERT INTO bukkit_currency(name, name_singular, name_plural, rate, default_amount, material) VALUES(?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO elysium_currency(name, name_singular, name_plural, rate, default_amount, material) VALUES(?, ?, ?, ?, ?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
                 statement.setString(1, `object`.name)
@@ -81,10 +81,10 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
         return id
     }
 
-    override fun update(`object`: BukkitCurrency) {
+    override fun update(`object`: ElysiumCurrency) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "UPDATE bukkit_currency SET name = ?, name_singular = ?, name_plural = ?, rate = ?, default_amount = ?, material = ? WHERE id = ?"
+                    "UPDATE elysium_currency SET name = ?, name_singular = ?, name_plural = ?, rate = ?, default_amount = ?, material = ? WHERE id = ?"
             ).use { statement ->
                 statement.setString(1, `object`.name)
                 statement.setString(2, `object`.nameSingular)
@@ -100,19 +100,19 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
         }
     }
 
-    override fun get(id: Int): BukkitCurrency? {
+    override fun get(id: Int): ElysiumCurrency? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var currency: BukkitCurrency? = null
+            var currency: ElysiumCurrency? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, name, name_singular, name_plural, rate, default_amount, material FROM bukkit_currency WHERE id = ?"
+                        "SELECT id, name, name_singular, name_plural, rate, default_amount, material FROM elysium_currency WHERE id = ?"
                 ).use { statement ->
                     statement.setInt(1, id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        currency = BukkitCurrency(
+                        currency = ElysiumCurrency(
                                 resultSet.getInt("id"),
                                 resultSet.getString("name"),
                                 resultSet.getString("name_singular"),
@@ -133,19 +133,19 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
         }
     }
 
-    fun get(name: String): BukkitCurrency? {
+    fun get(name: String): ElysiumCurrency? {
         if (nameCache.containsKey(name)) {
             return get(nameCache.get(name) as Int)
         } else {
-            var currency: BukkitCurrency? = null
+            var currency: ElysiumCurrency? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, name, name_singular, name_plural, rate, default_amount, material FROM bukkit_currency WHERE name = ?"
+                        "SELECT id, name, name_singular, name_plural, rate, default_amount, material FROM elysium_currency WHERE name = ?"
                 ).use { statement ->
                     statement.setString(1, name)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        currency = BukkitCurrency(
+                        currency = ElysiumCurrency(
                                 resultSet.getInt("id"),
                                 resultSet.getString("name"),
                                 resultSet.getString("name_singular"),
@@ -166,11 +166,11 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
         }
     }
 
-    fun getAll(): Collection<BukkitCurrency> {
-        val currencies = ArrayList<BukkitCurrency>()
+    fun getAll(): Collection<ElysiumCurrency> {
+        val currencies = ArrayList<ElysiumCurrency>()
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "SELECT id FROM bukkit_currency"
+                    "SELECT id FROM elysium_currency"
             ).use { statement ->
                 val resultSet = statement.executeQuery()
                 while (resultSet.next()) {
@@ -182,10 +182,10 @@ class BukkitCurrencyTable: Table<BukkitCurrency> {
         return currencies
     }
 
-    override fun delete(`object`: BukkitCurrency) {
+    override fun delete(`object`: ElysiumCurrency) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "DELETE FROM bukkit_currency WHERE id = ?"
+                    "DELETE FROM elysium_currency WHERE id = ?"
             ).use { statement ->
                 statement.setInt(1, `object`.id)
                 statement.executeUpdate()

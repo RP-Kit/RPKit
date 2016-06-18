@@ -1,7 +1,7 @@
 package com.seventh_root.elysium.characters.bukkit.command.race
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
-import com.seventh_root.elysium.characters.bukkit.race.BukkitRaceProvider
+import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class RaceRemoveCommand(private val plugin: ElysiumCharactersBukkit) : CommandExecutor {
+class RaceRemoveCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -27,7 +27,7 @@ class RaceRemoveCommand(private val plugin: ElysiumCharactersBukkit) : CommandEx
         if (sender is Conversable) {
             if (sender.hasPermission("elysium.characters.command.race.remove")) {
                 if (args.size > 0) {
-                    val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+                    val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java)
                     val raceBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
                         raceBuilder.append(args[i]).append(' ')
@@ -50,14 +50,14 @@ class RaceRemoveCommand(private val plugin: ElysiumCharactersBukkit) : CommandEx
         return true
     }
 
-    private inner class RacePrompt : ValidatingPrompt() {
+    private inner class RacePrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java).getRace(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java).getRace(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+            val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java)
             raceProvider.removeRace(raceProvider.getRace(input)!!)
             return RaceSetPrompt()
         }
@@ -72,7 +72,7 @@ class RaceRemoveCommand(private val plugin: ElysiumCharactersBukkit) : CommandEx
 
     }
 
-    private inner class RaceSetPrompt : MessagePrompt() {
+    private inner class RaceSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION

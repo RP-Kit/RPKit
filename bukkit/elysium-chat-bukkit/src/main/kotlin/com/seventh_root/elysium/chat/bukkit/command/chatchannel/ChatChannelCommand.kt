@@ -6,7 +6,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-class ChatChannelCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
+class ChatChannelCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
 
     private val chatChannelJoinCommand: ChatChannelJoinCommand
     private val chatChannelLeaveCommand: ChatChannelLeaveCommand

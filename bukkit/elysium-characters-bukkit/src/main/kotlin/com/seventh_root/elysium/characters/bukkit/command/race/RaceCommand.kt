@@ -6,7 +6,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-class RaceCommand(private val plugin: ElysiumCharactersBukkit) : CommandExecutor {
+class RaceCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val raceAddCommand: RaceAddCommand
     private val raceRemoveCommand: RaceRemoveCommand
     private val raceListCommand: RaceListCommand

@@ -1,17 +1,46 @@
 package com.seventh_root.elysium.chat.bukkit.chatgroup
 
-import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import com.seventh_root.elysium.core.database.TableRow
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
+import java.util.*
 
-interface ElysiumChatGroup : TableRow {
+class ElysiumChatGroup(
+        override var id: Int = 0,
+        var name: String,
+        players: List<ElysiumPlayer>,
+        invited: List<ElysiumPlayer>
+): TableRow {
 
-    var name: String
-    val players: Collection<ElysiumPlayer>
-    fun addPlayer(player: ElysiumPlayer)
-    fun removePlayer(player: ElysiumPlayer)
-    val invited: Collection<ElysiumPlayer>
-    fun invite(player: ElysiumPlayer)
-    fun uninvite(player: ElysiumPlayer)
-    fun sendMessage(sender: ElysiumPlayer, message: String)
+    private val players0 = mutableListOf<ElysiumPlayer>()
+    val players: List<ElysiumPlayer>
+        get() = Collections.unmodifiableList(players0)
+    private val invited0 = mutableListOf<ElysiumPlayer>()
+    val invited: List<ElysiumPlayer>
+        get() = Collections.unmodifiableList(invited0)
+
+    init {
+        players0.addAll(players)
+        invited0.addAll(invited)
+    }
+
+    fun addPlayer(player: ElysiumPlayer) {
+        throw UnsupportedOperationException()
+    }
+
+    fun removePlayer(player: ElysiumPlayer) {
+        throw UnsupportedOperationException()
+    }
+
+    fun invite(player: ElysiumPlayer) {
+        throw UnsupportedOperationException()
+    }
+
+    fun uninvite(player: ElysiumPlayer) {
+        throw UnsupportedOperationException()
+    }
+
+    fun sendMessage(sender: ElysiumPlayer, message: String) {
+        throw UnsupportedOperationException()
+    }
 
 }

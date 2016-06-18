@@ -1,9 +1,9 @@
 package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -12,7 +12,7 @@ import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 import org.bukkit.permissions.Permissible
 
-class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
+class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -29,8 +29,8 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit) : CommandExe
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.chat.command.chatchannel.join")) {
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
                 if (chatChannelProvider.chatChannels.size > 0) {
                     val player = playerProvider.getPlayer(sender)
                     if (args.size > 0) {
@@ -67,17 +67,17 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit) : CommandExe
         return true
     }
 
-    private inner class ChatChannelPrompt : ValidatingPrompt() {
+    private inner class ChatChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null && (context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.join." + input)
+            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(input) != null && (context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.join." + input)
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
                 val player = playerProvider.getPlayer(conversable)
                 val channel = chatChannelProvider.getChatChannel(input)!!
                 channel.addListener(player)
@@ -87,7 +87,7 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit) : CommandExe
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            if (plugin.core!!.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(invalidInput) == null) {
+            if (plugin.core!!.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(invalidInput) == null) {
                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-join-invalid-chatchannel"))
             } else if (!(context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.join." + invalidInput)) {
                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel-join-channel")
@@ -97,7 +97,7 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit) : CommandExe
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
             val channelListBuilder = StringBuilder()
             for (channel in chatChannelProvider.chatChannels) {
                 channelListBuilder.append(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-list-item")
@@ -109,7 +109,7 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit) : CommandExe
 
     }
 
-    private inner class ChatChannelJoinedPrompt : MessagePrompt() {
+    private inner class ChatChannelJoinedPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION

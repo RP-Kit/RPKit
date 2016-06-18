@@ -1,7 +1,7 @@
 package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class ChatChannelDeleteCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
+class ChatChannelDeleteCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -26,7 +26,7 @@ class ChatChannelDeleteCommand(private val plugin: ElysiumChatBukkit) : CommandE
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Conversable) {
             if (sender.hasPermission("elysium.chat.command.chatchannel.delete")) {
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
                 if (chatChannelProvider.chatChannels.size > 0) {
                     if (args.size > 0) {
                         val chatChannelBuilder = StringBuilder()
@@ -54,16 +54,16 @@ class ChatChannelDeleteCommand(private val plugin: ElysiumChatBukkit) : CommandE
         return true
     }
 
-    private inner class ChatChannelPrompt : ValidatingPrompt() {
+    private inner class ChatChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
                 val channel = chatChannelProvider.getChatChannel(input)!!
                 chatChannelProvider.removeChatChannel(channel)
             }
@@ -80,7 +80,7 @@ class ChatChannelDeleteCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelDeletedPrompt : MessagePrompt() {
+    private inner class ChatChannelDeletedPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION

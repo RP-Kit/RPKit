@@ -8,7 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin
 
 import java.sql.SQLException
 
-abstract class ElysiumBukkitPlugin : JavaPlugin() {
+abstract class ElysiumBukkitPlugin: JavaPlugin() {
 
     lateinit var core: ElysiumCore
 

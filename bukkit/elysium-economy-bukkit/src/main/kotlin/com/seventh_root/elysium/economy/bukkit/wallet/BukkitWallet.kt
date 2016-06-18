@@ -10,4 +10,4 @@ data class BukkitWallet(
         val character: ElysiumCharacter,
         val currency: ElysiumCurrency,
         var balance: Int
-) : TableRow
+): TableRow

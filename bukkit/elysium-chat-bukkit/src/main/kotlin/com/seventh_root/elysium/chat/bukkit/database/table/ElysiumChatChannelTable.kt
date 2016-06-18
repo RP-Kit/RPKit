@@ -1,9 +1,9 @@
 package com.seventh_root.elysium.chat.bukkit.database.table
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannel
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelListener
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelSpeaker
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
@@ -17,18 +17,18 @@ import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.util.*
 
-class BukkitChatChannelTable: Table<BukkitChatChannel> {
+class ElysiumChatChannelTable: Table<ElysiumChatChannel> {
 
     private val plugin: ElysiumChatBukkit
     private val cacheManager: CacheManager
-    private val cache: Cache<Int, BukkitChatChannel>
+    private val cache: Cache<Int, ElysiumChatChannel>
     private val nameCache: Cache<String, Int>
 
-    constructor(plugin: ElysiumChatBukkit, database: Database): super(database, BukkitChatChannel::class.java) {
+    constructor(plugin: ElysiumChatBukkit, database: Database): super(database, ElysiumChatChannel::class.java) {
         this.plugin = plugin
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitChatChannel::class.java,
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ElysiumChatChannel::class.java,
                         ResourcePoolsBuilder.heap(20L)).build())
         nameCache = cacheManager.createCache("nameCache",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
@@ -39,7 +39,7 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
         try {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "CREATE TABLE IF NOT EXISTS bukkit_chat_channel(" +
+                        "CREATE TABLE IF NOT EXISTS elysium_chat_channel(" +
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
                             "name VARCHAR(256)," +
                             "color_red INTEGER," +
@@ -83,12 +83,12 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
         }
     }
 
-    override fun insert(`object`: BukkitChatChannel): Int {
+    override fun insert(`object`: ElysiumChatChannel): Int {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "INSERT INTO bukkit_chat_channel(name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    RETURN_GENERATED_KEYS).use({ statement ->
+                    "INSERT INTO elysium_chat_channel(name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    RETURN_GENERATED_KEYS).use { statement ->
                 statement.setString(1, `object`.name)
                 statement.setInt(2, `object`.color.red)
                 statement.setInt(3, `object`.color.green)
@@ -109,15 +109,15 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                     cache.put(id, `object`)
                     nameCache.put(`object`.name, id)
                 }
-            })
+            }
         }
         return id
     }
 
-    override fun update(`object`: BukkitChatChannel) {
+    override fun update(`object`: ElysiumChatChannel) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "UPDATE bukkit_chat_channel SET name = ?, color_red = ?, color_green = ?, color_blue = ?, format_string = ?, radius = ?, clear_radius = ?, match_pattern = ?, irc_enabled = ?, irc_channel = ?, irc_whitelist = ?, joined_by_default = ? WHERE id = ?").use({ statement ->
+                    "UPDATE elysium_chat_channel SET name = ?, color_red = ?, color_green = ?, color_blue = ?, format_string = ?, radius = ?, clear_radius = ?, match_pattern = ?, irc_enabled = ?, irc_channel = ?, irc_whitelist = ?, joined_by_default = ? WHERE id = ?").use { statement ->
                 statement.setString(1, `object`.name)
                 statement.setInt(2, `object`.color.red)
                 statement.setInt(3, `object`.color.green)
@@ -134,22 +134,22 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                 statement.executeUpdate()
                 cache.put(`object`.id, `object`)
                 nameCache.put(`object`.name, `object`.id)
-            })
+            }
         }
     }
 
-    override fun get(id: Int): BukkitChatChannel? {
+    override fun get(id: Int): ElysiumChatChannel? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var chatChannel: BukkitChatChannel? = null
+            var chatChannel: ElysiumChatChannel? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default FROM bukkit_chat_channel WHERE id = ?").use({ statement ->
+                        "SELECT id, name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default FROM elysium_chat_channel WHERE id = ?").use { statement ->
                     statement.setInt(1, id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        val finalChatChannel = BukkitChatChannel(
+                        val finalChatChannel = ElysiumChatChannel(
                                 plugin = plugin,
                                 id = resultSet.getInt("id"),
                                 name = resultSet.getString("name"),
@@ -173,24 +173,24 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                         cache.put(id, finalChatChannel)
                         nameCache.put(finalChatChannel.name, id)
                     }
-                })
+                }
             }
             return chatChannel
         }
     }
 
-    fun get(name: String): BukkitChatChannel? {
+    fun get(name: String): ElysiumChatChannel? {
         if (nameCache.containsKey(name)) {
             return get(nameCache.get(name) as Int)
         } else {
-            var chatChannel: BukkitChatChannel? = null
+            var chatChannel: ElysiumChatChannel? = null
             plugin.core.database.createConnection().use { connection ->
-                connection.prepareStatement("SELECT id, name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default FROM bukkit_chat_channel WHERE name = ?").use({ statement ->
+                connection.prepareStatement("SELECT id, name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default FROM elysium_chat_channel WHERE name = ?").use { statement ->
                     statement.setString(1, name)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
                         val id = resultSet.getInt("id")
-                        val finalChatChannel = BukkitChatChannel(
+                        val finalChatChannel = ElysiumChatChannel(
                                 plugin = plugin,
                                 id = id,
                                 name = resultSet.getString("name"),
@@ -214,16 +214,16 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                         cache.put(id, finalChatChannel)
                         nameCache.put(finalChatChannel.name, id)
                     }
-                })
+                }
             }
             return chatChannel
         }
     }
 
-    fun getAll(): Collection<BukkitChatChannel> {
-        val chatChannels = ArrayList<BukkitChatChannel>()
+    fun getAll(): Collection<ElysiumChatChannel> {
+        val chatChannels = ArrayList<ElysiumChatChannel>()
         plugin.core.database.createConnection().use { connection ->
-            connection.prepareStatement("SELECT id FROM bukkit_chat_channel").use({ statement ->
+            connection.prepareStatement("SELECT id FROM elysium_chat_channel").use { statement ->
                 val resultSet = statement.executeQuery()
                 while (resultSet.next()) {
                     val chatChannel = get(resultSet.getInt("id"))
@@ -233,20 +233,20 @@ class BukkitChatChannelTable: Table<BukkitChatChannel> {
                         chatChannels.add(chatChannel)
                     }
                 }
-            })
+            }
         }
         return chatChannels
     }
 
-    override fun delete(`object`: BukkitChatChannel) {
+    override fun delete(`object`: ElysiumChatChannel) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "DELETE FROM chat_channel_speaker WHERE chat_channel_id = ?").use({ speakersStatement ->
+                    "DELETE FROM chat_channel_speaker WHERE chat_channel_id = ?").use { speakersStatement ->
                 speakersStatement.setInt(1, `object`.id)
                 speakersStatement.executeUpdate()
                 cache.remove(`object`.id)
                 nameCache.remove(`object`.name)
-            })
+            }
         }
         val chatChannelListenerTable = database.getTable(ChatChannelListener::class.java) as? ChatChannelListenerTable
         val chatChannelListeners = chatChannelListenerTable?.get(`object`)
