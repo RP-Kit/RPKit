@@ -1,7 +1,7 @@
 package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class ChatChannelSetJoinedByDefaultCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
+class ChatChannelSetJoinedByDefaultCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -36,10 +36,10 @@ class ChatChannelSetJoinedByDefaultCommand(private val plugin: ElysiumChatBukkit
         return true
     }
 
-    private inner class ChatChannelPrompt : ValidatingPrompt() {
+    private inner class ChatChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(input) != null
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
@@ -57,7 +57,7 @@ class ChatChannelSetJoinedByDefaultCommand(private val plugin: ElysiumChatBukkit
 
     }
 
-    private inner class ChatChannelJoinedByDefaultPrompt : BooleanPrompt() {
+    private inner class ChatChannelJoinedByDefaultPrompt: BooleanPrompt() {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Boolean): Prompt {
             context.setSessionData("joined_by_default", input)
@@ -74,14 +74,14 @@ class ChatChannelSetJoinedByDefaultCommand(private val plugin: ElysiumChatBukkit
 
     }
 
-    private inner class ChatChannelJoinedByDefaultSetPrompt : MessagePrompt() {
+    private inner class ChatChannelJoinedByDefaultSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
             val chatChannel = chatChannelProvider.getChatChannel(context.getSessionData("channel") as String)!!
             chatChannel.isJoinedByDefault = context.getSessionData("joined_by_default") as Boolean
             chatChannelProvider.updateChatChannel(chatChannel)

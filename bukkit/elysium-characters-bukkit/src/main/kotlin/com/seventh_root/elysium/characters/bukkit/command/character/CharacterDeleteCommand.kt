@@ -1,8 +1,8 @@
 package com.seventh_root.elysium.characters.bukkit.command.character
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : CommandExecutor {
+class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
     private val confirmationConversationFactory: ConversationFactory
 
@@ -42,8 +42,8 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : Comm
                         characterNameBuilder.append(args[i]).append(" ")
                     }
                     characterNameBuilder.append(args[args.size - 1])
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                    val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                    val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
                     val player = playerProvider.getPlayer(sender)
                     var charFound = false
                     // Prioritise exact matches...
@@ -85,13 +85,13 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : Comm
         return true
     }
 
-    private inner class CharacterPrompt : ValidatingPrompt() {
+    private inner class CharacterPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
                 val player = playerProvider.getPlayer(conversable)
                 for (character in characterProvider.getCharacters(player)) {
                     if (character.name.equals(input, ignoreCase = true)) {
@@ -110,8 +110,8 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : Comm
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
                 val player = playerProvider.getPlayer(conversable)
                 var charFound = false
                 // Prioritise exact matches...
@@ -140,9 +140,9 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : Comm
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
+            val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
             val player = playerProvider.getPlayer(context.forWhom as Player)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
             val characterListBuilder = StringBuilder()
             for (character in characterProvider.getCharacters(player)) {
                 characterListBuilder.append("\n").append(
@@ -154,11 +154,11 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : Comm
 
     }
 
-    private inner class ConfirmationPrompt : BooleanPrompt() {
+    private inner class ConfirmationPrompt: BooleanPrompt() {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Boolean): Prompt? {
             if (input) {
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
                 val character = characterProvider.getCharacter(context.getSessionData("character_id") as Int)
                 characterProvider.removeCharacter(character!!)
                 return CharacterDeletedPrompt()
@@ -177,7 +177,7 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit) : Comm
 
     }
 
-    private inner class CharacterDeletedPrompt : MessagePrompt() {
+    private inner class CharacterDeletedPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION

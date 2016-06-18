@@ -1,8 +1,8 @@
 package com.seventh_root.elysium.characters.bukkit.command.gender
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
-import com.seventh_root.elysium.characters.bukkit.gender.BukkitGender
-import com.seventh_root.elysium.characters.bukkit.gender.BukkitGenderProvider
+import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGender
+import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGenderProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class GenderAddCommand(private val plugin: ElysiumCharactersBukkit) : CommandExecutor {
+class GenderAddCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -28,14 +28,14 @@ class GenderAddCommand(private val plugin: ElysiumCharactersBukkit) : CommandExe
         if (sender is Conversable) {
             if (sender.hasPermission("elysium.characters.command.gender.add")) {
                 if (args.size > 0) {
-                    val genderProvider = plugin.core.serviceManager.getServiceProvider(BukkitGenderProvider::class.java)
+                    val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
                     val genderBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
                         genderBuilder.append(args[i]).append(' ')
                     }
                     genderBuilder.append(args[args.size - 1])
                     if (genderProvider.getGender(genderBuilder.toString()) == null) {
-                        genderProvider.addGender(BukkitGender(genderBuilder.toString()))
+                        genderProvider.addGender(ElysiumGender(name = genderBuilder.toString()))
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-add-valid")))
                     } else {
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-add-invalid-gender")))
@@ -50,14 +50,14 @@ class GenderAddCommand(private val plugin: ElysiumCharactersBukkit) : CommandExe
         return true
     }
 
-    private inner class GenderPrompt : ValidatingPrompt() {
+    private inner class GenderPrompt: ValidatingPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
             return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-add-prompt"))
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val genderProvider = plugin.core.serviceManager.getServiceProvider(BukkitGenderProvider::class.java)
+            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
             return genderProvider.getGender(input) == null
         }
 
@@ -66,14 +66,14 @@ class GenderAddCommand(private val plugin: ElysiumCharactersBukkit) : CommandExe
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val genderProvider = plugin.core.serviceManager.getServiceProvider(BukkitGenderProvider::class.java)
-            genderProvider.addGender(BukkitGender(input))
+            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
+            genderProvider.addGender(ElysiumGender(name = input))
             return GenderAddedPrompt()
         }
 
     }
 
-    private inner class GenderAddedPrompt : MessagePrompt() {
+    private inner class GenderAddedPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION

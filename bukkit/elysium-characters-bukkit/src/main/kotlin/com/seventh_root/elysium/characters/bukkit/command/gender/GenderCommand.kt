@@ -6,7 +6,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-class GenderCommand(private val plugin: ElysiumCharactersBukkit) : CommandExecutor {
+class GenderCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val genderAddCommand: GenderAddCommand
     private val genderRemoveCommand: GenderRemoveCommand
     private val genderListCommand: GenderListCommand

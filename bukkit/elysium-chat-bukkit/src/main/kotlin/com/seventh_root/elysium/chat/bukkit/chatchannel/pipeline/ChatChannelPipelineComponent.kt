@@ -4,7 +4,7 @@ import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
 import com.seventh_root.elysium.chat.bukkit.exception.ChatChannelMessageFormattingFailureException
 
-abstract class ChatChannelPipelineComponent : Comparable<ChatChannelPipelineComponent> {
+abstract class ChatChannelPipelineComponent: Comparable<ChatChannelPipelineComponent> {
 
     enum class Type private constructor(val priority: Int) {
 

@@ -1,6 +1,6 @@
 package com.seventh_root.elysium.trade.bukkit.listener
 
-import com.seventh_root.elysium.economy.bukkit.currency.BukkitCurrencyProvider
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
 import com.seventh_root.elysium.trade.bukkit.ElysiumTradeBukkit
 import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
@@ -26,7 +26,7 @@ class SignChangeListener(private val plugin: ElysiumTradeBukkit): Listener {
                     event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-sign-invalid-price")))
                     return
                 }
-                if (plugin.core.serviceManager.getServiceProvider(BukkitCurrencyProvider::class.java).getCurrency(event.getLine(3)) == null) {
+                if (plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(event.getLine(3)) == null) {
                     event.block.breakNaturally()
                     event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-sign-invalid-currency")))
                     return

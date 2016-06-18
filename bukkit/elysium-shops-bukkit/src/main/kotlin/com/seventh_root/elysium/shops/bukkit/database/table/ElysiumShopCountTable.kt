@@ -1,12 +1,12 @@
 package com.seventh_root.elysium.shops.bukkit.database.table
 
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.shops.bukkit.ElysiumShopsBukkit
-import com.seventh_root.elysium.shops.bukkit.shopcount.BukkitShopCount
+import com.seventh_root.elysium.shops.bukkit.shopcount.ElysiumShopCount
 import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
@@ -15,18 +15,18 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
 
-class BukkitShopCountTable : Table<BukkitShopCount> {
+class ElysiumShopCountTable: Table<ElysiumShopCount> {
 
     private val plugin: ElysiumShopsBukkit
     private val cacheManager: CacheManager
-    private val cache: Cache<Int, BukkitShopCount>
+    private val cache: Cache<Int, ElysiumShopCount>
     private val characterCache: Cache<Int, Int>
 
-    constructor(database: Database, plugin: ElysiumShopsBukkit): super(database, BukkitShopCount::class.java) {
+    constructor(database: Database, plugin: ElysiumShopsBukkit): super(database, ElysiumShopCount::class.java) {
         this.plugin = plugin
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitShopCount::class.java,
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, ElysiumShopCount::class.java,
                         ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
         characterCache = cacheManager.createCache("characterCache", CacheConfigurationBuilder
                 .newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
@@ -36,11 +36,11 @@ class BukkitShopCountTable : Table<BukkitShopCount> {
     override fun create() {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS bukkit_shop_count(" +
+                    "CREATE TABLE IF NOT EXISTS elysium_shop_count(" +
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
                             "character_id INTEGER," +
                             "count INTEGER," +
-                            "FOREIGN KEY(character_id) REFERENCES bukkit_character(id)" +
+                            "FOREIGN KEY(character_id) REFERENCES elysium_character(id)" +
                     ")"
             ).use { statement ->
                 statement.executeUpdate()
@@ -48,11 +48,11 @@ class BukkitShopCountTable : Table<BukkitShopCount> {
         }
     }
 
-    override fun insert(`object`: BukkitShopCount): Int {
+    override fun insert(`object`: ElysiumShopCount): Int {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "INSERT INTO bukkit_shop_count(character_id, count) VALUES(?, ?)",
+                    "INSERT INTO elysium_shop_count(character_id, count) VALUES(?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
                 statement.setInt(1, `object`.character.id)
@@ -70,10 +70,10 @@ class BukkitShopCountTable : Table<BukkitShopCount> {
         return id
     }
 
-    override fun update(`object`: BukkitShopCount) {
+    override fun update(`object`: ElysiumShopCount) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "UPDATE bukkit_shop_count SET character_id = ?, count = ? WHERE id = ?"
+                    "UPDATE elysium_shop_count SET character_id = ?, count = ? WHERE id = ?"
             ).use { statement ->
                 statement.setInt(1, `object`.character.id)
                 statement.setInt(2, `object`.count)
@@ -85,22 +85,22 @@ class BukkitShopCountTable : Table<BukkitShopCount> {
         }
     }
 
-    override fun get(id: Int): BukkitShopCount? {
+    override fun get(id: Int): ElysiumShopCount? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var shopCount: BukkitShopCount? = null
+            var shopCount: ElysiumShopCount? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, character_id, count FROM bukkit_shop_count WHERE id = ?"
+                        "SELECT id, character_id, count FROM elysium_shop_count WHERE id = ?"
                 ).use { statement ->
                     statement.setInt(1, id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
                         val characterId = resultSet.getInt("character_id")
-                        shopCount = BukkitShopCount(
+                        shopCount = ElysiumShopCount(
                                 id,
-                                plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                                plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
                                         .getCharacter(characterId)!!,
                                 resultSet.getInt("count")
                         )
@@ -113,20 +113,20 @@ class BukkitShopCountTable : Table<BukkitShopCount> {
         }
     }
 
-    fun get(character: ElysiumCharacter): BukkitShopCount? {
+    fun get(character: ElysiumCharacter): ElysiumShopCount? {
         if (characterCache.containsKey(character.id)) {
             return get(characterCache.get(character.id) as Int)
         } else {
-            var shopCount: BukkitShopCount? = null
+            var shopCount: ElysiumShopCount? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, character_id, count FROM bukkit_shop_count WHERE character_id = ?"
+                        "SELECT id, character_id, count FROM elysium_shop_count WHERE character_id = ?"
                 ).use { statement ->
                     statement.setInt(1, character.id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
                         val id = resultSet.getInt("id")
-                        shopCount = BukkitShopCount(
+                        shopCount = ElysiumShopCount(
                                 id,
                                 character,
                                 resultSet.getInt("count")
@@ -140,10 +140,10 @@ class BukkitShopCountTable : Table<BukkitShopCount> {
         }
     }
 
-    override fun delete(`object`: BukkitShopCount) {
+    override fun delete(`object`: ElysiumShopCount) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "DELETE FROM bukkit_shop_count WHERE id = ?"
+                    "DELETE FROM elysium_shop_count WHERE id = ?"
             ).use { statement ->
                 statement.setInt(1, `object`.id)
                 statement.executeUpdate()

@@ -4,11 +4,11 @@ import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipe
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
 import com.seventh_root.elysium.core.util.MathUtils
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.bukkit.ChatColor
 import java.util.*
 
-class BukkitGarbleChatChannelPipelineComponent(var clearRange: Double) : ChatChannelPipelineComponent() {
+class GarbleChatChannelPipelineComponent(var clearRange: Double): ChatChannelPipelineComponent() {
 
     override val type: ChatChannelPipelineComponent.Type
         get() = PRE_PROCESSOR
@@ -16,7 +16,7 @@ class BukkitGarbleChatChannelPipelineComponent(var clearRange: Double) : ChatCha
     override fun process(message: String, context: ChatMessageContext): String {
         val sender = context.sender
         val receiver = context.receiver
-        if (sender is BukkitPlayer && receiver is BukkitPlayer) {
+        if (sender is ElysiumPlayer && receiver is ElysiumPlayer) {
             val senderOfflineBukkitPlayer = sender.bukkitPlayer.player
             val receiverOfflineBukkitPlayer = receiver.bukkitPlayer.player
             if (senderOfflineBukkitPlayer.isOnline && receiverOfflineBukkitPlayer.isOnline) {

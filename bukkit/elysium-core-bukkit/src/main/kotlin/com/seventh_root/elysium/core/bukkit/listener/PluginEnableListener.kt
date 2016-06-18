@@ -6,7 +6,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginEnableEvent
 
-class PluginEnableListener(private val plugin: ElysiumCoreBukkit) : Listener {
+class PluginEnableListener(private val plugin: ElysiumCoreBukkit): Listener {
 
     @EventHandler
     fun onPluginEnable(event: PluginEnableEvent) {

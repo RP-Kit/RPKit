@@ -1,7 +1,7 @@
 package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class ChatChannelSetIRCWhitelistCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
+class ChatChannelSetIRCWhitelistCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -36,10 +36,10 @@ class ChatChannelSetIRCWhitelistCommand(private val plugin: ElysiumChatBukkit) :
         return true
     }
 
-    private inner class ChatChannelPrompt : ValidatingPrompt() {
+    private inner class ChatChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java).getChatChannel(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(input) != null
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
@@ -57,7 +57,7 @@ class ChatChannelSetIRCWhitelistCommand(private val plugin: ElysiumChatBukkit) :
 
     }
 
-    private inner class ChatChannelIRCWhitelistPrompt : BooleanPrompt() {
+    private inner class ChatChannelIRCWhitelistPrompt: BooleanPrompt() {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Boolean): Prompt {
             context.setSessionData("irc_whitelist", input)
@@ -74,7 +74,7 @@ class ChatChannelSetIRCWhitelistCommand(private val plugin: ElysiumChatBukkit) :
 
     }
 
-    private inner class ChatChannelIRCWhitelistSetPrompt : MessagePrompt() {
+    private inner class ChatChannelIRCWhitelistSetPrompt: MessagePrompt() {
 
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
@@ -82,7 +82,7 @@ class ChatChannelSetIRCWhitelistCommand(private val plugin: ElysiumChatBukkit) :
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
             val chatChannel = chatChannelProvider.getChatChannel(context.getSessionData("channel") as String)!!
             chatChannel.isIRCWhitelist = context.getSessionData("irc_whitelist") as Boolean
             chatChannelProvider.updateChatChannel(chatChannel)

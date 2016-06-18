@@ -2,8 +2,7 @@ package com.seventh_root.elysium.characters.bukkit.gender
 
 import com.seventh_root.elysium.core.database.TableRow
 
-interface Gender : TableRow {
-
-    val name: String
-
-}
+class ElysiumGender(
+        override var id: Int = 0,
+        val name: String
+): TableRow

@@ -2,7 +2,7 @@ package com.seventh_root.elysium.characters.bukkit.character
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.core.database.use
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayer
+import com.seventh_root.elysium.core.service.ServiceProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.ehcache.Cache
 import org.ehcache.CacheManager
@@ -12,7 +12,7 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.SQLException
 import java.util.*
 
-class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
+class ElysiumCharacterProvider: ServiceProvider {
 
     private val plugin: ElysiumCharactersBukkit
     private val activeCharacterCacheManager: CacheManager
@@ -26,20 +26,20 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
                         ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
     }
 
-    override fun getCharacter(id: Int): BukkitCharacter? {
-        return plugin.core.database.getTable(BukkitCharacter::class.java)!![id]
+    fun getCharacter(id: Int): ElysiumCharacter? {
+        return plugin.core.database.getTable(ElysiumCharacter::class.java)!![id]
     }
 
-    override fun getActiveCharacter(player: ElysiumPlayer): BukkitCharacter? {
+    fun getActiveCharacter(player: ElysiumPlayer): ElysiumCharacter? {
         val playerId = player.id
         if (activeCharacterCache.containsKey(playerId)) {
             return getCharacter(activeCharacterCache.get(playerId) as Int)
         } else {
             try {
-                var character: BukkitCharacter? = null
+                var character: ElysiumCharacter? = null
                 plugin.core.database.createConnection().use { connection ->
                     connection.prepareStatement(
-                            "SELECT character_id FROM player_character WHERE player_id = ?").use({ statement ->
+                            "SELECT character_id FROM player_character WHERE player_id = ?").use { statement ->
                         statement.setInt(1, player.id)
                         val resultSet = statement.executeQuery()
                         if (resultSet.next()) {
@@ -47,7 +47,7 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
                             character = getCharacter(characterId)
                             activeCharacterCache.put(playerId, characterId)
                         }
-                    })
+                    }
                 }
                 return character
             } catch (exception: SQLException) {
@@ -57,10 +57,10 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
         return null
     }
 
-    override fun setActiveCharacter(player: ElysiumPlayer, character: BukkitCharacter?) {
+    fun setActiveCharacter(player: ElysiumPlayer, character: ElysiumCharacter?) {
         val oldCharacter = getActiveCharacter(player)
         if (oldCharacter != null) {
-            if (player is BukkitPlayer) {
+            if (player is ElysiumPlayer) {
                 val offlineBukkitPlayer = player.bukkitPlayer
                 if (offlineBukkitPlayer.isOnline) {
                     val bukkitPlayer = offlineBukkitPlayer.player
@@ -80,17 +80,17 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
             try {
                 plugin.core.database.createConnection().use { connection ->
                     connection.prepareStatement(
-                            "INSERT INTO player_character(player_id, character_id) VALUES(?, ?) ON DUPLICATE KEY UPDATE character_id = VALUES(character_id)").use({ statement ->
+                            "INSERT INTO player_character(player_id, character_id) VALUES(?, ?) ON DUPLICATE KEY UPDATE character_id = VALUES(character_id)").use { statement ->
                         statement.setInt(1, player.id)
                         statement.setInt(2, character.id)
                         statement.executeUpdate()
-                    })
+                    }
                 }
             } catch (exception: SQLException) {
                 exception.printStackTrace()
             }
 
-            if (player is BukkitPlayer) {
+            if (player is ElysiumPlayer) {
                 val offlineBukkitPlayer = player.bukkitPlayer
                 if (offlineBukkitPlayer.isOnline) {
                     val bukkitPlayer = offlineBukkitPlayer.player
@@ -113,11 +113,11 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
             try {
                 plugin.core.database.createConnection().use { connection ->
                     connection.prepareStatement(
-                            "DELETE FROM player_character WHERE player_id = ? AND character_id = ?").use({ statement ->
+                            "DELETE FROM player_character WHERE player_id = ? AND character_id = ?").use { statement ->
                         statement.setInt(1, player.id)
                         statement.setInt(2, oldCharacter.id)
                         statement.executeUpdate()
-                    })
+                    }
                 }
             } catch (exception: SQLException) {
                 exception.printStackTrace()
@@ -126,19 +126,19 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
         }
     }
 
-    override fun getCharacters(player: ElysiumPlayer): Collection<BukkitCharacter> {
+    fun getCharacters(player: ElysiumPlayer): Collection<ElysiumCharacter> {
         try {
-            val characters: MutableList<BukkitCharacter> = ArrayList()
+            val characters: MutableList<ElysiumCharacter> = ArrayList()
             plugin.core.database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id FROM bukkit_character WHERE player_id = ? ORDER BY id").use({ statement ->
+                        "SELECT id FROM elysium_character WHERE player_id = ? ORDER BY id").use { statement ->
                     statement.setInt(1, player.id)
                     val resultSet = statement.executeQuery()
                     while (resultSet.next()) {
                         characters.add(getCharacter(resultSet.getInt("id"))!!)
                     }
 
-                })
+                }
             }
             return characters
         } catch (exception: SQLException) {
@@ -147,22 +147,22 @@ class BukkitCharacterProvider : CharacterProvider<BukkitCharacter> {
         return emptyList()
     }
 
-    override fun addCharacter(character: BukkitCharacter): Int {
-        return plugin.core.database.getTable(BukkitCharacter::class.java)!!.insert(character)
+    fun addCharacter(character: ElysiumCharacter): Int {
+        return plugin.core.database.getTable(ElysiumCharacter::class.java)!!.insert(character)
     }
 
-    override fun removeCharacter(character: BukkitCharacter) {
+    fun removeCharacter(character: ElysiumCharacter) {
         val player = character.player
         if (player != null)
             setActiveCharacter(player, null)
-        plugin.core.database.getTable(BukkitCharacter::class.java)!!.delete(character)
+        plugin.core.database.getTable(ElysiumCharacter::class.java)!!.delete(character)
     }
 
-    override fun updateCharacter(character: BukkitCharacter) {
+    fun updateCharacter(character: ElysiumCharacter) {
         if (plugin.config.getBoolean("characters.delete-character-on-death") && character.isDead) {
             removeCharacter(character)
         } else {
-            plugin.core.database.getTable(BukkitCharacter::class.java)!!.update(character)
+            plugin.core.database.getTable(ElysiumCharacter::class.java)!!.update(character)
         }
     }
 

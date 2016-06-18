@@ -8,7 +8,7 @@ import com.seventh_root.elysium.core.service.ServiceProvider
 
 import java.sql.SQLException
 
-class ElysiumCoreBukkit : ElysiumBukkitPlugin() {
+class ElysiumCoreBukkit: ElysiumBukkitPlugin() {
 
     override lateinit var serviceProviders: Array<ServiceProvider>
 

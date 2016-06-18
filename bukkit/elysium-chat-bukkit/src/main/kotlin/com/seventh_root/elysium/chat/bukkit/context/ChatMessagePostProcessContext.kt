@@ -4,9 +4,7 @@ import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
 
-interface ChatMessagePostProcessContext {
-
-    val chatChannel: ElysiumChatChannel
-    val sender: ElysiumPlayer
-
-}
+class ChatMessagePostProcessContext(
+        val chatChannel: ElysiumChatChannel,
+        val sender: ElysiumPlayer
+)

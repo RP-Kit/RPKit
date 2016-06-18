@@ -6,7 +6,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-class CharacterSetCommand(private val plugin: ElysiumCharactersBukkit) : CommandExecutor {
+class CharacterSetCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     private val characterSetPlayerCommand: CharacterSetPlayerCommand
     private val characterSetNameCommand: CharacterSetNameCommand

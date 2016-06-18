@@ -1,13 +1,13 @@
 package com.seventh_root.elysium.characters.bukkit.database.table
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacter
-import com.seventh_root.elysium.characters.bukkit.gender.BukkitGenderProvider
-import com.seventh_root.elysium.characters.bukkit.race.BukkitRaceProvider
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
+import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGenderProvider
+import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProvider
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
-import com.seventh_root.elysium.players.bukkit.player.BukkitPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
@@ -25,17 +25,17 @@ import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.sql.Types.INTEGER
 
-class BukkitCharacterTable: Table<BukkitCharacter> {
+class ElysiumCharacterTable: Table<ElysiumCharacter> {
 
     private val plugin: ElysiumCharactersBukkit
     private val cacheManager: CacheManager
-    private val cache: Cache<Int, BukkitCharacter>
+    private val cache: Cache<Int, ElysiumCharacter>
 
-    constructor(database: Database, plugin: ElysiumCharactersBukkit): super(database, BukkitCharacter::class.java) {
+    constructor(database: Database, plugin: ElysiumCharactersBukkit): super(database, ElysiumCharacter::class.java) {
         this.plugin = plugin;
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, BukkitCharacter::class.java,
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ElysiumCharacter::class.java,
                         ResourcePoolsBuilder.heap((plugin.server.maxPlayers * 2).toLong())).build())
     }
 
@@ -43,7 +43,7 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
         try {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "CREATE TABLE IF NOT EXISTS bukkit_character (" +
+                        "CREATE TABLE IF NOT EXISTS elysium_character (" +
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
                             "player_id INTEGER," +
                             "name VARCHAR(256)," +
@@ -69,10 +69,12 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
                             "max_mana INTEGER," +
                             "food_level INTEGER," +
                             "thirst_level INTEGER," +
-                            "FOREIGN KEY(player_id) REFERENCES bukkit_player(id)," +
-                            "FOREIGN KEY(gender_id) REFERENCES bukkit_gender(id)," +
-                            "FOREIGN KEY(race_id) REFERENCES bukkit_race(id)" +
-                        ")").use({ statement -> statement.executeUpdate() })
+                            "FOREIGN KEY(player_id) REFERENCES elysium_player(id)," +
+                            "FOREIGN KEY(gender_id) REFERENCES elysium_gender(id)," +
+                            "FOREIGN KEY(race_id) REFERENCES elysium_race(id)" +
+                        ")").use { statement ->
+                    statement.executeUpdate()
+                }
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
@@ -85,9 +87,11 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
                                 "player_id INTEGER," +
                                 "character_id INTEGER," +
                                 "UNIQUE(player_id)," +
-                                "FOREIGN KEY(player_id) REFERENCES bukkit_player(id)," +
-                                "FOREIGN KEY(character_id) REFERENCES bukkit_character(id)" +
-                        ")").use({ statement -> statement.executeUpdate() })
+                                "FOREIGN KEY(player_id) REFERENCES elysium_player(id)," +
+                                "FOREIGN KEY(character_id) REFERENCES elysium_character(id)" +
+                        ")").use { statement ->
+                    statement.executeUpdate()
+                }
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
@@ -107,13 +111,13 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
         }
     }
 
-    override fun insert(`object`: BukkitCharacter): Int {
+    override fun insert(`object`: ElysiumCharacter): Int {
         try {
             var id = 0
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "INSERT INTO bukkit_character(player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        RETURN_GENERATED_KEYS).use({ statement ->
+                        "INSERT INTO elysium_character(player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        RETURN_GENERATED_KEYS).use { statement ->
                     val player = `object`.player
                     if (player != null) {
                         statement.setInt(1, player.id)
@@ -160,7 +164,7 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
                         `object`.id = id
                         cache.put(id, `object`)
                     }
-                })
+                }
             }
             return id
         } catch (exception: SQLException) {
@@ -220,11 +224,11 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
         return emptyArray()
     }
 
-    override fun update(`object`: BukkitCharacter) {
+    override fun update(`object`: ElysiumCharacter) {
         try {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "UPDATE bukkit_character SET player_id = ?, name = ?, gender_id = ?, age = ?, race_id = ?, description = ?, dead = ?, world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ?, inventory_contents = ?, helmet = ?, chestplate = ?, leggings = ?, boots = ?, health = ?, max_health = ?, mana = ?, max_mana = ?, food_level = ?, thirst_level = ? WHERE id = ?").use({ statement ->
+                        "UPDATE elysium_character SET player_id = ?, name = ?, gender_id = ?, age = ?, race_id = ?, description = ?, dead = ?, world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ?, inventory_contents = ?, helmet = ?, chestplate = ?, leggings = ?, boots = ?, health = ?, max_health = ?, mana = ?, max_mana = ?, food_level = ?, thirst_level = ? WHERE id = ?").use { statement ->
                     val player = `object`.player
                     if (player != null) {
                         statement.setInt(1, player.id)
@@ -267,7 +271,7 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
                     statement.setInt(25, `object`.id)
                     statement.executeUpdate()
                     cache.put(`object`.id, `object`)
-                })
+                }
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()
@@ -275,22 +279,22 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
 
     }
 
-    override fun get(id: Int): BukkitCharacter? {
+    override fun get(id: Int): ElysiumCharacter? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
             try {
-                var character: BukkitCharacter? = null
+                var character: ElysiumCharacter? = null
                 database.createConnection().use { connection ->
                     connection.prepareStatement(
-                            "SELECT id, player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level FROM bukkit_character WHERE id = ?").use({ statement ->
-                        val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                        val genderProvider = plugin.core.serviceManager.getServiceProvider(BukkitGenderProvider::class.java)
-                        val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+                            "SELECT id, player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level FROM elysium_character WHERE id = ?").use { statement ->
+                        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                        val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
+                        val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java)
                         statement.setInt(1, id)
                         val resultSet = statement.executeQuery()
                         if (resultSet.next()) {
-                            character = BukkitCharacter(
+                            character = ElysiumCharacter(
                                     plugin = plugin,
                                     id = resultSet.getInt("id"),
                                     player = playerProvider.getPlayer(resultSet.getInt("player_id")),
@@ -322,7 +326,7 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
                             )
                             cache.put(id, character)
                         }
-                    })
+                    }
                 }
                 return character
             } catch (exception: SQLException) {
@@ -333,17 +337,17 @@ class BukkitCharacterTable: Table<BukkitCharacter> {
         return null
     }
 
-    override fun delete(`object`: BukkitCharacter) {
+    override fun delete(`object`: ElysiumCharacter) {
         try {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "DELETE FROM bukkit_character WHERE id = ?").use({ statement ->
+                        "DELETE FROM elysium_character WHERE id = ?").use { statement ->
                     statement.setInt(1, `object`.id)
                     statement.executeUpdate()
                     if (cache.containsKey(`object`.id)) {
                         cache.remove(`object`.id)
                     }
-                })
+                }
             }
         } catch (exception: SQLException) {
             exception.printStackTrace()

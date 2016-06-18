@@ -38,7 +38,7 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : TableRow> getTable(type: Class<T>): Table<T>? {
+    fun <T: TableRow> getTable(type: Class<T>): Table<T>? {
         val table = tables[UPPER_CAMEL.to(LOWER_UNDERSCORE, type.simpleName)]
         return table as Table<T>?
     }
@@ -52,7 +52,7 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
         if (tableVersionTable != null) {
             val tableVersion = tableVersionTable.get(table.name)
             if (tableVersion == null) {
-                tableVersionTable.insert(TableVersion(table.name, version))
+                tableVersionTable.insert(TableVersion(table = table.name, version = version))
             } else {
                 tableVersion.version = version
                 tableVersionTable.update(tableVersion)

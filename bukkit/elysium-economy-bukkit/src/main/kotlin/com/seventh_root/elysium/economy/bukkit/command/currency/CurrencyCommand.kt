@@ -6,7 +6,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-class CurrencyCommand(private val plugin: ElysiumEconomyBukkit) : CommandExecutor {
+class CurrencyCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor {
     private val currencyAddCommand: CurrencyAddCommand
     private val currencyRemoveCommand: CurrencyRemoveCommand
     private val currencyListCommand: CurrencyListCommand
