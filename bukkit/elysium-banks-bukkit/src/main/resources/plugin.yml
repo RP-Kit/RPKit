@@ -1,0 +1,9 @@
+name: elysium-banks-bukkit
+author: alyphen
+version: @version@
+main: com.seventh_root.elysium.banks.bukkit.ElysiumBanksBukkit
+depend: [elysium-core-bukkit, elysium-players-bukkit, elysium-characters-bukkit, elysium-economy-bukkit]
+permissions:
+    elysium.banks.sign.bank:
+        description: Allows the creation of bank signs
+        default: op
