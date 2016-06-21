@@ -5,7 +5,7 @@ import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
-import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
+import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.event.EventHandler
@@ -42,12 +42,12 @@ class AsyncPlayerChatListener(private val plugin: ElysiumChatBukkit): Listener {
         }
         if (channel != null) {
             for (listener in channel.listeners) {
-                if (listener is ElysiumPlayer) {
-                    val bukkitOfflinePlayer = listener.bukkitPlayer
+                val bukkitOfflinePlayer = listener.bukkitPlayer
+                if (bukkitOfflinePlayer != null) {
                     if (bukkitOfflinePlayer.isOnline) {
                         if (channel.radius <= 0
                                 || (bukkitOfflinePlayer.player.world == bukkitPlayer.world
-                                    && bukkitPlayer.location.distanceSquared(bukkitOfflinePlayer.player.location) <= channel.radius * channel.radius)
+                                && bukkitPlayer.location.distanceSquared(bukkitOfflinePlayer.player.location) <= channel.radius * channel.radius)
                         ) {
                             val processedMessage = channel.processMessage(message, ChatMessageContext(channel, player, listener))
                             if (processedMessage != null) {
@@ -57,7 +57,13 @@ class AsyncPlayerChatListener(private val plugin: ElysiumChatBukkit): Listener {
                     }
                 }
             }
-            channel.postProcess(message, ChatMessagePostProcessContext(channel, player))
+            if (channel.isIRCEnabled) {
+                val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class.java)
+                val processedMessage = channel.postProcess(message, ChatMessagePostProcessContext(channel, player))
+                ircProvider.ircBot.sendIRC().message(channel.ircChannel, ChatColor.stripColor(processedMessage))
+            } else {
+                channel.postProcess(message, ChatMessagePostProcessContext(channel, player))
+            }
         } else {
             event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-chat-channel")))
         }

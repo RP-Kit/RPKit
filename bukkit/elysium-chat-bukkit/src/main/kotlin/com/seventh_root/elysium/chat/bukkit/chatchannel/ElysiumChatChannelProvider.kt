@@ -1,9 +1,9 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.IRCChatChannelPipelineComponent
-import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelTable
 import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelSpeakerTable
+import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelTable
+import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import com.seventh_root.elysium.core.service.ServiceProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
@@ -24,10 +24,18 @@ class ElysiumChatChannelProvider(private val plugin: ElysiumChatBukkit): Service
 
     fun addChatChannel(chatChannel: ElysiumChatChannel) {
         plugin.core.database.getTable(ElysiumChatChannel::class.java)!!.insert(chatChannel)
+        if (chatChannel.isIRCEnabled) {
+            val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class.java)
+            ircProvider.ircBot.sendIRC().joinChannel(chatChannel.ircChannel)
+        }
     }
 
     fun removeChatChannel(chatChannel: ElysiumChatChannel) {
         plugin.core.database.getTable(ElysiumChatChannel::class.java)!!.delete(chatChannel)
+        if (chatChannel.isIRCEnabled) {
+            val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class.java)
+            ircProvider.ircBot.sendRaw().rawLine("PART ${chatChannel.ircChannel}")
+        }
     }
 
     fun updateChatChannel(chatChannel: ElysiumChatChannel) {
@@ -49,17 +57,7 @@ class ElysiumChatChannelProvider(private val plugin: ElysiumChatBukkit): Service
     }
 
     fun getChatChannelFromIRCChannel(ircChannel: String): ElysiumChatChannel? {
-        for (channel in chatChannels) {
-            val pipeline = channel.pipeline
-            for (component in pipeline) {
-                if (component is IRCChatChannelPipelineComponent) {
-                    if (component.ircChannel == ircChannel) {
-                        return channel
-                    }
-                }
-            }
-        }
-        return null
+        return chatChannels.filter { chatChannel -> chatChannel.ircChannel == ircChannel }.firstOrNull()
     }
 
 }

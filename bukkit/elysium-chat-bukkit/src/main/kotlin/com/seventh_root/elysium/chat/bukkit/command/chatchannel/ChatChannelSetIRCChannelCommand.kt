@@ -60,7 +60,7 @@ class ChatChannelSetIRCChannelCommand(private val plugin: ElysiumChatBukkit): Co
     private inner class ChatChannelIRCChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return input.matches("/([#&][^\\x07\\x2C\\s]{0,200})/".toRegex())
+            return input.matches("[&#+!][^ ,:]{1,50}".toRegex())
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {

@@ -45,6 +45,11 @@ messages:
     chatchannel-set-joined-by-default-valid: '&aDefault join state set.'
     chatchannel-list-title: '&fChat channels:'
     chatchannel-list-item: '&f- $color$name'
+    irc-register-valid: 'Registered. Please check your email for the verification code to complete the verification process.'
+    irc-register-invalid-email-invalid: 'You did not specify a valid email.'
+    irc-register-invalid-email-not-specified: 'You must specify an email.'
+    irc-verify-valid: 'Attempted to verify. If you correctly entered the verification code, I should now be verified.'
+    irc-verify-invalid-verification-code-not-specified: 'You must specify the registration code from your email.'
     not-from-console: '&cYou may not use this command from console.'
     operation-cancelled: '&cOperation cancelled.'
     no-chat-channel: '&cYou are not currently speaking in a chat channel. Please list channels with /chatchannel list and then speak in one using /chatchannel speak.'
@@ -72,3 +77,12 @@ messages:
     no-message: '&cFailed to send message due to lack of message.'
     no-character: '&cThat channel requires you to have an active character.'
     no-channel: '&cFailed to send message due to missing channel.'
+irc:
+    name: 'elysium'
+    real-name: 'elysium'
+    login: 'elysium'
+    cap-enabled: true
+    auto-nick-change-enabled: true
+    auto-split-message-enabled: false
+    server: 'chat.freenode.net:6667'
+    password: 'change_me'

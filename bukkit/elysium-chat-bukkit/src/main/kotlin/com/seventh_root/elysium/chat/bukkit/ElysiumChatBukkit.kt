@@ -5,6 +5,7 @@ import com.seventh_root.elysium.chat.bukkit.command.chatchannel.ChatChannelComma
 import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelListenerTable
 import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelSpeakerTable
 import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelTable
+import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import com.seventh_root.elysium.chat.bukkit.listener.AsyncPlayerChatListener
 import com.seventh_root.elysium.chat.bukkit.listener.PlayerJoinListener
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
@@ -15,12 +16,14 @@ import java.sql.SQLException
 class ElysiumChatBukkit: ElysiumBukkitPlugin() {
 
     private lateinit var chatChannelProvider: ElysiumChatChannelProvider
+    private lateinit var ircProvider: ElysiumIRCProvider
     override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()
         chatChannelProvider = ElysiumChatChannelProvider(this)
-        serviceProviders = arrayOf<ServiceProvider>(chatChannelProvider)
+        ircProvider = ElysiumIRCProvider(this)
+        serviceProviders = arrayOf(chatChannelProvider, ircProvider)
     }
 
     override fun registerCommands() {
