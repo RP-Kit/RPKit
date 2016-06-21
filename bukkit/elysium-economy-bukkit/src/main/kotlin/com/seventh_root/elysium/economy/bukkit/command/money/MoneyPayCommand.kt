@@ -231,21 +231,26 @@ class MoneyPayCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
             val amount = context.getSessionData("amount") as Int
             if (fromCharacter != null) {
                 if (toCharacter != null) {
-                    if (fromBukkitPlayer.location.distanceSquared(toPlayer.bukkitPlayer.player.location) <= plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
-                        if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
-                            if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
-                                economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
-                                toCharacter.player?.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-received"))
-                                        .replace("\$amount", amount.toString())
-                                        .replace("\$currency", if (amount == 1) currency.nameSingular else currency.namePlural)
-                                        .replace("\$character", fromCharacter.name)
-                                        .replace("\$player", fromCharacter.player?.name?:""))
-                                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-valid"))
+                    val toBukkitPlayer = toPlayer.bukkitPlayer
+                    if (toBukkitPlayer != null) {
+                        if (fromBukkitPlayer.location.distanceSquared(toBukkitPlayer.player.location) <= plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
+                            if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
+                                if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
+                                    economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
+                                    toCharacter.player?.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-received"))
+                                            .replace("\$amount", amount.toString())
+                                            .replace("\$currency", if (amount == 1) currency.nameSingular else currency.namePlural)
+                                            .replace("\$character", fromCharacter.name)
+                                            .replace("\$player", fromCharacter.player?.name ?: ""))
+                                    return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-valid"))
+                                } else {
+                                    return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-limit"))
+                                }
                             } else {
-                                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-limit"))
+                                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-balance"))
                             }
                         } else {
-                            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-balance"))
+                            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-player-invalid-player-distance"))
                         }
                     } else {
                         return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-player-invalid-player-distance"))

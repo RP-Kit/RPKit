@@ -17,18 +17,22 @@ class GarbleChatChannelPipelineComponent(var clearRange: Double): ChatChannelPip
         val sender = context.sender
         val receiver = context.receiver
         if (sender is ElysiumPlayer && receiver is ElysiumPlayer) {
-            val senderOfflineBukkitPlayer = sender.bukkitPlayer.player
-            val receiverOfflineBukkitPlayer = receiver.bukkitPlayer.player
-            if (senderOfflineBukkitPlayer.isOnline && receiverOfflineBukkitPlayer.isOnline) {
-                val senderBukkitPlayer = senderOfflineBukkitPlayer.player
-                val receiverBukkitPlayer = receiverOfflineBukkitPlayer.player
-                if (senderBukkitPlayer.hasLineOfSight(receiverBukkitPlayer)) {
-                    val distance = MathUtils.fastSqrt(senderBukkitPlayer.location.distanceSquared(receiverBukkitPlayer.location))
-                    val hearingRange = context.chatChannel.radius.toDouble()
-                    val clarity = 1.0 - (distance - clearRange) / hearingRange
-                    return garbleMessage(message, clarity)
-                } else {
-                    return garbleMessage(message, 0.0)
+            val senderOfflineBukkitPlayer = sender.bukkitPlayer
+            val receiverOfflineBukkitPlayer = receiver.bukkitPlayer
+            if (senderOfflineBukkitPlayer != null) {
+                if (receiverOfflineBukkitPlayer != null) {
+                    if (senderOfflineBukkitPlayer.isOnline && receiverOfflineBukkitPlayer.isOnline) {
+                        val senderBukkitPlayer = senderOfflineBukkitPlayer.player
+                        val receiverBukkitPlayer = receiverOfflineBukkitPlayer.player
+                        if (senderBukkitPlayer.hasLineOfSight(receiverBukkitPlayer)) {
+                            val distance = MathUtils.fastSqrt(senderBukkitPlayer.location.distanceSquared(receiverBukkitPlayer.location))
+                            val hearingRange = context.chatChannel.radius.toDouble()
+                            val clarity = 1.0 - (distance - clearRange) / hearingRange
+                            return garbleMessage(message, clarity)
+                        } else {
+                            return garbleMessage(message, 0.0)
+                        }
+                    }
                 }
             }
         }

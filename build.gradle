@@ -47,6 +47,8 @@ project(":elysium-core") {
     def gsonVersion = "2.2.4"
     def ehcacheVersion = "3.0.2"
     def kotlinVersion = "1.0.1-2"
+    def slf4jVersion = "1.7.20"
+    def pircBotXVersion = "2.1"
 
     dependencies {
         compile group: "mysql", name: "mysql-connector-java", version: mysqlConnectorVersion
@@ -56,7 +58,8 @@ project(":elysium-core") {
         compile group: "com.google.code.gson", name: "gson", version: gsonVersion
         compile group: "org.ehcache", name: "ehcache", version: ehcacheVersion
         compile group: "org.jetbrains.kotlin", name: "kotlin-stdlib", version: kotlinVersion
-        compile group: "org.slf4j", name: "slf4j-jdk14", version: "1.7.20"
+        compile group: "org.slf4j", name: "slf4j-jdk14", version: slf4jVersion
+        compile group: "org.pircbotx", name: "pircbotx", version: pircBotXVersion
     }
 
     apply plugin: "com.github.johnrengelman.shadow"

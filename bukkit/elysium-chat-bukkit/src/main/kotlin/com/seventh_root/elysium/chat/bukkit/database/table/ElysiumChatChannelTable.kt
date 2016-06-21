@@ -167,8 +167,6 @@ class ElysiumChatChannelTable: Table<ElysiumChatChannel> {
                                 isIRCWhitelist = resultSet.getBoolean("irc_whitelist"),
                                 isJoinedByDefault = resultSet.getBoolean("joined_by_default")
                         )
-                        (database.getTable(ChatChannelSpeaker::class.java) as? ChatChannelSpeakerTable)?.get(finalChatChannel)?.map { speaker -> speaker.player }?.forEach { speaker -> finalChatChannel.addSpeaker0(speaker) }
-                        (database.getTable(ChatChannelListener::class.java) as? ChatChannelListenerTable)?.get(finalChatChannel)?.map { listener -> listener.player }?.forEach { listener -> finalChatChannel.addListener0(listener) }
                         chatChannel = finalChatChannel
                         cache.put(id, finalChatChannel)
                         nameCache.put(finalChatChannel.name, id)
@@ -208,8 +206,6 @@ class ElysiumChatChannelTable: Table<ElysiumChatChannel> {
                                 isIRCWhitelist = resultSet.getBoolean("irc_whitelist"),
                                 isJoinedByDefault = resultSet.getBoolean("joined_by_default")
                         )
-                        (database.getTable(ChatChannelSpeaker::class.java) as? ChatChannelSpeakerTable)?.get(finalChatChannel)?.map { speaker -> speaker.player }?.forEach { speaker -> finalChatChannel.addSpeaker0(speaker) }
-                        (database.getTable(ChatChannelListener::class.java) as? ChatChannelListenerTable)?.get(finalChatChannel)?.map { listener -> listener.player }?.forEach { listener -> finalChatChannel.addListener0(listener) }
                         chatChannel = finalChatChannel
                         cache.put(id, finalChatChannel)
                         nameCache.put(finalChatChannel.name, id)
@@ -222,7 +218,7 @@ class ElysiumChatChannelTable: Table<ElysiumChatChannel> {
 
     fun getAll(): Collection<ElysiumChatChannel> {
         val chatChannels = ArrayList<ElysiumChatChannel>()
-        plugin.core.database.createConnection().use { connection ->
+        database.createConnection().use { connection ->
             connection.prepareStatement("SELECT id FROM elysium_chat_channel").use { statement ->
                 val resultSet = statement.executeQuery()
                 while (resultSet.next()) {

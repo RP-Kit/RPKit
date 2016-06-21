@@ -62,17 +62,19 @@ class ElysiumCharacterProvider: ServiceProvider {
         if (oldCharacter != null) {
             if (player is ElysiumPlayer) {
                 val offlineBukkitPlayer = player.bukkitPlayer
-                if (offlineBukkitPlayer.isOnline) {
-                    val bukkitPlayer = offlineBukkitPlayer.player
-                    oldCharacter.inventoryContents = bukkitPlayer.inventory.contents
-                    oldCharacter.helmet = bukkitPlayer.inventory.helmet
-                    oldCharacter.chestplate = bukkitPlayer.inventory.chestplate
-                    oldCharacter.leggings = bukkitPlayer.inventory.leggings
-                    oldCharacter.boots = bukkitPlayer.inventory.boots
-                    oldCharacter.location = bukkitPlayer.location
-                    oldCharacter.health = bukkitPlayer.health
-                    oldCharacter.foodLevel = bukkitPlayer.foodLevel
-                    updateCharacter(oldCharacter)
+                if (offlineBukkitPlayer != null) {
+                    if (offlineBukkitPlayer.isOnline) {
+                        val bukkitPlayer = offlineBukkitPlayer.player
+                        oldCharacter.inventoryContents = bukkitPlayer.inventory.contents
+                        oldCharacter.helmet = bukkitPlayer.inventory.helmet
+                        oldCharacter.chestplate = bukkitPlayer.inventory.chestplate
+                        oldCharacter.leggings = bukkitPlayer.inventory.leggings
+                        oldCharacter.boots = bukkitPlayer.inventory.boots
+                        oldCharacter.location = bukkitPlayer.location
+                        oldCharacter.health = bukkitPlayer.health
+                        oldCharacter.foodLevel = bukkitPlayer.foodLevel
+                        updateCharacter(oldCharacter)
+                    }
                 }
             }
         }
@@ -92,19 +94,21 @@ class ElysiumCharacterProvider: ServiceProvider {
 
             if (player is ElysiumPlayer) {
                 val offlineBukkitPlayer = player.bukkitPlayer
-                if (offlineBukkitPlayer.isOnline) {
-                    val bukkitPlayer = offlineBukkitPlayer.player
-                    bukkitPlayer.inventory.contents = character.inventoryContents
-                    bukkitPlayer.inventory.helmet = character.helmet
-                    bukkitPlayer.inventory.chestplate = character.chestplate
-                    bukkitPlayer.inventory.leggings = character.leggings
-                    bukkitPlayer.inventory.boots = character.boots
-                    bukkitPlayer.teleport(character.location)
-                    bukkitPlayer.maxHealth = character.maxHealth
-                    bukkitPlayer.health = character.health
-                    bukkitPlayer.foodLevel = character.foodLevel
-                    if (plugin.config.getBoolean("characters.set-player-display-name")) {
-                        bukkitPlayer.displayName = character.name
+                if (offlineBukkitPlayer != null) {
+                    if (offlineBukkitPlayer.isOnline) {
+                        val bukkitPlayer = offlineBukkitPlayer.player
+                        bukkitPlayer.inventory.contents = character.inventoryContents
+                        bukkitPlayer.inventory.helmet = character.helmet
+                        bukkitPlayer.inventory.chestplate = character.chestplate
+                        bukkitPlayer.inventory.leggings = character.leggings
+                        bukkitPlayer.inventory.boots = character.boots
+                        bukkitPlayer.teleport(character.location)
+                        bukkitPlayer.maxHealth = character.maxHealth
+                        bukkitPlayer.health = character.health
+                        bukkitPlayer.foodLevel = character.foodLevel
+                        if (plugin.config.getBoolean("characters.set-player-display-name")) {
+                            bukkitPlayer.displayName = character.name
+                        }
                     }
                 }
             }

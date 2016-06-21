@@ -65,12 +65,14 @@ class ElysiumChatChannel: TableRow {
                 }
             }
         }
-    private val speakers0: MutableList<ElysiumPlayer>
     val speakers: List<ElysiumPlayer>
-        get() = Collections.unmodifiableList(speakers0)
-    private val listeners0: MutableList<ElysiumPlayer>
+        get() = (plugin.core.database.getTable(ChatChannelSpeaker::class.java) as ChatChannelSpeakerTable)
+                        .get(this)
+                        .map { speaker -> speaker.player }
     val listeners: List<ElysiumPlayer>
-        get() = Collections.unmodifiableList(listeners0)
+        get() = (plugin.core.database.getTable(ChatChannelListener::class.java) as ChatChannelListenerTable)
+                .get(this)
+                .map { speaker -> speaker.player }
     val pipeline: MutableList<ChatChannelPipelineComponent>
     var matchPattern: String
     var isIRCEnabled: Boolean
@@ -134,8 +136,6 @@ class ElysiumChatChannel: TableRow {
         this.formatString = formatString
         this.radius = radius
         this.clearRadius = clearRadius
-        this.speakers0 = speakers
-        this.listeners0 = listeners
         this.matchPattern = matchPattern
         this.isIRCEnabled = isIRCEnabled
         this.ircChannel = ircChannel
@@ -152,21 +152,13 @@ class ElysiumChatChannel: TableRow {
     }
 
     fun addSpeaker(speaker: ElysiumPlayer) {
-        if (!speakers0.contains(speaker)) {
-            speakers0.add(speaker)
+        if (!speakers.contains(speaker)) {
             plugin.core.database.getTable(ChatChannelSpeaker::class.java)?.insert(ChatChannelSpeaker(0, this, speaker))
         }
     }
 
-    fun addSpeaker0(speaker: ElysiumPlayer) {
-        if (!speakers0.contains(speaker)) {
-            speakers0.add(speaker)
-        }
-    }
-
     fun removeSpeaker(speaker: ElysiumPlayer) {
-        while (speakers0.contains(speaker)) {
-            speakers0.remove(speaker)
+        while (speakers.contains(speaker)) {
             val chatChannelSpeakerTable = plugin.core.database.getTable(ChatChannelSpeaker::class.java) as? ChatChannelSpeakerTable
             if (chatChannelSpeakerTable != null) {
                 val chatChannelSpeaker = chatChannelSpeakerTable.get(speaker)
@@ -179,28 +171,14 @@ class ElysiumChatChannel: TableRow {
         }
     }
 
-    fun removeSpeaker0(speaker: ElysiumPlayer) {
-        while (speakers0.contains(speaker)) {
-            speakers0.remove(speaker)
-        }
-    }
-
     fun addListener(listener: ElysiumPlayer) {
-        if (!listeners0.contains(listener)) {
-            listeners0.add(listener)
+        if (!listeners.contains(listener)) {
             plugin.core.database.getTable(ChatChannelListener::class.java)?.insert(ChatChannelListener(0, this, listener))
         }
     }
 
-    fun addListener0(listener: ElysiumPlayer) {
-        if (!listeners0.contains(listener)) {
-            listeners0.add(listener)
-        }
-    }
-
     fun removeListener(listener: ElysiumPlayer) {
-        while (listeners0.contains(listener)) {
-            listeners0.remove(listener)
+        while (listeners.contains(listener)) {
             val chatChannelListenerTable = plugin.core.database.getTable(ChatChannelListener::class.java) as? ChatChannelListenerTable
             if (chatChannelListenerTable != null) {
                 val chatChannelListeners = chatChannelListenerTable.get(listener)
@@ -208,12 +186,6 @@ class ElysiumChatChannel: TableRow {
                     .filter { chatChannelListener -> chatChannelListener.chatChannel == this }
                     .forEach { chatChannelListener -> chatChannelListenerTable.delete(chatChannelListener) }
             }
-        }
-    }
-
-    fun removeListener0(listener: ElysiumPlayer) {
-        while (listeners0.contains(listener)) {
-            listeners0.remove(listener)
         }
     }
 
@@ -227,8 +199,10 @@ class ElysiumChatChannel: TableRow {
                 val elysiumPlayer = context.sender
                 if (elysiumPlayer is ElysiumPlayer) {
                     val bukkitPlayer = elysiumPlayer.bukkitPlayer
-                    if (bukkitPlayer.isOnline) {
-                        bukkitPlayer.player.sendMessage(exception.message)
+                    if (bukkitPlayer != null) {
+                        if (bukkitPlayer.isOnline) {
+                            bukkitPlayer.player.sendMessage(exception.message)
+                        }
                     }
                 }
                 break
@@ -238,7 +212,7 @@ class ElysiumChatChannel: TableRow {
         return processedMessage
     }
 
-    fun postProcess(message: String?, context: ChatMessagePostProcessContext) {
+    fun postProcess(message: String?, context: ChatMessagePostProcessContext): String? {
         var processedMessage = message
         for (pipelineComponent in pipeline) {
             if (processedMessage == null) break
@@ -248,12 +222,15 @@ class ElysiumChatChannel: TableRow {
                 val elysiumPlayer = context.sender
                 if (elysiumPlayer is ElysiumPlayer) {
                     val bukkitPlayer = elysiumPlayer.bukkitPlayer
-                    if (bukkitPlayer.isOnline) {
-                        bukkitPlayer.player.sendMessage(exception.message)
+                    if (bukkitPlayer != null) {
+                        if (bukkitPlayer.isOnline) {
+                            bukkitPlayer.player.sendMessage(exception.message)
+                        }
                     }
                 }
             }
         }
+        return processedMessage
     }
 
     fun log(message: String) {
