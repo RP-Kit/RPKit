@@ -41,11 +41,11 @@ class PlayerInteractListener(private val plugin: ElysiumBanksBukkit): Listener {
                 val sign = event.clickedBlock.state as Sign
                 if (sign.getLine(0).equals(GREEN.toString() + "[bank]", ignoreCase = true)) {
                     event.isCancelled = true
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-                    val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
-                    val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
-                    val bankProvider = plugin.core.serviceManager.getServiceProvider(ElysiumBankProvider::class.java)
+                    val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                    val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                    val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
+                    val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class)
+                    val bankProvider = plugin.core.serviceManager.getServiceProvider(ElysiumBankProvider::class)
                     val player = playerProvider.getPlayer(event.player)
                     val character = characterProvider.getActiveCharacter(player)
                     if (character != null) {

@@ -37,10 +37,10 @@ class SignChangeListener(private val plugin: ElysiumShopsBukkit): Listener {
     fun onSignChange(event: SignChangeEvent) {
         if (event.getLine(0) == "[shop]") {
             if (event.player.hasPermission("elysium.shops.sign.shop")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-                val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
-                val shopCountProvider = plugin.core.serviceManager.getServiceProvider(ElysiumShopCountProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
+                val shopCountProvider = plugin.core.serviceManager.getServiceProvider(ElysiumShopCountProvider::class)
                 val player = playerProvider.getPlayer(event.player)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {

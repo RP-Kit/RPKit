@@ -67,7 +67,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit): CommandEx
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
             return chatChannelProvider.getChatChannel(input) == null
         }
 
@@ -380,7 +380,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit): CommandEx
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
             val name = context.getSessionData("name") as String
             val color = context.getSessionData("color") as Color
             val formatString = context.getSessionData("format_string") as String

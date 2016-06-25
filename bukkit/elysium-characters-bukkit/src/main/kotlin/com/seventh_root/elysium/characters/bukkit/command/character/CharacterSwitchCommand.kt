@@ -49,8 +49,8 @@ class CharacterSwitchCommand(private val plugin: ElysiumCharactersBukkit): Comma
                         characterNameBuilder.append(args[i]).append(" ")
                     }
                     characterNameBuilder.append(args[args.size - 1])
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                    val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                    val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
                     val player = playerProvider.getPlayer(sender)
                     var charFound = false
                     // Prioritise exact matches...
@@ -93,8 +93,8 @@ class CharacterSwitchCommand(private val plugin: ElysiumCharactersBukkit): Comma
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
                 val player = playerProvider.getPlayer(conversable)
                 for (character in characterProvider.getCharacters(player)) {
                     if (character.name.equals(input, ignoreCase = true)) {
@@ -113,8 +113,8 @@ class CharacterSwitchCommand(private val plugin: ElysiumCharactersBukkit): Comma
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
                 val player = playerProvider.getPlayer(conversable)
                 var charFound = false
                 // Prioritise exact matches...
@@ -143,9 +143,9 @@ class CharacterSwitchCommand(private val plugin: ElysiumCharactersBukkit): Comma
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+            val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
             val player = playerProvider.getPlayer(context.forWhom as Player)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
             val characterListBuilder = StringBuilder()
             for (character in characterProvider.getCharacters(player)) {
                 characterListBuilder.append("\n").append(

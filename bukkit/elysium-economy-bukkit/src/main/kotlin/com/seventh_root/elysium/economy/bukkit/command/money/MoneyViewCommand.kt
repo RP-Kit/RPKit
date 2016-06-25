@@ -34,10 +34,10 @@ class MoneyViewCommand(private val plugin: ElysiumEconomyBukkit): CommandExecuto
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender is Conversable) {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-            val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
+            val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+            val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class)
+            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
             val bukkitPlayer = if (args.size > 0) plugin.server.getPlayer(args[0]) else if (sender is Player) sender else null
             if (bukkitPlayer != null) {
                 val player = playerProvider.getPlayer(bukkitPlayer)

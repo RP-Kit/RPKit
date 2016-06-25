@@ -31,8 +31,8 @@ class CharacterCardCommand(private val plugin: ElysiumCharactersBukkit): Command
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.characters.command.character.card.self")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
                 var player = playerProvider.getPlayer(sender)
                 if (sender.hasPermission("elysiumcharacters.command.character.card.other")) {
                     if (args.size > 0) {
@@ -46,7 +46,7 @@ class CharacterCardCommand(private val plugin: ElysiumCharactersBukkit): Command
                 if (character != null) {
                     for (line in plugin.config.getStringList("messages.character-card")) {
                         var filteredLine = ChatColor.translateAlternateColorCodes('&', line)
-                        val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterCardFieldProvider::class.java)
+                        val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterCardFieldProvider::class)
                         characterCardFieldProvider.characterCardFields.forEach { field -> filteredLine = filteredLine.replace("\$${field.name}", field.get(character)) }
                         sender.sendMessage(filteredLine)
                     }

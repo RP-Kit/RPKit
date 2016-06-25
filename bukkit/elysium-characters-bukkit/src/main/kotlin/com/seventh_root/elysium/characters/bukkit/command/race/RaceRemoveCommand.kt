@@ -43,7 +43,7 @@ class RaceRemoveCommand(private val plugin: ElysiumCharactersBukkit): CommandExe
         if (sender is Conversable) {
             if (sender.hasPermission("elysium.characters.command.race.remove")) {
                 if (args.size > 0) {
-                    val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java)
+                    val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class)
                     val raceBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
                         raceBuilder.append(args[i]).append(' ')
@@ -69,11 +69,11 @@ class RaceRemoveCommand(private val plugin: ElysiumCharactersBukkit): CommandExe
     private inner class RacePrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java).getRace(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class).getRace(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java)
+            val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class)
             raceProvider.removeRace(raceProvider.getRace(input)!!)
             return RaceSetPrompt()
         }

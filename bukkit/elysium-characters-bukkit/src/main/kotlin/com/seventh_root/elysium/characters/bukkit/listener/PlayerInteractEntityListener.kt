@@ -36,14 +36,14 @@ class PlayerInteractEntityListener(private val plugin: ElysiumCharactersBukkit):
                 if (event.rightClicked is Player) {
                     if (event.player.hasPermission("elysium.characters.command.character.card.other")) {
                         val bukkitPlayer = event.rightClicked as Player
-                        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
                         val player = playerProvider.getPlayer(bukkitPlayer)
                         val character = characterProvider.getActiveCharacter(player)
                         if (character != null) {
                             for (line in plugin.config.getStringList("messages.character-card")) {
                                 var filteredLine = ChatColor.translateAlternateColorCodes('&', line)
-                                val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterCardFieldProvider::class.java)
+                                val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterCardFieldProvider::class)
                                 characterCardFieldProvider.characterCardFields.forEach { field -> filteredLine = filteredLine.replace("\$${field.name}", field.get(character)) }
                                 event.player.sendMessage(filteredLine)
                             }

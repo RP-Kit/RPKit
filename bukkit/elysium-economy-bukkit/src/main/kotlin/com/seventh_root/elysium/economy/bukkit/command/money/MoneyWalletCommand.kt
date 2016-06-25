@@ -50,7 +50,7 @@ class MoneyWalletCommand(private val plugin: ElysiumEconomyBukkit): CommandExecu
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("elysium.economy.command.money.wallet")) {
             if (sender is Player) {
-                val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
+                val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
                 if (args.size > 0) {
                     val currency = currencyProvider.getCurrency(args[0])
                     if (currency != null) {
@@ -76,9 +76,9 @@ class MoneyWalletCommand(private val plugin: ElysiumEconomyBukkit): CommandExecu
     }
 
     private fun showWallet(bukkitPlayer: Player, currency: ElysiumCurrency) {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-        val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
+        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+        val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class)
         val player = playerProvider.getPlayer(bukkitPlayer)
         val character = characterProvider.getActiveCharacter(player)
         if (character != null) {
@@ -113,17 +113,17 @@ class MoneyWalletCommand(private val plugin: ElysiumEconomyBukkit): CommandExecu
 
     private inner class CurrencyPrompt: ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class).getCurrency(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("currency", plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(input))
+            context.setSessionData("currency", plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class).getCurrency(input))
             return CurrencySetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
             return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-currency-prompt")) + "\n" +
-                    plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).currencies
+                    plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class).currencies
                             .map { currency -> ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-currency-prompt-list-item")).replace("\$currency", currency.name) }
                             .joinToString("\n")
         }

@@ -40,7 +40,7 @@ class ElysiumChatChannelProviderImpl(private val plugin: ElysiumChatBukkit): Ely
     override fun addChatChannel(chatChannel: ElysiumChatChannel) {
         plugin.core.database.getTable(ElysiumChatChannel::class.java)!!.insert(chatChannel)
         if (chatChannel.isIRCEnabled) {
-            val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class.java)
+            val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
             ircProvider.ircBot.sendIRC().joinChannel(chatChannel.ircChannel)
         }
     }
@@ -48,7 +48,7 @@ class ElysiumChatChannelProviderImpl(private val plugin: ElysiumChatBukkit): Ely
     override fun removeChatChannel(chatChannel: ElysiumChatChannel) {
         plugin.core.database.getTable(ElysiumChatChannel::class.java)!!.delete(chatChannel)
         if (chatChannel.isIRCEnabled) {
-            val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class.java)
+            val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
             ircProvider.ircBot.sendRaw().rawLine("PART ${chatChannel.ircChannel}")
         }
     }

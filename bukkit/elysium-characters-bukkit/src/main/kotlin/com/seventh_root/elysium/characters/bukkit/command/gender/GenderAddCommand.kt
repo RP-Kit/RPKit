@@ -44,7 +44,7 @@ class GenderAddCommand(private val plugin: ElysiumCharactersBukkit): CommandExec
         if (sender is Conversable) {
             if (sender.hasPermission("elysium.characters.command.gender.add")) {
                 if (args.size > 0) {
-                    val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
+                    val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class)
                     val genderBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
                         genderBuilder.append(args[i]).append(' ')
@@ -73,7 +73,7 @@ class GenderAddCommand(private val plugin: ElysiumCharactersBukkit): CommandExec
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
+            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class)
             return genderProvider.getGender(input) == null
         }
 
@@ -82,7 +82,7 @@ class GenderAddCommand(private val plugin: ElysiumCharactersBukkit): CommandExec
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
+            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class)
             genderProvider.addGender(ElysiumGenderImpl(name = input))
             return GenderAddedPrompt()
         }

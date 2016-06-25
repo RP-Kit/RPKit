@@ -29,7 +29,7 @@ class ChatChannelListCommand(private val plugin: ElysiumChatBukkit): CommandExec
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("elysium.chat.command.chatchannel.list")) {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-list-title")))
-            for (channel in plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).chatChannels) {
+            for (channel in plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).chatChannels) {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-list-item"))
                         .replace("\$color", ChatColorUtils.closestChatColorToColor(channel.color).toString())
                         .replace("\$name", channel.name))

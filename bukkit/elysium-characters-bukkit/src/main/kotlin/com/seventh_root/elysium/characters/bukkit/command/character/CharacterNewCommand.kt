@@ -86,11 +86,11 @@ class CharacterNewCommand(private val plugin: ElysiumCharactersBukkit): CommandE
     private inner class GenderPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java).getGender(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class).getGender(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
+            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class)
             context.setSessionData("gender", genderProvider.getGender(input))
             return GenderSetPrompt()
         }
@@ -100,7 +100,7 @@ class CharacterNewCommand(private val plugin: ElysiumCharactersBukkit): CommandE
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
+            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class)
             val genderListBuilder = StringBuilder()
             for (gender in genderProvider.genders) {
                 genderListBuilder.append(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-list-item")
@@ -163,11 +163,11 @@ class CharacterNewCommand(private val plugin: ElysiumCharactersBukkit): CommandE
     private inner class RacePrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java).getRace(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class).getRace(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java)
+            val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class)
             context.setSessionData("race", raceProvider.getRace(input))
             return RaceSetPrompt()
         }
@@ -177,7 +177,7 @@ class CharacterNewCommand(private val plugin: ElysiumCharactersBukkit): CommandE
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java)
+            val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class)
             val raceListBuilder = StringBuilder()
             for (race in raceProvider.races) {
                 raceListBuilder.append(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-list-item")
@@ -213,8 +213,8 @@ class CharacterNewCommand(private val plugin: ElysiumCharactersBukkit): CommandE
             if (input.equals("end", ignoreCase = true)) {
                 val conversable = context.forWhom
                 if (conversable is Player) {
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                    val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                    val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
                     val player = playerProvider.getPlayer(conversable)
                     val character = characterProvider.getActiveCharacter(player)
                     if (character != null) {
@@ -253,8 +253,8 @@ class CharacterNewCommand(private val plugin: ElysiumCharactersBukkit): CommandE
         override fun getPromptText(context: ConversationContext): String {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
                 val player = playerProvider.getPlayer(conversable)
                 val newCharacter = ElysiumCharacterImpl(
                         plugin = plugin,

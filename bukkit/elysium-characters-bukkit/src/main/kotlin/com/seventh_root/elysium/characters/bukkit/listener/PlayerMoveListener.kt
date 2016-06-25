@@ -31,8 +31,8 @@ class PlayerMoveListener(private val plugin: ElysiumCharactersBukkit): Listener 
 
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
         val player = playerProvider.getPlayer(event.player)
         val character = characterProvider.getActiveCharacter(player)
         if (character != null && character.isDead) {

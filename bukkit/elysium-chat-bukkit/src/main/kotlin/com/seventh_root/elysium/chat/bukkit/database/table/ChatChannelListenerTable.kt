@@ -145,8 +145,8 @@ class ChatChannelListenerTable: Table<ChatChannelListener> {
                     if (resultSet.next()) {
                         val finalChatChannelListener = ChatChannelListener(
                                 resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
-                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java).getPlayer(resultSet.getInt("player_id"))!!
+                                plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
+                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!
                         )
                         chatChannelListener = finalChatChannelListener
                         cache.put(id, finalChatChannelListener)
@@ -182,8 +182,8 @@ class ChatChannelListenerTable: Table<ChatChannelListener> {
                         val id = resultSet.getInt("id")
                         val finalChatChannelListener = ChatChannelListener(
                                 id,
-                                plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
-                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java).getPlayer(resultSet.getInt("player_id"))!!
+                                plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
+                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!
                         )
                         chatChannelListeners.add(finalChatChannelListener)
                         cache.put(id, finalChatChannelListener)

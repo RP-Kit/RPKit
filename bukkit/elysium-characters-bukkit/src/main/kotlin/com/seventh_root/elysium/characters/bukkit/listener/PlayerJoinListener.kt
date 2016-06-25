@@ -29,8 +29,8 @@ class PlayerJoinListener(val plugin: ElysiumCharactersBukkit): Listener {
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
         if (plugin.config.getBoolean("characters.set-player-display-name")) {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+            val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
             val player = playerProvider.getPlayer(event.player)
             val character = characterProvider.getActiveCharacter(player)
             event.player.displayName = character?.name?:event.player.name

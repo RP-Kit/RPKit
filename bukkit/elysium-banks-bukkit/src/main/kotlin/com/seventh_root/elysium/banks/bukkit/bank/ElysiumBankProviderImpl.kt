@@ -38,7 +38,7 @@ class ElysiumBankProviderImpl(private val plugin: ElysiumBanksBukkit): ElysiumBa
     }
 
     override fun deposit(character: ElysiumCharacter, currency: ElysiumCurrency, amount: Int) {
-        val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
+        val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class)
         if (economyProvider.getBalance(character, currency) >= amount) {
             economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - amount)
             setBalance(character, currency, getBalance(character, currency) + amount)
@@ -46,7 +46,7 @@ class ElysiumBankProviderImpl(private val plugin: ElysiumBanksBukkit): ElysiumBa
     }
 
     override fun withdraw(character: ElysiumCharacter, currency: ElysiumCurrency, amount: Int) {
-        val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
+        val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class)
         if (getBalance(character, currency) >= amount) {
             economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + amount)
             setBalance(character, currency, getBalance(character, currency) + amount)

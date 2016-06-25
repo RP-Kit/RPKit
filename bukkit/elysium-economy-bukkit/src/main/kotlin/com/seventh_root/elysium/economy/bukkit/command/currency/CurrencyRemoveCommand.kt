@@ -43,7 +43,7 @@ class CurrencyRemoveCommand(private val plugin: ElysiumEconomyBukkit): CommandEx
         if (sender is Conversable) {
             if (sender.hasPermission("elysium.economy.command.currency.remove")) {
                 if (args.size > 0) {
-                    val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
+                    val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
                     val currencyBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
                         currencyBuilder.append(args[i]).append(' ')
@@ -69,11 +69,11 @@ class CurrencyRemoveCommand(private val plugin: ElysiumEconomyBukkit): CommandEx
     private inner class CurrencyPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class).getCurrency(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
+            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
             currencyProvider.removeCurrency(currencyProvider.getCurrency(input)!!)
             return CurrencySetPrompt()
         }

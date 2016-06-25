@@ -31,7 +31,7 @@ class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, 
         get() = FORMATTER
 
     override fun process(message: String, context: ChatMessageContext): String? {
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
         val sender = context.sender
         val receiver = context.receiver
         val senderCharacter = characterProvider.getActiveCharacter(sender)
@@ -72,7 +72,7 @@ class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, 
     }
 
     override fun postProcess(message: String, context: ChatMessagePostProcessContext): String? {
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
         val sender = context.sender
         val senderCharacter = characterProvider.getActiveCharacter(sender)
         val chatChannel = context.chatChannel

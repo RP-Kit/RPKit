@@ -45,8 +45,8 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit): CommandExec
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.chat.command.chatchannel.join")) {
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
                 if (chatChannelProvider.chatChannels.size > 0) {
                     val player = playerProvider.getPlayer(sender)
                     if (args.size > 0) {
@@ -86,14 +86,14 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit): CommandExec
     private inner class ChatChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(input) != null && (context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.join." + input)
+            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).getChatChannel(input) != null && (context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.join." + input)
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
                 val player = playerProvider.getPlayer(conversable)
                 val channel = chatChannelProvider.getChatChannel(input)!!
                 channel.addListener(player)
@@ -103,7 +103,7 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit): CommandExec
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            if (plugin.core!!.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(invalidInput) == null) {
+            if (plugin.core!!.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).getChatChannel(invalidInput) == null) {
                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-join-invalid-chatchannel"))
             } else if (!(context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.join." + invalidInput)) {
                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel-join-channel")
@@ -113,7 +113,7 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit): CommandExec
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
             val channelListBuilder = StringBuilder()
             for (channel in chatChannelProvider.chatChannels) {
                 channelListBuilder.append(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-list-item")

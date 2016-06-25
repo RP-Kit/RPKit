@@ -27,7 +27,7 @@ class GenderListCommand(private val plugin: ElysiumCharactersBukkit): CommandExe
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("elysium.characters.command.gender.list")) {
-            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
+            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class)
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-list-title")))
             for (gender in genderProvider.genders) {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-list-item"))

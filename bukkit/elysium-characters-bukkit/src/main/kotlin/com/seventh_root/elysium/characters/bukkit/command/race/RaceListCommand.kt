@@ -27,7 +27,7 @@ class RaceListCommand(private val plugin: ElysiumCharactersBukkit): CommandExecu
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("elysium.characters.command.race.list")) {
-            val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java)
+            val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class)
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-list-title")))
             for (race in raceProvider.races) {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-list-item")

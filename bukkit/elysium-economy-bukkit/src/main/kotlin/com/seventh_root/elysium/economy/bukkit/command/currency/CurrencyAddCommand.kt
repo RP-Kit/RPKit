@@ -59,7 +59,7 @@ class CurrencyAddCommand(private val plugin: ElysiumEconomyBukkit): CommandExecu
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
+            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
             return currencyProvider.getCurrency(input) == null
         }
 
@@ -233,7 +233,7 @@ class CurrencyAddCommand(private val plugin: ElysiumEconomyBukkit): CommandExecu
 
     private inner class CurrencyAddedPrompt: MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt? {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
+            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
             currencyProvider.addCurrency(
                     ElysiumCurrencyImpl(
                             name = context.getSessionData("name") as String,

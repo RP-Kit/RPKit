@@ -137,8 +137,8 @@ class ChatChannelSpeakerTable: Table<ChatChannelSpeaker> {
                     if (resultSet.next()) {
                         val finalChatChannelSpeaker = ChatChannelSpeaker(
                                 resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
-                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java).getPlayer(resultSet.getInt("player_id"))!!
+                                plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
+                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!
                         )
                         chatChannelSpeaker = finalChatChannelSpeaker
                         cache.put(id, finalChatChannelSpeaker)
@@ -170,8 +170,8 @@ class ChatChannelSpeakerTable: Table<ChatChannelSpeaker> {
                         val id = resultSet.getInt("id")
                         val finalChatChannelSpeaker = ChatChannelSpeaker(
                                 id,
-                                plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
-                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java).getPlayer(resultSet.getInt("player_id"))!!
+                                plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).getChatChannel(resultSet.getInt("chat_channel_id"))!!,
+                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!
                         )
                         chatChannelSpeaker = finalChatChannelSpeaker
                         cache.put(id, finalChatChannelSpeaker)

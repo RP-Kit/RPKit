@@ -42,7 +42,7 @@ class ChatChannelDeleteCommand(private val plugin: ElysiumChatBukkit): CommandEx
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Conversable) {
             if (sender.hasPermission("elysium.chat.command.chatchannel.delete")) {
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
                 if (chatChannelProvider.chatChannels.size > 0) {
                     if (args.size > 0) {
                         val chatChannelBuilder = StringBuilder()
@@ -73,13 +73,13 @@ class ChatChannelDeleteCommand(private val plugin: ElysiumChatBukkit): CommandEx
     private inner class ChatChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).getChatChannel(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
                 val channel = chatChannelProvider.getChatChannel(input)!!
                 chatChannelProvider.removeChatChannel(channel)
             }
