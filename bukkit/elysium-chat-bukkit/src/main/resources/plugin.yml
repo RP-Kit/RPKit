@@ -3,7 +3,7 @@ version: @version@
 main: com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 author: alyphen
 description: Elysium Chat implementation for Bukkit
-depend: [elysium-core-bukkit, elysium-players-bukkit, elysium-characters-bukkit]
+depend: [elysium-core-bukkit, elysium-player-lib-bukkit, elysium-character-lib-bukkit, elysium-chat-lib-bukkit]
 commands:
     chatchannel:
         description: |

@@ -22,7 +22,7 @@ import com.seventh_root.elysium.shops.bukkit.listener.BlockBreakListener
 import com.seventh_root.elysium.shops.bukkit.listener.InventoryClickListener
 import com.seventh_root.elysium.shops.bukkit.listener.PlayerInteractListener
 import com.seventh_root.elysium.shops.bukkit.listener.SignChangeListener
-import com.seventh_root.elysium.shops.bukkit.shopcount.ElysiumShopCountProvider
+import com.seventh_root.elysium.shops.bukkit.shopcount.ElysiumShopCountProviderImpl
 
 
 class ElysiumShopsBukkit: ElysiumBukkitPlugin() {
@@ -31,7 +31,7 @@ class ElysiumShopsBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {
         serviceProviders = arrayOf(
-                ElysiumShopCountProvider(this)
+                ElysiumShopCountProviderImpl(this)
         )
     }
 

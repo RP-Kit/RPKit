@@ -21,6 +21,7 @@ import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
 import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyImpl
 import org.bukkit.Material
 import org.ehcache.Cache
 import org.ehcache.CacheManager
@@ -128,7 +129,7 @@ class ElysiumCurrencyTable: Table<ElysiumCurrency> {
                     statement.setInt(1, id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        currency = ElysiumCurrency(
+                        currency = ElysiumCurrencyImpl(
                                 resultSet.getInt("id"),
                                 resultSet.getString("name"),
                                 resultSet.getString("name_singular"),
@@ -161,7 +162,7 @@ class ElysiumCurrencyTable: Table<ElysiumCurrency> {
                     statement.setString(1, name)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        currency = ElysiumCurrency(
+                        val finalCurrency = ElysiumCurrencyImpl(
                                 resultSet.getInt("id"),
                                 resultSet.getString("name"),
                                 resultSet.getString("name_singular"),
@@ -170,11 +171,9 @@ class ElysiumCurrencyTable: Table<ElysiumCurrency> {
                                 resultSet.getInt("default_amount"),
                                 Material.getMaterial(resultSet.getString("material"))
                         )
-                        if (currency != null) {
-                            val finalCurrency = currency!!
-                            cache.put(finalCurrency.id, finalCurrency)
-                            nameCache.put(finalCurrency.name, finalCurrency.id)
-                        }
+                        currency = finalCurrency
+                        cache.put(finalCurrency.id, finalCurrency)
+                        nameCache.put(finalCurrency.name, finalCurrency.id)
                     }
                 }
             }

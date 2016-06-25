@@ -24,7 +24,7 @@ import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.bukkit.ChatColor
 import java.util.*
 
-class GarbleChatChannelPipelineComponent(var clearRange: Double): ChatChannelPipelineComponent() {
+class GarbleChatChannelPipelineComponent(var clearRange: Double): ChatChannelPipelineComponent {
 
     override val type: ChatChannelPipelineComponent.Type
         get() = PRE_PROCESSOR

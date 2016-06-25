@@ -2,7 +2,7 @@ name: elysium-trade-bukkit
 author: alyphen
 version: @version@
 main: com.seventh_root.elysium.trade.bukkit.ElysiumTradeBukkit
-depend: [elysium-core-bukkit, elysium-characters-bukkit, elysium-players-bukkit, elysium-economy-bukkit]
+depend: [elysium-core-bukkit, elysium-character-lib-bukkit, elysium-player-lib-bukkit, elysium-economy-lib-bukkit]
 permissions:
     elysium.trade.sign.trader.buy:
         description: Allows buying from trader signs

@@ -17,7 +17,7 @@
 package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelImpl
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
 import org.bukkit.ChatColor
@@ -391,7 +391,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit): CommandEx
             val ircChannel = context.getSessionData("irc_channel") as String
             val ircWhitelist = context.getSessionData("irc_whitelist") as Boolean
             val joinedByDefault = context.getSessionData("joined_by_default") as Boolean
-            val chatChannel = ElysiumChatChannel(
+            val chatChannel = ElysiumChatChannelImpl(
                     plugin = plugin,
                     name = name,
                     color = color,

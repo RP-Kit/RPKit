@@ -1,0 +1,5 @@
+name: elysium-shop-lib-bukkit
+author: alyphen
+version: @version@
+main: com.seventh_root.elysium.shops.bukkit.ElysiumShopLibBukkit
+depend: [elysium-core-bukkit, elysium-character-lib-bukkit, elysium-economy-lib-bukkit]

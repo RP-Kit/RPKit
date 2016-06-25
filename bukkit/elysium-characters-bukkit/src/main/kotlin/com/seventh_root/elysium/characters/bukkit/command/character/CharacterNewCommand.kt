@@ -17,7 +17,7 @@
 package com.seventh_root.elysium.characters.bukkit.command.character
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
-import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterImpl
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
 import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGender
 import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGenderProvider
@@ -256,7 +256,7 @@ class CharacterNewCommand(private val plugin: ElysiumCharactersBukkit): CommandE
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
                 val player = playerProvider.getPlayer(conversable)
-                val newCharacter = ElysiumCharacter(
+                val newCharacter = ElysiumCharacterImpl(
                         plugin = plugin,
                         player = player,
                         name = context.getSessionData("name") as String,

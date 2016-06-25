@@ -1,0 +1,5 @@
+name: elysium-chat-lib-bukkit
+author: alyphen
+version: @version@
+main: com.seventh_root.elysium.chat.bukkit.ElysiumChatLibBukkit
+depend: [elysium-core-bukkit, elysium-player-lib-bukkit, elysium-character-lib-bukkit]

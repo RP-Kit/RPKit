@@ -89,12 +89,12 @@ project(":elysium-core") {
 
 }
 
-// Bukkit implementations
+// Bukkit interfaces
 
 project(":bukkit:elysium-core-bukkit") {
 
     dependencies {
-        compile group: "org.bukkit", name: "bukkit", version: "1.9-R0.1-SNAPSHOT"
+        compile group: "org.bukkit", name: "bukkit", version: "1.9.4-R0.1-SNAPSHOT"
         compile project(":elysium-core")
     }
 
@@ -136,10 +136,247 @@ project(":bukkit:elysium-core-bukkit") {
 
 }
 
+project(":bukkit:elysium-player-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-player-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-player-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-player-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-character-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-character-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-character-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-character-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-chat-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-player-lib-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-chat-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-chat-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-chat-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-economy-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-economy-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-economy-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-economy-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-bank-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-bank-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-bank-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-bank-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-shop-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-shop-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-shop-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-shop-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-auction-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-auction-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-auction-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-auction-lib-bukkit").group
+
+        }
+    }
+
+}
+
+// Bukkit implementations
+
 project(":bukkit:elysium-players-bukkit") {
 
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-player-lib-bukkit")
     }
 
     processResources {
@@ -172,7 +409,8 @@ project(":bukkit:elysium-characters-bukkit") {
 
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
-        compile project(":bukkit:elysium-players-bukkit")
+        compile project(":bukkit:elysium-player-lib-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
     }
 
     processResources {
@@ -205,8 +443,9 @@ project(":bukkit:elysium-chat-bukkit") {
 
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
-        compile project(":bukkit:elysium-players-bukkit")
-        compile project(":bukkit:elysium-characters-bukkit")
+        compile project(":bukkit:elysium-player-lib-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-chat-lib-bukkit")
     }
 
     processResources {
@@ -239,7 +478,8 @@ project(":bukkit:elysium-economy-bukkit") {
 
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
-        compile project(":bukkit:elysium-characters-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
     }
 
     processResources {
@@ -272,8 +512,9 @@ project(":bukkit:elysium-banks-bukkit") {
 
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
-        compile project(":bukkit:elysium-characters-bukkit")
-        compile project(":bukkit:elysium-economy-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
+        compile project(":bukkit:elysium-bank-lib-bukkit")
     }
 
     processResources {
@@ -306,8 +547,8 @@ project(":bukkit:elysium-trade-bukkit") {
 
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
-        compile project(":bukkit:elysium-characters-bukkit")
-        compile project(":bukkit:elysium-economy-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
     }
 
     processResources {
@@ -340,8 +581,9 @@ project(":bukkit:elysium-shops-bukkit") {
 
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
-        compile project(":bukkit:elysium-characters-bukkit")
-        compile project(":bukkit:elysium-economy-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
+        compile project(":bukkit:elysium-shop-lib-bukkit")
     }
 
     processResources {
@@ -374,8 +616,9 @@ project(":bukkit:elysium-auctions-bukkit") {
 
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
-        compile project(":bukkit:elysium-characters-bukkit")
-        compile project(":bukkit:elysium-economy-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
+        compile project(":bukkit:elysium-auction-lib-bukkit")
     }
 
     processResources {

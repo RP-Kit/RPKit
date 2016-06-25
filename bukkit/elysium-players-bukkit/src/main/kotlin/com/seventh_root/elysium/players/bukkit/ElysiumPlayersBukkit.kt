@@ -21,6 +21,7 @@ import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceProvider
 import com.seventh_root.elysium.players.bukkit.database.table.ElysiumPlayerTable
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProviderImpl
 import java.sql.SQLException
 
 class ElysiumPlayersBukkit: ElysiumBukkitPlugin() {
@@ -29,7 +30,7 @@ class ElysiumPlayersBukkit: ElysiumBukkitPlugin() {
     override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
-        playerProvider = ElysiumPlayerProvider(this)
+        playerProvider = ElysiumPlayerProviderImpl(this)
         serviceProviders = arrayOf<ServiceProvider>(playerProvider)
     }
 
