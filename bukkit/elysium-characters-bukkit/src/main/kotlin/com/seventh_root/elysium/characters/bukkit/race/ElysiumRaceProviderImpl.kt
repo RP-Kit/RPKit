@@ -25,11 +25,11 @@ import java.util.*
 class ElysiumRaceProviderImpl(private val plugin: ElysiumCharactersBukkit): ElysiumRaceProvider {
 
     override fun getRace(id: Int): ElysiumRace? {
-        return plugin.core.database.getTable(ElysiumRace::class.java)!![id]
+        return plugin.core.database.getTable(ElysiumRaceTable::class)[id]
     }
 
     override fun getRace(name: String): ElysiumRace? {
-        val table = plugin.core.database.getTable(ElysiumRace::class.java)
+        val table = plugin.core.database.getTable(ElysiumRaceTable::class)
         if (table is ElysiumRaceTable) {
             return table[name]
         }
@@ -57,11 +57,11 @@ class ElysiumRaceProviderImpl(private val plugin: ElysiumCharactersBukkit): Elys
         }
 
     override fun addRace(race: ElysiumRace) {
-        plugin.core.database.getTable(ElysiumRace::class.java)!!.insert(race)
+        plugin.core.database.getTable(ElysiumRaceTable::class).insert(race)
     }
 
     override fun removeRace(race: ElysiumRace) {
-        plugin.core.database.getTable(ElysiumRace::class.java)!!.delete(race)
+        plugin.core.database.getTable(ElysiumRaceTable::class).delete(race)
     }
 
 }

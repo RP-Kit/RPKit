@@ -21,8 +21,7 @@ import com.google.common.base.CaseFormat.UPPER_CAMEL
 
 abstract class Table<T: TableRow>(val database: Database, val name: String, val type: Class<T>) {
 
-    constructor(database: Database, type: Class<T>): this(database, UPPER_CAMEL.to(LOWER_UNDERSCORE, type.simpleName), type) {
-    }
+    constructor(database: Database, type: Class<T>): this(database, UPPER_CAMEL.to(LOWER_UNDERSCORE, type.simpleName), type)
 
     abstract fun create()
 

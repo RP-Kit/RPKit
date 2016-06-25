@@ -21,20 +21,19 @@ import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
 import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 import com.seventh_root.elysium.economy.bukkit.database.table.ElysiumWalletTable
 import com.seventh_root.elysium.economy.bukkit.exception.NegativeBalanceException
-import com.seventh_root.elysium.economy.bukkit.wallet.ElysiumWallet
 
 
 class ElysiumEconomyProviderImpl(val plugin: ElysiumEconomyBukkit): ElysiumEconomyProvider {
 
     override fun getBalance(character: ElysiumCharacter, currency: ElysiumCurrency): Int {
-        return (plugin.core.database.getTable(com.seventh_root.elysium.economy.bukkit.wallet.ElysiumWallet::class.java) as ElysiumWalletTable).get(character, currency).balance
+        return plugin.core.database.getTable(ElysiumWalletTable::class).get(character, currency).balance
     }
 
     override fun setBalance(character: ElysiumCharacter, currency: ElysiumCurrency, amount: Int) {
         if (amount < 0) throw NegativeBalanceException()
-        val wallet = (plugin.core.database.getTable(ElysiumWallet::class.java) as ElysiumWalletTable).get(character, currency)
+        val wallet = plugin.core.database.getTable(ElysiumWalletTable::class).get(character, currency)
         wallet.balance = amount
-        plugin.core.database.getTable(ElysiumWallet::class.java)!!.update(wallet)
+        plugin.core.database.getTable(ElysiumWalletTable::class).update(wallet)
     }
 
     override fun transfer(from: ElysiumCharacter, to: ElysiumCharacter, currency: ElysiumCurrency, amount: Int) {
@@ -43,7 +42,7 @@ class ElysiumEconomyProviderImpl(val plugin: ElysiumEconomyBukkit): ElysiumEcono
     }
 
     override fun getRichestCharacters(currency: ElysiumCurrency, amount: Int): List<ElysiumCharacter> {
-        return (plugin.core.database.getTable(ElysiumWallet::class.java) as ElysiumWalletTable).getTop(amount, currency)
+        return plugin.core.database.getTable(ElysiumWalletTable::class).getTop(amount, currency)
     }
 
 }

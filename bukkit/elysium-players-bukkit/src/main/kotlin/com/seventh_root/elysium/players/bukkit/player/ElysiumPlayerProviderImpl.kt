@@ -25,12 +25,12 @@ import org.pircbotx.User
 class ElysiumPlayerProviderImpl(private val plugin: ElysiumPlayersBukkit): ElysiumPlayerProvider {
 
     override fun getPlayer(id: Int): ElysiumPlayer? {
-        return plugin.core.database.getTable(ElysiumPlayer::class.java)!![id]
+        return plugin.core.database.getTable(ElysiumPlayerTable::class)[id]
     }
 
     override fun getPlayer(bukkitPlayer: OfflinePlayer): ElysiumPlayer {
-        val table = plugin.core.database.getTable(ElysiumPlayer::class.java)
-        var player = (table as ElysiumPlayerTable).get(bukkitPlayer)
+        val table = plugin.core.database.getTable(ElysiumPlayerTable::class)
+        var player = table.get(bukkitPlayer)
         if (player == null) {
             player = ElysiumPlayerImpl(
                     name = bukkitPlayer.name,
@@ -42,8 +42,8 @@ class ElysiumPlayerProviderImpl(private val plugin: ElysiumPlayersBukkit): Elysi
     }
 
     override fun getPlayer(ircUser: User): ElysiumPlayer {
-        val table = plugin.core.database.getTable(ElysiumPlayer::class.java)
-        var player = (table as ElysiumPlayerTable).get(ircUser)
+        val table = plugin.core.database.getTable(ElysiumPlayerTable::class)
+        var player = table.get(ircUser)
         if (player == null) {
             player = ElysiumPlayerImpl(
                     name = ircUser.nick,
@@ -55,12 +55,12 @@ class ElysiumPlayerProviderImpl(private val plugin: ElysiumPlayersBukkit): Elysi
     }
 
     override fun addPlayer(player: ElysiumPlayer) {
-        val bukkitPlayerTable: Table<ElysiumPlayer> = plugin.core.database.getTable(ElysiumPlayer::class.java) as Table<ElysiumPlayer>
+        val bukkitPlayerTable: Table<ElysiumPlayer> = plugin.core.database.getTable(ElysiumPlayerTable::class)
         bukkitPlayerTable.insert(player)
     }
 
     override fun removePlayer(player: ElysiumPlayer) {
-        plugin.core.database.getTable(ElysiumPlayer::class.java)!!.delete(player)
+        plugin.core.database.getTable(ElysiumPlayerTable::class).delete(player)
     }
 
 }

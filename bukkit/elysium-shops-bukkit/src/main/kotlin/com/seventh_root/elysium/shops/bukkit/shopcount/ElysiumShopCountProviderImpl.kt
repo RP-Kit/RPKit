@@ -24,14 +24,14 @@ import com.seventh_root.elysium.shops.bukkit.database.table.ElysiumShopCountTabl
 class ElysiumShopCountProviderImpl(private val plugin: ElysiumShopsBukkit): ElysiumShopCountProvider {
 
     override fun getShopCount(character: ElysiumCharacter): Int {
-        return (plugin.core.database.getTable(ElysiumShopCount::class.java) as? ElysiumShopCountTable)?.get(character)?.count?:0
+        return plugin.core.database.getTable(ElysiumShopCountTable::class).get(character)?.count?:0
     }
 
     override fun setShopCount(character: ElysiumCharacter, amount: Int) {
-        val shopCount = (plugin.core.database.getTable(ElysiumShopCount::class.java) as? ElysiumShopCountTable)?.get(character)?:
+        val shopCount = plugin.core.database.getTable(ElysiumShopCountTable::class).get(character) ?:
                 ElysiumShopCount(0, character, 0)
         shopCount.count = amount
-        plugin.core.database.getTable(ElysiumShopCount::class.java)?.update(shopCount)
+        plugin.core.database.getTable(ElysiumShopCountTable::class).update(shopCount)
     }
 
 }

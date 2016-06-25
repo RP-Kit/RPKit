@@ -16,20 +16,19 @@
 
 package com.seventh_root.elysium.core.database
 
-import com.google.common.base.CaseFormat.LOWER_UNDERSCORE
-import com.google.common.base.CaseFormat.UPPER_CAMEL
 import com.seventh_root.elysium.core.database.table.TableVersionTable
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
 import java.util.*
+import kotlin.reflect.KClass
 
 class Database @JvmOverloads constructor(val url: String, val userName: String? = null, val password: String? = null) {
 
-    private val tables: MutableMap<String, Table<*>>
+    private val tables: MutableMap<KClass<out Table<*>>, Table<*>>
 
     init {
-        tables = HashMap<String, Table<*>>()
+        tables = HashMap<KClass<out Table<*>>, Table<*>>()
         addTable(TableVersionTable(this))
     }
 
@@ -43,36 +42,32 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
     }
 
     fun addTable(table: Table<*>) {
-        tables.put(table.name, table)
+        tables.put(table.javaClass.kotlin, table)
         table.create()
         table.applyMigrations()
     }
 
-    fun getTable(name: String): Table<*>? {
-        val table = tables[name]
-        return table
+    fun <T: Table<*>> getTable(type: Class<T>): T {
+        return getTable(type.kotlin)
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T: TableRow> getTable(type: Class<T>): Table<T>? {
-        val table = tables[UPPER_CAMEL.to(LOWER_UNDERSCORE, type.simpleName)]
-        return table as Table<T>?
+    fun <T: Table<*>> getTable(type: KClass<T>): T {
+        return tables[type] as T
     }
 
     fun getTableVersion(table: Table<*>): String? {
-        return (getTable(TableVersion::class.java) as TableVersionTable).get(table.name)?.version
+        return getTable(TableVersionTable::class).get(table.name)?.version
     }
 
     fun setTableVersion(table: Table<*>, version: String) {
-        val tableVersionTable: TableVersionTable? = getTable(TableVersion::class.java) as TableVersionTable
-        if (tableVersionTable != null) {
-            val tableVersion = tableVersionTable.get(table.name)
-            if (tableVersion == null) {
-                tableVersionTable.insert(TableVersion(table = table.name, version = version))
-            } else {
-                tableVersion.version = version
-                tableVersionTable.update(tableVersion)
-            }
+        val tableVersionTable = getTable(TableVersionTable::class)
+        val tableVersion = tableVersionTable.get(table.name)
+        if (tableVersion == null) {
+            tableVersionTable.insert(TableVersion(table = table.name, version = version))
+        } else {
+            tableVersion.version = version
+            tableVersionTable.update(tableVersion)
         }
     }
 

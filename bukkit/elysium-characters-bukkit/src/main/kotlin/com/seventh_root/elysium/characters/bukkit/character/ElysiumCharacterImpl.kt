@@ -21,7 +21,6 @@ import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGender
 import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGenderProvider
 import com.seventh_root.elysium.characters.bukkit.race.ElysiumRace
 import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProvider
-import com.seventh_root.elysium.core.database.TableRow
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.bukkit.Bukkit
 import org.bukkit.Location

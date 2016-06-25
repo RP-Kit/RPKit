@@ -22,22 +22,22 @@ import com.seventh_root.elysium.economy.bukkit.database.table.ElysiumCurrencyTab
 class ElysiumCurrencyProviderImpl(private val plugin: ElysiumEconomyBukkit): ElysiumCurrencyProvider {
 
     override fun getCurrency(id: Int): ElysiumCurrency? {
-        return plugin.core.database.getTable(ElysiumCurrency::class.java)?.get(id)
+        return plugin.core.database.getTable(ElysiumCurrencyTable::class)[id]
     }
 
     override fun getCurrency(name: String): ElysiumCurrency? {
-        return (plugin.core.database.getTable(ElysiumCurrency::class.java) as ElysiumCurrencyTable).get(name)
+        return plugin.core.database.getTable(ElysiumCurrencyTable::class).get(name)
     }
 
     override val currencies: Collection<ElysiumCurrency>
-        get() = (plugin.core.database.getTable(ElysiumCurrency::class.java) as ElysiumCurrencyTable).getAll()
+        get() = plugin.core.database.getTable(ElysiumCurrencyTable::class).getAll()
 
     override fun addCurrency(currency: ElysiumCurrency) {
-        plugin.core.database.getTable(ElysiumCurrency::class.java)?.insert(currency)
+        plugin.core.database.getTable(ElysiumCurrencyTable::class).insert(currency)
     }
 
     override fun removeCurrency(currency: ElysiumCurrency) {
-        plugin.core.database.getTable(ElysiumCurrency::class.java)?.delete(currency)
+        plugin.core.database.getTable(ElysiumCurrencyTable::class).delete(currency)
     }
 
     override val defaultCurrency: ElysiumCurrency?
