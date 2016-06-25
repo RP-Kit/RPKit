@@ -81,11 +81,11 @@ class ElysiumChatChannelImpl: ElysiumChatChannel {
             }
         }
     override val speakers: List<ElysiumPlayer>
-        get() = (plugin.core.database.getTable(ChatChannelSpeaker::class.java) as ChatChannelSpeakerTable)
+        get() = plugin.core.database.getTable(ChatChannelSpeakerTable::class)
                         .get(this)
                         .map { speaker -> speaker.player }
     override val listeners: List<ElysiumPlayer>
-        get() = (plugin.core.database.getTable(ChatChannelListener::class.java) as ChatChannelListenerTable)
+        get() = plugin.core.database.getTable(ChatChannelListenerTable::class)
                 .get(this)
                 .map { speaker -> speaker.player }
     override val pipeline: MutableList<ChatChannelPipelineComponent>
@@ -168,13 +168,13 @@ class ElysiumChatChannelImpl: ElysiumChatChannel {
 
     override fun addSpeaker(speaker: ElysiumPlayer) {
         if (!speakers.contains(speaker)) {
-            plugin.core.database.getTable(ChatChannelSpeaker::class.java)?.insert(ChatChannelSpeaker(0, this, speaker))
+            plugin.core.database.getTable(ChatChannelSpeakerTable::class).insert(ChatChannelSpeaker(0, this, speaker))
         }
     }
 
     override fun removeSpeaker(speaker: ElysiumPlayer) {
         while (speakers.contains(speaker)) {
-            val chatChannelSpeakerTable = plugin.core.database.getTable(ChatChannelSpeaker::class.java) as? ChatChannelSpeakerTable
+            val chatChannelSpeakerTable = plugin.core.database.getTable(ChatChannelSpeakerTable::class)
             if (chatChannelSpeakerTable != null) {
                 val chatChannelSpeaker = chatChannelSpeakerTable.get(speaker)
                 if (chatChannelSpeaker != null) {
@@ -188,13 +188,13 @@ class ElysiumChatChannelImpl: ElysiumChatChannel {
 
     override fun addListener(listener: ElysiumPlayer) {
         if (!listeners.contains(listener)) {
-            plugin.core.database.getTable(ChatChannelListener::class.java)?.insert(ChatChannelListener(0, this, listener))
+            plugin.core.database.getTable(ChatChannelListenerTable::class).insert(ChatChannelListener(0, this, listener))
         }
     }
 
     override fun removeListener(listener: ElysiumPlayer) {
         while (listeners.contains(listener)) {
-            val chatChannelListenerTable = plugin.core.database.getTable(ChatChannelListener::class.java) as? ChatChannelListenerTable
+            val chatChannelListenerTable = plugin.core.database.getTable(ChatChannelListenerTable::class)
             if (chatChannelListenerTable != null) {
                 val chatChannelListeners = chatChannelListenerTable.get(listener)
                 chatChannelListeners

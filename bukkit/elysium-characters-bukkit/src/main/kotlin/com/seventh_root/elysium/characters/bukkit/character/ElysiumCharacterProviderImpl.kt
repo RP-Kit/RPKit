@@ -17,6 +17,7 @@
 package com.seventh_root.elysium.characters.bukkit.character
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
+import com.seventh_root.elysium.characters.bukkit.database.table.ElysiumCharacterTable
 import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.ehcache.Cache
@@ -42,7 +43,7 @@ class ElysiumCharacterProviderImpl: ElysiumCharacterProvider {
     }
 
     override fun getCharacter(id: Int): ElysiumCharacter? {
-        return plugin.core.database.getTable(ElysiumCharacter::class.java)!![id]
+        return plugin.core.database.getTable(ElysiumCharacterTable::class)[id]
     }
 
     override fun getActiveCharacter(player: ElysiumPlayer): ElysiumCharacter? {
@@ -167,21 +168,21 @@ class ElysiumCharacterProviderImpl: ElysiumCharacterProvider {
     }
 
     override fun addCharacter(character: ElysiumCharacter): Int {
-        return plugin.core.database.getTable(ElysiumCharacter::class.java)!!.insert(character)
+        return plugin.core.database.getTable(ElysiumCharacterTable::class).insert(character)
     }
 
     override fun removeCharacter(character: ElysiumCharacter) {
         val player = character.player
         if (player != null)
             setActiveCharacter(player, null)
-        plugin.core.database.getTable(ElysiumCharacter::class.java)!!.delete(character)
+        plugin.core.database.getTable(ElysiumCharacterTable::class).delete(character)
     }
 
     override fun updateCharacter(character: ElysiumCharacter) {
         if (plugin.config.getBoolean("characters.delete-character-on-death") && character.isDead) {
             removeCharacter(character)
         } else {
-            plugin.core.database.getTable(ElysiumCharacter::class.java)!!.update(character)
+            plugin.core.database.getTable(ElysiumCharacterTable::class).update(character)
         }
     }
 

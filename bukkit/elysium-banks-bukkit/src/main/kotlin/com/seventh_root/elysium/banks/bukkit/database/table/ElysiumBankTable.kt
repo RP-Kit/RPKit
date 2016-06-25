@@ -89,7 +89,7 @@ class ElysiumBankTable: Table<ElysiumBank> {
                     `object`.id = id
                     cache.put(id, `object`)
                     val currencyBanks = characterCache.get(`object`.character.id)?:mutableMapOf<Int, Int>()
-                    (currencyBanks as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
+                    @Suppress("UNCHECKED_CAST") (currencyBanks as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
                     characterCache.put(`object`.character.id, currencyBanks)
                 }
             }
@@ -109,7 +109,7 @@ class ElysiumBankTable: Table<ElysiumBank> {
                 statement.executeUpdate()
                 cache.put(`object`.id, `object`)
                 val currencyBanks = characterCache.get(`object`.character.id)?:mutableMapOf<Int, Int>()
-                (currencyBanks as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
+                @Suppress("UNCHECKED_CAST") (currencyBanks as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
                 characterCache.put(`object`.character.id, currencyBanks)
             }
         }

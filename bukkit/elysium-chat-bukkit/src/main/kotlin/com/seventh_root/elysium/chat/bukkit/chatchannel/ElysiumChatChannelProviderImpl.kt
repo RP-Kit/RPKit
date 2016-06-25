@@ -26,19 +26,19 @@ class ElysiumChatChannelProviderImpl(private val plugin: ElysiumChatBukkit): Ely
 
     override val chatChannels: Collection<ElysiumChatChannel>
         get() {
-            return (plugin.core.database.getTable(ElysiumChatChannel::class.java) as ElysiumChatChannelTable).getAll()
+            return plugin.core.database.getTable(ElysiumChatChannelTable::class).getAll()
         }
 
     override fun getChatChannel(id: Int): ElysiumChatChannel? {
-        return plugin.core.database.getTable(ElysiumChatChannel::class.java)!![id]
+        return plugin.core.database.getTable(ElysiumChatChannelTable::class)[id]
     }
 
     override fun getChatChannel(name: String): ElysiumChatChannel? {
-        return (plugin.core.database.getTable(ElysiumChatChannel::class.java) as ElysiumChatChannelTable).get(name)
+        return plugin.core.database.getTable(ElysiumChatChannelTable::class).get(name)
     }
 
     override fun addChatChannel(chatChannel: ElysiumChatChannel) {
-        plugin.core.database.getTable(ElysiumChatChannel::class.java)!!.insert(chatChannel)
+        plugin.core.database.getTable(ElysiumChatChannelTable::class).insert(chatChannel)
         if (chatChannel.isIRCEnabled) {
             val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
             ircProvider.ircBot.sendIRC().joinChannel(chatChannel.ircChannel)
@@ -46,7 +46,7 @@ class ElysiumChatChannelProviderImpl(private val plugin: ElysiumChatBukkit): Ely
     }
 
     override fun removeChatChannel(chatChannel: ElysiumChatChannel) {
-        plugin.core.database.getTable(ElysiumChatChannel::class.java)!!.delete(chatChannel)
+        plugin.core.database.getTable(ElysiumChatChannelTable::class).delete(chatChannel)
         if (chatChannel.isIRCEnabled) {
             val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
             ircProvider.ircBot.sendRaw().rawLine("PART ${chatChannel.ircChannel}")
@@ -54,11 +54,11 @@ class ElysiumChatChannelProviderImpl(private val plugin: ElysiumChatBukkit): Ely
     }
 
     override fun updateChatChannel(chatChannel: ElysiumChatChannel) {
-        plugin.core.database.getTable(ElysiumChatChannel::class.java)!!.update(chatChannel)
+        plugin.core.database.getTable(ElysiumChatChannelTable::class).update(chatChannel)
     }
 
     override fun getPlayerChannel(player: ElysiumPlayer): ElysiumChatChannel? {
-        return (plugin.core.database.getTable(ChatChannelSpeaker::class.java) as? ChatChannelSpeakerTable)?.get(player)?.chatChannel as? ElysiumChatChannel
+        return plugin.core.database.getTable(ChatChannelSpeakerTable::class).get(player)?.chatChannel
     }
 
     override fun setPlayerChannel(player: ElysiumPlayer, channel: ElysiumChatChannel) {

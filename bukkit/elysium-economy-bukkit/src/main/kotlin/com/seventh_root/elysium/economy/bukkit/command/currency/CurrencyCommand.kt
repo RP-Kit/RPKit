@@ -35,7 +35,7 @@ class CurrencyCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (args.size > 0) {
-            var newArgsList: MutableList<String> = arrayListOf()
+            val newArgsList: MutableList<String> = arrayListOf()
             for (i: Int in 1..(args.size - 1)) {
                 newArgsList.add(args[i])
             }

@@ -103,7 +103,7 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit): CommandExec
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            if (plugin.core!!.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).getChatChannel(invalidInput) == null) {
+            if (plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).getChatChannel(invalidInput) == null) {
                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-join-invalid-chatchannel"))
             } else if (!(context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.join." + invalidInput)) {
                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel-join-channel")

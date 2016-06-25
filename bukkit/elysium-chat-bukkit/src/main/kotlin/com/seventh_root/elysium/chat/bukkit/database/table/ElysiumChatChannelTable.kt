@@ -17,8 +17,6 @@
 package com.seventh_root.elysium.chat.bukkit.database.table
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelListener
-import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelSpeaker
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelImpl
 import com.seventh_root.elysium.core.database.Database
@@ -261,11 +259,11 @@ class ElysiumChatChannelTable: Table<ElysiumChatChannel> {
                 nameCache.remove(`object`.name)
             }
         }
-        val chatChannelListenerTable = database.getTable(ChatChannelListener::class.java) as? ChatChannelListenerTable
-        val chatChannelListeners = chatChannelListenerTable?.get(`object`)
-        chatChannelListeners?.forEach { chatChannelListenerTable?.delete(it) }
-        val chatChannelSpeakerTable = database.getTable(ChatChannelSpeaker::class.java) as? ChatChannelSpeakerTable
-        val chatChannelSpeakers = chatChannelSpeakerTable?.get(`object`)
-        chatChannelSpeakers?.forEach { chatChannelSpeakerTable?.delete(it) }
+        val chatChannelListenerTable = database.getTable(ChatChannelListenerTable::class)
+        val chatChannelListeners = chatChannelListenerTable.get(`object`)
+        chatChannelListeners.forEach { chatChannelListenerTable.delete(it) }
+        val chatChannelSpeakerTable = database.getTable(ChatChannelSpeakerTable::class)
+        val chatChannelSpeakers = chatChannelSpeakerTable.get(`object`)
+        chatChannelSpeakers.forEach { chatChannelSpeakerTable.delete(it) }
     }
 }

@@ -27,14 +27,14 @@ import com.seventh_root.elysium.economy.bukkit.exception.NegativeBalanceExceptio
 class ElysiumBankProviderImpl(private val plugin: ElysiumBanksBukkit): ElysiumBankProvider {
 
     override fun getBalance(character: ElysiumCharacter, currency: ElysiumCurrency): Int {
-        return (plugin.core.database.getTable(ElysiumBank::class.java) as ElysiumBankTable).get(character, currency).balance
+        return plugin.core.database.getTable(ElysiumBankTable::class).get(character, currency).balance
     }
 
     override fun setBalance(character: ElysiumCharacter, currency: ElysiumCurrency, amount: Int) {
         if (amount < 0) throw NegativeBalanceException()
-        val bank = (plugin.core.database.getTable(ElysiumBank::class.java) as ElysiumBankTable).get(character, currency)
+        val bank = plugin.core.database.getTable(ElysiumBankTable::class).get(character, currency)
         bank.balance = amount
-        plugin.core.database.getTable(ElysiumBank::class.java)!!.update(bank)
+        plugin.core.database.getTable(ElysiumBankTable::class).update(bank)
     }
 
     override fun deposit(character: ElysiumCharacter, currency: ElysiumCurrency, amount: Int) {

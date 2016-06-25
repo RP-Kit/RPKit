@@ -16,8 +16,6 @@
 
 package com.seventh_root.elysium.chat.bukkit.exception
 
-import com.seventh_root.elysium.chat.bukkit.exception.ChatChannelMessageProcessingException
-
 class ChatChannelMessagePostProcessingException: ChatChannelMessageProcessingException {
 
     constructor() {

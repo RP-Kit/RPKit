@@ -25,11 +25,11 @@ import java.util.*
 class ElysiumGenderProviderImpl(private val plugin: ElysiumCharactersBukkit): ElysiumGenderProvider {
 
     override fun getGender(id: Int): ElysiumGender? {
-        return plugin.core.database.getTable(ElysiumGender::class.java)!![id]
+        return plugin.core.database.getTable(ElysiumGenderTable::class)[id]
     }
 
     override fun getGender(name: String): ElysiumGender? {
-        val table = plugin.core.database.getTable(ElysiumGender::class.java)
+        val table = plugin.core.database.getTable(ElysiumGenderTable::class)
         if (table is ElysiumGenderTable) {
             return table[name]
         }
@@ -57,11 +57,11 @@ class ElysiumGenderProviderImpl(private val plugin: ElysiumCharactersBukkit): El
         }
 
     override fun addGender(gender: ElysiumGender) {
-        plugin.core.database.getTable(ElysiumGender::class.java)!!.insert(gender)
+        plugin.core.database.getTable(ElysiumGenderTable::class).insert(gender)
     }
 
     override fun removeGender(gender: ElysiumGender) {
-        plugin.core.database.getTable(ElysiumGender::class.java)!!.delete(gender)
+        plugin.core.database.getTable(ElysiumGenderTable::class).delete(gender)
     }
 
 }
