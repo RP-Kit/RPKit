@@ -43,8 +43,8 @@ class CharacterSetAgeCommand(private val plugin: ElysiumCharactersBukkit): Comma
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.characters.command.character.set.age")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
                 val player = playerProvider.getPlayer(sender)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
@@ -98,8 +98,8 @@ class CharacterSetAgeCommand(private val plugin: ElysiumCharactersBukkit): Comma
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
                 val player = playerProvider.getPlayer(conversable)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {

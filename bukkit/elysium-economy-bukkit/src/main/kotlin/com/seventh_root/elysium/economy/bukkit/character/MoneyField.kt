@@ -26,8 +26,8 @@ class MoneyField(val plugin: ElysiumEconomyBukkit): CharacterCardField {
 
     override val name = "money"
     override fun get(character: ElysiumCharacter): String {
-        val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
-        val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
+        val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class)
+        val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
         return currencyProvider.currencies
                 .map { currency ->
                     val balance = economyProvider.getBalance(character, currency)

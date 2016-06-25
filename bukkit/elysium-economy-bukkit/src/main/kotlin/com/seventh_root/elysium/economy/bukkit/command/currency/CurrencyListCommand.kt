@@ -27,7 +27,7 @@ class CurrencyListCommand(private val plugin: ElysiumEconomyBukkit): CommandExec
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("elysium.economy.command.currency.list")) {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
+            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.currency-list-title")))
             for (currency in currencyProvider.currencies) {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.currency-list-item"))

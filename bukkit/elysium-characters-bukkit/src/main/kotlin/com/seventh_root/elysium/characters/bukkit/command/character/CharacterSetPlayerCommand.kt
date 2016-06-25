@@ -45,8 +45,8 @@ class CharacterSetPlayerCommand(private val plugin: ElysiumCharactersBukkit): Co
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.characters.command.character.set.player")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
                 val player = playerProvider.getPlayer(sender)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
@@ -81,8 +81,8 @@ class CharacterSetPlayerCommand(private val plugin: ElysiumCharactersBukkit): Co
         override fun acceptValidatedInput(context: ConversationContext, input: Player): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
                 val player = playerProvider.getPlayer(conversable)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {

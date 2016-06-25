@@ -25,7 +25,7 @@ import org.pircbotx.User
 class IRCRegisterCommand(private val plugin: ElysiumChatBukkit): IRCCommand("register") {
 
     override fun execute(channel: Channel, sender: User, cmd: IRCCommand, label: String, args: Array<String>) {
-        val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class.java)
+        val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
         if (args.size > 0) {
             if (args[0].matches(Regex("(\\w[-._\\w]*\\w@\\w[-._\\w]*\\w\\.\\w{2,3})"))) {
                 ircProvider.ircBot.sendIRC().message("NickServ", "REGISTER " + plugin.config.getString("irc.password") + " " + args[0])

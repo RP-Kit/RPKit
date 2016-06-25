@@ -42,9 +42,9 @@ class BlockBreakListener(val plugin: ElysiumShopsBukkit): Listener {
             sign = event.block.getRelative(UP).state as? Sign
         }
         if (sign?.getLine(0) == GREEN.toString() + "[shop]") {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-            val shopCountProvider = plugin.core.serviceManager.getServiceProvider(ElysiumShopCountProvider::class.java)
+            val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+            val shopCountProvider = plugin.core.serviceManager.getServiceProvider(ElysiumShopCountProvider::class)
             val player = playerProvider.getPlayer(event.player)
             val character = characterProvider.getActiveCharacter(player)
             if (character != null) {

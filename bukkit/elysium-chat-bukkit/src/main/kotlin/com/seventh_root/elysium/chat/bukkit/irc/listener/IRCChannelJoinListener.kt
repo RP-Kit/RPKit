@@ -28,7 +28,7 @@ class IRCChannelJoinListener(private val plugin: ElysiumChatBukkit): ListenerAda
         val user = event.user
         if (user != null) {
             val verified = user.isVerified
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
             val chatChannel = chatChannelProvider.getChatChannelFromIRCChannel(event.channel.name)
             if (chatChannel != null) {
                 if (chatChannel.isIRCWhitelist) {

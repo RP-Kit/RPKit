@@ -42,10 +42,10 @@ class InventoryClickListener(val plugin: ElysiumShopsBukkit): Listener {
             val sign = chest.block.getRelative(UP).state
             if (sign is Sign) {
                 if (sign.getLine(0) == GREEN.toString() + "[shop]") {
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-                    val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
-                    val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
+                    val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                    val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                    val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class)
+                    val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
                     val sellerCharacter = characterProvider.getCharacter(sign.getLine(3).toInt()) ?: return
                     val buyerBukkitPlayer = event.whoClicked as? Player ?: return
                     val buyerPlayer = playerProvider.getPlayer(buyerBukkitPlayer)

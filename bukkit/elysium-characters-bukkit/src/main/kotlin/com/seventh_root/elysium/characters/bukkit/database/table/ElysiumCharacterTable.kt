@@ -305,9 +305,9 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
                 database.createConnection().use { connection ->
                     connection.prepareStatement(
                             "SELECT id, player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level FROM elysium_character WHERE id = ?").use { statement ->
-                        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                        val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
-                        val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java)
+                        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                        val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class)
+                        val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class)
                         statement.setInt(1, id)
                         val resultSet = statement.executeQuery()
                         if (resultSet.next()) {

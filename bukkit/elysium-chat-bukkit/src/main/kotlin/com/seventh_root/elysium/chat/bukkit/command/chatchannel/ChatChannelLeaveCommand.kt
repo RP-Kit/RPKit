@@ -44,8 +44,8 @@ class ChatChannelLeaveCommand(private val plugin: ElysiumChatBukkit): CommandExe
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.chat.command.chatchannel.leave")) {
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
                 if (chatChannelProvider.chatChannels.size > 0) {
                     val player = playerProvider.getPlayer(sender)
                     if (args.size > 0) {
@@ -86,14 +86,14 @@ class ChatChannelLeaveCommand(private val plugin: ElysiumChatBukkit): CommandExe
     private inner class ChatChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(input) != null && (context.forWhom as Permissible).hasPermission("elysium.")
+            return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).getChatChannel(input) != null && (context.forWhom as Permissible).hasPermission("elysium.")
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
                 val player = playerProvider.getPlayer(conversable)
                 val channel = chatChannelProvider.getChatChannel(input)!!
                 channel.removeListener(player)
@@ -104,7 +104,7 @@ class ChatChannelLeaveCommand(private val plugin: ElysiumChatBukkit): CommandExe
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            if (plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java).getChatChannel(invalidInput) == null) {
+            if (plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).getChatChannel(invalidInput) == null) {
                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-leave-invalid-chatchannel"))
             } else if (!(context.forWhom as Permissible).hasPermission("elysium.chat.command.chatchannel.leave." + invalidInput)) {
                 return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel-leave-channel")

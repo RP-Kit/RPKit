@@ -26,8 +26,8 @@ import org.pircbotx.hooks.events.ConnectEvent
 class IRCConnectListener(private val plugin: ElysiumChatBukkit): ListenerAdapter() {
 
     override fun onConnect(event: ConnectEvent?) {
-        val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class.java)
-        val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+        val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
+        val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
         for (channel in chatChannelProvider.chatChannels) {
             if (channel.isIRCEnabled) {
                 ircProvider.ircBot.sendIRC().joinChannel(channel.ircChannel)

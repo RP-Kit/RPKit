@@ -129,8 +129,8 @@ class ElysiumWalletTable: Table<ElysiumWallet> {
                     if (resultSet.next()) {
                         wallet = ElysiumWallet(
                                 id = resultSet.getInt("id"),
-                                character = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java).getCharacter(resultSet.getInt("character_id"))!!,
-                                currency = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(resultSet.getInt("currency_id"))!!,
+                                character = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class).getCharacter(resultSet.getInt("character_id"))!!,
+                                currency = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class).getCurrency(resultSet.getInt("currency_id"))!!,
                                 balance = resultSet.getInt("balance")
                         )
                         cache.put(id, wallet)
@@ -160,8 +160,8 @@ class ElysiumWalletTable: Table<ElysiumWallet> {
                         val balance = resultSet.getInt("balance")
                         wallet = ElysiumWallet(
                                 id = id,
-                                character = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java).getCharacter(characterId)!!,
-                                currency = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(currencyId)!!,
+                                character = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class).getCharacter(characterId)!!,
+                                currency = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class).getCurrency(currencyId)!!,
                                 balance = balance
                         )
                         val finalWallet = wallet!!

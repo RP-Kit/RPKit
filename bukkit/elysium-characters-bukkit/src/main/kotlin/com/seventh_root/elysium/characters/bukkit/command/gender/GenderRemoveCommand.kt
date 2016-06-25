@@ -43,7 +43,7 @@ class GenderRemoveCommand(private val plugin: ElysiumCharactersBukkit): CommandE
         if (sender is Conversable) {
             if (sender.hasPermission("elysium.characters.command.gender.remove")) {
                 if (args.size > 0) {
-                    val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
+                    val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class)
                     val genderBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
                         genderBuilder.append(args[i]).append(' ')
@@ -69,11 +69,11 @@ class GenderRemoveCommand(private val plugin: ElysiumCharactersBukkit): CommandE
     private inner class GenderPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java).getGender(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class).getGender(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class.java)
+            val genderProvider = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class)
             genderProvider.removeGender(genderProvider.getGender(input)!!)
             return GenderSetPrompt()
         }

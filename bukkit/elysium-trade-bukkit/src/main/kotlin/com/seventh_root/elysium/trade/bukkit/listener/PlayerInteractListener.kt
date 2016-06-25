@@ -47,12 +47,12 @@ class PlayerInteractListener(private val plugin: ElysiumTradeBukkit): Listener {
                         var buyPrice = sign.getLine(2).split(" | ")[0].toInt()
                         var sellPrice = sign.getLine(2).split(" | ")[1].toInt()
                         var actualPrice = arrayOf(buyPrice, sellPrice).average()
-                        val currency = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(sign.getLine(3))
+                        val currency = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class).getCurrency(sign.getLine(3))
                         if (currency != null) {
                             if (event.action === RIGHT_CLICK_BLOCK) {
-                                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-                                val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
+                                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                                val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class)
                                 val player = playerProvider.getPlayer(event.player)
                                 val character = characterProvider.getActiveCharacter(player)
                                 if (character != null) {
@@ -82,9 +82,9 @@ class PlayerInteractListener(private val plugin: ElysiumTradeBukkit): Listener {
                                     event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                                 }
                             } else if (event.action == LEFT_CLICK_BLOCK) {
-                                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-                                val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
+                                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                                val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class)
                                 val player = playerProvider.getPlayer(event.player)
                                 val character = characterProvider.getActiveCharacter(player)
                                 if (character != null) {

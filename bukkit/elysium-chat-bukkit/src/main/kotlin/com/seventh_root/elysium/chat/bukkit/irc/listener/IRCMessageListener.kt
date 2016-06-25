@@ -28,11 +28,11 @@ import org.pircbotx.hooks.events.MessageEvent
 class IRCMessageListener(private val plugin: ElysiumChatBukkit): ListenerAdapter() {
 
     override fun onMessage(event: MessageEvent) {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
+        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
         val user = event.user
         if (user != null) {
             val sender = playerProvider.getPlayer(user)
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
             val chatChannel = chatChannelProvider.getChatChannelFromIRCChannel(event.channel.name)
             chatChannel?.listeners
                     ?.filter { listener -> listener.bukkitPlayer != null }

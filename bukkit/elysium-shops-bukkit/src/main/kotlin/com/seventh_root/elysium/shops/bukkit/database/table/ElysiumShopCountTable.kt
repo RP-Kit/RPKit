@@ -116,7 +116,7 @@ class ElysiumShopCountTable: Table<ElysiumShopCount> {
                         val characterId = resultSet.getInt("character_id")
                         shopCount = ElysiumShopCount(
                                 id,
-                                plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+                                plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
                                         .getCharacter(characterId)!!,
                                 resultSet.getInt("count")
                         )

@@ -51,7 +51,7 @@ class ElysiumEconomyBukkit: ElysiumBukkitPlugin() {
     }
 
     override fun onPostEnable() {
-        core.serviceManager.getServiceProvider(ElysiumCharacterCardFieldProvider::class.java)
+        core.serviceManager.getServiceProvider(ElysiumCharacterCardFieldProvider::class)
                 .characterCardFields.add(MoneyField(this))
     }
 

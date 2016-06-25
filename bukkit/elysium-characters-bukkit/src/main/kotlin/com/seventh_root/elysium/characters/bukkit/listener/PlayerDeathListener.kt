@@ -27,8 +27,8 @@ class PlayerDeathListener(private val plugin: ElysiumCharactersBukkit): Listener
 
     @EventHandler
     fun onPlayerDeath(event: PlayerDeathEvent) {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
+        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
         val player = playerProvider.getPlayer(event.entity)
         val character = characterProvider.getActiveCharacter(player)
         if (character != null) {

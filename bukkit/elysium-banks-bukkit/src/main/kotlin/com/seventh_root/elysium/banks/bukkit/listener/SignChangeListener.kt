@@ -45,7 +45,7 @@ class SignChangeListener(private val plugin: ElysiumBanksBukkit): Listener {
             } else {
                 event.setLine(2, "1")
             }
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
+            val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
             if (currencyProvider.getCurrency(event.getLine(3)) == null) {
                 val defaultCurrency = currencyProvider.defaultCurrency
                 if (defaultCurrency == null) {

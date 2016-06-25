@@ -33,10 +33,10 @@ class InventoryCloseListener(private val plugin: ElysiumEconomyBukkit): Listener
         if (event.inventory.title.toLowerCase().contains("wallet")) {
             val bukkitPlayer = event.player
             if (bukkitPlayer is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class.java)
-                val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
-                val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class)
+                val economyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumEconomyProvider::class)
                 val currency = currencyProvider.getCurrency(event.inventory.title.substringAfterLast("[").substringBeforeLast("]"))
                 if (currency != null) {
                     val amount = event.inventory.contents

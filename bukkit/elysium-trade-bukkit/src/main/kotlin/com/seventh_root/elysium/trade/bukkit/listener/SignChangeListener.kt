@@ -43,7 +43,7 @@ class SignChangeListener(private val plugin: ElysiumTradeBukkit): Listener {
                     event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-sign-invalid-price")))
                     return
                 }
-                if (plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java).getCurrency(event.getLine(3)) == null) {
+                if (plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class).getCurrency(event.getLine(3)) == null) {
                     event.block.breakNaturally()
                     event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-sign-invalid-currency")))
                     return
