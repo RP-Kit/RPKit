@@ -25,7 +25,7 @@ import com.seventh_root.elysium.chat.bukkit.exception.ChatChannelMessageFormatti
 import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
 import org.bukkit.ChatColor
 
-class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, var formatString: String?): ChatChannelPipelineComponent() {
+class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, var formatString: String?): ChatChannelPipelineComponent {
 
     override val type: ChatChannelPipelineComponent.Type
         get() = FORMATTER

@@ -21,7 +21,7 @@ import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
 import java.io.IOException
 
-class LogChatChannelPipelineComponent: ChatChannelPipelineComponent() {
+class LogChatChannelPipelineComponent: ChatChannelPipelineComponent {
 
     override val type: ChatChannelPipelineComponent.Type
         get() = POST_PROCESSOR

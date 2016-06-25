@@ -18,8 +18,8 @@ package com.seventh_root.elysium.chat.bukkit.irc.listener
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
-import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
-import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
+import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContextImpl
+import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContextImpl
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.MessageEvent
@@ -38,9 +38,9 @@ class IRCMessageListener(private val plugin: ElysiumChatBukkit): ListenerAdapter
                     ?.filter { listener -> listener.bukkitPlayer != null }
                     ?.filter { listener -> listener.bukkitPlayer?.player?.isOnline ?: false }
                     ?.forEach { listener ->
-                        listener.bukkitPlayer?.player?.sendMessage(chatChannel.processMessage(event.message, ChatMessageContext(chatChannel, sender, listener)))
+                        listener.bukkitPlayer?.player?.sendMessage(chatChannel.processMessage(event.message, ChatMessageContextImpl(chatChannel, sender, listener)))
                     }
-            chatChannel?.postProcess(event.message, ChatMessagePostProcessContext(chatChannel, sender))
+            chatChannel?.postProcess(event.message, ChatMessagePostProcessContextImpl(chatChannel, sender))
         }
     }
 

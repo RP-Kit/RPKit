@@ -26,9 +26,11 @@ import com.seventh_root.elysium.economy.bukkit.command.money.MoneyCommand
 import com.seventh_root.elysium.economy.bukkit.command.money.MoneyPayCommand
 import com.seventh_root.elysium.economy.bukkit.command.money.MoneyWalletCommand
 import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProviderImpl
 import com.seventh_root.elysium.economy.bukkit.database.table.ElysiumCurrencyTable
 import com.seventh_root.elysium.economy.bukkit.database.table.ElysiumWalletTable
 import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProvider
+import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProviderImpl
 import com.seventh_root.elysium.economy.bukkit.listener.InventoryCloseListener
 
 
@@ -40,8 +42,8 @@ class ElysiumEconomyBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {
         saveDefaultConfig()
-        currencyProvider = ElysiumCurrencyProvider(this)
-        economyProvider = ElysiumEconomyProvider(this)
+        currencyProvider = ElysiumCurrencyProviderImpl(this)
+        economyProvider = ElysiumEconomyProviderImpl(this)
         serviceProviders = arrayOf(
                 currencyProvider,
                 economyProvider

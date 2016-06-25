@@ -18,6 +18,7 @@ package com.seventh_root.elysium.characters.bukkit.database.table
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterImpl
 import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGenderProvider
 import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProvider
 import com.seventh_root.elysium.core.database.Database
@@ -310,7 +311,7 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
                         statement.setInt(1, id)
                         val resultSet = statement.executeQuery()
                         if (resultSet.next()) {
-                            character = ElysiumCharacter(
+                            character = ElysiumCharacterImpl(
                                     plugin = plugin,
                                     id = resultSet.getInt("id"),
                                     player = playerProvider.getPlayer(resultSet.getInt("player_id")),

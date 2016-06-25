@@ -17,7 +17,7 @@
 package com.seventh_root.elysium.economy.bukkit.command.currency
 
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
-import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyImpl
 import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
 import org.bukkit.ChatColor
 import org.bukkit.Material
@@ -235,7 +235,7 @@ class CurrencyAddCommand(private val plugin: ElysiumEconomyBukkit): CommandExecu
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val currencyProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCurrencyProvider::class.java)
             currencyProvider.addCurrency(
-                    ElysiumCurrency(
+                    ElysiumCurrencyImpl(
                             name = context.getSessionData("name") as String,
                             nameSingular = context.getSessionData("name_singular") as String,
                             namePlural = context.getSessionData("name_plural") as String,

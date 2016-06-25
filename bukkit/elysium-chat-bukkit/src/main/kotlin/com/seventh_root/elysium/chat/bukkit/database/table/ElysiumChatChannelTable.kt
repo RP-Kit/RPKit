@@ -20,6 +20,7 @@ import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelListener
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelSpeaker
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelImpl
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
@@ -165,7 +166,7 @@ class ElysiumChatChannelTable: Table<ElysiumChatChannel> {
                     statement.setInt(1, id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        val finalChatChannel = ElysiumChatChannel(
+                        val finalChatChannel = ElysiumChatChannelImpl(
                                 plugin = plugin,
                                 id = resultSet.getInt("id"),
                                 name = resultSet.getString("name"),
@@ -204,7 +205,7 @@ class ElysiumChatChannelTable: Table<ElysiumChatChannel> {
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
                         val id = resultSet.getInt("id")
-                        val finalChatChannel = ElysiumChatChannel(
+                        val finalChatChannel = ElysiumChatChannelImpl(
                                 plugin = plugin,
                                 id = id,
                                 name = resultSet.getString("name"),

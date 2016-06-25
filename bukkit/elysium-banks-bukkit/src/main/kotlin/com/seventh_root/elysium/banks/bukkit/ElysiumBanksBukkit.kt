@@ -17,6 +17,7 @@
 package com.seventh_root.elysium.banks.bukkit
 
 import com.seventh_root.elysium.banks.bukkit.bank.ElysiumBankProvider
+import com.seventh_root.elysium.banks.bukkit.bank.ElysiumBankProviderImpl
 import com.seventh_root.elysium.banks.bukkit.database.table.ElysiumBankTable
 import com.seventh_root.elysium.banks.bukkit.listener.PlayerInteractListener
 import com.seventh_root.elysium.banks.bukkit.listener.SignChangeListener
@@ -32,7 +33,7 @@ class ElysiumBanksBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {
         saveDefaultConfig()
-        bankProvider = ElysiumBankProvider(this)
+        bankProvider = ElysiumBankProviderImpl(this)
         serviceProviders = arrayOf(
                 bankProvider
         )

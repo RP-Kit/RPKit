@@ -3,7 +3,7 @@ version: @version@
 main: com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 author: alyphen
 description: Elysium Characters implementation for Bukkit
-depend: [elysium-core-bukkit, elysium-players-bukkit]
+depend: [elysium-core-bukkit, elysium-player-lib-bukkit, elysium-character-lib-bukkit]
 commands:
     character:
         description: Character management command

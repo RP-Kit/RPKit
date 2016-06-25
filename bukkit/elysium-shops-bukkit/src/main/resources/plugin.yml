@@ -2,7 +2,7 @@ name: elysium-shops-bukkit
 author: alyphen
 version: @version@
 main: com.seventh_root.elysium.shops.bukkit.ElysiumShopsBukkit
-depend: [elysium-core-bukkit, elysium-players-bukkit, elysium-characters-bukkit, elysium-economy-bukkit]
+depend: [elysium-core-bukkit, elysium-player-lib-bukkit, elysium-character-lib-bukkit, elysium-economy-lib-bukkit, elysium-shop-lib-bukkit]
 permissions:
     elysium.shops.sign.shop:
         description: Allows creation of shops

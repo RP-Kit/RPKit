@@ -17,6 +17,7 @@
 package com.seventh_root.elysium.characters.bukkit
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProviderImpl
 import com.seventh_root.elysium.characters.bukkit.character.field.*
 import com.seventh_root.elysium.characters.bukkit.command.character.CharacterCommand
 import com.seventh_root.elysium.characters.bukkit.command.gender.GenderCommand
@@ -25,11 +26,13 @@ import com.seventh_root.elysium.characters.bukkit.database.table.ElysiumCharacte
 import com.seventh_root.elysium.characters.bukkit.database.table.ElysiumGenderTable
 import com.seventh_root.elysium.characters.bukkit.database.table.ElysiumRaceTable
 import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGenderProvider
+import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGenderProviderImpl
 import com.seventh_root.elysium.characters.bukkit.listener.PlayerDeathListener
 import com.seventh_root.elysium.characters.bukkit.listener.PlayerInteractEntityListener
 import com.seventh_root.elysium.characters.bukkit.listener.PlayerJoinListener
 import com.seventh_root.elysium.characters.bukkit.listener.PlayerMoveListener
 import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProvider
+import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProviderImpl
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceProvider
@@ -45,10 +48,10 @@ class ElysiumCharactersBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {
         saveDefaultConfig()
-        characterProvider = ElysiumCharacterProvider(this)
-        genderProvider = ElysiumGenderProvider(this)
-        raceProvider = ElysiumRaceProvider(this)
-        characterCardFieldProvider = ElysiumCharacterCardFieldProvider()
+        characterProvider = ElysiumCharacterProviderImpl(this)
+        genderProvider = ElysiumGenderProviderImpl(this)
+        raceProvider = ElysiumRaceProviderImpl(this)
+        characterCardFieldProvider = ElysiumCharacterCardFieldProviderImpl()
         serviceProviders = arrayOf(
                 characterProvider,
                 genderProvider,

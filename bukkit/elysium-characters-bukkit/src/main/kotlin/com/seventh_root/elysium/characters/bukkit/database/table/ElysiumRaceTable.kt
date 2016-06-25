@@ -17,6 +17,7 @@
 package com.seventh_root.elysium.characters.bukkit.database.table
 
 import com.seventh_root.elysium.characters.bukkit.race.ElysiumRace
+import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceImpl
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
@@ -120,7 +121,7 @@ class ElysiumRaceTable: Table<ElysiumRace> {
                         if (resultSet.next()) {
                             val id1 = resultSet.getInt("id")
                             val name = resultSet.getString("name")
-                            race = ElysiumRace(id1, name)
+                            race = ElysiumRaceImpl(id1, name)
                             cache.put(id, race)
                             nameCache.put(name, id1)
                         }
@@ -148,7 +149,7 @@ class ElysiumRaceTable: Table<ElysiumRace> {
                         if (resultSet.next()) {
                             val id = resultSet.getInt("id")
                             val name1 = resultSet.getString("name")
-                            race = ElysiumRace(id, name1)
+                            race = ElysiumRaceImpl(id, name1)
                             cache.put(id, race)
                             nameCache.put(name1, id)
                         }

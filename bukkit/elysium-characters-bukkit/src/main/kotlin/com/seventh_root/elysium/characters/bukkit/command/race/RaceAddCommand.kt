@@ -17,7 +17,7 @@
 package com.seventh_root.elysium.characters.bukkit.command.race
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
-import com.seventh_root.elysium.characters.bukkit.race.ElysiumRace
+import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceImpl
 import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
@@ -51,7 +51,7 @@ class RaceAddCommand(private val plugin: ElysiumCharactersBukkit): CommandExecut
                     }
                     raceBuilder.append(args[args.size - 1])
                     if (raceProvider.getRace(raceBuilder.toString()) == null) {
-                        raceProvider.addRace(ElysiumRace(name = raceBuilder.toString()))
+                        raceProvider.addRace(ElysiumRaceImpl(name = raceBuilder.toString()))
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-add-valid")))
                     } else {
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-add-")))
@@ -79,7 +79,7 @@ class RaceAddCommand(private val plugin: ElysiumCharactersBukkit): CommandExecut
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class.java)
-            raceProvider.addRace(ElysiumRace(name = input))
+            raceProvider.addRace(ElysiumRaceImpl(name = input))
             return RaceAddedPrompt()
         }
 

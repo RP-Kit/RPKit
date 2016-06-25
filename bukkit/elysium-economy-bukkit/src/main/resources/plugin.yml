@@ -3,7 +3,7 @@ version: @version@
 main: com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
 author: alyphen
 description: Elysium Economy implementation for Bukkit
-depend: [elysium-core-bukkit, elysium-players-bukkit, elysium-characters-bukkit]
+depend: [elysium-core-bukkit, elysium-character-lib-bukkit, elysium-economy-lib-bukkit]
 commands:
     money:
         description: Money management command

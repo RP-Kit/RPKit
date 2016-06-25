@@ -21,6 +21,7 @@ import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.players.bukkit.ElysiumPlayersBukkit
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerImpl
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.ehcache.Cache
@@ -172,7 +173,12 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                         val name = resultSet.getString("name")
                         val minecraftUUID = resultSet.getString("minecraft_uuid")
                         val ircNick = resultSet.getString("irc_nick")
-                        player = ElysiumPlayer(id, name, if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)), ircNick)
+                        player = ElysiumPlayerImpl(
+                                id,
+                                name,
+                                if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
+                                ircNick
+                        )
                         cache.put(id, player)
                         if (minecraftUUID != null) {
                             minecraftCache.put(minecraftUUID, id)
@@ -202,7 +208,12 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                         val id = resultSet.getInt("id")
                         val minecraftUUID = resultSet.getString("minecraft_uuid")
                         val ircNick = resultSet.getString("irc_nick")
-                        player = ElysiumPlayer(id, name, if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)), ircNick)
+                        player = ElysiumPlayerImpl(
+                                id,
+                                name,
+                                if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
+                                ircNick
+                        )
                         cache.put(id, player)
                         nameCache.put(name, id)
                         if (minecraftUUID != null) {
@@ -233,7 +244,12 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                         val name = resultSet.getString("name")
                         val minecraftUUID = resultSet.getString("minecraft_uuid")
                         val ircNick = resultSet.getString("irc_nick")
-                        player = ElysiumPlayer(id, name, if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)), ircNick)
+                        player = ElysiumPlayerImpl(
+                                id,
+                                name,
+                                if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
+                                ircNick
+                        )
                         cache.put(id, player)
                         nameCache.put(name, id)
                         if (minecraftUUID != null) {
@@ -265,7 +281,12 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                         val name = resultSet.getString("name")
                         val minecraftUUID = resultSet.getString("minecraft_uuid")
                         val ircNick = resultSet.getString("irc_nick")
-                        player = ElysiumPlayer(id, name, if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)), ircNick)
+                        player = ElysiumPlayerImpl(
+                                id,
+                                name,
+                                if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
+                                ircNick
+                        )
                         cache.put(id, player)
                         nameCache.put(name, id)
                         if (minecraftUUID != null) {

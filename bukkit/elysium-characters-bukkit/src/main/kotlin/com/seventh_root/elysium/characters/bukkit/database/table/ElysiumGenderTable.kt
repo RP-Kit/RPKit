@@ -17,6 +17,7 @@
 package com.seventh_root.elysium.characters.bukkit.database.table
 
 import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGender
+import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGenderImpl
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
@@ -122,7 +123,7 @@ class ElysiumGenderTable: Table<ElysiumGender> {
                         if (resultSet.next()) {
                             val id1 = resultSet.getInt("id")
                             val name = resultSet.getString("name")
-                            gender = ElysiumGender(id1, name)
+                            gender = ElysiumGenderImpl(id1, name)
                             cache.put(id, gender)
                             nameCache.put(name, id1)
                         }
@@ -150,7 +151,7 @@ class ElysiumGenderTable: Table<ElysiumGender> {
                         if (resultSet.next()) {
                             val id = resultSet.getInt("id")
                             val name1 = resultSet.getString("name")
-                            gender = ElysiumGender(id, name1)
+                            gender = ElysiumGenderImpl(id, name1)
                             cache.put(id, gender)
                             nameCache.put(name1, id)
                         }
