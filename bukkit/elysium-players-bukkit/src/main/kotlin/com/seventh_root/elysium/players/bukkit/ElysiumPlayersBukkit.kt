@@ -19,6 +19,7 @@ package com.seventh_root.elysium.players.bukkit
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceProvider
+import com.seventh_root.elysium.players.bukkit.command.account.AccountCommand
 import com.seventh_root.elysium.players.bukkit.database.table.ElysiumPlayerTable
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProviderImpl
@@ -32,6 +33,10 @@ class ElysiumPlayersBukkit: ElysiumBukkitPlugin() {
     override fun onEnable() {
         playerProvider = ElysiumPlayerProviderImpl(this)
         serviceProviders = arrayOf<ServiceProvider>(playerProvider)
+    }
+
+    override fun registerCommands() {
+        getCommand("account").executor = AccountCommand(this)
     }
 
     @Throws(SQLException::class)

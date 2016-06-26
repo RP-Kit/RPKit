@@ -55,8 +55,13 @@ class ElysiumPlayerProviderImpl(private val plugin: ElysiumPlayersBukkit): Elysi
     }
 
     override fun addPlayer(player: ElysiumPlayer) {
-        val bukkitPlayerTable: Table<ElysiumPlayer> = plugin.core.database.getTable(ElysiumPlayerTable::class)
-        bukkitPlayerTable.insert(player)
+        val table: Table<ElysiumPlayer> = plugin.core.database.getTable(ElysiumPlayerTable::class)
+        table.insert(player)
+    }
+
+    override fun updatePlayer(player: ElysiumPlayer) {
+        val table = plugin.core.database.getTable(ElysiumPlayerTable::class)
+        table.update(player)
     }
 
     override fun removePlayer(player: ElysiumPlayer) {

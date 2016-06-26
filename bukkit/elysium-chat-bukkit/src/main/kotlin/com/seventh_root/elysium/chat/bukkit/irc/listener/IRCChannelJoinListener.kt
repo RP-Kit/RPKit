@@ -18,6 +18,7 @@ package com.seventh_root.elysium.chat.bukkit.irc.listener
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import org.pircbotx.PircBotX
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.JoinEvent
@@ -25,8 +26,10 @@ import org.pircbotx.hooks.events.JoinEvent
 class IRCChannelJoinListener(private val plugin: ElysiumChatBukkit): ListenerAdapter() {
 
     override fun onJoin(event: JoinEvent) {
+        val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
         val user = event.user
         if (user != null) {
+            ircProvider.addIRCUser(user)
             val verified = user.isVerified
             val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
             val chatChannel = chatChannelProvider.getChatChannelFromIRCChannel(event.channel.name)

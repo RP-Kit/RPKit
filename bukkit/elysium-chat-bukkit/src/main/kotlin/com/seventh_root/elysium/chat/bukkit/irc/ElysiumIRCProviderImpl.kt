@@ -22,21 +22,25 @@ import com.seventh_root.elysium.chat.bukkit.irc.command.IRCVerifyCommand
 import com.seventh_root.elysium.chat.bukkit.irc.listener.IRCChannelJoinListener
 import com.seventh_root.elysium.chat.bukkit.irc.listener.IRCConnectListener
 import com.seventh_root.elysium.chat.bukkit.irc.listener.IRCMessageListener
+import com.seventh_root.elysium.chat.bukkit.irc.listener.IRCUserListListener
 import org.bukkit.scheduler.BukkitRunnable
 import org.pircbotx.Configuration
 import org.pircbotx.PircBotX
+import org.pircbotx.User
 
 class ElysiumIRCProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumIRCProvider {
 
     override val ircBot: PircBotX
+    private val ircUsers: MutableMap<String, User>
 
     init {
         val configuration = Configuration.Builder()
                 .setAutoNickChange(true)
                 .setCapEnabled(true)
+                .addListener(IRCChannelJoinListener(plugin))
                 .addListener(IRCConnectListener(plugin))
                 .addListener(IRCMessageListener(plugin))
-                .addListener(IRCChannelJoinListener(plugin))
+                .addListener(IRCUserListListener(plugin))
                 .addListener(IRCRegisterCommand(plugin))
                 .addListener(IRCVerifyCommand(plugin))
                 .setAutoReconnect(true)
@@ -92,6 +96,15 @@ class ElysiumIRCProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumIRCP
                 ircBot.startBot()
             }
         }.runTaskAsynchronously(plugin)
+        ircUsers = mutableMapOf<String, User>()
+    }
+
+    override fun getIRCUser(nick: String): User? {
+        return ircUsers[nick]
+    }
+
+    override fun addIRCUser(user: User) {
+        ircUsers[user.nick] = user
     }
 
 }

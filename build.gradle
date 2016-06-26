@@ -9,7 +9,7 @@ buildscript {
 
     dependencies {
         classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.1-2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.2-1"
     }
 
 }
@@ -46,7 +46,7 @@ project(":elysium-core") {
     def guavaVersion = "17.0"
     def gsonVersion = "2.2.4"
     def ehcacheVersion = "3.0.2"
-    def kotlinVersion = "1.0.1-2"
+    def kotlinVersion = "1.0.2-1"
     def slf4jVersion = "1.7.20"
     def pircBotXVersion = "2.1"
 
@@ -58,6 +58,7 @@ project(":elysium-core") {
         compile group: "com.google.code.gson", name: "gson", version: gsonVersion
         compile group: "org.ehcache", name: "ehcache", version: ehcacheVersion
         compile group: "org.jetbrains.kotlin", name: "kotlin-stdlib", version: kotlinVersion
+        compile group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: kotlinVersion
         compile group: "org.slf4j", name: "slf4j-jdk14", version: slf4jVersion
         compile group: "org.pircbotx", name: "pircbotx", version: pircBotXVersion
     }
@@ -377,6 +378,7 @@ project(":bukkit:elysium-players-bukkit") {
     dependencies {
         compile project(":bukkit:elysium-core-bukkit")
         compile project(":bukkit:elysium-player-lib-bukkit")
+        compile project(":bukkit:elysium-chat-lib-bukkit")
     }
 
     processResources {

@@ -26,5 +26,6 @@ interface ElysiumPlayerProvider: ServiceProvider {
     fun getPlayer(bukkitPlayer: OfflinePlayer): ElysiumPlayer
     fun getPlayer(ircUser: User): ElysiumPlayer
     fun addPlayer(player: ElysiumPlayer)
+    fun updatePlayer(player: ElysiumPlayer)
     fun removePlayer(player: ElysiumPlayer)
 }
