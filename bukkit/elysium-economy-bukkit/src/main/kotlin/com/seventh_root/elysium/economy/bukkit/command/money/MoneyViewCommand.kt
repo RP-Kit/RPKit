@@ -41,7 +41,7 @@ class MoneyViewCommand(private val plugin: ElysiumEconomyBukkit): CommandExecuto
             val bukkitPlayer = if (args.size > 0) plugin.server.getPlayer(args[0]) else if (sender is Player) sender else null
             if (bukkitPlayer != null) {
                 val player = playerProvider.getPlayer(bukkitPlayer)
-                var character: ElysiumCharacter?
+                val character: ElysiumCharacter?
                 if (args.size > 1) {
                     val nameBuilder = StringBuilder()
                     for (i in 1..args.size - 2) {

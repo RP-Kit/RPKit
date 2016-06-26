@@ -42,11 +42,7 @@ class CharacterCommand(private val plugin: ElysiumCharactersBukkit): CommandExec
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (args.size > 0) {
-            var newArgsList: MutableList<String> = arrayListOf()
-            for (i: Int in 1..(args.size - 1)) {
-                newArgsList.add(args[i])
-            }
-            var newArgs = newArgsList.toTypedArray()
+            val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("set", ignoreCase = true)) {
                 return characterSetCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("card", ignoreCase = true) || args[0].equals("show", ignoreCase = true) || args[0].equals("view", ignoreCase = true)) {
