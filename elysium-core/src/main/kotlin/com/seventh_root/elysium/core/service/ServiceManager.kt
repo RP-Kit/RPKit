@@ -16,6 +16,7 @@
 
 package com.seventh_root.elysium.core.service
 
+import com.seventh_root.elysium.core.exception.UnregisteredServiceException
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
@@ -37,13 +38,15 @@ class ServiceManager {
     }
 
     @Suppress("UNCHECKED_CAST")
+    @Throws(UnregisteredServiceException::class)
     fun <T: ServiceProvider> getServiceProvider(type: Class<T>): T {
         return getServiceProvider(type.kotlin)
     }
 
     @Suppress("UNCHECKED_CAST")
+    @Throws(UnregisteredServiceException::class)
     fun <T: ServiceProvider> getServiceProvider(type: KClass<T>): T {
-        return providers[type] as T
+        return providers[type] as? T ?: throw UnregisteredServiceException(type)
     }
 
 }

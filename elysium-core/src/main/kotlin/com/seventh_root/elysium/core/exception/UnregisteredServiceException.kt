@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.chat.bukkit.irc
+package com.seventh_root.elysium.core.exception
 
-import com.seventh_root.elysium.core.service.ServiceProvider
-import org.pircbotx.PircBotX
-import org.pircbotx.User
+import kotlin.reflect.KClass
 
 
-interface ElysiumIRCProvider: ServiceProvider {
-    val ircBot: PircBotX
-    fun getIRCUser(nick: String): User?
-    fun addIRCUser(user: User)
-}
+class UnregisteredServiceException(type: KClass<*>): Exception("No service is registered for " + type.qualifiedName)

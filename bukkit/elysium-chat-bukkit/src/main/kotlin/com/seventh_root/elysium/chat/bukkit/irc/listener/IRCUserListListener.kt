@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.chat.bukkit.irc
+package com.seventh_root.elysium.chat.bukkit.irc.listener
 
-import com.seventh_root.elysium.core.service.ServiceProvider
-import org.pircbotx.PircBotX
-import org.pircbotx.User
+import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
+import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
+import org.pircbotx.hooks.ListenerAdapter
+import org.pircbotx.hooks.events.UserListEvent
 
 
-interface ElysiumIRCProvider: ServiceProvider {
-    val ircBot: PircBotX
-    fun getIRCUser(nick: String): User?
-    fun addIRCUser(user: User)
+class IRCUserListListener(private val plugin: ElysiumChatBukkit): ListenerAdapter() {
+
+    override fun onUserList(event: UserListEvent) {
+        val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
+        event.users.forEach { user -> ircProvider.addIRCUser(user) }
+    }
+
 }

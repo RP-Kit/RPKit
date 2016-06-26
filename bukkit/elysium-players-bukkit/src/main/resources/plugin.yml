@@ -4,6 +4,7 @@ main: com.seventh_root.elysium.players.bukkit.ElysiumPlayersBukkit
 author: alyphen
 description: Elysium Players implementation for Bukkit
 depend: [elysium-core-bukkit, elysium-player-lib-bukkit]
+softdepend: [elysium-chat-lib-bukkit]
 commands:
     account:
         description: |
