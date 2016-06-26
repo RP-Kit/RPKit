@@ -16,9 +16,9 @@
 
 package com.seventh_root.elysium.characters.bukkit.gender
 
-import com.seventh_root.elysium.core.database.TableRow
+import com.seventh_root.elysium.core.database.Entity
 
 
-interface ElysiumGender: TableRow {
+interface ElysiumGender: Entity {
     val name: String
 }

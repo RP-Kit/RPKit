@@ -72,47 +72,47 @@ class ElysiumCurrencyTable: Table<ElysiumCurrency> {
         }
     }
 
-    override fun insert(`object`: ElysiumCurrency): Int {
+    override fun insert(entity: ElysiumCurrency): Int {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "INSERT INTO elysium_currency(name, name_singular, name_plural, rate, default_amount, material) VALUES(?, ?, ?, ?, ?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
-                statement.setString(1, `object`.name)
-                statement.setString(2, `object`.nameSingular)
-                statement.setString(3, `object`.namePlural)
-                statement.setDouble(4, `object`.rate)
-                statement.setInt(5, `object`.defaultAmount)
-                statement.setString(6, `object`.material.name)
+                statement.setString(1, entity.name)
+                statement.setString(2, entity.nameSingular)
+                statement.setString(3, entity.namePlural)
+                statement.setDouble(4, entity.rate)
+                statement.setInt(5, entity.defaultAmount)
+                statement.setString(6, entity.material.name)
                 statement.executeUpdate()
                 val generatedKeys = statement.generatedKeys
                 if (generatedKeys.next()) {
                     id = generatedKeys.getInt(1)
-                    `object`.id = id
-                    cache.put(id, `object`)
-                    nameCache.put(`object`.name, id)
+                    entity.id = id
+                    cache.put(id, entity)
+                    nameCache.put(entity.name, id)
                 }
             }
         }
         return id
     }
 
-    override fun update(`object`: ElysiumCurrency) {
+    override fun update(entity: ElysiumCurrency) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "UPDATE elysium_currency SET name = ?, name_singular = ?, name_plural = ?, rate = ?, default_amount = ?, material = ? WHERE id = ?"
             ).use { statement ->
-                statement.setString(1, `object`.name)
-                statement.setString(2, `object`.nameSingular)
-                statement.setString(3, `object`.namePlural)
-                statement.setDouble(4, `object`.rate)
-                statement.setInt(5, `object`.defaultAmount)
-                statement.setString(6, `object`.material.name)
-                statement.setInt(7, `object`.id)
+                statement.setString(1, entity.name)
+                statement.setString(2, entity.nameSingular)
+                statement.setString(3, entity.namePlural)
+                statement.setDouble(4, entity.rate)
+                statement.setInt(5, entity.defaultAmount)
+                statement.setString(6, entity.material.name)
+                statement.setInt(7, entity.id)
                 statement.executeUpdate()
-                cache.put(`object`.id, `object`)
-                nameCache.put(`object`.name, `object`.id)
+                cache.put(entity.id, entity)
+                nameCache.put(entity.name, entity.id)
             }
         }
     }
@@ -197,15 +197,15 @@ class ElysiumCurrencyTable: Table<ElysiumCurrency> {
         return currencies
     }
 
-    override fun delete(`object`: ElysiumCurrency) {
+    override fun delete(entity: ElysiumCurrency) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "DELETE FROM elysium_currency WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, `object`.id)
+                statement.setInt(1, entity.id)
                 statement.executeUpdate()
-                if (cache.containsKey(`object`.id)) {
-                    cache.remove(`object`.id)
+                if (cache.containsKey(entity.id)) {
+                    cache.remove(entity.id)
                 }
             }
         }

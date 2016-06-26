@@ -65,39 +65,39 @@ class ElysiumPrefixTable: Table<ElysiumPrefix> {
         }
     }
 
-    override fun insert(`object`: ElysiumPrefix): Int {
+    override fun insert(entity: ElysiumPrefix): Int {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "INSERT INTO elysium_prefix(name, prefix) VALUES(?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
-                statement.setString(1, `object`.name)
-                statement.setString(2, `object`.prefix)
+                statement.setString(1, entity.name)
+                statement.setString(2, entity.prefix)
                 statement.executeUpdate()
                 val generatedKeys = statement.generatedKeys
                 if (generatedKeys.next()) {
                     id = generatedKeys.getInt(1)
-                    `object`.id = id
-                    cache.put(id, `object`)
-                    nameCache.put(`object`.name, `object`)
+                    entity.id = id
+                    cache.put(id, entity)
+                    nameCache.put(entity.name, entity)
                 }
             }
         }
         return id
     }
 
-    override fun update(`object`: ElysiumPrefix) {
+    override fun update(entity: ElysiumPrefix) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "UPDATE elysium_prefix SET name = ?, prefix = ? WHERE id = ?"
             ).use { statement ->
-                statement.setString(1, `object`.name)
-                statement.setString(2, `object`.prefix)
-                statement.setInt(3, `object`.id)
+                statement.setString(1, entity.name)
+                statement.setString(2, entity.prefix)
+                statement.setInt(3, entity.id)
                 statement.executeUpdate()
-                cache.put(`object`.id, `object`)
-                nameCache.put(`object`.name, `object`)
+                cache.put(entity.id, entity)
+                nameCache.put(entity.name, entity)
             }
         }
     }
@@ -174,15 +174,15 @@ class ElysiumPrefixTable: Table<ElysiumPrefix> {
         return prefixes
     }
 
-    override fun delete(`object`: ElysiumPrefix) {
+    override fun delete(entity: ElysiumPrefix) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "DELETE FROM elysium_prefix WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, `object`.id)
+                statement.setInt(1, entity.id)
                 statement.executeUpdate()
-                cache.remove(`object`.id)
-                nameCache.remove(`object`.name)
+                cache.remove(entity.id)
+                nameCache.remove(entity.name)
             }
         }
     }

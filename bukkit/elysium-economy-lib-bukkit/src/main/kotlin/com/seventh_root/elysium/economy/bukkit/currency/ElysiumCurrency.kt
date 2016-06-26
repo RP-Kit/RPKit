@@ -16,10 +16,10 @@
 
 package com.seventh_root.elysium.economy.bukkit.currency
 
-import com.seventh_root.elysium.core.database.TableRow
+import com.seventh_root.elysium.core.database.Entity
 import org.bukkit.Material
 
-interface ElysiumCurrency: TableRow {
+interface ElysiumCurrency: Entity {
 
     var name: String
     var nameSingular: String

@@ -76,49 +76,49 @@ class ChatChannelSpeakerTable: Table<ChatChannelSpeaker> {
         }
     }
 
-    override fun insert(`object`: ChatChannelSpeaker): Int {
+    override fun insert(entity: ChatChannelSpeaker): Int {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "INSERT INTO chat_channel_speaker(player_id, chat_channel_id) VALUES(?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
-                statement.setInt(1, `object`.player.id)
-                statement.setInt(2, `object`.chatChannel.id)
+                statement.setInt(1, entity.player.id)
+                statement.setInt(2, entity.chatChannel.id)
                 statement.executeUpdate()
                 val generatedKeys = statement.generatedKeys
                 if (generatedKeys.next()) {
                     id = generatedKeys.getInt(1)
-                    `object`.id = id
-                    cache.put(id, `object`)
-                    val chatChannelSpeakers = chatChannelCache.get(`object`.chatChannel.id) as? MutableList<Int>?:mutableListOf<Int>()
+                    entity.id = id
+                    cache.put(id, entity)
+                    val chatChannelSpeakers = chatChannelCache.get(entity.chatChannel.id) as? MutableList<Int>?:mutableListOf<Int>()
                     if (!chatChannelSpeakers.contains(id)) {
                         chatChannelSpeakers.add(id)
                     }
-                    chatChannelCache.put(`object`.chatChannel.id, chatChannelSpeakers)
-                    playerCache.put(`object`.player.id, `object`.id)
+                    chatChannelCache.put(entity.chatChannel.id, chatChannelSpeakers)
+                    playerCache.put(entity.player.id, entity.id)
                 }
             }
         }
         return id
     }
 
-    override fun update(`object`: ChatChannelSpeaker) {
+    override fun update(entity: ChatChannelSpeaker) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "UPDATE chat_channel_speaker SET chat_channel_id = ?, player_id = ? WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, `object`.chatChannel.id)
-                statement.setInt(2, `object`.player.id)
-                statement.setInt(3, `object`.id)
+                statement.setInt(1, entity.chatChannel.id)
+                statement.setInt(2, entity.player.id)
+                statement.setInt(3, entity.id)
                 statement.executeUpdate()
-                cache.put(`object`.id, `object`)
-                val chatChannelSpeakers = chatChannelCache.get(`object`.chatChannel.id) as? MutableList<Int>?:mutableListOf<Int>()
-                if (!chatChannelSpeakers.contains(`object`.id)) {
-                    chatChannelSpeakers.add(`object`.id)
+                cache.put(entity.id, entity)
+                val chatChannelSpeakers = chatChannelCache.get(entity.chatChannel.id) as? MutableList<Int>?:mutableListOf<Int>()
+                if (!chatChannelSpeakers.contains(entity.id)) {
+                    chatChannelSpeakers.add(entity.id)
                 }
-                chatChannelCache.put(`object`.chatChannel.id, chatChannelSpeakers)
-                playerCache.put(`object`.player.id, `object`.id)
+                chatChannelCache.put(entity.chatChannel.id, chatChannelSpeakers)
+                playerCache.put(entity.player.id, entity.id)
             }
         }
     }
@@ -208,16 +208,16 @@ class ChatChannelSpeakerTable: Table<ChatChannelSpeaker> {
         }
     }
 
-    override fun delete(`object`: ChatChannelSpeaker) {
+    override fun delete(entity: ChatChannelSpeaker) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "DELETE FROM chat_channel_speaker WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, `object`.id)
+                statement.setInt(1, entity.id)
                 statement.executeUpdate()
-                cache.remove(`object`.id)
-                chatChannelCache.remove(`object`.chatChannel.id)
-                playerCache.remove(`object`.player.id)
+                cache.remove(entity.id)
+                chatChannelCache.remove(entity.chatChannel.id)
+                playerCache.remove(entity.player.id)
             }
         }
     }

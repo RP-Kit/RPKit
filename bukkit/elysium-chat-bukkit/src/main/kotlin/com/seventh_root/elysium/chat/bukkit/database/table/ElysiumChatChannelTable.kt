@@ -98,57 +98,57 @@ class ElysiumChatChannelTable: Table<ElysiumChatChannel> {
         }
     }
 
-    override fun insert(`object`: ElysiumChatChannel): Int {
+    override fun insert(entity: ElysiumChatChannel): Int {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "INSERT INTO elysium_chat_channel(name, color_red, color_green, color_blue, format_string, radius, clear_radius, match_pattern, irc_enabled, irc_channel, irc_whitelist, joined_by_default) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     RETURN_GENERATED_KEYS).use { statement ->
-                statement.setString(1, `object`.name)
-                statement.setInt(2, `object`.color.red)
-                statement.setInt(3, `object`.color.green)
-                statement.setInt(4, `object`.color.blue)
-                statement.setString(5, `object`.formatString)
-                statement.setInt(6, `object`.radius)
-                statement.setInt(7, `object`.clearRadius)
-                statement.setString(8, `object`.matchPattern)
-                statement.setBoolean(9, `object`.isIRCEnabled)
-                statement.setString(10, `object`.ircChannel)
-                statement.setBoolean(11, `object`.isIRCWhitelist)
-                statement.setBoolean(12, `object`.isJoinedByDefault)
+                statement.setString(1, entity.name)
+                statement.setInt(2, entity.color.red)
+                statement.setInt(3, entity.color.green)
+                statement.setInt(4, entity.color.blue)
+                statement.setString(5, entity.formatString)
+                statement.setInt(6, entity.radius)
+                statement.setInt(7, entity.clearRadius)
+                statement.setString(8, entity.matchPattern)
+                statement.setBoolean(9, entity.isIRCEnabled)
+                statement.setString(10, entity.ircChannel)
+                statement.setBoolean(11, entity.isIRCWhitelist)
+                statement.setBoolean(12, entity.isJoinedByDefault)
                 statement.executeUpdate()
                 val generatedKeys = statement.generatedKeys
                 if (generatedKeys.next()) {
                     id = generatedKeys.getInt(1)
-                    `object`.id = id
-                    cache.put(id, `object`)
-                    nameCache.put(`object`.name, id)
+                    entity.id = id
+                    cache.put(id, entity)
+                    nameCache.put(entity.name, id)
                 }
             }
         }
         return id
     }
 
-    override fun update(`object`: ElysiumChatChannel) {
+    override fun update(entity: ElysiumChatChannel) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "UPDATE elysium_chat_channel SET name = ?, color_red = ?, color_green = ?, color_blue = ?, format_string = ?, radius = ?, clear_radius = ?, match_pattern = ?, irc_enabled = ?, irc_channel = ?, irc_whitelist = ?, joined_by_default = ? WHERE id = ?").use { statement ->
-                statement.setString(1, `object`.name)
-                statement.setInt(2, `object`.color.red)
-                statement.setInt(3, `object`.color.green)
-                statement.setInt(4, `object`.color.blue)
-                statement.setString(5, `object`.formatString)
-                statement.setInt(6, `object`.radius)
-                statement.setInt(7, `object`.clearRadius)
-                statement.setString(8, `object`.matchPattern)
-                statement.setBoolean(9, `object`.isIRCEnabled)
-                statement.setString(10, `object`.ircChannel)
-                statement.setBoolean(11, `object`.isIRCWhitelist)
-                statement.setBoolean(12, `object`.isJoinedByDefault)
-                statement.setInt(13, `object`.id)
+                statement.setString(1, entity.name)
+                statement.setInt(2, entity.color.red)
+                statement.setInt(3, entity.color.green)
+                statement.setInt(4, entity.color.blue)
+                statement.setString(5, entity.formatString)
+                statement.setInt(6, entity.radius)
+                statement.setInt(7, entity.clearRadius)
+                statement.setString(8, entity.matchPattern)
+                statement.setBoolean(9, entity.isIRCEnabled)
+                statement.setString(10, entity.ircChannel)
+                statement.setBoolean(11, entity.isIRCWhitelist)
+                statement.setBoolean(12, entity.isJoinedByDefault)
+                statement.setInt(13, entity.id)
                 statement.executeUpdate()
-                cache.put(`object`.id, `object`)
-                nameCache.put(`object`.name, `object`.id)
+                cache.put(entity.id, entity)
+                nameCache.put(entity.name, entity.id)
             }
         }
     }
@@ -249,21 +249,21 @@ class ElysiumChatChannelTable: Table<ElysiumChatChannel> {
         return chatChannels
     }
 
-    override fun delete(`object`: ElysiumChatChannel) {
+    override fun delete(entity: ElysiumChatChannel) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "DELETE FROM chat_channel_speaker WHERE chat_channel_id = ?").use { speakersStatement ->
-                speakersStatement.setInt(1, `object`.id)
+                speakersStatement.setInt(1, entity.id)
                 speakersStatement.executeUpdate()
-                cache.remove(`object`.id)
-                nameCache.remove(`object`.name)
+                cache.remove(entity.id)
+                nameCache.remove(entity.name)
             }
         }
         val chatChannelListenerTable = database.getTable(ChatChannelListenerTable::class)
-        val chatChannelListeners = chatChannelListenerTable.get(`object`)
+        val chatChannelListeners = chatChannelListenerTable.get(entity)
         chatChannelListeners.forEach { chatChannelListenerTable.delete(it) }
         val chatChannelSpeakerTable = database.getTable(ChatChannelSpeakerTable::class)
-        val chatChannelSpeakers = chatChannelSpeakerTable.get(`object`)
+        val chatChannelSpeakers = chatChannelSpeakerTable.get(entity)
         chatChannelSpeakers.forEach { chatChannelSpeakerTable.delete(it) }
     }
 }

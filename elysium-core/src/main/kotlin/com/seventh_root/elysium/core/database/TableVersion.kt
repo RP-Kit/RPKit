@@ -21,4 +21,4 @@ class TableVersion(
         override var id: Int = 0,
         val table: String,
         var version: String
-): TableRow
+): Entity

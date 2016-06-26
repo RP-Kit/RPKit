@@ -20,7 +20,7 @@ import com.google.common.base.CaseFormat.LOWER_UNDERSCORE
 import com.google.common.base.CaseFormat.UPPER_CAMEL
 import kotlin.reflect.KClass
 
-abstract class Table<T: TableRow>(val database: Database, val name: String, val type: KClass<T>) {
+abstract class Table<T: Entity>(val database: Database, val name: String, val type: KClass<T>) {
 
     constructor(database: Database, type: KClass<T>): this(database, UPPER_CAMEL.to(LOWER_UNDERSCORE, type.simpleName), type)
 
@@ -34,12 +34,12 @@ abstract class Table<T: TableRow>(val database: Database, val name: String, val 
 
     }
 
-    abstract fun insert(`object`: T): Int
+    abstract fun insert(entity: T): Int
 
-    abstract fun update(`object`: T)
+    abstract fun update(entity: T)
 
     abstract operator fun get(id: Int): T?
 
-    abstract fun delete(`object`: T)
+    abstract fun delete(entity: T)
 
 }

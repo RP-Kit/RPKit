@@ -16,11 +16,11 @@
 
 package com.seventh_root.elysium.players.bukkit.player
 
-import com.seventh_root.elysium.core.database.TableRow
+import com.seventh_root.elysium.core.database.Entity
 import org.bukkit.OfflinePlayer
 
 
-interface ElysiumPlayer: TableRow {
+interface ElysiumPlayer: Entity {
 
     var name: String
     var bukkitPlayer: OfflinePlayer?

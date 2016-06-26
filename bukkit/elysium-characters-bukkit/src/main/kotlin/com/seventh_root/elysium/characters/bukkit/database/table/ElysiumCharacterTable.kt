@@ -128,58 +128,58 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
         }
     }
 
-    override fun insert(`object`: ElysiumCharacter): Int {
+    override fun insert(entity: ElysiumCharacter): Int {
         try {
             var id = 0
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "INSERT INTO elysium_character(player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         RETURN_GENERATED_KEYS).use { statement ->
-                    val player = `object`.player
+                    val player = entity.player
                     if (player != null) {
                         statement.setInt(1, player.id)
                     } else {
                         statement.setNull(2, INTEGER)
                     }
-                    statement.setString(2, `object`.name)
-                    val gender = `object`.gender
+                    statement.setString(2, entity.name)
+                    val gender = entity.gender
                     if (gender != null) {
                         statement.setInt(3, gender.id)
                     } else {
                         statement.setNull(3, INTEGER)
                     }
-                    statement.setInt(4, `object`.age)
-                    val race = `object`.race
+                    statement.setInt(4, entity.age)
+                    val race = entity.race
                     if (race != null) {
                         statement.setInt(5, race.id)
                     } else {
                         statement.setNull(5, INTEGER)
                     }
-                    statement.setString(6, `object`.description)
-                    statement.setBoolean(7, `object`.isDead)
-                    statement.setString(8, `object`.location.world.name)
-                    statement.setDouble(9, `object`.location.x)
-                    statement.setDouble(10, `object`.location.y)
-                    statement.setDouble(11, `object`.location.z)
-                    statement.setFloat(12, `object`.location.yaw)
-                    statement.setFloat(13, `object`.location.pitch)
-                    statement.setBytes(14, serializeInventory(`object`.inventoryContents))
-                    statement.setBytes(15, serializeItemStack(`object`.helmet))
-                    statement.setBytes(16, serializeItemStack(`object`.chestplate))
-                    statement.setBytes(17, serializeItemStack(`object`.leggings))
-                    statement.setBytes(18, serializeItemStack(`object`.boots))
-                    statement.setDouble(19, `object`.health)
-                    statement.setDouble(20, `object`.maxHealth)
-                    statement.setInt(21, `object`.mana)
-                    statement.setInt(22, `object`.maxMana)
-                    statement.setInt(23, `object`.foodLevel)
-                    statement.setInt(24, `object`.thirstLevel)
+                    statement.setString(6, entity.description)
+                    statement.setBoolean(7, entity.isDead)
+                    statement.setString(8, entity.location.world.name)
+                    statement.setDouble(9, entity.location.x)
+                    statement.setDouble(10, entity.location.y)
+                    statement.setDouble(11, entity.location.z)
+                    statement.setFloat(12, entity.location.yaw)
+                    statement.setFloat(13, entity.location.pitch)
+                    statement.setBytes(14, serializeInventory(entity.inventoryContents))
+                    statement.setBytes(15, serializeItemStack(entity.helmet))
+                    statement.setBytes(16, serializeItemStack(entity.chestplate))
+                    statement.setBytes(17, serializeItemStack(entity.leggings))
+                    statement.setBytes(18, serializeItemStack(entity.boots))
+                    statement.setDouble(19, entity.health)
+                    statement.setDouble(20, entity.maxHealth)
+                    statement.setInt(21, entity.mana)
+                    statement.setInt(22, entity.maxMana)
+                    statement.setInt(23, entity.foodLevel)
+                    statement.setInt(24, entity.thirstLevel)
                     statement.executeUpdate()
                     val generatedKeys = statement.generatedKeys
                     if (generatedKeys.next()) {
                         id = generatedKeys.getInt(1)
-                        `object`.id = id
-                        cache.put(id, `object`)
+                        entity.id = id
+                        cache.put(id, entity)
                     }
                 }
             }
@@ -241,53 +241,53 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
         return emptyArray()
     }
 
-    override fun update(`object`: ElysiumCharacter) {
+    override fun update(entity: ElysiumCharacter) {
         try {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "UPDATE elysium_character SET player_id = ?, name = ?, gender_id = ?, age = ?, race_id = ?, description = ?, dead = ?, world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ?, inventory_contents = ?, helmet = ?, chestplate = ?, leggings = ?, boots = ?, health = ?, max_health = ?, mana = ?, max_mana = ?, food_level = ?, thirst_level = ? WHERE id = ?").use { statement ->
-                    val player = `object`.player
+                    val player = entity.player
                     if (player != null) {
                         statement.setInt(1, player.id)
                     } else {
                         statement.setNull(1, INTEGER)
                     }
-                    statement.setString(2, `object`.name)
-                    val gender = `object`.gender
+                    statement.setString(2, entity.name)
+                    val gender = entity.gender
                     if (gender != null) {
                         statement.setInt(3, gender.id)
                     } else {
                         statement.setNull(3, INTEGER)
                     }
-                    statement.setInt(4, `object`.age)
-                    val race = `object`.race
+                    statement.setInt(4, entity.age)
+                    val race = entity.race
                     if (race != null) {
                         statement.setInt(5, race.id)
                     } else {
                         statement.setNull(5, INTEGER)
                     }
-                    statement.setString(6, `object`.description)
-                    statement.setBoolean(7, `object`.isDead)
-                    statement.setString(8, `object`.location.world.name)
-                    statement.setDouble(9, `object`.location.x)
-                    statement.setDouble(10, `object`.location.y)
-                    statement.setDouble(11, `object`.location.z)
-                    statement.setFloat(12, `object`.location.yaw)
-                    statement.setFloat(13, `object`.location.pitch)
-                    statement.setBytes(14, serializeInventory(`object`.inventoryContents))
-                    statement.setBytes(15, serializeItemStack(`object`.helmet))
-                    statement.setBytes(16, serializeItemStack(`object`.chestplate))
-                    statement.setBytes(17, serializeItemStack(`object`.leggings))
-                    statement.setBytes(18, serializeItemStack(`object`.boots))
-                    statement.setDouble(19, `object`.health)
-                    statement.setDouble(20, `object`.maxHealth)
-                    statement.setInt(21, `object`.mana)
-                    statement.setInt(22, `object`.maxMana)
-                    statement.setInt(23, `object`.foodLevel)
-                    statement.setInt(24, `object`.thirstLevel)
-                    statement.setInt(25, `object`.id)
+                    statement.setString(6, entity.description)
+                    statement.setBoolean(7, entity.isDead)
+                    statement.setString(8, entity.location.world.name)
+                    statement.setDouble(9, entity.location.x)
+                    statement.setDouble(10, entity.location.y)
+                    statement.setDouble(11, entity.location.z)
+                    statement.setFloat(12, entity.location.yaw)
+                    statement.setFloat(13, entity.location.pitch)
+                    statement.setBytes(14, serializeInventory(entity.inventoryContents))
+                    statement.setBytes(15, serializeItemStack(entity.helmet))
+                    statement.setBytes(16, serializeItemStack(entity.chestplate))
+                    statement.setBytes(17, serializeItemStack(entity.leggings))
+                    statement.setBytes(18, serializeItemStack(entity.boots))
+                    statement.setDouble(19, entity.health)
+                    statement.setDouble(20, entity.maxHealth)
+                    statement.setInt(21, entity.mana)
+                    statement.setInt(22, entity.maxMana)
+                    statement.setInt(23, entity.foodLevel)
+                    statement.setInt(24, entity.thirstLevel)
+                    statement.setInt(25, entity.id)
                     statement.executeUpdate()
-                    cache.put(`object`.id, `object`)
+                    cache.put(entity.id, entity)
                 }
             }
         } catch (exception: SQLException) {
@@ -354,15 +354,15 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
         return null
     }
 
-    override fun delete(`object`: ElysiumCharacter) {
+    override fun delete(entity: ElysiumCharacter) {
         try {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "DELETE FROM elysium_character WHERE id = ?").use { statement ->
-                    statement.setInt(1, `object`.id)
+                    statement.setInt(1, entity.id)
                     statement.executeUpdate()
-                    if (cache.containsKey(`object`.id)) {
-                        cache.remove(`object`.id)
+                    if (cache.containsKey(entity.id)) {
+                        cache.remove(entity.id)
                     }
                 }
             }

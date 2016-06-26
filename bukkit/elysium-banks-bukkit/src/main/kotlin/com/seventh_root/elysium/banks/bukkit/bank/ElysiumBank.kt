@@ -17,7 +17,7 @@
 package com.seventh_root.elysium.banks.bukkit.bank
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
-import com.seventh_root.elysium.core.database.TableRow
+import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 
 
@@ -26,4 +26,4 @@ class ElysiumBank(
         val character: ElysiumCharacter,
         val currency: ElysiumCurrency,
         var balance: Int
-): TableRow
+): Entity
