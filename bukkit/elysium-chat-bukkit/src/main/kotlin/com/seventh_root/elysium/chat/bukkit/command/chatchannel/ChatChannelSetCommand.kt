@@ -51,11 +51,7 @@ class ChatChannelSetCommand(private val plugin: ElysiumChatBukkit): CommandExecu
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("elysium.chat.command.chatchannel.set")) {
             if (args.size > 0) {
-                var newArgsList: MutableList<String> = arrayListOf()
-                for (i: Int in 1..(args.size - 1)) {
-                    newArgsList.add(args[i])
-                }
-                var newArgs = newArgsList.toTypedArray()
+                val newArgs = args.drop(1).toTypedArray()
                 if (args[0].equals("name", ignoreCase = true)) {
                     chatChannelSetNameCommand.onCommand(sender, command, label, newArgs)
                 } else if (args[0].equals("color", ignoreCase = true) || args[0].equals("colour", ignoreCase = true)) {

@@ -44,11 +44,7 @@ class CharacterSetCommand(private val plugin: ElysiumCharactersBukkit): CommandE
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (args.size > 0) {
-            var newArgsList: MutableList<String> = arrayListOf()
-            for (i: Int in 1..(args.size - 1)) {
-                newArgsList.add(args[i])
-            }
-            var newArgs = newArgsList.toTypedArray()
+            val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("player", ignoreCase = true)) {
                 return characterSetPlayerCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("name", ignoreCase = true)) {

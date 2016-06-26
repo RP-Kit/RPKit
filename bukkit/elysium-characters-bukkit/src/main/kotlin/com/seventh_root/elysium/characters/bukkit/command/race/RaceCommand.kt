@@ -35,11 +35,7 @@ class RaceCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor 
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (args.size > 0) {
-            var newArgsList: MutableList<String> = arrayListOf()
-            for (i: Int in 1..(args.size - 1)) {
-                newArgsList.add(args[i])
-            }
-            var newArgs = newArgsList.toTypedArray()
+            val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("add", ignoreCase = true) || args[0].equals("create", ignoreCase = true) || args[0].equals("new", ignoreCase = true)) {
                 return raceAddCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("remove", ignoreCase = true) || args[0].equals("delete", ignoreCase = true)) {

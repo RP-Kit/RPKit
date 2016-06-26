@@ -33,11 +33,7 @@ class MoneyCommand(val plugin: ElysiumEconomyBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.size > 0) {
-            val newArgsList: MutableList<String> = arrayListOf()
-            for (i: Int in 1..(args.size - 1)) {
-                newArgsList.add(args[i])
-            }
-            val newArgs = newArgsList.toTypedArray()
+            val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("subtract", ignoreCase = true) || args[0].equals("sub", ignoreCase = true)) {
                 return moneySubtractCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("add", ignoreCase = true)) {
