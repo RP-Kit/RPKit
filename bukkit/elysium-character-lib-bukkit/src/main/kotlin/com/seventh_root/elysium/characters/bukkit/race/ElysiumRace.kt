@@ -16,9 +16,9 @@
 
 package com.seventh_root.elysium.characters.bukkit.race
 
-import com.seventh_root.elysium.core.database.TableRow
+import com.seventh_root.elysium.core.database.Entity
 
 
-interface ElysiumRace: TableRow {
+interface ElysiumRace: Entity {
     val name: String
 }

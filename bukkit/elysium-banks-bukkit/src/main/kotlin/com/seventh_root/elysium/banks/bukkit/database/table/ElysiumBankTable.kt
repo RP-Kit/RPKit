@@ -72,45 +72,45 @@ class ElysiumBankTable: Table<ElysiumBank> {
         }
     }
 
-    override fun insert(`object`: ElysiumBank): Int {
+    override fun insert(entity: ElysiumBank): Int {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "INSERT INTO elysium_bank(character_id, currency_id, balance) VALUES(?, ?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
-                statement.setInt(1, `object`.character.id)
-                statement.setInt(2, `object`.currency.id)
-                statement.setInt(3, `object`.balance)
+                statement.setInt(1, entity.character.id)
+                statement.setInt(2, entity.currency.id)
+                statement.setInt(3, entity.balance)
                 statement.executeUpdate()
                 val generatedKeys = statement.generatedKeys
                 if (generatedKeys.next()) {
                     id = generatedKeys.getInt(1)
-                    `object`.id = id
-                    cache.put(id, `object`)
-                    val currencyBanks = characterCache.get(`object`.character.id)?:mutableMapOf<Int, Int>()
-                    @Suppress("UNCHECKED_CAST") (currencyBanks as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
-                    characterCache.put(`object`.character.id, currencyBanks)
+                    entity.id = id
+                    cache.put(id, entity)
+                    val currencyBanks = characterCache.get(entity.character.id)?:mutableMapOf<Int, Int>()
+                    @Suppress("UNCHECKED_CAST") (currencyBanks as MutableMap<Int, Int>).put(entity.currency.id, entity.id)
+                    characterCache.put(entity.character.id, currencyBanks)
                 }
             }
         }
         return id
     }
 
-    override fun update(`object`: ElysiumBank) {
+    override fun update(entity: ElysiumBank) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "UPDATE elysium_bank SET character_id = ?, currency_id = ?, balance = ? WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, `object`.character.id)
-                statement.setInt(2, `object`.currency.id)
-                statement.setInt(3, `object`.balance)
-                statement.setInt(4, `object`.id)
+                statement.setInt(1, entity.character.id)
+                statement.setInt(2, entity.currency.id)
+                statement.setInt(3, entity.balance)
+                statement.setInt(4, entity.id)
                 statement.executeUpdate()
-                cache.put(`object`.id, `object`)
-                val currencyBanks = characterCache.get(`object`.character.id)?:mutableMapOf<Int, Int>()
-                @Suppress("UNCHECKED_CAST") (currencyBanks as MutableMap<Int, Int>).put(`object`.currency.id, `object`.id)
-                characterCache.put(`object`.character.id, currencyBanks)
+                cache.put(entity.id, entity)
+                val currencyBanks = characterCache.get(entity.character.id)?:mutableMapOf<Int, Int>()
+                @Suppress("UNCHECKED_CAST") (currencyBanks as MutableMap<Int, Int>).put(entity.currency.id, entity.id)
+                characterCache.put(entity.character.id, currencyBanks)
             }
         }
     }
@@ -211,16 +211,16 @@ class ElysiumBankTable: Table<ElysiumBank> {
         return top.map { bank -> bank.character }
     }
 
-    override fun delete(`object`: ElysiumBank) {
+    override fun delete(entity: ElysiumBank) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "DELETE FROM elysium_bank WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, `object`.id)
+                statement.setInt(1, entity.id)
                 statement.executeUpdate()
-                cache.remove(`object`.id)
-                val characterId = `object`.character.id
-                characterCache[characterId].remove(`object`.currency.id)
+                cache.remove(entity.id)
+                val characterId = entity.character.id
+                characterCache[characterId].remove(entity.currency.id)
                 if (characterCache[characterId].isEmpty()) {
                     characterCache.remove(characterId)
                 }

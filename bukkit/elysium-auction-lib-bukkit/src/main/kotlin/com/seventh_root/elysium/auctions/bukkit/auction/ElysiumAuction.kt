@@ -17,13 +17,13 @@
 package com.seventh_root.elysium.auctions.bukkit.auction
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
-import com.seventh_root.elysium.core.database.TableRow
+import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 
 
-interface ElysiumAuction: TableRow {
+interface ElysiumAuction: Entity {
 
     val item: ItemStack
     val currency: ElysiumCurrency

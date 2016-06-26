@@ -44,7 +44,7 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
         }
     }
 
-    override fun insert(`object`: TableVersion): Int {
+    override fun insert(entity: TableVersion): Int {
         try {
             var id = 0
             database.createConnection().use {
@@ -53,13 +53,13 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
                     RETURN_GENERATED_KEYS
                 ).use {
                     statement ->
-                        statement.setString(1, `object`.table)
-                        statement.setString(2, `object`.version)
+                        statement.setString(1, entity.table)
+                        statement.setString(2, entity.version)
                         statement.executeUpdate()
                         val generatedKeys = statement.generatedKeys
                         if (generatedKeys.next()) {
                             id = generatedKeys.getInt(1)
-                            `object`.id = id
+                            entity.id = id
                         }
                 }
             }
@@ -70,16 +70,16 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
         return 0
     }
 
-    override fun update(`object`: TableVersion) {
+    override fun update(entity: TableVersion) {
         try {
             database.createConnection().use {
                 connection -> connection.prepareStatement(
                     "UPDATE table_version SET table_name = ?, version = ? WHERE id = ?"
                 ).use {
                     statement ->
-                        statement.setString(1, `object`.table)
-                        statement.setString(2, `object`.version)
-                        statement.setInt(3, `object`.id)
+                        statement.setString(1, entity.table)
+                        statement.setString(2, entity.version)
+                        statement.setInt(3, entity.id)
                         statement.executeUpdate()
                     }
             }
@@ -132,7 +132,7 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
         return null
     }
 
-    override fun delete(`object`: TableVersion) {
+    override fun delete(entity: TableVersion) {
         try {
             database.createConnection().use {
                 connection -> connection.prepareStatement(

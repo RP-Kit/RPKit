@@ -16,13 +16,13 @@
 
 package com.seventh_root.elysium.characters.bukkit.character
 
-import com.seventh_root.elysium.core.database.TableRow
+import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 
 
-interface ElysiumCharacter: TableRow {
+interface ElysiumCharacter: Entity {
     var player: ElysiumPlayer?
     var name: String
     var gender: com.seventh_root.elysium.characters.bukkit.gender.ElysiumGender?

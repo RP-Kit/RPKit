@@ -64,39 +64,39 @@ class ElysiumShopCountTable: Table<ElysiumShopCount> {
         }
     }
 
-    override fun insert(`object`: ElysiumShopCount): Int {
+    override fun insert(entity: ElysiumShopCount): Int {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "INSERT INTO elysium_shop_count(character_id, count) VALUES(?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
-                statement.setInt(1, `object`.character.id)
-                statement.setInt(2, `object`.count)
+                statement.setInt(1, entity.character.id)
+                statement.setInt(2, entity.count)
                 statement.executeUpdate()
                 val generatedKeys = statement.generatedKeys
                 if (generatedKeys.next()) {
                     id = generatedKeys.getInt(1)
-                    `object`.id = id
-                    cache.put(id, `object`)
-                    characterCache.put(`object`.character.id, id)
+                    entity.id = id
+                    cache.put(id, entity)
+                    characterCache.put(entity.character.id, id)
                 }
             }
         }
         return id
     }
 
-    override fun update(`object`: ElysiumShopCount) {
+    override fun update(entity: ElysiumShopCount) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "UPDATE elysium_shop_count SET character_id = ?, count = ? WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, `object`.character.id)
-                statement.setInt(2, `object`.count)
-                statement.setInt(3, `object`.id)
+                statement.setInt(1, entity.character.id)
+                statement.setInt(2, entity.count)
+                statement.setInt(3, entity.id)
                 statement.executeUpdate()
-                cache.put(`object`.id, `object`)
-                characterCache.put(`object`.character.id, `object`.id)
+                cache.put(entity.id, entity)
+                characterCache.put(entity.character.id, entity.id)
             }
         }
     }
@@ -156,15 +156,15 @@ class ElysiumShopCountTable: Table<ElysiumShopCount> {
         }
     }
 
-    override fun delete(`object`: ElysiumShopCount) {
+    override fun delete(entity: ElysiumShopCount) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "DELETE FROM elysium_shop_count WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, `object`.id)
+                statement.setInt(1, entity.id)
                 statement.executeUpdate()
-                cache.remove(`object`.id)
-                characterCache.remove(`object`.character.id)
+                cache.remove(entity.id)
+                characterCache.remove(entity.character.id)
             }
         }
     }

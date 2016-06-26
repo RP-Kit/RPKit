@@ -76,57 +76,57 @@ class ChatChannelListenerTable: Table<ChatChannelListener> {
         }
     }
 
-    override fun insert(`object`: ChatChannelListener): Int {
+    override fun insert(entity: ChatChannelListener): Int {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "INSERT INTO chat_channel_listener(player_id, chat_channel_id) VALUES(?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
-                statement.setInt(1, `object`.player.id)
-                statement.setInt(2, `object`.chatChannel.id)
+                statement.setInt(1, entity.player.id)
+                statement.setInt(2, entity.chatChannel.id)
                 statement.executeUpdate()
                 val generatedKeys = statement.generatedKeys
                 if (generatedKeys.next()) {
                     id = generatedKeys.getInt(1)
-                    `object`.id = id
-                    cache.put(id, `object`)
-                    val chatChannelListeners = chatChannelCache.get(`object`.chatChannel.id) as? MutableList<Int>?:mutableListOf<Int>()
+                    entity.id = id
+                    cache.put(id, entity)
+                    val chatChannelListeners = chatChannelCache.get(entity.chatChannel.id) as? MutableList<Int>?:mutableListOf<Int>()
                     if (!chatChannelListeners.contains(id)) {
                         chatChannelListeners.add(id)
                     }
-                    chatChannelCache.put(`object`.chatChannel.id, chatChannelListeners)
-                    val playerChannels = playerCache.get(`object`.player.id) as? MutableList<Int>?:mutableListOf<Int>()
-                    if (!playerChannels.contains(`object`.id)) {
-                        playerChannels.add(`object`.id)
+                    chatChannelCache.put(entity.chatChannel.id, chatChannelListeners)
+                    val playerChannels = playerCache.get(entity.player.id) as? MutableList<Int>?:mutableListOf<Int>()
+                    if (!playerChannels.contains(entity.id)) {
+                        playerChannels.add(entity.id)
                     }
-                    playerCache.put(`object`.player.id, playerChannels)
+                    playerCache.put(entity.player.id, playerChannels)
                 }
             }
         }
         return id
     }
 
-    override fun update(`object`: ChatChannelListener) {
+    override fun update(entity: ChatChannelListener) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "UPDATE chat_channel_listener SET chat_channel_id = ?, player_id = ? WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, `object`.chatChannel.id)
-                statement.setInt(2, `object`.player.id)
-                statement.setInt(3, `object`.id)
+                statement.setInt(1, entity.chatChannel.id)
+                statement.setInt(2, entity.player.id)
+                statement.setInt(3, entity.id)
                 statement.executeUpdate()
-                cache.put(`object`.id, `object`)
-                val chatChannelListeners = chatChannelCache.get(`object`.chatChannel.id) as? MutableList<Int>?:mutableListOf<Int>()
-                if (!chatChannelListeners.contains(`object`.id)) {
-                    chatChannelListeners.add(`object`.id)
+                cache.put(entity.id, entity)
+                val chatChannelListeners = chatChannelCache.get(entity.chatChannel.id) as? MutableList<Int>?:mutableListOf<Int>()
+                if (!chatChannelListeners.contains(entity.id)) {
+                    chatChannelListeners.add(entity.id)
                 }
-                chatChannelCache.put(`object`.chatChannel.id, chatChannelListeners)
-                val playerChannels = playerCache.get(`object`.player.id) as? MutableList<Int>?:mutableListOf<Int>()
-                if (!playerChannels.contains(`object`.id)) {
-                    playerChannels.add(`object`.id)
+                chatChannelCache.put(entity.chatChannel.id, chatChannelListeners)
+                val playerChannels = playerCache.get(entity.player.id) as? MutableList<Int>?:mutableListOf<Int>()
+                if (!playerChannels.contains(entity.id)) {
+                    playerChannels.add(entity.id)
                 }
-                playerCache.put(`object`.player.id, playerChannels)
+                playerCache.put(entity.player.id, playerChannels)
             }
         }
     }
@@ -224,16 +224,16 @@ class ChatChannelListenerTable: Table<ChatChannelListener> {
         }
     }
 
-    override fun delete(`object`: ChatChannelListener) {
+    override fun delete(entity: ChatChannelListener) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "DELETE FROM chat_channel_listener WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, `object`.id)
+                statement.setInt(1, entity.id)
                 statement.executeUpdate()
-                cache.remove(`object`.id)
-                chatChannelCache.remove(`object`.chatChannel.id)
-                playerCache.remove(`object`.player.id)
+                cache.remove(entity.id)
+                chatChannelCache.remove(entity.chatChannel.id)
+                playerCache.remove(entity.player.id)
             }
         }
     }

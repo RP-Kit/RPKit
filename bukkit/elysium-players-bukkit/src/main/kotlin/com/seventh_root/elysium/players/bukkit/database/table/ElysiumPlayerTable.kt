@@ -90,20 +90,20 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         }
     }
 
-    override fun insert(`object`: ElysiumPlayer): Int {
+    override fun insert(entity: ElysiumPlayer): Int {
         var id: Int = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "INSERT INTO elysium_player(name, minecraft_uuid, irc_nick) VALUES(?, ?, ?)",
                     RETURN_GENERATED_KEYS).use { statement ->
-                statement.setString(1, `object`.name)
-                val bukkitPlayer = `object`.bukkitPlayer
+                statement.setString(1, entity.name)
+                val bukkitPlayer = entity.bukkitPlayer
                 if (bukkitPlayer != null) {
                     statement.setString(2, bukkitPlayer.uniqueId.toString())
                 } else {
                     statement.setNull(2, VARCHAR)
                 }
-                val ircNick = `object`.ircNick
+                val ircNick = entity.ircNick
                 if (ircNick != null) {
                     statement.setString(3, ircNick)
                 } else {
@@ -113,9 +113,9 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                 val generatedKeys = statement.generatedKeys
                 if (generatedKeys.next()) {
                     id = generatedKeys.getInt(1)
-                    `object`.id = id
-                    cache.put(id, `object`)
-                    nameCache.put(`object`.name, id)
+                    entity.id = id
+                    cache.put(id, entity)
+                    nameCache.put(entity.name, id)
                     if (bukkitPlayer != null) {
                         minecraftCache.put(bukkitPlayer.uniqueId.toString(), id)
                     }
@@ -128,32 +128,32 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         return id
     }
 
-    override fun update(`object`: ElysiumPlayer) {
+    override fun update(entity: ElysiumPlayer) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "UPDATE elysium_player SET name = ?, minecraft_uuid = ?, irc_nick = ? WHERE id = ?").use { statement ->
-                statement.setString(1, `object`.name)
-                val bukkitPlayer = `object`.bukkitPlayer
+                statement.setString(1, entity.name)
+                val bukkitPlayer = entity.bukkitPlayer
                 if (bukkitPlayer != null) {
                     statement.setString(2, bukkitPlayer.uniqueId.toString())
                 } else {
                     statement.setNull(2, VARCHAR)
                 }
-                val ircNick = `object`.ircNick
+                val ircNick = entity.ircNick
                 if (ircNick != null) {
                     statement.setString(3, ircNick)
                 } else {
                     statement.setNull(3, VARCHAR)
                 }
-                statement.setInt(4, `object`.id)
+                statement.setInt(4, entity.id)
                 statement.executeUpdate()
-                cache.put(`object`.id, `object`)
-                nameCache.put(`object`.name, `object`.id)
+                cache.put(entity.id, entity)
+                nameCache.put(entity.name, entity.id)
                 if (bukkitPlayer != null) {
-                    minecraftCache.put(bukkitPlayer.uniqueId.toString(), `object`.id)
+                    minecraftCache.put(bukkitPlayer.uniqueId.toString(), entity.id)
                 }
                 if (ircNick != null) {
-                    ircCache.put(ircNick, `object`.id)
+                    ircCache.put(ircNick, entity.id)
                 }
             }
         }
@@ -302,19 +302,19 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         }
     }
 
-    override fun delete(`object`: ElysiumPlayer) {
+    override fun delete(entity: ElysiumPlayer) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
                     "DELETE FROM elysium_player WHERE id = ?").use { statement ->
-                statement.setInt(1, `object`.id)
+                statement.setInt(1, entity.id)
                 statement.executeUpdate()
-                cache.remove(`object`.id)
-                nameCache.remove(`object`.name)
-                val bukkitPlayer = `object`.bukkitPlayer
+                cache.remove(entity.id)
+                nameCache.remove(entity.name)
+                val bukkitPlayer = entity.bukkitPlayer
                 if (bukkitPlayer != null) {
                     minecraftCache.remove(bukkitPlayer.uniqueId.toString())
                 }
-                val ircNick = `object`.ircNick
+                val ircNick = entity.ircNick
                 if (ircNick != null) {
                     ircCache.remove(ircNick)
                 }

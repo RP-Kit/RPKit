@@ -65,21 +65,21 @@ class ElysiumGenderTable: Table<ElysiumGender> {
         }
     }
 
-    override fun insert(`object`: ElysiumGender): Int {
+    override fun insert(entity: ElysiumGender): Int {
         try {
             var id = 0
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "INSERT INTO elysium_gender(name) VALUES(?)",
                         RETURN_GENERATED_KEYS).use { statement ->
-                    statement.setString(1, `object`.name)
+                    statement.setString(1, entity.name)
                     statement.executeUpdate()
                     val generatedKeys = statement.generatedKeys
                     if (generatedKeys.next()) {
                         id = generatedKeys.getInt(1)
-                        `object`.id = id
-                        cache.put(id, `object`)
-                        nameCache.put(`object`.name, id)
+                        entity.id = id
+                        cache.put(id, entity)
+                        nameCache.put(entity.name, id)
                     }
                 }
             }
@@ -91,16 +91,16 @@ class ElysiumGenderTable: Table<ElysiumGender> {
         return 0
     }
 
-    override fun update(`object`: ElysiumGender) {
+    override fun update(entity: ElysiumGender) {
         try {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "UPDATE elysium_gender SET name = ? WHERE id = ?").use { statement ->
-                    statement.setString(1, `object`.name)
-                    statement.setInt(2, `object`.id)
+                    statement.setString(1, entity.name)
+                    statement.setInt(2, entity.id)
                     statement.executeUpdate()
-                    cache.put(`object`.id, `object`)
-                    nameCache.put(`object`.name, `object`.id)
+                    cache.put(entity.id, entity)
+                    nameCache.put(entity.name, entity.id)
                 }
             }
         } catch (exception: SQLException) {
@@ -165,15 +165,15 @@ class ElysiumGenderTable: Table<ElysiumGender> {
         return null
     }
 
-    override fun delete(`object`: ElysiumGender) {
+    override fun delete(entity: ElysiumGender) {
         try {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "DELETE FROM elysium_gender WHERE id = ?").use { statement ->
-                    statement.setInt(1, `object`.id)
+                    statement.setInt(1, entity.id)
                     statement.executeUpdate()
-                    cache.remove(`object`.id)
-                    nameCache.remove(`object`.name)
+                    cache.remove(entity.id)
+                    nameCache.remove(entity.name)
                 }
             }
         } catch (exception: SQLException) {

@@ -19,12 +19,12 @@ package com.seventh_root.elysium.chat.bukkit.chatchannel
 import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipelineComponent
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
-import com.seventh_root.elysium.core.database.TableRow
+import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import java.awt.Color
 
 
-interface ElysiumChatChannel: TableRow {
+interface ElysiumChatChannel: Entity {
     var name: String
     var color: Color
     var formatString: String
