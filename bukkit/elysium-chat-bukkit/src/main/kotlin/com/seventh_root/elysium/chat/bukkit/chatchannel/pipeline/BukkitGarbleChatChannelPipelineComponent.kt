@@ -3,6 +3,7 @@ package com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline
 import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent
 import com.seventh_root.elysium.api.chat.ChatChannelPipelineComponent.Type.PRE_PROCESSOR
 import com.seventh_root.elysium.api.chat.ChatMessageContext
+import com.seventh_root.elysium.api.chat.ChatMessagePostProcessContext
 import com.seventh_root.elysium.core.util.MathUtils
 import com.seventh_root.elysium.players.bukkit.BukkitPlayer
 import org.bukkit.ChatColor
@@ -32,6 +33,10 @@ class BukkitGarbleChatChannelPipelineComponent(var clearRange: Double) : ChatCha
                 }
             }
         }
+        return message
+    }
+
+    override fun postProcess(message: String, context: ChatMessagePostProcessContext): String? {
         return message
     }
 
