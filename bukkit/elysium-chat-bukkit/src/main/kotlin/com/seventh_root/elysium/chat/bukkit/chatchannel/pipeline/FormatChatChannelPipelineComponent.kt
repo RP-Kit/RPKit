@@ -22,6 +22,7 @@ import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipe
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
 import com.seventh_root.elysium.chat.bukkit.exception.ChatChannelMessageFormattingFailureException
+import com.seventh_root.elysium.chat.bukkit.prefix.ElysiumPrefixProvider
 import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
 import org.bukkit.ChatColor
 
@@ -32,6 +33,7 @@ class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, 
 
     override fun process(message: String, context: ChatMessageContext): String? {
         val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+        val prefixProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPrefixProvider::class)
         val sender = context.sender
         val receiver = context.receiver
         val senderCharacter = characterProvider.getActiveCharacter(sender)
@@ -40,6 +42,9 @@ class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, 
         var formattedMessage = ChatColor.translateAlternateColorCodes('&', formatString)
         if (formattedMessage.contains("\$message")) {
             formattedMessage = formattedMessage.replace("\$message", message)
+        }
+        if (formattedMessage.contains("\$sender-prefix")) {
+            formattedMessage = formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(sender))
         }
         if (formattedMessage.contains("\$sender-player")) {
             formattedMessage = formattedMessage.replace("\$sender-player", sender.name)
@@ -50,6 +55,9 @@ class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, 
             } else {
                 throw ChatChannelMessageFormattingFailureException(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
             }
+        }
+        if (formattedMessage.contains("\$receiver-prefix")) {
+            formattedMessage = formattedMessage.replace("\$receiver-prefix", prefixProvider.getPrefix(receiver))
         }
         if (formattedMessage.contains("\$receiver-player")) {
             formattedMessage = formattedMessage.replace("\$receiver-player", receiver.name)
