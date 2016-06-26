@@ -17,6 +17,13 @@ commands:
             /chatchannel set - Modifies a chat channel
         aliases: [channel, chan, ch]
         usage: /<command> [join|leave|create|delete|speak|list|set]
+    prefix:
+        description: |
+            Prefix management command
+            /prefix add - Adds a prefix
+            /prefix remove - Removes a prefix
+            /prefix list - Lists prefixes
+        usage: /<command> [add|remove|list]
 permissions:
     elysium.chat.command.chatchannel.create:
         description: Allows creating chat channels
@@ -77,4 +84,16 @@ permissions:
         default: true
     elysium.chat.command.chatchannel.speak.[channel]:
         description: Allows speaking in a specific chat channel
+        default: op
+    elysium.chat.prefix.[prefix]:
+        description: Adds the prefix to the player when speaking in chat
+        default: false
+    elysium.chat.command.prefix.add:
+        description: Allows adding prefixes
+        default: op
+    elysium.chat.command.prefix.remove:
+        description: Allows removing prefixes
+        default: op
+    elysium.chat.command.prefix.list:
+        description: Allows listing prefixes
         default: op
