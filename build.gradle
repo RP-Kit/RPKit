@@ -73,7 +73,7 @@ project(":apis:elysium-core-api") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -95,7 +95,7 @@ project(":apis:elysium-player-api") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -118,7 +118,7 @@ project(":apis:elysium-character-api") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -142,7 +142,7 @@ project(":apis:elysium-chat-api") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -166,7 +166,7 @@ project(":apis:elysium-economy-api") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -213,7 +213,7 @@ project(":bukkit:elysium-core-bukkit") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -258,7 +258,7 @@ project(":bukkit:elysium-players-bukkit") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -304,7 +304,7 @@ project(":bukkit:elysium-characters-bukkit") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -351,7 +351,7 @@ project(":bukkit:elysium-chat-bukkit") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -398,7 +398,7 @@ project(":bukkit:elysium-economy-bukkit") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -432,7 +432,7 @@ project(":bukkit:elysium-banks-bukkit") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -466,7 +466,7 @@ project(":bukkit:elysium-trade-bukkit") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -500,7 +500,7 @@ project(":bukkit:elysium-shops-bukkit") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -534,7 +534,7 @@ project(":bukkit:elysium-auctions-bukkit") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repo.seventh-root.com/repository/internal/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
