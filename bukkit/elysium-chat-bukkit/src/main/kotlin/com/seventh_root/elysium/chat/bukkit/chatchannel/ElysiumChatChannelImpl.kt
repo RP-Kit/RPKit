@@ -17,7 +17,10 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.*
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipelineComponent
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.FormatChatChannelPipelineComponent
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.GarbleChatChannelPipelineComponent
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.LogChatChannelPipelineComponent
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
 import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelListenerTable
@@ -91,39 +94,8 @@ class ElysiumChatChannelImpl: ElysiumChatChannel {
     override val pipeline: MutableList<ChatChannelPipelineComponent>
     override var matchPattern: String
     override var isIRCEnabled: Boolean
-        set(ircEnabled) {
-            field = ircEnabled
-            if (ircEnabled) {
-                pipeline.add(IRCChatChannelPipelineComponent(ircChannel, isIRCWhitelist))
-                pipeline.sort()
-            } else {
-                val pipelineIterator = pipeline.iterator()
-                while (pipelineIterator.hasNext()) {
-                    val pipelineComponent = pipelineIterator.next()
-                    if (pipelineComponent is IRCChatChannelPipelineComponent) {
-                        pipelineIterator.remove()
-                    }
-                }
-            }
-        }
     override var ircChannel: String
-        set(ircChannel) {
-            field = ircChannel
-            if (isIRCEnabled) {
-                pipeline.filter { pipelineComponent -> pipelineComponent is IRCChatChannelPipelineComponent }
-                        .map { pipelineComponent -> pipelineComponent as IRCChatChannelPipelineComponent }
-                        .forEach { pipelineComponent -> pipelineComponent.ircChannel = ircChannel }
-            }
-        }
     override var isIRCWhitelist: Boolean
-        set(ircWhitelist) {
-            field = ircWhitelist
-            if (isIRCEnabled) {
-                pipeline.filter { pipelineComponent -> pipelineComponent is IRCChatChannelPipelineComponent }
-                        .map { pipelineComponent -> pipelineComponent as IRCChatChannelPipelineComponent }
-                        .forEach { pipelineComponent -> pipelineComponent.isWhitelist = ircWhitelist }
-            }
-        }
     override var isJoinedByDefault: Boolean
 
     constructor(
@@ -134,8 +106,6 @@ class ElysiumChatChannelImpl: ElysiumChatChannel {
             formatString: String = "&f[\$color\$channel&f] &7\$sender-player&f: \$message",
             radius: Int = -1,
             clearRadius: Int = -1,
-            speakers: MutableList<ElysiumPlayer> = mutableListOf<ElysiumPlayer>(),
-            listeners: MutableList<ElysiumPlayer> = mutableListOf<ElysiumPlayer>(),
             pipeline: MutableList<ChatChannelPipelineComponent> = mutableListOf<ChatChannelPipelineComponent>(),
             matchPattern: String = "",
             isIRCEnabled: Boolean = false,
@@ -157,13 +127,10 @@ class ElysiumChatChannelImpl: ElysiumChatChannel {
         this.isIRCWhitelist = isIRCWhitelist
         this.isJoinedByDefault = isJoinedByDefault
         if (radius > 0 && clearRadius > 0) {
-            pipeline.add(GarbleChatChannelPipelineComponent(clearRadius.toDouble()));
+            pipeline.add(GarbleChatChannelPipelineComponent(clearRadius.toDouble()))
         }
-        pipeline.add(FormatChatChannelPipelineComponent(plugin, formatString));
-        if (isIRCEnabled && radius <= 0 && !ircChannel.trim().equals("")) {
-            pipeline.add(IRCChatChannelPipelineComponent(ircChannel, isIRCWhitelist));
-        }
-        pipeline.add(LogChatChannelPipelineComponent());
+        pipeline.add(FormatChatChannelPipelineComponent(plugin, formatString))
+        pipeline.add(LogChatChannelPipelineComponent())
     }
 
     override fun addSpeaker(speaker: ElysiumPlayer) {
@@ -175,12 +142,10 @@ class ElysiumChatChannelImpl: ElysiumChatChannel {
     override fun removeSpeaker(speaker: ElysiumPlayer) {
         while (speakers.contains(speaker)) {
             val chatChannelSpeakerTable = plugin.core.database.getTable(ChatChannelSpeakerTable::class)
-            if (chatChannelSpeakerTable != null) {
-                val chatChannelSpeaker = chatChannelSpeakerTable.get(speaker)
-                if (chatChannelSpeaker != null) {
-                    if (chatChannelSpeaker.chatChannel == this) {
-                        chatChannelSpeakerTable.delete(chatChannelSpeaker)
-                    }
+            val chatChannelSpeaker = chatChannelSpeakerTable.get(speaker)
+            if (chatChannelSpeaker != null) {
+                if (chatChannelSpeaker.chatChannel == this) {
+                    chatChannelSpeakerTable.delete(chatChannelSpeaker)
                 }
             }
         }
@@ -195,12 +160,10 @@ class ElysiumChatChannelImpl: ElysiumChatChannel {
     override fun removeListener(listener: ElysiumPlayer) {
         while (listeners.contains(listener)) {
             val chatChannelListenerTable = plugin.core.database.getTable(ChatChannelListenerTable::class)
-            if (chatChannelListenerTable != null) {
-                val chatChannelListeners = chatChannelListenerTable.get(listener)
-                chatChannelListeners
-                    .filter { chatChannelListener -> chatChannelListener.chatChannel == this }
-                    .forEach { chatChannelListener -> chatChannelListenerTable.delete(chatChannelListener) }
-            }
+            val chatChannelListeners = chatChannelListenerTable.get(listener)
+            chatChannelListeners
+                .filter { chatChannelListener -> chatChannelListener.chatChannel == this }
+                .forEach { chatChannelListener -> chatChannelListenerTable.delete(chatChannelListener) }
         }
     }
 
