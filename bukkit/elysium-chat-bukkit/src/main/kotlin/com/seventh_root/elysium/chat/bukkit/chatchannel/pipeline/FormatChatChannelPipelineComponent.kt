@@ -81,12 +81,16 @@ class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, 
 
     override fun postProcess(message: String, context: ChatMessagePostProcessContext): String? {
         val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+        val prefixProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPrefixProvider::class)
         val sender = context.sender
         val senderCharacter = characterProvider.getActiveCharacter(sender)
         val chatChannel = context.chatChannel
         var formattedMessage = ChatColor.translateAlternateColorCodes('&', formatString)
         if (formattedMessage.contains("\$message")) {
             formattedMessage = formattedMessage.replace("\$message", message)
+        }
+        if (formattedMessage.contains("\$sender-prefix")) {
+            formattedMessage = formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(sender))
         }
         if (formattedMessage.contains("\$sender-player")) {
             formattedMessage = formattedMessage.replace("\$sender-player", sender.name)
@@ -97,12 +101,6 @@ class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, 
             } else {
                 throw ChatChannelMessageFormattingFailureException(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
             }
-        }
-        if (formattedMessage.contains("\$receiver-player")) {
-            formattedMessage = formattedMessage.replace("\$receiver-player", "\$receiver-player")
-        }
-        if (formattedMessage.contains("\$receiver-character")) {
-            formattedMessage = formattedMessage.replace("\$receiver-character", "\$receiver-character")
         }
         if (formattedMessage.contains("\$channel")) {
             formattedMessage = formattedMessage.replace("\$channel", chatChannel.name)
