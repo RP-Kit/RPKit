@@ -17,14 +17,14 @@
 package com.seventh_root.elysium.chat.bukkit.database.table
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelListener
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
-import com.seventh_root.elysium.chat.bukkit.chatchannel.ChatChannelListener
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
-import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
@@ -41,7 +41,7 @@ class ChatChannelListenerTable: Table<ChatChannelListener> {
     private val chatChannelCache: Cache<Int, MutableList<*>>
     private val playerCache: Cache<Int, MutableList<*>>
 
-    constructor(plugin: ElysiumChatBukkit, database: Database): super(database, ChatChannelListener::class.java) {
+    constructor(database: Database, plugin: ElysiumChatBukkit): super(database, ChatChannelListener::class.java) {
         this.plugin = plugin
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache",

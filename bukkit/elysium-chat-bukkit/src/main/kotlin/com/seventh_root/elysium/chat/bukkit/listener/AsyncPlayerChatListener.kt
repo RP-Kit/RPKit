@@ -22,6 +22,8 @@ import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvid
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContextImpl
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContextImpl
 import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
+import com.seventh_root.elysium.chat.bukkit.snooper.ElysiumSnooperProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.event.EventHandler
@@ -73,12 +75,14 @@ class AsyncPlayerChatListener(private val plugin: ElysiumChatBukkit): Listener {
                     }
                 }
             }
+            val snoopers = mutableListOf<ElysiumPlayer>()
+            snoopers.addAll(plugin.core.serviceManager.getServiceProvider(ElysiumSnooperProvider::class).snoopers)
+            snoopers.removeAll(channel.listeners)
+            val processedMessage = channel.postProcess(message, ChatMessagePostProcessContextImpl(channel, player))
+            snoopers.forEach { snooper -> snooper.bukkitPlayer?.player?.sendMessage(processedMessage) }
             if (channel.isIRCEnabled) {
                 val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
-                val processedMessage = channel.postProcess(message, ChatMessagePostProcessContextImpl(channel, player))
                 ircProvider.ircBot.sendIRC().message(channel.ircChannel, ChatColor.stripColor(processedMessage))
-            } else {
-                channel.postProcess(message, ChatMessagePostProcessContextImpl(channel, player))
             }
         } else {
             event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-chat-channel")))
