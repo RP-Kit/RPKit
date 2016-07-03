@@ -1,0 +1,11 @@
+shops:
+    limit: 2
+messages:
+    shop-line-1-invalid: '&cLine 1 format must be "buy [number]" or "sell [number] [type]'
+    shop-line-2-invalid: '&cLine 2 format must be "for [price] [currency]"'
+    no-permission-shop: '&cYou do not have permission to create shops.'
+    no-permission-shop-limit: '&cYou have surpassed the shop limit.'
+    no-character: '&cYou need a character in order to perform this action.'
+    no-stealing: '&cYou cannot steal from this shop.'
+    not-enough-money: '&cYou do not have enough money to buy that.'
+    not-enough-shop-items: '&cThe shop does not contain enough items.'

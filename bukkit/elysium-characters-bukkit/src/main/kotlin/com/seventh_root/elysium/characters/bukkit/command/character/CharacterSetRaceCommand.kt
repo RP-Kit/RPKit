@@ -1,9 +1,25 @@
+/*
+ * Copyright 2016 Ross Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.seventh_root.elysium.characters.bukkit.command.character
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
-import com.seventh_root.elysium.characters.bukkit.race.BukkitRaceProvider
-import com.seventh_root.elysium.players.bukkit.BukkitPlayerProvider
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
+import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -11,7 +27,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit) : CommandExecutor {
+class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -28,8 +44,8 @@ class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit) : Com
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("elysium.characters.command.character.set.race")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
                 val player = playerProvider.getPlayer(sender)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
@@ -39,7 +55,7 @@ class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit) : Com
                             raceBuilder.append(args[i]).append(" ")
                         }
                         raceBuilder.append(args[args.size - 1])
-                        val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+                        val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class)
                         val race = raceProvider.getRace(raceBuilder.toString())
                         if (race != null) {
                             character.race = race
@@ -63,18 +79,18 @@ class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit) : Com
         return true
     }
 
-    private inner class RacePrompt : ValidatingPrompt() {
+    private inner class RacePrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java).getRace(input) != null
+            return plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class).getRace(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class)
                 val player = playerProvider.getPlayer(conversable)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
@@ -90,7 +106,7 @@ class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit) : Com
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val raceProvider = plugin.core.serviceManager.getServiceProvider(BukkitRaceProvider::class.java)
+            val raceProvider = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class)
             val raceListBuilder = StringBuilder()
             for (race in raceProvider.races) {
                 raceListBuilder.append(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-list-item")
@@ -101,7 +117,7 @@ class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit) : Com
 
     }
 
-    private inner class RaceSetPrompt : MessagePrompt() {
+    private inner class RaceSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION

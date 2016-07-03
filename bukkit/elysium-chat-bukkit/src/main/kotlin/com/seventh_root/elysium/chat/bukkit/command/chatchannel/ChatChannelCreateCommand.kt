@@ -1,8 +1,24 @@
+/*
+ * Copyright 2016 Ross Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannel
-import com.seventh_root.elysium.chat.bukkit.chatchannel.BukkitChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelImpl
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
@@ -12,7 +28,7 @@ import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 import java.awt.Color
 
-class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandExecutor {
+class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -44,14 +60,14 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
         return true
     }
 
-    private inner class ChatChannelNamePrompt : ValidatingPrompt() {
+    private inner class ChatChannelNamePrompt: ValidatingPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
             return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-create-prompt"))
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
             return chatChannelProvider.getChatChannel(input) == null
         }
 
@@ -66,7 +82,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelNameSetPrompt : MessagePrompt() {
+    private inner class ChatChannelNameSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return ChatChannelColorPrompt()
@@ -78,7 +94,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelColorPrompt : ValidatingPrompt() {
+    private inner class ChatChannelColorPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             try {
@@ -105,7 +121,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelColorSetPrompt : MessagePrompt() {
+    private inner class ChatChannelColorSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return ChatChannelFormatStringPrompt()
@@ -117,7 +133,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelFormatStringPrompt : StringPrompt() {
+    private inner class ChatChannelFormatStringPrompt: StringPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
             return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-set-formatstring-prompt"))
@@ -130,7 +146,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelFormatStringSetPrompt : MessagePrompt() {
+    private inner class ChatChannelFormatStringSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return ChatChannelRadiusPrompt()
@@ -142,7 +158,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelRadiusPrompt : NumericPrompt() {
+    private inner class ChatChannelRadiusPrompt: NumericPrompt() {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
             context.setSessionData("radius", input.toInt())
@@ -155,7 +171,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelRadiusSetPrompt : MessagePrompt() {
+    private inner class ChatChannelRadiusSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             if (context.getSessionData("radius") as Int > 0) {
@@ -172,7 +188,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelClearRadiusPrompt : NumericPrompt() {
+    private inner class ChatChannelClearRadiusPrompt: NumericPrompt() {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
             context.setSessionData("clear_radius", input.toInt())
@@ -185,7 +201,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelClearRadiusSetPrompt : MessagePrompt() {
+    private inner class ChatChannelClearRadiusSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return ChatChannelMatchPatternPrompt()
@@ -197,7 +213,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelMatchPatternPrompt : StringPrompt() {
+    private inner class ChatChannelMatchPatternPrompt: StringPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
             return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-set-match-pattern-prompt"))
@@ -213,7 +229,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelMatchPatternSetPrompt : MessagePrompt() {
+    private inner class ChatChannelMatchPatternSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             if (context.getSessionData("radius") as Int <= 0) {
@@ -232,7 +248,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelIRCEnabledPrompt : BooleanPrompt() {
+    private inner class ChatChannelIRCEnabledPrompt: BooleanPrompt() {
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
             return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel.set-irc-enabled-invalid-boolean"))
@@ -249,7 +265,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelIRCEnabledSetPrompt : MessagePrompt() {
+    private inner class ChatChannelIRCEnabledSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             if (context.getSessionData("irc_enabled") as Boolean) {
@@ -267,10 +283,10 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelIRCChannelPrompt : ValidatingPrompt() {
+    private inner class ChatChannelIRCChannelPrompt: ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return input.matches("/([#&][^\\x07\\x2C\\s]{0,200})/".toRegex())
+            return input.matches("[&#+!][^ ,:]{1,50}".toRegex())
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
@@ -288,7 +304,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelIRCChannelSetPrompt : MessagePrompt() {
+    private inner class ChatChannelIRCChannelSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return ChatChannelIRCWhitelistPrompt()
@@ -300,7 +316,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelIRCWhitelistPrompt : BooleanPrompt() {
+    private inner class ChatChannelIRCWhitelistPrompt: BooleanPrompt() {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Boolean): Prompt {
             context.setSessionData("irc_whitelist", input)
@@ -317,7 +333,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelIRCWhitelistSetPrompt : MessagePrompt() {
+    private inner class ChatChannelIRCWhitelistSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return ChatChannelJoinedByDefaultPrompt()
@@ -329,7 +345,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelJoinedByDefaultPrompt : BooleanPrompt() {
+    private inner class ChatChannelJoinedByDefaultPrompt: BooleanPrompt() {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Boolean): Prompt {
             context.setSessionData("joined_by_default", input)
@@ -346,7 +362,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
 
     }
 
-    private inner class ChatChannelJoinedByDefaultSetPrompt : MessagePrompt() {
+    private inner class ChatChannelJoinedByDefaultSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return ChatChannelCreatedPrompt()
@@ -357,14 +373,14 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
         }
     }
 
-    private inner class ChatChannelCreatedPrompt : MessagePrompt() {
+    private inner class ChatChannelCreatedPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(BukkitChatChannelProvider::class.java)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
             val name = context.getSessionData("name") as String
             val color = context.getSessionData("color") as Color
             val formatString = context.getSessionData("format_string") as String
@@ -375,7 +391,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit) : CommandE
             val ircChannel = context.getSessionData("irc_channel") as String
             val ircWhitelist = context.getSessionData("irc_whitelist") as Boolean
             val joinedByDefault = context.getSessionData("joined_by_default") as Boolean
-            val chatChannel = BukkitChatChannel(
+            val chatChannel = ElysiumChatChannelImpl(
                     plugin = plugin,
                     name = name,
                     color = color,

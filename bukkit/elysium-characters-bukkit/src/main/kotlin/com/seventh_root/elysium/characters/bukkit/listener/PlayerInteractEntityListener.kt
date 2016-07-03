@@ -1,53 +1,58 @@
+/*
+ * Copyright 2016 Ross Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.seventh_root.elysium.characters.bukkit.listener
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
-import com.seventh_root.elysium.characters.bukkit.character.BukkitCharacterProvider
-import com.seventh_root.elysium.players.bukkit.BukkitPlayerProvider
+import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
+import com.seventh_root.elysium.characters.bukkit.character.field.ElysiumCharacterCardFieldProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.inventory.EquipmentSlot.HAND
 
-class PlayerInteractEntityListener(private val plugin: ElysiumCharactersBukkit) : Listener {
+class PlayerInteractEntityListener(private val plugin: ElysiumCharactersBukkit): Listener {
 
     @EventHandler
     fun onPlayerInteractEntity(event: PlayerInteractEntityEvent) {
-        if (event.player.isSneaking || !plugin.config.getBoolean("characters.view-card-requires-sneak")) {
-            if (event.rightClicked is Player) {
-                if (event.player.hasPermission("elysium.characters.command.character.card.other")) {
-                    val bukkitPlayer = event.rightClicked as Player
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(BukkitPlayerProvider::class.java)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(BukkitCharacterProvider::class.java)
-                    val player = playerProvider.getPlayer(bukkitPlayer)
-                    val character = characterProvider.getActiveCharacter(player)
-                    if (character != null) {
-                        for (line in plugin.config.getStringList("messages.character-card")) {
-                            val gender = character.gender
-                            val race = character.race
-                            event.player.sendMessage(
-                                    ChatColor.translateAlternateColorCodes('&', line)
-                                            .replace("\$name", character.name)
-                                            .replace("\$player", player.name)
-                                            .replace("\$gender", if (gender != null) gender.name else "unset")
-                                            .replace("\$age", Integer.toString(character.age))
-                                            .replace("\$race", if (race != null) race.name else "unset")
-                                            .replace("\$description", character.description)
-                                            .replace("\$dead", if (character.isDead) "yes" else "no")
-                                            .replace("\$health", java.lang.Double.toString(character.health))
-                                            .replace("\$max-health", java.lang.Double.toString(character.maxHealth))
-                                            .replace("\$mana", Integer.toString(character.mana))
-                                            .replace("\$max-mana", Integer.toString(character.maxMana))
-                                            .replace("\$food", Integer.toString(character.foodLevel))
-                                            .replace("\$max-food", Integer.toString(20))
-                                            .replace("\$thirst", Integer.toString(character.thirstLevel))
-                                            .replace("\$max-thirst", Integer.toString(20)))
+        if (event.hand == HAND) {
+            if (event.player.isSneaking || !plugin.config.getBoolean("characters.view-card-requires-sneak")) {
+                if (event.rightClicked is Player) {
+                    if (event.player.hasPermission("elysium.characters.command.character.card.other")) {
+                        val bukkitPlayer = event.rightClicked as Player
+                        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                        val player = playerProvider.getPlayer(bukkitPlayer)
+                        val character = characterProvider.getActiveCharacter(player)
+                        if (character != null) {
+                            for (line in plugin.config.getStringList("messages.character-card")) {
+                                var filteredLine = ChatColor.translateAlternateColorCodes('&', line)
+                                val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterCardFieldProvider::class)
+                                characterCardFieldProvider.characterCardFields.forEach { field -> filteredLine = filteredLine.replace("\$${field.name}", field.get(character)) }
+                                event.player.sendMessage(filteredLine)
+                            }
+                        } else {
+                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character-other")))
                         }
                     } else {
-                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character-other")))
+                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-card-other")))
                     }
-                } else {
-                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-card-other")))
                 }
             }
         }

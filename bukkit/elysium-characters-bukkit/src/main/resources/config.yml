@@ -111,3 +111,4 @@ characters:
     view-card-requires-sneak: true
     kill-character-on-death: false
     delete-character-on-death: false
+    set-player-display-name: false
