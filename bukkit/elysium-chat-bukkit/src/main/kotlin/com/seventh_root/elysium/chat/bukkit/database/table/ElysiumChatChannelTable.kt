@@ -39,7 +39,7 @@ class ElysiumChatChannelTable: Table<ElysiumChatChannel> {
     private val cache: Cache<Int, ElysiumChatChannel>
     private val nameCache: Cache<String, Int>
 
-    constructor(plugin: ElysiumChatBukkit, database: Database): super(database, ElysiumChatChannel::class.java) {
+    constructor(database: Database, plugin: ElysiumChatBukkit): super(database, ElysiumChatChannel::class.java) {
         this.plugin = plugin
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache",

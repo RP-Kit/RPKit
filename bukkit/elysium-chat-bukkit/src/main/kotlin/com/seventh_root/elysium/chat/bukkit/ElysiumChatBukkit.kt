@@ -20,16 +20,17 @@ import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvid
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProviderImpl
 import com.seventh_root.elysium.chat.bukkit.command.chatchannel.ChatChannelCommand
 import com.seventh_root.elysium.chat.bukkit.command.prefix.PrefixCommand
-import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelListenerTable
-import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelSpeakerTable
-import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelTable
-import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumPrefixTable
+import com.seventh_root.elysium.chat.bukkit.command.snoop.SnoopCommand
+import com.seventh_root.elysium.chat.bukkit.database.table.*
 import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProviderImpl
 import com.seventh_root.elysium.chat.bukkit.listener.AsyncPlayerChatListener
+import com.seventh_root.elysium.chat.bukkit.listener.PlayerCommandPreprocessListener
 import com.seventh_root.elysium.chat.bukkit.listener.PlayerJoinListener
 import com.seventh_root.elysium.chat.bukkit.prefix.ElysiumPrefixProvider
 import com.seventh_root.elysium.chat.bukkit.prefix.ElysiumPrefixProviderImpl
+import com.seventh_root.elysium.chat.bukkit.snooper.ElysiumSnooperProvider
+import com.seventh_root.elysium.chat.bukkit.snooper.ElysiumSnooperProviderImpl
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceProvider
@@ -40,6 +41,7 @@ class ElysiumChatBukkit: ElysiumBukkitPlugin() {
     private lateinit var chatChannelProvider: ElysiumChatChannelProvider
     private lateinit var ircProvider: ElysiumIRCProvider
     private lateinit var prefixProvider: ElysiumPrefixProvider
+    private lateinit var snooperProvider: ElysiumSnooperProvider
     override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
@@ -47,26 +49,39 @@ class ElysiumChatBukkit: ElysiumBukkitPlugin() {
         chatChannelProvider = ElysiumChatChannelProviderImpl(this)
         ircProvider = ElysiumIRCProviderImpl(this)
         prefixProvider = ElysiumPrefixProviderImpl(this)
-        serviceProviders = arrayOf(chatChannelProvider, ircProvider, prefixProvider)
+        snooperProvider = ElysiumSnooperProviderImpl(this)
+        serviceProviders = arrayOf(
+                chatChannelProvider,
+                ircProvider,
+                prefixProvider,
+                snooperProvider
+        )
+    }
+
+    override fun onDisable() {
+        ircProvider.ircBot.sendIRC().quitServer(config.getString("messages.irc-quit"))
     }
 
     override fun registerCommands() {
         getCommand("chatchannel").executor = ChatChannelCommand(this)
         getCommand("prefix").executor = PrefixCommand(this)
+        getCommand("snoop").executor = SnoopCommand(this)
     }
 
     override fun registerListeners() {
         registerListeners(
                 AsyncPlayerChatListener(this),
-                PlayerJoinListener(this)
+                PlayerJoinListener(this),
+                PlayerCommandPreprocessListener(this)
         )
     }
 
     @Throws(SQLException::class)
     override fun createTables(database: Database) {
-        database.addTable(ElysiumChatChannelTable(this, database))
-        database.addTable(ChatChannelListenerTable(this, database))
-        database.addTable(ChatChannelSpeakerTable(this, database))
+        database.addTable(ElysiumChatChannelTable(database, this))
+        database.addTable(ChatChannelListenerTable(database, this))
+        database.addTable(ChatChannelSpeakerTable(database, this))
         database.addTable(ElysiumPrefixTable(database))
+        database.addTable(ElysiumSnooperTable(database, this))
     }
 }

@@ -24,6 +24,13 @@ commands:
             /prefix remove - Removes a prefix
             /prefix list - Lists prefixes
         usage: /<command> [add|remove|list]
+    snoop:
+        description: |
+            Snooping command
+            /snoop on - Enables snooping
+            /snoop off - Disables snooping
+            /snoop check - Checks if you are snooping
+        usage: /<command> [on|off|check]
 permissions:
     elysium.chat.command.chatchannel.create:
         description: Allows creating chat channels
@@ -96,4 +103,13 @@ permissions:
         default: op
     elysium.chat.command.prefix.list:
         description: Allows listing prefixes
+        default: op
+    elysium.chat.command.snoop.on:
+        description: Allows enabling snoop
+        default: op
+    elysium.chat.command.snoop.off:
+        description: Allows disabling snoop
+        default: op
+    elysium.chat.command.snoop.check:
+        description: Allows checking snoop
         default: op
