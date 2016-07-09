@@ -27,6 +27,9 @@ subprojects {
         maven {
             url "https://hub.spigotmc.org/nexus/content/groups/public/"
         }
+        maven {
+            url "http://nexus.theyeticave.net/content/repositories/pub_releases"
+        }
     }
 }
 
@@ -96,6 +99,7 @@ project(":bukkit:elysium-core-bukkit") {
 
     dependencies {
         compile group: "org.bukkit", name: "bukkit", version: "1.9.4-R0.1-SNAPSHOT"
+        compile group: "net.milkbowl.vault", name: "VaultAPI", version: "1.5"
         compile project(":elysium-core")
     }
 
