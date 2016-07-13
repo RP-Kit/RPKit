@@ -16,8 +16,11 @@
 
 package com.seventh_root.elysium.banks.bukkit
 
+import com.seventh_root.elysium.banks.bukkit.vault.ElysiumBanksVaultEconomy
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.service.ServiceProvider
+import net.milkbowl.vault.economy.Economy
+import org.bukkit.plugin.ServicePriority
 
 
 class ElysiumBankLibBukkit: ElysiumBukkitPlugin() {
@@ -26,6 +29,9 @@ class ElysiumBankLibBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {
         serviceProviders = arrayOf<ServiceProvider>()
+        if (server.pluginManager.getPlugin("Vault") != null) {
+            server.servicesManager.register(Economy::class.java, ElysiumBanksVaultEconomy(this), this, ServicePriority.High)
+        }
     }
 
 }

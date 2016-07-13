@@ -16,8 +16,11 @@
 
 package com.seventh_root.elysium.chat.bukkit
 
+import com.seventh_root.elysium.chat.bukkit.vault.ElysiumChatVaultChat
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.service.ServiceProvider
+import net.milkbowl.vault.chat.Chat
+import org.bukkit.plugin.ServicePriority.Normal
 
 
 class ElysiumChatLibBukkit: ElysiumBukkitPlugin() {
@@ -26,6 +29,9 @@ class ElysiumChatLibBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {
         serviceProviders = arrayOf<ServiceProvider>()
+        if (server.pluginManager.getPlugin("Vault") != null) {
+            server.servicesManager.register(Chat::class.java, ElysiumChatVaultChat(this), this, Normal)
+        }
     }
 
 }
