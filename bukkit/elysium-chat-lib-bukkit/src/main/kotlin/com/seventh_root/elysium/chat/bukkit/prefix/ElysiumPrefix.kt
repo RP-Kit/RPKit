@@ -21,5 +21,5 @@ import com.seventh_root.elysium.core.database.Entity
 
 interface ElysiumPrefix: Entity {
     val name: String
-    val prefix: String
+    var prefix: String
 }
