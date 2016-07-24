@@ -59,9 +59,7 @@ class ElysiumBankTable: Table<ElysiumBank> {
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
                             "character_id INTEGER," +
                             "currency_id INTEGER," +
-                            "balance INTEGER," +
-                            "FOREIGN KEY(character_id) REFERENCES elysium_character(id) ON DELETE CASCADE ON UPDATE CASCADE," +
-                            "FOREIGN KEY(currency_id) REFERENCES elysium_currency(id) ON DELETE CASCADE ON UPDATE CASCADE" +
+                            "balance INTEGER" +
                     ")"
             ).use { statement ->
                 statement.executeUpdate()

@@ -18,8 +18,13 @@ package com.seventh_root.elysium.chat.bukkit
 
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProviderImpl
+import com.seventh_root.elysium.chat.bukkit.chatgroup.ElysiumChatGroupProvider
+import com.seventh_root.elysium.chat.bukkit.chatgroup.ElysiumChatGroupProviderImpl
 import com.seventh_root.elysium.chat.bukkit.command.chatchannel.ChatChannelCommand
+import com.seventh_root.elysium.chat.bukkit.command.chatgroup.ChatGroupCommand
+import com.seventh_root.elysium.chat.bukkit.command.message.MessageCommand
 import com.seventh_root.elysium.chat.bukkit.command.prefix.PrefixCommand
+import com.seventh_root.elysium.chat.bukkit.command.reply.ReplyCommand
 import com.seventh_root.elysium.chat.bukkit.command.snoop.SnoopCommand
 import com.seventh_root.elysium.chat.bukkit.database.table.*
 import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
@@ -39,6 +44,7 @@ import java.sql.SQLException
 class ElysiumChatBukkit: ElysiumBukkitPlugin() {
 
     private lateinit var chatChannelProvider: ElysiumChatChannelProvider
+    private lateinit var chatGroupProvider: ElysiumChatGroupProvider
     private lateinit var ircProvider: ElysiumIRCProvider
     private lateinit var prefixProvider: ElysiumPrefixProvider
     private lateinit var snooperProvider: ElysiumSnooperProvider
@@ -47,11 +53,13 @@ class ElysiumChatBukkit: ElysiumBukkitPlugin() {
     override fun onEnable() {
         saveDefaultConfig()
         chatChannelProvider = ElysiumChatChannelProviderImpl(this)
+        chatGroupProvider = ElysiumChatGroupProviderImpl(this)
         ircProvider = ElysiumIRCProviderImpl(this)
         prefixProvider = ElysiumPrefixProviderImpl(this)
         snooperProvider = ElysiumSnooperProviderImpl(this)
         serviceProviders = arrayOf(
                 chatChannelProvider,
+                chatGroupProvider,
                 ircProvider,
                 prefixProvider,
                 snooperProvider
@@ -66,6 +74,9 @@ class ElysiumChatBukkit: ElysiumBukkitPlugin() {
         getCommand("chatchannel").executor = ChatChannelCommand(this)
         getCommand("prefix").executor = PrefixCommand(this)
         getCommand("snoop").executor = SnoopCommand(this)
+        getCommand("chatgroup").executor = ChatGroupCommand(this)
+        getCommand("reply").executor = ReplyCommand(this)
+        getCommand("message").executor = MessageCommand(this)
     }
 
     override fun registerListeners() {
@@ -83,5 +94,10 @@ class ElysiumChatBukkit: ElysiumBukkitPlugin() {
         database.addTable(ChatChannelSpeakerTable(database, this))
         database.addTable(ElysiumPrefixTable(database))
         database.addTable(ElysiumSnooperTable(database, this))
+        database.addTable(ElysiumChatGroupTable(database, this))
+        database.addTable(ChatGroupMemberTable(database, this))
+        database.addTable(ChatGroupInviteTable(database, this))
+        database.addTable(LastUsedChatGroupTable(database, this))
     }
+
 }

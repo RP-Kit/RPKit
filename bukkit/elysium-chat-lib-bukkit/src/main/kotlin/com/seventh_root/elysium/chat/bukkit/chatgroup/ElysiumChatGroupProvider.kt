@@ -17,12 +17,15 @@
 package com.seventh_root.elysium.chat.bukkit.chatgroup
 
 import com.seventh_root.elysium.core.service.ServiceProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
 
 interface ElysiumChatGroupProvider: ServiceProvider {
-    fun getChatGroup(id: Int): ElysiumChatGroup
-    fun getChatGroup(name: String): ElysiumChatGroup
+    fun getChatGroup(id: Int): ElysiumChatGroup?
+    fun getChatGroup(name: String): ElysiumChatGroup?
     fun addChatGroup(chatGroup: ElysiumChatGroup)
     fun removeChatGroup(chatGroup: ElysiumChatGroup)
     fun updateChatGroup(chatGroup: ElysiumChatGroup)
+    fun getLastUsedChatGroup(player: ElysiumPlayer): ElysiumChatGroup?
+    fun setLastUsedChatGroup(player: ElysiumPlayer, chatGroup: ElysiumChatGroup)
 }
