@@ -59,7 +59,9 @@ class ElysiumGenderTable: Table<ElysiumGender> {
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
+    }
 
+    override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
             database.setTableVersion(this, "0.1.0")
         }
