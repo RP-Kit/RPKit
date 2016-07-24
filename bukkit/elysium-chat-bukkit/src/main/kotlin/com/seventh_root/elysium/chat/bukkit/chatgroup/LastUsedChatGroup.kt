@@ -20,13 +20,8 @@ import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
 
-interface ElysiumChatGroup: Entity {
-    val name: String
-    val members: List<ElysiumPlayer>
-    val invited: List<ElysiumPlayer>
-    fun addMember(player: ElysiumPlayer)
-    fun removeMember(player: ElysiumPlayer)
-    fun invite(player: ElysiumPlayer)
-    fun uninvite(player: ElysiumPlayer)
-    fun sendMessage(sender: ElysiumPlayer, message: String)
-}
+class LastUsedChatGroup(
+        override var id: Int = 0,
+        val player: ElysiumPlayer,
+        var chatGroup: ElysiumChatGroup
+): Entity

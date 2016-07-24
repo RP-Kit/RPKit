@@ -17,7 +17,8 @@
 package com.seventh_root.elysium.chat.bukkit.database.table
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.snooper.ElysiumSnooper
+import com.seventh_root.elysium.chat.bukkit.chatgroup.ElysiumChatGroupProvider
+import com.seventh_root.elysium.chat.bukkit.chatgroup.LastUsedChatGroup
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
@@ -31,36 +32,31 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
 
-class ElysiumSnooperTable: Table<ElysiumSnooper> {
+class LastUsedChatGroupTable: Table<LastUsedChatGroup> {
 
     private val plugin: ElysiumChatBukkit
     private val cacheManager: CacheManager
-    private val cache: Cache<Int, ElysiumSnooper>
+    private val cache: Cache<Int, LastUsedChatGroup>
     private val playerCache: Cache<Int, Int>
 
-    constructor(database: Database, plugin: ElysiumChatBukkit) : super(database, ElysiumSnooper::class) {
+    constructor(database: Database, plugin: ElysiumChatBukkit): super(database, LastUsedChatGroup::class) {
         this.plugin = plugin
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ElysiumSnooper::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, LastUsedChatGroup::class.java,
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
         playerCache = cacheManager.createCache("playerCache",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.3.0")
-        }
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
     }
 
     override fun create() {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS elysium_snooper(" +
+                    "CREATE TABLE IF NOT EXISTS last_used_chat_group(" +
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "player_id INTEGER" +
+                            "player_id INTEGER," +
+                            "chat_group_id INTEGER" +
                     ")"
             ).use { statement ->
                 statement.executeUpdate()
@@ -68,34 +64,42 @@ class ElysiumSnooperTable: Table<ElysiumSnooper> {
         }
     }
 
-    override fun insert(entity: ElysiumSnooper): Int {
-        var id: Int = 0
+    override fun applyMigrations() {
+        if (database.getTableVersion(this) == null) {
+            database.setTableVersion(this, "0.4.0")
+        }
+    }
+
+    override fun insert(entity: LastUsedChatGroup): Int {
+        var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "INSERT INTO elysium_snooper(player_id) VALUES(?)",
+                    "INSERT INTO last_used_chat_group(player_id, chat_group_id) VALUES(?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
                 statement.setInt(1, entity.player.id)
+                statement.setInt(2, entity.chatGroup.id)
                 statement.executeUpdate()
                 val generatedKeys = statement.generatedKeys
                 if (generatedKeys.next()) {
                     id = generatedKeys.getInt(1)
                     entity.id = id
                     cache.put(id, entity)
-                    playerCache.put(entity.player.id, entity.id)
+                    playerCache.put(entity.player.id, id)
                 }
             }
         }
         return id
     }
 
-    override fun update(entity: ElysiumSnooper) {
+    override fun update(entity: LastUsedChatGroup) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "UPDATE elysium_snooper SET player_id = ? WHERE id = ?"
+                    "UPDATE last_used_chat_group SET player_id = ?, chat_group_id = ? WHERE id = ?"
             ).use { statement ->
                 statement.setInt(1, entity.player.id)
-                statement.setInt(2, entity.id)
+                statement.setInt(2, entity.chatGroup.id)
+                statement.setInt(3, entity.id)
                 statement.executeUpdate()
                 cache.put(entity.id, entity)
                 playerCache.put(entity.player.id, entity.id)
@@ -103,77 +107,64 @@ class ElysiumSnooperTable: Table<ElysiumSnooper> {
         }
     }
 
-    override fun get(id: Int): ElysiumSnooper? {
+    override fun get(id: Int): LastUsedChatGroup? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var snooper: ElysiumSnooper? = null
+            var lastUsedChatGroup: LastUsedChatGroup? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, player_id FROM elysium_snooper WHERE id = ?"
+                        "SELECT id, player_id, chat_group_id FROM last_used_chat_group WHERE id = ?"
                 ).use { statement ->
                     statement.setInt(1, id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        val finalSnooper = ElysiumSnooper(
+                        val finalLastUsedChatGroup = LastUsedChatGroup(
                                 resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!
+                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!,
+                                plugin.core.serviceManager.getServiceProvider(ElysiumChatGroupProvider::class).getChatGroup(resultSet.getInt("chat_group_id"))!!
                         )
-                        snooper = finalSnooper
-                        cache.put(id, finalSnooper)
-                        playerCache.put(finalSnooper.player.id, finalSnooper.id)
+                        lastUsedChatGroup = finalLastUsedChatGroup
+                        cache.put(id, finalLastUsedChatGroup)
+                        playerCache.put(finalLastUsedChatGroup.player.id, id)
                     }
                 }
             }
-            return snooper
+            return lastUsedChatGroup
         }
     }
 
-    fun get(player: ElysiumPlayer): ElysiumSnooper? {
+    fun get(player: ElysiumPlayer): LastUsedChatGroup? {
         if (playerCache.containsKey(player.id)) {
             return get(playerCache.get(player.id))
         } else {
-            var snooper: ElysiumSnooper? = null
+            var lastUsedChatGroup: LastUsedChatGroup? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, player_id FROM elysium_snooper WHERE player_id = ?"
+                        "SELECT id, player_id, chat_group_id FROM last_used_chat_group WHERE player_id = ?"
                 ).use { statement ->
                     statement.setInt(1, player.id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        val finalSnooper = ElysiumSnooper(
+                        val finalLastUsedChatGroup = LastUsedChatGroup(
                                 resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!
+                                plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!,
+                                plugin.core.serviceManager.getServiceProvider(ElysiumChatGroupProvider::class).getChatGroup(resultSet.getInt("chat_group_id"))!!
                         )
-                        snooper = finalSnooper
-                        cache.put(finalSnooper.id, finalSnooper)
-                        playerCache.put(finalSnooper.player.id, finalSnooper.id)
+                        lastUsedChatGroup = finalLastUsedChatGroup
+                        cache.put(finalLastUsedChatGroup.id, finalLastUsedChatGroup)
+                        playerCache.put(finalLastUsedChatGroup.player.id, finalLastUsedChatGroup.id)
                     }
                 }
             }
-            return snooper
+            return lastUsedChatGroup
         }
     }
 
-    fun getAll(): List<ElysiumSnooper> {
-        val snoopers = mutableListOf<ElysiumSnooper>()
+    override fun delete(entity: LastUsedChatGroup) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "SELECT id FROM elysium_snooper"
-            ).use { statement ->
-                val resultSet = statement.executeQuery()
-                while (resultSet.next()) {
-                    snoopers.add(get(resultSet.getInt("id"))!!)
-                }
-            }
-        }
-        return snoopers
-    }
-
-    override fun delete(entity: ElysiumSnooper) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM elysium_snooper WHERE id = ?"
+                    "DELETE FROM last_used_chat_group WHERE id = ?"
             ).use { statement ->
                 statement.setInt(1, entity.id)
                 statement.executeUpdate()

@@ -55,8 +55,7 @@ class ElysiumShopCountTable: Table<ElysiumShopCount> {
                     "CREATE TABLE IF NOT EXISTS elysium_shop_count(" +
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
                             "character_id INTEGER," +
-                            "count INTEGER," +
-                            "FOREIGN KEY(character_id) REFERENCES elysium_character(id)" +
+                            "count INTEGER" +
                     ")"
             ).use { statement ->
                 statement.executeUpdate()

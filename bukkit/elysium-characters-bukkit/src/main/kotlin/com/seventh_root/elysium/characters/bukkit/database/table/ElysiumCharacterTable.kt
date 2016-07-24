@@ -85,10 +85,7 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
                             "mana INTEGER," +
                             "max_mana INTEGER," +
                             "food_level INTEGER," +
-                            "thirst_level INTEGER," +
-                            "FOREIGN KEY(player_id) REFERENCES elysium_player(id)," +
-                            "FOREIGN KEY(gender_id) REFERENCES elysium_gender(id)," +
-                            "FOREIGN KEY(race_id) REFERENCES elysium_race(id)" +
+                            "thirst_level INTEGER" +
                         ")").use { statement ->
                     statement.executeUpdate()
                 }
@@ -103,9 +100,7 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
                         "CREATE TABLE IF NOT EXISTS player_character(" +
                                 "player_id INTEGER," +
                                 "character_id INTEGER," +
-                                "UNIQUE(player_id)," +
-                                "FOREIGN KEY(player_id) REFERENCES elysium_player(id)," +
-                                "FOREIGN KEY(character_id) REFERENCES elysium_character(id)" +
+                                "UNIQUE(player_id)" +
                         ")").use { statement ->
                     statement.executeUpdate()
                 }

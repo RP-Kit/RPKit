@@ -31,6 +31,26 @@ commands:
             /snoop off - Disables snooping
             /snoop check - Checks if you are snooping
         usage: /<command> [on|off|check]
+    chatgroup:
+        description: |
+            Chat group management command
+            /chatgroup create - Creates a chat group
+            /chatgroup disband - Disbands a chat group
+            /chatgroup invite - Invites a player to a chat group
+            /chatgroup join - Joins a chat group
+            /chatgroup leave - Leaves a chat group
+            /chatgroup message - Sends a message to a chat group
+            /chatgroup members - Lists members of a chat group
+        aliases: [cg]
+        usage: /<command> [create|disband|invite|join|leave|message|members]
+    message:
+        description: Message a player or chat group
+        aliases: [msg, pm]
+        usage: /<command> [target] [message]
+    reply:
+        description: Reply to the last private message or chat group message sent to you
+        aliases: [r]
+        usage: /<command> [message]
 permissions:
     elysium.chat.command.chatchannel.create:
         description: Allows creating chat channels
@@ -113,3 +133,33 @@ permissions:
     elysium.chat.command.snoop.check:
         description: Allows checking snoop
         default: op
+    elysium.chat.command.chatgroup:
+        description: Allows using chat group commands
+        default: true
+    elysium.chat.command.chatgroup.create:
+        description: Allows creation of chat groups
+        default: true
+    elysium.chat.command.chatgroup.disband:
+        description: Allows disbanding chat groups
+        default: true
+    elysium.chat.command.chatgroup.invite:
+        description: Allows inviting people to chat groups
+        default: true
+    elysium.chat.command.chatgroup.join:
+        description: Allows joining chat groups
+        default: true
+    elysium.chat.command.chatgroup.leave:
+        description: Allows leaving chat groups
+        default: true
+    elysium.chat.command.chatgroup.members:
+        description: Allows listing members of chat groups
+        default: true
+    elysium.chat.command.chatgroup.message:
+        description: Allows messaging a chat group
+        default: true
+    elysium.chat.command.message:
+        description: Allows private messaging
+        default: true
+    elysium.chat.command.reply:
+        description: Allows replying to private messages
+        default: true

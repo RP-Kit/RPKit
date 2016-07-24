@@ -61,10 +61,8 @@ class ChatChannelSpeakerTable: Table<ChatChannelSpeaker> {
                     "CREATE TABLE IF NOT EXISTS chat_channel_speaker(" +
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
                             "player_id INTEGER," +
-                            "chat_channel_id INTEGER," +
-                            "FOREIGN KEY(player_id) REFERENCES elysium_player(id)," +
-                            "FOREIGN KEY(chat_channel_id) REFERENCES elysium_chat_channel(id)" +
-                            ")").use { statement ->
+                            "chat_channel_id INTEGER" +
+                    ")").use { statement ->
                 statement.executeUpdate()
             }
         }
