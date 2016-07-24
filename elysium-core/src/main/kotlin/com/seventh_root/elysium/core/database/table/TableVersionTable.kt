@@ -44,6 +44,10 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
         }
     }
 
+    override fun applyMigrations() {
+
+    }
+
     override fun insert(entity: TableVersion): Int {
         try {
             var id = 0

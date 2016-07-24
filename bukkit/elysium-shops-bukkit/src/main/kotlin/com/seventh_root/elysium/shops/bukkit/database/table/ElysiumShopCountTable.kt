@@ -63,6 +63,12 @@ class ElysiumShopCountTable: Table<ElysiumShopCount> {
         }
     }
 
+    override fun applyMigrations() {
+        if (database.getTableVersion(this) == null) {
+            database.setTableVersion(this, "0.4.0")
+        }
+    }
+
     override fun insert(entity: ElysiumShopCount): Int {
         var id = 0
         database.createConnection().use { connection ->

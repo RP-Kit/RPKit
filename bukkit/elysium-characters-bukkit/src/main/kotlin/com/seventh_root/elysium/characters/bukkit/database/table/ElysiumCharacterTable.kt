@@ -108,13 +108,12 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.1.0")
-        }
     }
 
     override fun applyMigrations() {
+        if (database.getTableVersion(this) == null) {
+            database.setTableVersion(this, "0.1.2")
+        }
         if (database.getTableVersion(this).equals("0.1.0")) {
             database.setTableVersion(this, "0.1.1")
         }

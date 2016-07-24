@@ -65,6 +65,9 @@ class ElysiumWalletTable: Table<ElysiumWallet> {
                 statement.executeUpdate()
             }
         }
+    }
+
+    override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
             database.setTableVersion(this, "0.2.0")
         }

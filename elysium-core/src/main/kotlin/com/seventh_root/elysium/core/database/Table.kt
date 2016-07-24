@@ -30,9 +30,7 @@ abstract class Table<T: Entity>(val database: Database, val name: String, val ty
 
     abstract fun create()
 
-    open fun applyMigrations() {
-
-    }
+    abstract fun applyMigrations()
 
     abstract fun insert(entity: T): Int
 
