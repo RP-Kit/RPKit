@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.auctions.bukkit
-
-import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
-import com.seventh_root.elysium.core.service.ServiceProvider
+package com.seventh_root.elysium.core.web
 
 
-class ElysiumAuctionsBukkit: ElysiumBukkitPlugin() {
-
-
-    override fun onEnable() {
-        serviceProviders = arrayOf<ServiceProvider>()
-    }
-
-}
+class NavigationLink(val name: String, val url: String)

@@ -25,8 +25,6 @@ import org.bukkit.plugin.ServicePriority
 
 class ElysiumEconomyLibBukkit: ElysiumBukkitPlugin() {
 
-    override lateinit var serviceProviders: Array<ServiceProvider>
-
     override fun onEnable() {
         serviceProviders = arrayOf<ServiceProvider>()
         if (server.pluginManager.getPlugin("Vault") != null) {

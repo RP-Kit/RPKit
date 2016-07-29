@@ -29,7 +29,6 @@ import com.seventh_root.elysium.core.service.ServiceProvider
 class ElysiumBanksBukkit: ElysiumBukkitPlugin() {
 
     private lateinit var bankProvider: ElysiumBankProvider
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()

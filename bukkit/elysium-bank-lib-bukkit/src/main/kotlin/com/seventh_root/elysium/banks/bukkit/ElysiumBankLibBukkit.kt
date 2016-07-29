@@ -25,7 +25,6 @@ import org.bukkit.plugin.ServicePriority
 
 class ElysiumBankLibBukkit: ElysiumBukkitPlugin() {
 
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         serviceProviders = arrayOf<ServiceProvider>()

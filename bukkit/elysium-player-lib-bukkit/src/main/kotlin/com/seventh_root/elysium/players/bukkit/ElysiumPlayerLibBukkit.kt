@@ -21,8 +21,6 @@ import com.seventh_root.elysium.core.service.ServiceProvider
 
 class ElysiumPlayerLibBukkit: ElysiumBukkitPlugin() {
 
-    override lateinit var serviceProviders: Array<ServiceProvider>
-
     override fun onEnable() {
         serviceProviders = arrayOf<ServiceProvider>()
     }

@@ -48,7 +48,6 @@ class ElysiumChatBukkit: ElysiumBukkitPlugin() {
     private lateinit var ircProvider: ElysiumIRCProvider
     private lateinit var prefixProvider: ElysiumPrefixProvider
     private lateinit var snooperProvider: ElysiumSnooperProvider
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()

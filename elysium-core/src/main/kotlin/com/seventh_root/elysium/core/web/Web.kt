@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.auctions.bukkit
+package com.seventh_root.elysium.core.web
 
-import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
-import com.seventh_root.elysium.core.service.ServiceProvider
-
-
-class ElysiumAuctionsBukkit: ElysiumBukkitPlugin() {
+import org.eclipse.jetty.server.Server
 
 
-    override fun onEnable() {
-        serviceProviders = arrayOf<ServiceProvider>()
-    }
-
-}
+class Web(val server: Server, val navigationBar: Array<NavigationLink>)

@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.auctions.bukkit
+package com.seventh_root.elysium.core.web
 
-import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
-import com.seventh_root.elysium.core.service.ServiceProvider
-
-
-class ElysiumAuctionsBukkit: ElysiumBukkitPlugin() {
+import javax.servlet.http.HttpServlet
 
 
-    override fun onEnable() {
-        serviceProviders = arrayOf<ServiceProvider>()
-    }
+abstract class ElysiumServlet: HttpServlet() {
+
+    abstract val url: String
 
 }

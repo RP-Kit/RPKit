@@ -38,7 +38,6 @@ class ElysiumEconomyBukkit: ElysiumBukkitPlugin() {
 
     private lateinit var currencyProvider: ElysiumCurrencyProvider
     private lateinit var economyProvider: ElysiumEconomyProvider
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()
