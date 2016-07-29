@@ -22,7 +22,6 @@ import com.seventh_root.elysium.core.service.ServiceProvider
 
 class ElysiumAuctionLibBukkit: ElysiumBukkitPlugin() {
 
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         serviceProviders = arrayOf<ServiceProvider>()

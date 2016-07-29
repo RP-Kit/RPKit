@@ -18,15 +18,19 @@ package com.seventh_root.elysium.core
 
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceManager
-
+import com.seventh_root.elysium.core.web.Web
 import java.util.logging.Logger
 
-class ElysiumCore(val logger: Logger, val database: Database) {
+class ElysiumCore(val logger: Logger, val database: Database, val web: Web) {
 
     val serviceManager: ServiceManager
 
     init {
         serviceManager = ServiceManager()
+        Thread {
+            web.server.start()
+            web.server.join()
+        }.start()
     }
 
 }

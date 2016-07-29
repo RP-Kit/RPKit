@@ -2,3 +2,5 @@ database:
     url: jdbc:mysql://localhost/elysium
     username: elysium
     password: secret
+web-server:
+    port: 8089

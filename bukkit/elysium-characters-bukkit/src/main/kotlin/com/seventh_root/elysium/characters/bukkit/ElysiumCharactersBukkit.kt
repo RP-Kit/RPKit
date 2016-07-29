@@ -44,7 +44,6 @@ class ElysiumCharactersBukkit: ElysiumBukkitPlugin() {
     private lateinit var genderProvider: ElysiumGenderProvider
     private lateinit var raceProvider: ElysiumRaceProvider
     private lateinit var characterCardFieldProvider: ElysiumCharacterCardFieldProvider
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()

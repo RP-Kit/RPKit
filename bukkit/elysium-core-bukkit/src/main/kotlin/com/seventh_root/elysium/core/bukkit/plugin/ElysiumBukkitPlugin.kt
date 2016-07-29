@@ -19,9 +19,9 @@ package com.seventh_root.elysium.core.bukkit.plugin
 import com.seventh_root.elysium.core.ElysiumCore
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceProvider
+import com.seventh_root.elysium.core.web.ElysiumServlet
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
-
 import java.sql.SQLException
 
 abstract class ElysiumBukkitPlugin: JavaPlugin() {
@@ -50,6 +50,7 @@ abstract class ElysiumBukkitPlugin: JavaPlugin() {
     open fun createTables(database: Database) {
     }
 
-    abstract var serviceProviders: Array<ServiceProvider>
+    lateinit var serviceProviders: Array<ServiceProvider>
+    lateinit var servlets: Array<ElysiumServlet>
 
 }

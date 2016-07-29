@@ -30,6 +30,9 @@ subprojects {
         maven {
             url "http://nexus.theyeticave.net/content/repositories/pub_releases"
         }
+        maven {
+            url "https://jitpack.io"
+        }
     }
 }
 
@@ -52,6 +55,8 @@ project(":elysium-core") {
     def kotlinVersion = "1.0.2-1"
     def slf4jVersion = "1.7.20"
     def pircBotXVersion = "2.1"
+    def jettyVersion = "9.4.0.M0"
+    def velocityVersion = "1.7"
 
     dependencies {
         compile group: "mysql", name: "mysql-connector-java", version: mysqlConnectorVersion
@@ -64,6 +69,10 @@ project(":elysium-core") {
         compile group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: kotlinVersion
         compile group: "org.slf4j", name: "slf4j-jdk14", version: slf4jVersion
         compile group: "org.pircbotx", name: "pircbotx", version: pircBotXVersion
+        compile group: "org.eclipse.jetty", name: "jetty-server", version: jettyVersion
+        compile group: "org.eclipse.jetty", name: "jetty-servlet", version: jettyVersion
+        compile group: "org.eclipse.jetty", name: "jetty-webapp", version: jettyVersion
+        compile group: "org.apache.velocity", name: "velocity", version: velocityVersion
     }
 
     apply plugin: "com.github.johnrengelman.shadow"
