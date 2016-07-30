@@ -19,10 +19,15 @@ package com.seventh_root.elysium.players.bukkit
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceProvider
+import com.seventh_root.elysium.core.web.NavigationLink
 import com.seventh_root.elysium.players.bukkit.command.account.AccountCommand
 import com.seventh_root.elysium.players.bukkit.database.table.ElysiumPlayerTable
+import com.seventh_root.elysium.players.bukkit.listener.PlayerJoinListener
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProviderImpl
+import com.seventh_root.elysium.players.bukkit.servlet.PlayerServlet
+import com.seventh_root.elysium.players.bukkit.servlet.PlayersServlet
+import com.seventh_root.elysium.players.bukkit.servlet.api.v0_4.PlayerAPIServlet
 import java.sql.SQLException
 
 class ElysiumPlayersBukkit: ElysiumBukkitPlugin() {
@@ -32,10 +37,19 @@ class ElysiumPlayersBukkit: ElysiumBukkitPlugin() {
     override fun onEnable() {
         playerProvider = ElysiumPlayerProviderImpl(this)
         serviceProviders = arrayOf<ServiceProvider>(playerProvider)
+        servlets = arrayOf(PlayersServlet(this), PlayerServlet(this), PlayerAPIServlet(this))
+    }
+
+    override fun onPostEnable() {
+        core.web.navigationBar.add(NavigationLink("Players", "/players/"))
     }
 
     override fun registerCommands() {
         getCommand("account").executor = AccountCommand(this)
+    }
+
+    override fun registerListeners() {
+        registerListeners(PlayerJoinListener(this))
     }
 
     @Throws(SQLException::class)

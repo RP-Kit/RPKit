@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.players.bukkit.player
+package com.seventh_root.elysium.core.web
 
-import org.bukkit.OfflinePlayer
 
-class ElysiumPlayerImpl(
-        override var id: Int = 0,
-        override var name: String,
-        override var bukkitPlayer: OfflinePlayer? = null,
-        override var ircNick: String? = null,
-        override var lastKnownIP: String? = null
-): ElysiumPlayer
+class Alert(
+        val type: Alert.Type,
+        val message: String
+) {
+    enum class Type(val cssClass: String) {
+        SUCCESS("alert-success"),
+        INFO("alert-info"),
+        WARNING("alert-warning"),
+        DANGER("alert-danger");
+        override fun toString(): String {
+            return cssClass
+        }
+    }
+}

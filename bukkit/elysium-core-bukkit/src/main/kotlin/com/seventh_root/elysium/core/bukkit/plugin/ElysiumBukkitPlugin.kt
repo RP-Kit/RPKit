@@ -50,7 +50,7 @@ abstract class ElysiumBukkitPlugin: JavaPlugin() {
     open fun createTables(database: Database) {
     }
 
-    lateinit var serviceProviders: Array<ServiceProvider>
-    lateinit var servlets: Array<ElysiumServlet>
+    var serviceProviders = arrayOf<ServiceProvider>()
+    var servlets = arrayOf<ElysiumServlet>()
 
 }

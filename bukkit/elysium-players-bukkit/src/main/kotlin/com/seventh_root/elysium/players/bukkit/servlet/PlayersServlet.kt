@@ -14,35 +14,39 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.core.bukkit.servlet
+package com.seventh_root.elysium.players.bukkit.servlet
 
-import com.seventh_root.elysium.core.bukkit.ElysiumCoreBukkit
 import com.seventh_root.elysium.core.web.ElysiumServlet
+import com.seventh_root.elysium.players.bukkit.ElysiumPlayersBukkit
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.Velocity
+import java.net.InetAddress
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletResponse.SC_OK
 
+class PlayersServlet(private val plugin: ElysiumPlayersBukkit): ElysiumServlet() {
 
-class IndexServlet(private val plugin: ElysiumCoreBukkit): ElysiumServlet() {
-
-    override val url = "/"
+    override val url = "/players/"
 
     override fun doGet(req: HttpServletRequest, resp: HttpServletResponse) {
         resp.contentType = "text/html"
         resp.status = SC_OK
         val templateBuilder = StringBuilder()
-        val scanner = Scanner(javaClass.getResourceAsStream("/web/index.html"))
+        val scanner = Scanner(javaClass.getResourceAsStream("/web/players.html"))
         while (scanner.hasNextLine()) {
             templateBuilder.append(scanner.nextLine()).append('\n')
         }
         scanner.close()
         val velocityContext = VelocityContext()
+        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
         velocityContext.put("server", plugin.server.serverName)
         velocityContext.put("navigationBar", plugin.core.web.navigationBar)
-        Velocity.evaluate(velocityContext, resp.writer, "/web/index.html", templateBuilder.toString())
+        velocityContext.put("player", playerProvider.getPlayer(InetAddress.getByName(req.remoteAddr)))
+        velocityContext.put("onlinePlayers", plugin.server.onlinePlayers.map { player -> playerProvider.getPlayer(player) }.toTypedArray())
+        Velocity.evaluate(velocityContext, resp.writer, "/web/players.html", templateBuilder.toString())
     }
 
 }

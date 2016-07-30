@@ -19,4 +19,4 @@ package com.seventh_root.elysium.core.web
 import org.eclipse.jetty.server.Server
 
 
-class Web(val server: Server, val navigationBar: Array<NavigationLink>)
+class Web(val server: Server, val navigationBar: MutableList<NavigationLink>)

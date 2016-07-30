@@ -35,9 +35,19 @@
                     </div>
                 </div>
             </nav>
+            #foreach($alert in $alerts)
+            <div class="alert $alert.Type alert-dismissable" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                $alert.Message
+            </div>
+            #end
             <div class="jumbotron">
-                <h1>Home</h1>
-                <p>Welcome to Elysium.</p>
+                <h1><img src="https://www.minecraftskinstealer.com/face.php?u=$player.BukkitPlayer.Name" alt="$player.Name's skin" class="img-rounded" /> $player.Name</h1>
+                <br />
+                <div class="container">
+                    <div class="row"><div class="col-sm-2"><strong>Minecraft:</strong></div><div class="col-sm-10">$!player.BukkitPlayer.Name</div></div>
+                    <div class="row"><div class="col-sm-2"><strong>IRC:</strong></div><div class="col-sm-10">$!player.IrcNick</div></div>
+                </div>
             </div>
         </div>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>

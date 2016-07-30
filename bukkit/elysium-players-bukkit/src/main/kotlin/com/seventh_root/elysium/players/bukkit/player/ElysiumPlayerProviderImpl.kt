@@ -21,11 +21,16 @@ import com.seventh_root.elysium.players.bukkit.ElysiumPlayersBukkit
 import com.seventh_root.elysium.players.bukkit.database.table.ElysiumPlayerTable
 import org.bukkit.OfflinePlayer
 import org.pircbotx.User
+import java.net.InetAddress
 
 class ElysiumPlayerProviderImpl(private val plugin: ElysiumPlayersBukkit): ElysiumPlayerProvider {
 
     override fun getPlayer(id: Int): ElysiumPlayer? {
         return plugin.core.database.getTable(ElysiumPlayerTable::class)[id]
+    }
+
+    override fun getPlayer(name: String): ElysiumPlayer? {
+        return plugin.core.database.getTable(ElysiumPlayerTable::class).get(name)
     }
 
     override fun getPlayer(bukkitPlayer: OfflinePlayer): ElysiumPlayer {
@@ -34,9 +39,13 @@ class ElysiumPlayerProviderImpl(private val plugin: ElysiumPlayersBukkit): Elysi
         if (player == null) {
             player = ElysiumPlayerImpl(
                     name = bukkitPlayer.name,
-                    bukkitPlayer = bukkitPlayer
+                    bukkitPlayer = bukkitPlayer,
+                    lastKnownIP = bukkitPlayer.player?.address?.address?.hostAddress
             )
             addPlayer(player)
+        } else {
+            player.lastKnownIP = bukkitPlayer.player?.address?.address?.hostAddress
+            updatePlayer(player)
         }
         return player
     }
@@ -52,6 +61,10 @@ class ElysiumPlayerProviderImpl(private val plugin: ElysiumPlayersBukkit): Elysi
             addPlayer(player)
         }
         return player
+    }
+
+    override fun getPlayer(lastKnownIP: InetAddress): ElysiumPlayer? {
+        return plugin.core.database.getTable(ElysiumPlayerTable::class).get(lastKnownIP)
     }
 
     override fun addPlayer(player: ElysiumPlayer) {
