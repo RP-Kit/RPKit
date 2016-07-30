@@ -42,7 +42,7 @@ class ElysiumCoreBukkit: ElysiumBukkitPlugin() {
         core = ElysiumCore(
                 logger,
                 Database(config.getString("database.url"), config.getString("database.username"), config.getString("database.password")),
-                Web(webServer, arrayOf(NavigationLink("Home", "/")))
+                Web(webServer, mutableListOf(NavigationLink("Home", "/")))
         )
         try {
             createTables(core.database)
@@ -81,6 +81,7 @@ class ElysiumCoreBukkit: ElysiumBukkitPlugin() {
             exception.printStackTrace()
         }
         registerServiceProviders(elysiumBukkitPlugin)
+        registerServlets(elysiumBukkitPlugin)
         elysiumBukkitPlugin.registerCommands()
         elysiumBukkitPlugin.registerListeners()
         elysiumBukkitPlugin.onPostEnable()

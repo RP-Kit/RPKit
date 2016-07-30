@@ -19,12 +19,15 @@ package com.seventh_root.elysium.players.bukkit.player
 import com.seventh_root.elysium.core.service.ServiceProvider
 import org.bukkit.OfflinePlayer
 import org.pircbotx.User
+import java.net.InetAddress
 
 
 interface ElysiumPlayerProvider: ServiceProvider {
     fun getPlayer(id: Int): ElysiumPlayer?
+    fun getPlayer(name: String): ElysiumPlayer?
     fun getPlayer(bukkitPlayer: OfflinePlayer): ElysiumPlayer
     fun getPlayer(ircUser: User): ElysiumPlayer
+    fun getPlayer(lastKnownIP: InetAddress): ElysiumPlayer?
     fun addPlayer(player: ElysiumPlayer)
     fun updatePlayer(player: ElysiumPlayer)
     fun removePlayer(player: ElysiumPlayer)

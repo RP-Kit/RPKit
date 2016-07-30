@@ -25,5 +25,6 @@ interface ElysiumPlayer: Entity {
     var name: String
     var bukkitPlayer: OfflinePlayer?
     var ircNick: String?
+    var lastKnownIP: String?
 
 }
