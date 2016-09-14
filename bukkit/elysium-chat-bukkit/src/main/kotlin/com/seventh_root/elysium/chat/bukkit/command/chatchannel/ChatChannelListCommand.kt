@@ -18,7 +18,7 @@ package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
-import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
+import com.seventh_root.elysium.core.bukkit.util.closestChatColor
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -31,7 +31,7 @@ class ChatChannelListCommand(private val plugin: ElysiumChatBukkit): CommandExec
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-list-title")))
             for (channel in plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class).chatChannels) {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-list-item"))
-                        .replace("\$color", ChatColorUtils.closestChatColorToColor(channel.color).toString())
+                        .replace("\$color", channel.color.closestChatColor().toString())
                         .replace("\$name", channel.name))
             }
         } else {

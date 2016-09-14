@@ -18,7 +18,7 @@ package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
-import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
+import com.seventh_root.elysium.core.bukkit.util.closestChatColor
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
@@ -117,7 +117,7 @@ class ChatChannelJoinCommand(private val plugin: ElysiumChatBukkit): CommandExec
             val channelListBuilder = StringBuilder()
             for (channel in chatChannelProvider.chatChannels) {
                 channelListBuilder.append(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-list-item")
-                        .replace("\$color", ChatColorUtils.closestChatColorToColor(channel.color).toString())
+                        .replace("\$color", channel.color.closestChatColor().toString())
                         .replace("\$name", channel.name))).append("\n")
             }
             return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-join-prompt")) + "\n" + channelListBuilder.toString()
