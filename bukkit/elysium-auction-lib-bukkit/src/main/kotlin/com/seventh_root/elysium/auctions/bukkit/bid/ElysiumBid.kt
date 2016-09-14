@@ -14,32 +14,17 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.auctions.bukkit.auction
+package com.seventh_root.elysium.auctions.bukkit.bid
 
-import com.seventh_root.elysium.auctions.bukkit.bid.ElysiumBid
+import com.seventh_root.elysium.auctions.bukkit.auction.ElysiumAuction
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.core.database.Entity
-import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
-import org.bukkit.Location
-import org.bukkit.inventory.ItemStack
 
 
-interface ElysiumAuction: Entity {
+interface ElysiumBid: Entity {
 
-    val item: ItemStack
-    val currency: ElysiumCurrency
-    val location: Location?
+    val auction: ElysiumAuction
     val character: ElysiumCharacter
-    val bids: List<ElysiumBid>
-    val duration: Long
-    val endTime: Long
-    val startPrice: Int
-    val buyOutPrice: Int?
-    val noSellPrice: Int?
-    val minimumBidIncrement: Int
-    val isBiddingOpen: Boolean
-    fun addBid(bid: ElysiumBid)
-    fun openBidding()
-    fun closeBidding()
+    val amount: Int
 
 }

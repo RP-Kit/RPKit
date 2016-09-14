@@ -21,25 +21,23 @@ import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterImpl
 import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGenderProvider
 import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProvider
+import com.seventh_root.elysium.core.bukkit.util.itemStackArrayFromByteArray
+import com.seventh_root.elysium.core.bukkit.util.itemStackFromByteArray
+import com.seventh_root.elysium.core.bukkit.util.toByteArray
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.inventory.ItemStack
-import org.bukkit.util.io.BukkitObjectInputStream
-import org.bukkit.util.io.BukkitObjectOutputStream
 import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.IOException
 import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
+import java.sql.Types.BLOB
 import java.sql.Types.INTEGER
 
 class ElysiumCharacterTable: Table<ElysiumCharacter> {
@@ -157,11 +155,31 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
                     statement.setDouble(11, entity.location.z)
                     statement.setFloat(12, entity.location.yaw)
                     statement.setFloat(13, entity.location.pitch)
-                    statement.setBytes(14, serializeInventory(entity.inventoryContents))
-                    statement.setBytes(15, serializeItemStack(entity.helmet))
-                    statement.setBytes(16, serializeItemStack(entity.chestplate))
-                    statement.setBytes(17, serializeItemStack(entity.leggings))
-                    statement.setBytes(18, serializeItemStack(entity.boots))
+                    statement.setBytes(14, entity.inventoryContents.toByteArray())
+                    val helmet = entity.helmet
+                    if (helmet != null) {
+                        statement.setBytes(15, helmet.toByteArray())
+                    } else {
+                        statement.setNull(15, BLOB)
+                    }
+                    val chestplate = entity.chestplate
+                    if (chestplate != null) {
+                        statement.setBytes(16, chestplate.toByteArray())
+                    } else {
+                        statement.setNull(16, BLOB)
+                    }
+                    val leggings = entity.leggings
+                    if (leggings != null) {
+                        statement.setBytes(17, leggings.toByteArray())
+                    } else {
+                        statement.setNull(17, BLOB)
+                    }
+                    val boots = entity.boots
+                    if (boots != null) {
+                        statement.setBytes(18, boots.toByteArray())
+                    } else {
+                        statement.setNull(18, BLOB)
+                    }
                     statement.setDouble(19, entity.health)
                     statement.setDouble(20, entity.maxHealth)
                     statement.setInt(21, entity.mana)
@@ -182,57 +200,6 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
             exception.printStackTrace()
         }
         return 0
-    }
-
-    private fun serializeItemStack(itemStack: ItemStack?): ByteArray? {
-        try {
-            ByteArrayOutputStream().use { byteArrayOutputStream ->
-                BukkitObjectOutputStream(byteArrayOutputStream).use { bukkitObjectOutputStream ->
-                    bukkitObjectOutputStream.writeObject(itemStack)
-                    return byteArrayOutputStream.toByteArray()
-                }
-            }
-        } catch (exception: IOException) {
-            exception.printStackTrace()
-        }
-        return null
-    }
-
-    private fun deserializeItemStack(bytes: ByteArray): ItemStack? {
-        try {
-            ByteArrayInputStream(bytes).use { byteArrayInputStream -> BukkitObjectInputStream(byteArrayInputStream).use { bukkitObjectInputStream -> return bukkitObjectInputStream.readObject() as ItemStack? } }
-        } catch (exception: Exception) {
-            exception.printStackTrace()
-        }
-
-        return null
-    }
-
-    private fun serializeInventory(inventoryContents: Array<ItemStack>): ByteArray? {
-        try {
-            ByteArrayOutputStream().use { byteArrayOutputStream ->
-                BukkitObjectOutputStream(byteArrayOutputStream).use { bukkitObjectOutputStream ->
-                    bukkitObjectOutputStream.writeObject(inventoryContents)
-                    return byteArrayOutputStream.toByteArray()
-                }
-            }
-        } catch (exception: IOException) {
-            exception.printStackTrace()
-        }
-
-        return null
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun deserializeInventory(bytes: ByteArray): Array<ItemStack> {
-        try {
-            ByteArrayInputStream(bytes)
-                    .use { byteArrayInputStream -> BukkitObjectInputStream(byteArrayInputStream)
-                            .use { bukkitObjectInputStream -> return bukkitObjectInputStream.readObject() as Array<ItemStack> } }
-        } catch (exception: Exception) {
-            exception.printStackTrace()
-        }
-        return emptyArray()
     }
 
     override fun update(entity: ElysiumCharacter) {
@@ -268,11 +235,31 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
                     statement.setDouble(11, entity.location.z)
                     statement.setFloat(12, entity.location.yaw)
                     statement.setFloat(13, entity.location.pitch)
-                    statement.setBytes(14, serializeInventory(entity.inventoryContents))
-                    statement.setBytes(15, serializeItemStack(entity.helmet))
-                    statement.setBytes(16, serializeItemStack(entity.chestplate))
-                    statement.setBytes(17, serializeItemStack(entity.leggings))
-                    statement.setBytes(18, serializeItemStack(entity.boots))
+                    statement.setBytes(14, entity.inventoryContents.toByteArray())
+                    val helmet = entity.helmet
+                    if (helmet != null) {
+                        statement.setBytes(15, helmet.toByteArray())
+                    } else {
+                        statement.setNull(15, BLOB)
+                    }
+                    val chestplate = entity.chestplate
+                    if (chestplate != null) {
+                        statement.setBytes(16, chestplate.toByteArray())
+                    } else {
+                        statement.setNull(16, BLOB)
+                    }
+                    val leggings = entity.leggings
+                    if (leggings != null) {
+                        statement.setBytes(17, leggings.toByteArray())
+                    } else {
+                        statement.setNull(17, BLOB)
+                    }
+                    val boots = entity.boots
+                    if (boots != null) {
+                        statement.setBytes(18, boots.toByteArray())
+                    } else {
+                        statement.setNull(18, BLOB)
+                    }
                     statement.setDouble(19, entity.health)
                     statement.setDouble(20, entity.maxHealth)
                     statement.setInt(21, entity.mana)
@@ -305,6 +292,10 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
                         statement.setInt(1, id)
                         val resultSet = statement.executeQuery()
                         if (resultSet.next()) {
+                            val helmetBytes = resultSet.getBytes("helmet")
+                            val chestplateBytes = resultSet.getBytes("chestplate")
+                            val leggingsBytes = resultSet.getBytes("leggings")
+                            val bootsBytes = resultSet.getBytes("boots")
                             character = ElysiumCharacterImpl(
                                     plugin = plugin,
                                     id = resultSet.getInt("id"),
@@ -323,11 +314,11 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
                                             resultSet.getFloat("yaw"),
                                             resultSet.getFloat("pitch")
                                     ),
-                                    inventoryContents = deserializeInventory(resultSet.getBytes("inventory_contents")),
-                                    helmet = deserializeItemStack(resultSet.getBytes("helmet")),
-                                    chestplate = deserializeItemStack(resultSet.getBytes("chestplate")),
-                                    leggings = deserializeItemStack(resultSet.getBytes("leggings")),
-                                    boots = deserializeItemStack(resultSet.getBytes("boots")),
+                                    inventoryContents = itemStackArrayFromByteArray(resultSet.getBytes("inventory_contents")),
+                                    helmet = if (helmetBytes != null) itemStackFromByteArray(helmetBytes) else null,
+                                    chestplate = if (chestplateBytes != null) itemStackFromByteArray(chestplateBytes) else null,
+                                    leggings = if (leggingsBytes != null) itemStackFromByteArray(resultSet.getBytes("leggings")) else null,
+                                    boots = if (bootsBytes != null) itemStackFromByteArray(resultSet.getBytes("boots")) else null,
                                     health = resultSet.getDouble("health"),
                                     maxHealth = resultSet.getDouble("max_health"),
                                     mana = resultSet.getInt("mana"),
