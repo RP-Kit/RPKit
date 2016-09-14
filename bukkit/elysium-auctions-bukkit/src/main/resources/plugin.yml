@@ -3,3 +3,23 @@ author: alyphen
 version: @version@
 main: com.seventh_root.elysium.auctions.bukkit.ElysiumAuctionsBukkit
 depend: [elysium-core-bukkit, elysium-character-lib-bukkit, elysium-economy-lib-bukkit, elysium-auction-lib-bukkit]
+commands:
+    auction:
+        description: Auction management command
+        usage: /<command>
+    bid:
+        description: Bidding command
+        usage: /<command> [player] [amount]
+permissions:
+    elysium.auctions.command.auction.create:
+        description: Allows the creation of auctions
+        default: true
+    elysium.auctions.command.bid:
+        description: Allows bidding on auctions
+        default: true
+    elysium.auctions.sign.auction:
+        description: Allows creating auction signs
+        default: true
+    elysium.auctions.sign.auction.bid:
+        description: Allows bidding via auction signs
+        default: true
