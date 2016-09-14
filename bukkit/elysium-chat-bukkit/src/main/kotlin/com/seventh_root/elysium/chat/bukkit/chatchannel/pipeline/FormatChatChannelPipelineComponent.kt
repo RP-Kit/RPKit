@@ -23,7 +23,7 @@ import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
 import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
 import com.seventh_root.elysium.chat.bukkit.exception.ChatChannelMessageFormattingFailureException
 import com.seventh_root.elysium.chat.bukkit.prefix.ElysiumPrefixProvider
-import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
+import com.seventh_root.elysium.core.bukkit.util.closestChatColor
 import org.bukkit.ChatColor
 
 class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, var formatString: String?): ChatChannelPipelineComponent {
@@ -73,7 +73,7 @@ class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, 
             formattedMessage = formattedMessage.replace("\$channel", chatChannel.name)
         }
         if (formattedMessage.contains("\$color") || formattedMessage.contains("\$colour")) {
-            val chatColorString = ChatColorUtils.closestChatColorToColor(chatChannel.color).toString()
+            val chatColorString = chatChannel.color.closestChatColor().toString()
             formattedMessage = formattedMessage.replace("\$color", chatColorString).replace("\$colour", chatColorString)
         }
         return formattedMessage
@@ -106,7 +106,7 @@ class FormatChatChannelPipelineComponent(private val plugin: ElysiumChatBukkit, 
             formattedMessage = formattedMessage.replace("\$channel", chatChannel.name)
         }
         if (formattedMessage.contains("\$color") || formattedMessage.contains("\$colour")) {
-            val chatColorString = ChatColorUtils.closestChatColorToColor(chatChannel.color).toString()
+            val chatColorString = chatChannel.color.closestChatColor().toString()
             formattedMessage = formattedMessage.replace("\$color", chatColorString).replace("\$colour", chatColorString)
         }
         return formattedMessage

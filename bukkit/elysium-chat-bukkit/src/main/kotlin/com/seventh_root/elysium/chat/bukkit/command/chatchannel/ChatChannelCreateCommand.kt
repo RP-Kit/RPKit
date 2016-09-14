@@ -19,7 +19,7 @@ package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelImpl
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
-import com.seventh_root.elysium.core.bukkit.util.ChatColorUtils
+import com.seventh_root.elysium.core.bukkit.util.toColor
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -107,7 +107,7 @@ class ChatChannelCreateCommand(private val plugin: ElysiumChatBukkit): CommandEx
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("color", ChatColorUtils.colorFromChatColor(ChatColor.valueOf(input.toUpperCase().replace(' ', '_'))))
+            context.setSessionData("color", ChatColor.valueOf(input.toUpperCase().replace(' ', '_')).toColor())
             return ChatChannelColorSetPrompt()
         }
 
