@@ -152,6 +152,7 @@ messages:
     no-channel: '&cFailed to send message due to missing channel.'
     command-snoop: '&2[command] $sender-player: $command'
 irc:
+    enabled: false
     name: 'elysium'
     real-name: 'elysium'
     login: 'elysium'

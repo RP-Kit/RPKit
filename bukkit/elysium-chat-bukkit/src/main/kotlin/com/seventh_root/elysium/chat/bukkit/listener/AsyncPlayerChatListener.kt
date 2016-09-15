@@ -80,9 +80,11 @@ class AsyncPlayerChatListener(private val plugin: ElysiumChatBukkit): Listener {
             snoopers.removeAll(channel.listeners)
             val processedMessage = channel.postProcess(message, ChatMessagePostProcessContextImpl(channel, player))
             snoopers.forEach { snooper -> snooper.bukkitPlayer?.player?.sendMessage(processedMessage) }
-            if (channel.isIRCEnabled) {
-                val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
-                ircProvider.ircBot.sendIRC().message(channel.ircChannel, ChatColor.stripColor(processedMessage))
+            if (plugin.config.getBoolean("irc.enabled")) {
+                if (channel.isIRCEnabled) {
+                    val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
+                    ircProvider.ircBot.sendIRC().message(channel.ircChannel, ChatColor.stripColor(processedMessage))
+                }
             }
         } else {
             event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-chat-channel")))
