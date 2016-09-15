@@ -38,7 +38,6 @@ import com.seventh_root.elysium.chat.bukkit.snooper.ElysiumSnooperProvider
 import com.seventh_root.elysium.chat.bukkit.snooper.ElysiumSnooperProviderImpl
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
-import com.seventh_root.elysium.core.service.ServiceProvider
 import java.sql.SQLException
 
 class ElysiumChatBukkit: ElysiumBukkitPlugin() {
@@ -53,20 +52,31 @@ class ElysiumChatBukkit: ElysiumBukkitPlugin() {
         saveDefaultConfig()
         chatChannelProvider = ElysiumChatChannelProviderImpl(this)
         chatGroupProvider = ElysiumChatGroupProviderImpl(this)
-        ircProvider = ElysiumIRCProviderImpl(this)
         prefixProvider = ElysiumPrefixProviderImpl(this)
         snooperProvider = ElysiumSnooperProviderImpl(this)
-        serviceProviders = arrayOf(
-                chatChannelProvider,
-                chatGroupProvider,
-                ircProvider,
-                prefixProvider,
-                snooperProvider
-        )
+        if (config.getBoolean("irc.enabled")) {
+            ircProvider = ElysiumIRCProviderImpl(this)
+            serviceProviders = arrayOf(
+                    chatChannelProvider,
+                    chatGroupProvider,
+                    ircProvider,
+                    prefixProvider,
+                    snooperProvider
+            )
+        } else {
+            serviceProviders = arrayOf(
+                    chatChannelProvider,
+                    chatGroupProvider,
+                    prefixProvider,
+                    snooperProvider
+            )
+        }
     }
 
     override fun onDisable() {
-        ircProvider.ircBot.sendIRC().quitServer(config.getString("messages.irc-quit"))
+        if (config.getBoolean("irc.enabled")) {
+            ircProvider.ircBot.sendIRC().quitServer(config.getString("messages.irc-quit"))
+        }
     }
 
     override fun registerCommands() {

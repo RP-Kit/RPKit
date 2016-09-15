@@ -252,7 +252,7 @@ class ElysiumChatChannelTable: Table<ElysiumChatChannel> {
     override fun delete(entity: ElysiumChatChannel) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "DELETE FROM chat_channel_speaker WHERE chat_channel_id = ?").use { speakersStatement ->
+                    "DELETE FROM elysium_chat_channel WHERE id = ?").use { speakersStatement ->
                 speakersStatement.setInt(1, entity.id)
                 speakersStatement.executeUpdate()
                 cache.remove(entity.id)
