@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.chat.bukkit.command.chatchannel
+package com.seventh_root.elysium.chat.bukkit.command.unmute
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
@@ -26,7 +26,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class ChatChannelCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
+class UnmuteCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender is Player) {
@@ -36,19 +36,19 @@ class ChatChannelCommand(private val plugin: ElysiumChatBukkit): CommandExecutor
                 val player = playerProvider.getPlayer(sender)
                 val chatChannel = chatChannelProvider.getChatChannel(args[0])
                 if (chatChannel != null) {
-                    if (sender.hasPermission("elysium.chat.command.chatchannel.${chatChannel.name}")) {
-                        chatChannel.addSpeaker(player)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-valid"))
+                    if (sender.hasPermission("elysium.chat.command.unmute.${chatChannel.name}")) {
+                        chatChannel.addListener(player)
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.unmute-valid"))
                                 .replace("\$channel", chatChannel.name))
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel"))
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-unmute"))
                                 .replace("\$channel", chatChannel.name))
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-invalid-chatchannel")))
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.unmute-invalid-chatchannel")))
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-usage")))
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.unmute-usage")))
             }
         } else {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))

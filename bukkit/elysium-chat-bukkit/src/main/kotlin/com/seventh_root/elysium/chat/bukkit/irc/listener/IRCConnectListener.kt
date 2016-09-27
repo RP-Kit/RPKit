@@ -18,6 +18,7 @@ package com.seventh_root.elysium.chat.bukkit.irc.listener
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.undirected.IRCComponent
 import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.ConnectEvent
@@ -29,8 +30,12 @@ class IRCConnectListener(private val plugin: ElysiumChatBukkit): ListenerAdapter
         val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
         val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
         for (channel in chatChannelProvider.chatChannels) {
-            if (channel.isIRCEnabled) {
-                ircProvider.ircBot.sendIRC().joinChannel(channel.ircChannel)
+            val ircChannel = channel.undirectedPipeline
+                    .map { component -> component as? IRCComponent }
+                    .filterNotNull()
+                    .firstOrNull()?.ircChannel
+            if (ircChannel != null) {
+                ircProvider.ircBot.sendIRC().joinChannel(ircChannel)
             }
         }
     }

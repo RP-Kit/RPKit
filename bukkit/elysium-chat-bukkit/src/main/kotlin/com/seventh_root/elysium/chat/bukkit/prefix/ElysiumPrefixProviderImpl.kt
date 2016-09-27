@@ -17,34 +17,40 @@
 package com.seventh_root.elysium.chat.bukkit.prefix
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumPrefixTable
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
+import org.bukkit.ChatColor
 
 
 class ElysiumPrefixProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumPrefixProvider {
 
-    override val prefixes: List<ElysiumPrefix>
-        get() = plugin.core.database.getTable(ElysiumPrefixTable::class).getAll()
+    override val prefixes: List<ElysiumPrefix> = plugin.config.getConfigurationSection("prefixes")
+            .getKeys(false)
+            .mapIndexed { id, name ->
+                    ElysiumPrefixImpl(id, name, ChatColor.translateAlternateColorCodes('&', plugin.config.getString("prefixes.$name")))
+            }
 
     override fun addPrefix(prefix: ElysiumPrefix) {
-        plugin.core.database.getTable(ElysiumPrefixTable::class).insert(prefix)
+        plugin.config.set("prefixes.${prefix.name}", prefix.prefix)
+        plugin.saveConfig()
     }
 
     override fun updatePrefix(prefix: ElysiumPrefix) {
-        plugin.core.database.getTable(ElysiumPrefixTable::class).update(prefix)
+        plugin.config.set("prefixes.${prefix.name}", prefix.prefix)
+        plugin.saveConfig()
     }
 
     override fun removePrefix(prefix: ElysiumPrefix) {
-        plugin.core.database.getTable(ElysiumPrefixTable::class).delete(prefix)
+        plugin.config.set("prefixes.${prefix.name}", null)
+        plugin.saveConfig()
     }
 
     override fun getPrefix(name: String): ElysiumPrefix? {
-        return plugin.core.database.getTable(ElysiumPrefixTable::class).get(name)
+        return prefixes.filter { prefix -> prefix.name == name }.firstOrNull()
     }
 
     override fun getPrefix(player: ElysiumPlayer): String {
         val prefixBuilder = StringBuilder()
-        for (prefix in plugin.core.database.getTable(ElysiumPrefixTable::class).getAll()) {
+        for (prefix in prefixes) {
             if (player.bukkitPlayer?.isOnline?:false) {
                 if (player.bukkitPlayer?.player?.hasPermission("elysium.chat.prefix.${prefix.name}")?:false) {
                     prefixBuilder.append(prefix.prefix).append(' ')

@@ -16,97 +16,88 @@
 
 package com.seventh_root.elysium.chat.bukkit
 
-import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProviderImpl
-import com.seventh_root.elysium.chat.bukkit.chatgroup.ElysiumChatGroupProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.directed.*
+import com.seventh_root.elysium.chat.bukkit.chatchannel.undirected.IRCComponent
+import com.seventh_root.elysium.chat.bukkit.chatchannel.undirected.LogComponent
+import com.seventh_root.elysium.chat.bukkit.chatchannel.undirected.UndirectedFormatComponent
 import com.seventh_root.elysium.chat.bukkit.chatgroup.ElysiumChatGroupProviderImpl
 import com.seventh_root.elysium.chat.bukkit.command.chatchannel.ChatChannelCommand
-import com.seventh_root.elysium.chat.bukkit.command.chatgroup.ChatGroupCommand
-import com.seventh_root.elysium.chat.bukkit.command.message.MessageCommand
-import com.seventh_root.elysium.chat.bukkit.command.prefix.PrefixCommand
-import com.seventh_root.elysium.chat.bukkit.command.reply.ReplyCommand
-import com.seventh_root.elysium.chat.bukkit.command.snoop.SnoopCommand
-import com.seventh_root.elysium.chat.bukkit.database.table.*
+import com.seventh_root.elysium.chat.bukkit.command.listchatchannels.ListChatChannelsCommand
+import com.seventh_root.elysium.chat.bukkit.command.mute.MuteCommand
+import com.seventh_root.elysium.chat.bukkit.command.unmute.UnmuteCommand
+import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelMuteTable
+import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelSpeakerTable
 import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProviderImpl
 import com.seventh_root.elysium.chat.bukkit.listener.AsyncPlayerChatListener
 import com.seventh_root.elysium.chat.bukkit.listener.PlayerCommandPreprocessListener
-import com.seventh_root.elysium.chat.bukkit.listener.PlayerJoinListener
-import com.seventh_root.elysium.chat.bukkit.prefix.ElysiumPrefixProvider
+import com.seventh_root.elysium.chat.bukkit.mute.ElysiumChatChannelMuteProvider
 import com.seventh_root.elysium.chat.bukkit.prefix.ElysiumPrefixProviderImpl
-import com.seventh_root.elysium.chat.bukkit.snooper.ElysiumSnooperProvider
 import com.seventh_root.elysium.chat.bukkit.snooper.ElysiumSnooperProviderImpl
+import com.seventh_root.elysium.chat.bukkit.speaker.ElysiumChatChannelSpeakerProvider
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
-import java.sql.SQLException
+import org.bukkit.configuration.serialization.ConfigurationSerialization
+
 
 class ElysiumChatBukkit: ElysiumBukkitPlugin() {
 
-    private lateinit var chatChannelProvider: ElysiumChatChannelProvider
-    private lateinit var chatGroupProvider: ElysiumChatGroupProvider
-    private lateinit var ircProvider: ElysiumIRCProvider
-    private lateinit var prefixProvider: ElysiumPrefixProvider
-    private lateinit var snooperProvider: ElysiumSnooperProvider
-
     override fun onEnable() {
+        ConfigurationSerialization.registerClass(DirectedFormatComponent::class.java, "DirectedFormatComponent")
+        ConfigurationSerialization.registerClass(GarbleComponent::class.java, "GarbleComponent")
+        ConfigurationSerialization.registerClass(RadiusFilterComponent::class.java, "RadiusFilterComponent")
+        ConfigurationSerialization.registerClass(SendMessageComponent::class.java, "SendMessageComponent")
+        ConfigurationSerialization.registerClass(SnoopComponent::class.java, "SnoopComponent")
+        ConfigurationSerialization.registerClass(IRCComponent::class.java, "IRCComponent")
+        ConfigurationSerialization.registerClass(LogComponent::class.java, "LogComponent")
+        ConfigurationSerialization.registerClass(UndirectedFormatComponent::class.java, "UndirectedFormatComponent")
         saveDefaultConfig()
-        chatChannelProvider = ElysiumChatChannelProviderImpl(this)
-        chatGroupProvider = ElysiumChatGroupProviderImpl(this)
-        prefixProvider = ElysiumPrefixProviderImpl(this)
-        snooperProvider = ElysiumSnooperProviderImpl(this)
         if (config.getBoolean("irc.enabled")) {
-            ircProvider = ElysiumIRCProviderImpl(this)
             serviceProviders = arrayOf(
-                    chatChannelProvider,
-                    chatGroupProvider,
-                    ircProvider,
-                    prefixProvider,
-                    snooperProvider
+                    ElysiumIRCProviderImpl(this),
+                    ElysiumPrefixProviderImpl(this),
+                    ElysiumChatChannelProviderImpl(this),
+                    ElysiumChatChannelMuteProvider(this),
+                    ElysiumChatChannelSpeakerProvider(this),
+                    ElysiumChatGroupProviderImpl(this),
+                    ElysiumSnooperProviderImpl(this)
             )
         } else {
             serviceProviders = arrayOf(
-                    chatChannelProvider,
-                    chatGroupProvider,
-                    prefixProvider,
-                    snooperProvider
+                    ElysiumPrefixProviderImpl(this),
+                    ElysiumChatChannelProviderImpl(this),
+                    ElysiumChatChannelMuteProvider(this),
+                    ElysiumChatChannelSpeakerProvider(this),
+                    ElysiumChatGroupProviderImpl(this),
+                    ElysiumSnooperProviderImpl(this)
             )
         }
     }
 
     override fun onDisable() {
         if (config.getBoolean("irc.enabled")) {
-            ircProvider.ircBot.sendIRC().quitServer(config.getString("messages.irc-quit"))
+            core.serviceManager.getServiceProvider(ElysiumIRCProvider::class).ircBot.sendIRC().quitServer(config.getString("messages.irc-quit"))
         }
     }
 
     override fun registerCommands() {
         getCommand("chatchannel").executor = ChatChannelCommand(this)
-        getCommand("prefix").executor = PrefixCommand(this)
-        getCommand("snoop").executor = SnoopCommand(this)
-        getCommand("chatgroup").executor = ChatGroupCommand(this)
-        getCommand("reply").executor = ReplyCommand(this)
-        getCommand("message").executor = MessageCommand(this)
+        getCommand("mute").executor = MuteCommand(this)
+        getCommand("unmute").executor = UnmuteCommand(this)
+        getCommand("listchatchannels").executor = ListChatChannelsCommand(this)
     }
 
     override fun registerListeners() {
         registerListeners(
                 AsyncPlayerChatListener(this),
-                PlayerJoinListener(this),
                 PlayerCommandPreprocessListener(this)
         )
     }
 
-    @Throws(SQLException::class)
     override fun createTables(database: Database) {
-        database.addTable(ElysiumChatChannelTable(database, this))
-        database.addTable(ChatChannelListenerTable(database, this))
-        database.addTable(ChatChannelSpeakerTable(database, this))
-        database.addTable(ElysiumPrefixTable(database))
-        database.addTable(ElysiumSnooperTable(database, this))
-        database.addTable(ElysiumChatGroupTable(database, this))
-        database.addTable(ChatGroupMemberTable(database, this))
-        database.addTable(ChatGroupInviteTable(database, this))
-        database.addTable(LastUsedChatGroupTable(database, this))
+        database.addTable(ElysiumChatChannelMuteTable(database, this))
+        database.addTable(ElysiumChatChannelSpeakerTable(database, this))
     }
 
 }
