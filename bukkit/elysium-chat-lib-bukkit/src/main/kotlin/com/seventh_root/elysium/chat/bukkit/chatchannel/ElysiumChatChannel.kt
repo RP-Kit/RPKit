@@ -16,33 +16,26 @@
 
 package com.seventh_root.elysium.chat.bukkit.chatchannel
 
-import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.ChatChannelPipelineComponent
-import com.seventh_root.elysium.chat.bukkit.context.ChatMessageContext
-import com.seventh_root.elysium.chat.bukkit.context.ChatMessagePostProcessContext
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineComponent
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
 import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import java.awt.Color
 
 
 interface ElysiumChatChannel: Entity {
-    var name: String
-    var color: Color
-    var formatString: String
-    var radius: Int
-    var clearRadius: Int
+    val name: String
+    val color: Color
+    val radius: Double
     val speakers: List<ElysiumPlayer>
     val listeners: List<ElysiumPlayer>
-    val pipeline: MutableList<ChatChannelPipelineComponent>
-    var matchPattern: String
-    var isIRCEnabled: Boolean
-    var ircChannel: String
-    var isIRCWhitelist: Boolean
-    var isJoinedByDefault: Boolean
+    val directedPipeline: List<DirectedChatChannelPipelineComponent>
+    val undirectedPipeline: List<UndirectedChatChannelPipelineComponent>
+    val matchPattern: String?
+    val isJoinedByDefault: Boolean
     fun addSpeaker(speaker: ElysiumPlayer)
     fun removeSpeaker(speaker: ElysiumPlayer)
     fun addListener(listener: ElysiumPlayer)
     fun removeListener(listener: ElysiumPlayer)
-    fun processMessage(message: String?, context: ChatMessageContext): String?
-    fun postProcess(message: String?, context: ChatMessagePostProcessContext): String?
-    fun log(message: String)
+    fun sendMessage(sender: ElysiumPlayer, message: String)
 }

@@ -16,12 +16,9 @@
 
 package com.seventh_root.elysium.chat.bukkit.listener
 
-import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.prefix.ElysiumPrefixProvider
-import com.seventh_root.elysium.chat.bukkit.snooper.ElysiumSnooperProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
@@ -31,29 +28,17 @@ class PlayerCommandPreprocessListener(private val plugin: ElysiumChatBukkit): Li
 
     @EventHandler
     fun onPlayerCommandPreProcess(event: PlayerCommandPreprocessEvent) {
-        val snooperProvider = plugin.core.serviceManager.getServiceProvider(ElysiumSnooperProvider::class)
-        val prefixProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPrefixProvider::class)
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
-        val sender = playerProvider.getPlayer(event.player)
-        val senderCharacter = characterProvider.getActiveCharacter(sender)
-        val snoopers = snooperProvider.snoopers
-        var commandMessage = ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.command-snoop"))
-        if (commandMessage.contains("\$command")) {
-            commandMessage = commandMessage.replace("\$command", event.message)
-        }
-        if (commandMessage.contains("\$sender-prefix")) {
-            commandMessage = commandMessage.replace("\$sender-prefix", prefixProvider.getPrefix(sender))
-        }
-        if (commandMessage.contains("\$sender-player")) {
-            commandMessage = commandMessage.replace("\$sender-player", sender.name)
-        }
-        if (commandMessage.contains("\$sender-character")) {
-            if (senderCharacter != null) {
-                commandMessage = commandMessage.replace("\$sender-character", senderCharacter.name)
+        val chatChannelName = event.message.split(Regex("\\s+"))[0].drop(1)
+        val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
+        val chatChannel = chatChannelProvider.getChatChannel(chatChannelName)
+        if (chatChannel != null) {
+            if (event.player.hasPermission("elysium.chat.command.chatchannel.${chatChannel.name}")) {
+                event.isCancelled = true
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val player = playerProvider.getPlayer(event.player)
+                chatChannel.sendMessage(player, event.message.split(Regex("\\s+")).drop(1).joinToString(" "))
             }
         }
-        snoopers.forEach { snooper -> snooper.bukkitPlayer?.player?.sendMessage(commandMessage) }
     }
 
 }

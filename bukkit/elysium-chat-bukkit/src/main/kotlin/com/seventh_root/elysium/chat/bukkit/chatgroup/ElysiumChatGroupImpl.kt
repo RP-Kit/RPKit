@@ -20,7 +20,6 @@ import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProv
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.database.table.ChatGroupInviteTable
 import com.seventh_root.elysium.chat.bukkit.database.table.ChatGroupMemberTable
-import com.seventh_root.elysium.chat.bukkit.exception.ChatChannelMessageFormattingFailureException
 import com.seventh_root.elysium.chat.bukkit.prefix.ElysiumPrefixProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.bukkit.ChatColor
@@ -79,8 +78,6 @@ class ElysiumChatGroupImpl(
             if (formattedMessage.contains("\$sender-character")) {
                 if (senderCharacter != null) {
                     formattedMessage = formattedMessage.replace("\$sender-character", senderCharacter.name)
-                } else {
-                    throw ChatChannelMessageFormattingFailureException(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }
             }
             if (formattedMessage.contains("\$receiver-prefix")) {
