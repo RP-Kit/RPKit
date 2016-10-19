@@ -34,6 +34,10 @@ subprojects {
             url "https://jitpack.io"
         }
     }
+
+    dependencies {
+        testCompile group: "io.kotlintest", name: "kotlintest", version: "1.3.4"
+    }
 }
 
 File propertiesFile = new File("repo.properties")
@@ -176,6 +180,39 @@ project(":bukkit:elysium-player-lib-bukkit") {
             pom.version = project(":bukkit:elysium-player-lib-bukkit").version
             pom.artifactId = project(":bukkit:elysium-player-lib-bukkit").name
             pom.groupId = project(":bukkit:elysium-player-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-permissions-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-permissions-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-permissions-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-permissions-lib-bukkit").group
 
         }
     }
@@ -414,6 +451,39 @@ project(":bukkit:elysium-players-bukkit") {
             pom.version = project(":bukkit:elysium-players-bukkit").version
             pom.artifactId = project(":bukkit:elysium-players-bukkit").name
             pom.groupId = project(":bukkit:elysium-players-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-permissions-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-player-lib-bukkit")
+        compile project(":bukkit:elysium-permissions-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-permissions-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-permissions-bukkit").name
+            pom.groupId = project(":bukkit:elysium-permissions-bukkit").group
 
         }
     }

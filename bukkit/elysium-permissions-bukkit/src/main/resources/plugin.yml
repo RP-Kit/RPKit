@@ -1,0 +1,16 @@
+name: elysium-permissions-bukkit
+author: alyphen
+version: @version@
+main: com.seventh_root.elysium.permissions.bukkit.ElysiumPermissionsBukkit
+depend: [elysium-core-bukkit, elysium-player-lib-bukkit, elysium-permissions-lib-bukkit]
+commands:
+    group:
+        description: Group management command
+        usage: /<command> [add|remove] [player] [group]
+permissions:
+    elysium.permissions.command.group.add:
+        description: Allows adding groups to players
+        default: op
+    elysium.permissions.command.group.remove:
+        description: Allows removing groups from players
+        default: op
