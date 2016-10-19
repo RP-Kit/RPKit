@@ -1,0 +1,5 @@
+name: elysium-permissions-lib-bukkit
+author: alyphen
+version: @version@
+main: com.seventh_root.elysium.permissions.bukkit.ElysiumPermissionsLibBukkit
+depend: [elysium-core-bukkit, elysium-player-lib-bukkit]
