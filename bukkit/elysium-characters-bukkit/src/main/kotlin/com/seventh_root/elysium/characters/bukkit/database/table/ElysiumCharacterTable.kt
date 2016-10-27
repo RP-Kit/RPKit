@@ -114,7 +114,7 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
             exception.printStackTrace()
         }
 
-        if (database.getTableVersion(this) == null) {
+        if (database.getTableVersion(this) == null) {   
             database.setTableVersion(this, "0.1.0")
         }
     }
@@ -133,7 +133,12 @@ class ElysiumCharacterTable: Table<ElysiumCharacter> {
             var id = 0
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "INSERT INTO elysium_character(player_id, name, gender_id, age, race_id, description, dead, world, x, y, z, yaw, pitch, inventory_contents, helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, food_level, thirst_level) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        "INSERT INTO " +
+                            "elysium_character(player_id, name, gender_id, age, race_id, " +
+                            "description, dead, world, x, y, z, yaw, pitch, inventory_contents, " +
+                            "helmet, chestplate, leggings, boots, health, max_health, mana, max_mana, " +
+                            "food_level, thirst_level) " +
+                            "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         RETURN_GENERATED_KEYS).use { statement ->
                     val player = entity.player
                     if (player != null) {
