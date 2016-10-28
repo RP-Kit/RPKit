@@ -18,11 +18,17 @@ package com.seventh_root.elysium.characters.bukkit.character.field
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 
-class RaceField: CharacterCardField {
+class RaceField: HideableCharacterCardField {
 
     override val name = "race"
     override fun get(character: ElysiumCharacter): String {
-        return character.race?.name?:"unset"
+        return if (isHidden(character)) "[HIDDEN]" else character.race?.name?:"unset"
+    }
+    override fun isHidden(character: ElysiumCharacter): Boolean {
+        return character.isRaceHidden
+    }
+    override fun setHidden(character: ElysiumCharacter, hidden: Boolean) {
+        character.isRaceHidden = hidden
     }
 
 }

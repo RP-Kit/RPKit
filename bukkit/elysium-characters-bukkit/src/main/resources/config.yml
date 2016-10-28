@@ -108,6 +108,12 @@ characters:
         max-mana: 20
         food-level: 20
         thirst-level: 20
+        player-hidden: false
+        name-hidden: false
+        gender-hidden: false
+        age-hidden: false
+        race-hidden: false
+        description-hidden: false
     view-card-requires-sneak: true
     kill-character-on-death: false
     delete-character-on-death: false

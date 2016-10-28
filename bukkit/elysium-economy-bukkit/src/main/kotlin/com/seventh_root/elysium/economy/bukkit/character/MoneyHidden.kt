@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.characters.bukkit.character.field
+package com.seventh_root.elysium.economy.bukkit.character
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
+import com.seventh_root.elysium.core.database.Entity
 
 
-class PlayerField: HideableCharacterCardField {
-
-    override val name = "player"
-    override fun get(character: ElysiumCharacter): String {
-        return if (isHidden(character)) "[HIDDEN]" else character.player?.name?:"unset"
-    }
-    override fun isHidden(character: ElysiumCharacter): Boolean {
-        return character.isPlayerHidden
-    }
-    override fun setHidden(character: ElysiumCharacter, hidden: Boolean) {
-        character.isPlayerHidden = hidden
-    }
-
-}
+class MoneyHidden(
+        override var id: Int = 0,
+        val character: ElysiumCharacter
+) : Entity
