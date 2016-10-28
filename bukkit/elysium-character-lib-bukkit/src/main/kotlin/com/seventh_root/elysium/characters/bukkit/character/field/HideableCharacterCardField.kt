@@ -19,17 +19,9 @@ package com.seventh_root.elysium.characters.bukkit.character.field
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 
 
-class PlayerField: HideableCharacterCardField {
+interface HideableCharacterCardField: CharacterCardField {
 
-    override val name = "player"
-    override fun get(character: ElysiumCharacter): String {
-        return if (isHidden(character)) "[HIDDEN]" else character.player?.name?:"unset"
-    }
-    override fun isHidden(character: ElysiumCharacter): Boolean {
-        return character.isPlayerHidden
-    }
-    override fun setHidden(character: ElysiumCharacter, hidden: Boolean) {
-        character.isPlayerHidden = hidden
-    }
+    fun isHidden(character: ElysiumCharacter): Boolean
+    fun setHidden(character: ElysiumCharacter, hidden: Boolean)
 
 }

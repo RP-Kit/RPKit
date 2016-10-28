@@ -16,6 +16,8 @@
 
 package com.seventh_root.elysium.characters.bukkit.character
 
+import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGender
+import com.seventh_root.elysium.characters.bukkit.race.ElysiumRace
 import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.bukkit.Location
@@ -25,9 +27,9 @@ import org.bukkit.inventory.ItemStack
 interface ElysiumCharacter: Entity {
     var player: ElysiumPlayer?
     var name: String
-    var gender: com.seventh_root.elysium.characters.bukkit.gender.ElysiumGender?
+    var gender: ElysiumGender?
     var age: Int
-    var race: com.seventh_root.elysium.characters.bukkit.race.ElysiumRace?
+    var race: ElysiumRace?
     var description: String
     var isDead: Boolean
     var location: Location
@@ -42,4 +44,10 @@ interface ElysiumCharacter: Entity {
     var maxMana: Int
     var foodLevel: Int
     var thirstLevel: Int
+    var isPlayerHidden: Boolean
+    var isNameHidden: Boolean
+    var isGenderHidden: Boolean
+    var isAgeHidden: Boolean
+    var isRaceHidden: Boolean
+    var isDescriptionHidden: Boolean
 }

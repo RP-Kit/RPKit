@@ -20,10 +20,4 @@ import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.service.ServiceProvider
 
 
-class ElysiumCharacterLibBukkit: ElysiumBukkitPlugin() {
-
-    override fun onEnable() {
-        serviceProviders = arrayOf<ServiceProvider>()
-    }
-
-}
+class ElysiumCharacterLibBukkit: ElysiumBukkitPlugin()
