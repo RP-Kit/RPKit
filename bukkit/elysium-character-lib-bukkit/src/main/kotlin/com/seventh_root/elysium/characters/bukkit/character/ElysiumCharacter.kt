@@ -50,4 +50,5 @@ interface ElysiumCharacter: Entity {
     var isAgeHidden: Boolean
     var isRaceHidden: Boolean
     var isDescriptionHidden: Boolean
+    fun showCharacterCard(player: ElysiumPlayer)
 }

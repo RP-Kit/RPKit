@@ -17,12 +17,16 @@
 package com.seventh_root.elysium.characters.bukkit.character
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
+import com.seventh_root.elysium.characters.bukkit.character.field.ElysiumCharacterCardFieldProvider
+import com.seventh_root.elysium.characters.bukkit.character.field.HideableCharacterCardField
 import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGender
 import com.seventh_root.elysium.characters.bukkit.gender.ElysiumGenderProvider
 import com.seventh_root.elysium.characters.bukkit.race.ElysiumRace
 import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
+import mkremins.fanciful.FancyMessage
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 
@@ -31,9 +35,9 @@ class ElysiumCharacterImpl constructor(
         override var id: Int = 0,
         override var player: ElysiumPlayer?,
         name: String = plugin.config.getString("characters.defaults.name"),
-        override var gender: ElysiumGender? = plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class).getGender(plugin.config.getString("characters.defaults.gender")),
+        override var gender: ElysiumGender? = if (plugin.config.getString("characters.defaults.gender") != null) plugin.core.serviceManager.getServiceProvider(ElysiumGenderProvider::class).getGender(plugin.config.getString("characters.defaults.gender")) else null,
         override var age: Int = plugin.config.getInt("characters.defaults.age"),
-        override var race: ElysiumRace? = plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class).getRace(plugin.config.getString("characters.defaults.race")),
+        override var race: ElysiumRace? = if (plugin.config.getString("characters.defaults.race") != null) plugin.core.serviceManager.getServiceProvider(ElysiumRaceProvider::class).getRace(plugin.config.getString("characters.defaults.race")) else null,
         description: String = plugin.config.getString("characters.defaults.description"),
         dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
         override var location: Location = Bukkit.getWorlds()[0].spawnLocation,
@@ -70,6 +74,110 @@ class ElysiumCharacterImpl constructor(
             }
         }
     override var isDead = dead
+
+    override fun showCharacterCard(player: ElysiumPlayer) {
+        val offlineBukkitPlayer = player.bukkitPlayer
+        if (offlineBukkitPlayer != null) {
+            if (offlineBukkitPlayer.isOnline) {
+                val bukkitPlayer = offlineBukkitPlayer.player
+                val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterCardFieldProvider::class)
+                for (line in plugin.config.getStringList("messages.character-card")) {
+                    val message = FancyMessage("")
+                    var chatColor: ChatColor? = null
+                    var chatFormat: ChatColor? = null
+                    var i = 0
+                    while (i < line.length) {
+                        if (line[i] === '&') {
+                            val colourOrFormat = ChatColor.getByChar(line[i + 1])
+                            if (colourOrFormat.isColor) {
+                                chatColor = colourOrFormat
+                                chatFormat = null
+                            }
+                            if (colourOrFormat.isFormat) chatFormat = colourOrFormat
+                            i += 1
+                        } else {
+                            var fieldFound = false
+                            characterCardFieldProvider.characterCardFields
+                                    .filter { field -> line.length >= i + "\$${field.name}".length }
+                                    .filter { field -> line.substring(i, i + "\$${field.name}".length) == "\$${field.name}" }
+                                    .forEach { field ->
+                                        message.then(field.get(this))
+                                        if (chatColor != null) {
+                                            message.color(chatColor)
+                                        }
+                                        if (chatFormat != null) {
+                                            message.style(chatFormat)
+                                        }
+                                        i += "\$${field.name}".length - 1
+                                        fieldFound = true
+                                    }
+                            if (!fieldFound) {
+                                var editFound = false
+                                characterCardFieldProvider.characterCardFields
+                                        .filter { field -> line.length >= i + "\$edit(${field.name})".length }
+                                        .filter { field -> line.substring(i, i + "\$edit(${field.name})".length) == "\$edit(${field.name})" }
+                                        .forEach { field ->
+                                            if (player == this.player) {
+                                                message.then("Edit")
+                                                            .command("/character set ${field.name}")
+                                                            .tooltip("Click to change your character's ${field.name}")
+                                                if (chatColor != null) {
+                                                    message.color(chatColor)
+                                                }
+                                                if (chatFormat != null) {
+                                                    message.style(chatFormat)
+                                                }
+                                            }
+                                            i += "\$edit(${field.name})".length - 1
+                                            editFound = true
+                                        }
+                                if (!editFound) {
+                                    var hideFound = false
+                                    characterCardFieldProvider.characterCardFields
+                                            .filter { field -> line.length >= i + "\$hide(${field.name})".length }
+                                            .filter { field -> line.substring(i, i + "\$hide(${field.name})".length) == "\$hide(${field.name})" }
+                                            .filter { it is HideableCharacterCardField }
+                                            .map { field -> field as HideableCharacterCardField }
+                                            .forEach { field ->
+                                                if (player == this.player) {
+                                                    if (field.isHidden(this)) {
+                                                        message.then("Unhide")
+                                                                .command("/character unhide ${field.name}")
+                                                                .tooltip("Click to unhide your character's ${field.name}")
+                                                    } else {
+                                                        message.then("Hide")
+                                                                .command("/character hide ${field.name}")
+                                                                .tooltip("Click to hide your character's ${field.name}")
+                                                    }
+                                                    if (chatColor != null) {
+                                                        message.color(chatColor)
+                                                    }
+                                                    if (chatFormat != null) {
+                                                        message.style(chatFormat)
+                                                    }
+                                                }
+                                                i += "\$hide(${field.name})".length - 1
+                                                hideFound = true
+                                            }
+                                    if (!hideFound) {
+                                        message.then(Character.toString(line[i]))
+                                        if (chatColor != null) {
+                                            message.color(chatColor)
+                                        }
+                                        if (chatFormat != null) {
+                                            message.style(chatFormat)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        i++
+                    }
+                    message.send(bukkitPlayer)
+                }
+            }
+        }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

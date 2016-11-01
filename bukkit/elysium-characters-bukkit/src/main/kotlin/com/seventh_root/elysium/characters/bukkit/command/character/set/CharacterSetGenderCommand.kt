@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.characters.bukkit.command.character
+package com.seventh_root.elysium.characters.bukkit.command.character.set
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider

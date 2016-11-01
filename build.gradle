@@ -24,15 +24,10 @@ allprojects {
 subprojects {
     repositories {
         mavenCentral()
-        maven {
-            url "https://hub.spigotmc.org/nexus/content/groups/public/"
-        }
-        maven {
-            url "http://nexus.hc.to/content/repositories/pub_releases"
-        }
-        maven {
-            url "https://jitpack.io"
-        }
+        maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
+        maven { url "http://nexus.hc.to/content/repositories/pub_releases" }
+        maven { url "https://jitpack.io" }
+        maven { url "http://repo.stealthyone.com/content/groups/public" }
     }
 
     dependencies {
@@ -113,6 +108,7 @@ project(":bukkit:elysium-core-bukkit") {
     dependencies {
         compile group: "org.bukkit", name: "bukkit", version: "1.10.2-R0.1-SNAPSHOT"
         compile group: "net.milkbowl.vault", name: "VaultAPI", version: "1.6"
+        compile group: "mkremins", name: "fanciful", version: "0.4.0-SNAPSHOT"
         compile project(":elysium-core")
     }
 
@@ -128,6 +124,7 @@ project(":bukkit:elysium-core-bukkit") {
 
         dependencies {
             include(project(":elysium-core"))
+            include(dependency("mkremins:fanciful"))
         }
 
         classifier = ""

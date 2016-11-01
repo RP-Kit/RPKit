@@ -51,16 +51,34 @@ permissions:
         default: true
     elysium.characters.command.character.set.player:
         description: Allows assigning your characters to a different player
-        default: true
+        default: op
     elysium.characters.command.character.set.race:
         description: Allows setting your character''s race
+        default: true
+    elysium.characters.command.character.hide.age:
+        description: Allows hiding your character''s age
+        default: true
+    elysium.characters.command.character.hide.description:
+        description: Allows hiding your character''s description
+        default: true
+    elysium.characters.command.character.hide.gender:
+        description: Allows hiding your character''s gender
+        default: true
+    elysium.characters.command.character.hide.name:
+        description: Allows hiding your character''s name
+        default: true
+    elysium.characters.command.character.hide.player:
+        description: Allows hiding your character''s player
+        default: true
+    elysium.characters.command.character.hide.race:
+        description: Allows hiding your character''s race
         default: true
     elysium.characters.command.character.switch:
         description: Allows switching to other characters
         default: true
     elysium.characters.command.character.delete:
         description: Allows deleting characters
-        default: true
+        default: op
     elysium.characters.command.gender.add:
         description: Allows creation of genders
         default: op
