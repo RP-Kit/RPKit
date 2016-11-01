@@ -9,7 +9,7 @@ buildscript {
 
     dependencies {
         classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.2-1"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.4"
     }
 
 }
@@ -51,7 +51,7 @@ project(":elysium-core") {
     def guavaVersion = "17.0"
     def gsonVersion = "2.2.4"
     def ehcacheVersion = "3.0.2"
-    def kotlinVersion = "1.0.2-1"
+    def kotlinVersion = "1.0.4"
     def slf4jVersion = "1.7.20"
     def pircBotXVersion = "2.1"
     def jettyVersion = "9.4.0.M0"
