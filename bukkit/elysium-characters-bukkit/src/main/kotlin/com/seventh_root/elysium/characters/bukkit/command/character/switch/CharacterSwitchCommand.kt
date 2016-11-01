@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.characters.bukkit.command.character
+package com.seventh_root.elysium.characters.bukkit.command.character.switch
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
@@ -26,20 +26,11 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
+class CharacterSwitchCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
-    private val confirmationConversationFactory: ConversationFactory
 
     init {
         conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(CharacterPrompt()).withEscapeSequence("cancel").thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console"))).addConversationAbandonedListener { event ->
-            if (!event.gracefulExit()) {
-                val conversable = event.context.forWhom
-                if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
-                }
-            }
-        }
-        confirmationConversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(ConfirmationPrompt()).withEscapeSequence("cancel").thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console"))).addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
@@ -51,7 +42,7 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit): Comma
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
-            if (sender.hasPermission("elysium.characters.command.character.delete")) {
+            if (sender.hasPermission("elysium.characters.command.character.switch")) {
                 if (args.size > 0) {
                     val characterNameBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
@@ -65,9 +56,7 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit): Comma
                     // Prioritise exact matches...
                     for (character in characterProvider.getCharacters(player)) {
                         if (character.name.equals(characterNameBuilder.toString(), ignoreCase = true)) {
-                            val conversation = confirmationConversationFactory.buildConversation(sender)
-                            conversation.context.setSessionData("character_id", character.id)
-                            conversation.begin()
+                            characterProvider.setActiveCharacter(player, character)
                             charFound = true
                             break
                         }
@@ -76,24 +65,22 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit): Comma
                     if (!charFound) {
                         for (character in characterProvider.getCharacters(player)) {
                             if (character.name.toLowerCase().contains(characterNameBuilder.toString().toLowerCase())) {
-                                val conversation = confirmationConversationFactory.buildConversation(sender)
-                                conversation.context.setSessionData("character_id", character.id)
-                                conversation.begin()
+                                characterProvider.setActiveCharacter(player, character)
                                 charFound = true
                                 break
                             }
                         }
                     }
                     if (charFound) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-valid")))
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-switch-valid")))
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-invalid-character")))
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-switch-invalid-character")))
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-delete")))
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-switch")))
             }
         } else {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
@@ -133,7 +120,7 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit): Comma
                 // Prioritise exact matches...
                 for (character in characterProvider.getCharacters(player)) {
                     if (character.name.equals(input, ignoreCase = true)) {
-                        context.setSessionData("character_id", character.id)
+                        characterProvider.setActiveCharacter(player, character)
                         charFound = true
                         break
                     }
@@ -142,17 +129,17 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit): Comma
                 if (!charFound) {
                     for (character in characterProvider.getCharacters(player)) {
                         if (character.name.toLowerCase().contains(input.toLowerCase())) {
-                            context.setSessionData("character_id", character.id)
+                            characterProvider.setActiveCharacter(player, character)
                             break
                         }
                     }
                 }
             }
-            return CharacterDeletedPrompt()
+            return CharacterSwitchedPrompt()
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-invalid-character"))
+            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-switch-invalid-character"))
         }
 
         override fun getPromptText(context: ConversationContext): String {
@@ -165,42 +152,19 @@ class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit): Comma
                         ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-list-item")
                                 .replace("\$character", character.name)))
             }
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-prompt")) + characterListBuilder.toString()
+            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-switch-prompt")) + characterListBuilder.toString()
         }
 
     }
 
-    private inner class ConfirmationPrompt: BooleanPrompt() {
-
-        override fun acceptValidatedInput(context: ConversationContext, input: Boolean): Prompt? {
-            if (input) {
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
-                val character = characterProvider.getCharacter(context.getSessionData("character_id") as Int)
-                characterProvider.removeCharacter(character!!)
-                return CharacterDeletedPrompt()
-            } else {
-                return Prompt.END_OF_CONVERSATION
-            }
-        }
-
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-confirmation-invalid-boolean"))
-        }
-
-        override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-confirmation"))
-        }
-
-    }
-
-    private inner class CharacterDeletedPrompt: MessagePrompt() {
+    private inner class CharacterSwitchedPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-valid"))
+            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-switch-valid"))
         }
     }
 

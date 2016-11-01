@@ -17,6 +17,14 @@
 package com.seventh_root.elysium.characters.bukkit.command.character
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
+import com.seventh_root.elysium.characters.bukkit.command.character.card.CharacterCardCommand
+import com.seventh_root.elysium.characters.bukkit.command.character.create.CharacterNewCommand
+import com.seventh_root.elysium.characters.bukkit.command.character.delete.CharacterDeleteCommand
+import com.seventh_root.elysium.characters.bukkit.command.character.hide.CharacterHideCommand
+import com.seventh_root.elysium.characters.bukkit.command.character.list.CharacterListCommand
+import com.seventh_root.elysium.characters.bukkit.command.character.set.CharacterSetCommand
+import com.seventh_root.elysium.characters.bukkit.command.character.switch.CharacterSwitchCommand
+import com.seventh_root.elysium.characters.bukkit.command.character.unhide.CharacterUnhideCommand
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -25,6 +33,8 @@ import org.bukkit.command.CommandSender
 class CharacterCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     private val characterSetCommand: CharacterSetCommand
+    private val characterHideCommand: CharacterHideCommand
+    private val characterUnhideCommand: CharacterUnhideCommand
     private val characterCardCommand: CharacterCardCommand
     private val characterSwitchCommand: CharacterSwitchCommand
     private val characterListCommand: CharacterListCommand
@@ -33,6 +43,8 @@ class CharacterCommand(private val plugin: ElysiumCharactersBukkit): CommandExec
 
     init {
         characterSetCommand = CharacterSetCommand(plugin)
+        characterHideCommand = CharacterHideCommand(plugin)
+        characterUnhideCommand = CharacterUnhideCommand(plugin)
         characterCardCommand = CharacterCardCommand(plugin)
         characterSwitchCommand = CharacterSwitchCommand(plugin)
         characterListCommand = CharacterListCommand(plugin)
@@ -45,6 +57,10 @@ class CharacterCommand(private val plugin: ElysiumCharactersBukkit): CommandExec
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("set", ignoreCase = true)) {
                 return characterSetCommand.onCommand(sender, command, label, newArgs)
+            } else if (args[0].equals("hide", ignoreCase = true)) {
+                return characterHideCommand.onCommand(sender, command, label, newArgs)
+            } else if (args[0].equals("unhide", ignoreCase = true)) {
+                return characterUnhideCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("card", ignoreCase = true) || args[0].equals("show", ignoreCase = true) || args[0].equals("view", ignoreCase = true)) {
                 return characterCardCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("switch", ignoreCase = true)) {

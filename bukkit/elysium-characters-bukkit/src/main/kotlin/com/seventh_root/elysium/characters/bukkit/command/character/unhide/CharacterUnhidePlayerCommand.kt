@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.characters.bukkit.command.character
+package com.seventh_root.elysium.characters.bukkit.command.character.unhide
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
@@ -25,21 +25,26 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class CharacterListCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
+
+class CharacterUnhidePlayerCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
-            if (sender.hasPermission("elysium.characters.command.character.list")) {
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+            if (sender.hasPermission("elysium.characters.command.character.unhide.player")) {
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
                 val player = playerProvider.getPlayer(sender)
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-list-title")))
-                for (character in characterProvider.getCharacters(player)) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-list-item"))
-                            .replace("\$character", character.name))
+                val character = characterProvider.getActiveCharacter(player)
+                if (character != null) {
+                    character.isPlayerHidden = false
+                    characterProvider.updateCharacter(character)
+                    characterProvider.setActiveCharacter(player, null)
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-unhide-player-valid")))
+                } else {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-list")))
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-unhide-player")))
             }
         } else {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))

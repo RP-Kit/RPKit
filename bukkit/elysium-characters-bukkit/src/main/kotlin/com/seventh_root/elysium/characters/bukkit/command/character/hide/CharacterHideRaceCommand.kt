@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.characters.bukkit.command.character
+package com.seventh_root.elysium.characters.bukkit.command.character.hide
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
-import com.seventh_root.elysium.characters.bukkit.character.field.ElysiumCharacterCardFieldProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
@@ -26,35 +25,25 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class CharacterCardCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
+class CharacterHideRaceCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
+
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender is Player) {
-            if (sender.hasPermission("elysium.characters.command.character.card.self")) {
+            if (sender.hasPermission("elysium.characters.command.character.hide.race")) {
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
-                var player = playerProvider.getPlayer(sender)
-                if (sender.hasPermission("elysiumcharacters.command.character.card.other")) {
-                    if (args.size > 0) {
-                        val bukkitPlayer = plugin.server.getPlayer(args[0])
-                        if (bukkitPlayer != null) {
-                            player = playerProvider.getPlayer(bukkitPlayer)
-                        }
-                    }
-                }
+                val player = playerProvider.getPlayer(sender)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
-                    for (line in plugin.config.getStringList("messages.character-card")) {
-                        var filteredLine = ChatColor.translateAlternateColorCodes('&', line)
-                        val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterCardFieldProvider::class)
-                        characterCardFieldProvider.characterCardFields.forEach { field -> filteredLine = filteredLine.replace("\$${field.name}", field.get(character)) }
-                        sender.sendMessage(filteredLine)
-                    }
+                    character.isRaceHidden = true
+                    characterProvider.updateCharacter(character)
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-hide-race-valid")))
                 } else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-card-self")))
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-hide-race")))
             }
         } else {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))

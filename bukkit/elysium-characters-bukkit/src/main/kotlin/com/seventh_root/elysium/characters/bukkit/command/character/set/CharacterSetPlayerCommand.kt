@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seventh_root.elysium.characters.bukkit.command.character
+package com.seventh_root.elysium.characters.bukkit.command.character.set
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
@@ -25,12 +25,14 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
+import org.bukkit.plugin.Plugin
 
-class CharacterSetAgeCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
+class CharacterSetPlayerCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
+
     private val conversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(AgePrompt()).withEscapeSequence("cancel").thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console"))).addConversationAbandonedListener { event ->
+        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(PlayerPrompt(plugin)).withEscapeSequence("cancel").thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console"))).addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
@@ -42,26 +44,23 @@ class CharacterSetAgeCommand(private val plugin: ElysiumCharactersBukkit): Comma
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
-            if (sender.hasPermission("elysium.characters.command.character.set.age")) {
+            if (sender.hasPermission("elysium.characters.command.character.set.player")) {
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
                 val player = playerProvider.getPlayer(sender)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
                     if (args.size > 0) {
-                        try {
-                            val age = args[0].toInt()
-                            if (age >= plugin.config.getInt("characters.min-age") && age <= plugin.config.getInt("characters.max-age")) {
-                                character.age = age
-                                characterProvider.updateCharacter(character)
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-age-valid")))
-                            } else {
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-age-invalid-validation")))
-                            }
-                        } catch (exception: NumberFormatException) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-age-invalid-number")))
+                        @Suppress("DEPRECATION") val newBukkitPlayer = plugin.server.getPlayer(args[0])
+                        if (newBukkitPlayer != null) {
+                            val newPlayer = playerProvider.getPlayer(newBukkitPlayer)
+                            character.player = newPlayer
+                            characterProvider.updateCharacter(character)
+                            characterProvider.setActiveCharacter(player, null)
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-valid")))
+                        } else {
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-invalid-player")))
                         }
-
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
@@ -69,7 +68,7 @@ class CharacterSetAgeCommand(private val plugin: ElysiumCharactersBukkit): Comma
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-set-age")))
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-set-player")))
             }
         } else {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
@@ -77,25 +76,9 @@ class CharacterSetAgeCommand(private val plugin: ElysiumCharactersBukkit): Comma
         return true
     }
 
-    private inner class AgePrompt: NumericPrompt() {
+    private inner class PlayerPrompt(plugin: Plugin): PlayerNamePrompt(plugin) {
 
-        override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-age-prompt"))
-        }
-
-        override fun isNumberValid(context: ConversationContext?, input: Number?): Boolean {
-            return input!!.toInt() >= plugin.config.getInt("characters.min-age") && input.toInt() <= plugin.config.getInt("characters.max-age")
-        }
-
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: Number?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-age-invalid-validation"))
-        }
-
-        override fun getInputNotNumericText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-age-invalid-number"))
-        }
-
-        override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
+        override fun acceptValidatedInput(context: ConversationContext, input: Player): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
@@ -103,25 +86,33 @@ class CharacterSetAgeCommand(private val plugin: ElysiumCharactersBukkit): Comma
                 val player = playerProvider.getPlayer(conversable)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
-                    character.age = input.toInt()
+                    character.player = playerProvider.getPlayer(input)
                     characterProvider.updateCharacter(character)
+                    characterProvider.setActiveCharacter(player, null)
                 }
             }
-            return AgeSetPrompt()
+            return PlayerSetPrompt()
+        }
+
+        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
+            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-invalid-player"))
+        }
+
+        override fun getPromptText(context: ConversationContext): String {
+            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-prompt"))
         }
 
     }
 
-    private inner class AgeSetPrompt: MessagePrompt() {
+    private inner class PlayerSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-age-valid"))
+            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-valid"))
         }
 
     }
-
 }
