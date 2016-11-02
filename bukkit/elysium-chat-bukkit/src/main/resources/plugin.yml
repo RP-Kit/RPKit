@@ -47,21 +47,9 @@ commands:
         aliases: [r]
         usage: /<command> [message]
 permissions:
-    elysium.chat.command.chatchannel.[chatchannel]:
-        description: Allows speaking in a chat channel
-        default: false
-    elysium.chat.command.mute.[chatchannel]:
-        description: Allows muting a chat channel
-        default: false
-    elysium.chat.command.unmute.[chatchannel]:
-        description: Allows unmuting a chat channel
-        default: false
     elysium.chat.command.listchatchannels:
         description: Allows listing chat channels
         default: true
-    elysium.chat.listen.[chatchannel]:
-        description: Allows listening to a chat channel
-        default: false
     elysium.chat.prefix.[prefix]:
         description: Adds the prefix to the player when speaking in chat
         default: false

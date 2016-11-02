@@ -16,6 +16,7 @@
 
 package com.seventh_root.elysium.chat.bukkit
 
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProviderImpl
 import com.seventh_root.elysium.chat.bukkit.chatchannel.directed.*
 import com.seventh_root.elysium.chat.bukkit.chatchannel.undirected.IRCComponent
@@ -33,12 +34,15 @@ import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProviderImpl
 import com.seventh_root.elysium.chat.bukkit.listener.AsyncPlayerChatListener
 import com.seventh_root.elysium.chat.bukkit.listener.PlayerCommandPreprocessListener
 import com.seventh_root.elysium.chat.bukkit.mute.ElysiumChatChannelMuteProvider
+import com.seventh_root.elysium.chat.bukkit.prefix.ElysiumPrefixProvider
 import com.seventh_root.elysium.chat.bukkit.prefix.ElysiumPrefixProviderImpl
 import com.seventh_root.elysium.chat.bukkit.snooper.ElysiumSnooperProviderImpl
 import com.seventh_root.elysium.chat.bukkit.speaker.ElysiumChatChannelSpeakerProvider
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
 import org.bukkit.configuration.serialization.ConfigurationSerialization
+import org.bukkit.permissions.Permission
+import org.bukkit.permissions.PermissionDefault
 
 
 class ElysiumChatBukkit: ElysiumBukkitPlugin() {
@@ -54,24 +58,41 @@ class ElysiumChatBukkit: ElysiumBukkitPlugin() {
         ConfigurationSerialization.registerClass(UndirectedFormatComponent::class.java, "UndirectedFormatComponent")
         saveDefaultConfig()
         if (config.getBoolean("irc.enabled")) {
+            val ircProvider = ElysiumIRCProviderImpl(this)
+            val prefixProvider = ElysiumPrefixProviderImpl(this)
+            val chatChannelProvider = ElysiumChatChannelProviderImpl(this)
+            val chatChannelMuteProvider = ElysiumChatChannelMuteProvider(this)
+            val chatChannelSpeakerProvider = ElysiumChatChannelSpeakerProvider(this)
+            val chatGroupProvider = ElysiumChatGroupProviderImpl(this)
+            val snooperProvider =  ElysiumSnooperProviderImpl(this)
             serviceProviders = arrayOf(
-                    ElysiumIRCProviderImpl(this),
-                    ElysiumPrefixProviderImpl(this),
-                    ElysiumChatChannelProviderImpl(this),
-                    ElysiumChatChannelMuteProvider(this),
-                    ElysiumChatChannelSpeakerProvider(this),
-                    ElysiumChatGroupProviderImpl(this),
-                    ElysiumSnooperProviderImpl(this)
+                    ircProvider,
+                    prefixProvider,
+                    chatChannelProvider,
+                    chatChannelMuteProvider,
+                    chatChannelSpeakerProvider,
+                    chatGroupProvider,
+                    snooperProvider
             )
+            registerChatChannelPermissions(chatChannelProvider)
+            registerPrefixPermissions(prefixProvider)
         } else {
+            val prefixProvider = ElysiumPrefixProviderImpl(this)
+            val chatChannelProvider = ElysiumChatChannelProviderImpl(this)
+            val chatChannelMuteProvider = ElysiumChatChannelMuteProvider(this)
+            val chatChannelSpeakerProvider = ElysiumChatChannelSpeakerProvider(this)
+            val chatGroupProvider = ElysiumChatGroupProviderImpl(this)
+            val snooperProvider =  ElysiumSnooperProviderImpl(this)
             serviceProviders = arrayOf(
-                    ElysiumPrefixProviderImpl(this),
-                    ElysiumChatChannelProviderImpl(this),
-                    ElysiumChatChannelMuteProvider(this),
-                    ElysiumChatChannelSpeakerProvider(this),
-                    ElysiumChatGroupProviderImpl(this),
-                    ElysiumSnooperProviderImpl(this)
+                    prefixProvider,
+                    chatChannelProvider,
+                    chatChannelMuteProvider,
+                    chatChannelSpeakerProvider,
+                    chatGroupProvider,
+                    snooperProvider
             )
+            registerChatChannelPermissions(chatChannelProvider)
+            registerPrefixPermissions(prefixProvider)
         }
     }
 
@@ -98,6 +119,41 @@ class ElysiumChatBukkit: ElysiumBukkitPlugin() {
     override fun createTables(database: Database) {
         database.addTable(ElysiumChatChannelMuteTable(database, this))
         database.addTable(ElysiumChatChannelSpeakerTable(database, this))
+    }
+
+    private fun registerChatChannelPermissions(chatChannelProvider: ElysiumChatChannelProvider) {
+        chatChannelProvider.chatChannels.forEach { chatChannel ->
+            server.pluginManager.addPermission(Permission(
+                    "elysium.chat.command.chatchannel.${chatChannel.name}",
+                    "Allows speaking in ${chatChannel.name}",
+                    PermissionDefault.OP
+            ))
+            server.pluginManager.addPermission(Permission(
+                    "elysium.chat.command.mute.${chatChannel.name}",
+                    "Allows muting ${chatChannel.name}",
+                    PermissionDefault.OP
+            ))
+            server.pluginManager.addPermission(Permission(
+                    "elysium.chat.command.unmute.${chatChannel.name}",
+                    "Allows unmuting ${chatChannel.name}",
+                    PermissionDefault.OP
+            ))
+            server.pluginManager.addPermission(Permission(
+                    "elysium.chat.listen.${chatChannel.name}",
+                    "Allows listening to ${chatChannel.name}",
+                    PermissionDefault.OP
+            ))
+        }
+    }
+
+    private fun registerPrefixPermissions(prefixProvider: ElysiumPrefixProvider) {
+        prefixProvider.prefixes.forEach { prefix ->
+            server.pluginManager.addPermission(Permission(
+                    "elysium.chat.prefix.${prefix.name}",
+                    "Gives the player the prefix ${prefix.name}",
+                    PermissionDefault.FALSE
+            ))
+        }
     }
 
 }
