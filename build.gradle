@@ -418,6 +418,39 @@ project(":bukkit:elysium-auction-lib-bukkit") {
 
 }
 
+project(":bukkit:elysium-stat-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-stat-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-stat-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-stat-lib-bukkit").group
+
+        }
+    }
+
+}
+
 // Bukkit implementations
 
 project(":bukkit:elysium-players-bukkit") {
@@ -723,6 +756,41 @@ project(":bukkit:elysium-auctions-bukkit") {
             pom.version = project(":bukkit:elysium-auctions-bukkit").version
             pom.artifactId = project(":bukkit:elysium-auctions-bukkit").name
             pom.groupId = project(":bukkit:elysium-auctions-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-stats-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-player-lib-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-stat-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-stats-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-stats-bukkit").name
+            pom.groupId = project(":bukkit:elysium-stats-bukkit").group
 
         }
     }
