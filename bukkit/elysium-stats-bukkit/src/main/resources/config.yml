@@ -1,0 +1,31 @@
+# These are parsed as mathematical expressions. You may use variables added by other plugins.
+# Built in variables are:
+# character: The character (ElysiumCharacter)
+# player: The player (ElysiumPlayer) (If you wish to get Bukkit's OfflinePlayer in order to access Bukkit methods, use getBukkitPlayer())
+# minecraftLevel: The player's level in Minecraft (Integer)
+# characterGender: The character's gender from the character implementation (ElysiumGender)
+# characterAge: The character's age from the character implementation (Integer)
+# characterRace: The character's race from the character implementation (ElysiumRace)
+# characterHelmet: The character's helmet from the character implementation (ItemStack)
+# characterChestplate: The character's chestplate from the character implementation (ItemStack)
+# characterLeggings: The character's leggings from the character implementation (ItemStack)
+# characterBoots: The character's boots from the character implementation (ItemStack)
+# characterHealth: The character's health from the character implementation (Double)
+# characterMaxHealth: The character's max health from the character implementation (Double)
+# characterMana: The character's mana from the character implementation (Integer)
+# characterMaxMana: The character's max mana from the character implementation (Integer)
+# characterFoodLevel: The character's food level from the character implementation (Integer)
+# characterThirstLevel: The character's thirst level from the character implementation (Integer)
+stats:
+    strength: >
+      (minecraftLevel * 5)
+      + (characterHelmet == null ? 0 : characterHelmet.getType().toString() == "DIAMOND_HELMET" ? 10 : 0)
+      + (characterHelmet == null ? 0 : characterHelmet.getType().toString() == "IRON_HELMET" ? 8 : 0)
+    agility: '(minecraftLevel * 20) - characterAge + characterFoodLevel'
+    intelligence: '(minecraftLevel * 5) + characterMana'
+messages:
+    stats-list-title: '&fStats:'
+    stats-list-item: '&7$stat: &f$value'
+    no-character: '&cYou must have an active character in order to perform this command.'
+    not-from-console: '&cYou must be a player to perform this command.'
+    no-permission-stats: '&cYou do not have permission to view your stats.'

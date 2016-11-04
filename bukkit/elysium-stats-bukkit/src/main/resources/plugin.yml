@@ -1,0 +1,13 @@
+name: elysium-stats-bukkit
+author: alyphen
+version: @version@
+main: com.seventh_root.elysium.stats.bukkit.ElysiumStatsBukkit
+depend: [elysium-core-bukkit, elysium-player-lib-bukkit, elysium-character-lib-bukkit, elysium-stat-lib-bukkit]
+commands:
+    stats:
+        description: Shows your stats
+        usage: /<command>
+permissions:
+    elysium.stats.command.stats:
+        description: Allows viewing stats
+        default: true
