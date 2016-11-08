@@ -18,13 +18,35 @@ package com.seventh_root.elysium.auctions.bukkit.auction
 
 import com.seventh_root.elysium.core.service.ServiceProvider
 
-
+/**
+ * Provides auction-related operations.
+ */
 interface ElysiumAuctionProvider: ServiceProvider {
 
+    /**
+     * Adds an auction to be tracked by this auction provider.
+     */
     fun addAuction(auction: ElysiumAuction)
+
+    /**
+     * Updates an auction's state in data storage.
+     */
     fun updateAuction(auction: ElysiumAuction)
+
+    /**
+     * Removes an auction from being tracked by this auction provider.
+     */
     fun removeAuction(auction: ElysiumAuction)
+
+    /**
+     * Gets an auction by ID.
+     * If there is no auction with the given ID, null is returned.
+     */
     fun getAuction(id: Int): ElysiumAuction?
+
+    /**
+     * Gets a list of all auctions tracked by this auction provider.
+     */
     fun getAuctions(): List<ElysiumAuction>
 
 }

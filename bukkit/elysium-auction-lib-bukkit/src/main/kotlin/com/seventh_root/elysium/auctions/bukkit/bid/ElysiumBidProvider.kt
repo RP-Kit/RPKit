@@ -19,12 +19,29 @@ package com.seventh_root.elysium.auctions.bukkit.bid
 import com.seventh_root.elysium.auctions.bukkit.auction.ElysiumAuction
 import com.seventh_root.elysium.core.service.ServiceProvider
 
-
+/**
+ * Provides bid-related operations.
+ */
 interface ElysiumBidProvider: ServiceProvider {
 
+    /**
+     * Adds a bid.
+     */
     fun addBid(bid: ElysiumBid)
+
+    /**
+     * Updates a bid in data storage.
+     */
     fun updateBid(bid: ElysiumBid)
+
+    /**
+     * Removes a bid.
+     */
     fun removeBid(bid: ElysiumBid)
+
+    /**
+     * Gets a list of all bids made for a particular auction.
+     */
     fun getBids(auction: ElysiumAuction): List<ElysiumBid>
 
 }
