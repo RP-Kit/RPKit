@@ -16,18 +16,46 @@
 
 package com.seventh_root.elysium.core.web
 
-
+/**
+ * Represents an alert, to be shown on a page
+ *
+ * @param type The type of the alert. This will affect which colour it shows in.
+ * @param message The message shown in the alert.
+ */
 class Alert(
         val type: Alert.Type,
         val message: String
 ) {
+
+    /**
+     * An enum containing all types of alerts.
+     * These are applied to alerts with bootstrap CSS classes.
+     */
     enum class Type(val cssClass: String) {
+
+        /**
+         * An alert type for an operation that ended in success.
+         */
         SUCCESS("alert-success"),
+
+        /**
+         * An informative alert type .
+         */
         INFO("alert-info"),
+
+        /**
+         * A warning alert type.
+         */
         WARNING("alert-warning"),
+
+        /**
+         * An alert type which indicates danger.
+         */
         DANGER("alert-danger");
+
         override fun toString(): String {
             return cssClass
         }
     }
+
 }

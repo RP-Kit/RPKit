@@ -20,6 +20,9 @@ import com.seventh_root.elysium.core.exception.UnregisteredServiceException
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
+/**
+ * Manages service providers.
+ */
 class ServiceManager {
 
     private val providers: MutableMap<KClass<out ServiceProvider>, ServiceProvider>
@@ -28,6 +31,10 @@ class ServiceManager {
         providers = ConcurrentHashMap<KClass<out ServiceProvider>, ServiceProvider>()
     }
 
+    /**
+     * Registers a service provider with this service manager.
+     * The service provider will be registered for all interfaces it is assignable from.
+     */
     fun registerServiceProvider(provider: ServiceProvider) {
         for (providerInterface in provider.javaClass.interfaces) {
             if (ServiceProvider::class.java.isAssignableFrom(providerInterface)) {
@@ -37,12 +44,30 @@ class ServiceManager {
         }
     }
 
+    /**
+     * Gets a service provider by type.
+     * Uses a [Class] to allow easy usage from Java.
+     * There is an alternative method available which uses a [KClass] to make this easier from Kotlin.
+     *
+     * @param type The type of the service provider required.
+     * @return The service provider
+     * @throws UnregisteredServiceException If no service is found with the type.
+     */
     @Suppress("UNCHECKED_CAST")
     @Throws(UnregisteredServiceException::class)
     fun <T: ServiceProvider> getServiceProvider(type: Class<T>): T {
         return getServiceProvider(type.kotlin)
     }
 
+    /**
+     * Gets a service provider by type.
+     * Uses a [KClass] to allow easy usage from Kotlin.
+     * There is an alternative method available which uses a [Class] to make this easier from Java.
+     *
+     * @param type The type of the service provider required.
+     * @return The service provider
+     * @throws UnregisteredServiceException If no service is found with the type.
+     */
     @Suppress("UNCHECKED_CAST")
     @Throws(UnregisteredServiceException::class)
     fun <T: ServiceProvider> getServiceProvider(type: KClass<T>): T {

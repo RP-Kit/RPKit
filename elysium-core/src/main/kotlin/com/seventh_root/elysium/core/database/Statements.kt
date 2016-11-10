@@ -18,6 +18,12 @@ package com.seventh_root.elysium.core.database
 
 import java.sql.Statement
 
+/**
+ * Executes specified block with statement and close statement after this
+ *
+ * @param block The block to execute
+ * @return The result of the block
+ */
 fun <T, S: Statement> S.use(block: (S) -> T): T {
     try {
         return block(this)

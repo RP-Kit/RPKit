@@ -18,6 +18,12 @@ package com.seventh_root.elysium.core.database
 
 import java.sql.Connection
 
+/**
+ * Executes specified block with connection and close connection after this
+ *
+ * @param block the block to execute
+ * @return The result of the block
+ */
 fun <T> Connection.use(block: (Connection) -> T): T {
     try {
         return block(this)

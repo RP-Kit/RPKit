@@ -16,4 +16,9 @@
 
 package com.seventh_root.elysium.core.service
 
+/**
+ * Represents a service provider, to be used with [ServiceManager]
+ * Most common usage is to extend this in an interface within a library plugin, then implement that interface in a plugin.
+ * This allows plugins to switch the underlying implementation without needing to switch the rest of their infrastructure.
+ */
 interface ServiceProvider

@@ -23,7 +23,10 @@ import com.seventh_root.elysium.core.database.use
 import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
-
+/**
+ * Represents the database table used to record versions of tables.
+ * Allows for migrations to be applied if a table is out of date.
+ */
 class TableVersionTable(database: Database): Table<TableVersion>(database, TableVersion::class.java) {
 
     override fun create() {
@@ -114,6 +117,9 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
         return null
     }
 
+    /**
+     * Gets the version of a table.
+     */
     fun get(table: String): TableVersion? {
         try {
             var tableVersion: TableVersion? = null

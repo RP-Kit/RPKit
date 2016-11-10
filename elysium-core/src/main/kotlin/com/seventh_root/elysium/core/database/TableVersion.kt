@@ -16,7 +16,13 @@
 
 package com.seventh_root.elysium.core.database
 
-
+/**
+ * Represents the version of a table.
+ *
+ * @param id The ID of the table version, defaults to 0. Set automatically when inserted into a table.
+ * @param table The name of the table
+ * @param version The version of the table
+ */
 class TableVersion(
         override var id: Int = 0,
         val table: String,

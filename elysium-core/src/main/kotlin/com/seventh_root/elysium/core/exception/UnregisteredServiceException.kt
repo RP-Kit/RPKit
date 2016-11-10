@@ -18,5 +18,7 @@ package com.seventh_root.elysium.core.exception
 
 import kotlin.reflect.KClass
 
-
+/**
+ * Thrown when a service is attempted to be retrieved, but none exists.
+ */
 class UnregisteredServiceException(type: KClass<*>): Exception("No service is registered for " + type.qualifiedName)

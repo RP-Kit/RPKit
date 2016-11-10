@@ -18,6 +18,13 @@ package com.seventh_root.elysium.core.util
 
 object MathUtils {
 
+    /**
+     * Performs a fast, but less accurate, square root operation.
+     * This may be used when quickly attempting to find things like distance, where the accuracy of [Math.sqrt] is not necessarily required.
+     *
+     * @param number The number to square root
+     * @return The approximate square root of the number.
+     */
     fun fastSqrt(number: Double): Double {
         return java.lang.Double.longBitsToDouble((java.lang.Double.doubleToLongBits(number) - (1L shl 52) shr 1) + (1L shl 61))
     }
