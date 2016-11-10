@@ -99,6 +99,8 @@ interface ElysiumAuction: Entity {
 
     /**
      * Adds a bid to the auction.
+     *
+     * @param bid The bid to add
      */
     fun addBid(bid: ElysiumBid)
 
