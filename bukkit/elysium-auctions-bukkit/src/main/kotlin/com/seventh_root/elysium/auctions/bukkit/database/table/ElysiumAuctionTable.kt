@@ -35,7 +35,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.sql.Types.*
 
-
+/**
+ * Represents the auction table.
+ */
 class ElysiumAuctionTable: Table<ElysiumAuction> {
 
     private val plugin: ElysiumAuctionsBukkit
@@ -230,6 +232,11 @@ class ElysiumAuctionTable: Table<ElysiumAuction> {
         }
     }
 
+    /**
+     * Gets a list of all auctions
+     *
+     * @return A list containing all auctions
+     */
     fun getAll(): List<ElysiumAuction> {
         val auctions = mutableListOf<ElysiumAuction>()
         database.createConnection().use { connection ->

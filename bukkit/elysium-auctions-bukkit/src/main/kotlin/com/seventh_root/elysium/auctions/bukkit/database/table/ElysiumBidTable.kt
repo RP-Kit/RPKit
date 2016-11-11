@@ -32,7 +32,9 @@ import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
-
+/**
+ * Represents the bid table.
+ */
 class ElysiumBidTable: Table<ElysiumBid> {
 
     private val plugin: ElysiumAuctionsBukkit
@@ -136,6 +138,11 @@ class ElysiumBidTable: Table<ElysiumBid> {
         }
     }
 
+    /**
+     * Gets all bids for a particular auction.
+     *
+     * @return A list of the bids made on the auction
+     */
     fun get(auction: ElysiumAuction): List<ElysiumBid> {
         if (auctionCache.containsKey(auction.id)) {
             return auctionCache.get(auction.id) as List<ElysiumBid>

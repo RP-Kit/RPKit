@@ -30,6 +30,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 
+/**
+ * Player interact listener for auction signs.
+ */
 class PlayerInteractListener(private val plugin: ElysiumAuctionsBukkit): Listener {
 
     @EventHandler

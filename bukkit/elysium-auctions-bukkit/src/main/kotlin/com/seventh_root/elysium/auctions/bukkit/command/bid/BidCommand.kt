@@ -28,7 +28,10 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-
+/**
+ * Command for bidding on auctions.
+ * Player must specify the auction ID (given to the creator of the auction upon creation) and the amount bid.
+ */
 class BidCommand(private val plugin: ElysiumAuctionsBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
