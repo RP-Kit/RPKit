@@ -20,7 +20,15 @@ import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.core.service.ServiceProvider
 import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 
-
+/**
+ * Represents a bank provider.
+ * Banks allow storage of unlimited currency, as opposed to the wallet in the economy plugin,
+ * so for large transactions it may be required to retrieve money from the bank.
+ * Each character is currently assumed to have a single global bank account per currency, which may be accessed at any
+ * bank for that currency.
+ * A bank provider stores the balance for the character, and has convenience methods to withdraw and deposit money
+ * to the character's wallet.
+ */
 interface ElysiumBankProvider: ServiceProvider {
     fun getBalance(character: ElysiumCharacter, currency: ElysiumCurrency): Int
     fun setBalance(character: ElysiumCharacter, currency: ElysiumCurrency, amount: Int)

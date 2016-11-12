@@ -22,7 +22,12 @@ import com.seventh_root.elysium.core.service.ServiceProvider
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.ServicePriority
 
-
+/**
+ * Class to allow auction lib to load as a plugin.
+ * This allows plugins requiring auctions or implementing auctions to depend on the plugin.
+ * With this plugin loaded, a Vault economy service is added for banks plugins on [ServicePriority.High].
+ * If banks plugins wish to provide their own economy service, they should register on [ServicePriority.Highest]
+ */
 class ElysiumBankLibBukkit: ElysiumBukkitPlugin() {
 
 

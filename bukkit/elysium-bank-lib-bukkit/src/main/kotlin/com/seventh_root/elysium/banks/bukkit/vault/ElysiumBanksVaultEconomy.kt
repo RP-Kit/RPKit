@@ -23,10 +23,14 @@ import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
 import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import net.milkbowl.vault.economy.AbstractEconomy
+import net.milkbowl.vault.economy.Economy
 import net.milkbowl.vault.economy.EconomyResponse
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType.FAILURE
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType.SUCCESS
-
+/**
+ * A Vault [Economy] implementation for banks plugins.
+ * Registered at higher priority than the elysium-economy implementation
+ */
 class ElysiumBanksVaultEconomy(private val plugin: ElysiumBankLibBukkit): AbstractEconomy() {
 
     override fun getBanks(): MutableList<String>? {
