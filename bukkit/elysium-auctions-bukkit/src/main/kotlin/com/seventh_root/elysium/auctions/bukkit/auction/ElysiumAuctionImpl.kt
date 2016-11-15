@@ -27,7 +27,9 @@ import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 
-
+/**
+ * Auction implementation.
+ */
 class ElysiumAuctionImpl(
         private val plugin: ElysiumAuctionsBukkit,
         override var id: Int = 0,

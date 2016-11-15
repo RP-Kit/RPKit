@@ -20,7 +20,9 @@ import com.seventh_root.elysium.auctions.bukkit.ElysiumAuctionsBukkit
 import com.seventh_root.elysium.auctions.bukkit.auction.ElysiumAuction
 import com.seventh_root.elysium.auctions.bukkit.database.table.ElysiumBidTable
 
-
+/**
+ * Bid provider implementation.
+ */
 class ElysiumBidProviderImpl(private val plugin: ElysiumAuctionsBukkit): ElysiumBidProvider {
 
     override fun addBid(bid: ElysiumBid) {
