@@ -23,9 +23,10 @@ import com.seventh_root.elysium.banks.bukkit.listener.PlayerInteractListener
 import com.seventh_root.elysium.banks.bukkit.listener.SignChangeListener
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
-import com.seventh_root.elysium.core.service.ServiceProvider
 
-
+/**
+ * Elysium banks plugin default implementation.
+ */
 class ElysiumBanksBukkit: ElysiumBukkitPlugin() {
 
     private lateinit var bankProvider: ElysiumBankProvider

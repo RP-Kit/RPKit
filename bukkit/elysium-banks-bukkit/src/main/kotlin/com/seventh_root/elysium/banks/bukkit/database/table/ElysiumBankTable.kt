@@ -33,7 +33,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.util.*
 
-
+/**
+ * Represents the bank table.
+ */
 class ElysiumBankTable: Table<ElysiumBank> {
 
     private val plugin: ElysiumBanksBukkit
