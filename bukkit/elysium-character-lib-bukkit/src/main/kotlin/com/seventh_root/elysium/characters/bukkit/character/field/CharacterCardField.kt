@@ -18,10 +18,25 @@ package com.seventh_root.elysium.characters.bukkit.character.field
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 
-
+/**
+ * Represents a character card field.
+ * Each character card field gives a variable to use with character cards.
+ * When the variable is used on the character card, it is replaced with what is returned from calling [get] with the
+ * character for whom the character card belongs to.
+ */
 interface CharacterCardField {
 
+    /**
+     * The name of the character
+     */
     val name: String
+
+    /**
+     * Gets the value of the field for a character.
+     *
+     * @param character The character
+     * @return The value of the character card field for the character
+     */
     fun get(character: ElysiumCharacter): String
 
 }

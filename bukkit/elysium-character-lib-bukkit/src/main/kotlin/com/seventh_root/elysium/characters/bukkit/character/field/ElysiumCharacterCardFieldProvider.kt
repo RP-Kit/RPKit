@@ -18,7 +18,18 @@ package com.seventh_root.elysium.characters.bukkit.character.field
 
 import com.seventh_root.elysium.core.service.ServiceProvider
 
-
+/**
+ * Represents a character card field provider.
+ * Character card fields may be added to the list of character card fields in order to allow display on character cards.
+ * Each character card field available from the character card field provider is usable on character cards where the
+ * character card implementation permits usage of such variables.
+ */
 interface ElysiumCharacterCardFieldProvider: ServiceProvider {
+
+    /**
+     * A list of all character card fields.
+     * In order to make character card fields usable on character cards, they must be added to this.
+     */
     val characterCardFields: MutableList<CharacterCardField>
+
 }
