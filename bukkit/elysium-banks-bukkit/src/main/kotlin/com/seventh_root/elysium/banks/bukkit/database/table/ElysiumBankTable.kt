@@ -151,6 +151,7 @@ class ElysiumBankTable: Table<ElysiumBank> {
      *
      * @param character The character to get the account for
      * @param currency The currency which the account should be in
+     * @return The account of the character in the currency
      */
     fun get(character: ElysiumCharacter, currency: ElysiumCurrency): ElysiumBank {
         if (characterCache.containsKey(character.id)) {
@@ -207,6 +208,7 @@ class ElysiumBankTable: Table<ElysiumBank> {
      *
      * @param amount The amount of characters to retrieve
      * @param currency The currency to
+     * @return A list of characters with the highest balance in the given currency
      */
     fun getTop(amount: Int = 5, currency: ElysiumCurrency): List<ElysiumCharacter> {
         val top = ArrayList<ElysiumBank>()
