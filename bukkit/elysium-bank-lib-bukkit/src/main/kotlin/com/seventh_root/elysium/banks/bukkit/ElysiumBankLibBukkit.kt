@@ -23,8 +23,8 @@ import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.ServicePriority
 
 /**
- * Class to allow auction lib to load as a plugin.
- * This allows plugins requiring auctions or implementing auctions to depend on the plugin.
+ * Class to allow bank lib to load as a plugin.
+ * This allows plugins requiring auctions or implementing banks to depend on the plugin.
  * With this plugin loaded, a Vault economy service is added for banks plugins on [ServicePriority.High].
  * If banks plugins wish to provide their own economy service, they should register on [ServicePriority.Highest]
  */
