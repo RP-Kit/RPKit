@@ -18,6 +18,9 @@ package com.seventh_root.elysium.characters.bukkit.character.field
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 
+/**
+ * Character card field for name.
+ */
 class NameField: HideableCharacterCardField {
 
     override val name = "name"

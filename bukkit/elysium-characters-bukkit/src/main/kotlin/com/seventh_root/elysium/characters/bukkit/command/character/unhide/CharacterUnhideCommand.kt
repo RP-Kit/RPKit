@@ -22,6 +22,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
+/**
+ * Character unhide command.
+ * Parent command for commands to unhide different character card fields.
+ */
 class CharacterUnhideCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     private val characterUnhidePlayerCommand = CharacterUnhidePlayerCommand(plugin)

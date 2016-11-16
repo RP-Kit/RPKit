@@ -40,6 +40,9 @@ import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.sql.Types.BLOB
 import java.sql.Types.INTEGER
 
+/**
+ * Represents the character table.
+ */
 class ElysiumCharacterTable: Table<ElysiumCharacter> {
 
     private val plugin: ElysiumCharactersBukkit

@@ -30,6 +30,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
+/**
+ * Character command.
+ * Parent command for all character management commands.
+ */
 class CharacterCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     private val characterSetCommand: CharacterSetCommand

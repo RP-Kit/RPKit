@@ -27,6 +27,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
+/**
+ * Character set race command.
+ * Sets character's race.
+ */
 class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 

@@ -25,6 +25,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
+/**
+ * Race remove command.
+ * Removes a race.
+ */
 class RaceRemoveCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 

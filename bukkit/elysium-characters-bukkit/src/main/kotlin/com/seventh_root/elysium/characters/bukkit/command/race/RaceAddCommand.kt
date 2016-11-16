@@ -26,6 +26,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
+/**
+ * Race add command.
+ * Adds a race.
+ */
 class RaceAddCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 

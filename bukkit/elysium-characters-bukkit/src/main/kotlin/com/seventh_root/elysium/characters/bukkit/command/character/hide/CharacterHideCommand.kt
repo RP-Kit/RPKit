@@ -22,6 +22,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
+/**
+ * Character hide command.
+ * Parent command for commands to hide different character card fields.
+ */
 class CharacterHideCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     private val characterHidePlayerCommand = CharacterHidePlayerCommand(plugin)

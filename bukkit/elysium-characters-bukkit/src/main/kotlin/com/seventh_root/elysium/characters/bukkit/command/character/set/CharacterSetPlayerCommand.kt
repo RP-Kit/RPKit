@@ -27,6 +27,10 @@ import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 
+/**
+ * Character set player command.
+ * Transfers a character to another player.
+ */
 class CharacterSetPlayerCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     private val conversationFactory: ConversationFactory

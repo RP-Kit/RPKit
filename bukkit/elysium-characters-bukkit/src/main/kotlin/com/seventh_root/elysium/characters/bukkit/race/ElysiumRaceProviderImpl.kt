@@ -22,6 +22,9 @@ import com.seventh_root.elysium.core.database.use
 import java.sql.SQLException
 import java.util.*
 
+/**
+ * Race provider implementation.
+ */
 class ElysiumRaceProviderImpl(private val plugin: ElysiumCharactersBukkit): ElysiumRaceProvider {
 
     override fun getRace(id: Int): ElysiumRace? {

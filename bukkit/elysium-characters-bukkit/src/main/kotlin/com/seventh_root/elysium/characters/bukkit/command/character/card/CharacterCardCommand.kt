@@ -25,6 +25,10 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
+/**
+ * Character card command.
+ * Displays the character card of the active character of either the player running the command or the specified player.
+ */
 class CharacterCardCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {

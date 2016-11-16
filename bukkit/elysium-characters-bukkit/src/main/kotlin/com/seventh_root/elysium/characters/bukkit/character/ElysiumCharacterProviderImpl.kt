@@ -28,6 +28,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.SQLException
 import java.util.*
 
+/**
+ * Character provider implementation.
+ */
 class ElysiumCharacterProviderImpl: ElysiumCharacterProvider {
 
     private val plugin: ElysiumCharactersBukkit

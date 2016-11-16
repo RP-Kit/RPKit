@@ -18,7 +18,9 @@ package com.seventh_root.elysium.characters.bukkit.character.field
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 
-
+/**
+ * Character card field for gender.
+ */
 class GenderField: HideableCharacterCardField {
 
     override val name = "gender"

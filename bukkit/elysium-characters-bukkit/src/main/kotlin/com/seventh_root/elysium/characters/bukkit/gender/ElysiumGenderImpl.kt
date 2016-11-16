@@ -16,6 +16,9 @@
 
 package com.seventh_root.elysium.characters.bukkit.gender
 
+/**
+ * Gender implementation.
+ */
 class ElysiumGenderImpl(
         override var id: Int = 0,
         override val name: String

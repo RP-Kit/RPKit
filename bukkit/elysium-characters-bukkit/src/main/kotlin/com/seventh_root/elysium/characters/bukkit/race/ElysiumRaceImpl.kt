@@ -16,6 +16,9 @@
 
 package com.seventh_root.elysium.characters.bukkit.race
 
+/**
+ * Race implementation.
+ */
 class ElysiumRaceImpl(
         override var id: Int = 0,
         override val name: String
