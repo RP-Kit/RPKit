@@ -18,9 +18,22 @@ package com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline
 
 import com.seventh_root.elysium.chat.bukkit.context.UndirectedChatChannelMessageContext
 
-
+/**
+ * An undirected chat channel pipeline component.
+ * This is used in the undirected pipeline for a channel, for messages that are not directed towards a particular
+ * individual.
+ * This means [process] is called once for the message, and the contents of the message are the same for each recipient.
+ * Use cases include sending messages to an IRC channel, and for writing messages to a log file.
+ */
 interface UndirectedChatChannelPipelineComponent {
 
+    /**
+     * Processes a message with the given context.
+     * This will be called once per message.
+     *
+     * @param context The message context
+     * @return The message context, after modifications performed by the component
+     */
     fun process(context: UndirectedChatChannelMessageContext): UndirectedChatChannelMessageContext
 
 }

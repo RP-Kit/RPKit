@@ -21,8 +21,15 @@ import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.service.ServiceProvider
 import net.milkbowl.vault.chat.Chat
 import org.bukkit.plugin.ServicePriority.Normal
+import org.bukkit.plugin.ServicePriority
 
-
+/**
+ * Class to allow chat lib to load as a plugin.
+ * This allows plugins requiring chat or implementing chat to depend on the plugin.
+ * With this plugin loaded, a Vault chat service is added for chat plugins on [ServicePriority.Normal].
+ * If chat plugins wish to provide their own chat service, they should register on [ServicePriority.High]
+ * or [ServicePriority.Highest].
+ */
 class ElysiumChatLibBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {

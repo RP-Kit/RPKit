@@ -22,6 +22,9 @@ import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.permission.Permission
 
+/**
+ * A Vault [Chat] implementation for chat plugins.
+ */
 class ElysiumChatVaultChat(private val plugin: ElysiumChatLibBukkit): Chat(plugin.server.servicesManager.getRegistration(Permission::class.java).provider) {
 
     override fun getGroupPrefix(world: String, group: String): String {

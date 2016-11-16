@@ -20,9 +20,30 @@ import com.seventh_root.elysium.core.service.ServiceProvider
 import org.pircbotx.PircBotX
 import org.pircbotx.User
 
-
+/**
+ * Provides IRC related operations.
+ */
 interface ElysiumIRCProvider: ServiceProvider {
+
+    /**
+     * The IRC bot instance. May be used to send messages to the IRC server, among other operations.
+     */
     val ircBot: PircBotX
+
+    /**
+     * Gets the IRC user with the given nickname.
+     * If no user has the given nickname, null is returned.
+     *
+     * @param nick The nickname of the user
+     * @return The IRC user with the given nickname
+     */
     fun getIRCUser(nick: String): User?
+
+    /**
+     * Adds an IRC user to be tracked by this IRC provider.
+     *
+     * @param user The user to add
+     */
     fun addIRCUser(user: User)
+
 }
