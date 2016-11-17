@@ -19,7 +19,12 @@ package com.seventh_root.elysium.chat.bukkit.chatgroup
 import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
-
+/**
+ * Represents the last used chat group of a player.
+ *
+ * @property player The player
+ * @property chatGroup The player's last used chat group
+ */
 class LastUsedChatGroup(
         override var id: Int = 0,
         val player: ElysiumPlayer,

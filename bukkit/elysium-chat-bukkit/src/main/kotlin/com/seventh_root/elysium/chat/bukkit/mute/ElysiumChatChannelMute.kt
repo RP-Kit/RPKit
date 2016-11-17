@@ -20,7 +20,12 @@ import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
 import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
-
+/**
+ * Represents a chat channel mute.
+ *
+ * @property player The player
+ * @property chatChannel The chat channel muted
+ */
 class ElysiumChatChannelMute(
         override var id: Int = 0,
         val player: ElysiumPlayer,

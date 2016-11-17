@@ -30,7 +30,9 @@ import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
-
+/**
+ * Represents the snooper table.
+ */
 class ElysiumSnooperTable: Table<ElysiumSnooper> {
 
     private val plugin: ElysiumChatBukkit
@@ -129,6 +131,13 @@ class ElysiumSnooperTable: Table<ElysiumSnooper> {
         }
     }
 
+    /**
+     * Gets the snooper instance for a player.
+     * If the player does not have a snooper entry, null is returned.
+     *
+     * @param player The player
+     * @return The snooper instance, or null if none exists
+     */
     fun get(player: ElysiumPlayer): ElysiumSnooper? {
         if (playerCache.containsKey(player.id)) {
             return get(playerCache.get(player.id))
@@ -155,6 +164,11 @@ class ElysiumSnooperTable: Table<ElysiumSnooper> {
         }
     }
 
+    /**
+     * Gets all snoopers
+     *
+     * @return A list containing all snoopers
+     */
     fun getAll(): List<ElysiumSnooper> {
         val snoopers = mutableListOf<ElysiumSnooper>()
         database.createConnection().use { connection ->

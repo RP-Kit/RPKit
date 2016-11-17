@@ -23,7 +23,12 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 
-
+/**
+ * Player command preprocess listener.
+ * Picks up commands before they are sent to normal chat processing, allowing them to be interpreted as chat channel
+ * commands.
+ * Hacky and circumvents the command system, but users are stuck in their ways.
+ */
 class PlayerCommandPreprocessListener(private val plugin: ElysiumChatBukkit): Listener {
 
     @EventHandler

@@ -20,7 +20,9 @@ import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
 import com.seventh_root.elysium.chat.bukkit.context.DirectedChatChannelMessageContext
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
-
+/**
+ * Directed chat channel message context implementation.
+ */
 class DirectedChatChannelMessageContextImpl(
         override val chatChannel: ElysiumChatChannel,
         override val sender: ElysiumPlayer,

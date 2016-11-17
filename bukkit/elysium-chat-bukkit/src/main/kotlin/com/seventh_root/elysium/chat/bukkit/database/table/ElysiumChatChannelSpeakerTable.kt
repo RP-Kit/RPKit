@@ -31,6 +31,9 @@ import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
+/**
+ * Represents the chat channel speaker table
+ */
 class ElysiumChatChannelSpeakerTable: Table<ElysiumChatChannelSpeaker> {
 
     private val plugin: ElysiumChatBukkit
@@ -127,6 +130,12 @@ class ElysiumChatChannelSpeakerTable: Table<ElysiumChatChannelSpeaker> {
         }
     }
 
+    /**
+     * Gets the speaker instance for a player, or null if the player is not speaking in a channel.
+     *
+     * @param player The player
+     * @return The chat channel speaker instance, or null if the player is not currently speaking in a channel.
+     */
     fun get(player: ElysiumPlayer): ElysiumChatChannelSpeaker? {
         var chatChannelSpeaker: ElysiumChatChannelSpeaker? = null
         database.createConnection().use { connection ->

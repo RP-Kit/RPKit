@@ -22,9 +22,17 @@ import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelMut
 import com.seventh_root.elysium.core.service.ServiceProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
-
+/**
+ * Provides chat channel mute related services.
+ */
 class ElysiumChatChannelMuteProvider(private val plugin: ElysiumChatBukkit): ServiceProvider {
 
+    /**
+     * Adds a chat channel mute.
+     *
+     * @param player The player
+     * @param chatChannel The chat channel
+     */
     fun addChatChannelMute(player: ElysiumPlayer, chatChannel: ElysiumChatChannel) {
         if (!hasPlayerMutedChatChannel(player, chatChannel)) {
             plugin.core.database.getTable(ElysiumChatChannelMuteTable::class).insert(
@@ -36,6 +44,12 @@ class ElysiumChatChannelMuteProvider(private val plugin: ElysiumChatBukkit): Ser
         }
     }
 
+    /**
+     * Removes a chat channel mute.
+     *
+     * @param player The player
+     * @param chatChannel The chat channel
+     */
     fun removeChatChannelMute(player: ElysiumPlayer, chatChannel: ElysiumChatChannel) {
         val chatChannelMuteTable = plugin.core.database.getTable(ElysiumChatChannelMuteTable::class)
         val chatChannelMute = chatChannelMuteTable.get(player, chatChannel)
@@ -44,6 +58,13 @@ class ElysiumChatChannelMuteProvider(private val plugin: ElysiumChatBukkit): Ser
         }
     }
 
+    /**
+     * Checks whether a player has muted a chat channel.
+     *
+     * @param player The player
+     * @param chatChannel The chat channel
+     * @return Whether the player has muted the chat channel
+     */
     fun hasPlayerMutedChatChannel(player: ElysiumPlayer, chatChannel: ElysiumChatChannel): Boolean {
         return plugin.core.database.getTable(ElysiumChatChannelMuteTable::class).get(player, chatChannel) != null
     }

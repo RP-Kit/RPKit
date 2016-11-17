@@ -21,6 +21,9 @@ import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatGroupTable
 import com.seventh_root.elysium.chat.bukkit.database.table.LastUsedChatGroupTable
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
+/**
+ * Chat group provider implementation.
+ */
 class ElysiumChatGroupProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumChatGroupProvider {
 
     override fun getChatGroup(id: Int): ElysiumChatGroup? {

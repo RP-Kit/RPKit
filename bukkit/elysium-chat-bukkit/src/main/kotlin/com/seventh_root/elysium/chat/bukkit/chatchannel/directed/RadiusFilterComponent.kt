@@ -21,6 +21,10 @@ import com.seventh_root.elysium.chat.bukkit.context.DirectedChatChannelMessageCo
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
+/**
+ * Radius filter component.
+ * Filters out messages if they are beyond the radius of the channel.
+ */
 @SerializableAs("RadiusFilterComponent")
 class RadiusFilterComponent: DirectedChatChannelPipelineComponent, ConfigurationSerializable {
 

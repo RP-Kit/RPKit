@@ -25,6 +25,10 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 import java.util.*
 
+/**
+ * Garble component.
+ * Garbles messages based on the distance between the sender and receiver of the message.
+ */
 @SerializableAs("GarbleComponent")
 class GarbleComponent(var clearRadius: Double): DirectedChatChannelPipelineComponent, ConfigurationSerializable {
 

@@ -32,7 +32,9 @@ import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement
 
-
+/**
+ * Represents chat group invite table.
+ */
 class ChatGroupInviteTable: Table<ChatGroupInvite> {
 
     private val plugin: ElysiumChatBukkit
@@ -166,6 +168,12 @@ class ChatGroupInviteTable: Table<ChatGroupInvite> {
         }
     }
 
+    /**
+     * Gets a list of invites for a particular chat group.
+     *
+     * @param chatGroup The chat group
+     * @return A list of chat group invites
+     */
     fun get(chatGroup: ElysiumChatGroup): List<ChatGroupInvite> {
         if (chatGroupCache.containsKey(chatGroup.id)) {
             return (chatGroupCache.get(chatGroup.id) as List<Int>).map { id -> get(id)!! }
@@ -190,6 +198,12 @@ class ChatGroupInviteTable: Table<ChatGroupInvite> {
         }
     }
 
+    /**
+     * Gets a list of chat group invites for a particular player.
+     *
+     * @param player The player
+     * @return A list of chat group invites for the player
+     */
     fun get(player: ElysiumPlayer): List<ChatGroupInvite> {
         if (playerCache.containsKey(player.id)) {
             return (playerCache.get(player.id) as List<Int>).map { id -> get(id)!! }

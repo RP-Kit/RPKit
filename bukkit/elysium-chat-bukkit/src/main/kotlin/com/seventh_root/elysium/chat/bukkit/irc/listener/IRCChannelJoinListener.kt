@@ -24,6 +24,10 @@ import org.pircbotx.PircBotX
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.JoinEvent
 
+/**
+ * IRC channel join listener.
+ * Prevents unauthorised users joining whitelisted channels.
+ */
 class IRCChannelJoinListener(private val plugin: ElysiumChatBukkit): ListenerAdapter() {
 
     override fun onJoin(event: JoinEvent) {

@@ -31,7 +31,9 @@ import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
-
+/**
+ * Represents the last used chat group table
+ */
 class LastUsedChatGroupTable: Table<LastUsedChatGroup> {
 
     private val plugin: ElysiumChatBukkit
@@ -134,6 +136,13 @@ class LastUsedChatGroupTable: Table<LastUsedChatGroup> {
         }
     }
 
+    /**
+     * Gets the last used chat group of a player.
+     * If the player has never used a chat group, null is returned.
+     *
+     * @param player The player
+     * @return The player's last used chat group, or null if no chat group has been used
+     */
     fun get(player: ElysiumPlayer): LastUsedChatGroup? {
         if (playerCache.containsKey(player.id)) {
             return get(playerCache.get(player.id))

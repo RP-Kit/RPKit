@@ -21,7 +21,10 @@ import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import org.pircbotx.Channel
 import org.pircbotx.User
 
-
+/**
+ * IRC verify command.
+ * Verifies the IRC bot with NickServ based on the password that was sent to the e-mail when the bot was registered.
+ */
 class IRCVerifyCommand(private val plugin: ElysiumChatBukkit): IRCCommand("verify") {
 
     override fun execute(channel: Channel, sender: User, cmd: IRCCommand, label: String, args: Array<String>) {

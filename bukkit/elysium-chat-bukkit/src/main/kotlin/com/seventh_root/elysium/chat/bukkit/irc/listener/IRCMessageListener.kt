@@ -22,7 +22,10 @@ import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.MessageEvent
 
-
+/**
+ * IRC message listener.
+ * Sends messages to chat channels when received in IRC.
+ */
 class IRCMessageListener(private val plugin: ElysiumChatBukkit): ListenerAdapter() {
 
     override fun onMessage(event: MessageEvent) {

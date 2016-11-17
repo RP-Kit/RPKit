@@ -24,7 +24,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-
+/**
+ * List chat channels command.
+ * Lists available chat channels.
+ */
 class ListChatChannelsCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("elysium.chat.command.listchatchannels")) {

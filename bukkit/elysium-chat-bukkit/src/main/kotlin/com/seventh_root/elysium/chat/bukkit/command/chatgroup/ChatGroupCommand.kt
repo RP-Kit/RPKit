@@ -22,7 +22,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-
+/**
+ * Chat group command.
+ * Parent command for all chat group management commands.
+ */
 class ChatGroupCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
 
     private val chatGroupCreateCommand = ChatGroupCreateCommand(plugin)

@@ -25,7 +25,10 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-
+/**
+ * Chat group invite command.
+ * Invites a player to a chat group.
+ */
 class ChatGroupInviteCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
