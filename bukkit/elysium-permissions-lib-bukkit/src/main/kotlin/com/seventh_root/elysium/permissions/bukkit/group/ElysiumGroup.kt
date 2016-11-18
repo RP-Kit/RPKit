@@ -16,10 +16,29 @@
 
 package com.seventh_root.elysium.permissions.bukkit.group
 
-
+/**
+ * Represents a group.
+ */
 interface ElysiumGroup {
+
+    /**
+     * The name of the group.
+     */
     val name: String
+
+    /**
+     * A list of permissions allowed by the group.
+     */
     val allow: List<String>
+
+    /**
+     * A list of permissions denied by the group.
+     */
     val deny: List<String>
+
+    /**
+     * A list of groups permissions are inherited from.
+     */
     val inheritance: List<ElysiumGroup>
+
 }
