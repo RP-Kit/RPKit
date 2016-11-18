@@ -28,7 +28,9 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 
-
+/**
+ * Elysium permissions plugin default implementation.
+ */
 class ElysiumPermissionsBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {

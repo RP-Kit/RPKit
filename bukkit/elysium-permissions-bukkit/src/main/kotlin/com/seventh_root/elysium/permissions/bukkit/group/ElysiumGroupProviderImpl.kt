@@ -21,7 +21,9 @@ import com.seventh_root.elysium.permissions.bukkit.database.table.PlayerGroupTab
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.bukkit.permissions.PermissionAttachment
 
-
+/**
+ * Group provider implementation.
+ */
 class ElysiumGroupProviderImpl(private val plugin: ElysiumPermissionsBukkit): ElysiumGroupProvider {
 
     override val groups: List<ElysiumGroup> = plugin.config.getList("groups") as List<ElysiumGroupImpl>

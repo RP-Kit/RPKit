@@ -24,7 +24,9 @@ import org.bukkit.event.EventPriority.LOWEST
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 
-
+/**
+ * Player join listener for assigning permissions.
+ */
 class PlayerJoinListener(private val plugin: ElysiumPermissionsBukkit): Listener {
 
     @EventHandler(priority = LOWEST)
