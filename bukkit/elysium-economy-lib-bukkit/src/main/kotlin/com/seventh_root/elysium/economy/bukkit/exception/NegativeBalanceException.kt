@@ -16,4 +16,7 @@
 
 package com.seventh_root.elysium.economy.bukkit.exception
 
+/**
+ * Thrown when a character goes into negative balance.
+ */
 class NegativeBalanceException(): Exception("Balance must not be set to a negative value.")
