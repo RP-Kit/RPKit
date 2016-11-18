@@ -22,6 +22,9 @@ import org.bukkit.util.io.BukkitObjectOutputStream
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
+/**
+ * Converts the item stack to a byte array for serialization.
+ */
 fun ItemStack.toByteArray(): ByteArray {
     ByteArrayOutputStream().use { byteArrayOutputStream ->
         BukkitObjectOutputStream(byteArrayOutputStream).use { bukkitObjectOutputStream ->
