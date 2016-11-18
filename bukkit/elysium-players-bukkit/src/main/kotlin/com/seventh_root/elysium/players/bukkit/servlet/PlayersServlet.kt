@@ -27,6 +27,10 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletResponse.SC_OK
 
+/**
+ * Players servlet.
+ * Serves player list page.
+ */
 class PlayersServlet(private val plugin: ElysiumPlayersBukkit): ElysiumServlet() {
 
     override val url = "/players/"

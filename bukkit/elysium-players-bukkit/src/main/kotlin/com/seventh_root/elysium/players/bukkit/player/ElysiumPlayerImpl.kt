@@ -18,6 +18,9 @@ package com.seventh_root.elysium.players.bukkit.player
 
 import org.bukkit.OfflinePlayer
 
+/**
+ * Player implementation.
+ */
 class ElysiumPlayerImpl(
         override var id: Int = 0,
         override var name: String,

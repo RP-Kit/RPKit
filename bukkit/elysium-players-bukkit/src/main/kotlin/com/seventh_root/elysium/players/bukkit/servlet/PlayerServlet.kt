@@ -29,7 +29,10 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletResponse.*
 
-
+/**
+ * Player servlet.
+ * Serves player pages.
+ */
 class PlayerServlet(private val plugin: ElysiumPlayersBukkit): ElysiumServlet() {
 
     override val url = "/player/*"

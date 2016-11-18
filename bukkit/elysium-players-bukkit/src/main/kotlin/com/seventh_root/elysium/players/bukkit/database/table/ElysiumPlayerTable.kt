@@ -36,6 +36,9 @@ import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.sql.Types.VARCHAR
 import java.util.*
 
+/**
+ * Represents the player table.
+ */
 class ElysiumPlayerTable: Table<ElysiumPlayer> {
 
     private val cacheManager: CacheManager
@@ -233,6 +236,13 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         }
     }
 
+    /**
+     * Gets a player by name.
+     * If no player is found with the given name, null is returned.
+     *
+     * @param name The name of the player
+     * @return The player, or null if no player is found with the given name
+     */
     fun get(name: String): ElysiumPlayer? {
         if (nameCache.containsKey(name)) {
             return get(nameCache.get(name))
@@ -271,6 +281,13 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         }
     }
 
+    /**
+     * Gets a player by Bukkit player instance.
+     * If no player is found linked to the given Bukkit player, null is returned.
+     *
+     * @param bukkitPlayer The Bukkit player instance
+     * @return The player, or null if no player is found linked to the Bukkit player instance
+     */
     fun get(bukkitPlayer: OfflinePlayer): ElysiumPlayer? {
         if (minecraftCache.containsKey(bukkitPlayer.uniqueId.toString())) {
             return get(minecraftCache[bukkitPlayer.uniqueId.toString()])
@@ -312,6 +329,14 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         }
     }
 
+
+    /**
+     * Gets a player by the IRC user instance.
+     * If no player is found linked to the given IRC user, null is returned.
+     *
+     * @param ircUser The IRC user instance
+     * @return The player, or null if no player is found linked to the IRC user instance
+     */
     fun get(ircUser: User): ElysiumPlayer? {
         if (ircCache.containsKey(ircUser.nick)) {
             return get(ircCache.get(ircUser.nick))
@@ -354,6 +379,13 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         }
     }
 
+    /**
+     * Gets a player by an IP address.
+     * If no player last used the given IP address, null is returned.
+     *
+     * @param lastKnownIP The last known IP
+     * @return The player that last used the IP, or null if no player is found that last used the IP
+     */
     fun get(lastKnownIP: InetAddress): ElysiumPlayer? {
         if (ipCache.containsKey(lastKnownIP.hostAddress)) {
             return get(ipCache.get(lastKnownIP.hostAddress))!!

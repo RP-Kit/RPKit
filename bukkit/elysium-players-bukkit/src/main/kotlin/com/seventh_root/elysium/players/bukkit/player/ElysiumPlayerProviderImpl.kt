@@ -23,6 +23,9 @@ import org.bukkit.OfflinePlayer
 import org.pircbotx.User
 import java.net.InetAddress
 
+/**
+ * Player provider implementation.
+ */
 class ElysiumPlayerProviderImpl(private val plugin: ElysiumPlayersBukkit): ElysiumPlayerProvider {
 
     override fun getPlayer(id: Int): ElysiumPlayer? {
