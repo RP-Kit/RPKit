@@ -19,6 +19,9 @@ package com.seventh_root.elysium.economy.bukkit.currency
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
 import com.seventh_root.elysium.economy.bukkit.database.table.ElysiumCurrencyTable
 
+/**
+ * Currency provider implementation.
+ */
 class ElysiumCurrencyProviderImpl(private val plugin: ElysiumEconomyBukkit): ElysiumCurrencyProvider {
 
     override fun getCurrency(id: Int): ElysiumCurrency? {

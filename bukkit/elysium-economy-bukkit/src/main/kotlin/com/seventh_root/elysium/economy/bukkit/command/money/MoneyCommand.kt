@@ -22,6 +22,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
+/**
+ * Money command.
+ * Parent command for all money management commands.
+ */
 class MoneyCommand(val plugin: ElysiumEconomyBukkit): CommandExecutor {
 
     private val moneySubtractCommand = MoneySubtractCommand(plugin)

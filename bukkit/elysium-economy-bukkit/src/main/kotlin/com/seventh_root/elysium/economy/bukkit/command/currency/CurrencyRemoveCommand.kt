@@ -25,6 +25,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
+/**
+ * Currency remove command.
+ * Removes a currency.
+ */
 class CurrencyRemoveCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 

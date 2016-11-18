@@ -31,6 +31,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.PreparedStatement
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
+/**
+ * Represents the money hidden table.
+ */
 class MoneyHiddenTable: Table<MoneyHidden> {
 
     private val plugin: ElysiumEconomyBukkit
@@ -127,6 +130,13 @@ class MoneyHiddenTable: Table<MoneyHidden> {
         }
     }
 
+    /**
+     * Gets the money hidden instance for a character.
+     * If there is no money hidden row for the character, null is returned.
+     *
+     * @param character The character
+     * @return The money hidden instance, or null if there is no money hidden instance for the character
+     */
     fun get(character: ElysiumCharacter): MoneyHidden? {
         if (cache.containsKey(character.id)) {
             return get(characterCache.get(character.id))

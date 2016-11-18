@@ -29,7 +29,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.Conversable
 import org.bukkit.entity.Player
 
-
+/**
+ * Money view command.
+ * Views the money of a player's active character.
+ */
 class MoneyViewCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {

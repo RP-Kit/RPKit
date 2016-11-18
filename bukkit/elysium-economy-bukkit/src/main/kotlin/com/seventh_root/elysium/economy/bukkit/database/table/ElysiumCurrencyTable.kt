@@ -31,7 +31,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.util.*
 
-
+/**
+ * Represents the currency table.
+ */
 class ElysiumCurrencyTable: Table<ElysiumCurrency> {
 
     private val plugin: ElysiumEconomyBukkit
@@ -153,6 +155,13 @@ class ElysiumCurrencyTable: Table<ElysiumCurrency> {
         }
     }
 
+    /**
+     * Gets a currency by name.
+     * If no currency is found with the given name is found, null is returned.
+     *
+     * @param name The name
+     * @return The currency, or null if no currency is found with the given name
+     */
     fun get(name: String): ElysiumCurrency? {
         if (nameCache.containsKey(name)) {
             return get(nameCache.get(name) as Int)
@@ -184,6 +193,11 @@ class ElysiumCurrencyTable: Table<ElysiumCurrency> {
         }
     }
 
+    /**
+     * Gets all currencies contained in the table.
+     *
+     * @return A collection containing all currencies.
+     */
     fun getAll(): Collection<ElysiumCurrency> {
         val currencies = ArrayList<ElysiumCurrency>()
         database.createConnection().use { connection ->

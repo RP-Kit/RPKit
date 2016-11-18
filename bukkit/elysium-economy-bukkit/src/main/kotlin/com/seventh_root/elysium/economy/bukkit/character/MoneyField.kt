@@ -23,6 +23,10 @@ import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
 import com.seventh_root.elysium.economy.bukkit.database.table.MoneyHiddenTable
 import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProvider
 
+/**
+ * Character card field for money.
+ * Shows money for all currencies, separated by ", "
+ */
 class MoneyField(val plugin: ElysiumEconomyBukkit): HideableCharacterCardField {
 
     override val name = "money"

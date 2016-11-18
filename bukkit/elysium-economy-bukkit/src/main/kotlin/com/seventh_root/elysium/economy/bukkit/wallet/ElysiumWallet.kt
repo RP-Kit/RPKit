@@ -17,10 +17,16 @@
 package com.seventh_root.elysium.economy.bukkit.wallet
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
-import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 import com.seventh_root.elysium.core.database.Entity
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 
-
+/**
+ * Represents a wallet.
+ *
+ * @property character The owner of the wallet
+ * @property currency The currency of the contents of the wallet
+ * @property balance The balance currently contained in the wallet
+ */
 data class ElysiumWallet(
         override var id: Int = 0,
         val character: ElysiumCharacter,
