@@ -18,6 +18,7 @@ package com.seventh_root.elysium.economy.bukkit.currency
 
 import com.seventh_root.elysium.core.database.Entity
 import org.bukkit.Material
+import java.lang.Math.floor
 
 /**
  * Represents a currency.
@@ -63,8 +64,8 @@ interface ElysiumCurrency: Entity {
      * @param currency The currency to convert to
      * @return The amount converted into the currency
      */
-    fun convert(amount: Double, currency: ElysiumCurrency): Double {
-        return (amount / rate) * currency.rate;
+    fun convert(amount: Int, currency: ElysiumCurrency): Int {
+        return floor((amount.toDouble() / rate) * currency.rate).toInt()
     }
 
 }
