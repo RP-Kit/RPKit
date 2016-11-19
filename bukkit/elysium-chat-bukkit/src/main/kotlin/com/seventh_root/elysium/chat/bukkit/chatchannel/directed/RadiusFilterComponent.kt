@@ -30,8 +30,32 @@ class RadiusFilterComponent: DirectedChatChannelPipelineComponent, Configuration
 
     override fun process(context: DirectedChatChannelMessageContext): DirectedChatChannelMessageContext {
         if (context.isCancelled) return context
-        context.isCancelled = context.sender.bukkitPlayer?.player?.location
-                ?.distanceSquared(context.receiver.bukkitPlayer?.player?.location)?:Double.MAX_VALUE > context.chatChannel.radius * context.chatChannel.radius
+        val senderBukkitPlayer = context.sender.bukkitPlayer
+        val receiverBukkitPlayer = context.receiver.bukkitPlayer
+        if (senderBukkitPlayer != null && receiverBukkitPlayer != null) {
+            val senderBukkitOnlinePlayer = senderBukkitPlayer.player
+            val receiverBukkitOnlinePlayer = receiverBukkitPlayer.player
+            if (senderBukkitOnlinePlayer != null && receiverBukkitOnlinePlayer != null) {
+                val senderLocation = senderBukkitOnlinePlayer.location
+                val receiverLocation = receiverBukkitOnlinePlayer.location
+                if (senderLocation.world == receiverLocation.world) {
+                    if (senderLocation.distanceSquared(receiverLocation) > context.chatChannel.radius * context.chatChannel.radius) {
+                        context.isCancelled = true
+                    }
+                    // If there is a radius filter in place, the only situation where the message is not cancelled
+                    // is both players having a Minecraft player online AND the players being in the same world,
+                    // within the chat channel's radius.
+                    // If any of these conditions fail, the message is cancelled, otherwise it maintains the same
+                    // cancelled state as before reaching the component.
+                } else {
+                    context.isCancelled = true
+                }
+            } else {
+                context.isCancelled = true
+            }
+        } else {
+            context.isCancelled = true
+        }
         return context
     }
 
