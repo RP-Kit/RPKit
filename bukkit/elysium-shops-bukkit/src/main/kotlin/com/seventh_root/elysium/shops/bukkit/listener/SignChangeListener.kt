@@ -30,7 +30,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.SignChangeEvent
 
-
+/**
+ * Sign change listener for shops.
+ */
 class SignChangeListener(private val plugin: ElysiumShopsBukkit): Listener {
 
     @EventHandler

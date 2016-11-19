@@ -32,7 +32,9 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 
-
+/**
+ * Inventory click listener for shops.
+ */
 class InventoryClickListener(val plugin: ElysiumShopsBukkit): Listener {
 
     @EventHandler

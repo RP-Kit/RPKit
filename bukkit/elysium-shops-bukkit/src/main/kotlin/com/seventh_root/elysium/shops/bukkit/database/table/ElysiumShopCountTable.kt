@@ -30,7 +30,9 @@ import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
-
+/**
+ * Represents the shop count table.
+ */
 class ElysiumShopCountTable: Table<ElysiumShopCount> {
 
     private val plugin: ElysiumShopsBukkit
@@ -134,6 +136,13 @@ class ElysiumShopCountTable: Table<ElysiumShopCount> {
         }
     }
 
+    /**
+     * Gets the shop count for a character.
+     * If there is no shop count for the given character
+     *
+     * @param character The character
+     * @return The shop count for the character, or null if there is no shop count for the given character
+     */
     fun get(character: ElysiumCharacter): ElysiumShopCount? {
         if (characterCache.containsKey(character.id)) {
             return get(characterCache.get(character.id) as Int)
