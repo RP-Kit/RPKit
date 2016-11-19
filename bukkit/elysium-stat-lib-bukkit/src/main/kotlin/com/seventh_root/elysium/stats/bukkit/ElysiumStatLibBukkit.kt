@@ -18,6 +18,8 @@ package com.seventh_root.elysium.stats.bukkit
 
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 
-
-class ElysiumStatLibBukkit: ElysiumBukkitPlugin() {
-}
+/**
+ * Class to allow stat lib to load as a plugin.
+ * This allows plugins requiring stats or implementing stats to depend on the plugin.
+ */
+class ElysiumStatLibBukkit: ElysiumBukkitPlugin()

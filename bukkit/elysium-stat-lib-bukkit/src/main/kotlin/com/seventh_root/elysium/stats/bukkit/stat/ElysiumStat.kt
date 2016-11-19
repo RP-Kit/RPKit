@@ -19,8 +19,29 @@ package com.seventh_root.elysium.stats.bukkit.stat
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.core.database.Entity
 
+/**
+ * Represents a stat.
+ */
 interface ElysiumStat: Entity {
+
+    /**
+     * The name of the stat.
+     */
     val name: String
+
+    /**
+     * The script used to calculate the stat.
+     * Written in JavaScript, parsed with Nashorn.
+     */
     val script: String
+
+    /**
+     * Gets the stat for the given character, and the given stat variables.
+     *
+     * @param character The character
+     * @param variables A list containing all variables required to get the stat.
+     *                  Usually [ElysiumStatVariableProvider.statVariables]
+     */
     fun get(character: ElysiumCharacter, variables: List<ElysiumStatVariable>): Int
+
 }
