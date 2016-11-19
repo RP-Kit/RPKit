@@ -20,7 +20,9 @@ import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import javax.script.ScriptContext.ENGINE_SCOPE
 import javax.script.ScriptEngineManager
 
-
+/**
+ * Stat implementation.
+ */
 class ElysiumStatImpl(
         override var id: Int = 0,
         override val name: String,

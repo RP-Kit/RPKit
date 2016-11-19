@@ -18,7 +18,9 @@ package com.seventh_root.elysium.stats.bukkit.stat
 
 import com.seventh_root.elysium.stats.bukkit.ElysiumStatsBukkit
 
-
+/**
+ * Stat provider implementation.
+ */
 class ElysiumStatProviderImpl(private val plugin: ElysiumStatsBukkit): ElysiumStatProvider {
 
     override val stats: List<ElysiumStat>

@@ -27,7 +27,10 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-
+/**
+ * Stats command.
+ * Shows all stat values for the player's active character.
+ */
 class StatsCommand(private val plugin: ElysiumStatsBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {

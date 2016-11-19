@@ -28,7 +28,9 @@ import com.seventh_root.elysium.stats.bukkit.stat.ElysiumStatVariable
 import com.seventh_root.elysium.stats.bukkit.stat.ElysiumStatVariableProviderImpl
 import org.bukkit.inventory.ItemStack
 
-
+/**
+ * Elysium stats plugin default implementation.
+ */
 class ElysiumStatsBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {
