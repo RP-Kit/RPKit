@@ -20,11 +20,24 @@ import com.seventh_root.elysium.auctions.bukkit.auction.ElysiumAuction
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.core.database.Entity
 
-
+/**
+ * Represents a bid.
+ */
 interface ElysiumBid: Entity {
 
+    /**
+     * The auction that this bid is for.
+     */
     val auction: ElysiumAuction
+
+    /**
+     * The character that made this bid.
+     */
     val character: ElysiumCharacter
+
+    /**
+     * The amount this bid is for. The currency is defined by the auction.
+     */
     val amount: Int
 
 }

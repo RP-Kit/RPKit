@@ -19,7 +19,11 @@ package com.seventh_root.elysium.economy.bukkit.character
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.core.database.Entity
 
-
+/**
+ * An entity to contain which characters have their money hidden.
+ *
+ * @property character The character
+ */
 class MoneyHidden(
         override var id: Int = 0,
         val character: ElysiumCharacter

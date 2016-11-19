@@ -19,6 +19,9 @@ package com.seventh_root.elysium.permissions.bukkit.group
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
+/**
+ * Group implementation.
+ */
 @SerializableAs("ElysiumGroupImpl")
 data class ElysiumGroupImpl(
         override val name: String,

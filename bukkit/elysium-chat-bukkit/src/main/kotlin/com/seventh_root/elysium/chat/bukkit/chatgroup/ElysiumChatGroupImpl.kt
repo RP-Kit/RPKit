@@ -24,6 +24,9 @@ import com.seventh_root.elysium.chat.bukkit.prefix.ElysiumPrefixProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.bukkit.ChatColor
 
+/**
+ * Chat group implementation.
+ */
 class ElysiumChatGroupImpl(
         private val plugin: ElysiumChatBukkit,
         override var id: Int = 0,

@@ -23,7 +23,9 @@ import com.seventh_root.elysium.shops.bukkit.listener.PlayerInteractListener
 import com.seventh_root.elysium.shops.bukkit.listener.SignChangeListener
 import com.seventh_root.elysium.shops.bukkit.shopcount.ElysiumShopCountProviderImpl
 
-
+/**
+ * Elysium shops plugin default implementation.
+ */
 class ElysiumShopsBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {

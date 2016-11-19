@@ -19,7 +19,9 @@ package com.seventh_root.elysium.auctions.bukkit.auction
 import com.seventh_root.elysium.auctions.bukkit.ElysiumAuctionsBukkit
 import com.seventh_root.elysium.auctions.bukkit.database.table.ElysiumAuctionTable
 
-
+/**
+ * Auction provider implementation.
+ */
 class ElysiumAuctionProviderImpl(private val plugin: ElysiumAuctionsBukkit): ElysiumAuctionProvider {
 
     override fun getAuction(id: Int): ElysiumAuction? {

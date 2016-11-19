@@ -22,6 +22,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
+/**
+ * Character set command.
+ * Parent command for commands used to set character attributes.
+ */
 class CharacterSetCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     private val characterSetPlayerCommand: CharacterSetPlayerCommand

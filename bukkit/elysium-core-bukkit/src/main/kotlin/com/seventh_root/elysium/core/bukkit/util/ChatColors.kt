@@ -37,6 +37,9 @@ private val LIGHT_PURPLE = Color(255, 85, 255)
 private val YELLOW = Color(255, 255, 85)
 private val WHITE = Color(255, 255, 255)
 
+/**
+ * Gets the closest Bukkit chat color to the color.
+ */
 fun Color.closestChatColor(): ChatColor {
     var minDistSquared = java.lang.Double.MAX_VALUE
     var closest: ChatColor? = null
@@ -53,6 +56,9 @@ fun Color.closestChatColor(): ChatColor {
     return closest!!
 }
 
+/**
+ * Gets the color of this chat color.
+ */
 fun ChatColor.toColor(): Color? {
     when (this) {
         ChatColor.BLACK -> return BLACK

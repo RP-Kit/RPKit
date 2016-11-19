@@ -25,7 +25,10 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-
+/**
+ * Character hide race command.
+ * Hides character's race.
+ */
 class CharacterHideRaceCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {

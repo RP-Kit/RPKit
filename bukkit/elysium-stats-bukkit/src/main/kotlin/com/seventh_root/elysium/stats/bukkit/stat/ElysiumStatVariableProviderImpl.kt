@@ -18,6 +18,9 @@ package com.seventh_root.elysium.stats.bukkit.stat
 
 import com.seventh_root.elysium.stats.bukkit.ElysiumStatsBukkit
 
+/**
+ * Stat variable provider implementation.
+ */
 class ElysiumStatVariableProviderImpl(private val plugin: ElysiumStatsBukkit): ElysiumStatVariableProvider {
 
     override val statVariables: MutableList<ElysiumStatVariable> = mutableListOf()

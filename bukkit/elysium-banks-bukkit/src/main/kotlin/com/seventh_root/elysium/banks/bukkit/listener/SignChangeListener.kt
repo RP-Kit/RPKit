@@ -24,7 +24,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.SignChangeEvent
 
-
+/**
+ * Sign change listener for bank signs.
+ */
 class SignChangeListener(private val plugin: ElysiumBanksBukkit): Listener {
     @EventHandler
     fun onSignChange(event: SignChangeEvent) {

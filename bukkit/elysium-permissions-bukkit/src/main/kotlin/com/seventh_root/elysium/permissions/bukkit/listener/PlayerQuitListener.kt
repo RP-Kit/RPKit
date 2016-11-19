@@ -23,7 +23,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 
-
+/**
+ * Player quit listener for unassigning permissions.
+ */
 class PlayerQuitListener(private val plugin: ElysiumPermissionsBukkit): Listener {
 
     @EventHandler

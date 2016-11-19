@@ -23,6 +23,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
+/**
+ * Currency list command.
+ * Lists available currencies.
+ */
 class CurrencyListCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {

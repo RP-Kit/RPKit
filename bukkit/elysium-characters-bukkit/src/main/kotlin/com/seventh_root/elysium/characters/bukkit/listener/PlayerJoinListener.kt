@@ -23,7 +23,11 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 
-
+/**
+ * Player join listener for display names.
+ * Updates player display names upon joining in order to allow for chat plugins that do not have built-in Elysium
+ * support to utilise character names.
+ */
 class PlayerJoinListener(val plugin: ElysiumCharactersBukkit): Listener {
 
     @EventHandler

@@ -26,6 +26,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
+/**
+ * Character delete command.
+ * Deletes a character.
+ */
 class CharacterDeleteCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
     private val confirmationConversationFactory: ConversationFactory

@@ -21,7 +21,10 @@ import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import org.pircbotx.Channel
 import org.pircbotx.User
 
-
+/**
+ * IRC register command.
+ * Registers the IRC bot with NickServ on the server using the password given in the config, and the e-mail specified.
+ */
 class IRCRegisterCommand(private val plugin: ElysiumChatBukkit): IRCCommand("register") {
 
     override fun execute(channel: Channel, sender: User, cmd: IRCCommand, label: String, args: Array<String>) {

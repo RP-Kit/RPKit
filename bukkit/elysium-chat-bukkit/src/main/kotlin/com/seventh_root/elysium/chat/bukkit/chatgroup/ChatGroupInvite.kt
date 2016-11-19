@@ -19,7 +19,12 @@ package com.seventh_root.elysium.chat.bukkit.chatgroup
 import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
-
+/**
+ * Represents a chat group invite.
+ *
+ * @property chatGroup The chat group the invite is for
+ * @property player The player invited
+ */
 class ChatGroupInvite(
         override var id: Int = 0,
         val chatGroup: ElysiumChatGroup,

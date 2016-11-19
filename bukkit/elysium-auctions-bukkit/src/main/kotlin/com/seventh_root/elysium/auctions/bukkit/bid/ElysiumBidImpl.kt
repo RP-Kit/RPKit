@@ -19,6 +19,9 @@ package com.seventh_root.elysium.auctions.bukkit.bid
 import com.seventh_root.elysium.auctions.bukkit.auction.ElysiumAuction
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 
+/**
+ * Bid implementation.
+ */
 class ElysiumBidImpl(
         override var id: Int = 0,
         override val auction: ElysiumAuction,

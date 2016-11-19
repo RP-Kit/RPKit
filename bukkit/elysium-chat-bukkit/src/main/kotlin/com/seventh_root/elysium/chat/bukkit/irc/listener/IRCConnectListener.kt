@@ -23,7 +23,10 @@ import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.ConnectEvent
 
-
+/**
+ * IRC connect listener.
+ * Joins each of the channels upon connecting.
+ */
 class IRCConnectListener(private val plugin: ElysiumChatBukkit): ListenerAdapter() {
 
     override fun onConnect(event: ConnectEvent?) {

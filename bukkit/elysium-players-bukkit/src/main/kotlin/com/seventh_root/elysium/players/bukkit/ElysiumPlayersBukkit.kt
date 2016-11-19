@@ -30,6 +30,9 @@ import com.seventh_root.elysium.players.bukkit.servlet.PlayersServlet
 import com.seventh_root.elysium.players.bukkit.servlet.api.v0_4.PlayerAPIServlet
 import java.sql.SQLException
 
+/**
+ * Elysium players plugin default implementation.
+ */
 class ElysiumPlayersBukkit: ElysiumBukkitPlugin() {
 
     private lateinit var playerProvider: ElysiumPlayerProvider

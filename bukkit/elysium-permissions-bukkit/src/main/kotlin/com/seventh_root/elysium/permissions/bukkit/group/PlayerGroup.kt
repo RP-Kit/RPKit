@@ -17,10 +17,14 @@
 package com.seventh_root.elysium.permissions.bukkit.group
 
 import com.seventh_root.elysium.core.database.Entity
-import com.seventh_root.elysium.permissions.bukkit.group.ElysiumGroup
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
-
+/**
+ * Represents a player group.
+ *
+ * @property player The player
+ * @property group The group
+ */
 class PlayerGroup(
         override var id: Int = 0,
         val player: ElysiumPlayer,

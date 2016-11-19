@@ -18,8 +18,21 @@ package com.seventh_root.elysium.stats.bukkit.stat
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 
-
+/**
+ * Represents a stat variable.
+ * Used when calculating stats.
+ */
 interface ElysiumStatVariable {
+
+    /**
+     * The name of the variable.
+     */
     val name: String
+
+    /**
+     * Gets the value of the variable for the given character.
+     * This may be any type, and should be documented with the supplier of the variable implementation.
+     */
     fun get(character: ElysiumCharacter): Any?
+
 }

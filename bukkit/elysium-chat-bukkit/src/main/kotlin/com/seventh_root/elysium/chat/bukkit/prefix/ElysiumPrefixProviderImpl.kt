@@ -20,7 +20,9 @@ import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import org.bukkit.ChatColor
 
-
+/**
+ * Prefix provider implementation.
+ */
 class ElysiumPrefixProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumPrefixProvider {
 
     override val prefixes: List<ElysiumPrefix> = plugin.config.getConfigurationSection("prefixes")

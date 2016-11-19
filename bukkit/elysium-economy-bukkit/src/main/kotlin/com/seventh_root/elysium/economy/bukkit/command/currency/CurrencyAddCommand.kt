@@ -27,6 +27,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
+/**
+ * Currency add command.
+ * Adds a currency.
+ */
 class CurrencyAddCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor {
     private val conversationFactory = ConversationFactory(plugin)
             .withModality(true)

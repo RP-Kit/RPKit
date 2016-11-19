@@ -21,6 +21,10 @@ import com.seventh_root.elysium.chat.bukkit.context.DirectedChatChannelMessageCo
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
+/**
+ * Send message component.
+ * Sends message to the receiver.
+ */
 @SerializableAs("SendMessageComponent")
 class SendMessageComponent: DirectedChatChannelPipelineComponent, ConfigurationSerializable {
 

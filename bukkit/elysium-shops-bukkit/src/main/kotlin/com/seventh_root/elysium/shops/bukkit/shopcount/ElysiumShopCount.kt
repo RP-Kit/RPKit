@@ -19,7 +19,12 @@ package com.seventh_root.elysium.shops.bukkit.shopcount
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.core.database.Entity
 
-
+/**
+ * Represents a shop count.
+ *
+ * @property character The character
+ * @property count The amount of shops owned by the character
+ */
 class ElysiumShopCount(
         override var id: Int = 0,
         val character: ElysiumCharacter,

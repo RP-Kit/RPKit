@@ -18,7 +18,14 @@ package com.seventh_root.elysium.characters.bukkit.gender
 
 import com.seventh_root.elysium.core.database.Entity
 
-
+/**
+ * Represents a gender.
+ */
 interface ElysiumGender: Entity {
+
+    /**
+     * The name of the gender.
+     */
     val name: String
+
 }

@@ -25,7 +25,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.SignChangeEvent
 
-
+/**
+ * Sign change listener for trader signs.
+ */
 class SignChangeListener(private val plugin: ElysiumTradeBukkit): Listener {
 
     @EventHandler

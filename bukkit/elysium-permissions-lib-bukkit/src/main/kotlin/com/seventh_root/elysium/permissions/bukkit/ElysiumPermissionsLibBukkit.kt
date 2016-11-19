@@ -18,5 +18,8 @@ package com.seventh_root.elysium.permissions.bukkit
 
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 
-
+/**
+ * Class to allow permissions lib to load as a plugin.
+ * This allows plugins requiring permissions or implementing permissions to depend on the plugin.
+ */
 class ElysiumPermissionsLibBukkit: ElysiumBukkitPlugin()

@@ -22,7 +22,11 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-
+/**
+ * Represents the auction command.
+ * Parent for all auction management commands.
+ * Currently, the only accepted operation is to create an auction by specifying 'create' or 'new'.
+ */
 class AuctionCommand(private val plugin: ElysiumAuctionsBukkit): CommandExecutor {
 
     private val auctionCreateCommand = AuctionCreateCommand(plugin)

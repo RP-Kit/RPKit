@@ -26,6 +26,10 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.inventory.EquipmentSlot.HAND
 
+/**
+ * Player interact entity listener for character cards.
+ * This shows character cards upon right-clicking players.
+ */
 class PlayerInteractEntityListener(private val plugin: ElysiumCharactersBukkit): Listener {
 
     @EventHandler

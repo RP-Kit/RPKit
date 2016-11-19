@@ -17,7 +17,9 @@
 package com.seventh_root.elysium.characters.bukkit
 
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
-import com.seventh_root.elysium.core.service.ServiceProvider
 
-
+/**
+ * Class to allow character lib to load as a plugin.
+ * This allows plugins requiring characters or implementing characters to depend on the plugin.
+ */
 class ElysiumCharacterLibBukkit: ElysiumBukkitPlugin()

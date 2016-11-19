@@ -17,12 +17,12 @@
 package com.seventh_root.elysium.economy.bukkit.command.money
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
-import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
-import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
 import com.seventh_root.elysium.economy.bukkit.ElysiumEconomyBukkit
+import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrencyProvider
 import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
@@ -31,7 +31,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-
+/**
+ * Money subtract command.
+ * Takes money from a player's active character.
+ */
 class MoneySubtractCommand(val plugin: ElysiumEconomyBukkit): CommandExecutor {
 
     private val conversationFactory = ConversationFactory(plugin)

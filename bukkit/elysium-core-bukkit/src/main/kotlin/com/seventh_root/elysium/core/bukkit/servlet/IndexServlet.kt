@@ -25,7 +25,9 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletResponse.SC_OK
 
-
+/**
+ * Servlet for Elysium index page.
+ */
 class IndexServlet(private val plugin: ElysiumCoreBukkit): ElysiumServlet() {
 
     override val url = "/"

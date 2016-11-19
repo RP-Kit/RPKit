@@ -22,6 +22,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 
+/**
+ * Player join listener for creating player instance.
+ */
 class PlayerJoinListener(private val plugin: ElysiumPlayersBukkit): Listener {
 
     @EventHandler

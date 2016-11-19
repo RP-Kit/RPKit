@@ -16,7 +16,9 @@
 
 package com.seventh_root.elysium.chat.bukkit.prefix
 
-
+/**
+ * Prefix implementation.
+ */
 class ElysiumPrefixImpl(
         override var id: Int = 0,
         override val name: String,

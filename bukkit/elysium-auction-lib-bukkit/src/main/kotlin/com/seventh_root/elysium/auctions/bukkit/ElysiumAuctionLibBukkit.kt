@@ -19,9 +19,11 @@ package com.seventh_root.elysium.auctions.bukkit
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.service.ServiceProvider
 
-
+/**
+ * Class to allow auction lib to load as a plugin.
+ * This allows plugins requiring auctions or implementing auctions to depend on the plugin.
+ */
 class ElysiumAuctionLibBukkit: ElysiumBukkitPlugin() {
-
 
     override fun onEnable() {
         serviceProviders = arrayOf<ServiceProvider>()

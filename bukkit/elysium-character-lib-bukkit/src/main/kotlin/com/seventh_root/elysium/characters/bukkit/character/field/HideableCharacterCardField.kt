@@ -18,10 +18,29 @@ package com.seventh_root.elysium.characters.bukkit.character.field
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 
-
+/**
+ * Represents a hideable character card field.
+ * Hideable character card fields can be set to hidden, which prevents their contents from being shown on the character
+ * card.
+ * What should be visible when the character card field is hidden is up to the implementation, and should be included
+ * in the [get] method.
+ */
 interface HideableCharacterCardField: CharacterCardField {
 
+    /**
+     * Checks whether the field is hidden for the given character.
+     *
+     * @param character The character to check
+     * @return Whether the field is hidden
+     */
     fun isHidden(character: ElysiumCharacter): Boolean
+
+    /**
+     * Sets whether the field is hidden for the given character.
+     *
+     * @param character The character to set the field's hidden state for
+     * @param hidden Whether the field should be hidden for the given character
+     */
     fun setHidden(character: ElysiumCharacter, hidden: Boolean)
 
 }

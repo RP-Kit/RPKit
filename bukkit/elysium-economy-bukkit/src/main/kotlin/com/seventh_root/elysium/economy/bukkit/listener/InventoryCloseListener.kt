@@ -26,6 +26,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryCloseEvent
 
+/**
+ * Inventory close listener for wallets.
+ */
 class InventoryCloseListener(private val plugin: ElysiumEconomyBukkit): Listener {
 
     @EventHandler

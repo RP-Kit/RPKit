@@ -26,6 +26,10 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
+/**
+ * Character new command.
+ * Creates a new character, then allows the player to modify fields from the defaults (specified in the config).
+ */
 class CharacterNewCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {

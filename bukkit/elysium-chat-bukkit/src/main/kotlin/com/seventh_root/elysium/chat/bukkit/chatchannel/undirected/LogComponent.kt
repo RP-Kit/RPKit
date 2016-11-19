@@ -29,6 +29,10 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Log component.
+ * Logs messages to a dated log file.
+ */
 @SerializableAs("LogComponent")
 class LogComponent(private val plugin: ElysiumChatBukkit): UndirectedChatChannelPipelineComponent, ConfigurationSerializable {
 

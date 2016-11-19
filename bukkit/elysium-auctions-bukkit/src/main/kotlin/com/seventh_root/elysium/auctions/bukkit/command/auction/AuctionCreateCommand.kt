@@ -30,7 +30,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
-
+/**
+ * Auction creation command.
+ * Currently does not take any further arguments, instead using conversations to obtain data needed to create the auction.
+ */
 class AuctionCreateCommand(private val plugin: ElysiumAuctionsBukkit): CommandExecutor {
 
     val conversationFactory: ConversationFactory = ConversationFactory(plugin)

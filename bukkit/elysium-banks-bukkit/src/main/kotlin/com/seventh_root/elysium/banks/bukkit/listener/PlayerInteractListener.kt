@@ -31,7 +31,9 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK
 import org.bukkit.event.player.PlayerInteractEvent
 
-
+/**
+ * Player interact listener for bank signs.
+ */
 class PlayerInteractListener(private val plugin: ElysiumBanksBukkit): Listener {
 
     @EventHandler

@@ -25,7 +25,10 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-
+/**
+ * Character unhide gender command.
+ * Unhides character's gender.
+ */
 class CharacterUnhideGenderCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {

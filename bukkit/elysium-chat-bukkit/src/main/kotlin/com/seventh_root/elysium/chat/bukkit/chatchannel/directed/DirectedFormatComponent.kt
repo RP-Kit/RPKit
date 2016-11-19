@@ -27,6 +27,10 @@ import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
+/**
+ * Directed format component.
+ * Formats messages for individual receivers of a message.
+ */
 @SerializableAs("DirectedFormatComponent")
 class DirectedFormatComponent(private val plugin: ElysiumChatBukkit, val formatString: String): DirectedChatChannelPipelineComponent, ConfigurationSerializable {
 

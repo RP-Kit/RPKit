@@ -16,8 +16,15 @@
 
 package com.seventh_root.elysium.core.database
 
+/**
+ * Represents a database entity.
+ */
 interface Entity {
 
+    /**
+     * The ID of the entity.
+     * Used for database lookups. Guaranteed to be unique for the table.
+     */
     var id: Int
 
 }

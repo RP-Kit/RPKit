@@ -22,6 +22,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
+/**
+ * Race command.
+ * Parent for all race management commands.
+ */
 class RaceCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val raceAddCommand: RaceAddCommand
     private val raceRemoveCommand: RaceRemoveCommand

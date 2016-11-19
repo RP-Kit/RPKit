@@ -22,6 +22,9 @@ import com.seventh_root.elysium.core.database.use
 import java.sql.SQLException
 import java.util.*
 
+/**
+ * Gender provider implementation.
+ */
 class ElysiumGenderProviderImpl(private val plugin: ElysiumCharactersBukkit): ElysiumGenderProvider {
 
     override fun getGender(id: Int): ElysiumGender? {

@@ -19,15 +19,50 @@ package com.seventh_root.elysium.economy.bukkit.currency
 import com.seventh_root.elysium.core.database.Entity
 import org.bukkit.Material
 
+/**
+ * Represents a currency.
+ */
 interface ElysiumCurrency: Entity {
 
+    /**
+     * The name of the currency.
+     */
     var name: String
+
+    /**
+     * The singular form of the name of the currency.
+     * Used when referring to one of the currency.
+     */
     var nameSingular: String
+
+    /**
+     * The plural form of the currency.
+     * Used when referring to anything except one of the currency.
+     */
     var namePlural: String
+
+    /**
+     * The rate of conversion of the currency.
+     */
     var rate: Double
+
+    /**
+     * The default amount of the currency owned by characters upon starting.
+     */
     var defaultAmount: Int
+
+    /**
+     * The material used to represent the currency as a physical item.
+     */
     var material: Material
 
+    /**
+     * Converts an amount of the currency to another currency.
+     *
+     * @param amount The amount to convert
+     * @param currency The currency to convert to
+     * @return The amount converted into the currency
+     */
     fun convert(amount: Double, currency: ElysiumCurrency): Double {
         return (amount / rate) * currency.rate;
     }

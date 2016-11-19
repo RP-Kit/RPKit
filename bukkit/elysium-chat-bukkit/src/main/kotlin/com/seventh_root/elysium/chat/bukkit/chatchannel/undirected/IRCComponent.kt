@@ -25,6 +25,10 @@ import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
+/**
+ * IRC component.
+ * Sends message to IRC channel.
+ */
 @SerializableAs("IRCComponent")
 class IRCComponent(
         private val plugin: ElysiumChatBukkit,

@@ -32,6 +32,9 @@ import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
+/**
+ * Represents the chat channel mute table
+ */
 class ElysiumChatChannelMuteTable: Table<ElysiumChatChannelMute> {
 
     private val plugin: ElysiumChatBukkit
@@ -128,6 +131,13 @@ class ElysiumChatChannelMuteTable: Table<ElysiumChatChannelMute> {
         }
     }
 
+    /**
+     * Gets the chat channel mute instance for a player in a channel, or null if there is none.
+     *
+     * @param player The player
+     * @param chatChannel The chat channel
+     * @return A chat channel mute instance, or null if none exists
+     */
     fun get(player: ElysiumPlayer, chatChannel: ElysiumChatChannel): ElysiumChatChannelMute? {
         var chatChannelMute: ElysiumChatChannelMute? = null
         database.createConnection().use { connection ->

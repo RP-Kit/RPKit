@@ -30,6 +30,10 @@ import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import java.sql.SQLException
 
+/**
+ * Elysium's core, Bukkit implementation.
+ * Allows Elysium to function on Bukkit.
+ */
 class ElysiumCoreBukkit: ElysiumBukkitPlugin() {
 
     lateinit var servletContext: ServletContextHandler
@@ -61,18 +65,33 @@ class ElysiumCoreBukkit: ElysiumBukkitPlugin() {
         registerListeners(PluginEnableListener(this))
     }
 
+    /**
+     * Registers the service providers of a plugin.
+     *
+     * @param plugin The plugin
+     */
     fun registerServiceProviders(plugin: ElysiumBukkitPlugin) {
         for (provider in plugin.serviceProviders) {
             core.serviceManager.registerServiceProvider(provider)
         }
     }
 
+    /**
+     * Registers the servlets of the plugin.
+     *
+     * @param plugin The plugin
+     */
     fun registerServlets(plugin: ElysiumBukkitPlugin) {
         for (servlet in plugin.servlets) {
             servletContext.addServlet(ServletHolder(servlet), servlet.url)
         }
     }
 
+    /**
+     * Initializes an Elysium plugin.
+     *
+     * @param elysiumBukkitPlugin The plugin to initialize
+     */
     fun initializePlugin(elysiumBukkitPlugin: ElysiumBukkitPlugin) {
         elysiumBukkitPlugin.core = core
         try {

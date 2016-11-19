@@ -24,6 +24,9 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletResponse.*
 
+/**
+ * Player API v0.4 servlet.
+ */
 class PlayerAPIServlet(private val plugin: ElysiumPlayersBukkit): ElysiumServlet() {
 
     override val url = "/api/v0.4/player/*"

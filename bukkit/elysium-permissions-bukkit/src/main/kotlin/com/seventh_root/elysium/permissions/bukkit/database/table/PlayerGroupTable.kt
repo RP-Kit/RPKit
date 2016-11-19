@@ -20,8 +20,8 @@ import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.database.Table
 import com.seventh_root.elysium.core.database.use
 import com.seventh_root.elysium.permissions.bukkit.ElysiumPermissionsBukkit
-import com.seventh_root.elysium.permissions.bukkit.group.PlayerGroup
 import com.seventh_root.elysium.permissions.bukkit.group.ElysiumGroupProvider
+import com.seventh_root.elysium.permissions.bukkit.group.PlayerGroup
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.ehcache.Cache
@@ -32,6 +32,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.PreparedStatement
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
+/**
+ * Represents the player group table.
+ */
 class PlayerGroupTable: Table<PlayerGroup> {
 
     private val plugin: ElysiumPermissionsBukkit

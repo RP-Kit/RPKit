@@ -19,9 +19,33 @@ package com.seventh_root.elysium.chat.bukkit.context
 import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannel
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
+/**
+ * An undirected chat channel message context.
+ * Stores data for messages passed through a chat channel's undirected pipeline.
+ */
 interface UndirectedChatChannelMessageContext {
+
+    /**
+     * The chat channel the message is being sent to.
+     */
     val chatChannel: ElysiumChatChannel
+
+    /**
+     * The sender of the message.
+     */
     val sender: ElysiumPlayer
+
+    /**
+     * The message. Changing the message results in the updated message being propagated to all further pipeline
+     * components.
+     */
     var message: String
+
+    /**
+     * Whether the message has been cancelled.
+     * If the message is cancelled, further pipeline components may choose whether they still  wish to operate on the
+     * message or not.
+     */
     var isCancelled: Boolean
+
 }

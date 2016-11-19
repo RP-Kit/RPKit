@@ -22,7 +22,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-
+/**
+ * Account command.
+ * Parent command for all account management commands.
+ */
 class AccountCommand(private val plugin: ElysiumPlayersBukkit): CommandExecutor {
 
     private val accountLinkCommand = AccountLinkCommand(plugin)

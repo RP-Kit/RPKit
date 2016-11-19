@@ -26,7 +26,10 @@ import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletResponse.SC_NOT_FOUND
 import javax.servlet.http.HttpServletResponse.SC_OK
 
-
+/**
+ * Servlet for serving static content.
+ * One may be required for each individual plugin's static content,
+ */
 class StaticServlet(private val plugin: ElysiumCoreBukkit): ElysiumServlet() {
 
     override val url = "/static/*"

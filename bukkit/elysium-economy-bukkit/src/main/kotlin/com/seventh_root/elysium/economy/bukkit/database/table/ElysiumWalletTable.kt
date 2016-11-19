@@ -33,7 +33,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.util.*
 
-
+/**
+ * Represents the wallet table.
+ */
 class ElysiumWalletTable: Table<ElysiumWallet> {
 
     private val plugin: ElysiumEconomyBukkit

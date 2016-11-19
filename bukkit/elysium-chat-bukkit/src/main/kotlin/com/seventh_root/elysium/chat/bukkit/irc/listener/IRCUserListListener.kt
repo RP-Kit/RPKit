@@ -21,7 +21,10 @@ import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.UserListEvent
 
-
+/**
+ * IRC user list listener.
+ * Registers all users in channels with the IRC provider upon receiving the user list.
+ */
 class IRCUserListListener(private val plugin: ElysiumChatBukkit): ListenerAdapter() {
 
     override fun onUserList(event: UserListEvent) {

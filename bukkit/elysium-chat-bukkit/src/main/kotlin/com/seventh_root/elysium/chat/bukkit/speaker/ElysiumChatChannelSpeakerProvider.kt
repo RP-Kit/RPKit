@@ -22,13 +22,28 @@ import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelSpe
 import com.seventh_root.elysium.core.service.ServiceProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
-
+/**
+ * Provides chat channel speaker related operations.
+ */
 class ElysiumChatChannelSpeakerProvider(private val plugin: ElysiumChatBukkit): ServiceProvider {
 
+    /**
+     * Gets which channel a player is speaking in.
+     * If the player is not currently speaking in a channel, null is returned
+     *
+     * @param player The player
+     * @return The chat channel, or null if the player is not currently speaking
+     */
     fun getPlayerChannel(player: ElysiumPlayer): ElysiumChatChannel? {
         return plugin.core.database.getTable(ElysiumChatChannelSpeakerTable::class).get(player)?.chatChannel
     }
 
+    /**
+     * Sets the channel a player is speaking in.
+     *
+     * @param player The player
+     * @param chatChannel The chat channel to set
+     */
     fun setPlayerChannel(player: ElysiumPlayer, chatChannel: ElysiumChatChannel) {
         val table = plugin.core.database.getTable(ElysiumChatChannelSpeakerTable::class)
         var chatChannelSpeaker = table.get(player)
@@ -41,6 +56,11 @@ class ElysiumChatChannelSpeakerProvider(private val plugin: ElysiumChatBukkit): 
         }
     }
 
+    /**
+     * Stops a player speaking in any channels.
+     *
+     * @param player The player to stop speaking
+     */
     fun removePlayerChannel(player: ElysiumPlayer) {
         val table = plugin.core.database.getTable(ElysiumChatChannelSpeakerTable::class)
         val chatChannelSpeaker = table.get(player)

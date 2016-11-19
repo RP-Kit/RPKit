@@ -29,7 +29,9 @@ import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
-
+/**
+ * Represents the chat group table.
+ */
 class ElysiumChatGroupTable: Table<ElysiumChatGroup> {
 
     private val plugin: ElysiumChatBukkit
@@ -129,6 +131,13 @@ class ElysiumChatGroupTable: Table<ElysiumChatGroup> {
         }
     }
 
+    /**
+     * Gets a chat group by name.
+     * If no chat group exists with the given name, null is returned.
+     *
+     * @param name The name
+     * @return The chat group, or null if there is no chat group with the given name
+     */
     fun get(name: String): ElysiumChatGroup? {
         if (nameCache.containsKey(name)) {
             return get(nameCache.get(name))

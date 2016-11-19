@@ -16,5 +16,10 @@
 
 package com.seventh_root.elysium.core.web
 
-
+/**
+ * Represents a navigation link to display on Elysium web pages.
+ *
+ * @property name The name to show in the navigation bar.
+ * @property url The relative URL to link to when clicked.
+ */
 class NavigationLink(val name: String, val url: String)

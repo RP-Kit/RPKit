@@ -44,7 +44,9 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 
-
+/**
+ * Elysium chat plugin default implementation.
+ */
 class ElysiumChatBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {

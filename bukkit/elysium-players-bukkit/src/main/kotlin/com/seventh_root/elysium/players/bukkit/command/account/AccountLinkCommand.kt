@@ -22,6 +22,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
+/**
+ * Account link command.
+ * Links another account to the current player.
+ */
 class AccountLinkCommand(private val plugin: ElysiumPlayersBukkit): CommandExecutor {
 
     private val accountLinkIRCCommand = AccountLinkIRCCommand(plugin)

@@ -30,6 +30,9 @@ import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 
+/**
+ * Character implementation.
+ */
 class ElysiumCharacterImpl constructor(
         val plugin: ElysiumCharactersBukkit,
         override var id: Int = 0,

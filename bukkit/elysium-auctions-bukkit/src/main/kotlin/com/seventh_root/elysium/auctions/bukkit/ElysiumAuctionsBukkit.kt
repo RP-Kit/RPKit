@@ -27,7 +27,9 @@ import com.seventh_root.elysium.auctions.bukkit.listener.SignChangeListener
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
 
-
+/**
+ * Elysium auctions plugin default implementation.
+ */
 class ElysiumAuctionsBukkit: ElysiumBukkitPlugin() {
 
 

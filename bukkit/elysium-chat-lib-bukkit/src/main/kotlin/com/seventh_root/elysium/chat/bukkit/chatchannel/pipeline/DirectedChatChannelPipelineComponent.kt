@@ -18,9 +18,23 @@ package com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline
 
 import com.seventh_root.elysium.chat.bukkit.context.DirectedChatChannelMessageContext
 
-
+/**
+ * A directed chat channel pipeline component.
+ * This is used in the directed pipeline for a channel, for messages that are directed towards a particular individual.
+ * This means [process] is called for each recipient of the message, and the contents of the final message may be
+ * different for each recipient.
+ * Use cases include for message formatting for individuals, and for garbling text based on the distance of the
+ * recipient from the sender.
+ */
 interface DirectedChatChannelPipelineComponent {
 
+    /**
+     * Processes a message with the given context.
+     * This will be called once per recipient of a message.
+     *
+     * @param context The message context
+     * @return The message context, after modifications performed by the component
+     */
     fun process(context: DirectedChatChannelMessageContext): DirectedChatChannelMessageContext
 
 }

@@ -24,6 +24,11 @@ import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import java.sql.SQLException
 
+/**
+ * Represents an Elysium plugin.
+ * Provides convenience methods for registering listeners, commands, database tables, and provides service providers and
+ * servlets.
+ */
 abstract class ElysiumBukkitPlugin: JavaPlugin() {
 
     lateinit var core: ElysiumCore

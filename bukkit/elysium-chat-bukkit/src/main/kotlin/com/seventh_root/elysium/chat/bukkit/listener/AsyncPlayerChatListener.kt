@@ -24,6 +24,10 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
 
+/**
+ * Player chat listener.
+ * Cancels normal message processing and passes the message to the appropriate chat channel.
+ */
 class AsyncPlayerChatListener(private val plugin: ElysiumChatBukkit): Listener {
 
     @EventHandler

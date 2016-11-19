@@ -20,7 +20,9 @@ import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.trade.bukkit.listener.PlayerInteractListener
 import com.seventh_root.elysium.trade.bukkit.listener.SignChangeListener
 
-
+/**
+ * Elysium trade plugin default implementation.
+ */
 class ElysiumTradeBukkit: ElysiumBukkitPlugin() {
 
     override fun onEnable() {

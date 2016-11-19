@@ -24,6 +24,10 @@ import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
+/**
+ * Snoop component.
+ * Sends message to snoopers if the message would not be sent to them otherwise.
+ */
 @SerializableAs("SnoopComponent")
 class SnoopComponent(private val plugin: ElysiumChatBukkit): DirectedChatChannelPipelineComponent, ConfigurationSerializable {
 

@@ -23,7 +23,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-
+/**
+ * Chat group members command.
+ * Views members of a chat group.
+ */
 class ChatGroupMembersCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {

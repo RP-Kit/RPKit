@@ -18,7 +18,9 @@ package com.seventh_root.elysium.economy.bukkit.currency
 
 import org.bukkit.Material
 
-
+/**
+ * Currency implementation.
+ */
 class ElysiumCurrencyImpl(
         override var id: Int = 0,
         override var name: String,

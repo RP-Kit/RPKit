@@ -29,7 +29,9 @@ import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import java.awt.Color
 
-
+/**
+ * Chat channel implementation.
+ */
 class ElysiumChatChannelImpl(
         private val plugin: ElysiumChatBukkit,
         override var id: Int = 0,

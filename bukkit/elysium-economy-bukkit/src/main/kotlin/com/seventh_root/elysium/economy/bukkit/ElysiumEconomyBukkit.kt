@@ -33,7 +33,9 @@ import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProvider
 import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProviderImpl
 import com.seventh_root.elysium.economy.bukkit.listener.InventoryCloseListener
 
-
+/**
+ * Elysium economy plugin default implementation.
+ */
 class ElysiumEconomyBukkit: ElysiumBukkitPlugin() {
 
     private lateinit var currencyProvider: ElysiumCurrencyProvider

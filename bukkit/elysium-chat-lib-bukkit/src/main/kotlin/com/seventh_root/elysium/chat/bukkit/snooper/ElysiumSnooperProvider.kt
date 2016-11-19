@@ -19,8 +19,25 @@ package com.seventh_root.elysium.chat.bukkit.snooper
 import com.seventh_root.elysium.core.service.ServiceProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
+/**
+ * Provides snooper related operations.
+ */
 interface ElysiumSnooperProvider: ServiceProvider {
+
+    /**
+     * A list of all players who are currently snooping.
+     * This list is immutable, so players should be added or removed with [addSnooper] and [removeSnooper] respectively.
+     */
     val snoopers: List<ElysiumPlayer>
+
+    /**
+     * Adds a snooper. This player is then able to see messages they would not otherwise see.
+     */
     fun addSnooper(player: ElysiumPlayer)
+
+    /**
+     * Removes a snooper. This player then no longer receives messages outside of what they normally see.
+     */
     fun removeSnooper(player: ElysiumPlayer)
+
 }

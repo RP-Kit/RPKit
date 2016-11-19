@@ -28,6 +28,9 @@ import org.pircbotx.Configuration
 import org.pircbotx.PircBotX
 import org.pircbotx.User
 
+/**
+ * IRC provider implementation.
+ */
 class ElysiumIRCProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumIRCProvider {
 
     override val ircBot: PircBotX

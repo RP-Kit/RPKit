@@ -18,11 +18,46 @@ package com.seventh_root.elysium.characters.bukkit.gender
 
 import com.seventh_root.elysium.core.service.ServiceProvider
 
-
+/**
+ * Provides gender-related services.
+ */
 interface ElysiumGenderProvider: ServiceProvider {
+
+    /**
+     * A collection of genders currently managed by this gender provider.
+     * This is immutable, genders must be added and removed using [addGender] and [removeGender].
+     */
     val genders: Collection<ElysiumGender>
+
+    /**
+     * Gets a gender by ID.
+     * If there is no gender with the given ID, null is returned.
+     *
+     * @param id The ID of the gender
+     * @return The gender, or null if no gender is found with the given ID
+     */
     fun getGender(id: Int): ElysiumGender?
+
+    /**
+     * Gets a gender by name.
+     * If there is no gender with the given name, null is returned.
+     *
+     * @param name The name of the gender
+     * @return The gender, or null if no gender is found with the given name
+     */
     fun getGender(name: String): ElysiumGender?
+
+    /**
+     * Adds a gender to be tracked by this gender provider.
+     *
+     * @param gender The gender to add
+     */
     fun addGender(gender: ElysiumGender)
+
+    /**
+     * Removes a gender from being tracked by this gender provider.
+     *
+     * @param gender The gender to remove
+     */
     fun removeGender(gender: ElysiumGender)
 }

@@ -18,9 +18,15 @@ package com.seventh_root.elysium.core.web
 
 import javax.servlet.http.HttpServlet
 
-
+/**
+ * Represents a servlet to be used by the Elysium web component.
+ * In addition to ordinary [HttpServlet] functionality, this includes the relative URL at which the servlet will be displayed.
+ */
 abstract class ElysiumServlet: HttpServlet() {
 
+    /**
+     * The relative URL at which the servlet will be displayed.
+     */
     abstract val url: String
 
 }

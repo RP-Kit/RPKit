@@ -16,7 +16,9 @@
 
 package com.seventh_root.elysium.characters.bukkit.character.field
 
-
+/**
+ * Character card field provider implementation.
+ */
 class ElysiumCharacterCardFieldProviderImpl: ElysiumCharacterCardFieldProvider {
 
     override val characterCardFields = mutableListOf<CharacterCardField>()

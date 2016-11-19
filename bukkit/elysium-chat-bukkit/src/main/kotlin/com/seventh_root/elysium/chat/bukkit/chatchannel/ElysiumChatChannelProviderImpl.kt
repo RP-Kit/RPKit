@@ -24,6 +24,9 @@ import com.seventh_root.elysium.chat.bukkit.speaker.ElysiumChatChannelSpeakerPro
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 import java.awt.Color
 
+/**
+ * Chat channel provider implementation.
+ */
 class ElysiumChatChannelProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumChatChannelProvider {
 
     override val chatChannels: MutableList<ElysiumChatChannel> = plugin.config.getConfigurationSection("chat-channels")

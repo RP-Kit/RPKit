@@ -25,6 +25,9 @@ import net.milkbowl.vault.economy.AbstractEconomy
 import net.milkbowl.vault.economy.EconomyResponse
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType.*
 
+/**
+ * A Vault [Economy] implementation for economy plugins.
+ */
 class ElysiumEconomyVaultEconomy(private val plugin: ElysiumEconomyLibBukkit): AbstractEconomy() {
 
     override fun getBanks(): MutableList<String> {

@@ -33,7 +33,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.util.*
 
-
+/**
+ * Represents the bank table.
+ */
 class ElysiumBankTable: Table<ElysiumBank> {
 
     private val plugin: ElysiumBanksBukkit
@@ -143,6 +145,14 @@ class ElysiumBankTable: Table<ElysiumBank> {
         }
     }
 
+    /**
+     * Gets the bank account for the given character in the given currency.
+     * If no account exists, one will be created.
+     *
+     * @param character The character to get the account for
+     * @param currency The currency which the account should be in
+     * @return The account of the character in the currency
+     */
     fun get(character: ElysiumCharacter, currency: ElysiumCurrency): ElysiumBank {
         if (characterCache.containsKey(character.id)) {
             return get(characterCache[character.id][currency.id] as Int)!!
@@ -193,6 +203,13 @@ class ElysiumBankTable: Table<ElysiumBank> {
         }
     }
 
+    /**
+     * Gets the characters with the highest balance in the given currency.
+     *
+     * @param amount The amount of characters to retrieve
+     * @param currency The currency to
+     * @return A list of characters with the highest balance in the given currency
+     */
     fun getTop(amount: Int = 5, currency: ElysiumCurrency): List<ElysiumCharacter> {
         val top = ArrayList<ElysiumBank>()
         database.createConnection().use { connection ->
