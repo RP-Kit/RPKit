@@ -27,8 +27,7 @@ import com.seventh_root.elysium.chat.bukkit.command.chatchannel.ChatChannelComma
 import com.seventh_root.elysium.chat.bukkit.command.listchatchannels.ListChatChannelsCommand
 import com.seventh_root.elysium.chat.bukkit.command.mute.MuteCommand
 import com.seventh_root.elysium.chat.bukkit.command.unmute.UnmuteCommand
-import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelMuteTable
-import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelSpeakerTable
+import com.seventh_root.elysium.chat.bukkit.database.table.*
 import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
 import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProviderImpl
 import com.seventh_root.elysium.chat.bukkit.listener.AsyncPlayerChatListener
@@ -121,6 +120,11 @@ class ElysiumChatBukkit: ElysiumBukkitPlugin() {
     override fun createTables(database: Database) {
         database.addTable(ElysiumChatChannelMuteTable(database, this))
         database.addTable(ElysiumChatChannelSpeakerTable(database, this))
+        database.addTable(ElysiumChatGroupTable(database, this))
+        database.addTable(ChatGroupInviteTable(database, this))
+        database.addTable(ChatGroupMemberTable(database, this))
+        database.addTable(LastUsedChatGroupTable(database, this))
+        database.addTable(ElysiumSnooperTable(database, this))
     }
 
     private fun registerChatChannelPermissions(chatChannelProvider: ElysiumChatChannelProvider) {

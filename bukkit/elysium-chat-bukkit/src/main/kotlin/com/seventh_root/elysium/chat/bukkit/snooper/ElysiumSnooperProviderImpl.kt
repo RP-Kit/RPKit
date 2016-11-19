@@ -39,4 +39,10 @@ class ElysiumSnooperProviderImpl(private val plugin: ElysiumChatBukkit): Elysium
             snooperTable.delete(snooper)
         }
     }
+
+    override fun isSnooping(player: ElysiumPlayer): Boolean {
+        val snooperTable = plugin.core.database.getTable(ElysiumSnooperTable::class)
+        return snooperTable.get(player) != null
+    }
+
 }

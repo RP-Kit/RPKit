@@ -40,4 +40,12 @@ interface ElysiumSnooperProvider: ServiceProvider {
      */
     fun removeSnooper(player: ElysiumPlayer)
 
+    /**
+     * Checks whether a player is snooping.
+     *
+     * @param player The player
+     * @return Whether the player is currently snooping
+     */
+    fun isSnooping(player: ElysiumPlayer): Boolean
+
 }
