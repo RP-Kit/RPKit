@@ -30,6 +30,8 @@ class Alert(
     /**
      * An enum containing all types of alerts.
      * These are applied to alerts with bootstrap CSS classes.
+     *
+     * @property cssClass The bootstrap CSS class.
      */
     enum class Type(val cssClass: String) {
 
