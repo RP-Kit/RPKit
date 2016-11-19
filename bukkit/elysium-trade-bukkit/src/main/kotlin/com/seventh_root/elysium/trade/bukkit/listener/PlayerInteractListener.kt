@@ -32,7 +32,9 @@ import org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 
-
+/**
+ * Player interact listener for trader signs.
+ */
 class PlayerInteractListener(private val plugin: ElysiumTradeBukkit): Listener {
 
     @EventHandler

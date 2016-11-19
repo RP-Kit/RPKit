@@ -24,7 +24,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 
-
+/**
+ * Block break listener for trader signs.
+ */
 class BlockBreakListener(private val plugin: ElysiumTradeBukkit): Listener {
 
     @EventHandler
