@@ -25,9 +25,9 @@ import kotlin.reflect.KClass
  * These are managed by a [Database] instance.
  * Tables may manage their own caching internally.
  *
- * @param database The [Database] instance which manages the table
- * @param name The name of the table
- * @param type The type of entity stored in the table
+ * @property database The [Database] instance which manages the table
+ * @property name The name of the table
+ * @property type The type of entity stored in the table
  */
 abstract class Table<T: Entity>(val database: Database, val name: String, val type: KClass<T>) {
 

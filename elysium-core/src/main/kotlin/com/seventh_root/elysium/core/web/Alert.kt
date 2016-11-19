@@ -19,8 +19,8 @@ package com.seventh_root.elysium.core.web
 /**
  * Represents an alert, to be shown on a page
  *
- * @param type The type of the alert. This will affect which colour it shows in.
- * @param message The message shown in the alert.
+ * @property type The type of the alert. This will affect which colour it shows in.
+ * @property message The message shown in the alert.
  */
 class Alert(
         val type: Alert.Type,
@@ -39,7 +39,7 @@ class Alert(
         SUCCESS("alert-success"),
 
         /**
-         * An informative alert type .
+         * An informative alert type.
          */
         INFO("alert-info"),
 
@@ -53,6 +53,9 @@ class Alert(
          */
         DANGER("alert-danger");
 
+        /**
+         * Converts the type to a string containing the CSS class to use with bootstrap.
+         */
         override fun toString(): String {
             return cssClass
         }

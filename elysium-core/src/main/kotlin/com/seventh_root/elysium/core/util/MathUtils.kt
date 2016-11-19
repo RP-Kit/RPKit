@@ -16,6 +16,9 @@
 
 package com.seventh_root.elysium.core.util
 
+/**
+ * Maths functions object.
+ */
 object MathUtils {
 
     /**

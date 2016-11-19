@@ -25,9 +25,9 @@ import java.util.logging.Logger
  * Represents the core of Elysium.
  * Most core Elysium functionality is accessible from here, including the logger, database, web and service managers.
  *
- * @param logger The logger to use
- * @param database The database instance to use
- * @param web The web instance to use
+ * @property logger The logger to use
+ * @property database The database instance to use
+ * @property web The web instance to use
  */
 class ElysiumCore(val logger: Logger, val database: Database, val web: Web) {
 

@@ -21,7 +21,7 @@ import org.eclipse.jetty.server.Server
 /**
  * Represents the web component of Elysium.
  *
- * @param server The [Server] instance
- * @param navigationBar A list of navigation links which will be displayed on the navigation bar on all pages.
+ * @property server The [Server] instance
+ * @property navigationBar A list of navigation links which will be displayed on the navigation bar on all pages.
  */
 class Web(val server: Server, val navigationBar: MutableList<NavigationLink>)

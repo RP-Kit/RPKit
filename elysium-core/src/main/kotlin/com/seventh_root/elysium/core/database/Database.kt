@@ -26,6 +26,10 @@ import kotlin.reflect.KClass
 /**
  * Represents a database.
  * Primarily used for obtaining connections and keeping track of tables.
+ *
+ * @property url The URL of the database
+ * @property userName The username to connect to the database with. May be null to avoid authenticating.
+ * @property password The password to connect to the database with. May be null to avoid authenticating.
  */
 class Database @JvmOverloads constructor(val url: String, val userName: String? = null, val password: String? = null) {
 
