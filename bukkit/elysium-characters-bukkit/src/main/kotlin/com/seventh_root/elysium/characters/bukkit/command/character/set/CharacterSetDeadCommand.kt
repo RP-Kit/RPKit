@@ -60,6 +60,7 @@ class CharacterSetDeadCommand(private val plugin: ElysiumCharactersBukkit): Comm
                             character.isDead = dead
                             characterProvider.updateCharacter(character)
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-dead-valid")))
+                            character.showCharacterCard(player)
                         } else {
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-set-dead-" + if (dead) "yes" else "no")))
                         }
@@ -113,6 +114,13 @@ class CharacterSetDeadCommand(private val plugin: ElysiumCharactersBukkit): Comm
     private inner class DeadSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
+            val conversable = context.forWhom
+            if (conversable is Player) {
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val player = playerProvider.getPlayer(context.forWhom as Player)
+                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+            }
             return Prompt.END_OF_CONVERSATION
         }
 
@@ -125,6 +133,13 @@ class CharacterSetDeadCommand(private val plugin: ElysiumCharactersBukkit): Comm
     private inner class DeadNotSetNoPermissionPrompt(private val dead: Boolean): MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
+            val conversable = context.forWhom
+            if (conversable is Player) {
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val player = playerProvider.getPlayer(context.forWhom as Player)
+                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+            }
             return Prompt.END_OF_CONVERSATION
         }
 

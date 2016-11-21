@@ -62,6 +62,7 @@ class CharacterSetPlayerCommand(private val plugin: ElysiumCharactersBukkit): Co
                             characterProvider.updateCharacter(character)
                             characterProvider.setActiveCharacter(player, null)
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-valid")))
+                            character.showCharacterCard(player)
                         } else {
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-invalid-player")))
                         }
@@ -111,6 +112,13 @@ class CharacterSetPlayerCommand(private val plugin: ElysiumCharactersBukkit): Co
     private inner class PlayerSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
+            val conversable = context.forWhom
+            if (conversable is Player) {
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val player = playerProvider.getPlayer(context.forWhom as Player)
+                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+            }
             return Prompt.END_OF_CONVERSATION
         }
 

@@ -42,6 +42,7 @@ class CharacterUnhideDescriptionCommand(private val plugin: ElysiumCharactersBuk
                     character.isDescriptionHidden = false
                     characterProvider.updateCharacter(character)
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-unhide-description-valid")))
+                    character.showCharacterCard(player)
                 } else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }

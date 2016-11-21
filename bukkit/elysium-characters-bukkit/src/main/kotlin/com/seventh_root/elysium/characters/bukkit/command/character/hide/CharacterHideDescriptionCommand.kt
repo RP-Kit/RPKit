@@ -42,6 +42,7 @@ class CharacterHideDescriptionCommand(private val plugin: ElysiumCharactersBukki
                     character.isDescriptionHidden = true
                     characterProvider.updateCharacter(character)
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-hide-description-valid")))
+                    character.showCharacterCard(player)
                 } else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }

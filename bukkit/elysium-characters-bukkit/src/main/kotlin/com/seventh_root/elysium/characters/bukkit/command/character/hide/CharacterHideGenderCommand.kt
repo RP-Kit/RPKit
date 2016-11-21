@@ -42,6 +42,7 @@ class CharacterHideGenderCommand(private val plugin: ElysiumCharactersBukkit): C
                     character.isGenderHidden = true
                     characterProvider.updateCharacter(character)
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-hide-gender-valid")))
+                    character.showCharacterCard(player)
                 } else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }

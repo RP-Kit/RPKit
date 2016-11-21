@@ -42,6 +42,7 @@ class CharacterHideRaceCommand(private val plugin: ElysiumCharactersBukkit): Com
                     character.isRaceHidden = true
                     characterProvider.updateCharacter(character)
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-hide-race-valid")))
+                    character.showCharacterCard(player)
                 } else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }

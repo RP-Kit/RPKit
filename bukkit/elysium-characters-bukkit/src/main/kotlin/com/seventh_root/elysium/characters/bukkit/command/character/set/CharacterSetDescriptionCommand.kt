@@ -61,6 +61,7 @@ class CharacterSetDescriptionCommand(private val plugin: ElysiumCharactersBukkit
                         character.description = descriptionBuilder.toString()
                         characterProvider.updateCharacter(character)
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-description-valid")))
+                        character.showCharacterCard(player)
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
@@ -111,6 +112,13 @@ class CharacterSetDescriptionCommand(private val plugin: ElysiumCharactersBukkit
     private inner class DescriptionSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
+            val conversable = context.forWhom
+            if (conversable is Player) {
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val player = playerProvider.getPlayer(context.forWhom as Player)
+                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+            }
             return Prompt.END_OF_CONVERSATION
         }
 

@@ -42,6 +42,7 @@ class CharacterUnhideNameCommand(private val plugin: ElysiumCharactersBukkit): C
                     character.isNameHidden = false
                     characterProvider.updateCharacter(character)
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-unhide-name-valid")))
+                    character.showCharacterCard(player)
                 } else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }
