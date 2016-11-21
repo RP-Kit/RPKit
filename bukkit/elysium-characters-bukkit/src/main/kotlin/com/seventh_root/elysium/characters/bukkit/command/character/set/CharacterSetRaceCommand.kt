@@ -65,6 +65,7 @@ class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit): Comm
                             character.race = race
                             characterProvider.updateCharacter(character)
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-race-valid")))
+                            character.showCharacterCard(player)
                         } else {
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-race-invalid-race")))
                         }
@@ -124,6 +125,13 @@ class CharacterSetRaceCommand(private val plugin: ElysiumCharactersBukkit): Comm
     private inner class RaceSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
+            val conversable = context.forWhom
+            if (conversable is Player) {
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val player = playerProvider.getPlayer(context.forWhom as Player)
+                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+            }
             return Prompt.END_OF_CONVERSATION
         }
 

@@ -59,6 +59,7 @@ class CharacterSetAgeCommand(private val plugin: ElysiumCharactersBukkit): Comma
                                 character.age = age
                                 characterProvider.updateCharacter(character)
                                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-age-valid")))
+                                character.showCharacterCard(player)
                             } else {
                                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-age-invalid-validation")))
                             }
@@ -119,6 +120,13 @@ class CharacterSetAgeCommand(private val plugin: ElysiumCharactersBukkit): Comma
     private inner class AgeSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
+            val conversable = context.forWhom
+            if (conversable is Player) {
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val player = playerProvider.getPlayer(context.forWhom as Player)
+                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+            }
             return Prompt.END_OF_CONVERSATION
         }
 

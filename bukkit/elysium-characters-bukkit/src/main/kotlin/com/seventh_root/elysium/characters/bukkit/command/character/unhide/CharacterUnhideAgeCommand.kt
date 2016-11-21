@@ -42,6 +42,7 @@ class CharacterUnhideAgeCommand(private val plugin: ElysiumCharactersBukkit): Co
                     character.isAgeHidden = false
                     characterProvider.updateCharacter(character)
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-unhide-age-valid")))
+                    character.showCharacterCard(player)
                 } else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }

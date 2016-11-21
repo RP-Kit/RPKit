@@ -43,6 +43,7 @@ class CharacterHidePlayerCommand(private val plugin: ElysiumCharactersBukkit): C
                     characterProvider.updateCharacter(character)
                     characterProvider.setActiveCharacter(player, null)
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-hide-player-valid")))
+                    character.showCharacterCard(player)
                 } else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }

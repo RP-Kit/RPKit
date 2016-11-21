@@ -61,6 +61,7 @@ class CharacterSetNameCommand(private val plugin: ElysiumCharactersBukkit): Comm
                         character.name = nameBuilder.toString()
                         characterProvider.updateCharacter(character)
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-name-valid")))
+                        character.showCharacterCard(player)
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
@@ -102,6 +103,13 @@ class CharacterSetNameCommand(private val plugin: ElysiumCharactersBukkit): Comm
     private inner class NameSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
+            val conversable = context.forWhom
+            if (conversable is Player) {
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val player = playerProvider.getPlayer(context.forWhom as Player)
+                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+            }
             return Prompt.END_OF_CONVERSATION
         }
 

@@ -43,6 +43,7 @@ class CharacterUnhidePlayerCommand(private val plugin: ElysiumCharactersBukkit):
                     characterProvider.updateCharacter(character)
                     characterProvider.setActiveCharacter(player, null)
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-unhide-player-valid")))
+                    character.showCharacterCard(player)
                 } else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }

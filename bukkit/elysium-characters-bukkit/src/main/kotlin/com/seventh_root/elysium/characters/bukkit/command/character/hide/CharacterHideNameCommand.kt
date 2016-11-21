@@ -42,6 +42,7 @@ class CharacterHideNameCommand(private val plugin: ElysiumCharactersBukkit): Com
                     character.isNameHidden = true
                     characterProvider.updateCharacter(character)
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-hide-name-valid")))
+                    character.showCharacterCard(player)
                 } else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                 }

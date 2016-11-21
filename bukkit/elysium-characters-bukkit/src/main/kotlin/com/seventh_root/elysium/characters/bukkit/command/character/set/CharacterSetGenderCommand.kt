@@ -60,6 +60,7 @@ class CharacterSetGenderCommand(private val plugin: ElysiumCharactersBukkit): Co
                             character.gender = gender
                             characterProvider.updateCharacter(character)
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-gender-valid")))
+                            character.showCharacterCard(player)
                         } else {
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-gender-invalid-gender")))
                         }
@@ -119,6 +120,13 @@ class CharacterSetGenderCommand(private val plugin: ElysiumCharactersBukkit): Co
     private inner class GenderSetPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
+            val conversable = context.forWhom
+            if (conversable is Player) {
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterProvider::class)
+                val player = playerProvider.getPlayer(context.forWhom as Player)
+                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+            }
             return Prompt.END_OF_CONVERSATION
         }
 
