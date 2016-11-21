@@ -63,9 +63,8 @@ interface ElysiumCharacterProvider: ServiceProvider {
      * Adds a character to be tracked by this character provider.
      *
      * @param character The character to add
-     * @return The ID of the character
      */
-    fun addCharacter(character: ElysiumCharacter): Int
+    fun addCharacter(character: ElysiumCharacter)
 
     /**
      * Removes a character from being tracked by this character provider.

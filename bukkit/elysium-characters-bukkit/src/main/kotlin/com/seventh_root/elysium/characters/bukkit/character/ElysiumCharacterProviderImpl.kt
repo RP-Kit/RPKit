@@ -170,8 +170,8 @@ class ElysiumCharacterProviderImpl: ElysiumCharacterProvider {
         return emptyList()
     }
 
-    override fun addCharacter(character: ElysiumCharacter): Int {
-        return plugin.core.database.getTable(ElysiumCharacterTable::class).insert(character)
+    override fun addCharacter(character: ElysiumCharacter) {
+        plugin.core.database.getTable(ElysiumCharacterTable::class).insert(character)
     }
 
     override fun removeCharacter(character: ElysiumCharacter) {
