@@ -798,3 +798,35 @@ project(":bukkit:elysium-stats-bukkit") {
     }
 
 }
+
+project(":bukkit:elysium-food-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-food-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-food-bukkit").name
+            pom.groupId = project(":bukkit:elysium-food-bukkit").group
+
+        }
+    }
+
+}
