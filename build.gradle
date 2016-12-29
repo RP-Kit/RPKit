@@ -108,7 +108,7 @@ project(":elysium-core") {
 project(":bukkit:elysium-core-bukkit") {
 
     dependencies {
-        compile group: "org.bukkit", name: "bukkit", version: "1.10.2-R0.1-SNAPSHOT"
+        compile group: "org.bukkit", name: "bukkit", version: "1.11.2-R0.1-SNAPSHOT"
         compile group: "net.milkbowl.vault", name: "VaultAPI", version: "1.6"
         compile group: "mkremins", name: "fanciful", version: "0.4.0-SNAPSHOT"
         compile project(":elysium-core")
