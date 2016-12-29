@@ -453,6 +453,41 @@ project(":bukkit:elysium-stat-lib-bukkit") {
 
 }
 
+project(":bukkit:elysium-payment-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
+        compile project(":bukkit:elysium-bank-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-payment-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-payment-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-payment-lib-bukkit").group
+
+        }
+    }
+
+}
+
 // Bukkit implementations
 
 project(":bukkit:elysium-players-bukkit") {
@@ -825,6 +860,42 @@ project(":bukkit:elysium-food-bukkit") {
             pom.version = project(":bukkit:elysium-food-bukkit").version
             pom.artifactId = project(":bukkit:elysium-food-bukkit").name
             pom.groupId = project(":bukkit:elysium-food-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-payments-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
+        compile project(":bukkit:elysium-bank-lib-bukkit")
+        compile project(":bukkit:elysium-payment-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-payments-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-payments-bukkit").name
+            pom.groupId = project(":bukkit:elysium-payments-bukkit").group
 
         }
     }
