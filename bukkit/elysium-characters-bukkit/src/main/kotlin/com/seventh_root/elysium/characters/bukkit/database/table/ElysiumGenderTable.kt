@@ -29,6 +29,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
+/**
+ * Represents the gender table.
+ */
 class ElysiumGenderTable: Table<ElysiumGender> {
 
     private val cacheManager: CacheManager
@@ -59,7 +62,9 @@ class ElysiumGenderTable: Table<ElysiumGender> {
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
+    }
 
+    override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
             database.setTableVersion(this, "0.1.0")
         }
@@ -137,6 +142,13 @@ class ElysiumGenderTable: Table<ElysiumGender> {
         return null
     }
 
+    /**
+     * Gets a gender by name.
+     * If no gender is found with the given name, null is returned.
+     *
+     * @param name The name of the gender
+     * @return The gender, or null if no gender is found with the given name
+     */
     operator fun get(name: String): ElysiumGender? {
         if (nameCache.containsKey(name)) {
             return get(nameCache.get(name) as Int)

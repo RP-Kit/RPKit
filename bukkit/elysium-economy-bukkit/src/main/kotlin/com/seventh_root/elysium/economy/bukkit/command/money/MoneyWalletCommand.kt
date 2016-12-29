@@ -30,7 +30,10 @@ import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-
+/**
+ * Money wallet command.
+ * Opens the player's active character's wallet with a physical currency representation.
+ */
 class MoneyWalletCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor {
 
     private val conversationFactory = ConversationFactory(plugin)

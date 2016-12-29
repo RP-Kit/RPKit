@@ -23,6 +23,10 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 
+/**
+ * Player death listener for characters.
+ * If server is configured to kill characters upon death, this will be done with this listener.
+ */
 class PlayerDeathListener(private val plugin: ElysiumCharactersBukkit): Listener {
 
     @EventHandler

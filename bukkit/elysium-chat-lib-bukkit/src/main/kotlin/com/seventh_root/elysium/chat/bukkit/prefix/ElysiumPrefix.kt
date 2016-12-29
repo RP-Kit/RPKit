@@ -18,8 +18,20 @@ package com.seventh_root.elysium.chat.bukkit.prefix
 
 import com.seventh_root.elysium.core.database.Entity
 
-
+/**
+ * Represents a prefix.
+ */
 interface ElysiumPrefix: Entity {
+
+    /**
+     * The name of the prefix.
+     * This is used to create the permissions, and for purposes of configuration.
+     */
     val name: String
-    val prefix: String
+
+    /**
+     * The prefix as it appears in chat.
+     * May use Minecraft chat colours.
+     */
+    var prefix: String
 }

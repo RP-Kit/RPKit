@@ -19,8 +19,25 @@ package com.seventh_root.elysium.shops.bukkit.shopcount
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.core.service.ServiceProvider
 
-
+/**
+ * Provides shop count related operations.
+ */
 interface ElysiumShopCountProvider: ServiceProvider {
+
+    /**
+     * Gets the shop count of a character.
+     *
+     * @param character The character
+     * @return The amount of shops owned by the character
+     */
     fun getShopCount(character: ElysiumCharacter): Int
+
+    /**
+     * Sets the amount of shops owned by a character.
+     *
+     * @param character The character
+     * @param amount The amount of shops to set
+     */
     fun setShopCount(character: ElysiumCharacter, amount: Int)
+
 }

@@ -16,26 +16,49 @@
 
 package com.seventh_root.elysium.chat.bukkit.chatgroup
 
-class ElysiumChatGroupProviderImpl: ElysiumChatGroupProvider {
+import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
+import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatGroupTable
+import com.seventh_root.elysium.chat.bukkit.database.table.LastUsedChatGroupTable
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
-    override fun getChatGroup(id: Int): ElysiumChatGroup {
-        throw UnsupportedOperationException()
+/**
+ * Chat group provider implementation.
+ */
+class ElysiumChatGroupProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumChatGroupProvider {
+
+    override fun getChatGroup(id: Int): ElysiumChatGroup? {
+        return plugin.core.database.getTable(ElysiumChatGroupTable::class)[id]
     }
 
-    override fun getChatGroup(name: String): ElysiumChatGroup {
-        throw UnsupportedOperationException()
+    override fun getChatGroup(name: String): ElysiumChatGroup? {
+        return plugin.core.database.getTable(ElysiumChatGroupTable::class).get(name)
     }
 
     override fun addChatGroup(chatGroup: ElysiumChatGroup) {
-        throw UnsupportedOperationException()
+        plugin.core.database.getTable(ElysiumChatGroupTable::class).insert(chatGroup)
     }
 
     override fun removeChatGroup(chatGroup: ElysiumChatGroup) {
-        throw UnsupportedOperationException()
+        plugin.core.database.getTable(ElysiumChatGroupTable::class).delete(chatGroup)
     }
 
     override fun updateChatGroup(chatGroup: ElysiumChatGroup) {
-        throw UnsupportedOperationException()
+        plugin.core.database.getTable(ElysiumChatGroupTable::class).update(chatGroup)
+    }
+
+    override fun getLastUsedChatGroup(player: ElysiumPlayer): ElysiumChatGroup? {
+        return plugin.core.database.getTable(LastUsedChatGroupTable::class).get(player)?.chatGroup?:null
+    }
+
+    override fun setLastUsedChatGroup(player: ElysiumPlayer, chatGroup: ElysiumChatGroup) {
+        val lastUsedChatGroupTable = plugin.core.database.getTable(LastUsedChatGroupTable::class)
+        val lastUsedChatGroup = lastUsedChatGroupTable.get(player)
+        if (lastUsedChatGroup != null) {
+            lastUsedChatGroup.chatGroup = chatGroup
+            lastUsedChatGroupTable.update(lastUsedChatGroup)
+        } else {
+            lastUsedChatGroupTable.insert(LastUsedChatGroup(player = player, chatGroup = chatGroup))
+        }
     }
 
 }

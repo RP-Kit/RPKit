@@ -16,16 +16,45 @@
 
 package com.seventh_root.elysium.auctions.bukkit
 
+import com.seventh_root.elysium.auctions.bukkit.auction.ElysiumAuctionProviderImpl
+import com.seventh_root.elysium.auctions.bukkit.bid.ElysiumBidProviderImpl
+import com.seventh_root.elysium.auctions.bukkit.command.auction.AuctionCommand
+import com.seventh_root.elysium.auctions.bukkit.command.bid.BidCommand
+import com.seventh_root.elysium.auctions.bukkit.database.table.ElysiumAuctionTable
+import com.seventh_root.elysium.auctions.bukkit.database.table.ElysiumBidTable
+import com.seventh_root.elysium.auctions.bukkit.listener.PlayerInteractListener
+import com.seventh_root.elysium.auctions.bukkit.listener.SignChangeListener
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
-import com.seventh_root.elysium.core.service.ServiceProvider
+import com.seventh_root.elysium.core.database.Database
 
-
+/**
+ * Elysium auctions plugin default implementation.
+ */
 class ElysiumAuctionsBukkit: ElysiumBukkitPlugin() {
 
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
-        serviceProviders = arrayOf<ServiceProvider>()
+        serviceProviders = arrayOf(
+                ElysiumAuctionProviderImpl(this),
+                ElysiumBidProviderImpl(this)
+        )
+    }
+
+    override fun registerCommands() {
+        getCommand("auction").executor = AuctionCommand(this)
+        getCommand("bid").executor = BidCommand(this)
+    }
+
+    override fun registerListeners() {
+        registerListeners(
+                SignChangeListener(this),
+                PlayerInteractListener(this)
+        )
+    }
+
+    override fun createTables(database: Database) {
+        database.addTable(ElysiumAuctionTable(database, this))
+        database.addTable(ElysiumBidTable(database, this))
     }
 
 }

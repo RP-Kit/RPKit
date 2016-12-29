@@ -3,3 +3,4 @@ author: alyphen
 version: @version@
 main: com.seventh_root.elysium.banks.bukkit.ElysiumBankLibBukkit
 depend: [elysium-core-bukkit, elysium-character-lib-bukkit, elysium-economy-lib-bukkit]
+softdepend: [Vault]

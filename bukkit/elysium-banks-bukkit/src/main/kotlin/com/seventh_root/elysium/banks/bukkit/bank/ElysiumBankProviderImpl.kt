@@ -23,7 +23,9 @@ import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 import com.seventh_root.elysium.economy.bukkit.economy.ElysiumEconomyProvider
 import com.seventh_root.elysium.economy.bukkit.exception.NegativeBalanceException
 
-
+/**
+ * Bank provider implementation.
+ */
 class ElysiumBankProviderImpl(private val plugin: ElysiumBanksBukkit): ElysiumBankProvider {
 
     override fun getBalance(character: ElysiumCharacter, currency: ElysiumCurrency): Int {

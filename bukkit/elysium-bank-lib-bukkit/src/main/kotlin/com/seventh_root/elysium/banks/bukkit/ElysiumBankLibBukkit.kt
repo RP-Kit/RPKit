@@ -16,16 +16,26 @@
 
 package com.seventh_root.elysium.banks.bukkit
 
+import com.seventh_root.elysium.banks.bukkit.vault.ElysiumBanksVaultEconomy
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.service.ServiceProvider
+import net.milkbowl.vault.economy.Economy
+import org.bukkit.plugin.ServicePriority
 
-
+/**
+ * Class to allow bank lib to load as a plugin.
+ * This allows plugins requiring auctions or implementing banks to depend on the plugin.
+ * With this plugin loaded, a Vault economy service is added for banks plugins on [ServicePriority.High].
+ * If banks plugins wish to provide their own economy service, they should register on [ServicePriority.Highest]
+ */
 class ElysiumBankLibBukkit: ElysiumBukkitPlugin() {
 
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         serviceProviders = arrayOf<ServiceProvider>()
+        if (server.pluginManager.getPlugin("Vault") != null) {
+            server.servicesManager.register(Economy::class.java, ElysiumBanksVaultEconomy(this), this, ServicePriority.High)
+        }
     }
 
 }

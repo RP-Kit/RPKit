@@ -30,11 +30,15 @@ import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.pircbotx.User
+import java.net.InetAddress
 import java.sql.Connection
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.sql.Types.VARCHAR
 import java.util.*
 
+/**
+ * Represents the player table.
+ */
 class ElysiumPlayerTable: Table<ElysiumPlayer> {
 
     private val cacheManager: CacheManager
@@ -42,6 +46,7 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
     private val nameCache: Cache<String, Int>
     private val minecraftCache: Cache<String, Int>
     private val ircCache: Cache<String, Int>
+    private val ipCache: Cache<String, Int>
 
     constructor(plugin: ElysiumPlayersBukkit, database: Database): super(database, ElysiumPlayer::class.java) {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
@@ -57,6 +62,9 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         ircCache = cacheManager.createCache("ircCache",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
                         ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+        ipCache = cacheManager.createCache("ipCache",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
     }
 
     override fun create() {
@@ -66,7 +74,8 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                         "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
                         "name VARCHAR(256)," +
                         "minecraft_uuid VARCHAR(36)," +
-                        "irc_nick VARCHAR(256)" +
+                        "irc_nick VARCHAR(256)," +
+                        "last_known_ip VARCHAR(256)" +
                     ")").use { statement ->
                 statement.executeUpdate()
             }
@@ -75,18 +84,32 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.3.0")
+            database.setTableVersion(this, "0.4.0")
         }
         if (database.getTableVersion(this) == "0.1.0") {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "ALTER TABLE elysium_player ADD COLUMN name AFTER id"
-                )
+                ).use { statement ->
+                    statement.executeUpdate()
+                }
                 connection.prepareStatement(
                         "ALTER TABLE elysium_player ADD COLUMN irc_nick VARCHAR(256)"
-                )
+                ).use { statement ->
+                    statement.executeUpdate()
+                }
             }
             database.setTableVersion(this, "0.3.0")
+        }
+        if (database.getTableVersion(this) == "0.3.0") {
+            database.createConnection().use { connection ->
+                connection.prepareStatement(
+                        "ALTER TABLE elysium_player ADD COLUMN last_known_ip VARCHAR(256) AFTER irc_nick"
+                ).use { statement ->
+                    statement.executeUpdate()
+                }
+            }
+            database.setTableVersion(this, "0.4.0")
         }
     }
 
@@ -94,7 +117,7 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         var id: Int = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "INSERT INTO elysium_player(name, minecraft_uuid, irc_nick) VALUES(?, ?, ?)",
+                    "INSERT INTO elysium_player(name, minecraft_uuid, irc_nick, last_known_ip) VALUES(?, ?, ?, ?)",
                     RETURN_GENERATED_KEYS).use { statement ->
                 statement.setString(1, entity.name)
                 val bukkitPlayer = entity.bukkitPlayer
@@ -108,6 +131,12 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                     statement.setString(3, ircNick)
                 } else {
                     statement.setNull(3, VARCHAR)
+                }
+                val lastKnownIP = entity.lastKnownIP
+                if (lastKnownIP != null) {
+                    statement.setString(4, lastKnownIP)
+                } else {
+                    statement.setNull(4, VARCHAR)
                 }
                 statement.executeUpdate()
                 val generatedKeys = statement.generatedKeys
@@ -131,7 +160,7 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
     override fun update(entity: ElysiumPlayer) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "UPDATE elysium_player SET name = ?, minecraft_uuid = ?, irc_nick = ? WHERE id = ?").use { statement ->
+                    "UPDATE elysium_player SET name = ?, minecraft_uuid = ?, irc_nick = ?, last_known_ip = ? WHERE id = ?").use { statement ->
                 statement.setString(1, entity.name)
                 val bukkitPlayer = entity.bukkitPlayer
                 if (bukkitPlayer != null) {
@@ -145,7 +174,13 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                 } else {
                     statement.setNull(3, VARCHAR)
                 }
-                statement.setInt(4, entity.id)
+                val lastKnownIP = entity.lastKnownIP
+                if (lastKnownIP != null) {
+                    statement.setString(4, lastKnownIP)
+                } else {
+                    statement.setNull(4, VARCHAR)
+                }
+                statement.setInt(5, entity.id)
                 statement.executeUpdate()
                 cache.put(entity.id, entity)
                 nameCache.put(entity.name, entity.id)
@@ -154,6 +189,9 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                 }
                 if (ircNick != null) {
                     ircCache.put(ircNick, entity.id)
+                }
+                if (lastKnownIP != null) {
+                    ipCache.put(lastKnownIP, entity.id)
                 }
             }
         }
@@ -166,18 +204,20 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
             var player: ElysiumPlayer? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, name, minecraft_uuid, irc_nick FROM elysium_player WHERE id = ?").use { statement ->
+                        "SELECT id, name, minecraft_uuid, irc_nick, last_known_ip FROM elysium_player WHERE id = ?").use { statement ->
                     statement.setInt(1, id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
                         val name = resultSet.getString("name")
                         val minecraftUUID = resultSet.getString("minecraft_uuid")
                         val ircNick = resultSet.getString("irc_nick")
+                        val lastKnownIP = resultSet.getString("last_known_ip")
                         player = ElysiumPlayerImpl(
                                 id,
                                 name,
                                 if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
-                                ircNick
+                                ircNick,
+                                lastKnownIP
                         )
                         cache.put(id, player)
                         if (minecraftUUID != null) {
@@ -186,6 +226,9 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                         if (ircNick != null) {
                             ircCache.put(ircNick, id)
                         }
+                        if (lastKnownIP != null) {
+                            ipCache.put(lastKnownIP, id)
+                        }
                     }
                 }
             }
@@ -193,6 +236,13 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         }
     }
 
+    /**
+     * Gets a player by name.
+     * If no player is found with the given name, null is returned.
+     *
+     * @param name The name of the player
+     * @return The player, or null if no player is found with the given name
+     */
     fun get(name: String): ElysiumPlayer? {
         if (nameCache.containsKey(name)) {
             return get(nameCache.get(name))
@@ -200,7 +250,7 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
             var player: ElysiumPlayer? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, name, minecraft_uuid, irc_nick FROM elysium_player WHERE name = ?"
+                        "SELECT id, name, minecraft_uuid, irc_nick, last_known_ip FROM elysium_player WHERE name = ?"
                 ).use { statement ->
                     statement.setString(1, name)
                     val resultSet = statement.executeQuery()
@@ -208,11 +258,13 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                         val id = resultSet.getInt("id")
                         val minecraftUUID = resultSet.getString("minecraft_uuid")
                         val ircNick = resultSet.getString("irc_nick")
+                        val lastKnownIP = resultSet.getString("last_known_ip")
                         player = ElysiumPlayerImpl(
                                 id,
                                 name,
                                 if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
-                                ircNick
+                                ircNick,
+                                lastKnownIP
                         )
                         cache.put(id, player)
                         nameCache.put(name, id)
@@ -229,6 +281,13 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         }
     }
 
+    /**
+     * Gets a player by Bukkit player instance.
+     * If no player is found linked to the given Bukkit player, null is returned.
+     *
+     * @param bukkitPlayer The Bukkit player instance
+     * @return The player, or null if no player is found linked to the Bukkit player instance
+     */
     fun get(bukkitPlayer: OfflinePlayer): ElysiumPlayer? {
         if (minecraftCache.containsKey(bukkitPlayer.uniqueId.toString())) {
             return get(minecraftCache[bukkitPlayer.uniqueId.toString()])
@@ -236,7 +295,7 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
             var player: ElysiumPlayer? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, name, minecraft_uuid, irc_nick FROM elysium_player WHERE minecraft_uuid = ?").use { statement ->
+                        "SELECT id, name, minecraft_uuid, irc_nick, last_known_ip FROM elysium_player WHERE minecraft_uuid = ?").use { statement ->
                     statement.setString(1, bukkitPlayer.uniqueId.toString())
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
@@ -244,11 +303,13 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                         val name = resultSet.getString("name")
                         val minecraftUUID = resultSet.getString("minecraft_uuid")
                         val ircNick = resultSet.getString("irc_nick")
+                        val lastKnownIP = resultSet.getString("last_known_ip")
                         player = ElysiumPlayerImpl(
                                 id,
                                 name,
                                 if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
-                                ircNick
+                                ircNick,
+                                lastKnownIP
                         )
                         cache.put(id, player)
                         nameCache.put(name, id)
@@ -258,6 +319,9 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                         if (ircNick != null) {
                             ircCache.put(ircNick, id)
                         }
+                        if (lastKnownIP != null) {
+                            ipCache.put(lastKnownIP, id)
+                        }
                     }
                 }
             }
@@ -265,6 +329,14 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
         }
     }
 
+
+    /**
+     * Gets a player by the IRC user instance.
+     * If no player is found linked to the given IRC user, null is returned.
+     *
+     * @param ircUser The IRC user instance
+     * @return The player, or null if no player is found linked to the IRC user instance
+     */
     fun get(ircUser: User): ElysiumPlayer? {
         if (ircCache.containsKey(ircUser.nick)) {
             return get(ircCache.get(ircUser.nick))
@@ -272,7 +344,7 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
             var player: ElysiumPlayer? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, name, minecraft_uuid, irc_nick FROM elysium_player WHERE irc_nick = ?"
+                        "SELECT id, name, minecraft_uuid, irc_nick, last_known_ip FROM elysium_player WHERE irc_nick = ?"
                 ).use { statement ->
                     statement.setString(1, ircUser.nick)
                     val resultSet = statement.executeQuery()
@@ -281,11 +353,13 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                         val name = resultSet.getString("name")
                         val minecraftUUID = resultSet.getString("minecraft_uuid")
                         val ircNick = resultSet.getString("irc_nick")
+                        val lastKnownIP = resultSet.getString("last_known_ip")
                         player = ElysiumPlayerImpl(
                                 id,
                                 name,
                                 if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
-                                ircNick
+                                ircNick,
+                                lastKnownIP
                         )
                         cache.put(id, player)
                         nameCache.put(name, id)
@@ -295,6 +369,55 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                         if (ircNick != null) {
                             ircCache.put(ircNick, id)
                         }
+                        if (lastKnownIP != null) {
+                            ipCache.put(lastKnownIP, id)
+                        }
+                    }
+                }
+            }
+            return player
+        }
+    }
+
+    /**
+     * Gets a player by an IP address.
+     * If no player last used the given IP address, null is returned.
+     *
+     * @param lastKnownIP The last known IP
+     * @return The player that last used the IP, or null if no player is found that last used the IP
+     */
+    fun get(lastKnownIP: InetAddress): ElysiumPlayer? {
+        if (ipCache.containsKey(lastKnownIP.hostAddress)) {
+            return get(ipCache.get(lastKnownIP.hostAddress))!!
+        } else {
+            var player: ElysiumPlayer? = null
+            database.createConnection().use { connection ->
+                connection.prepareStatement(
+                        "SELECT id, name, minecraft_uuid, irc_nick, last_known_ip FROM elysium_player WHERE last_known_ip = ?"
+                ).use { statement ->
+                    statement.setString(1, lastKnownIP.hostAddress)
+                    val resultSet = statement.executeQuery()
+                    if (resultSet.next()) {
+                        val id = resultSet.getInt("id")
+                        val name = resultSet.getString("name")
+                        val minecraftUUID = resultSet.getString("minecraft_uuid")
+                        val ircNick = resultSet.getString("irc_nick")
+                        player = ElysiumPlayerImpl(
+                                id,
+                                name,
+                                if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
+                                ircNick,
+                                lastKnownIP.hostAddress
+                        )
+                        cache.put(id, player)
+                        nameCache.put(name, id)
+                        if (minecraftUUID != null) {
+                            minecraftCache.put(minecraftUUID, id)
+                        }
+                        if (ircNick != null) {
+                            ircCache.put(ircNick, id)
+                        }
+                        ipCache.put(lastKnownIP.hostAddress, id)
                     }
                 }
             }
@@ -317,6 +440,10 @@ class ElysiumPlayerTable: Table<ElysiumPlayer> {
                 val ircNick = entity.ircNick
                 if (ircNick != null) {
                     ircCache.remove(ircNick)
+                }
+                val lastKnownIP = entity.lastKnownIP
+                if (lastKnownIP != null) {
+                    ipCache.remove(lastKnownIP)
                 }
             }
         }

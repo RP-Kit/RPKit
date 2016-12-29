@@ -21,14 +21,26 @@ messages:
     character-set-race-prompt: '&fWhat is your character''s race? &7(Type cancel to cancel)'
     character-set-race-invalid-race: '&cThat''s not a valid race.'
     character-set-race-valid: '&aRace set.'
+    character-hide-age-valid: '&aAge hidden.'
+    character-hide-description-valid: '&aDescription hidden.'
+    character-hide-player-valid: '&aPlayer hidden.'
+    character-hide-name-valid: '&aName hidden.'
+    character-hide-gender-valid: '&aGender hidden.'
+    character-hide-race-valid: '&aRace hidden.'
+    character-unhide-age-valid: '&aAge unhidden.'
+    character-unhide-description-valid: '&aDescription unhidden.'
+    character-unhide-player-valid: '&aPlayer unhidden.'
+    character-unhide-name-valid: '&aName unhidden.'
+    character-unhide-gender-valid: '&aGender unhidden.'
+    character-unhide-race-valid: '&aRace unhidden.'
     character-card:
-    - '&7$name'
+    - '&7$name (&a&l$edit(name)&7/&a&l$hide(name)&7)'
     - '&7Player: &f$player'
-    - '&7Gender: &f$gender'
-    - '&7Age: &f$age'
-    - '&7Race: &f$race'
-    - '&7Description: &f$description'
-    - '&7Dead: &f$dead'
+    - '&7Gender: &f$gender &7(&a&l$edit(gender)&7/&a&l$hide(gender)&7)'
+    - '&7Age: &f$age &7(&a&l$edit(age)&7/&a&l$hide(age)&7)'
+    - '&7Race: &f$race &7(&a&l$edit(race)&7/&a&l$hide(race)&7)'
+    - '&7Description: &f$description &7(&a&l$edit(description)&7/&a&l$hide(description)&7)'
+    - '&7Dead: &f$dead &7(&a&l$edit(dead)&7)'
     - '&7Health: &f$health&7/&f$max-health'
     - '&7Food: &f$food&7/&f$max-food'
     - '&7Thirst: &f$thirst&7/&f$max-thirst'
@@ -78,6 +90,12 @@ messages:
     no-permission-character-set-name: '&cYou do not have permission to set your character''s name.'
     no-permission-character-set-player: '&cYou do not have permission to transfer your character to another player.'
     no-permission-character-set-race: '&cYou do not have permission to set your character''s race.'
+    no-permission-character-hide-age: '&cYou do not have permission to hide your character''s age.'
+    no-permission-character-hide-description: '&cYou do not have permission to hide your character''s description.'
+    no-permission-character-hide-gender: '&cYou do not have permission to hide your character''s gender.'
+    no-permission-character-hide-name: '&cYou do not have permission to hide your character''s name.'
+    no-permission-character-hide-player: '&cYou do not have permission to hide your character''s player.'
+    no-permission-character-hide-race: '&cYou do not have permission to hide your character''s race.'
     no-permission-character-switch: '&cYou do not have permission to switch characters.'
     no-permission-character-delete: '&cYou do not have permission to delete characters.'
     no-permission-gender-add: '&cYou do not have permission to add genders.'
@@ -91,11 +109,11 @@ characters:
     min-age: 0
     max-age: 10000
     defaults:
-        name: ''
+        name: 'unset'
         gender: null
         age: 20
         race: null
-        description: ''
+        description: 'unset'
         dead: false
         inventory-contents: []
         helmet: null
@@ -108,6 +126,12 @@ characters:
         max-mana: 20
         food-level: 20
         thirst-level: 20
+        player-hidden: false
+        name-hidden: false
+        gender-hidden: false
+        age-hidden: false
+        race-hidden: false
+        description-hidden: false
     view-card-requires-sneak: true
     kill-character-on-death: false
     delete-character-on-death: false

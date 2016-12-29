@@ -20,8 +20,11 @@ import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
 import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumSnooperTable
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
-
+/**
+ * Snooper provider implementation.
+ */
 class ElysiumSnooperProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumSnooperProvider {
+
     override val snoopers: List<ElysiumPlayer>
         get() = plugin.core.database.getTable(ElysiumSnooperTable::class).getAll().map { snooper -> snooper.player }
 
@@ -36,4 +39,10 @@ class ElysiumSnooperProviderImpl(private val plugin: ElysiumChatBukkit): Elysium
             snooperTable.delete(snooper)
         }
     }
+
+    override fun isSnooping(player: ElysiumPlayer): Boolean {
+        val snooperTable = plugin.core.database.getTable(ElysiumSnooperTable::class)
+        return snooperTable.get(player) != null
+    }
+
 }

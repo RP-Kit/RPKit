@@ -9,7 +9,8 @@ buildscript {
 
     dependencies {
         classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.2-1"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.6"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.9"
     }
 
 }
@@ -17,16 +18,22 @@ buildscript {
 allprojects {
     apply plugin: "kotlin"
     apply plugin: "maven"
+    apply plugin: "org.jetbrains.dokka"
     group = "com.seventh-root"
-    version = "0.3.1-SNAPSHOT"
+    version = "0.4.0"
 }
 
 subprojects {
     repositories {
         mavenCentral()
-        maven {
-            url "https://hub.spigotmc.org/nexus/content/groups/public/"
-        }
+        maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
+        maven { url "http://nexus.hc.to/content/repositories/pub_releases" }
+        maven { url "https://jitpack.io" }
+        maven { url "http://repo.stealthyone.com/content/groups/public" }
+    }
+
+    dependencies {
+        testCompile group: "io.kotlintest", name: "kotlintest", version: "1.3.4"
     }
 }
 
@@ -46,9 +53,11 @@ project(":elysium-core") {
     def guavaVersion = "17.0"
     def gsonVersion = "2.2.4"
     def ehcacheVersion = "3.0.2"
-    def kotlinVersion = "1.0.2-1"
+    def kotlinVersion = "1.0.5-2"
     def slf4jVersion = "1.7.20"
     def pircBotXVersion = "2.1"
+    def jettyVersion = "9.4.0.M0"
+    def velocityVersion = "1.7"
 
     dependencies {
         compile group: "mysql", name: "mysql-connector-java", version: mysqlConnectorVersion
@@ -61,6 +70,10 @@ project(":elysium-core") {
         compile group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: kotlinVersion
         compile group: "org.slf4j", name: "slf4j-jdk14", version: slf4jVersion
         compile group: "org.pircbotx", name: "pircbotx", version: pircBotXVersion
+        compile group: "org.eclipse.jetty", name: "jetty-server", version: jettyVersion
+        compile group: "org.eclipse.jetty", name: "jetty-servlet", version: jettyVersion
+        compile group: "org.eclipse.jetty", name: "jetty-webapp", version: jettyVersion
+        compile group: "org.apache.velocity", name: "velocity", version: velocityVersion
     }
 
     apply plugin: "com.github.johnrengelman.shadow"
@@ -95,7 +108,9 @@ project(":elysium-core") {
 project(":bukkit:elysium-core-bukkit") {
 
     dependencies {
-        compile group: "org.bukkit", name: "bukkit", version: "1.9.4-R0.1-SNAPSHOT"
+        compile group: "org.bukkit", name: "bukkit", version: "1.11.2-R0.1-SNAPSHOT"
+        compile group: "net.milkbowl.vault", name: "VaultAPI", version: "1.6"
+        compile group: "mkremins", name: "fanciful", version: "0.4.0-SNAPSHOT"
         compile project(":elysium-core")
     }
 
@@ -111,6 +126,7 @@ project(":bukkit:elysium-core-bukkit") {
 
         dependencies {
             include(project(":elysium-core"))
+            include(dependency("mkremins:fanciful"))
         }
 
         classifier = ""
@@ -163,6 +179,39 @@ project(":bukkit:elysium-player-lib-bukkit") {
             pom.version = project(":bukkit:elysium-player-lib-bukkit").version
             pom.artifactId = project(":bukkit:elysium-player-lib-bukkit").name
             pom.groupId = project(":bukkit:elysium-player-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-permissions-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-permissions-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-permissions-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-permissions-lib-bukkit").group
 
         }
     }
@@ -371,6 +420,74 @@ project(":bukkit:elysium-auction-lib-bukkit") {
 
 }
 
+project(":bukkit:elysium-stat-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-stat-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-stat-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-stat-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-payment-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
+        compile project(":bukkit:elysium-bank-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-payment-lib-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-payment-lib-bukkit").name
+            pom.groupId = project(":bukkit:elysium-payment-lib-bukkit").group
+
+        }
+    }
+
+}
+
 // Bukkit implementations
 
 project(":bukkit:elysium-players-bukkit") {
@@ -401,6 +518,39 @@ project(":bukkit:elysium-players-bukkit") {
             pom.version = project(":bukkit:elysium-players-bukkit").version
             pom.artifactId = project(":bukkit:elysium-players-bukkit").name
             pom.groupId = project(":bukkit:elysium-players-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-permissions-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-player-lib-bukkit")
+        compile project(":bukkit:elysium-permissions-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-permissions-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-permissions-bukkit").name
+            pom.groupId = project(":bukkit:elysium-permissions-bukkit").group
 
         }
     }
@@ -643,6 +793,109 @@ project(":bukkit:elysium-auctions-bukkit") {
             pom.version = project(":bukkit:elysium-auctions-bukkit").version
             pom.artifactId = project(":bukkit:elysium-auctions-bukkit").name
             pom.groupId = project(":bukkit:elysium-auctions-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-stats-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-player-lib-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-stat-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-stats-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-stats-bukkit").name
+            pom.groupId = project(":bukkit:elysium-stats-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-food-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-food-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-food-bukkit").name
+            pom.groupId = project(":bukkit:elysium-food-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:elysium-payments-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:elysium-core-bukkit")
+        compile project(":bukkit:elysium-character-lib-bukkit")
+        compile project(":bukkit:elysium-economy-lib-bukkit")
+        compile project(":bukkit:elysium-bank-lib-bukkit")
+        compile project(":bukkit:elysium-payment-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:elysium-payments-bukkit").version
+            pom.artifactId = project(":bukkit:elysium-payments-bukkit").name
+            pom.groupId = project(":bukkit:elysium-payments-bukkit").group
 
         }
     }

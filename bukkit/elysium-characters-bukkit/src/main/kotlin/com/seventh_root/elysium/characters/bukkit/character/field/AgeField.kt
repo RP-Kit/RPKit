@@ -18,11 +18,20 @@ package com.seventh_root.elysium.characters.bukkit.character.field
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 
-class AgeField: CharacterCardField {
+/**
+ * A character card field for age.
+ */
+class AgeField: HideableCharacterCardField {
 
     override val name = "age"
     override fun get(character: ElysiumCharacter): String {
-        return character.age.toString()
+        return if (isHidden(character)) "[HIDDEN]" else character.age.toString()
+    }
+    override fun isHidden(character: ElysiumCharacter): Boolean {
+        return character.isAgeHidden
+    }
+    override fun setHidden(character: ElysiumCharacter, hidden: Boolean) {
+        character.isAgeHidden = hidden
     }
 
 }

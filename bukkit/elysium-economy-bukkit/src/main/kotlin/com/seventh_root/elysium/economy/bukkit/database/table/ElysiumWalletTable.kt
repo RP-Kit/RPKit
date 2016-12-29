@@ -33,7 +33,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.util.*
 
-
+/**
+ * Represents the wallet table.
+ */
 class ElysiumWalletTable: Table<ElysiumWallet> {
 
     private val plugin: ElysiumEconomyBukkit
@@ -59,14 +61,15 @@ class ElysiumWalletTable: Table<ElysiumWallet> {
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
                             "character_id INTEGER," +
                             "currency_id INTEGER," +
-                            "balance INTEGER," +
-                            "FOREIGN KEY(character_id) REFERENCES elysium_character(id) ON DELETE CASCADE ON UPDATE CASCADE," +
-                            "FOREIGN KEY(currency_id) REFERENCES elysium_currency(id) ON DELETE CASCADE ON UPDATE CASCADE" +
-                            ")"
+                            "balance INTEGER" +
+                    ")"
             ).use { statement ->
                 statement.executeUpdate()
             }
         }
+    }
+
+    override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
             database.setTableVersion(this, "0.2.0")
         }

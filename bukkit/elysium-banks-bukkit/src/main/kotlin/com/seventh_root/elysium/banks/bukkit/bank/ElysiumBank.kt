@@ -20,7 +20,11 @@ import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.economy.bukkit.currency.ElysiumCurrency
 
-
+/**
+ * Represents a bank account for a character in a currency.
+ * Each character may have one account in each currency.
+ * Unlike their wallet balance, bank balance does not have a cap (or rather, a high enough cap that no one will reach it)
+ */
 class ElysiumBank(
         override var id: Int = 0,
         val character: ElysiumCharacter,

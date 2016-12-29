@@ -21,6 +21,10 @@ import org.pircbotx.User
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.MessageEvent
 
+/**
+ * Represents an IRC command.
+ * These commands are executed when a user begins a message with "!" in IRC.
+ */
 abstract class IRCCommand(val name: String) : ListenerAdapter() {
 
     override fun onMessage(event: MessageEvent) {
@@ -36,6 +40,15 @@ abstract class IRCCommand(val name: String) : ListenerAdapter() {
         }
     }
 
+    /**
+     * Called when the command is executed.
+     *
+     * @param channel The IRC channel within which the command was executed
+     * @param sender The user sending the command
+     * @param cmd The command
+     * @param label The label of the command used
+     * @param args An array of arguments specified
+     */
     abstract fun execute(channel: Channel, sender: User, cmd: IRCCommand, label: String, args: Array<String>)
 
 }

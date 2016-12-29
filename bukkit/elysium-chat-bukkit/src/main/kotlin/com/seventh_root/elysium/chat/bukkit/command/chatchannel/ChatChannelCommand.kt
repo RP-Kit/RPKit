@@ -17,53 +17,44 @@
 package com.seventh_root.elysium.chat.bukkit.command.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
+import com.seventh_root.elysium.chat.bukkit.chatchannel.ElysiumChatChannelProvider
+import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 
+/**
+ * Chat channel command.
+ * Sets which chat channel a player is speaking in.
+ */
 class ChatChannelCommand(private val plugin: ElysiumChatBukkit): CommandExecutor {
 
-    private val chatChannelJoinCommand: ChatChannelJoinCommand
-    private val chatChannelLeaveCommand: ChatChannelLeaveCommand
-    private val chatChannelSpeakCommand: ChatChannelSpeakCommand
-    private val chatChannelCreateCommand: ChatChannelCreateCommand
-    private val chatChannelDeleteCommand: ChatChannelDeleteCommand
-    private val chatChannelListCommand: ChatChannelListCommand
-    private val chatChannelSetCommand: ChatChannelSetCommand
-
-    init {
-        chatChannelJoinCommand = ChatChannelJoinCommand(plugin)
-        chatChannelLeaveCommand = ChatChannelLeaveCommand(plugin)
-        chatChannelSpeakCommand = ChatChannelSpeakCommand(plugin)
-        chatChannelCreateCommand = ChatChannelCreateCommand(plugin)
-        chatChannelDeleteCommand = ChatChannelDeleteCommand(plugin)
-        chatChannelListCommand = ChatChannelListCommand(plugin)
-        chatChannelSetCommand = ChatChannelSetCommand(plugin)
-    }
-
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (args.size > 0) {
-            val newArgs = args.drop(1).toTypedArray()
-            if (args[0].equals("join", ignoreCase = true) || args[0].equals("unmute", ignoreCase = true)) {
-                return chatChannelJoinCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("leave", ignoreCase = true) || args[0].equals("mute", ignoreCase = true)) {
-                return chatChannelLeaveCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("speak", ignoreCase = true) || args[0].equals("talk", ignoreCase = true)) {
-                return chatChannelSpeakCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("create", ignoreCase = true) || args[0].equals("new", ignoreCase = true) || args[0].equals("add", ignoreCase = true)) {
-                return chatChannelCreateCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("delete", ignoreCase = true) || args[0].equals("remove", ignoreCase = true)) {
-                return chatChannelDeleteCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("list", ignoreCase = true)) {
-                return chatChannelListCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("set", ignoreCase = true) || args[0].equals("modify", ignoreCase = true)) {
-                return chatChannelSetCommand.onCommand(sender, command, label, newArgs)
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+        if (sender is Player) {
+            if (args.size > 0) {
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(ElysiumPlayerProvider::class)
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelProvider::class)
+                val player = playerProvider.getPlayer(sender)
+                val chatChannel = chatChannelProvider.getChatChannel(args[0])
+                if (chatChannel != null) {
+                    if (sender.hasPermission("elysium.chat.command.chatchannel.${chatChannel.name}")) {
+                        chatChannel.addSpeaker(player)
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-valid"))
+                                .replace("\$channel", chatChannel.name))
+                    } else {
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel"))
+                                .replace("\$channel", chatChannel.name))
+                    }
+                } else {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-invalid-chatchannel")))
+                }
             } else {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-usage")))
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-usage")))
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
         }
         return true
     }

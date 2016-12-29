@@ -27,6 +27,9 @@ import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType.BLINDNESS
 
+/**
+ * Player move listener for preventing players from moving about with a dead character.
+ */
 class PlayerMoveListener(private val plugin: ElysiumCharactersBukkit): Listener {
 
     @EventHandler

@@ -17,14 +17,13 @@
 package com.seventh_root.elysium.trade.bukkit
 
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
-import com.seventh_root.elysium.core.service.ServiceProvider
 import com.seventh_root.elysium.trade.bukkit.listener.PlayerInteractListener
 import com.seventh_root.elysium.trade.bukkit.listener.SignChangeListener
 
-
+/**
+ * Elysium trade plugin default implementation.
+ */
 class ElysiumTradeBukkit: ElysiumBukkitPlugin() {
-
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()

@@ -18,11 +18,47 @@ package com.seventh_root.elysium.characters.bukkit.race
 
 import com.seventh_root.elysium.core.service.ServiceProvider
 
-
+/**
+ * Provides race-related services.
+ */
 interface ElysiumRaceProvider: ServiceProvider {
+
+    /**
+     * A collection of races currently managed by this race provider.
+     * This is immutable, races must be added and removed using [addRace] and [removeRace].
+     */
     val races: Collection<ElysiumRace>
+
+    /**
+     * Gets a race by ID.
+     * If there is no race with the given ID, null is returned.
+     *
+     * @param id The ID of the race
+     * @return The race, or null if no race is found with the given ID
+     */
     fun getRace(id: Int): ElysiumRace?
+
+    /**
+     * Gets a race by name.
+     * If there is no race with the given name, null is returned.
+     *
+     * @param name The name of the race
+     * @return The race, or null if no race is found with the given name
+     */
     fun getRace(name: String): ElysiumRace?
+
+    /**
+     * Adds a race to be tracked by this race provider.
+     *
+     * @param race The race to add
+     */
     fun addRace(race: ElysiumRace)
+
+    /**
+     * Removes a race from being tracked by this race provider.
+     *
+     * @param race The race to remove
+     */
     fun removeRace(race: ElysiumRace)
+
 }

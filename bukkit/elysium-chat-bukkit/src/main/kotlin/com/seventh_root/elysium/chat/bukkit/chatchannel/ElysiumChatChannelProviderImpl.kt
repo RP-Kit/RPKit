@@ -17,48 +17,59 @@
 package com.seventh_root.elysium.chat.bukkit.chatchannel
 
 import com.seventh_root.elysium.chat.bukkit.ElysiumChatBukkit
-import com.seventh_root.elysium.chat.bukkit.database.table.ChatChannelSpeakerTable
-import com.seventh_root.elysium.chat.bukkit.database.table.ElysiumChatChannelTable
-import com.seventh_root.elysium.chat.bukkit.irc.ElysiumIRCProvider
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineComponent
+import com.seventh_root.elysium.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
+import com.seventh_root.elysium.chat.bukkit.chatchannel.undirected.IRCComponent
+import com.seventh_root.elysium.chat.bukkit.speaker.ElysiumChatChannelSpeakerProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
+import java.awt.Color
 
+/**
+ * Chat channel provider implementation.
+ */
 class ElysiumChatChannelProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumChatChannelProvider {
 
-    override val chatChannels: Collection<ElysiumChatChannel>
-        get() {
-            return plugin.core.database.getTable(ElysiumChatChannelTable::class).getAll()
-        }
+    override val chatChannels: MutableList<ElysiumChatChannel> = plugin.config.getConfigurationSection("chat-channels")
+                .getKeys(false)
+                .mapIndexed { id, channelName -> ElysiumChatChannelImpl(
+                        plugin = plugin,
+                        id = id,
+                        name = channelName,
+                        color = Color(
+                                plugin.config.getInt("chat-channels.$channelName.color.red"),
+                                plugin.config.getInt("chat-channels.$channelName.color.green"),
+                                plugin.config.getInt("chat-channels.$channelName.color.blue")
+                        ),
+                        radius = plugin.config.getDouble("chat-channels.$channelName.radius"),
+                        directedPipeline = plugin.config.getList("chat-channels.$channelName.directed-pipeline") as List<DirectedChatChannelPipelineComponent>,
+                        undirectedPipeline = plugin.config.getList("chat-channels.$channelName.undirected-pipeline") as List<UndirectedChatChannelPipelineComponent>,
+                        matchPattern = plugin.config.getString("chat-channels.$channelName.match-pattern"),
+                        isJoinedByDefault = plugin.config.getBoolean("chat-channels.$channelName.joined-by-default")
+                ) }
+                .toMutableList()
 
     override fun getChatChannel(id: Int): ElysiumChatChannel? {
-        return plugin.core.database.getTable(ElysiumChatChannelTable::class)[id]
+        return chatChannels[id]
     }
 
     override fun getChatChannel(name: String): ElysiumChatChannel? {
-        return plugin.core.database.getTable(ElysiumChatChannelTable::class).get(name)
+        return chatChannels.filter { it.name == name }.firstOrNull()
     }
 
     override fun addChatChannel(chatChannel: ElysiumChatChannel) {
-        plugin.core.database.getTable(ElysiumChatChannelTable::class).insert(chatChannel)
-        if (chatChannel.isIRCEnabled) {
-            val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
-            ircProvider.ircBot.sendIRC().joinChannel(chatChannel.ircChannel)
-        }
+        chatChannels.add(chatChannel)
     }
 
     override fun removeChatChannel(chatChannel: ElysiumChatChannel) {
-        plugin.core.database.getTable(ElysiumChatChannelTable::class).delete(chatChannel)
-        if (chatChannel.isIRCEnabled) {
-            val ircProvider = plugin.core.serviceManager.getServiceProvider(ElysiumIRCProvider::class)
-            ircProvider.ircBot.sendRaw().rawLine("PART ${chatChannel.ircChannel}")
-        }
+        chatChannels.remove(chatChannel)
     }
 
     override fun updateChatChannel(chatChannel: ElysiumChatChannel) {
-        plugin.core.database.getTable(ElysiumChatChannelTable::class).update(chatChannel)
+
     }
 
     override fun getPlayerChannel(player: ElysiumPlayer): ElysiumChatChannel? {
-        return plugin.core.database.getTable(ChatChannelSpeakerTable::class).get(player)?.chatChannel
+        return plugin.core.serviceManager.getServiceProvider(ElysiumChatChannelSpeakerProvider::class).getPlayerChannel(player)
     }
 
     override fun setPlayerChannel(player: ElysiumPlayer, channel: ElysiumChatChannel) {
@@ -72,7 +83,13 @@ class ElysiumChatChannelProviderImpl(private val plugin: ElysiumChatBukkit): Ely
     }
 
     override fun getChatChannelFromIRCChannel(ircChannel: String): ElysiumChatChannel? {
-        return chatChannels.filter { chatChannel -> chatChannel.ircChannel == ircChannel }.firstOrNull()
+        return chatChannels.filter { chatChannel ->
+            chatChannel.undirectedPipeline
+                .map { component -> component as? IRCComponent }
+                .filterNotNull()
+                .firstOrNull() != null
+        }
+        .firstOrNull()
     }
 
 }

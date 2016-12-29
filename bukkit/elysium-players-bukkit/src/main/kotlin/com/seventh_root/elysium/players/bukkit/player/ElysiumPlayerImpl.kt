@@ -18,9 +18,13 @@ package com.seventh_root.elysium.players.bukkit.player
 
 import org.bukkit.OfflinePlayer
 
+/**
+ * Player implementation.
+ */
 class ElysiumPlayerImpl(
         override var id: Int = 0,
         override var name: String,
         override var bukkitPlayer: OfflinePlayer? = null,
-        override var ircNick: String? = null
+        override var ircNick: String? = null,
+        override var lastKnownIP: String? = null
 ): ElysiumPlayer

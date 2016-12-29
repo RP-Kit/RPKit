@@ -18,7 +18,6 @@ package com.seventh_root.elysium.characters.bukkit.listener
 
 import com.seventh_root.elysium.characters.bukkit.ElysiumCharactersBukkit
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacterProvider
-import com.seventh_root.elysium.characters.bukkit.character.field.ElysiumCharacterCardFieldProvider
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
@@ -27,6 +26,10 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.inventory.EquipmentSlot.HAND
 
+/**
+ * Player interact entity listener for character cards.
+ * This shows character cards upon right-clicking players.
+ */
 class PlayerInteractEntityListener(private val plugin: ElysiumCharactersBukkit): Listener {
 
     @EventHandler
@@ -41,12 +44,8 @@ class PlayerInteractEntityListener(private val plugin: ElysiumCharactersBukkit):
                         val player = playerProvider.getPlayer(bukkitPlayer)
                         val character = characterProvider.getActiveCharacter(player)
                         if (character != null) {
-                            for (line in plugin.config.getStringList("messages.character-card")) {
-                                var filteredLine = ChatColor.translateAlternateColorCodes('&', line)
-                                val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(ElysiumCharacterCardFieldProvider::class)
-                                characterCardFieldProvider.characterCardFields.forEach { field -> filteredLine = filteredLine.replace("\$${field.name}", field.get(character)) }
-                                event.player.sendMessage(filteredLine)
-                            }
+                            val rightClicker = playerProvider.getPlayer(event.player)
+                            character.showCharacterCard(rightClicker)
                         } else {
                             event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character-other")))
                         }

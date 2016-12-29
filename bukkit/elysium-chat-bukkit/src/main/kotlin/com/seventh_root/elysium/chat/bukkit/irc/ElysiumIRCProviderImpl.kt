@@ -28,6 +28,9 @@ import org.pircbotx.Configuration
 import org.pircbotx.PircBotX
 import org.pircbotx.User
 
+/**
+ * IRC provider implementation.
+ */
 class ElysiumIRCProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumIRCProvider {
 
     override val ircBot: PircBotX
@@ -71,7 +74,7 @@ class ElysiumIRCProviderImpl(private val plugin: ElysiumChatBukkit): ElysiumIRCP
         if (plugin.config.getString("irc.server").contains(":")) {
             try {
                 configuration.addServer(
-                            plugin.config.getString("irc.server").split(":")[0], plugin.config.getString("irc.server").split(":")[1].toInt()
+                        plugin.config.getString("irc.server").split(":")[0], plugin.config.getString("irc.server").split(":")[1].toInt()
                 )
             } catch (ignore: NumberFormatException) {
             }

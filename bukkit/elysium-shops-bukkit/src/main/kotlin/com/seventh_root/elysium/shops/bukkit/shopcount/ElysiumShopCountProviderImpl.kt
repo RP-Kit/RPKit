@@ -20,7 +20,9 @@ import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 import com.seventh_root.elysium.shops.bukkit.ElysiumShopsBukkit
 import com.seventh_root.elysium.shops.bukkit.database.table.ElysiumShopCountTable
 
-
+/**
+ * Shop count provider implementation.
+ */
 class ElysiumShopCountProviderImpl(private val plugin: ElysiumShopsBukkit): ElysiumShopCountProvider {
 
     override fun getShopCount(character: ElysiumCharacter): Int {

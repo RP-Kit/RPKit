@@ -18,14 +18,24 @@ package com.seventh_root.elysium.economy.bukkit
 
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.service.ServiceProvider
+import com.seventh_root.elysium.economy.bukkit.vault.ElysiumEconomyVaultEconomy
+import net.milkbowl.vault.economy.Economy
+import org.bukkit.plugin.ServicePriority
 
-
+/**
+ * Class to allow economy lib to load as a plugin.
+ * This allows plugins requiring economy or implementing economy to depend on the plugin.
+ * With this plugin loaded a Vault chat service is added for chat plugins on [ServicePriority.Normal].
+ * If economy plugins wish to provide their own economy service, they should register on [ServicePriority.Highest] in
+ * order to override bank implementation supplied in elysium-bank-lib
+ */
 class ElysiumEconomyLibBukkit: ElysiumBukkitPlugin() {
-
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         serviceProviders = arrayOf<ServiceProvider>()
+        if (server.pluginManager.getPlugin("Vault") != null) {
+            server.servicesManager.register(Economy::class.java, ElysiumEconomyVaultEconomy(this), this, ServicePriority.Normal)
+        }
     }
 
 }

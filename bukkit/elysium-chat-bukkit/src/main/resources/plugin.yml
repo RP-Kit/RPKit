@@ -6,24 +6,19 @@ description: Elysium Chat implementation for Bukkit
 depend: [elysium-core-bukkit, elysium-player-lib-bukkit, elysium-character-lib-bukkit, elysium-chat-lib-bukkit]
 commands:
     chatchannel:
-        description: |
-            Chat channel management command
-            /chatchannel join - Joins a channel
-            /chatchannel leave - Leaves a channel
-            /chatchannel create - Creates a channel
-            /chatchannel delete - Deletes a channel
-            /chatchannel speak - Speaks in a channel
-            /chatchannel list - Lists the chat channels
-            /chatchannel set - Modifies a chat channel
+        description: Switches which chat channel you are speaking in
+        usage: /<command> [channel]
         aliases: [channel, chan, ch]
-        usage: /<command> [join|leave|create|delete|speak|list|set]
-    prefix:
-        description: |
-            Prefix management command
-            /prefix add - Adds a prefix
-            /prefix remove - Removes a prefix
-            /prefix list - Lists prefixes
-        usage: /<command> [add|remove|list]
+    mute:
+        description: Mutes a chat channel
+        usage: /<command> [channel]
+    unmute:
+        description: Umutes a chat channel
+        usage: /<command> [channel]
+    listchatchannels:
+        description: Lists available chat channels
+        usage: /<command>
+        aliases: [listchannels, listchan, listch, lsc]
     snoop:
         description: |
             Snooping command
@@ -31,79 +26,33 @@ commands:
             /snoop off - Disables snooping
             /snoop check - Checks if you are snooping
         usage: /<command> [on|off|check]
+    chatgroup:
+        description: |
+            Chat group management command
+            /chatgroup create - Creates a chat group
+            /chatgroup disband - Disbands a chat group
+            /chatgroup invite - Invites a player to a chat group
+            /chatgroup join - Joins a chat group
+            /chatgroup leave - Leaves a chat group
+            /chatgroup message - Sends a message to a chat group
+            /chatgroup members - Lists members of a chat group
+        aliases: [cg]
+        usage: /<command> [create|disband|invite|join|leave|message|members]
+    message:
+        description: Message a player or chat group
+        aliases: [msg, pm]
+        usage: /<command> [target] [message]
+    reply:
+        description: Reply to the last private message or chat group message sent to you
+        aliases: [r]
+        usage: /<command> [message]
 permissions:
-    elysium.chat.command.chatchannel.create:
-        description: Allows creating chat channels
-        default: op
-    elysium.chat.command.chatchannel.delete:
-        description: Allows deleting chat channels
-        default: op
-    elysium.chat.command.chatchannel.join:
-        description: Allows joining chat channels
-        default: true
-    elysium.chat.command.chatchannel.join.[channel]:
-        description: Allows joining a specific chat channel
-        default: op
-    elysium.chat.command.chatchannel.leave:
-        description: Allows leaving chat channels
-        default: true
-    elysium.chat.command.chatchannel.leave.[channel]:
-        description: Allows leaving a specific chat channel
-        default: op
-    elysium.chat.command.chatchannel.list:
+    elysium.chat.command.listchatchannels:
         description: Allows listing chat channels
         default: true
-    elysium.chat.command.chatchannel.set:
-        description: Allows modifying chat channels
-        default: op
-    elysium.chat.command.chatchannel.set.name:
-        description: Allows modifying a chat channel name
-        default: op
-    elysium.chat.command.chatchannel.set.color:
-        description: Allows modifying a chat channel colour
-        default: op
-    elysium.chat.command.chatchannel.set.format:
-        description: Allows modifying a chat channel format
-        default: op
-    elysium.chat.command.chatchannel.set.radius:
-        description: Allows modifying a chat channel radius
-        default: op
-    elysium.chat.command.chatchannel.set.clearradius:
-        description: Allows modifying a chat channel clear radius
-        default: op
-    elysium.chat.command.chatchannel.set.matchpattern:
-        description: Allows modifying a chat channel match pattern
-        default: op
-    elysium.chat.command.chatchannel.set.ircenabled:
-        description: Allows enabling or disabling IRC for a chat channel
-        default: op
-    elysium.chat.command.chatchannel.set.ircchannel:
-        description: Allows modifying a chat channel IRC channel
-        default: op
-    elysium.chat.command.chatchannel.set.ircwhitelist:
-        description: Allows enabling or disabling IRC whitelisting for an IRC channel
-        default: op
-    elysium.chat.command.chatchannel.set.joinedbydefault:
-        description: Allows enabling or disabling making this channel a default channel
-        default: op
-    elysium.chat.command.chatchannel.speak:
-        description: Allows speaking in chat channels
-        default: true
-    elysium.chat.command.chatchannel.speak.[channel]:
-        description: Allows speaking in a specific chat channel
-        default: op
     elysium.chat.prefix.[prefix]:
         description: Adds the prefix to the player when speaking in chat
         default: false
-    elysium.chat.command.prefix.add:
-        description: Allows adding prefixes
-        default: op
-    elysium.chat.command.prefix.remove:
-        description: Allows removing prefixes
-        default: op
-    elysium.chat.command.prefix.list:
-        description: Allows listing prefixes
-        default: op
     elysium.chat.command.snoop.on:
         description: Allows enabling snoop
         default: op
@@ -113,3 +62,33 @@ permissions:
     elysium.chat.command.snoop.check:
         description: Allows checking snoop
         default: op
+    elysium.chat.command.chatgroup:
+        description: Allows using chat group commands
+        default: true
+    elysium.chat.command.chatgroup.create:
+        description: Allows creation of chat groups
+        default: true
+    elysium.chat.command.chatgroup.disband:
+        description: Allows disbanding chat groups
+        default: true
+    elysium.chat.command.chatgroup.invite:
+        description: Allows inviting people to chat groups
+        default: true
+    elysium.chat.command.chatgroup.join:
+        description: Allows joining chat groups
+        default: true
+    elysium.chat.command.chatgroup.leave:
+        description: Allows leaving chat groups
+        default: true
+    elysium.chat.command.chatgroup.members:
+        description: Allows listing members of chat groups
+        default: true
+    elysium.chat.command.chatgroup.message:
+        description: Allows messaging a chat group
+        default: true
+    elysium.chat.command.message:
+        description: Allows private messaging
+        default: true
+    elysium.chat.command.reply:
+        description: Allows replying to private messages
+        default: true

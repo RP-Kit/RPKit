@@ -18,11 +18,20 @@ package com.seventh_root.elysium.characters.bukkit.character.field
 
 import com.seventh_root.elysium.characters.bukkit.character.ElysiumCharacter
 
-class NameField: CharacterCardField {
+/**
+ * Character card field for name.
+ */
+class NameField: HideableCharacterCardField {
 
     override val name = "name"
     override fun get(character: ElysiumCharacter): String {
-        return character.name
+        return if (isHidden(character)) "[HIDDEN]" else character.name
+    }
+    override fun isHidden(character: ElysiumCharacter): Boolean {
+        return character.isNameHidden
+    }
+    override fun setHidden(character: ElysiumCharacter, hidden: Boolean) {
+        character.isNameHidden = hidden
     }
 
 }

@@ -1,0 +1,8 @@
+# See https://docs.oracle.com/javase/8/docs/api/index.html?java/text/SimpleDateFormat.html
+date-format: yyyy-MM-dd HH:mm:ss zzz
+# Measured in seconds.
+# Default applies to everything not set.
+# For material list, see https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+food-expiry:
+    default: 259200
+    CARROT_ITEM: 3020000

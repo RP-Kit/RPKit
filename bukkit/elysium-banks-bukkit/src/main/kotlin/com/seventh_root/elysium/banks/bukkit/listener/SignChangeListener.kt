@@ -24,7 +24,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.SignChangeEvent
 
-
+/**
+ * Sign change listener for bank signs.
+ */
 class SignChangeListener(private val plugin: ElysiumBanksBukkit): Listener {
     @EventHandler
     fun onSignChange(event: SignChangeEvent) {
@@ -37,7 +39,7 @@ class SignChangeListener(private val plugin: ElysiumBanksBukkit): Listener {
             }
             if (!(event.getLine(1).equals("withdraw", ignoreCase = true) || event.getLine(1).equals("deposit", ignoreCase = true) || event.getLine(1).equals("balance", ignoreCase = true))) {
                 event.block.breakNaturally()
-                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("bank-sign-invalid-operation")))
+                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bank-sign-invalid-operation")))
                 return
             }
             if (event.getLine(1).equals("balance", ignoreCase = true)) {

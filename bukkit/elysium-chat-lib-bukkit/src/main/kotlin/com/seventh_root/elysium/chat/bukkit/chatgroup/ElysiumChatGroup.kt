@@ -19,14 +19,61 @@ package com.seventh_root.elysium.chat.bukkit.chatgroup
 import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
-
+/**
+ * Represents a chat group.
+ */
 interface ElysiumChatGroup: Entity {
+
+    /**
+     * The name of the chat group.
+     */
     val name: String
-    val players: List<ElysiumPlayer>
+
+    /**
+     * A list of all members of the chat group.
+     * This list is immutable, members must be added and removed with [addMember] and [removeMember], respectively.
+     */
+    val members: List<ElysiumPlayer>
+
+    /**
+     * A list of all people that have received an invitation to the chat group.
+     * This list is immutable, invitations must be added and removed with [invite] and [uninvite], respectively.
+     */
     val invited: List<ElysiumPlayer>
-    fun addPlayer(player: ElysiumPlayer)
-    fun removePlayer(player: ElysiumPlayer)
+
+    /**
+     * Adds a member to the chat group.
+     *
+     * @param player The player to add
+     */
+    fun addMember(player: ElysiumPlayer)
+
+    /**
+     * Removes a member from the chat group.
+     *
+     * @param player The player to remove
+     */
+    fun removeMember(player: ElysiumPlayer)
+
+    /**
+     * Invites a player to the chat group.
+     *
+     * @param player The player to invite
+     */
     fun invite(player: ElysiumPlayer)
+
+    /**
+     * Uninvites a player from the chat group.
+     *
+     * @param player The player to uninvite
+     */
     fun uninvite(player: ElysiumPlayer)
+
+    /**
+     * Sends a message to the chat group.
+     *
+     * @param sender The player sending the message
+     * @param message The message
+     */
     fun sendMessage(sender: ElysiumPlayer, message: String)
 }

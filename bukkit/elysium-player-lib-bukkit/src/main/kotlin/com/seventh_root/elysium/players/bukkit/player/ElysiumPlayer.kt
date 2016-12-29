@@ -19,11 +19,32 @@ package com.seventh_root.elysium.players.bukkit.player
 import com.seventh_root.elysium.core.database.Entity
 import org.bukkit.OfflinePlayer
 
-
+/**
+ * Represents a player
+ */
 interface ElysiumPlayer: Entity {
 
+    /**
+     * The name of the player.
+     */
     var name: String
+
+    /**
+     * The Bukkit player instance.
+     * May be null if no Bukkit player is currently linked (e.g. if the player has just spoken through IRC)
+     */
     var bukkitPlayer: OfflinePlayer?
+
+    /**
+     * The IRC nickname.
+     * May be null if no IRC user is currently linked (e.g. if the player has only played in Minecraft)
+     */
     var ircNick: String?
+
+    /**
+     * The last known IP of the player.
+     * May be null if no IP is known (e.g. if the player has just spoken through IRC)
+     */
+    var lastKnownIP: String?
 
 }

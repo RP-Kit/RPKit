@@ -19,7 +19,9 @@ package com.seventh_root.elysium.chat.bukkit.snooper
 import com.seventh_root.elysium.core.database.Entity
 import com.seventh_root.elysium.players.bukkit.player.ElysiumPlayer
 
-
+/**
+ * Represents a snooper.
+ */
 class ElysiumSnooper(
         override var id: Int = 0,
         val player: ElysiumPlayer

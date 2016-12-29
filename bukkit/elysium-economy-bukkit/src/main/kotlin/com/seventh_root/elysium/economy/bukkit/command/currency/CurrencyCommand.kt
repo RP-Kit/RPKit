@@ -22,6 +22,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
+/**
+ * Currency command.
+ * Parent command for all currency management commands.
+ */
 class CurrencyCommand(private val plugin: ElysiumEconomyBukkit): CommandExecutor {
     private val currencyAddCommand: CurrencyAddCommand
     private val currencyRemoveCommand: CurrencyRemoveCommand

@@ -19,9 +19,11 @@ package com.seventh_root.elysium.shops.bukkit
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.service.ServiceProvider
 
+/**
+ * Class to allow shop lib to load as a plugin.
+ * This allows plugins requiring shops or implementing shops to depend on the plugin.
+ */
 class ElysiumShopLibBukkit: ElysiumBukkitPlugin() {
-
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         serviceProviders = arrayOf<ServiceProvider>()

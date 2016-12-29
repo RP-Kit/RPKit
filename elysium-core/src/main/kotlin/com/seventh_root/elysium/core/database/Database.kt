@@ -23,6 +23,14 @@ import java.sql.SQLException
 import java.util.*
 import kotlin.reflect.KClass
 
+/**
+ * Represents a database.
+ * Primarily used for obtaining connections and keeping track of tables.
+ *
+ * @property url The URL of the database
+ * @property userName The username to connect to the database with. May be null to avoid authenticating.
+ * @property password The password to connect to the database with. May be null to avoid authenticating.
+ */
 class Database @JvmOverloads constructor(val url: String, val userName: String? = null, val password: String? = null) {
 
     private val tables: MutableMap<KClass<out Table<*>>, Table<*>>
@@ -32,6 +40,11 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
         addTable(TableVersionTable(this))
     }
 
+    /**
+     * Create a new connection to the database.
+     *
+     * @return The connection
+     */
     @Throws(SQLException::class)
     fun createConnection(): Connection {
         if (userName == null && password == null) {
@@ -41,25 +54,58 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
         }
     }
 
+    /**
+     * Adds a table to be tracked by the database.
+     *
+     * @param table The table to be tracked.
+     */
     fun addTable(table: Table<*>) {
         tables.put(table.javaClass.kotlin, table)
         table.create()
         table.applyMigrations()
     }
 
+    /**
+     * Gets a table by its class
+     * Easiest method of use from Java plugins, for Kotlin plugins you can pass a [KClass]
+     *
+     * @param type The type of the table
+     * @return The table
+     */
     fun <T: Table<*>> getTable(type: Class<T>): T {
         return getTable(type.kotlin)
     }
 
+    /**
+     * Gets a table by its class
+     * Easiest method of use from Kotlin plugins, for Java plugins you can pass a [Class]
+     *
+     * @param type The type of the table
+     * @return The table
+     */
     @Suppress("UNCHECKED_CAST")
     fun <T: Table<*>> getTable(type: KClass<T>): T {
         return tables[type] as T
     }
 
+    /**
+     * Gets the version of a table.
+     * May return null if it has not been set in a previous execution.
+     *
+     * @param table The table to get the version of
+     * @return The version of the table. May be null.
+     */
     fun getTableVersion(table: Table<*>): String? {
         return getTable(TableVersionTable::class).get(table.name)?.version
     }
 
+    /**
+     * Sets a table's version.
+     * This should usually be called after performing a migration successfully.
+     *
+     * @param table The table to set the version of
+     * @param version The version to set
+     */
     fun setTableVersion(table: Table<*>, version: String) {
         val tableVersionTable = getTable(TableVersionTable::class)
         val tableVersion = tableVersionTable.get(table.name)

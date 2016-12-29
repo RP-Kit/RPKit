@@ -18,7 +18,14 @@ package com.seventh_root.elysium.characters.bukkit.race
 
 import com.seventh_root.elysium.core.database.Entity
 
-
+/**
+ * Represents a race.
+ */
 interface ElysiumRace: Entity {
+
+    /**
+     * The name of the race.
+     */
     val name: String
+
 }

@@ -22,6 +22,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
+/**
+ * Gender command.
+ * Parent command for all gender management commands.
+ */
 class GenderCommand(private val plugin: ElysiumCharactersBukkit): CommandExecutor {
     private val genderAddCommand: GenderAddCommand
     private val genderRemoveCommand: GenderRemoveCommand

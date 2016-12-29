@@ -18,15 +18,31 @@ package com.seventh_root.elysium.core
 
 import com.seventh_root.elysium.core.database.Database
 import com.seventh_root.elysium.core.service.ServiceManager
-
+import com.seventh_root.elysium.core.web.Web
 import java.util.logging.Logger
 
-class ElysiumCore(val logger: Logger, val database: Database) {
+/**
+ * Represents the core of Elysium.
+ * Most core Elysium functionality is accessible from here, including the logger, database, web and service managers.
+ *
+ * @property logger The logger to use
+ * @property database The database instance to use
+ * @property web The web instance to use
+ */
+class ElysiumCore(val logger: Logger, val database: Database, val web: Web) {
 
+    /**
+     * The service manager.
+     * Manages service providers.
+     */
     val serviceManager: ServiceManager
 
     init {
         serviceManager = ServiceManager()
+        Thread {
+            web.server.start()
+            web.server.join()
+        }.start()
     }
 
 }

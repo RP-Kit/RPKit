@@ -29,6 +29,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.sql.SQLException
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
+/**
+ * Represents the race table.
+ */
 class ElysiumRaceTable: Table<ElysiumRace> {
 
     private val cacheManager: CacheManager
@@ -59,7 +62,9 @@ class ElysiumRaceTable: Table<ElysiumRace> {
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
+    }
 
+    override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
             database.setTableVersion(this, "0.1.0")
         }
@@ -135,6 +140,13 @@ class ElysiumRaceTable: Table<ElysiumRace> {
         return null
     }
 
+    /**
+     * Gets a race by name.
+     * If no race is found with the given name, null is returned.
+     *
+     * @param name The name of the race
+     * @return The race, or null if no race is found with the given name
+     */
     operator fun get(name: String): ElysiumRace? {
         if (nameCache.containsKey(name)) {
             return get(nameCache.get(name) as Int)

@@ -35,16 +35,17 @@ import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProvider
 import com.seventh_root.elysium.characters.bukkit.race.ElysiumRaceProviderImpl
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.database.Database
-import com.seventh_root.elysium.core.service.ServiceProvider
 import java.sql.SQLException
 
+/**
+ * Elysium characters plugin default implementation.
+ */
 class ElysiumCharactersBukkit: ElysiumBukkitPlugin() {
 
     private lateinit var characterProvider: ElysiumCharacterProvider
     private lateinit var genderProvider: ElysiumGenderProvider
     private lateinit var raceProvider: ElysiumRaceProvider
     private lateinit var characterCardFieldProvider: ElysiumCharacterCardFieldProvider
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         saveDefaultConfig()

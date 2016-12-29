@@ -19,9 +19,11 @@ package com.seventh_root.elysium.players.bukkit
 import com.seventh_root.elysium.core.bukkit.plugin.ElysiumBukkitPlugin
 import com.seventh_root.elysium.core.service.ServiceProvider
 
+/**
+ * Class to allow player lib to load as a plugin.
+ * This allows plugins requiring players or implementing players to depend on the plugin.
+ */
 class ElysiumPlayerLibBukkit: ElysiumBukkitPlugin() {
-
-    override lateinit var serviceProviders: Array<ServiceProvider>
 
     override fun onEnable() {
         serviceProviders = arrayOf<ServiceProvider>()
