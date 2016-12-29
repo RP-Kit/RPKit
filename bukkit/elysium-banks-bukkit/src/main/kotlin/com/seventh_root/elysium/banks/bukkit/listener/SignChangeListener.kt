@@ -39,7 +39,7 @@ class SignChangeListener(private val plugin: ElysiumBanksBukkit): Listener {
             }
             if (!(event.getLine(1).equals("withdraw", ignoreCase = true) || event.getLine(1).equals("deposit", ignoreCase = true) || event.getLine(1).equals("balance", ignoreCase = true))) {
                 event.block.breakNaturally()
-                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("bank-sign-invalid-operation")))
+                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bank-sign-invalid-operation")))
                 return
             }
             if (event.getLine(1).equals("balance", ignoreCase = true)) {
