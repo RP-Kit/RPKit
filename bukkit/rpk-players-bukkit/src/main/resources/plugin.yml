@@ -1,0 +1,21 @@
+name: rpk-players-bukkit
+version: @version@
+main: com.rpkit.players.bukkit.RPKPlayersBukkit
+author: alyphen
+description: RPK Players implementation for Bukkit
+depend: [rpk-core-bukkit, rpk-player-lib-bukkit]
+softdepend: [rpk-chat-lib-bukkit]
+commands:
+    account:
+        description: |
+            Account management command
+            /account link [type] [name] - links the account of the given type
+        aliases: [acc]
+        usage: /<command> [link]
+permissions:
+    rpkit.players.command.account.link:
+        description: Allows linking other accounts
+        default: true
+    rpkit.players.command.account.link.irc:
+        description: Allows linking IRC account
+        default: true
