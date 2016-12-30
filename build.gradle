@@ -20,7 +20,7 @@ allprojects {
     apply plugin: "maven"
     apply plugin: "org.jetbrains.dokka"
     group = "com.seventh-root"
-    version = "0.4.0"
+    version = "1.0.0-SNAPSHOT"
 }
 
 subprojects {
