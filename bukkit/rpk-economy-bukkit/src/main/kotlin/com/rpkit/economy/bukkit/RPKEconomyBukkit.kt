@@ -19,6 +19,7 @@ package com.rpkit.economy.bukkit
 import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.exception.UnregisteredServiceException
 import com.rpkit.economy.bukkit.character.MoneyField
 import com.rpkit.economy.bukkit.command.currency.CurrencyCommand
 import com.rpkit.economy.bukkit.command.money.MoneyCommand
@@ -32,6 +33,7 @@ import com.rpkit.economy.bukkit.database.table.RPKWalletTable
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProviderImpl
 import com.rpkit.economy.bukkit.listener.InventoryCloseListener
+import com.rpkit.economy.bukkit.listener.PluginEnableListener
 
 /**
  * RPK economy plugin default implementation.
@@ -40,6 +42,7 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
 
     private lateinit var currencyProvider: RPKCurrencyProvider
     private lateinit var economyProvider: RPKEconomyProvider
+    private var moneyFieldInitialised: Boolean = false
 
     override fun onEnable() {
         saveDefaultConfig()
@@ -52,8 +55,17 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
     }
 
     override fun onPostEnable() {
-        core.serviceManager.getServiceProvider(RPKCharacterCardFieldProvider::class)
-                .characterCardFields.add(MoneyField(this))
+        attemptCharacterCardFieldInitialisation()
+    }
+
+    fun attemptCharacterCardFieldInitialisation() {
+        if (!moneyFieldInitialised) {
+            try {
+                core.serviceManager.getServiceProvider(RPKCharacterCardFieldProvider::class)
+                        .characterCardFields.add(MoneyField(this))
+                moneyFieldInitialised = true
+            } catch (ignore: UnregisteredServiceException) {}
+        }
     }
 
     override fun registerCommands() {
@@ -64,7 +76,7 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerListeners() {
-        registerListeners(InventoryCloseListener(this))
+        registerListeners(InventoryCloseListener(this), PluginEnableListener(this))
     }
 
     override fun createTables(database: Database) {
