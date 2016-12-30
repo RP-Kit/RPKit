@@ -1,0 +1,9 @@
+name: rpk-banks-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.banks.bukkit.RPKBanksBukkit
+depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-character-lib-bukkit, rpk-economy-lib-bukkit, rpk-bank-lib-bukkit]
+permissions:
+    rpkit.banks.sign.bank:
+        description: Allows the creation of bank signs
+        default: op

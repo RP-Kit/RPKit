@@ -1,0 +1,52 @@
+groups:
+- &default
+  ==: RPKGroupImpl
+  name: default
+  inheritance: []
+  allow:
+  - example.allow.permission
+  deny:
+  - example.deny.permission
+- &et
+  ==: RPKGroupImpl
+  name: et
+  inheritance: [*default]
+  allow:
+  - example.et.permission
+  deny: []
+- &dev
+  ==: RPKGroupImpl
+  name: dev
+  inheritance: [*default]
+  allow:
+  - example.dev.permission
+  deny: []
+- &mod
+  ==: RPKGroupImpl
+  name: mod
+  inheritance: [*default]
+  allow:
+  - example.mod.permission
+  deny: []
+- &admin
+  ==: RPKGroupImpl
+  name: admin
+  inheritance: [*mod]
+  allow:
+  - example.admin.permission
+  deny: []
+default-group: *default
+messages:
+  group-usage: '&cUsage: /group [add|remove]'
+  group-add-valid: '&aGroup $group added to $player.'
+  group-add-invalid-group: '&cNo group by that name exists.'
+  group-add-invalid-player: '&cNo player by that name is online.'
+  group-add-usage: '&cUsage: /group add [player] [group]'
+  group-remove-valid: '&aGroup $group removed from $player.'
+  group-remove-invalid-group: '&cNo group by that name exists.'
+  group-remove-invalid-player: '&cNo player by that name is online.'
+  group-remove-usage: '&cUsage: /group remove [player] [group]'
+  no-permission-group-add: '&cYou do not have permission to add groups to players.'
+  no-permission-group-remove: '&cYou do not have permission to remove groups from players.'
+  no-permission-group-add-group: '&cYou do not have permission to add $group to players.'
+  no-permission-group-remove-group: '&cYou do not have permission to remove $group from players.'

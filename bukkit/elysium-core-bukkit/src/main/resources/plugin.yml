@@ -1,5 +1,0 @@
-name: elysium-core-bukkit
-version: @version@
-main: com.seventh_root.elysium.core.bukkit.ElysiumCoreBukkit
-author: alyphen
-description: Elysium Core implementation for Bukkit

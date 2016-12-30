@@ -1,5 +1,0 @@
-name: elysium-auction-lib-bukkit
-author: alyphen
-version: @version@
-main: com.seventh_root.elysium.auctions.bukkit.ElysiumAuctionLibBukkit
-depend: [elysium-core-bukkit, elysium-character-lib-bukkit, elysium-economy-lib-bukkit]

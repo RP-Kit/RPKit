@@ -1,5 +1,0 @@
-name: elysium-food-bukkit
-author: alyphen
-version: @version@
-main: com.seventh_root.elysium.food.bukkit.ElysiumFoodBukkit
-depend: [elysium-core-bukkit]

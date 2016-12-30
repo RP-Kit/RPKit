@@ -1,0 +1,10 @@
+name: rpk-payment-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.payments.bukkit.RPKPaymentLibBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+- rpk-economy-lib-bukkit
+- rpk-bank-lib-bukkit

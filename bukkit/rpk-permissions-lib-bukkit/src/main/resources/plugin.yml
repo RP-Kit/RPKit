@@ -1,0 +1,5 @@
+name: rpk-permissions-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.permissions.bukkit.RPKPermissionsLibBukkit
+depend: [rpk-core-bukkit, rpk-player-lib-bukkit]

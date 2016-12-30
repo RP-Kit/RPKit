@@ -1,0 +1,16 @@
+name: rpk-permissions-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.permissions.bukkit.RPKPermissionsBukkit
+depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-permissions-lib-bukkit]
+commands:
+    group:
+        description: Group management command
+        usage: /<command> [add|remove] [player] [group]
+permissions:
+    rpkit.permissions.command.group.add:
+        description: Allows adding groups to players
+        default: op
+    rpkit.permissions.command.group.remove:
+        description: Allows removing groups from players
+        default: op
