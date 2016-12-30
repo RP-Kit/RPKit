@@ -1,5 +1,0 @@
-name: elysium-player-lib-bukkit
-author: alyphen
-version: @version@
-main: com.seventh_root.elysium.players.bukkit.ElysiumPlayerLibBukkit
-depend: [elysium-core-bukkit]

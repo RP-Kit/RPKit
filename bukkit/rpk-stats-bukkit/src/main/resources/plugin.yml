@@ -1,0 +1,13 @@
+name: rpk-stats-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.stats.bukkit.RPKStatsBukkit
+depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-character-lib-bukkit, rpk-stat-lib-bukkit]
+commands:
+    stats:
+        description: Shows your stats
+        usage: /<command>
+permissions:
+    rpkit.stats.command.stats:
+        description: Allows viewing stats
+        default: true

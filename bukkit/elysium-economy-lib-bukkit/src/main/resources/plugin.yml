@@ -1,6 +1,0 @@
-name: elysium-economy-lib-bukkit
-author: alyphen
-version: @version@
-main: com.seventh_root.elysium.economy.bukkit.ElysiumEconomyLibBukkit
-depend: [elysium-core-bukkit, elysium-character-lib-bukkit]
-softdepend: [Vault]
