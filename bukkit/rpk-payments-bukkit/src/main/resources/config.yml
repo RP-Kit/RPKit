@@ -71,6 +71,7 @@ messages:
     payment-set-name-usage: '&cUsage: /payment set name [group]'
     payment-set-name-prompt: '&fWhat would you like the name of the payment group to be set to? &7(Type cancel to cancel)'
     payment-set-name-valid: '&aName set.'
+    payment-set-usage: '&cUsage: /payment set [amount|currency|interval|name]'
     payment-notification-member-fail-to-pay: '&cYou failed to pay to payment group "$group" on $date.'
     payment-notification-owner-fail-to-pay: '&c$member failed to pay to payment group "$group" on $date.'
     payment-notification-member-fail-to-be-paid: '&cPayment group "$group" failed to pay you on $date.'
