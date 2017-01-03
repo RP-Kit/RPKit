@@ -48,7 +48,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                     val paymentGroup = paymentGroupProvider.getPaymentGroup(args[0])
                     if (paymentGroup != null) {
                         if (paymentGroup.owners.contains(character)) {
-                            for (line in plugin.config.getStringList("messages.payment-info")) {
+                            for (line in plugin.config.getStringList("messages.payment-info-owner")) {
                                 val message = FancyMessage("")
                                 var chatColor: ChatColor? = null
                                 var chatFormat: ChatColor? = null
@@ -305,7 +305,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                 message.send(sender)
                             }
                         } else {
-                            for (line in plugin.config.getStringList("messages.payment-info")) {
+                            for (line in plugin.config.getStringList("messages.payment-info-not-owner")) {
                                 val message = FancyMessage("")
                                 var chatColor: ChatColor? = null
                                 var chatFormat: ChatColor? = null
