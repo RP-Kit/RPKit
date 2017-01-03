@@ -35,7 +35,7 @@ messages:
     payment-deposit-usage: '&cUsage: /payment deposit [group] [amount]'
     payment-list-title: '&fPayment groups:'
     payment-list-item: '&f- &7$name &f(&7$rank&f)'
-    payment-info:
+    payment-info-owner:
     - '&7$name (&a&l$edit(name)&7)'
     - '&7Owners: &f$owners'
     - '&7Members: &f$members'
@@ -43,6 +43,16 @@ messages:
     - '&7Amount: &f$amount &7(&a&l$edit(amount)&7)'
     - '&7Currency: &f$currency &7(&a&l$edit(currency)&7)'
     - '&7Interval: &f$interval &7(&a&l$edit(interval)&7)'
+    - '&7Last payment time: &f$last-payment-time'
+    - '&7Balance: &f$balance'
+    payment-info-not-owner:
+    - '&7$name'
+    - '&7Owners: &f$owners'
+    - '&7Members: &f$members'
+    - '&7Invites: &f$invites'
+    - '&7Amount: &f$amount'
+    - '&7Currency: &f$currency'
+    - '&7Interval: &f$interval'
     - '&7Last payment time: &f$last-payment-time'
     - '&7Balance: &f$balance'
     payment-info-invalid-group: '&cThere is no payment group by that name.'
@@ -71,6 +81,7 @@ messages:
     payment-set-name-usage: '&cUsage: /payment set name [group]'
     payment-set-name-prompt: '&fWhat would you like the name of the payment group to be set to? &7(Type cancel to cancel)'
     payment-set-name-valid: '&aName set.'
+    payment-set-usage: '&cUsage: /payment set [amount|currency|interval|name]'
     payment-notification-member-fail-to-pay: '&cYou failed to pay to payment group "$group" on $date.'
     payment-notification-owner-fail-to-pay: '&c$member failed to pay to payment group "$group" on $date.'
     payment-notification-member-fail-to-be-paid: '&cPayment group "$group" failed to pay you on $date.'
