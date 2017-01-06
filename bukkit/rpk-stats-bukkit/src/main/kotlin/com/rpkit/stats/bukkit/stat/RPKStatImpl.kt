@@ -36,6 +36,6 @@ class RPKStatImpl(
             bindings[variable.name] = variable.get(character)
         }
         engine.setBindings(bindings, ENGINE_SCOPE)
-        return Math.round(engine.eval(script) as Double).toInt()
+        return Math.round((engine.eval(script) as Number).toDouble()).toInt()
     }
 }
