@@ -82,12 +82,16 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                                                             if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
                                                                 economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
                                                                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-valid")))
-                                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-valid")))
+                                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-valid"))
+                                                                        .replace("\$amount", amount.toString())
+                                                                        .replace("\$currency", if (amount == 1) currency.nameSingular else currency.namePlural)
+                                                                        .replace("\$character", toCharacter.name)
+                                                                        .replace("\$player", toPlayer.name))
                                                                 toCharacter.player?.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-received"))
                                                                         .replace("\$amount", amount.toString())
                                                                         .replace("\$currency", if (amount == 1) currency.nameSingular else currency.namePlural)
                                                                         .replace("\$character", fromCharacter.name)
-                                                                        .replace("\$player", fromCharacter.player?.name ?: ""))
+                                                                        .replace("\$player", fromPlayer.name))
                                                             } else {
                                                                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-limit")))
                                                             }
@@ -260,8 +264,12 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                                             .replace("\$amount", amount.toString())
                                             .replace("\$currency", if (amount == 1) currency.nameSingular else currency.namePlural)
                                             .replace("\$character", fromCharacter.name)
-                                            .replace("\$player", fromCharacter.player?.name ?: ""))
+                                            .replace("\$player", fromPlayer.name))
                                     return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-valid"))
+                                            .replace("\$amount", amount.toString())
+                                            .replace("\$currency", if (amount == 1) currency.nameSingular else currency.namePlural)
+                                            .replace("\$character", toCharacter.name)
+                                            .replace("\$player", toPlayer.name)
                                 } else {
                                     return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-limit"))
                                 }
