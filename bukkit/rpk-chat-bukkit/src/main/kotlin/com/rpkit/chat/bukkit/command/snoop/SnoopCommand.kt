@@ -35,7 +35,7 @@ class SnoopCommand(private val plugin: RPKChatBukkit): CommandExecutor {
         val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
         if (sender is Player) {
             val player = playerProvider.getPlayer(sender)
-            if (args.size > 0) {
+            if (args.isNotEmpty()) {
                 if (args[0].equals("on", ignoreCase = true)) {
                     if (sender.hasPermission("rpkit.chat.command.snoop.on")) {
                         if (!snooperProvider.snoopers.contains(player)) {
@@ -72,7 +72,7 @@ class SnoopCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.snoop-usage")))
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages-snoop-usage")))
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.snoop-usage")))
             }
         } else {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
