@@ -126,7 +126,7 @@ chat-channels:
         - ==: UndirectedFormatComponent
           format: '$color&o$sender-character $message'
         - ==: LogComponent
-        match-pattern: '\*(.*)\*?'
+        match-pattern: '\*([^\*]+)\*?'
         joined-by-default: true
 messages:
     chatchannel-valid: '&aNow speaking in $channel.'
