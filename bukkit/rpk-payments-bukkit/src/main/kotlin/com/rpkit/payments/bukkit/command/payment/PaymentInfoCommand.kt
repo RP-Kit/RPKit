@@ -45,7 +45,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                     val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
                     val player = playerProvider.getPlayer(sender)
                     val character = characterProvider.getActiveCharacter(player)
-                    val paymentGroup = paymentGroupProvider.getPaymentGroup(args[0])
+                    val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
                     if (paymentGroup != null) {
                         if (paymentGroup.owners.contains(character)) {
                             for (line in plugin.config.getStringList("messages.payment-info-owner")) {

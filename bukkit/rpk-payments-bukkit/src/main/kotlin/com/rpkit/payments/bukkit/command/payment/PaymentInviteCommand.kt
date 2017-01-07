@@ -39,11 +39,11 @@ class PaymentInviteCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
         if (sender.hasPermission("rpkit.payments.command.payment.invite")) {
             if (args.size > 1) {
                 val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-                val paymentGroup = paymentGroupProvider.getPaymentGroup(args[0])
+                val paymentGroup = paymentGroupProvider.getPaymentGroup(args.dropLast(1).joinToString(" "))
                 if (paymentGroup != null) {
                     val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val bukkitPlayer = plugin.server.getPlayer(args[1])
+                    val bukkitPlayer = plugin.server.getPlayer(args.last())
                     val player = playerProvider.getPlayer(bukkitPlayer)
                     val character = characterProvider.getActiveCharacter(player)
                     if (character != null) {
