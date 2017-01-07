@@ -41,7 +41,7 @@ class PaymentLeaveCommand(private val plugin: RPKPaymentsBukkit): CommandExecuto
             if (args.isNotEmpty()) {
                 if (sender is Player) {
                     val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-                    val paymentGroup = paymentGroupProvider.getPaymentGroup(args[0])
+                    val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
                     if (paymentGroup != null) {
                         val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)

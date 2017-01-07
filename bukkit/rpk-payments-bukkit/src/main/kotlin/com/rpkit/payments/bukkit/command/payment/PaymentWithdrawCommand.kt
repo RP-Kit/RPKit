@@ -43,12 +43,12 @@ class PaymentWithdrawCommand(private val plugin: RPKPaymentsBukkit): CommandExec
                     val player = playerProvider.getPlayer(sender)
                     val character = characterProvider.getActiveCharacter(player)
                     if (character != null) {
-                        val paymentGroup = paymentGroupProvider.getPaymentGroup(args[0])
+                        val paymentGroup = paymentGroupProvider.getPaymentGroup(args.dropLast(1).joinToString(" "))
                         if (paymentGroup != null) {
                             val currency = paymentGroup.currency
                             if (currency != null) {
                                 try {
-                                    val amount = args[1].toInt()
+                                    val amount = args.last().toInt()
                                     if (amount > 0) {
                                         if (paymentGroup.balance >= amount) {
                                             bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) + amount)

@@ -46,7 +46,7 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                     currencyProvider.getCurrency(currencyName)
                 val paymentGroup = RPKPaymentGroupImpl(
                         plugin,
-                        name = args[0],
+                        name = args.joinToString(" "),
                         amount = plugin.config.getInt("payment-groups.defaults.amount"),
                         currency = currency,
                         interval = plugin.config.getLong("payment-groups.defaults.interval"),
