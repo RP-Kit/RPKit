@@ -40,14 +40,11 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
 
     val cacheManager: CacheManager
     val cache: Cache<Int, RPKPaymentGroup>
-    val nameCache: Cache<String, RPKPaymentGroup>
 
     init {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
         cache = cacheManager.createCache("cache", CacheConfigurationBuilder
                 .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroup::class.java, ResourcePoolsBuilder.heap(20L)))
-        nameCache = cacheManager.createCache("nameCache", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(String::class.java, RPKPaymentGroup::class.java, ResourcePoolsBuilder.heap(20L)))
     }
 
     override fun create() {
@@ -102,7 +99,6 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                     id = generatedKeys.getInt(1)
                     entity.id = id
                     cache.put(id, entity)
-                    nameCache.put(entity.name, entity)
                 }
             }
         }
@@ -135,7 +131,6 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                 statement.setInt(7, entity.id)
                 statement.executeUpdate()
                 cache.put(entity.id, entity)
-                nameCache.put(entity.name, entity)
             }
         }
     }
@@ -168,7 +163,6 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                                 resultSet.getInt("balance")
                         )
                         cache.put(id, finalPaymentGroup)
-                        nameCache.put(finalPaymentGroup.name, finalPaymentGroup)
                         paymentGroup = finalPaymentGroup
                     }
                 }
@@ -178,40 +172,19 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
     }
 
     fun get(name: String): RPKPaymentGroup? {
-        if (nameCache.containsKey(name)) {
-            return nameCache[name]
-        } else {
-            var paymentGroup: RPKPaymentGroup? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT `id`, `name`, `amount`, `currency_id`, `interval`, `last_payment_time`, `balance`" +
-                                " FROM `rpkit_payment_group`" +
-                                " WHERE `name` = ?"
-                ).use { statement ->
-                    statement.setString(1, name)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                        val currencyId = resultSet.getInt("currency_id")
-                        val currency = if (currencyId == 0) null else currencyProvider.getCurrency(currencyId)
-                        val finalPaymentGroup = RPKPaymentGroupImpl(
-                                plugin,
-                                resultSet.getInt("id"),
-                                resultSet.getString("name"),
-                                resultSet.getInt("amount"),
-                                currency,
-                                resultSet.getLong("interval"),
-                                resultSet.getDate("last_payment_time").time,
-                                resultSet.getInt("balance")
-                        )
-                        cache.put(finalPaymentGroup.id, finalPaymentGroup)
-                        nameCache.put(name, finalPaymentGroup)
-                        paymentGroup = finalPaymentGroup
-                    }
+        var paymentGroup: RPKPaymentGroup? = null
+        database.createConnection().use { connection ->
+            connection.prepareStatement(
+                    "SELECT `id` FROM `rpkit_payment_group` WHERE `name` = ?"
+            ).use { statement ->
+                statement.setString(1, name)
+                val resultSet = statement.executeQuery()
+                if (resultSet.next()) {
+                    paymentGroup = get(resultSet.getInt("id"))
                 }
             }
-            return paymentGroup
         }
+        return paymentGroup
     }
 
     fun getAll(): List<RPKPaymentGroup> {
@@ -235,7 +208,6 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                 statement.setInt(1, entity.id)
                 statement.executeUpdate()
                 cache.remove(entity.id)
-                nameCache.remove(entity.name)
             }
         }
     }
