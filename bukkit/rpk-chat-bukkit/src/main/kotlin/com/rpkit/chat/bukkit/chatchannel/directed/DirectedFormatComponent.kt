@@ -54,7 +54,7 @@ class DirectedFormatComponent(private val plugin: RPKChatBukkit, val formatStrin
         }
         if (formattedMessage.contains("\$sender-character")) {
             if (senderCharacter != null) {
-                formattedMessage = formattedMessage.replace("\$sender-character", senderCharacter.name)
+                formattedMessage = formattedMessage.replace("\$sender-character", if (senderCharacter.isNameHidden) "(HIDDEN ${senderCharacter.name.hashCode()})" else senderCharacter.name)
             } else {
                 context.isCancelled = true
             }
