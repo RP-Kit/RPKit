@@ -44,26 +44,31 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                     currencyProvider.defaultCurrency
                 else
                     currencyProvider.getCurrency(currencyName)
-                val paymentGroup = RPKPaymentGroupImpl(
-                        plugin,
-                        name = args.joinToString(" "),
-                        amount = plugin.config.getInt("payment-groups.defaults.amount"),
-                        currency = currency,
-                        interval = plugin.config.getLong("payment-groups.defaults.interval"),
-                        lastPaymentTime = System.currentTimeMillis(),
-                        balance = 0
-                )
-                paymentGroupProvider.addPaymentGroup(paymentGroup)
-                if (sender is Player) {
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val player = playerProvider.getPlayer(sender)
-                    val character = characterProvider.getActiveCharacter(player)
-                    if (character != null) {
-                        paymentGroup.addOwner(character)
+                val name = args.joinToString(" ")
+                if (paymentGroupProvider.getPaymentGroup(name) == null) {
+                    val paymentGroup = RPKPaymentGroupImpl(
+                            plugin,
+                            name = name,
+                            amount = plugin.config.getInt("payment-groups.defaults.amount"),
+                            currency = currency,
+                            interval = plugin.config.getLong("payment-groups.defaults.interval"),
+                            lastPaymentTime = System.currentTimeMillis(),
+                            balance = 0
+                    )
+                    paymentGroupProvider.addPaymentGroup(paymentGroup)
+                    if (sender is Player) {
+                        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                        val player = playerProvider.getPlayer(sender)
+                        val character = characterProvider.getActiveCharacter(player)
+                        if (character != null) {
+                            paymentGroup.addOwner(character)
+                        }
                     }
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-create-valid")))
+                } else{
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-create-invalid-name-already-exists")))
                 }
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-create-valid")))
             } else {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-create-usage")))
             }
