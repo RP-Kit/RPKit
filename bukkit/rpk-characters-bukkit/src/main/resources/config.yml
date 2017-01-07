@@ -33,7 +33,7 @@ messages:
     character-unhide-name-valid: '&aName unhidden.'
     character-unhide-gender-valid: '&aGender unhidden.'
     character-unhide-race-valid: '&aRace unhidden.'
-    character-card:
+    character-card-owner:
     - '&7$name (&a&l$edit(name)&7/&a&l$hide(name)&7)'
     - '&7Player: &f$player'
     - '&7Gender: &f$gender &7(&a&l$edit(gender)&7/&a&l$hide(gender)&7)'
@@ -42,6 +42,17 @@ messages:
     - '&7Description: &f$description &7(&a&l$edit(description)&7/&a&l$hide(description)&7)'
     - '&7Dead: &f$dead &7(&a&l$edit(dead)&7)'
     - '&7Health: &f$health&7/&f$max-health'
+    - '&7Food: &f$food&7/&f$max-food'
+    - '&7Thirst: &f$thirst&7/&f$max-thirst'
+    character-card-not-owner:
+    - '&7$name'
+    - '&7Player: &f$player'
+    - '&7Gender: &f$gender'
+    - '&7Age: &f$age'
+    - '&7Race: &f$race'
+    - '&7Description: &f$description'
+    - '&7Dead: &f$dead'
+    - '&7Health: &f$health'
     - '&7Food: &f$food&7/&f$max-food'
     - '&7Thirst: &f$thirst&7/&f$max-thirst'
     character-list-title: '&fYour characters: '
