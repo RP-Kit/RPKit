@@ -17,8 +17,8 @@
 package com.rpkit.characters.bukkit.character
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
 import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
+import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
 import com.rpkit.characters.bukkit.gender.RPKGender
 import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.race.RPKRace
@@ -84,7 +84,8 @@ class RPKCharacterImpl constructor(
             if (offlineBukkitPlayer.isOnline) {
                 val bukkitPlayer = offlineBukkitPlayer.player
                 val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterCardFieldProvider::class)
-                for (line in plugin.config.getStringList("messages.character-card")) {
+                for (line in if (player == this.player) plugin.config.getStringList("messages.character-card-owner") else
+                    plugin.config.getStringList("messages.character-card-not-owner")) {
                     val message = FancyMessage("")
                     var chatColor: ChatColor? = null
                     var chatFormat: ChatColor? = null
