@@ -23,6 +23,7 @@ import org.bukkit.ChatColor
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
+import java.util.regex.Pattern
 
 /**
  * Player chat listener.
@@ -36,9 +37,31 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
         val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
         val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
         val player = playerProvider.getPlayer(event.player)
-        val chatChannel = chatChannelProvider.getPlayerChannel(player)
+        var chatChannel = chatChannelProvider.getPlayerChannel(player)
+        var message = event.message
+        for (otherChannel in chatChannelProvider.chatChannels) {
+            val matchPattern = otherChannel.matchPattern
+            if (matchPattern != null) {
+                if (!matchPattern.isEmpty()) {
+                    if (message.matches(matchPattern.toRegex())) {
+                        chatChannel = otherChannel
+                        val pattern = Pattern.compile(matchPattern)
+                        val matcher = pattern.matcher(message)
+                        if (matcher.matches()) {
+                            if (matcher.groupCount() > 0) {
+                                message = matcher.group(1)
+                            }
+                        }
+                        if (!chatChannel.listeners.contains(player)) {
+                            chatChannel.addListener(player)
+                            chatChannelProvider.updateChatChannel(chatChannel)
+                        }
+                    }
+                }
+            }
+        }
         if (chatChannel != null) {
-            chatChannel.sendMessage(player, event.message)
+            chatChannel.sendMessage(player, message)
         } else {
             event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-chat-channel")))
         }

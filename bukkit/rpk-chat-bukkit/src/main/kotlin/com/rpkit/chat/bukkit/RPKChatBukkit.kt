@@ -16,7 +16,6 @@
 
 package com.rpkit.chat.bukkit
 
-import com.rpkit.chat.bukkit.chatchannel.directed.RadiusFilterComponent
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProviderImpl
 import com.rpkit.chat.bukkit.chatchannel.directed.*
@@ -25,9 +24,12 @@ import com.rpkit.chat.bukkit.chatchannel.undirected.LogComponent
 import com.rpkit.chat.bukkit.chatchannel.undirected.UndirectedFormatComponent
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProviderImpl
 import com.rpkit.chat.bukkit.command.chatchannel.ChatChannelCommand
+import com.rpkit.chat.bukkit.command.chatgroup.ChatGroupCommand
 import com.rpkit.chat.bukkit.command.listchatchannels.ListChatChannelsCommand
-import com.rpkit.chat.bukkit.database.table.RPKChatGroupTable
+import com.rpkit.chat.bukkit.command.message.MessageCommand
 import com.rpkit.chat.bukkit.command.mute.MuteCommand
+import com.rpkit.chat.bukkit.command.reply.ReplyCommand
+import com.rpkit.chat.bukkit.command.snoop.SnoopCommand
 import com.rpkit.chat.bukkit.command.unmute.UnmuteCommand
 import com.rpkit.chat.bukkit.database.table.*
 import com.rpkit.chat.bukkit.irc.RPKIRCProvider
@@ -110,6 +112,10 @@ class RPKChatBukkit: RPKBukkitPlugin() {
         getCommand("mute").executor = MuteCommand(this)
         getCommand("unmute").executor = UnmuteCommand(this)
         getCommand("listchatchannels").executor = ListChatChannelsCommand(this)
+        getCommand("chatgroup").executor = ChatGroupCommand(this)
+        getCommand("message").executor = MessageCommand(this)
+        getCommand("reply").executor = ReplyCommand(this)
+        getCommand("snoop").executor = SnoopCommand(this)
     }
 
     override fun registerListeners() {

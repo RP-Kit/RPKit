@@ -57,7 +57,7 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
                     val player = playerProvider.getPlayer(sender)
                     val character = characterProvider.getActiveCharacter(player)
                     val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-                    val paymentGroup = paymentGroupProvider.getPaymentGroup(args[0])
+                    val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
                     if (paymentGroup != null) {
                         if (paymentGroup.owners.contains(character)) {
                             val conversation = conversationFactory.buildConversation(sender)
@@ -81,18 +81,27 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
         return true
     }
 
-    private inner class NamePrompt: StringPrompt() {
+    private inner class NamePrompt: ValidatingPrompt() {
 
-        override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-set-name-prompt"))
+        override fun isInputValid(context: ConversationContext, input: String): Boolean {
+            val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
+            return paymentGroupProvider.getPaymentGroup(input) == null
         }
 
-        override fun acceptInput(context: ConversationContext, input: String): Prompt {
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
+            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-set-name-invalid-name-already-exists"))
+        }
+
+        override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
             val paymentGroup = context.getSessionData("payment_group") as RPKPaymentGroup
             paymentGroup.name = input
             paymentGroupProvider.updatePaymentGroup(paymentGroup)
             return NameSetPrompt()
+        }
+
+        override fun getPromptText(context: ConversationContext): String {
+            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-set-name-prompt"))
         }
 
     }
