@@ -57,7 +57,7 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
                     val player = playerProvider.getPlayer(sender)
                     val character = characterProvider.getActiveCharacter(player)
                     val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-                    val paymentGroup = paymentGroupProvider.getPaymentGroup(args[0])
+                    val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
                     if (paymentGroup != null) {
                         if (paymentGroup.owners.contains(character)) {
                             val conversation = conversationFactory.buildConversation(sender)
