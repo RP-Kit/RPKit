@@ -49,7 +49,7 @@ chat-channels:
         - ==: UndirectedFormatComponent
           format: '$color[$channel] $sender-prefix$color$sender-player: &f$message'
         - ==: IRCComponent
-          irc-channel: '#rpkit-support'
+          irc-channel: '#rpkit-staff'
           irc-whitelisted: false
         - ==: LogComponent
         joined-by-default: false
