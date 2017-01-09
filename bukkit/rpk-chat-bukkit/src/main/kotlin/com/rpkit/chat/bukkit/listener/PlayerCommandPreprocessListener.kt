@@ -19,6 +19,7 @@ package com.rpkit.chat.bukkit.listener
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import org.bukkit.ChatColor
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
@@ -41,7 +42,17 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit): Listen
                 event.isCancelled = true
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                 val player = playerProvider.getPlayer(event.player)
-                chatChannel.sendMessage(player, event.message.split(Regex("\\s+")).drop(1).joinToString(" "))
+                if (event.message.startsWith("/$chatChannelName ")) {
+                    chatChannel.sendMessage(player, event.message.split(Regex("\\s+")).drop(1).joinToString(" "))
+                } else if (event.message.startsWith("/$chatChannelName")) {
+                    chatChannel.addSpeaker(player)
+                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-valid"))
+                            .replace("\$channel", chatChannel.name))
+                }
+            } else {
+                event.isCancelled = true
+                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel"))
+                        .replace("\$channel", chatChannel.name))
             }
         }
     }
