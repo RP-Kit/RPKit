@@ -20,38 +20,24 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.database.use
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
-import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.permissions.bukkit.group.PlayerGroup
+import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.PreparedStatement
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
 /**
  * Represents the player group table.
  */
-class PlayerGroupTable: com.rpkit.core.database.Table<PlayerGroup> {
+class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBukkit) : Table<PlayerGroup>(database, PlayerGroup::class) {
 
-    private val plugin: RPKPermissionsBukkit
-    private val cacheManager: org.ehcache.CacheManager
-    private val cache: org.ehcache.Cache<Int, PlayerGroup>
-    private val playerCache: org.ehcache.Cache<Int, MutableList<*>>
-
-    constructor(database: com.rpkit.core.database.Database, plugin: RPKPermissionsBukkit): super(database, PlayerGroup::class) {
-        this.plugin = plugin
-        cacheManager = org.ehcache.config.builders.CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache",
-                org.ehcache.config.builders.CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, PlayerGroup::class.java,
-                        org.ehcache.config.builders.ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
-        playerCache = cacheManager.createCache("playerCache",
-                org.ehcache.config.builders.CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
-                        org.ehcache.config.builders.ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
-    }
+    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache = cacheManager.createCache("cache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, PlayerGroup::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 
     override fun create() {
         database.createConnection().use { connection ->
@@ -86,11 +72,6 @@ class PlayerGroupTable: com.rpkit.core.database.Table<PlayerGroup> {
                     id = generatedKeys.getInt(1)
                     entity.id = id
                     cache.put(id, entity)
-                    val playerGroups: MutableList<PlayerGroup> = playerCache.get(entity.player.id) as? MutableList<PlayerGroup>?:get(entity.player).toMutableList()
-                    if (!playerGroups.contains(entity)) {
-                        playerGroups.add(entity)
-                        playerCache.put(entity.player.id, playerGroups)
-                    }
                 }
             }
         }
@@ -107,11 +88,6 @@ class PlayerGroupTable: com.rpkit.core.database.Table<PlayerGroup> {
                 statement.setInt(3, entity.id)
                 statement.executeUpdate()
                 cache.put(entity.id, entity)
-                val playerGroups: MutableList<PlayerGroup> = playerCache.get(entity.player.id) as? MutableList<PlayerGroup>?:get(entity.player).toMutableList()
-                if (!playerGroups.contains(entity)) {
-                    playerGroups.add(entity)
-                    playerCache.put(entity.player.id, playerGroups)
-                }
             }
         }
     }
@@ -134,11 +110,6 @@ class PlayerGroupTable: com.rpkit.core.database.Table<PlayerGroup> {
                                 plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class).getGroup(resultSet.getString("group_name"))!!
                         )
                         cache.put(finalPlayerGroup.id, finalPlayerGroup)
-                        val playerGroups: MutableList<PlayerGroup> = playerCache.get(finalPlayerGroup.player.id) as? MutableList<PlayerGroup>?:get(finalPlayerGroup.player).toMutableList()
-                        if (!playerGroups.contains(finalPlayerGroup)) {
-                            playerGroups.add(finalPlayerGroup)
-                            playerCache.put(finalPlayerGroup.player.id, playerGroups)
-                        }
                         playerGroup = finalPlayerGroup
                     }
                 }
@@ -148,24 +119,20 @@ class PlayerGroupTable: com.rpkit.core.database.Table<PlayerGroup> {
     }
 
     fun get(player: RPKPlayer): List<PlayerGroup> {
-        if (playerCache.containsKey(player.id)) {
-            return playerCache.get(player.id) as List<PlayerGroup>
-        } else {
-            val playerGroups = mutableListOf<PlayerGroup>()
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id FROM player_group WHERE player_id = ?"
-                ).use { statement ->
-                    statement.setInt(1, player.id)
-                    val resultSet = statement.executeQuery()
-                    while (resultSet.next()) {
-                        val playerGroup = get(resultSet.getInt("id"))
-                        if (playerGroup != null) playerGroups.add(playerGroup)
-                    }
+        val playerGroups = mutableListOf<PlayerGroup>()
+        database.createConnection().use { connection ->
+            connection.prepareStatement(
+                    "SELECT id FROM player_group WHERE player_id = ?"
+            ).use { statement ->
+                statement.setInt(1, player.id)
+                val resultSet = statement.executeQuery()
+                while (resultSet.next()) {
+                    val playerGroup = get(resultSet.getInt("id"))
+                    if (playerGroup != null) playerGroups.add(playerGroup)
                 }
             }
-            return playerGroups
         }
+        return playerGroups
     }
 
     override fun delete(entity: PlayerGroup) {
@@ -176,11 +143,6 @@ class PlayerGroupTable: com.rpkit.core.database.Table<PlayerGroup> {
                 statement.setInt(1, entity.id)
                 statement.executeUpdate()
                 cache.remove(entity.id)
-                val playerGroups: MutableList<PlayerGroup> = playerCache.get(entity.player.id) as? MutableList<PlayerGroup>?:get(entity.player).toMutableList()
-                if (playerGroups.contains(entity)) {
-                    playerGroups.remove(entity)
-                    playerCache.put(entity.player.id, playerGroups)
-                }
             }
         }
     }
