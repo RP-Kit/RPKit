@@ -63,11 +63,8 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
                     if (sign.getLine(1).startsWith("buy")) {
                         val amount = sign.getLine(1).split(Regex("\\s+"))[1].toInt()
                         val price = sign.getLine(2).split(Regex("\\s+"))[1].toInt()
-                        val currencyBuilder = StringBuilder()
-                        for (i in 2..sign.getLine(2).split(Regex("\\s+")).size - 1) {
-                            currencyBuilder.append(sign.getLine(2).split(Regex("\\s+"))[i])
-                        }
-                        val currency = currencyProvider.getCurrency(currencyBuilder.toString()) ?: return
+                        val currencyWords = sign.getLine(2).split(Regex("\\s+"))
+                        val currency = currencyProvider.getCurrency(currencyWords.subList(2, currencyWords.size).joinToString(" ")) ?: return
                         val item = event.currentItem ?: return
                         val amtItem = ItemStack(item)
                         amtItem.amount = amount
