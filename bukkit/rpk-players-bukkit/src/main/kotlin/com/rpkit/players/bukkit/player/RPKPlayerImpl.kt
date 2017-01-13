@@ -16,7 +16,9 @@
 
 package com.rpkit.players.bukkit.player
 
+import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
+import java.util.*
 
 /**
  * Player implementation.
@@ -24,7 +26,15 @@ import org.bukkit.OfflinePlayer
 class RPKPlayerImpl(
         override var id: Int = 0,
         override var name: String,
-        override var bukkitPlayer: OfflinePlayer? = null,
+        var minecraftUUID: UUID? = null,
         override var ircNick: String? = null,
         override var lastKnownIP: String? = null
-): RPKPlayer
+): RPKPlayer {
+    override var bukkitPlayer: OfflinePlayer?
+        get() {
+            return Bukkit.getOfflinePlayer(minecraftUUID)
+        }
+        set(value) {
+            minecraftUUID = value?.uniqueId
+        }
+}

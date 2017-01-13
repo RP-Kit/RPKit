@@ -22,7 +22,6 @@ import com.rpkit.core.database.use
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerImpl
-import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.ehcache.Cache
 import org.ehcache.CacheManager
@@ -32,6 +31,7 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.pircbotx.User
 import java.net.InetAddress
 import java.sql.Connection
+import java.sql.PreparedStatement
 import java.sql.Statement.RETURN_GENERATED_KEYS
 import java.sql.Types.VARCHAR
 import java.util.*
@@ -76,9 +76,7 @@ class RPKPlayerTable: Table<RPKPlayer> {
                         "minecraft_uuid VARCHAR(36)," +
                         "irc_nick VARCHAR(256)," +
                         "last_known_ip VARCHAR(256)" +
-                    ")").use { statement ->
-                statement.executeUpdate()
-            }
+                    ")").use(PreparedStatement::executeUpdate)
         }
     }
 
@@ -90,14 +88,10 @@ class RPKPlayerTable: Table<RPKPlayer> {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "ALTER TABLE rpkit_player ADD COLUMN name AFTER id"
-                ).use { statement ->
-                    statement.executeUpdate()
-                }
+                ).use(PreparedStatement::executeUpdate)
                 connection.prepareStatement(
                         "ALTER TABLE rpkit_player ADD COLUMN irc_nick VARCHAR(256)"
-                ).use { statement ->
-                    statement.executeUpdate()
-                }
+                ).use(PreparedStatement::executeUpdate)
             }
             database.setTableVersion(this, "0.3.0")
         }
@@ -105,9 +99,7 @@ class RPKPlayerTable: Table<RPKPlayer> {
             database.createConnection().use { connection ->
                 connection.prepareStatement(
                         "ALTER TABLE rpkit_player ADD COLUMN last_known_ip VARCHAR(256) AFTER irc_nick"
-                ).use { statement ->
-                    statement.executeUpdate()
-                }
+                ).use(PreparedStatement::executeUpdate)
             }
             database.setTableVersion(this, "0.4.0")
         }
@@ -215,7 +207,7 @@ class RPKPlayerTable: Table<RPKPlayer> {
                         player = RPKPlayerImpl(
                                 id,
                                 name,
-                                if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
+                                if (minecraftUUID == null) null else UUID.fromString(minecraftUUID),
                                 ircNick,
                                 lastKnownIP
                         )
@@ -262,7 +254,7 @@ class RPKPlayerTable: Table<RPKPlayer> {
                         player = RPKPlayerImpl(
                                 id,
                                 name,
-                                if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
+                                if (minecraftUUID == null) null else UUID.fromString(minecraftUUID),
                                 ircNick,
                                 lastKnownIP
                         )
@@ -307,7 +299,7 @@ class RPKPlayerTable: Table<RPKPlayer> {
                         player = RPKPlayerImpl(
                                 id,
                                 name,
-                                if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
+                                if (minecraftUUID == null) null else UUID.fromString(minecraftUUID),
                                 ircNick,
                                 lastKnownIP
                         )
@@ -357,7 +349,7 @@ class RPKPlayerTable: Table<RPKPlayer> {
                         player = RPKPlayerImpl(
                                 id,
                                 name,
-                                if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
+                                if (minecraftUUID == null) null else UUID.fromString(minecraftUUID),
                                 ircNick,
                                 lastKnownIP
                         )
@@ -405,7 +397,7 @@ class RPKPlayerTable: Table<RPKPlayer> {
                         player = RPKPlayerImpl(
                                 id,
                                 name,
-                                if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(UUID.fromString(minecraftUUID)),
+                                if (minecraftUUID == null) null else UUID.fromString(minecraftUUID),
                                 ircNick,
                                 lastKnownIP.hostAddress
                         )

@@ -27,6 +27,7 @@ import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
+import java.sql.PreparedStatement
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
 /**
@@ -47,7 +48,7 @@ class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBuk
                             "player_id INTEGER," +
                             "group_name VARCHAR(256)" +
                     ")"
-            ).use(java.sql.PreparedStatement::executeUpdate)
+            ).use(PreparedStatement::executeUpdate)
         }
     }
 

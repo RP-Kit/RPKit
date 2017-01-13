@@ -27,7 +27,8 @@ import org.bukkit.permissions.PermissionAttachment
 class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupProvider {
 
     override val groups: List<RPKGroup> = plugin.config.getList("groups") as List<RPKGroupImpl>
-    private val permissionsAttachments = mutableMapOf<Int, PermissionAttachment>()
+    val defaultGroup = plugin.config.get("default-group") as RPKGroup
+    val permissionsAttachments = mutableMapOf<Int, PermissionAttachment>()
 
     override fun getGroup(name: String): RPKGroup? {
         return groups.filter { group -> group.name == name }.firstOrNull()
@@ -46,17 +47,20 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
         for (inheritedGroup in group.inheritance) {
             assignGroupPermissions(player, inheritedGroup)
         }
-        for (node in group.allow) {
-            if (permissionsAttachments[player.id]?.permissions?.containsKey(node)?:false) {
-                permissionsAttachments[player.id]?.unsetPermission(node)
+        val permissionsAttachment = permissionsAttachments[player.id]
+        if (permissionsAttachment != null) {
+            for (node in group.allow) {
+                if (permissionsAttachment.permissions.containsKey(node)) {
+                    permissionsAttachment.unsetPermission(node)
+                }
+                permissionsAttachment.setPermission(node, true)
             }
-            permissionsAttachments[player.id]?.setPermission(node, true)
-        }
-        for (node in group.deny) {
-            if (permissionsAttachments[player.id]?.permissions?.containsKey(node)?:false) {
-                permissionsAttachments[player.id]?.unsetPermission(node)
+            for (node in group.deny) {
+                if (permissionsAttachment.permissions.containsKey(node)) {
+                    permissionsAttachment.unsetPermission(node)
+                }
+                permissionsAttachment.setPermission(node, false)
             }
-            permissionsAttachments[player.id]?.setPermission(node, false)
         }
     }
 
@@ -82,14 +86,13 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
                     onlineBukkitPlayer.removeAttachment(permissionsAttachments[player.id])
                     permissionsAttachments[player.id] = onlineBukkitPlayer.addAttachment(plugin)
                 }
-                if (getGroups(player).isEmpty()) {
-                    val defaultGroup = plugin.config.get("default-group") as? RPKGroup
-                    if (defaultGroup != null) {
-                        addGroup(player, defaultGroup)
+                val groups = getGroups(player)
+                if (groups.isEmpty()) {
+                    assignGroupPermissions(player, defaultGroup)
+                } else {
+                    for (group in groups) {
+                        assignGroupPermissions(player, group)
                     }
-                }
-                for (existingGroup in getGroups(player)) {
-                    assignGroupPermissions(player, existingGroup)
                 }
             }
         }
