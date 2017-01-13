@@ -17,6 +17,8 @@
 package com.rpkit.shops.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.database.Database
+import com.rpkit.shops.bukkit.database.table.RPKShopCountTable
 import com.rpkit.shops.bukkit.listener.BlockBreakListener
 import com.rpkit.shops.bukkit.listener.InventoryClickListener
 import com.rpkit.shops.bukkit.listener.PlayerInteractListener
@@ -43,4 +45,7 @@ class RPKShopsBukkit: RPKBukkitPlugin() {
         )
     }
 
+    override fun createTables(database: Database) {
+        database.addTable(RPKShopCountTable(database, this))
+    }
 }
