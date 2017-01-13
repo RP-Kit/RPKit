@@ -42,7 +42,7 @@ class RPKPlayerProviderImpl(private val plugin: RPKPlayersBukkit): RPKPlayerProv
         if (player == null) {
             player = RPKPlayerImpl(
                     name = bukkitPlayer.name,
-                    bukkitPlayer = bukkitPlayer,
+                    minecraftUUID = bukkitPlayer.uniqueId,
                     lastKnownIP = bukkitPlayer.player?.address?.address?.hostAddress
             )
             addPlayer(player)
