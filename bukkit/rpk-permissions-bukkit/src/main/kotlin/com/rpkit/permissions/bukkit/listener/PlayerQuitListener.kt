@@ -20,6 +20,7 @@ import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 
@@ -28,7 +29,7 @@ import org.bukkit.event.player.PlayerQuitEvent
  */
 class PlayerQuitListener(private val plugin: RPKPermissionsBukkit): Listener {
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerQuit(event: PlayerQuitEvent) {
         val player = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(event.player)
         plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class).unassignPermissions(player)

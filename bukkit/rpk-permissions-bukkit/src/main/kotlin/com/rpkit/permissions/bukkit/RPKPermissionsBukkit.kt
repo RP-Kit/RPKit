@@ -51,7 +51,6 @@ class RPKPermissionsBukkit: RPKBukkitPlugin() {
                     PermissionDefault.OP
             ))
         }
-
     }
 
     override fun registerCommands() {
