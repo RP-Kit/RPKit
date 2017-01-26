@@ -1,0 +1,7 @@
+name: rpk-warp-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.warp.bukkit.RPKWarpLibBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
