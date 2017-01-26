@@ -33,7 +33,9 @@ import com.rpkit.economy.bukkit.database.table.RPKWalletTable
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProviderImpl
 import com.rpkit.economy.bukkit.listener.InventoryCloseListener
+import com.rpkit.economy.bukkit.listener.PlayerInteractListener
 import com.rpkit.economy.bukkit.listener.PluginEnableListener
+import com.rpkit.economy.bukkit.listener.SignChangeListener
 
 /**
  * RPK economy plugin default implementation.
@@ -76,7 +78,12 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerListeners() {
-        registerListeners(InventoryCloseListener(this), PluginEnableListener(this))
+        registerListeners(
+                InventoryCloseListener(this),
+                PlayerInteractListener(this),
+                PluginEnableListener(this),
+                SignChangeListener(this)
+        )
     }
 
     override fun createTables(database: Database) {
