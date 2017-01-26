@@ -1,0 +1,7 @@
+name: rpk-location-history-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.locationhistory.bukkit.RPKLocationHistoryLibBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit

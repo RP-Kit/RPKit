@@ -1,0 +1,7 @@
+name: rpk-kit-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.kit.bukkit.RPKKitLibBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit

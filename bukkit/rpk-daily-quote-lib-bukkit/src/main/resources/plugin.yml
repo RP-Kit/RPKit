@@ -1,0 +1,7 @@
+name: rpk-daily-quote-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.dailyquote.bukkit.RPKDailyQuoteLibBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
