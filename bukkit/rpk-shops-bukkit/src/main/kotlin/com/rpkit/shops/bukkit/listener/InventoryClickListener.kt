@@ -16,6 +16,7 @@
 
 package com.rpkit.shops.bukkit.listener
 
+import com.rpkit.banks.bukkit.bank.RPKBankProvider
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
@@ -47,6 +48,7 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
                     val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
+                    val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
                     val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
                     val sellerCharacter = characterProvider.getCharacter(sign.getLine(3).toInt()) ?: return
                     val buyerBukkitPlayer = event.whoClicked as? Player ?: return
@@ -70,7 +72,8 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
                         amtItem.amount = amount
                         if (chest.blockInventory.containsAtLeast(item, amount)) {
                             if (economyProvider.getBalance(buyerCharacter, currency) >= price) {
-                                economyProvider.transfer(buyerCharacter, sellerCharacter, currency, price)
+                                economyProvider.setBalance(buyerCharacter, currency, economyProvider.getBalance(buyerCharacter, currency) - price)
+                                bankProvider.setBalance(sellerCharacter, currency, bankProvider.getBalance(sellerCharacter, currency) + price)
                                 buyerBukkitPlayer.inventory.addItem(amtItem)
                                 chest.blockInventory.removeItem(amtItem)
                             } else {

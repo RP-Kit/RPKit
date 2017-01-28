@@ -9,3 +9,8 @@ messages:
     no-stealing: '&cYou cannot steal from this shop.'
     not-enough-money: '&cYou do not have enough money to buy that.'
     not-enough-shop-items: '&cThe shop does not contain enough items.'
+    shop-sell-not-enough-money: '&cThe shop''s owner does not have enough money to pay you.'
+    shop-sell-chest-not-found: '&cCould not find a chest below that shop to place your item into.'
+    shop-sell-not-enough-items: '&cYou do not have enough items to sell to that shop.'
+    shop-character-invalid: '&cThere is no character with that ID. Perhaps they have been deleted?'
+    shop-currency-invalid: '&cThere is no currency by that name.'
