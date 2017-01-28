@@ -358,6 +358,7 @@ project(":bukkit:rpk-shop-lib-bukkit") {
         compile project(":bukkit:rpk-core-bukkit")
         compile project(":bukkit:rpk-character-lib-bukkit")
         compile project(":bukkit:rpk-economy-lib-bukkit")
+        compile project(":bukkit:rpk-bank-lib-bukkit")
     }
 
     processResources {
@@ -966,6 +967,7 @@ project(":bukkit:rpk-shops-bukkit") {
         compile project(":bukkit:rpk-core-bukkit")
         compile project(":bukkit:rpk-character-lib-bukkit")
         compile project(":bukkit:rpk-economy-lib-bukkit")
+        compile project(":bukkit:rpk-bank-lib-bukkit")
         compile project(":bukkit:rpk-shop-lib-bukkit")
     }
 

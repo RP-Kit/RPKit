@@ -16,11 +16,13 @@
 
 package com.rpkit.shops.bukkit.listener
 
+import com.rpkit.banks.bukkit.bank.RPKBankProvider
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.shops.bukkit.RPKShopsBukkit
+import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material
 import org.bukkit.block.BlockFace.DOWN
@@ -76,15 +78,29 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit): Listener {
                                         val chestState = chestBlock.state as? Chest
                                         if (chestState != null) {
                                             val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-                                            if (economyProvider.getBalance(ownerCharacter, currency) >= price) {
+                                            val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
+                                            if (bankProvider.getBalance(ownerCharacter, currency) >= price) {
                                                 event.player.inventory.removeItem(items)
                                                 chestState.blockInventory.addItem(items)
-                                                economyProvider.transfer(ownerCharacter, customerCharacter, currency, price)
+                                                bankProvider.setBalance(ownerCharacter, currency, bankProvider.getBalance(ownerCharacter, currency) - price)
+                                                economyProvider.setBalance(customerCharacter, currency, economyProvider.getBalance(customerCharacter, currency) + price)
+                                            } else {
+                                                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-sell-not-enough-money")))
                                             }
+                                        } else {
+                                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-sell-chest-not-found")))
                                         }
+                                    } else {
+                                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-sell-not-enough-items")))
                                     }
+                                } else {
+                                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
                                 }
+                            } else {
+                                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-character-invalid")))
                             }
+                        } else {
+                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-currency-invalid")))
                         }
                     }
                 }

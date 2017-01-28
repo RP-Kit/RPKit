@@ -2,4 +2,8 @@ name: rpk-shop-lib-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.shops.bukkit.RPKShopLibBukkit
-depend: [rpk-core-bukkit, rpk-character-lib-bukkit, rpk-economy-lib-bukkit]
+depend:
+- rpk-core-bukkit
+- rpk-character-lib-bukkit
+- rpk-economy-lib-bukkit
+- rpk-bank-lib-bukkit
