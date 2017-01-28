@@ -18,6 +18,8 @@ package com.rpkit.chat.bukkit.listener
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
+import com.rpkit.chat.bukkit.snooper.RPKSnooperProvider
+import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.event.EventHandler
@@ -34,6 +36,7 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit): Listen
 
     @EventHandler
     fun onPlayerCommandPreProcess(event: PlayerCommandPreprocessEvent) {
+        // Quick channel switching
         val chatChannelName = event.message.split(Regex("\\s+"))[0].drop(1)
         val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
         val chatChannel = chatChannelProvider.getChatChannel(chatChannelName)
@@ -55,6 +58,18 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit): Listen
                         .replace("\$channel", chatChannel.name))
             }
         }
+
+        // Snooping
+        val snooperProvider = plugin.core.serviceManager.getServiceProvider(RPKSnooperProvider::class)
+        snooperProvider.snoopers
+                .map(RPKPlayer::bukkitPlayer)
+                .filterNotNull()
+                .filter { bukkitPlayer -> bukkitPlayer.isOnline }
+                .map { bukkitPlayer -> bukkitPlayer.player }
+                .forEach { bukkitPlayer -> bukkitPlayer.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.command-snoop"))
+                        .replace("\$sender-player", event.player.name)
+                        .replace("\$command", event.message)) }
+
     }
 
 }
