@@ -1,0 +1,28 @@
+name: rpk-locks-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.locks.bukkit.RPKLocksBukkit
+depend:
+- rpk-core-bukkit
+- rpk-character-lib-bukkit
+- rpk-lock-lib-bukkit
+commands:
+    getkey:
+        description: Gets a key for a lock
+        usage: /<command>
+    keyring:
+        description: Shows your keyring
+        usage: /<command>
+    unlock:
+        description: Removes the lock from a block
+        usage: /<command>
+permissions:
+    rpkit.locks.command.getkey:
+        description: Allows the player to get the key to locks
+        default: op
+    rpkit.locks.command.keyring:
+        description: Allows the player to view their keyring
+        default: true
+    rpkit.locks.command.unlock:
+        description: Allows the player to unlock blocks
+        default: true
