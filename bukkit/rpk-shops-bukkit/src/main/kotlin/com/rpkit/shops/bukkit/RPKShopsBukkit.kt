@@ -31,6 +31,7 @@ import com.rpkit.shops.bukkit.shopcount.RPKShopCountProviderImpl
 class RPKShopsBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKShopCountProviderImpl(this)
         )
