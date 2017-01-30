@@ -16,6 +16,7 @@
 
 package com.rpkit.players.bukkit.servlet
 
+import com.rpkit.chat.bukkit.irc.RPKIRCProvider
 import com.rpkit.core.web.Alert
 import com.rpkit.core.web.Alert.Type.DANGER
 import com.rpkit.core.web.Alert.Type.SUCCESS
@@ -95,13 +96,22 @@ class PlayerServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
                 val player = playerProvider.getPlayer(playerName)
                 if (player != null) {
                     if (player.lastKnownIP == req.remoteAddr) {
+                        val alerts = mutableListOf<Alert>()
                         val name = req.getParameter("name")
                         val ircNick = req.getParameter("irc_nick")
                         if (name != null && name.isNotBlank()) {
                             player.name = name
                         }
                         if (ircNick != null && ircNick.isNotBlank()) {
-                            player.ircNick = ircNick
+                            val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
+                            val ircUser = ircProvider.getIRCUser(ircNick)
+                            if (ircUser != null) {
+                                val existingIRCPlayer = playerProvider.getPlayer(ircUser)
+                                playerProvider.removePlayer(existingIRCPlayer)
+                                player.ircNick = ircNick
+                            } else {
+                                alerts.add(Alert(DANGER, "There is no user online on IRC by that name, so your IRC account could not be linked."))
+                            }
                         }
                         playerProvider.updatePlayer(player)
                         resp.contentType = "text/html"
@@ -116,7 +126,8 @@ class PlayerServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
                         velocityContext.put("server", plugin.server.serverName)
                         velocityContext.put("navigationBar", plugin.core.web.navigationBar)
                         velocityContext.put("player", player)
-                        velocityContext.put("alerts", arrayOf(Alert(SUCCESS, "Profile successfully updated.")))
+                        alerts.add(Alert(SUCCESS, "Profile successfully updated."))
+                        velocityContext.put("alerts", alerts.toTypedArray())
                         Velocity.evaluate(velocityContext, resp.writer, "/web/player.html", templateBuilder.toString())
                     } else {
                         resp.contentType = "text/html"
