@@ -30,8 +30,13 @@ import org.pircbotx.hooks.events.MessageEvent
 class IRCMessageListener(private val plugin: RPKChatBukkit): ListenerAdapter() {
 
     override fun onMessage(event: MessageEvent) {
+        // Commands all extend ListenerAdapter as well, and have their own handling.
+        // This stops commands from being sent to chat.
+        if (event.message.startsWith("!")) return
+
         val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
         val user = event.user
+        // According to PircBotX documentation, user can be null if the hostmask doesn't match a user at creation time.
         if (user != null) {
             val sender = playerProvider.getPlayer(user)
             val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
