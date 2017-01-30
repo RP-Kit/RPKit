@@ -71,7 +71,7 @@
                 #end
                 <h2>Online players</h2>
                 #foreach($onlinePlayer in $onlinePlayers)
-                <h3><a href="/player/$onlinePlayer.Name"><img src="https://www.minecraftskinstealer.com/face.php?u=$player.BukkitPlayer.Name" alt="$player.Name's skin" class="img-rounded" /></a> <a href="/player/$onlinePlayer.Name">$player.Name</a></h3>
+                <h3><a href="/player/$onlinePlayer.Name"><img src="https://www.minecraftskinstealer.com/face.php?u=$onlinePlayer.BukkitPlayer.Name" alt="$onlinePlayer.Name's skin" class="img-rounded" /></a> <a href="/player/$onlinePlayer.Name">$onlinePlayer.Name</a></h3>
                 #end
             </div>
         </div>
