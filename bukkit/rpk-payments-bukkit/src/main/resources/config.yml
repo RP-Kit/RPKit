@@ -29,6 +29,7 @@ messages:
     payment-withdraw-invalid-character: '&cYou must have an active character in order to withdraw money from a payment group.'
     payment-withdraw-usage: '&cUsage: /payment withdraw [group] [amount]'
     payment-deposit-valid: '&aDeposited money to the payment group.'
+    payment-deposit-invalid-balance: '&cYou do not have enough money in your bank account to deposit that amount.'
     payment-deposit-invalid-amount: '&cYou must specify a positive amount to deposit. If you wish to withdraw instead, use /payment withdraw.'
     payment-deposit-invalid-currency: '&cThat payment group doesn''t yet have a currency set, so it is impossible to deposit money.'
     payment-deposit-invalid-group: '&cThere is no payment group by that name.'
