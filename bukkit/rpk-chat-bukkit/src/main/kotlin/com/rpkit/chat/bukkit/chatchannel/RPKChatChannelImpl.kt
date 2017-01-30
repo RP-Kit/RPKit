@@ -86,4 +86,17 @@ class RPKChatChannelImpl(
         }
     }
 
+    override fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>) {
+        listeners.forEach { listener ->
+            var context: DirectedChatChannelMessageContext = DirectedChatChannelMessageContextImpl(this, sender, listener, message)
+            directedPipeline.forEach { component ->
+                context = component.process(context)
+            }
+        }
+        var context: UndirectedChatChannelMessageContext = UndirectedChatChannelMessageContextImpl(this, sender, message)
+        undirectedPipeline.forEach { component ->
+            context = component.process(context)
+        }
+    }
+
 }
