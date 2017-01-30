@@ -55,6 +55,8 @@ class PaymentDepositCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
                                             paymentGroup.balance = paymentGroup.balance + amount
                                             paymentGroupProvider.updatePaymentGroup(paymentGroup)
                                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-valid")))
+                                        } else {
+                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-balance")))
                                         }
                                     } else {
                                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-amount")))
