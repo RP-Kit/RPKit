@@ -28,6 +28,9 @@ permissions:
     rpkit.characters.command.character.new:
         description: Allows creating a new character
         default: true
+    rpkit.characters.command.character.new.nocooldown:
+        description: Removes the cooldown from creating characters
+        default: op
     rpkit.characters.command.character.set.age:
         description: Allows setting your character''s age
         default: true

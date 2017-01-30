@@ -19,6 +19,7 @@ package com.rpkit.characters.bukkit.command.character.create
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterImpl
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
@@ -37,12 +38,18 @@ class CharacterNewCommand(private val plugin: RPKCharactersBukkit): CommandExecu
             if (sender.hasPermission("rpkit.characters.command.character.new")) {
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                val newCharacterCooldownProvider = plugin.core.serviceManager.getServiceProvider(RPKNewCharacterCooldownProvider::class)
                 val player = playerProvider.getPlayer(sender)
-                val character = RPKCharacterImpl(plugin, player = player)
-                characterProvider.addCharacter(character)
-                characterProvider.setActiveCharacter(player, character)
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-new-valid")))
-                character.showCharacterCard(player)
+                if (sender.hasPermission("rpkit.characters.command.character.new.nocooldown") || newCharacterCooldownProvider.getNewCharacterCooldown(player) <= 0) {
+                    val character = RPKCharacterImpl(plugin, player = player)
+                    characterProvider.addCharacter(character)
+                    characterProvider.setActiveCharacter(player, character)
+                    newCharacterCooldownProvider.setNewCharacterCooldown(player, plugin.config.getLong("characters.new-character-cooldown"))
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-new-valid")))
+                    character.showCharacterCard(player)
+                } else {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-new-invalid-cooldown")))
+                }
             } else {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-new"))))
             }
