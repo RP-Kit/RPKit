@@ -54,7 +54,7 @@ class GroupRemoveCommand(private val plugin: RPKPermissionsBukkit): CommandExecu
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.group-remove-usage")))
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-remove-group")))
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-group-remove-group")))
         }
         return true
     }
