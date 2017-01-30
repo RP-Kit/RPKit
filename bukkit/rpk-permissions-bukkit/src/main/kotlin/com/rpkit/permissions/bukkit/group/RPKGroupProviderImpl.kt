@@ -43,7 +43,12 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
         }
     }
 
-    private fun assignGroupPermissions(player: RPKPlayer, group: RPKGroup) {
+    private fun assignGroupPermissions(player: RPKPlayer, group: RPKGroup, assignedGroups: MutableList<RPKGroup>) {
+        if (assignedGroups.contains(group)) return
+        assignedGroups.add(group)
+        for (inheritedGroup in group.inheritance) {
+            assignGroupPermissions(player, inheritedGroup, assignedGroups)
+        }
         val permissionsAttachment = permissionsAttachments[player.id]
         if (permissionsAttachment != null) {
             for (node in group.allow) {
@@ -85,20 +90,11 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
                 }
                 val groups = getGroups(player)
                 if (groups.isEmpty()) {
-                    assignGroupPermissions(player, defaultGroup)
+                    assignGroupPermissions(player, defaultGroup, mutableListOf<RPKGroup>())
                 } else {
                     val assignedGroups = mutableListOf<RPKGroup>()
                     for (group in groups) {
-                        if (!assignedGroups.contains(group)) {
-                            assignGroupPermissions(player, group)
-                            assignedGroups.add(group)
-                        }
-                        for (inheritedGroup in group.inheritance) {
-                            if (!assignedGroups.contains(inheritedGroup)) {
-                                assignGroupPermissions(player, inheritedGroup)
-                                assignedGroups.add(group)
-                            }
-                        }
+                        assignGroupPermissions(player, group, assignedGroups)
                     }
                 }
             }
