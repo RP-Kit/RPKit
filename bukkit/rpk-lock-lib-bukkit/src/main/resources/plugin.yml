@@ -1,0 +1,7 @@
+name: rpk-lock-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.locks.bukkit.RPKLockLibBukkit
+depend:
+- rpk-core-bukkit
+- rpk-character-lib-bukkit

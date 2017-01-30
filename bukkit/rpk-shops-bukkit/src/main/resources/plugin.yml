@@ -2,7 +2,13 @@ name: rpk-shops-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.shops.bukkit.RPKShopsBukkit
-depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-character-lib-bukkit, rpk-economy-lib-bukkit, rpk-shop-lib-bukkit]
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+- rpk-economy-lib-bukkit
+- rpk-bank-lib-bukkit
+- rpk-shop-lib-bukkit
 permissions:
     rpkit.shops.sign.shop:
         description: Allows creation of shops

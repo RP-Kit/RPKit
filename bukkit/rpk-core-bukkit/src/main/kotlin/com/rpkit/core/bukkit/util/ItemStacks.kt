@@ -23,7 +23,9 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 /**
- * Converts the item stack to a byte array for serialization.
+ * Converts the [ItemStack] to a [ByteArray] for serialization.
+ *
+ * @return The [ByteArray]
  */
 fun ItemStack.toByteArray(): ByteArray {
     ByteArrayOutputStream().use { byteArrayOutputStream ->
@@ -34,14 +36,36 @@ fun ItemStack.toByteArray(): ByteArray {
     }
 }
 
+/**
+ * Converts the given byte array to an [ItemStack].
+ *
+ * @param bytes The [ByteArray]
+ * @return The [ItemStack]
+ * @deprecated Replaced by extension method
+ * @see toItemStack
+ */
 fun itemStackFromByteArray(bytes: ByteArray): ItemStack {
-    ByteArrayInputStream(bytes).use { byteArrayInputStream ->
+    return bytes.toItemStack()
+}
+
+/**
+ * Converts the byte array to an [ItemStack].
+ *
+ * @return The [ItemStack]
+ */
+fun ByteArray.toItemStack(): ItemStack {
+    ByteArrayInputStream(this).use { byteArrayInputStream ->
         BukkitObjectInputStream(byteArrayInputStream).use { bukkitObjectInputStream ->
             return bukkitObjectInputStream.readObject() as ItemStack
         }
     }
 }
 
+/**
+ * Converts the [ItemStack] [Array] to a [ByteArray] for serialization.
+ *
+ * @return The [ByteArray]
+ */
 fun Array<ItemStack>.toByteArray(): ByteArray {
     ByteArrayOutputStream().use { byteArrayOutputStream ->
         BukkitObjectOutputStream(byteArrayOutputStream).use { bukkitObjectOutputStream ->
@@ -51,9 +75,24 @@ fun Array<ItemStack>.toByteArray(): ByteArray {
     }
 }
 
-
+/**
+ * Converts the [ByteArray] to an [ItemStack] [Array]
+ *
+ * @return The [ItemStack] [Array]
+ * @deprecated Replaced by extension method
+ * @see toItemStackArray
+ */
 fun itemStackArrayFromByteArray(bytes: ByteArray): Array<ItemStack> {
-    ByteArrayInputStream(bytes).use { byteArrayInputStream ->
+    return bytes.toItemStackArray()
+}
+
+/**
+ * Converts the [ByteArray] to an [ItemStack] [Array]
+ *
+ * @return The [ItemStack] [Array]
+ */
+fun ByteArray.toItemStackArray(): Array<ItemStack> {
+    ByteArrayInputStream(this).use { byteArrayInputStream ->
         BukkitObjectInputStream(byteArrayInputStream).use { bukkitObjectInputStream ->
             return bukkitObjectInputStream.readObject() as Array<ItemStack>
         }

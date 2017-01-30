@@ -26,6 +26,8 @@ import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material
 import org.bukkit.Material.CHEST
 import org.bukkit.block.BlockFace.DOWN
+import org.bukkit.block.Chest
+import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.SignChangeEvent
@@ -63,6 +65,20 @@ class SignChangeListener(private val plugin: RPKShopsBukkit): Listener {
                         event.setLine(0, GREEN.toString() + "[shop]")
                         event.setLine(3, character.id.toString())
                         event.block.getRelative(DOWN).type = CHEST
+                        val chest = event.block.getRelative(DOWN).state
+                        if (chest is Chest) {
+                            val chestData = chest.data
+                            if (chestData is org.bukkit.material.Chest) {
+                                val sign = event.block.state
+                                if (sign is Sign) {
+                                    val signData = sign.data
+                                    if (signData is org.bukkit.material.Sign) {
+                                        chestData.setFacingDirection(signData.facing)
+                                        chest.update()
+                                    }
+                                }
+                            }
+                        }
                         shopCountProvider.setShopCount(character, shopCountProvider.getShopCount(character) + 1)
                     } else {
                         event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-shop-limit")))

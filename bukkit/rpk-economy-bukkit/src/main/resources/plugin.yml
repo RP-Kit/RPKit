@@ -48,3 +48,6 @@ permissions:
     rpkit.economy.command.money.wallet:
         description: Allows opening your wallet
         default: true
+    rpkit.economy.sign.exchange:
+        description: Allows creating exchange signs
+        default: op

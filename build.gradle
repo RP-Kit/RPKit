@@ -20,7 +20,7 @@ allprojects {
     apply plugin: "maven"
     apply plugin: "org.jetbrains.dokka"
     group = "com.rpkit"
-    version = "1.0.5"
+    version = "1.1.0"
 }
 
 subprojects {
@@ -358,6 +358,7 @@ project(":bukkit:rpk-shop-lib-bukkit") {
         compile project(":bukkit:rpk-core-bukkit")
         compile project(":bukkit:rpk-character-lib-bukkit")
         compile project(":bukkit:rpk-economy-lib-bukkit")
+        compile project(":bukkit:rpk-bank-lib-bukkit")
     }
 
     processResources {
@@ -482,6 +483,237 @@ project(":bukkit:rpk-payment-lib-bukkit") {
             pom.version = project(":bukkit:rpk-payment-lib-bukkit").version
             pom.artifactId = project(":bukkit:rpk-payment-lib-bukkit").name
             pom.groupId = project(":bukkit:rpk-payment-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-warp-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-warp-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-warp-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-warp-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-kit-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-kit-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-kit-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-kit-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-drink-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-drink-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-drink-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-drink-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-location-history-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-location-history-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-location-history-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-location-history-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-tracking-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-tracking-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-tracking-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-tracking-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-daily-quote-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-daily-quote-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-daily-quote-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-daily-quote-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-lock-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-lock-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-lock-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-lock-lib-bukkit").group
 
         }
     }
@@ -735,6 +967,7 @@ project(":bukkit:rpk-shops-bukkit") {
         compile project(":bukkit:rpk-core-bukkit")
         compile project(":bukkit:rpk-character-lib-bukkit")
         compile project(":bukkit:rpk-economy-lib-bukkit")
+        compile project(":bukkit:rpk-bank-lib-bukkit")
         compile project(":bukkit:rpk-shop-lib-bukkit")
     }
 
@@ -896,6 +1129,80 @@ project(":bukkit:rpk-payments-bukkit") {
             pom.version = project(":bukkit:rpk-payments-bukkit").version
             pom.artifactId = project(":bukkit:rpk-payments-bukkit").name
             pom.groupId = project(":bukkit:rpk-payments-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-essentials-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
+        compile project(":bukkit:rpk-warp-lib-bukkit")
+        compile project(":bukkit:rpk-kit-lib-bukkit")
+        compile project(":bukkit:rpk-drink-lib-bukkit")
+        compile project(":bukkit:rpk-location-history-lib-bukkit")
+        compile project(":bukkit:rpk-tracking-lib-bukkit")
+        compile project(":bukkit:rpk-daily-quote-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-essentials-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-essentials-bukkit").name
+            pom.groupId = project(":bukkit:rpk-essentials-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-locks-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
+        compile project(":bukkit:rpk-lock-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-locks-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-locks-bukkit").name
+            pom.groupId = project(":bukkit:rpk-locks-bukkit").group
 
         }
     }

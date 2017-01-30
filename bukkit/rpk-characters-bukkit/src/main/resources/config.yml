@@ -61,6 +61,7 @@ messages:
     character-switch-invalid-character: '&cYou do not have a character by that name.'
     character-switch-valid: '&aCharacter switched.'
     character-new-valid: '&aCharacter created.'
+    character-new-invalid-cooldown: '&cYou may not create another character until the cooldown has passed.'
     character-delete-prompt: '&fWhat is the name of the character you would like to delete? &7(Type cancel to cancel)'
     character-delete-invalid-character: '&cYou do not have a character by that name.'
     character-delete-confirmation: '&fThis operation will be permanent, and you will not be able to recover your character. Are you sure you wish to continue?'
@@ -147,3 +148,4 @@ characters:
     kill-character-on-death: false
     delete-character-on-death: false
     set-player-display-name: false
+    new-character-cooldown: 604800000

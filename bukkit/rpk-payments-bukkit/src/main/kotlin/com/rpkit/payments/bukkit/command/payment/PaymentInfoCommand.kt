@@ -80,10 +80,12 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                         if (!fieldFound) {
                                             if (line.length >= i + "\$owners".length) {
                                                 if (line.substring(i, i + "\$owners".length) == "\$owners") {
+                                                    val hiddenOwners = paymentGroup.owners.filter { it.isNameHidden }.size
                                                     message.then(paymentGroup.owners
                                                             .filter { owner -> !owner.isNameHidden }
                                                             .map(RPKCharacter::name)
-                                                            .joinToString(", "))
+                                                            .joinToString(", ")
+                                                            + if (hiddenOwners > 0) " (plus $hiddenOwners hidden)" else "")
                                                     if (chatColor != null) {
                                                         message.color(chatColor)
                                                     }
@@ -98,10 +100,12 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                         if (!fieldFound) {
                                             if (line.length >= i + "\$members".length) {
                                                 if (line.substring(i, i + "\$members".length) == "\$members") {
+                                                    val hiddenMembers = paymentGroup.members.filter { it.isNameHidden }.size
                                                     message.then(paymentGroup.members
                                                             .filter { member -> !member.isNameHidden }
                                                             .map(RPKCharacter::name)
-                                                            .joinToString(", "))
+                                                            .joinToString(", ")
+                                                            + if (hiddenMembers > 0) " (plus $hiddenMembers hidden)" else "")
                                                     if (chatColor != null) {
                                                         message.color(chatColor)
                                                     }
@@ -337,7 +341,12 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                         if (!fieldFound) {
                                             if (line.length >= i + "\$owners".length) {
                                                 if (line.substring(i, i + "\$owners".length) == "\$owners") {
-                                                    message.then(paymentGroup.owners.joinToString(", "))
+                                                    val hiddenOwners = paymentGroup.owners.filter { it.isNameHidden }.size
+                                                    message.then(paymentGroup.owners
+                                                            .filter { owner -> !owner.isNameHidden }
+                                                            .map(RPKCharacter::name)
+                                                            .joinToString(", ")
+                                                            + if (hiddenOwners > 0) " (plus $hiddenOwners hidden)" else "")
                                                     if (chatColor != null) {
                                                         message.color(chatColor)
                                                     }
@@ -352,7 +361,12 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                         if (!fieldFound) {
                                             if (line.length >= i + "\$members".length) {
                                                 if (line.substring(i, i + "\$members".length) == "\$members") {
-                                                    message.then(paymentGroup.members.joinToString(", "))
+                                                    val hiddenMembers = paymentGroup.members.filter { it.isNameHidden }.size
+                                                    message.then(paymentGroup.members
+                                                            .filter { member -> !member.isNameHidden }
+                                                            .map(RPKCharacter::name)
+                                                            .joinToString(", ")
+                                                            + if (hiddenMembers > 0) " (plus $hiddenMembers hidden)" else "")
                                                     if (chatColor != null) {
                                                         message.color(chatColor)
                                                     }
