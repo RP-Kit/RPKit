@@ -24,6 +24,7 @@ import com.rpkit.characters.bukkit.command.gender.GenderCommand
 import com.rpkit.characters.bukkit.command.race.RaceCommand
 import com.rpkit.characters.bukkit.database.table.RPKCharacterTable
 import com.rpkit.characters.bukkit.database.table.RPKGenderTable
+import com.rpkit.characters.bukkit.database.table.RPKNewCharacterCooldownTable
 import com.rpkit.characters.bukkit.database.table.RPKRaceTable
 import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.gender.RPKGenderProviderImpl
@@ -31,6 +32,7 @@ import com.rpkit.characters.bukkit.listener.PlayerDeathListener
 import com.rpkit.characters.bukkit.listener.PlayerInteractEntityListener
 import com.rpkit.characters.bukkit.listener.PlayerJoinListener
 import com.rpkit.characters.bukkit.listener.PlayerMoveListener
+import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownProvider
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
 import com.rpkit.characters.bukkit.race.RPKRaceProviderImpl
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
@@ -46,6 +48,7 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
     private lateinit var genderProvider: RPKGenderProvider
     private lateinit var raceProvider: RPKRaceProvider
     private lateinit var characterCardFieldProvider: RPKCharacterCardFieldProvider
+    private lateinit var newCharacterCooldownProvider: RPKNewCharacterCooldownProvider
 
     override fun onEnable() {
         saveDefaultConfig()
@@ -53,11 +56,13 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         genderProvider = RPKGenderProviderImpl(this)
         raceProvider = RPKRaceProviderImpl(this)
         characterCardFieldProvider = RPKCharacterCardFieldProviderImpl()
+        newCharacterCooldownProvider = RPKNewCharacterCooldownProvider(this)
         serviceProviders = arrayOf(
                 characterProvider,
                 genderProvider,
                 raceProvider,
-                characterCardFieldProvider
+                characterCardFieldProvider,
+                newCharacterCooldownProvider
         )
         characterCardFieldProvider.characterCardFields.add(NameField())
         characterCardFieldProvider.characterCardFields.add(PlayerField())
@@ -94,5 +99,6 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         database.addTable(RPKGenderTable(database))
         database.addTable(RPKRaceTable(database))
         database.addTable(RPKCharacterTable(database, this))
+        database.addTable(RPKNewCharacterCooldownTable(database, this))
     }
 }
