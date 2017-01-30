@@ -124,4 +124,17 @@ interface RPKChatChannel: Entity {
      */
     fun sendMessage(sender: RPKPlayer, message: String)
 
+    /**
+     * Sends the message to the channel, passing it through the specified directed pipeline once for each listener, and
+     * the specified undirected pipeline once.
+     *
+     * @param sender The player sending the message
+     * @param message The message
+     * @param directedPipeline The directed pipeline
+     * @param undirectedPipeline The undirected pipeline
+     */
+    fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>) {
+        sendMessage(sender, message)
+    }
+
 }
