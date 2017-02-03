@@ -87,18 +87,20 @@ class RPKWarpTable(database: Database, private val plugin: RPKEssentialsBukkit):
             ).use { statement ->
                 statement.setInt(1, id)
                 val resultSet = statement.executeQuery()
-                warp = RPKWarpImpl(
-                        resultSet.getInt("id"),
-                        resultSet.getString("name"),
-                        Location(
-                                plugin.server.getWorld(resultSet.getString("world")),
-                                resultSet.getDouble("x"),
-                                resultSet.getDouble("y"),
-                                resultSet.getDouble("z"),
-                                resultSet.getFloat("yaw"),
-                                resultSet.getFloat("pitch")
-                        )
-                )
+                if (resultSet.next()) {
+                    warp = RPKWarpImpl(
+                            resultSet.getInt("id"),
+                            resultSet.getString("name"),
+                            Location(
+                                    plugin.server.getWorld(resultSet.getString("world")),
+                                    resultSet.getDouble("x"),
+                                    resultSet.getDouble("y"),
+                                    resultSet.getDouble("z"),
+                                    resultSet.getFloat("yaw"),
+                                    resultSet.getFloat("pitch")
+                            )
+                    )
+                }
             }
         }
         return warp
