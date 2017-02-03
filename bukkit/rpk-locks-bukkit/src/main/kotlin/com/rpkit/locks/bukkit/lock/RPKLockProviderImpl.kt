@@ -102,7 +102,7 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
         val key = ItemStack(item)
         val meta = key.itemMeta ?: return false
         val lore = if (key.hasItemMeta()) if (meta.hasLore()) meta.lore else mutableListOf<String>() else mutableListOf<String>()
-        val locationLoreItem = lore.filter { it.matches(Regex("\\w+,\\d+,\\d+,\\d+")) }.lastOrNull()
+        val locationLoreItem = lore.filter { it.matches(Regex("\\w+,-?\\d+,-?\\d+,-?\\d+")) }.lastOrNull()
         if (locationLoreItem != null) {
             lore.remove(locationLoreItem)
         }
