@@ -43,7 +43,7 @@ class PaymentInviteCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                 if (paymentGroup != null) {
                     val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val bukkitPlayer = plugin.server.getPlayer(args.last())
+                    val bukkitPlayer = plugin.server.getOfflinePlayer(args.last())
                     val player = playerProvider.getPlayer(bukkitPlayer)
                     val character = characterProvider.getActiveCharacter(player)
                     if (character != null) {
