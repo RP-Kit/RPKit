@@ -66,7 +66,7 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                                     ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-buy"))
                                                             .replace("\$quantity", amount.toString())
                                                             .replace("\$material", material.toString().toLowerCase().replace('_', ' '))
-                                                            .replace("\$price", buyPrice.toString() + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
+                                                            .replace("\$price", buyPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
                                             )
                                             actualPrice += plugin.config.getDouble("traders.price-change")
                                             actualPrice = Math.max(Math.min(actualPrice, plugin.config.getDouble("traders.maximum-price")), plugin.config.getDouble("traders.minimum-price")).toDouble()
@@ -91,15 +91,31 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                 val character = characterProvider.getActiveCharacter(player)
                                 if (character != null) {
                                     if (event.player.hasPermission("rpkit.trade.sign.trader.sell")) {
-                                        if (event.player.inventory.containsAtLeast(ItemStack(material), amount)) {
+                                        if (event.player.inventory.contains(material, amount)) {
                                             if (economyProvider.getBalance(character, currency) + sellPrice <= 1728) {
                                                 economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + sellPrice)
-                                                event.player.inventory.removeItem(ItemStack(material, amount))
+                                                var amountRemaining = amount
+                                                val contents = event.player.inventory.contents
+                                                contents
+                                                        .asSequence()
+                                                        .filter { it != null && it.type == material }
+                                                        .forEach {
+                                                            if (it.amount > amountRemaining) {
+                                                                it.amount = it.amount - amountRemaining
+                                                                amountRemaining = 0
+                                                            } else if (it.amount <= amountRemaining) {
+                                                                if (amountRemaining > 0) {
+                                                                    amountRemaining -= it.amount
+                                                                    it.type = Material.AIR
+                                                                }
+                                                            }
+                                                        }
+                                                event.player.inventory.contents = contents
                                                 event.player.sendMessage(
                                                         ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-sell"))
                                                                 .replace("\$quantity", amount.toString())
                                                                 .replace("\$material", material.toString().toLowerCase().replace('_', ' '))
-                                                                .replace("\$price", sellPrice.toString() + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
+                                                                .replace("\$price", sellPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
                                                 )
                                                 actualPrice -= plugin.config.getDouble("traders.price-change")
                                                 actualPrice = Math.max(Math.min(actualPrice, plugin.config.getDouble("traders.maximum-price")), plugin.config.getDouble("traders.minimum-price")).toDouble()
