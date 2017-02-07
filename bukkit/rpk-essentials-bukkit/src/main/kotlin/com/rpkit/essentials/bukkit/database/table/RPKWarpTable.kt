@@ -1,17 +1,17 @@
-package com.rpkit.travel.bukkit.database.table
+package com.rpkit.essentials.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.database.use
-import com.rpkit.travel.bukkit.RPKTravelBukkit
-import com.rpkit.travel.bukkit.warp.RPKWarpImpl
+import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
+import com.rpkit.essentials.bukkit.warp.RPKWarpImpl
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import org.bukkit.Location
 import java.sql.PreparedStatement
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
 
-class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Table<RPKWarp>(database, RPKWarp::class) {
+class RPKWarpTable(database: Database, private val plugin: RPKEssentialsBukkit): Table<RPKWarp>(database, RPKWarp::class) {
 
     override fun create() {
         database.createConnection().use { connection ->

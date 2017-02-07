@@ -4,10 +4,7 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.essentials.bukkit.command.*
 import com.rpkit.essentials.bukkit.dailyquote.RPKDailyQuoteProviderImpl
-import com.rpkit.essentials.bukkit.database.table.RPKDrunkennessTable
-import com.rpkit.essentials.bukkit.database.table.RPKLogMessagesEnabledTable
-import com.rpkit.essentials.bukkit.database.table.RPKPreviousLocationTable
-import com.rpkit.essentials.bukkit.database.table.RPKTrackingEnabledTable
+import com.rpkit.essentials.bukkit.database.table.*
 import com.rpkit.essentials.bukkit.drink.RPKDrinkProviderImpl
 import com.rpkit.essentials.bukkit.kit.RPKKitImpl
 import com.rpkit.essentials.bukkit.kit.RPKKitProviderImpl
@@ -18,6 +15,7 @@ import com.rpkit.essentials.bukkit.locationhistory.RPKLocationHistoryProviderImp
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageProvider
 import com.rpkit.essentials.bukkit.time.TimeSlowRunnable
 import com.rpkit.essentials.bukkit.tracking.RPKTrackingProviderImpl
+import com.rpkit.essentials.bukkit.warp.RPKWarpProviderImpl
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 
 
@@ -32,7 +30,8 @@ class RPKEssentialsBukkit: RPKBukkitPlugin() {
                 RPKKitProviderImpl(this),
                 RPKLocationHistoryProviderImpl(this),
                 RPKLogMessageProvider(this),
-                RPKTrackingProviderImpl(this)
+                RPKTrackingProviderImpl(this),
+                RPKWarpProviderImpl(this)
         )
         TimeSlowRunnable(this).runTaskTimer(this, 100L, 100L)
     }
@@ -40,6 +39,7 @@ class RPKEssentialsBukkit: RPKBukkitPlugin() {
     override fun registerCommands() {
         getCommand("back").executor = BackCommand(this)
         getCommand("clone").executor = CloneCommand(this)
+        getCommand("deletewarp").executor = DeleteWarpCommand(this)
         getCommand("distance").executor = DistanceCommand(this)
         getCommand("enchant").executor = EnchantCommand(this)
         getCommand("feed").executor = FeedCommand(this)
@@ -56,6 +56,7 @@ class RPKEssentialsBukkit: RPKBukkitPlugin() {
         getCommand("runas").executor = RunAsCommand(this)
         getCommand("seen").executor = SeenCommand(this)
         getCommand("setspawn").executor = SetSpawnCommand(this)
+        getCommand("setwarp").executor = SetWarpCommand(this)
         getCommand("smite").executor = SmiteCommand(this)
         getCommand("spawn").executor = SpawnCommand(this)
         getCommand("spawner").executor = SpawnerCommand(this)
@@ -66,6 +67,7 @@ class RPKEssentialsBukkit: RPKBukkitPlugin() {
         getCommand("toggletracking").executor = ToggleTrackingCommand(this)
         getCommand("track").executor = TrackCommand(this)
         getCommand("unsign").executor = UnsignCommand(this)
+        getCommand("warp").executor = WarpCommand(this)
     }
 
     override fun registerListeners() {
@@ -81,6 +83,7 @@ class RPKEssentialsBukkit: RPKBukkitPlugin() {
         database.addTable(RPKLogMessagesEnabledTable(database, this))
         database.addTable(RPKPreviousLocationTable(database, this))
         database.addTable(RPKTrackingEnabledTable(database, this))
+        database.addTable(RPKWarpTable(database, this))
     }
 
 }

@@ -1,4 +1,4 @@
-package com.rpkit.travel.bukkit.warp
+package com.rpkit.essentials.bukkit.warp
 
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import org.bukkit.Location
