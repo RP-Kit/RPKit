@@ -1,12 +1,12 @@
-package com.rpkit.essentials.bukkit.warp
+package com.rpkit.travel.bukkit.warp
 
-import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import com.rpkit.essentials.bukkit.database.table.RPKWarpTable
+import com.rpkit.travel.bukkit.RPKTravelBukkit
+import com.rpkit.travel.bukkit.database.table.RPKWarpTable
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import com.rpkit.warp.bukkit.warp.RPKWarpProvider
 
 
-class RPKWarpProviderImpl(private val plugin: RPKEssentialsBukkit): RPKWarpProvider {
+class RPKWarpProviderImpl(private val plugin: RPKTravelBukkit): RPKWarpProvider {
     override val warps: List<RPKWarp>
         get() = plugin.core.database.getTable(RPKWarpTable::class).getAll()
 

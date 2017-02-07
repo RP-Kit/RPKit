@@ -1,0 +1,4 @@
+messages:
+    warp-sign-invalid-warp: '&cThere is no warp by that name.'
+    warp-sign-valid: '&aWarp sign created.'
+    no-permission-warp-sign-create: '&cYou do not have permission to create warp signs.'

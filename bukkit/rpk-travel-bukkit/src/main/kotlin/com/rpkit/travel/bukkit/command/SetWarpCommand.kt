@@ -1,7 +1,7 @@
-package com.rpkit.essentials.bukkit.command
+package com.rpkit.travel.bukkit.command
 
-import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import com.rpkit.essentials.bukkit.warp.RPKWarpImpl
+import com.rpkit.travel.bukkit.RPKTravelBukkit
+import com.rpkit.travel.bukkit.warp.RPKWarpImpl
 import com.rpkit.warp.bukkit.warp.RPKWarpProvider
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
@@ -9,7 +9,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class SetWarpCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
+class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.essentials.command.setwarp")) {
