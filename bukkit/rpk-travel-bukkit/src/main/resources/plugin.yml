@@ -1,0 +1,11 @@
+name: rpk-travel-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.travel.bukkit.RPKTravelBukkit
+depend:
+- rpk-core-bukkit
+- rpk-warp-lib-bukkit
+permissions:
+    rpkit.travel.sign.warp.create:
+        description: Allows the creation of warp signs
+        default: op
