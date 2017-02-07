@@ -1,4 +1,4 @@
-package com.rpkit.essentials.bukkit.command
+package com.rpkit.travel.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.warp.bukkit.warp.RPKWarp
@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.util.*
 
-class WarpCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
+class WarpCommand(private val plugin: com.rpkit.essentials.bukkit.RPKEssentialsBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.essentials.command.warp")) {
