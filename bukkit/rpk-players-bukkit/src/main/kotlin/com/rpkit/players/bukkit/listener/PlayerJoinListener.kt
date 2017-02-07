@@ -31,7 +31,10 @@ class PlayerJoinListener(private val plugin: RPKPlayersBukkit): Listener {
     fun onPlayerJoin(event: PlayerJoinEvent) {
         // If RPK doesn't have a player for Bukkit's player, create it here so that the player can log on through
         // web UI. If RPK DOES have a player, update the last known IP.
-        plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(event.player)
+        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val player = playerProvider.getPlayer(event.player)
+        player.lastKnownIP = event.player.address?.address?.hostAddress
+        playerProvider.updatePlayer(player)
     }
 
 }
