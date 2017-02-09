@@ -720,6 +720,40 @@ project(":bukkit:rpk-lock-lib-bukkit") {
 
 }
 
+
+project(":bukkit:rpk-feature-flag-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-feature-flag-lib-bukkit")
+            pom.artifactId = project(":bukkit:rpk-feature-flag-lib-bukkit")
+            pom.groupId = project(":bukkit:rpk-feature-flag-lib-bukkit")
+
+        }
+    }
+
+}
+
 // Bukkit implementations
 
 project(":bukkit:rpk-players-bukkit") {
@@ -1236,6 +1270,36 @@ project(":bukkit:rpk-travel-bukkit") {
             pom.version = project(":bukkit:rpk-travel-bukkit").version
             pom.artifactId = project(":bukkit:rpk-travel-bukkit").name
             pom.groupId = project(":bukkit:rpk-travel-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-feature-flags-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-feature-flag-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repos.seventh-root.com/artifactory/libs-release-local/") {
+                
+            }
 
         }
     }
