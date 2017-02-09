@@ -1,0 +1,6 @@
+name: rpk-feature-flag-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.featureflags.bukkit.RPKFeatureFlagLibBukkit
+depend:
+- rpk-core-bukkit
