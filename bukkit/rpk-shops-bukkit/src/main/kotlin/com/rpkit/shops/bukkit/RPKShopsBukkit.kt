@@ -18,6 +18,7 @@ package com.rpkit.shops.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.shops.bukkit.command.RestockCommand
 import com.rpkit.shops.bukkit.database.table.RPKShopCountTable
 import com.rpkit.shops.bukkit.listener.BlockBreakListener
 import com.rpkit.shops.bukkit.listener.InventoryClickListener
@@ -44,6 +45,10 @@ class RPKShopsBukkit: RPKBukkitPlugin() {
                 PlayerInteractListener(this),
                 InventoryClickListener(this)
         )
+    }
+
+    override fun registerCommands() {
+        getCommand("restock").executor = RestockCommand(this)
     }
 
     override fun createTables(database: Database) {

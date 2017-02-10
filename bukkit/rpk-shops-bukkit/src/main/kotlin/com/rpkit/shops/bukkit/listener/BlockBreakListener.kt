@@ -43,13 +43,26 @@ class BlockBreakListener(val plugin: RPKShopsBukkit): Listener {
         if (state is Chest) {
             sign = event.block.getRelative(UP).state as? Sign
         }
-        if (sign?.getLine(0) == GREEN.toString() + "[shop]") {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val shopCountProvider = plugin.core.serviceManager.getServiceProvider(RPKShopCountProvider::class)
-            val player = playerProvider.getPlayer(event.player)
-            val character = characterProvider.getActiveCharacter(player)
-            if (character != null) {
+        if (sign != null) {
+            if (sign.getLine(0) == GREEN.toString() + "[shop]") {
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                val shopCountProvider = plugin.core.serviceManager.getServiceProvider(RPKShopCountProvider::class)
+                val player = playerProvider.getPlayer(event.player)
+                val character = characterProvider.getActiveCharacter(player)
+                val shopCharacter = if (sign.getLine(3)?.equals("admin", ignoreCase = true) ?: false) null else characterProvider.getCharacter(sign.getLine(3).toInt())
+                if (character == null) {
+                    event.isCancelled = true
+                    return
+                }
+                if (shopCharacter == null) {
+                    event.isCancelled=  true
+                    return
+                }
+                if (shopCharacter.id != character.id) {
+                    event.isCancelled = true
+                    return
+                }
                 val shopCount = shopCountProvider.getShopCount(character)
                 shopCountProvider.setShopCount(character, shopCount - 1)
             }
