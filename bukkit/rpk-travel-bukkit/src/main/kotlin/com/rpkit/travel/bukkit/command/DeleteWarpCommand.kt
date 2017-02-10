@@ -11,7 +11,7 @@ import org.bukkit.entity.Player
 class DeleteWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender.hasPermission("rpkit.essentials.command.deletewarp")) {
+        if (sender.hasPermission("rpkit.travel.command.deletewarp")) {
             if (sender is Player) {
                 if (args.isNotEmpty()) {
                     val warpProvider = plugin.core.serviceManager.getServiceProvider(RPKWarpProvider::class)

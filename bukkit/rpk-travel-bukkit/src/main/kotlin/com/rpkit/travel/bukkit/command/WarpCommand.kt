@@ -13,7 +13,7 @@ import java.util.*
 class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender.hasPermission("rpkit.essentials.command.warp")) {
+        if (sender.hasPermission("rpkit.travel.command.warp")) {
             if (sender is Player) {
                 val warpProvider = plugin.core.serviceManager.getServiceProvider(RPKWarpProvider::class)
                 if (args.isNotEmpty()) {
