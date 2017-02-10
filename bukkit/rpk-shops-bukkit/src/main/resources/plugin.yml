@@ -9,10 +9,20 @@ depend:
 - rpk-economy-lib-bukkit
 - rpk-bank-lib-bukkit
 - rpk-shop-lib-bukkit
+commands:
+    restock:
+        description: Restocks the stock in your line of sight with the given item
+        usage: /<command> [material]
 permissions:
     rpkit.shops.sign.shop:
         description: Allows creation of shops
         default: true
     rpkit.shops.sign.shop.nolimit:
         description: Removes shop limit
+        default: op
+    rpkit.shops.sign.shop.admin:
+        description: Allows the creation of admin shops
+        default: op
+    rpkit.shops.command.restock:
+        description: Allows restocking shops
         default: op
