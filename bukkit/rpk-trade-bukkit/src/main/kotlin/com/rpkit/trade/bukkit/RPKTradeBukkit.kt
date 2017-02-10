@@ -17,6 +17,7 @@
 package com.rpkit.trade.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.trade.bukkit.listener.BlockBreakListener
 import com.rpkit.trade.bukkit.listener.PlayerInteractListener
 import com.rpkit.trade.bukkit.listener.SignChangeListener
 
@@ -31,7 +32,11 @@ class RPKTradeBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerListeners() {
-        registerListeners(SignChangeListener(this), PlayerInteractListener(this))
+        registerListeners(
+                BlockBreakListener(this),
+                SignChangeListener(this),
+                PlayerInteractListener(this)
+        )
     }
 
 }
