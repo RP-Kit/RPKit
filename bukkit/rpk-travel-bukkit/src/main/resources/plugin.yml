@@ -5,7 +5,26 @@ main: com.rpkit.travel.bukkit.RPKTravelBukkit
 depend:
 - rpk-core-bukkit
 - rpk-warp-lib-bukkit
+commands:
+    deletewarp:
+        description: Deletes a warp
+        usage: /<command> [name]
+    setwarp:
+        description: Sets a warp at your current location
+        usage: /<command> [name]
+    warp:
+        description: Warps to a location
+        usage: /<command> [warp]
 permissions:
+    rpkit.travel.command.deletewarp:
+        description: Allows you to delete a warp
+        default: op
+    rpkit.travel.command.setwarp:
+        description: Allows you to set a warp
+        default: op
+    rpkit.travel.command.warp:
+        description: Allows you to use warps
+        default: op
     rpkit.travel.sign.warp.create:
         description: Allows the creation of warp signs
         default: op

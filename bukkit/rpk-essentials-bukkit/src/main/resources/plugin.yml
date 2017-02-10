@@ -124,9 +124,6 @@ permissions:
     rpkit.essentials.command.clone:
         description: Allows you to clone the item in your hand
         default: op
-    rpkit.essentials.command.deletewarp:
-        description: Allows you to delete a warp
-        default: op
     rpkit.essentials.command.distance:
         description: Allows you to check your distance to players
         default: true
@@ -178,9 +175,6 @@ permissions:
     rpkit.essentials.command.setspawn:
         description: Allows you to set the spawn
         default: op
-    rpkit.essentials.command.setwarp:
-        description: Allows you to set a warp
-        default: op
     rpkit.essentials.command.smite:
         description: Smites the player
         default: op
@@ -211,6 +205,3 @@ permissions:
     rpkit.essentials.command.unsign:
         description: Allows you to unsign books
         default: true
-    rpkit.essentials.command.warp:
-        description: Allows you to use warps
-        default: op

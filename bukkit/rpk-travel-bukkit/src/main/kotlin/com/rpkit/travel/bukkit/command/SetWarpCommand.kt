@@ -12,7 +12,7 @@ import org.bukkit.entity.Player
 class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender.hasPermission("rpkit.essentials.command.setwarp")) {
+        if (sender.hasPermission("rpkit.travel.command.setwarp")) {
             if (sender is Player) {
                 if (args.isNotEmpty()) {
                     val warpProvider = plugin.core.serviceManager.getServiceProvider(RPKWarpProvider::class)
