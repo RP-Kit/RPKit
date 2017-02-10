@@ -20,7 +20,6 @@ import com.rpkit.banks.bukkit.bank.RPKBankProvider
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.payments.bukkit.command.payment.PaymentCommand
-import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupMemberTable
 import com.rpkit.payments.bukkit.database.table.*
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProviderImpl
@@ -102,7 +101,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                             }
                                         }
                                     } else if (group.amount > 0) { // Payment Group -> Character, requires balance check on group
-                                        if (group.balance > group.amount) { // If group has enough money
+                                        if (group.balance >= group.amount) { // If group has enough money
                                             bankProvider.setBalance(member, currency, bankProvider.getBalance(member, currency) + group.amount)
                                             group.balance -= group.amount
                                             paymentGroupProvider.updatePaymentGroup(group)

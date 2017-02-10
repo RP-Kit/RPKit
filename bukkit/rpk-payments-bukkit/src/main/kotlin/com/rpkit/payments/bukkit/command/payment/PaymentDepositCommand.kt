@@ -45,27 +45,31 @@ class PaymentDepositCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
                     if (character != null) {
                         val paymentGroup = paymentGroupProvider.getPaymentGroup(args.dropLast(1).joinToString(" "))
                         if (paymentGroup != null) {
-                            val currency = paymentGroup.currency
-                            if (currency != null) {
-                                try {
-                                    val amount = args.last().toInt()
-                                    if (amount > 0) {
-                                        if (bankProvider.getBalance(character, currency) >= amount) {
-                                            bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - amount)
-                                            paymentGroup.balance = paymentGroup.balance + amount
-                                            paymentGroupProvider.updatePaymentGroup(paymentGroup)
-                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-valid")))
+                            if (paymentGroup.owners.contains(character)) {
+                                val currency = paymentGroup.currency
+                                if (currency != null) {
+                                    try {
+                                        val amount = args.last().toInt()
+                                        if (amount > 0) {
+                                            if (bankProvider.getBalance(character, currency) >= amount) {
+                                                bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - amount)
+                                                paymentGroup.balance = paymentGroup.balance + amount
+                                                paymentGroupProvider.updatePaymentGroup(paymentGroup)
+                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-valid")))
+                                            } else {
+                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-balance")))
+                                            }
                                         } else {
-                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-balance")))
+                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-amount")))
                                         }
-                                    } else {
+                                    } catch (exception: NumberFormatException) {
                                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-amount")))
                                     }
-                                } catch (exception: NumberFormatException) {
-                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-amount")))
+                                } else {
+                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-currency")))
                                 }
                             } else {
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-currency")))
+                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-owner")))
                             }
                         } else {
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-group")))
