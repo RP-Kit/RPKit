@@ -1,0 +1,8 @@
+messages:
+    roll: '&f$character/$player rolled &7$roll &ffrom &7$dice'
+    roll-invalid-parse: '&cFailed to parse your roll.'
+    roll-usage: '&cUsage: /roll [roll]'
+    not-from-console: '&cYou must be a player to perform that command.'
+    no-character: '&cYou must have a character to perform that command.'
+rolls:
+    radius: 8

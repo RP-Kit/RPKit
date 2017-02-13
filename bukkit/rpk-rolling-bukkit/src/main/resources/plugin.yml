@@ -1,0 +1,12 @@
+name: rpk-rolling-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.rolling.bukkit.RPKRollingBukkit
+commands:
+    roll:
+        description: Rolls
+        usage: /<command> [roll]
+permissions:
+    rpkit.rolling.command.roll:
+        description: Allows rolling
+        default: true
