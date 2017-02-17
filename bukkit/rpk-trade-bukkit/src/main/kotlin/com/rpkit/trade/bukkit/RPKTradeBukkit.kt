@@ -28,6 +28,17 @@ class RPKTradeBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
         saveDefaultConfig()
+        // Migrate config 1.1 -> 1.2
+        if (!config.isConfigurationSection("traders.minimum-price")) {
+            val minimumPrice = config.getInt("traders.minimum-price")
+            config.set("traders.minimum-price", null)
+            config.set("traders.minimum-price.default", minimumPrice)
+        }
+        if (!config.isConfigurationSection("traders.maximum-price")) {
+            val maximumPrice = config.getInt("traders.maximum-price")
+            config.set("traders.maximum-price", null)
+            config.set("traders.maximum-price.default", maximumPrice)
+        }
         serviceProviders = arrayOf()
     }
 
