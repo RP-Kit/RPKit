@@ -1,0 +1,6 @@
+# This file is where in game messages may be configured.
+# If you're only running rpk-core-bukkit this will be empty.
+# If you're already running some RPKit plugins, you may see some messages you can set.
+# If your server's native language is English, there probably aren't any reasons you'd want to configure this.
+# If the people on your server speak another language though, you can replace this file with a translated one for your
+# language.
