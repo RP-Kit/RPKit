@@ -29,7 +29,7 @@ class IRCRegisterCommand(private val plugin: RPKChatBukkit): IRCCommand("registe
 
     override fun execute(channel: Channel, sender: User, cmd: IRCCommand, label: String, args: Array<String>) {
         val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
-        if (args.size > 0) {
+        if (args.isNotEmpty()) {
             if (args[0].matches(Regex("(\\w[-._\\w]*\\w@\\w[-._\\w]*\\w\\.\\w{2,3})"))) {
                 ircProvider.ircBot.sendIRC().message("NickServ", "REGISTER " + plugin.config.getString("irc.password") + " " + args[0])
                 sender.send().message(plugin.config.getString("messages.irc-register-valid"))

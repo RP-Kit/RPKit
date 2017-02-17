@@ -146,6 +146,8 @@ messages:
     irc-verify-valid: 'Attempted to verify. If you correctly entered the verification code, I should now be verified.'
     irc-verify-invalid-verification-code-not-specified: 'You must specify the registration code from your email.'
     irc-quit: 'Server shut down.'
+    irc-list-title: 'Online players: '
+    irc-list-item: '$player, '
     snoop-usage: '&cUsage: /snoop [on|off|check]'
     snoop-enabled: '&aSnooping enabled.'
     snoop-already-enabled: '&cSnooping was already enabled.'
