@@ -96,6 +96,7 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
      */
     fun initializePlugin(rpkitBukkitPlugin: RPKBukkitPlugin) {
         rpkitBukkitPlugin.core = core
+        rpkitBukkitPlugin.setDefaultMessages()
         try {
             rpkitBukkitPlugin.createTables(core.database)
         } catch (exception: SQLException) {

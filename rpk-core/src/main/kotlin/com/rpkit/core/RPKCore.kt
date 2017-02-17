@@ -29,6 +29,7 @@ import java.util.logging.Logger
  * @property logger The logger to use
  * @property database The database instance to use
  * @property web The web instance to use
+ * @property messages The messages instance to use
  */
 class RPKCore(val logger: Logger, val database: Database, val web: Web, val messages: Messages) {
 

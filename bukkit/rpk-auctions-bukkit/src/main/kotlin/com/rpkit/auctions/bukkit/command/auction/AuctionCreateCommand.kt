@@ -23,7 +23,6 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -40,12 +39,12 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
             .withModality(true)
             .withFirstPrompt(CurrencyPrompt())
             .withEscapeSequence("cancel")
-            .thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
                 if (!event.gracefulExit()) {
                     val conversable = event.context.forWhom
                     if (conversable is Player) {
-                        conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                        conversable.sendMessage(plugin.core.messages["operation-cancelled"])
                     }
                 }
             }
@@ -60,13 +59,13 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
                 if (character != null) {
                     conversationFactory.buildConversation(sender).begin()
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.core.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-auction-create")))
+                sender.sendMessage(plugin.core.messages["no-permission-auction-create"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.core.messages["not-from-console"])
         }
         return true
     }
@@ -83,17 +82,18 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-currency-prompt")) + "\n" +
+            return plugin.core.messages["auction-set-currency-prompt"] + "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
                             .map { currency ->
-                                ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-currency-prompt-list-item"))
-                                        .replace("\$currency", currency.name)
+                                plugin.core.messages["auction-set-currency-prompt-list-item", mapOf(
+                                        Pair("currency", currency.name)
+                                )]
                             }
                             .joinToString("\n")
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-currency-invalid-currency"))
+            return plugin.core.messages["auction-set-currency-invalid-currency"]
         }
 
     }
@@ -105,7 +105,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-currency-valid"))
+            return plugin.core.messages["auction-set-currency-valid"]
         }
 
     }
@@ -118,7 +118,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-duration-prompt"))
+            return plugin.core.messages["auction-set-duration-prompt"]
         }
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
@@ -126,11 +126,11 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-duration-invalid-number"))
+            return plugin.core.messages["auction-set-duration-invalid-number"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-duration-invalid-negative"))
+            return plugin.core.messages["auction-set-duration-invalid-negative"]
         }
     }
 
@@ -141,7 +141,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-duration-valid"))
+            return plugin.core.messages["auction-set-duration-valid"]
         }
 
     }
@@ -154,7 +154,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-start-price-prompt"))
+            return plugin.core.messages["auction-set-start-price-prompt"]
         }
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
@@ -162,11 +162,11 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-start-price-invalid-number"))
+            return plugin.core.messages["auction-set-start-price-invalid-number"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-start-price-invalid-negative"))
+            return plugin.core.messages["auction-set-start-price-invalid-negative"]
         }
 
     }
@@ -178,7 +178,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-start-price-valid"))
+            return plugin.core.messages["auction-set-start-price-valid"]
         }
 
     }
@@ -191,7 +191,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-buy-out-price-prompt"))
+            return plugin.core.messages["auction-set-buy-out-price-prompt"]
         }
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
@@ -199,11 +199,11 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-buy-out-price-invalid-number"))
+            return plugin.core.messages["auction-set-buy-out-price-invalid-number"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-buy-out-price-invalid-negative"))
+            return plugin.core.messages["auction-set-buy-out-price-invalid-negative"]
         }
 
     }
@@ -215,7 +215,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-buy-out-price-valid"))
+            return plugin.core.messages["auction-set-buy-out-price-valid"]
         }
 
     }
@@ -228,7 +228,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-no-sell-price-prompt"))
+            return plugin.core.messages["auction-set-no-sell-price-prompt"]
         }
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
@@ -236,11 +236,11 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-no-sell-price-invalid-number"))
+            return plugin.core.messages["auction-set-no-sell-price-invalid-number"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-no-sell-price-invalid-negative"))
+            return plugin.core.messages["auction-set-no-sell-price-invalid-negative"]
         }
 
     }
@@ -252,7 +252,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-no-sell-price-valid"))
+            return plugin.core.messages["auction-set-no-sell-price-valid"]
         }
 
     }
@@ -265,7 +265,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-minimum-bid-increment-prompt"))
+            return plugin.core.messages["auction-set-minimum-bid-increment-prompt"]
         }
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
@@ -273,11 +273,11 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-minimum-bid-increment-invalid-number"))
+            return plugin.core.messages["auction-set-minimum-bid-increment-invalid-number"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-minimum-bid-increment-invalid-negative"))
+            return plugin.core.messages["auction-set-minimum-bid-increment-invalid-negative"]
         }
 
     }
@@ -289,7 +289,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-set-minimum-bid-increment-valid"))
+            return plugin.core.messages["auction-set-minimum-bid-increment-valid"]
         }
 
     }
@@ -329,7 +329,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-create-valid"))
+            return plugin.core.messages["auction-create-valid"]
         }
 
     }
@@ -342,10 +342,11 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
 
         override fun getPromptText(context: ConversationContext): String {
             if (context.getSessionData("id") != -1) {
-                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-create-id"))
-                        .replace("\$id", context.getSessionData("id").toString())
+                return plugin.core.messages["auction-create-id", mapOf(
+                        Pair("id", context.getSessionData("id").toString())
+                )]
             } else {
-                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character"))
+                return plugin.core.messages["no-character"]
             }
         }
 

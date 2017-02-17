@@ -18,11 +18,11 @@ package com.rpkit.auctions.bukkit.listener
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
 import com.rpkit.auctions.bukkit.auction.RPKAuctionProvider
+import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material.AIR
 import org.bukkit.block.Sign
@@ -40,7 +40,7 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
         if (event.hasBlock()) {
             val sign = event.clickedBlock.state
             if (sign is Sign) {
-                if (sign.getLine(0).equals("${GREEN}[auction]")) {
+                if (sign.getLine(0) == "$GREEN[auction]") {
                     if (event.player.hasPermission("rpkit.auctions.sign.auction.bid")) {
                         val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
@@ -54,7 +54,7 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
                                 auction.closeBidding()
                             }
                             if (auction.isBiddingOpen) {
-                                val bidAmount = (auction.bids.sortedByDescending { bid -> bid.amount }.firstOrNull()?.amount?:auction.startPrice) + auction.minimumBidIncrement
+                                val bidAmount = (auction.bids.sortedByDescending(RPKBid::amount).firstOrNull()?.amount?:auction.startPrice) + auction.minimumBidIncrement
                                 if (character != null) {
                                     if (bidAmount < economyProvider.getBalance(character, auction.currency)) {
                                         val radius = plugin.config.getInt("auctions.radius")
@@ -66,12 +66,13 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
                                             )
                                             auction.addBid(bid)
                                             auctionProvider.updateAuction(auction)
-                                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bid-valid"))
-                                                    .replace("\$amount", bid.amount.toString())
-                                                    .replace("\$currency", if (bid.amount == 1) auction.currency.nameSingular else auction.currency.namePlural)
-                                                    .replace("\$item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else ""))
+                                            event.player.sendMessage(plugin.core.messages["bid-valid", mapOf(
+                                                    Pair("amount", bid.amount.toString()),
+                                                    Pair("currency", if (bid.amount == 1) auction.currency.nameSingular else auction.currency.namePlural),
+                                                    Pair("item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else "")
+                                            )])
                                             auction.bids
-                                                    .map { bid -> bid.character }
+                                                    .map(RPKBid::character)
                                                     .toSet()
                                                     .filter { character -> character != bid.character }
                                                     .filter { character -> character.player != null }
@@ -81,12 +82,13 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
                                                     .filter { bukkitPlayer -> bukkitPlayer.isOnline }
                                                     .map { bukkitPlayer -> bukkitPlayer.player }
                                                     .forEach { player ->
-                                                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bid-created"))
-                                                                .replace("\$auction_id", bid.auction.id.toString())
-                                                                .replace("\$character", bid.character.name)
-                                                                .replace("\$amount", bid.amount.toString())
-                                                                .replace("\$currency", if (bid.amount == 1) auction.currency.nameSingular else auction.currency.namePlural)
-                                                                .replace("\$item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else ""))
+                                                        player.sendMessage(plugin.core.messages["bid-created", mapOf(
+                                                                Pair("auction_id", bid.auction.id.toString()),
+                                                                Pair("character", bid.character.name),
+                                                                Pair("amount", bid.amount.toString()),
+                                                                Pair("currency", if (bid.amount == 1) auction.currency.nameSingular else auction.currency.namePlural),
+                                                                Pair("item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else "")
+                                                        )])
                                                     }
                                             sign.setLine(3, (bid.amount + auction.minimumBidIncrement).toString())
                                             sign.update()
@@ -94,22 +96,22 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
                                                 event.clickedBlock.type = AIR
                                             }
                                         } else {
-                                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bid-invalid-too-far-away")))
+                                            event.player.sendMessage(plugin.core.messages["bid-invalid-too-far-away"])
                                         }
                                     } else {
-                                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bid-invalid-not-enough-money")))
+                                        event.player.sendMessage(plugin.core.messages["bid-invalid-not-enough-money"])
                                     }
                                 } else {
-                                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                                    event.player.sendMessage(plugin.core.messages["no-character"])
                                 }
                             } else {
-                                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bid-invalid-auction-not-open")))
+                                event.player.sendMessage(plugin.core.messages["bid-invalid-auction-not-open"])
                             }
                         } else {
-                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bid-invalid-auction-not-existent")))
+                            event.player.sendMessage(plugin.core.messages["bid-invalid-auction-not-existent"])
                         }
                     } else {
-                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bid")))
+                        event.player.sendMessage(plugin.core.messages["no-permission-bid"])
                     }
                 }
             }

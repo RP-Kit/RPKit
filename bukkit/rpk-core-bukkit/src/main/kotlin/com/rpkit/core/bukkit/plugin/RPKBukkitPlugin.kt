@@ -58,4 +58,8 @@ abstract class RPKBukkitPlugin: JavaPlugin() {
     var serviceProviders = arrayOf<ServiceProvider>()
     var servlets = arrayOf<RPKServlet>()
 
+    open fun setDefaultMessages() {
+
+    }
+
 }
