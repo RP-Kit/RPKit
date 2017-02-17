@@ -185,7 +185,7 @@ messages:
     chat-group-members-invalid-chat-group: '&cNo chat group by that name exists.'
     chat-group-members-usage: '&cUsage: /chatgroup members [name]'
     chat-group-usage: '&cUsage: /chatgroup [create|disband|invite|join|leave|message|players]'
-    reply-usage: '&cUsage: /reply [group] [message]'
+    reply-usage: '&cUsage: /reply [message]'
     reply-invalid-chat-group: '&cYou have not used a chat group or private messaged anyone recently.'
     message-invalid-target: '&cNo chat group or player by that name exists.'
     message-invalid-self: '&cYou cannot message yourself.'
