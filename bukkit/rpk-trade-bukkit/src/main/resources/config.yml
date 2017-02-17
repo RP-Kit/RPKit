@@ -15,6 +15,10 @@ messages:
     no-character: '&cYou need a character to perform that action. Please create one.'
 traders:
     price-change: 3
-    minimum-price: 5
-    maximum-price: 10000
+    minimum-price:
+        default: 5
+        STONE: 1
+    maximum-price:
+        default: 10000
+        STONE: 500
     trade-fee-percentage: 30

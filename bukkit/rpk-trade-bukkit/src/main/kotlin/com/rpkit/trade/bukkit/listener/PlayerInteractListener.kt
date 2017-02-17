@@ -69,7 +69,11 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                                             .replace("\$price", buyPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
                                             )
                                             actualPrice += plugin.config.getDouble("traders.price-change")
-                                            actualPrice = Math.max(Math.min(actualPrice, plugin.config.getDouble("traders.maximum-price")), plugin.config.getDouble("traders.minimum-price")).toDouble()
+                                            val maximumPrice = plugin.config.getDouble("traders.maximum-price.$material",
+                                                    plugin.config.getDouble("traders.maximum-price.default"))
+                                            val minimumPrice = plugin.config.getDouble("traders.minimum-price.$material",
+                                                    plugin.config.getDouble("traders.minimum-price.default"))
+                                            actualPrice = Math.max(Math.min(actualPrice, maximumPrice), minimumPrice)
                                             buyPrice = (actualPrice + ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
                                             sellPrice = (actualPrice - ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
                                             sign.setLine(2, buyPrice.toString() + " | " + sellPrice.toString())
@@ -118,7 +122,11 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                                                 .replace("\$price", sellPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
                                                 )
                                                 actualPrice -= plugin.config.getDouble("traders.price-change")
-                                                actualPrice = Math.max(Math.min(actualPrice, plugin.config.getDouble("traders.maximum-price")), plugin.config.getDouble("traders.minimum-price")).toDouble()
+                                                val maximumPrice = plugin.config.getDouble("traders.maximum-price.$material",
+                                                        plugin.config.getDouble("traders.maximum-price.default"))
+                                                val minimumPrice = plugin.config.getDouble("traders.minimum-price.$material",
+                                                        plugin.config.getDouble("traders.minimum-price.default"))
+                                                actualPrice = Math.max(Math.min(actualPrice, maximumPrice), minimumPrice)
                                                 buyPrice = (actualPrice + ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
                                                 sellPrice = (actualPrice - ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
                                                 sign.setLine(2, buyPrice.toString() + " | " + sellPrice.toString())
