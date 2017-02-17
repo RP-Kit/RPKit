@@ -49,14 +49,10 @@ class GarbleComponent(private val plugin: RPKChatBukkit, var clearRadius: Double
                     if (senderOfflineBukkitPlayer.isOnline && receiverOfflineBukkitPlayer.isOnline) {
                         val senderBukkitPlayer = senderOfflineBukkitPlayer.player
                         val receiverBukkitPlayer = receiverOfflineBukkitPlayer.player
-                        if (senderBukkitPlayer.hasLineOfSight(receiverBukkitPlayer)) {
-                            val distance = MathUtils.fastSqrt(senderBukkitPlayer.location.distanceSquared(receiverBukkitPlayer.location))
-                            val hearingRange = context.chatChannel.radius
-                            val clarity = 1.0 - (distance - clearRadius) / hearingRange
-                            context.message = garbleMessage(context.message, clarity)
-                        } else {
-                            context.message = garbleMessage(context.message, 0.0)
-                        }
+                        val distance = MathUtils.fastSqrt(senderBukkitPlayer.location.distanceSquared(receiverBukkitPlayer.location))
+                        val hearingRange = context.chatChannel.radius
+                        val clarity = 1.0 - (distance - clearRadius) / hearingRange
+                        context.message = garbleMessage(context.message, clarity)
                     }
                 }
             }
