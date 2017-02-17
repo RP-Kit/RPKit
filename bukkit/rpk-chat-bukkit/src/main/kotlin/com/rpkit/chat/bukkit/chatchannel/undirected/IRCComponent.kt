@@ -37,8 +37,12 @@ class IRCComponent(
 ): UndirectedChatChannelPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: UndirectedChatChannelMessageContext): UndirectedChatChannelMessageContext {
-        if (!context.isCancelled)
-            plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class).ircBot.sendIRC().message(ircChannel, ChatColor.stripColor(context.message))
+        if (!context.isCancelled) {
+            val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
+            if (ircProvider.ircBot.isConnected) {
+                ircProvider.ircBot.sendIRC().message(ircChannel, ChatColor.stripColor(context.message))
+            }
+        }
         return context
     }
 
