@@ -17,6 +17,7 @@
 package com.rpkit.chat.bukkit.irc
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.irc.command.IRCListCommand
 import com.rpkit.chat.bukkit.irc.command.IRCRegisterCommand
 import com.rpkit.chat.bukkit.irc.command.IRCVerifyCommand
 import com.rpkit.chat.bukkit.irc.listener.IRCChannelJoinListener
@@ -34,7 +35,7 @@ import org.pircbotx.User
 class RPKIRCProviderImpl(private val plugin: RPKChatBukkit): RPKIRCProvider {
 
     override val ircBot: PircBotX
-    private val ircUsers: MutableMap<String, User>
+    private val ircUsers: MutableMap<String, User> = mutableMapOf()
 
     init {
         val configuration = Configuration.Builder()
@@ -46,6 +47,7 @@ class RPKIRCProviderImpl(private val plugin: RPKChatBukkit): RPKIRCProvider {
                 .addListener(IRCUserListListener(plugin))
                 .addListener(IRCRegisterCommand(plugin))
                 .addListener(IRCVerifyCommand(plugin))
+                .addListener(IRCListCommand(plugin))
                 .setAutoReconnect(true)
         if (plugin.config.get("irc.name") != null) {
             val name = plugin.config.getString("irc.name")
@@ -99,7 +101,6 @@ class RPKIRCProviderImpl(private val plugin: RPKChatBukkit): RPKIRCProvider {
                 ircBot.startBot()
             }
         }.runTaskAsynchronously(plugin)
-        ircUsers = mutableMapOf<String, User>()
     }
 
     override fun getIRCUser(nick: String): User? {
