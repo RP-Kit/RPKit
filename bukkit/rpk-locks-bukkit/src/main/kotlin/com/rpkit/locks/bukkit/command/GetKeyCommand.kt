@@ -3,7 +3,6 @@ package com.rpkit.locks.bukkit.command
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.lock.RPKLockProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -17,12 +16,12 @@ class GetKeyCommand(private val plugin: RPKLocksBukkit): CommandExecutor {
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                 val lockProvider = plugin.core.serviceManager.getServiceProvider(RPKLockProvider::class)
                 lockProvider.setGettingKey(playerProvider.getPlayer(sender), true)
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.get-key-valid")))
+                sender.sendMessage(plugin.core.messages["get-key-valid"])
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.core.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-get-key")))
+            sender.sendMessage(plugin.core.messages["no-permission-get-key"])
         }
         return true
     }

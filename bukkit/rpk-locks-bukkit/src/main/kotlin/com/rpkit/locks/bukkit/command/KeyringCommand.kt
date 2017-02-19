@@ -4,7 +4,6 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.keyring.RPKKeyringProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -26,13 +25,13 @@ class KeyringCommand(private val plugin: RPKLocksBukkit): CommandExecutor {
                     inventory.contents = keyring.toTypedArray()
                     sender.openInventory(inventory)
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.core.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.core.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-keyring")))
+            sender.sendMessage(plugin.core.messages["no-permission-keyring"])
         }
         return true
     }
