@@ -22,7 +22,6 @@ import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -64,20 +63,21 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
             }
             val finalCharacter = character
             if (finalCharacter != null) {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-view-valid")))
+                sender.sendMessage(plugin.core.messages["money-view-valid"])
                 sender.sendMessage(currencyProvider.currencies
                         .map { currency ->
-                            ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-view-valid-list-item"))
-                                    .replace("\$currency", currency.name)
-                                    .replace("\$balance", economyProvider.getBalance(finalCharacter, currency).toString())
+                            plugin.core.messages["money-view-valid-list-item", mapOf(
+                                    Pair("currency", currency.name),
+                                    Pair("balance", economyProvider.getBalance(finalCharacter, currency).toString())
+                            )]
                         }
                         .toTypedArray()
                 )
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                sender.sendMessage(plugin.core.messages["no-character"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.core.messages["not-from-console"])
         }
         return true
     }

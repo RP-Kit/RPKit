@@ -37,22 +37,23 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit): Listener {
                                 if (economyProvider.getBalance(character, toCurrency) + convertedAmount <= 1728) {
                                     economyProvider.setBalance(character, fromCurrency, economyProvider.getBalance(character, fromCurrency) - amount)
                                     economyProvider.setBalance(character, toCurrency, economyProvider.getBalance(character, toCurrency) + convertedAmount)
-                                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.exchange-valid"))
-                                            .replace("\$from-amount", amount.toString())
-                                            .replace("\$to-amount", convertedAmount.toString())
-                                            .replace("\$from-currency", if (amount == 1) fromCurrency.nameSingular else fromCurrency.namePlural)
-                                            .replace("\$to-currency", if (convertedAmount == 1) toCurrency.nameSingular else toCurrency.namePlural))
+                                    event.player.sendMessage(plugin.core.messages["exchange-valid", mapOf(
+                                            Pair("from-amount", amount.toString()),
+                                            Pair("to-amount", convertedAmount.toString()),
+                                            Pair("from-currency", if (amount == 1) fromCurrency.nameSingular else fromCurrency.namePlural),
+                                            Pair("to-currency", if (convertedAmount == 1) toCurrency.nameSingular else toCurrency.namePlural)
+                                    )])
                                 } else {
-                                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.exchange-invalid-wallet-balance-too-high")))
+                                    event.player.sendMessage(plugin.core.messages["exchange-invalid-wallet-balance-too-high"])
                                 }
                             } else {
-                                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.exchange-invalid-wallet-balance-too-low")))
+                                event.player.sendMessage(plugin.core.messages["exchange-invalid-wallet-balance-too-low"])
                             }
                         } else {
-                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                            event.player.sendMessage(plugin.core.messages["no-character"])
                         }
                     } else {
-                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.exchange-invalid-format")))
+                        event.player.sendMessage(plugin.core.messages["exchange-invalid-format"])
                     }
                 }
             }

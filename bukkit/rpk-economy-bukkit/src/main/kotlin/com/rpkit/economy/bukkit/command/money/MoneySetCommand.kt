@@ -24,7 +24,6 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -41,12 +40,12 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
             .withModality(true)
             .withFirstPrompt(PlayerPrompt())
             .withEscapeSequence("cancel")
-            .thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
                 if (!event.gracefulExit()) {
                     val conversable = event.context.forWhom
                     if (conversable is Player) {
-                        conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                        conversable.sendMessage(plugin.core.messages["operation-cancelled"])
                     }
                 }
             }
@@ -63,7 +62,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                 val fromPlayer = playerProvider.getPlayer(fromBukkitPlayer)
                 val fromCharacter = characterProvider.getActiveCharacter(fromPlayer)
                 if (fromCharacter != null) {
-                    if (args.size > 0) {
+                    if (args.isNotEmpty()) {
                         val toBukkitPlayer = plugin.server.getPlayer(args[0])
                         if (toBukkitPlayer != null) {
                             val toPlayer = playerProvider.getPlayer(toBukkitPlayer)
@@ -81,46 +80,46 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                                                     if (amount >= 0) {
                                                         if (amount <= 1728) {
                                                             economyProvider.setBalance(character, currency, amount)
-                                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-amount-valid")))
-                                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-valid")))
+                                                            sender.sendMessage(plugin.core.messages["money-set-amount-valid"])
+                                                            sender.sendMessage(plugin.core.messages["money-set-valid"])
                                                         } else {
-                                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-amount-invalid-amount-limit")))
+                                                            sender.sendMessage(plugin.core.messages["money-set-amount-invalid-amount-limit"])
                                                         }
                                                     } else {
-                                                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-amount-invalid-amount-negative")))
+                                                        sender.sendMessage(plugin.core.messages["money-set-amount-invalid-amount-negative"])
                                                     }
                                                 } catch (exception: NumberFormatException) {
-                                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-amount-invalid-amount-number")))
+                                                    sender.sendMessage(plugin.core.messages["money-set-amount-invalid-amount-number"])
                                                 }
                                             } else {
                                                 conversationFactory.buildConversation(sender).begin()
                                             }
                                         } else {
-                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-currency-invalid-currency")))
+                                            sender.sendMessage(plugin.core.messages["money-set-currency-invalid-currency"])
                                         }
                                     } else {
                                         conversationFactory.buildConversation(sender).begin()
                                     }
                                 } else {
-                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-character-invalid-character")))
+                                    sender.sendMessage(plugin.core.messages["money-set-character-invalid-character"])
                                 }
                             } else {
                                 conversationFactory.buildConversation(sender).begin()
                             }
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-player-invalid-player")))
+                            sender.sendMessage(plugin.core.messages["money-set-player-invalid-player"])
                         }
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.core.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-money-set")))
+                sender.sendMessage(plugin.core.messages["no-permission-money-set"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.core.messages["not-from-console"])
         }
         return true
     }
@@ -135,11 +134,11 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-player-prompt"))
+            return plugin.core.messages["money-set-player-prompt"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-player-invalid-player"))
+            return plugin.core.messages["money-set-player-invalid-player"]
         }
 
     }
@@ -150,7 +149,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-player-valid"))
+            return plugin.core.messages["money-set-player-valid"]
         }
 
     }
@@ -159,30 +158,32 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             return plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     .getCharacters(context.getSessionData("player") as RPKPlayer)
-                    .filter { character -> character.name.equals(input) }
+                    .filter { character -> character.name == input }
                     .isNotEmpty()
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             context.setSessionData("character", plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     .getCharacters(context.getSessionData("player") as RPKPlayer)
-                    .filter { character -> character.name.equals(input) }
+                    .filter { character -> character.name == input }
                     .first()
             )
             return CharacterSetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-character-prompt")) +
+            return plugin.core.messages["money-set-character-prompt"] +
                     "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                             .getCharacters(context.getSessionData("player") as RPKPlayer)
-                            .map { character -> ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-character-prompt-list-item")).replace("\$character", character.name) }
+                            .map { character -> plugin.core.messages["money-set-character-prompt-list-item", mapOf(
+                                    Pair("character", character.name)
+                            )] }
                             .joinToString("\n")
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-character-invalid-character"))
+            return plugin.core.messages["money-set-character-invalid-character"]
         }
     }
 
@@ -192,7 +193,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-character-valid"))
+            return plugin.core.messages["money-set-character-valid"]
         }
 
     }
@@ -208,14 +209,16 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-currency-prompt")) + "\n" +
+            return plugin.core.messages["money-set-currency-prompt"] + "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
-                            .map { currency -> ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-currency-prompt-list-item")).replace("\$currency", currency.name) }
+                            .map { currency -> plugin.core.messages["money-set-currency-prompt-list-item", mapOf(
+                                    Pair("currency", currency.name)
+                            )] }
                             .joinToString("\n")
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-currency-invalid-currency"))
+            return plugin.core.messages["money-set-currency-invalid-currency"]
         }
     }
 
@@ -225,7 +228,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-currency-valid"))
+            return plugin.core.messages["money-set-currency-valid"]
         }
 
     }
@@ -242,19 +245,19 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-amount-prompt"))
+            return plugin.core.messages["money-set-amount-prompt"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
             if (invalidInput.toInt() < 0) {
-                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-amount-invalid-amount-negative"))
+                return plugin.core.messages["money-set-amount-invalid-amount-negative"]
             } else {
-                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-amount-invalid-amount-limit"))
+                return plugin.core.messages["money-set-amount-invalid-amount-limit"]
             }
         }
 
         override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-amount-invalid-amount-number"))
+            return plugin.core.messages["money-set-amount-invalid-amount-number"]
         }
 
     }
@@ -265,7 +268,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-amount-valid"))
+            return plugin.core.messages["money-set-amount-valid"]
         }
 
     }
@@ -281,7 +284,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-set-valid"))
+            return plugin.core.messages["money-set-valid"]
         }
 
     }
