@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -16,19 +15,20 @@ class InventoryCommand(private val plugin: RPKEssentialsBukkit) : CommandExecuto
                     if (plugin.server.getPlayer(args[0]) != null) {
                         val target = plugin.server.getPlayer(args[0])
                         sender.openInventory(target.inventory)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.inventory-valid"))
-                                .replace("\$player", target.name))
+                        sender.sendMessage(plugin.core.messages["inventory-valid", mapOf(
+                                Pair("player", target.name)
+                        )])
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.inventory-invalid-player")))
+                        sender.sendMessage(plugin.core.messages["inventory-invalid-player"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                    sender.sendMessage(plugin.core.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.inventory-usage")))
+                sender.sendMessage(plugin.core.messages["inventory-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-inventory")))
+            sender.sendMessage(plugin.core.messages["no-permission-inventory"])
         }
         return true
     }

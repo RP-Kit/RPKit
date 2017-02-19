@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -16,12 +15,12 @@ class GetBookCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
             if (sender is Player) {
                 sender.inventory.addItem(ItemStack(Material.BOOK_AND_QUILL))
                 sender.updateInventory()
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.get-book-valid")))
+                sender.sendMessage(plugin.core.messages["get-book-valid"])
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.core.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-get-book")))
+            sender.sendMessage(plugin.core.messages["no-permission-get-book"])
         }
         return true
     }

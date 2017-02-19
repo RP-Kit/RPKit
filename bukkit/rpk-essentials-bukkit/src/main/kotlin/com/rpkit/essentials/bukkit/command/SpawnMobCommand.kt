@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -21,22 +20,22 @@ class SpawnMobCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                             for (i in 0..amount - 1) {
                                 sender.location.world.spawnEntity(sender.location, entityType)
                             }
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.spawn-mob-valid")))
+                            sender.sendMessage(plugin.core.messages["spawn-mob-valid"])
                         } catch (exception: NumberFormatException) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.spawn-mob-invalid-amount")))
+                            sender.sendMessage(plugin.core.messages["spawn-mob-invalid-amount"])
                         }
 
                     } catch (exception: IllegalArgumentException) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.spawn-mob-invalid-mob")))
+                        sender.sendMessage(plugin.core.messages["spawn-mob-invalid-mob"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                    sender.sendMessage(plugin.core.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.spawn-mob-usage")))
+                sender.sendMessage(plugin.core.messages["spawn-mob-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-spawn-mob")))
+            sender.sendMessage(plugin.core.messages["no-permission-spawn-mob"])
         }
         return true
     }

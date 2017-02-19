@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -13,12 +12,12 @@ class SpawnCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
         if (sender.hasPermission("rpkit.essentials.command.spawn")) {
             if (sender is Player) {
                 sender.teleport(sender.world.spawnLocation)
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.spawn-valid")))
+                sender.sendMessage(plugin.core.messages["spawn-valid"])
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.core.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-spawn")))
+            sender.sendMessage(plugin.core.messages["no-permission-spawn"])
         }
         return true
     }

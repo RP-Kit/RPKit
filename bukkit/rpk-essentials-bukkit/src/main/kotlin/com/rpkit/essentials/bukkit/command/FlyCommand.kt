@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -23,19 +22,21 @@ class FlyCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             if (player != null) {
                 player.allowFlight = !player.allowFlight
                 if (player.allowFlight) {
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.fly-enable-notification")))
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.fly-enable-valid"))
-                            .replace("\$player", player.name))
+                    player.sendMessage(plugin.core.messages["fly-enable-notification"])
+                    sender.sendMessage(plugin.core.messages["fly-enable-valid", mapOf(
+                            Pair("player", player.name)
+                    )])
                 } else {
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.fly-disable-notification")))
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.fly-disable-valid"))
-                            .replace("\$player", player.name))
+                    player.sendMessage(plugin.core.messages["fly-disable-notification"])
+                    sender.sendMessage(plugin.core.messages["fly-disable-valid", mapOf(
+                            Pair("player", player.name)
+                    )])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.fly-usage-console")))
+                sender.sendMessage(plugin.core.messages["fly-usage-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-fly")))
+            sender.sendMessage(plugin.core.messages["no-permission-fly"])
         }
         return true
     }

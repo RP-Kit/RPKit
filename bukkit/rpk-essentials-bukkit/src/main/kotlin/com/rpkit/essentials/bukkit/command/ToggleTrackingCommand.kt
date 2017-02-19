@@ -4,7 +4,6 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.tracking.bukkit.tracking.RPKTrackingProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -23,18 +22,18 @@ class ToggleTrackingCommand(private val plugin: RPKEssentialsBukkit) : CommandEx
                 if (character != null) {
                     trackingProvider.setTrackable(character, !trackingProvider.isTrackable(character))
                     if (trackingProvider.isTrackable(character)) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.toggle-tracking-on-valid")))
+                        sender.sendMessage(plugin.core.messages["toggle-tracking-on-valid"])
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.toggle-tracking-off-valid")))
+                        sender.sendMessage(plugin.core.messages["toggle-tracking-off-valid"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character-self")))
+                    sender.sendMessage(plugin.core.messages["no-character-self"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-toggle-tracking")))
+                sender.sendMessage(plugin.core.messages["no-permission-toggle-tracking"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.core.messages["not-from-console"])
         }
         return true
     }

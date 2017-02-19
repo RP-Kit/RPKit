@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -14,15 +13,15 @@ class RepairCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             if (sender is Player) {
                 if (sender.inventory.itemInMainHand != null) {
                     sender.inventory.itemInMainHand.durability = 0.toShort()
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.repair-valid")))
+                    sender.sendMessage(plugin.core.messages["repair-valid"])
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.repair-invalid-item")))
+                    sender.sendMessage(plugin.core.messages["repair-invalid-item"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.core.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-repair")))
+            sender.sendMessage(plugin.core.messages["no-permission-repair"])
         }
         return true
     }

@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.block.CreatureSpawner
 import org.bukkit.command.Command
@@ -23,21 +22,21 @@ class SpawnerCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                         try {
                             val entityType = EntityType.valueOf(args[0].toUpperCase())
                             spawner.spawnedType = entityType
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.spawner-valid")))
+                            sender.sendMessage(plugin.core.messages["spawner-valid"])
                         } catch (exception: IllegalArgumentException) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.spawner-invalid-entity")))
+                            sender.sendMessage(plugin.core.messages["spawner-invalid-entity"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.spawner-invalid-block")))
+                        sender.sendMessage(plugin.core.messages["spawner-invalid-block"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                    sender.sendMessage(plugin.core.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.spawner-usage")))
+                sender.sendMessage(plugin.core.messages["spawner-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-spawner")))
+            sender.sendMessage(plugin.core.messages["no-permission-spawner"])
         }
         return true
     }

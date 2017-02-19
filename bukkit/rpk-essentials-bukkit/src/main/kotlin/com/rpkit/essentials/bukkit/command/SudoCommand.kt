@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -24,8 +23,9 @@ class SudoCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 sender.setOp(previousOpState)
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-sudo"))
-                    .replace("\$player", sender.name))
+            sender.sendMessage(plugin.core.messages["no-permission-sudo", mapOf(
+                    Pair("player", sender.name)
+            )])
         }
         return true
     }
