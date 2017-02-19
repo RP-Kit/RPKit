@@ -51,12 +51,33 @@ class BukkitMessages(private val plugin: RPKCoreBukkit): Messages {
         return ChatColor.translateAlternateColorCodes('&', messagesConfig.getString(key))
     }
 
+    override fun getList(key: String, vars: Map<String, String>): List<String> {
+        return messagesConfig.getStringList(key).map { message ->
+            var updatedMessage = message
+            vars.forEach { pair ->
+                updatedMessage = updatedMessage.replace("\$${pair.key}", pair.value)
+            }
+            updatedMessage
+        }
+    }
+
+    override fun getList(key: String): List<String> {
+        return messagesConfig.getStringList(key)
+    }
+
     override fun set(key: String, value: String) {
         messagesConfig.set(key, value)
         saveMessagesConfig()
     }
 
     override fun setDefault(key: String, value: String) {
+        if (!messagesConfig.contains(key, true)) {
+            messagesConfig.set(key, value)
+            saveMessagesConfig()
+        }
+    }
+
+    override fun setDefault(key: String, value: List<String>) {
         if (!messagesConfig.contains(key, true)) {
             messagesConfig.set(key, value)
             saveMessagesConfig()

@@ -18,7 +18,6 @@ package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -31,26 +30,30 @@ class ChatGroupMembersCommand(private val plugin: RPKChatBukkit): CommandExecuto
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.chat.command.chatgroup.members")) {
-            if (args.size >= 1) {
+            if (args.isNotEmpty()) {
                 val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
                 val chatGroup = chatGroupProvider.getChatGroup(args[0])
                 if (chatGroup != null) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-members-list-title")))
+                    sender.sendMessage(plugin.core.messages["chat-group-members-list-title"])
                     for (player in chatGroup.members) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-members-list-item")).replace("\$player", player.name))
+                        sender.sendMessage(plugin.core.messages["chat-group-members-list-item", mapOf(
+                                Pair("player", player.name)
+                        )])
                     }
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-invitations-list-title")))
+                    sender.sendMessage(plugin.core.messages["chat-group-invitations-list-title"])
                     for (player in chatGroup.invited) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-invitations-list-item")).replace("\$player", player.name))
+                        sender.sendMessage(plugin.core.messages["chat-group-invitations-list-item", mapOf(
+                                Pair("player", player.name)
+                        )])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-members-invalid-chat-group")))
+                    sender.sendMessage(plugin.core.messages["chat-group-members-invalid-chat-group"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-members-usage")))
+                sender.sendMessage(plugin.core.messages["chat-group-members-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chat-group-members")))
+            sender.sendMessage(plugin.core.messages["no-permission-chat-group-members"])
         }
         return true
     }

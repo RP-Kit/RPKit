@@ -19,7 +19,6 @@ package com.rpkit.chat.bukkit.listener
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
@@ -63,7 +62,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
         if (chatChannel != null) {
             chatChannel.sendMessage(player, message)
         } else {
-            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-chat-channel")))
+            event.player.sendMessage(plugin.core.messages["no-chat-channel"])
         }
     }
 

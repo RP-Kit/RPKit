@@ -19,7 +19,6 @@ package com.rpkit.chat.bukkit.command.chatgroup
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -45,25 +44,30 @@ class ChatGroupInviteCommand(private val plugin: RPKChatBukkit): CommandExecutor
                                 val bukkitPlayer = plugin.server.getPlayer(args[1])
                                 val player = playerProvider.getPlayer(bukkitPlayer)
                                 chatGroup.invite(player)
-                                player.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-invite-received")).replace("\$group", chatGroup.name))
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-invite-valid")).replace("\$player", player.name).replace("\$group", chatGroup.name))
+                                player.bukkitPlayer?.player?.sendMessage(plugin.core.messages["chat-group-invite-received", mapOf(
+                                        Pair("group", chatGroup.name)
+                                )])
+                                sender.sendMessage(plugin.core.messages["chat-group-invite-valid", mapOf(
+                                        Pair("player", player.name),
+                                        Pair("group", chatGroup.name)
+                                )])
                             } else {
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-invite-invalid-player")))
+                                sender.sendMessage(plugin.core.messages["chat-group-invite-invalid-player"])
                             }
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-invite-invalid-not-a-member")))
+                            sender.sendMessage(plugin.core.messages["chat-group-invite-invalid-not-a-member"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                        sender.sendMessage(plugin.core.messages["not-from-console"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-invite-invalid-chat-group")))
+                    sender.sendMessage(plugin.core.messages["chat-group-invite-invalid-chat-group"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-invite-usage")))
+                sender.sendMessage(plugin.core.messages["chat-group-invite-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chat-group-invite")))
+            sender.sendMessage(plugin.core.messages["no-permission-chat-group-invite"])
         }
         return true
     }

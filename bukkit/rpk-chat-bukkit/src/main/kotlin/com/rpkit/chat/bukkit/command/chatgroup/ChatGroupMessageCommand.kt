@@ -19,7 +19,6 @@ package com.rpkit.chat.bukkit.command.chatgroup
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -47,19 +46,19 @@ class ChatGroupMessageCommand(private val plugin: RPKChatBukkit): CommandExecuto
                             }
                             chatGroup.sendMessage(player, message.toString())
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-message-invalid-not-a-member")))
+                            sender.sendMessage(plugin.core.messages["chat-group-message-invalid-not-a-member"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                        sender.sendMessage(plugin.core.messages["not-from-console"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-message-invalid-chat-group")))
+                    sender.sendMessage(plugin.core.messages["chat-group-message-invalid-chat-group"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-message-usage")))
+                sender.sendMessage(plugin.core.messages["chat-group-message-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chat-group-message")))
+            sender.sendMessage(plugin.core.messages["no-permission-chat-group-message"])
         }
         return true
     }

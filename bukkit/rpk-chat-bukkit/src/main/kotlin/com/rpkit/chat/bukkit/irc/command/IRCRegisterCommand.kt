@@ -32,12 +32,12 @@ class IRCRegisterCommand(private val plugin: RPKChatBukkit): IRCCommand("registe
         if (args.isNotEmpty()) {
             if (args[0].matches(Regex("(\\w[-._\\w]*\\w@\\w[-._\\w]*\\w\\.\\w{2,3})"))) {
                 ircProvider.ircBot.sendIRC().message("NickServ", "REGISTER " + plugin.config.getString("irc.password") + " " + args[0])
-                sender.send().message(plugin.config.getString("messages.irc-register-valid"))
+                sender.send().message(plugin.core.messages["irc-register-valid"])
             } else {
-                sender.send().message(plugin.config.getString("messages.irc-register-invalid-email-invalid"))
+                sender.send().message(plugin.core.messages["irc-register-invalid-email-invalid"])
             }
         } else {
-            sender.send().message(plugin.config.getString("messages.irc-register-invalid-email-not-specified"))
+            sender.send().message(plugin.core.messages["irc-register-invalid-email-not-specified"])
         }
     }
 

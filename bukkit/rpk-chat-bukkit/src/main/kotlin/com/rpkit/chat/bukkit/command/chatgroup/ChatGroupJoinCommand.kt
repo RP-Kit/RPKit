@@ -19,7 +19,6 @@ package com.rpkit.chat.bukkit.command.chatgroup
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,7 +32,7 @@ class ChatGroupJoinCommand(private val plugin: RPKChatBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.chat.command.chatgroup.join")) {
-            if (args.size >= 1) {
+            if (args.isNotEmpty()) {
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                 val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
                 val chatGroup = chatGroupProvider.getChatGroup(args[0])
@@ -41,24 +40,29 @@ class ChatGroupJoinCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                     if (sender is Player) {
                         val player = playerProvider.getPlayer(sender)
                         if (chatGroup.invited.contains(player)) {
-                            chatGroup.members.forEach { member -> member.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-join-received")).replace("\$group", chatGroup.name).replace("\$player", player.name)) }
+                            chatGroup.members.forEach { member -> member.bukkitPlayer?.player?.sendMessage(plugin.core.messages["chat-group-join-received", mapOf(
+                                    Pair("group", chatGroup.name),
+                                    Pair("player", player.name)
+                            )]) }
                             chatGroup.addMember(player)
                             chatGroup.uninvite(player)
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-join-valid")).replace("\$group", chatGroup.name))
+                            sender.sendMessage(plugin.core.messages["chat-group-join-valid", mapOf(
+                                    Pair("group", chatGroup.name)
+                            )])
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-join-invalid-no-invite")))
+                            sender.sendMessage(plugin.core.messages["chat-group-join-invalid-no-invite"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                        sender.sendMessage(plugin.core.messages["not-from-console"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-join-invalid-chat-group")))
+                    sender.sendMessage(plugin.core.messages["chat-group-join-invalid-chat-group"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-join-usage")))
+                sender.sendMessage(plugin.core.messages["chat-group-join-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chat-group-join")))
+            sender.sendMessage(plugin.core.messages["no-permission-chat-group-join"])
         }
         return true
     }

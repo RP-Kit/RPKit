@@ -103,7 +103,7 @@ class RPKChatBukkit: RPKBukkitPlugin() {
 
     override fun onDisable() {
         if (config.getBoolean("irc.enabled")) {
-            core.serviceManager.getServiceProvider(RPKIRCProvider::class).ircBot.sendIRC().quitServer(config.getString("messages.irc-quit"))
+            core.serviceManager.getServiceProvider(RPKIRCProvider::class).ircBot.sendIRC().quitServer(core.messages["irc-quit"])
         }
     }
 
