@@ -19,7 +19,6 @@ package com.rpkit.characters.bukkit.listener
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -41,7 +40,7 @@ class PlayerMoveListener(private val plugin: RPKCharactersBukkit): Listener {
         if (character != null && character.isDead) {
             if (event.from.blockX != event.to.blockX || event.from.blockZ != event.to.blockZ) {
                 event.player.teleport(Location(event.from.world, event.from.blockX + 0.5, event.from.blockY + 0.5, event.from.blockZ.toDouble(), event.from.yaw, event.from.pitch))
-                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.dead-character")))
+                event.player.sendMessage(plugin.core.messages["dead-character"])
                 event.player.addPotionEffect(PotionEffect(BLINDNESS, 60, 1))
             }
         }

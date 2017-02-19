@@ -19,7 +19,6 @@ package com.rpkit.characters.bukkit.listener
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -47,10 +46,10 @@ class PlayerInteractEntityListener(private val plugin: RPKCharactersBukkit): Lis
                             val rightClicker = playerProvider.getPlayer(event.player)
                             character.showCharacterCard(rightClicker)
                         } else {
-                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character-other")))
+                            event.player.sendMessage(plugin.core.messages["no-character-other"])
                         }
                     } else {
-                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-card-other")))
+                        event.player.sendMessage(plugin.core.messages["no-permission-character-card-other"])
                     }
                 }
             }

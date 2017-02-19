@@ -25,7 +25,6 @@ import com.rpkit.characters.bukkit.command.character.list.CharacterListCommand
 import com.rpkit.characters.bukkit.command.character.set.CharacterSetCommand
 import com.rpkit.characters.bukkit.command.character.switch.CharacterSwitchCommand
 import com.rpkit.characters.bukkit.command.character.unhide.CharacterUnhideCommand
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -76,10 +75,10 @@ class CharacterCommand(private val plugin: RPKCharactersBukkit): CommandExecutor
             } else if (args[0].equals("delete", ignoreCase = true)) {
                 return characterDeleteCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-usage")))
+                sender.sendMessage(plugin.core.messages["character-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-usage")))
+            sender.sendMessage(plugin.core.messages["character-usage"])
         }
         return true
     }

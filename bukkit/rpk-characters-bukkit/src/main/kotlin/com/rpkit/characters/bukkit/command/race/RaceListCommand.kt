@@ -18,7 +18,6 @@ package com.rpkit.characters.bukkit.command.race
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -32,13 +31,14 @@ class RaceListCommand(private val plugin: RPKCharactersBukkit): CommandExecutor 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.characters.command.race.list")) {
             val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-list-title")))
+            sender.sendMessage(plugin.core.messages["race-list-title"])
             for (race in raceProvider.races) {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-list-item")
-                        .replace("\$race", race.name)))
+                sender.sendMessage(plugin.core.messages["race-list-item", mapOf(
+                        Pair("race", race.name)
+                )])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-race-list")))
+            sender.sendMessage(plugin.core.messages["no-permission-race-list"])
         }
         return true
     }

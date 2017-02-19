@@ -36,11 +36,16 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
     private val conversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(PlayerPrompt(plugin)).withEscapeSequence("cancel").thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console"))).addConversationAbandonedListener { event ->
+        conversationFactory = ConversationFactory(plugin)
+                .withModality(true)
+                .withFirstPrompt(PlayerPrompt(plugin))
+                .withEscapeSequence("cancel")
+                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
                 }
             }
         }
@@ -54,29 +59,29 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
                 val player = playerProvider.getPlayer(sender)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
-                    if (args.size > 0) {
+                    if (args.isNotEmpty()) {
                         @Suppress("DEPRECATION") val newBukkitPlayer = plugin.server.getPlayer(args[0])
                         if (newBukkitPlayer != null) {
                             val newPlayer = playerProvider.getPlayer(newBukkitPlayer)
                             character.player = newPlayer
                             characterProvider.updateCharacter(character)
                             characterProvider.setActiveCharacter(player, null)
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-valid")))
+                            sender.sendMessage(plugin.core.messages["character-set-player-valid"])
                             character.showCharacterCard(player)
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-invalid-player")))
+                            sender.sendMessage(plugin.core.messages["character-set-player-invalid-player"])
                         }
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.core.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-set-player")))
+                sender.sendMessage(plugin.core.messages["no-permission-character-set-player"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.core.messages["not-from-console"])
         }
         return true
     }
@@ -100,11 +105,11 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-invalid-player"))
+            return plugin.core.messages["character-set-player-invalid-player"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-prompt"))
+            return plugin.core.messages["character-set-player-prompt"]
         }
 
     }
@@ -123,7 +128,7 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-player-valid"))
+            return plugin.core.messages["character-set-player-valid"]
         }
 
     }

@@ -18,7 +18,6 @@ package com.rpkit.characters.bukkit.command.race
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,11 +32,15 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
     private val conversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(RacePrompt()).withEscapeSequence("cancel").addConversationAbandonedListener { event ->
+        conversationFactory = ConversationFactory(plugin)
+                .withModality(true)
+                .withFirstPrompt(RacePrompt())
+                .withEscapeSequence("cancel")
+                .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
                 }
             }
         }
@@ -46,7 +49,7 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Conversable) {
             if (sender.hasPermission("rpkit.characters.command.race.remove")) {
-                if (args.size > 0) {
+                if (args.isNotEmpty()) {
                     val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
                     val raceBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
@@ -56,15 +59,15 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
                     val race = raceProvider.getRace(raceBuilder.toString())
                     if (race != null) {
                         raceProvider.removeRace(race)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-remove-valid")))
+                        sender.sendMessage(plugin.core.messages["race-remove-valid"])
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-remove-invalid-race")))
+                        sender.sendMessage(plugin.core.messages["race-remove-invalid-race"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-race-remove")))
+                sender.sendMessage(plugin.core.messages["no-permission-race-remove"])
             }
         }
         return true
@@ -82,12 +85,12 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
             return RaceSetPrompt()
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-remove-invalid-race"))
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
+            return plugin.core.messages["race-remove-invalid-race"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-remove-prompt"))
+            return plugin.core.messages["race-remove-prompt"]
         }
 
     }
@@ -99,7 +102,7 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-remove-valid"))
+            return plugin.core.messages["race-remove-valid"]
         }
 
     }

@@ -18,7 +18,6 @@ package com.rpkit.characters.bukkit.command.gender
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.gender.RPKGenderProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,11 +32,15 @@ class GenderRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecu
     private val conversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(GenderPrompt()).withEscapeSequence("cancel").addConversationAbandonedListener { event ->
+        conversationFactory = ConversationFactory(plugin)
+                .withModality(true)
+                .withFirstPrompt(GenderPrompt())
+                .withEscapeSequence("cancel")
+                .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
                 }
             }
         }
@@ -46,7 +49,7 @@ class GenderRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecu
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Conversable) {
             if (sender.hasPermission("rpkit.characters.command.gender.remove")) {
-                if (args.size > 0) {
+                if (args.isNotEmpty()) {
                     val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
                     val genderBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
@@ -56,15 +59,15 @@ class GenderRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecu
                     val gender = genderProvider.getGender(genderBuilder.toString())
                     if (gender != null) {
                         genderProvider.removeGender(gender)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-remove-valid")))
+                        sender.sendMessage(plugin.core.messages["gender-remove-valid"])
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-remove-invalid-gender")))
+                        sender.sendMessage(plugin.core.messages["gender-remove-invalid-gender"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-gender-remove")))
+                sender.sendMessage(plugin.core.messages["no-permission-gender-remove"])
             }
         }
         return true
@@ -83,11 +86,11 @@ class GenderRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecu
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-remove-invalid-gender"))
+            return plugin.core.messages["gender-remove-invalid-gender"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-remove-prompt"))
+            return plugin.core.messages["gender-remove-prompt"]
         }
 
     }
@@ -99,7 +102,7 @@ class GenderRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecu
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-remove-valid"))
+            return plugin.core.messages["gender-remove-valid"]
         }
 
     }

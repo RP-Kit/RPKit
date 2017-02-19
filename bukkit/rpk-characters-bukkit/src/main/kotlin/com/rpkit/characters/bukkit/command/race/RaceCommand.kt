@@ -17,7 +17,6 @@
 package com.rpkit.characters.bukkit.command.race
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -47,10 +46,10 @@ class RaceCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
             } else if (args[0].equals("list", ignoreCase = true)) {
                 return raceListCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-usage")))
+                sender.sendMessage(plugin.core.messages["race-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-usage")))
+            sender.sendMessage(plugin.core.messages["race-usage"])
         }
         return true
     }

@@ -19,7 +19,6 @@ package com.rpkit.characters.bukkit.command.character.unhide
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -41,16 +40,16 @@ class CharacterUnhideNameCommand(private val plugin: RPKCharactersBukkit): Comma
                 if (character != null) {
                     character.isNameHidden = false
                     characterProvider.updateCharacter(character)
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-unhide-name-valid")))
+                    sender.sendMessage(plugin.core.messages["character-unhide-name-valid"])
                     character.showCharacterCard(player)
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.core.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-unhide-name")))
+                sender.sendMessage(plugin.core.messages["no-permission-character-unhide-name"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.core.messages["not-from-console"])
         }
         return true
     }

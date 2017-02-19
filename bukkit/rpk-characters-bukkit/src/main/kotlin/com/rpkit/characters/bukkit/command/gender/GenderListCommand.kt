@@ -18,7 +18,6 @@ package com.rpkit.characters.bukkit.command.gender
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.gender.RPKGenderProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -32,13 +31,14 @@ class GenderListCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.characters.command.gender.list")) {
             val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-list-title")))
+            sender.sendMessage(plugin.core.messages["gender-list-title"])
             for (gender in genderProvider.genders) {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-list-item"))
-                        .replace("\$gender", gender.name))
+                sender.sendMessage(plugin.core.messages["gender-list-item", mapOf(
+                        Pair("gender", gender.name)
+                )])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-gender-list")))
+            sender.sendMessage(plugin.core.messages["no-permission-gender-list"])
         }
         return true
     }

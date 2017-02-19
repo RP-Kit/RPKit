@@ -20,7 +20,6 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -35,11 +34,16 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
     private val conversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(GenderPrompt()).withEscapeSequence("cancel").thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console"))).addConversationAbandonedListener { event ->
+        conversationFactory = ConversationFactory(plugin)
+                .withModality(true)
+                .withFirstPrompt(GenderPrompt())
+                .withEscapeSequence("cancel")
+                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
                 }
             }
         }
@@ -53,28 +57,28 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
                 val player = playerProvider.getPlayer(sender)
                 val character = characterProvider.getActiveCharacter(player)
                 if (character != null) {
-                    if (args.size > 0) {
+                    if (args.isNotEmpty()) {
                         val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
                         val gender = genderProvider.getGender(args[0])
                         if (gender != null) {
                             character.gender = gender
                             characterProvider.updateCharacter(character)
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-gender-valid")))
+                            sender.sendMessage(plugin.core.messages["character-set-gender-valid"])
                             character.showCharacterCard(player)
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-gender-invalid-gender")))
+                            sender.sendMessage(plugin.core.messages["character-set-gender-invalid-gender"])
                         }
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.core.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages-no-permission-character-set-gender")))
+                sender.sendMessage(plugin.core.messages["no-permission-character-set-gender"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.core.messages["not-from-console"])
         }
         return true
     }
@@ -102,17 +106,18 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-gender-invalid-gender"))
+            return plugin.core.messages["character-set-gender-invalid-gender"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
             val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
             val genderListBuilder = StringBuilder()
             for (gender in genderProvider.genders) {
-                genderListBuilder.append(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-list-item")
-                        .replace("\$gender", gender.name))).append("\n")
+                genderListBuilder.append(plugin.core.messages["gender-list-item", mapOf(
+                        Pair("gender", gender.name)
+                )]).append("\n")
             }
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-gender-prompt")) + "\n" + genderListBuilder.toString()
+            return plugin.core.messages["character-set-gender-prompt"] + "\n" + genderListBuilder.toString()
         }
 
     }
@@ -131,7 +136,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-gender-valid"))
+            return plugin.core.messages["character-set-gender-valid"]
         }
 
     }

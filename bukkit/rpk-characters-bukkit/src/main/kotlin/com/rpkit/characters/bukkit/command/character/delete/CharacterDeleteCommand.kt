@@ -35,19 +35,29 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
     private val confirmationConversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(CharacterPrompt()).withEscapeSequence("cancel").thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console"))).addConversationAbandonedListener { event ->
+        conversationFactory = ConversationFactory(plugin)
+                .withModality(true)
+                .withFirstPrompt(CharacterPrompt())
+                .withEscapeSequence("cancel")
+                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
                 }
             }
         }
-        confirmationConversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(ConfirmationPrompt()).withEscapeSequence("cancel").thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console"))).addConversationAbandonedListener { event ->
+        confirmationConversationFactory = ConversationFactory(plugin)
+                .withModality(true)
+                .withFirstPrompt(ConfirmationPrompt())
+                .withEscapeSequence("cancel")
+                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
                 }
             }
         }
@@ -56,7 +66,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.delete")) {
-                if (args.size > 0) {
+                if (args.isNotEmpty()) {
                     val characterNameBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
                         characterNameBuilder.append(args[i]).append(" ")
@@ -89,18 +99,18 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
                         }
                     }
                     if (charFound) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-valid")))
+                        sender.sendMessage(plugin.core.messages["character-delete-valid"])
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-invalid-character")))
+                        sender.sendMessage(plugin.core.messages["character-delete-invalid-character"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-delete")))
+                sender.sendMessage(plugin.core.messages["no-permission-character-delete"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.core.messages["not-from-console"])
         }
         return true
     }
@@ -156,7 +166,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-invalid-character"))
+            return plugin.core.messages["character-delete-invalid-character"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
@@ -166,10 +176,11 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
             val characterListBuilder = StringBuilder()
             for (character in characterProvider.getCharacters(player)) {
                 characterListBuilder.append("\n").append(
-                        ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-list-item")
-                                .replace("\$character", character.name)))
+                        plugin.core.messages["character-list-item", mapOf(
+                                Pair("character", character.name))]
+                )
             }
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-prompt")) + characterListBuilder.toString()
+            return plugin.core.messages["character-delete-prompt"] + characterListBuilder.toString()
         }
 
     }
@@ -188,11 +199,11 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-confirmation-invalid-boolean"))
+            return plugin.core.messages["character-delete-confirmation-invalid-boolean"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-confirmation"))
+            return plugin.core.messages["character-delete-confirmation"]
         }
 
     }
@@ -204,7 +215,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-delete-valid"))
+            return plugin.core.messages["character-delete-valid"]
         }
     }
 

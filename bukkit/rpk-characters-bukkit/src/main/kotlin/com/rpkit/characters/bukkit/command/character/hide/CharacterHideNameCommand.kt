@@ -41,16 +41,16 @@ class CharacterHideNameCommand(private val plugin: RPKCharactersBukkit): Command
                 if (character != null) {
                     character.isNameHidden = true
                     characterProvider.updateCharacter(character)
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-hide-name-valid")))
+                    sender.sendMessage(plugin.core.messages["character-hide-name-valid"])
                     character.showCharacterCard(player)
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.core.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-hide-name")))
+                sender.sendMessage(plugin.core.messages["no-permission-character-hide-name"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.core.messages["not-from-console"])
         }
         return true
     }

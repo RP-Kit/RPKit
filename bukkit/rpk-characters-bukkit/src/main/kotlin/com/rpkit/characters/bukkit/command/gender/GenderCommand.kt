@@ -17,7 +17,6 @@
 package com.rpkit.characters.bukkit.command.gender
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -38,7 +37,7 @@ class GenderCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
     }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (args.size > 0) {
+        if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("add", ignoreCase = true) || args[0].equals("create", ignoreCase = true) || args[0].equals("new", ignoreCase = true)) {
                 return genderAddCommand.onCommand(sender, command, label, newArgs)
@@ -47,10 +46,10 @@ class GenderCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
             } else if (args[0].equals("list", ignoreCase = true)) {
                 return genderListCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-usage")))
+                sender.sendMessage(plugin.core.messages["gender-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-usage")))
+            sender.sendMessage(plugin.core.messages["gender-usage"])
         }
         return true
     }
