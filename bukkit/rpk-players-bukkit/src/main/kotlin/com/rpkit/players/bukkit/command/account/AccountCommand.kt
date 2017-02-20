@@ -17,7 +17,6 @@
 package com.rpkit.players.bukkit.command.account
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -31,15 +30,15 @@ class AccountCommand(private val plugin: RPKPlayersBukkit): CommandExecutor {
     private val accountLinkCommand = AccountLinkCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.size > 0) {
+        if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("link", ignoreCase = true)) {
                 return accountLinkCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.account-usage")))
+                sender.sendMessage(plugin.core.messages["account-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.account-usage")))
+            sender.sendMessage(plugin.core.messages["account-usage"])
         }
         return true
     }

@@ -20,7 +20,6 @@ import com.rpkit.chat.bukkit.irc.RPKIRCProvider
 import com.rpkit.core.exception.UnregisteredServiceException
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -47,21 +46,21 @@ class AccountLinkIRCCommand(private val plugin: RPKPlayersBukkit): CommandExecut
                             bukkitPlayer.ircNick = ircUser.nick
                             playerProvider.updatePlayer(bukkitPlayer)
                             playerProvider.removePlayer(ircPlayer)
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.account-link-irc-valid")))
+                            sender.sendMessage(plugin.core.messages["account-link-irc-valid"])
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.account-link-irc-invalid-already-linked")))
+                            sender.sendMessage(plugin.core.messages["account-link-irc-invalid-already-linked"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.account-link-irc-invalid-nick")))
+                        sender.sendMessage(plugin.core.messages["account-link-irc-invalid-nick"])
                     }
                 } catch (exception: UnregisteredServiceException) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.account-link-irc-invalid-no-irc-provider")))
+                    sender.sendMessage(plugin.core.messages["account-link-irc-invalid-no-irc-provider"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.account-link-irc-usage")))
+                sender.sendMessage(plugin.core.messages["account-link-irc-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.core.messages["not-from-console"])
         }
         return true
     }
