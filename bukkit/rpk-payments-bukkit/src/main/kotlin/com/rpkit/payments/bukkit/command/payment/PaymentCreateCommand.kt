@@ -22,7 +22,6 @@ import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupImpl
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -65,15 +64,15 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                             paymentGroup.addOwner(character)
                         }
                     }
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-create-valid")))
+                    sender.sendMessage(plugin.core.messages["payment-create-valid"])
                 } else{
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-create-invalid-name-already-exists")))
+                    sender.sendMessage(plugin.core.messages["payment-create-invalid-name-already-exists"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-create-usage")))
+                sender.sendMessage(plugin.core.messages["payment-create-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-payment-create")))
+            sender.sendMessage(plugin.core.messages["no-permission-payment-create"])
         }
         return true
     }

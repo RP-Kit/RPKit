@@ -21,7 +21,6 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -55,36 +54,36 @@ class PaymentWithdrawCommand(private val plugin: RPKPaymentsBukkit): CommandExec
                                                 bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) + amount)
                                                 paymentGroup.balance = paymentGroup.balance - amount
                                                 paymentGroupProvider.updatePaymentGroup(paymentGroup)
-                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-valid")))
+                                                sender.sendMessage(plugin.core.messages["payment-withdraw-valid"])
                                             } else {
-                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-invalid-balance")))
+                                                sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-balance"])
                                             }
                                         } else {
-                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-invalid-amount")))
+                                            sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-amount"])
                                         }
                                     } catch (exception: NumberFormatException) {
-                                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-invalid-amount")))
+                                        sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-amount"])
                                     }
                                 } else {
-                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-invalid-currency")))
+                                    sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-currency"])
                                 }
                             } else {
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-")))
+                                sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-owner"])
                             }
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-invalid-group")))
+                            sender.sendMessage(plugin.core.messages[".payment-withdraw-invalid-group"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-invalid-character")))
+                        sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-character"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-usage")))
+                    sender.sendMessage(plugin.core.messages["payment-withdraw-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.core.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-payment-withdraw")))
+            sender.sendMessage(plugin.core.messages["no-permission-payment-withdraw"])
         }
         return true
     }

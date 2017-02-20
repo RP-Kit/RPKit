@@ -22,7 +22,6 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -50,13 +49,14 @@ class PaymentLeaveCommand(private val plugin: RPKPaymentsBukkit): CommandExecuto
                         if (character != null) {
                             if (paymentGroup.members.contains(character)) {
                                 paymentGroup.removeMember(character)
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-leave-valid")))
+                                sender.sendMessage(plugin.core.messages["payment-leave-valid"])
                                 val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
                                 val now = System.currentTimeMillis()
-                                val ownerNotificationMessage = ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-notification-member-leave"))
-                                        .replace("\$member", character.name)
-                                        .replace("\$group", paymentGroup.name)
-                                        .replace("\$date", dateFormat.format(Date(now)))
+                                val ownerNotificationMessage = plugin.core.messages["payment-notification-member-leave", mapOf(
+                                        Pair("member", character.name),
+                                        Pair("group", paymentGroup.name),
+                                        Pair("date", dateFormat.format(Date(now)))
+                                )]
                                 paymentGroup.owners.forEach { owner ->
                                     if (!(owner.player?.bukkitPlayer?.isOnline ?: false)) {
                                         paymentNotificationProvider.addPaymentNotification(
@@ -73,22 +73,22 @@ class PaymentLeaveCommand(private val plugin: RPKPaymentsBukkit): CommandExecuto
                                     }
                                 }
                             } else {
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-leave-invalid-member")))
+                                sender.sendMessage(plugin.core.messages["payment-leave-invalid-member"])
                             }
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-leave-invalid-character")))
+                            sender.sendMessage(plugin.core.messages["payment-leave-invalid-character"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-leave-invalid-group")))
+                        sender.sendMessage(plugin.core.messages["payment-leave-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                    sender.sendMessage(plugin.core.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-leave-usage")))
+                sender.sendMessage(plugin.core.messages["payment-leave-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-payment-leave")))
+            sender.sendMessage(plugin.core.messages["no-permission-payment-leave"])
         }
         return true
     }

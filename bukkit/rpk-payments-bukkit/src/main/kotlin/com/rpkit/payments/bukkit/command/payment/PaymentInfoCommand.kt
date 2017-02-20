@@ -48,7 +48,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                     val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
                     if (paymentGroup != null) {
                         if (paymentGroup.owners.contains(character)) {
-                            for (line in plugin.config.getStringList("messages.payment-info-owner")) {
+                            for (line in plugin.core.messages.getList("payment-info-owner")) {
                                 val message = FancyMessage("")
                                 var chatColor: ChatColor? = null
                                 var chatFormat: ChatColor? = null
@@ -309,7 +309,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                 message.send(sender)
                             }
                         } else {
-                            for (line in plugin.config.getStringList("messages.payment-info-not-owner")) {
+                            for (line in plugin.core.messages.getList("payment-info-not-owner")) {
                                 val message = FancyMessage("")
                                 var chatColor: ChatColor? = null
                                 var chatFormat: ChatColor? = null
@@ -499,16 +499,16 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                             }
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-info-invalid-group")))
+                        sender.sendMessage(plugin.core.messages["payment-info-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-info-usage")))
+                    sender.sendMessage(plugin.core.messages["payment-info-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.core.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("no-permission-payment-info")))
+            sender.sendMessage(plugin.core.messages["no-permission-payment-info"])
         }
         return true
     }

@@ -39,38 +39,38 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                 val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
                 val player = playerProvider.getPlayer(sender)
                 val character = characterProvider.getActiveCharacter(player)
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-list-title")))
+                sender.sendMessage(plugin.core.messages["payment-list-title"])
                 val paymentGroups = paymentGroupProvider.paymentGroups
                 paymentGroups.filter { it.owners.contains(character) }
                         .forEach {
                             sender.sendMessage(
-                                ChatColor.translateAlternateColorCodes('&',
-                                        plugin.config.getString("messages.payment-list-item"))
-                                        .replace("\$name", it.name)
-                                        .replace("\$rank", "Owner")
+                                    plugin.core.messages["payment-list-item", mapOf(
+                                            Pair("name", it.name),
+                                            Pair("rank", "Owner")
+                                    )]
                             )
                         }
                 paymentGroups.filter { it.members.contains(character) }
                         .forEach {
                             sender.sendMessage(
-                                    ChatColor.translateAlternateColorCodes('&',
-                                            plugin.config.getString("messages.payment-list-item"))
-                                            .replace("\$name", it.name)
-                                            .replace("\$rank", "Member")
+                                    plugin.core.messages[".payment-list-item", mapOf(
+                                            Pair("name", it.name),
+                                            Pair("rank", "Member")
+                                    )]
                             )
                         }
                 paymentGroups.filter { it.invites.contains(character) }
                         .forEach {
                             sender.sendMessage(
-                                ChatColor.translateAlternateColorCodes('&',
-                                        plugin.config.getString("messages.payment-list-item"))
-                                        .replace("\$name", it.name)
-                                        .replace("\$rank", "Invited")
+                                    plugin.core.messages["payment-list-item", mapOf(
+                                            Pair("name", it.name),
+                                            Pair("rank", "Invited")
+                                    )]
                             )
                         }
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-payment-list")))
+            sender.sendMessage(plugin.core.messages["no-permission-payment-list"])
         }
         return true
     }

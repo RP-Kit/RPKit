@@ -22,7 +22,6 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -51,13 +50,14 @@ class PaymentJoinCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                             if (paymentGroup.invites.contains(character)) {
                                 paymentGroup.removeInvite(character)
                                 paymentGroup.addMember(character)
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-join-valid")))
+                                sender.sendMessage(plugin.core.messages["payment-join-valid"])
                                 val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
                                 val now = System.currentTimeMillis()
-                                val ownerNotificationMessage = ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-notification-member-join"))
-                                        .replace("\$member", character.name)
-                                        .replace("\$group", paymentGroup.name)
-                                        .replace("\$date", dateFormat.format(Date(now)))
+                                val ownerNotificationMessage = plugin.core.messages["payment-notification-member-join", mapOf(
+                                        Pair("member", character.name),
+                                        Pair("group", paymentGroup.name),
+                                        Pair("date", dateFormat.format(Date(now)))
+                                )]
                                 paymentGroup.owners.forEach { owner ->
                                     if (!(owner.player?.bukkitPlayer?.isOnline?:false)) {
                                         paymentNotificationProvider.addPaymentNotification(
@@ -74,22 +74,22 @@ class PaymentJoinCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                     }
                                 }
                             } else {
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-join-invalid-invite")))
+                                sender.sendMessage(plugin.core.messages["payment-join-invalid-invite"])
                             }
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-join-invalid-character")))
+                            sender.sendMessage(plugin.core.messages["payment-join-invalid-character"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-join-invalid-group")))
+                        sender.sendMessage(plugin.core.messages["payment-join-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                    sender.sendMessage(plugin.core.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-join-usage")))
+                sender.sendMessage(plugin.core.messages["payment-join-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-payment-join")))
+            sender.sendMessage(plugin.core.messages["no-permission-payment-join"])
         }
         return true
     }

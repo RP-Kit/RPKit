@@ -21,7 +21,6 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -55,36 +54,36 @@ class PaymentDepositCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
                                                 bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - amount)
                                                 paymentGroup.balance = paymentGroup.balance + amount
                                                 paymentGroupProvider.updatePaymentGroup(paymentGroup)
-                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-valid")))
+                                                sender.sendMessage(plugin.core.messages["payment-deposit-valid"])
                                             } else {
-                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-balance")))
+                                                sender.sendMessage(plugin.core.messages["payment-deposit-invalid-balance"])
                                             }
                                         } else {
-                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-amount")))
+                                            sender.sendMessage(plugin.core.messages["payment-deposit-invalid-amount"])
                                         }
                                     } catch (exception: NumberFormatException) {
-                                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-amount")))
+                                        sender.sendMessage(plugin.core.messages["payment-deposit-invalid-amount"])
                                     }
                                 } else {
-                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-currency")))
+                                    sender.sendMessage(plugin.core.messages["payment-deposit-invalid-currency"])
                                 }
                             } else {
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-owner")))
+                                sender.sendMessage(plugin.core.messages["payment-deposit-invalid-owner"])
                             }
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-group")))
+                            sender.sendMessage(plugin.core.messages["payment-deposit-invalid-group"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-invalid-character")))
+                        sender.sendMessage(plugin.core.messages["payment-deposit-invalid-character"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-deposit-usage")))
+                    sender.sendMessage(plugin.core.messages["payment-deposit-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.core.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-payment-deposit")))
+            sender.sendMessage(plugin.core.messages["no-permission-payment-deposit"])
         }
         return true
     }

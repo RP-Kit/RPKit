@@ -17,7 +17,6 @@
 package com.rpkit.payments.bukkit.command.payment
 
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -63,10 +62,10 @@ class PaymentCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
             } else if (args[0].equals("set", ignoreCase = true)) {
                 return paymentSetCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-usage")))
+                sender.sendMessage(plugin.core.messages["payment-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-usage")))
+            sender.sendMessage(plugin.core.messages["payment-usage"])
         }
         return true
     }
