@@ -18,6 +18,7 @@ package com.rpkit.core.bukkit
 
 import com.rpkit.core.RPKCore
 import com.rpkit.core.bukkit.listener.PluginEnableListener
+import com.rpkit.core.bukkit.message.BukkitMessages
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.bukkit.servlet.IndexServlet
 import com.rpkit.core.bukkit.servlet.StaticServlet
@@ -94,6 +95,8 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
      */
     fun initializePlugin(rpkitBukkitPlugin: RPKBukkitPlugin) {
         rpkitBukkitPlugin.core = core
+        rpkitBukkitPlugin.messages = BukkitMessages(rpkitBukkitPlugin)
+        rpkitBukkitPlugin.setDefaultMessages()
         try {
             rpkitBukkitPlugin.createTables(core.database)
         } catch (exception: SQLException) {

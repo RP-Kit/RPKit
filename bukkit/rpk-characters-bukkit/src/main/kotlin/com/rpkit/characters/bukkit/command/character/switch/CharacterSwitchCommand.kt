@@ -34,11 +34,16 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
     private val conversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(CharacterPrompt()).withEscapeSequence("cancel").thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console"))).addConversationAbandonedListener { event ->
+        conversationFactory = ConversationFactory(plugin)
+                .withModality(true)
+                .withFirstPrompt(CharacterPrompt())
+                .withEscapeSequence("cancel")
+                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
+                .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -47,7 +52,7 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.switch")) {
-                if (args.size > 0) {
+                if (args.isNotEmpty()) {
                     val characterNameBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
                         characterNameBuilder.append(args[i]).append(" ")
@@ -76,18 +81,18 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
                         }
                     }
                     if (charFound) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-switch-valid")))
+                        sender.sendMessage(plugin.messages["character-switch-valid"])
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-switch-invalid-character")))
+                        sender.sendMessage(plugin.messages["character-switch-invalid-character"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-switch")))
+                sender.sendMessage(plugin.messages["no-permission-character-switch"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -100,16 +105,12 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                 val player = playerProvider.getPlayer(conversable)
-                for (character in characterProvider.getCharacters(player)) {
-                    if (character.name.equals(input, ignoreCase = true)) {
-                        return true
-                    }
-                }
-                for (character in characterProvider.getCharacters(player)) {
-                    if (character.name.toLowerCase().contains(input.toLowerCase())) {
-                        return true
-                    }
-                }
+                characterProvider.getCharacters(player)
+                        .filter { it.name.equals(input, ignoreCase = true) }
+                        .forEach { return true }
+                characterProvider.getCharacters(player)
+                        .filter { it.name.toLowerCase().contains(input.toLowerCase()) }
+                        .forEach { return true }
             }
             return false
         }
@@ -143,7 +144,7 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-switch-invalid-character"))
+            return plugin.messages["character-switch-invalid-character"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
@@ -153,10 +154,11 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
             val characterListBuilder = StringBuilder()
             for (character in characterProvider.getCharacters(player)) {
                 characterListBuilder.append("\n").append(
-                        ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-list-item")
-                                .replace("\$character", character.name)))
+                        plugin.messages["character-list-item", mapOf(
+                                Pair("character", character.name)
+                        )])
             }
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-switch-prompt")) + characterListBuilder.toString()
+            return plugin.messages["character-switch-prompt"] + characterListBuilder.toString()
         }
 
     }
@@ -168,7 +170,7 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-switch-valid"))
+            return plugin.messages["character-switch-valid"]
         }
     }
 

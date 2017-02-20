@@ -20,7 +20,6 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import org.apache.commons.lang.BooleanUtils
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -36,11 +35,16 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit): CommandE
     private val conversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(DeadPrompt()).withEscapeSequence("cancel").thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console"))).addConversationAbandonedListener { event ->
+        conversationFactory = ConversationFactory(plugin)
+                .withModality(true)
+                .withFirstPrompt(DeadPrompt())
+                .withEscapeSequence("cancel")
+                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
+                .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -59,22 +63,22 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit): CommandE
                         if (dead && sender.hasPermission("rpkit.characters.command.character.set.dead.yes") || !dead && sender.hasPermission("rpkit.characters.command.character.set.dead.no")) {
                             character.isDead = dead
                             characterProvider.updateCharacter(character)
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-dead-valid")))
+                            sender.sendMessage(plugin.messages["character-set-dead-valid"])
                             character.showCharacterCard(player)
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-set-dead-" + if (dead) "yes" else "no")))
+                            sender.sendMessage(plugin.messages["no-permission-character-set-dead-" + if (dead) "yes" else "no"])
                         }
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages-no-permission-character-set-dead")))
+                sender.sendMessage(plugin.messages["no-permission-character-set-dead"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -102,11 +106,11 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit): CommandE
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-dead-invalid-boolean"))
+            return plugin.messages["character-set-dead-invalid-boolean"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-dead-prompt"))
+            return plugin.messages["character-set-dead-prompt"]
         }
 
     }
@@ -125,7 +129,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit): CommandE
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-dead-valid"))
+            return plugin.messages["character-set-dead-valid"]
         }
 
     }
@@ -144,7 +148,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit): CommandE
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-set-dead-" + if (dead) "yes" else "no"))
+            return plugin.messages["no-permission-character-set-dead-" + if (dead) "yes" else "no"]
         }
 
     }

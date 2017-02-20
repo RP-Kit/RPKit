@@ -1,7 +1,6 @@
 package com.rpkit.shops.bukkit.command
 
 import com.rpkit.shops.bukkit.RPKShopsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.block.Chest
 import org.bukkit.command.Command
@@ -25,21 +24,21 @@ class RestockCommand(private val plugin: RPKShopsBukkit): CommandExecutor {
                             for (i in 0..chest.inventory.size - 1) {
                                 chest.inventory.setItem(i, ItemStack(material, material.maxStackSize))
                             }
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.restock-valid")))
+                            sender.sendMessage(plugin.messages["restock-valid"])
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.restock-invalid-material")))
+                            sender.sendMessage(plugin.messages["restock-invalid-material"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.restock-usage")))
+                        sender.sendMessage(plugin.messages["restock-usage"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.restock-invalid-chest")))
+                    sender.sendMessage(plugin.messages["restock-invalid-chest"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-restock")))
+            sender.sendMessage(plugin.messages["no-permission-restock"])
         }
         return true
     }

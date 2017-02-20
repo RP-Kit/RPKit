@@ -17,7 +17,6 @@
 package com.rpkit.trade.bukkit.listener
 
 import com.rpkit.trade.bukkit.RPKTradeBukkit
-import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
@@ -35,10 +34,10 @@ class BlockBreakListener(private val plugin: RPKTradeBukkit): Listener {
             if (event.block.state != null) {
                 if (event.block.state is Sign) {
                     val sign = event.block.state as Sign
-                    if (sign.getLine(0).equals(GREEN.toString() + "[trader]")) {
+                    if (sign.getLine(0) == GREEN.toString() + "[trader]") {
                         if (!event.player.hasPermission("rpkit.trade.sign.trader.destroy")) {
                             event.isCancelled = true
-                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-trader-destroy")))
+                            event.player.sendMessage(plugin.messages["no-permission-trader-destroy"])
                         }
                     }
                 }

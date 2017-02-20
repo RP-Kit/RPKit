@@ -18,7 +18,6 @@ package com.rpkit.economy.bukkit.command.currency
 
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -32,13 +31,14 @@ class CurrencyListCommand(private val plugin: RPKEconomyBukkit): CommandExecutor
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.economy.command.currency.list")) {
             val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.currency-list-title")))
+            sender.sendMessage(plugin.messages["currency-list-title"])
             for (currency in currencyProvider.currencies) {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.currency-list-item"))
-                        .replace("\$currency", currency.name))
+                sender.sendMessage(plugin.messages["currency-list-item", mapOf(
+                        Pair("currency", currency.name)
+                )])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-currency-list")))
+            sender.sendMessage(plugin.messages["no-permission-currency-list"])
         }
         return true
     }

@@ -19,7 +19,6 @@ package com.rpkit.characters.bukkit.command.character.hide
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -41,16 +40,16 @@ class CharacterHideAgeCommand(private val plugin: RPKCharactersBukkit): CommandE
                 if (character != null) {
                     character.isAgeHidden = true
                     characterProvider.updateCharacter(character)
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-hide-age-valid")))
+                    sender.sendMessage(plugin.messages["character-hide-age-valid"])
                     character.showCharacterCard(player)
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-hide-age")))
+                sender.sendMessage(plugin.messages["no-permission-character-hide-age"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

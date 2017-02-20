@@ -60,4 +60,15 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
         database.addTable(RPKPlayerTable(this, database))
     }
 
+    override fun setDefaultMessages() {
+        messages.setDefault("account-usage", "&cUsage: /account [link]")
+        messages.setDefault("account-link-usage", "&cUsage: /account link [irc]")
+        messages.setDefault("account-link-irc-usage", "&cUsage: /account link irc [nick]")
+        messages.setDefault("account-link-irc-invalid-already-linked", "&cThat IRC user is already linked to a Minecraft user.")
+        messages.setDefault("account-link-irc-invalid-nick", "&cThere is no IRC user by that name online.")
+        messages.setDefault("account-link-irc-invalid-no-irc-provider", "&cThere is no IRC provider registered, so IRC accounts cannot be linked.")
+        messages.setDefault("account-link-irc-invalid-no-player-provider", "&cThere is no player provider registered, so IRC accounts cannot be linked.")
+        messages.setDefault("account-link-irc-valid", "&aAccount linked.")
+    }
+
 }

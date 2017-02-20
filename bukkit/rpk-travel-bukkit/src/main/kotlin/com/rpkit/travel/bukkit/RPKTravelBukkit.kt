@@ -36,4 +36,10 @@ class RPKTravelBukkit: RPKBukkitPlugin() {
         database.addTable(RPKWarpTable(database, this))
     }
 
+    override fun setDefaultMessages() {
+        messages.setDefault("warp-sign-invalid-warp", "&cThere is no warp by that name.")
+        messages.setDefault("warp-sign-valid", "&aWarp sign created.")
+        messages.setDefault("no-permission-warp-sign-create", "&cYou do not have permission to create warp signs.")
+    }
+
 }

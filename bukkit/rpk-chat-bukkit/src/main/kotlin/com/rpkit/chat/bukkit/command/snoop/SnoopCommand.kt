@@ -19,7 +19,6 @@ package com.rpkit.chat.bukkit.command.snoop
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.snooper.RPKSnooperProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -40,42 +39,42 @@ class SnoopCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                     if (sender.hasPermission("rpkit.chat.command.snoop.on")) {
                         if (!snooperProvider.snoopers.contains(player)) {
                             snooperProvider.addSnooper(player)
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.snoop-enabled")))
+                            sender.sendMessage(plugin.messages["snoop-enabled"])
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.snoop-already-enabled")))
+                            sender.sendMessage(plugin.messages["snoop-already-enabled"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-snoop-on")))
+                        sender.sendMessage(plugin.messages["no-permission-snoop-on"])
                     }
                 } else if (args[0].equals("off", ignoreCase = true)) {
                     if (sender.hasPermission("rpkit.chat.command.snoop.off")) {
                         if (snooperProvider.snoopers.contains(player)) {
                             snooperProvider.removeSnooper(player)
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.snoop-disabled")))
+                            sender.sendMessage(plugin.messages["snoop-disabled"])
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.snoop-already-disabled")))
+                            sender.sendMessage(plugin.messages["snoop-already-disabled"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("no-permission-snoop-off")))
+                        sender.sendMessage(plugin.messages["no-permission-snoop-off"])
                     }
                 } else if (args[0].equals("check", ignoreCase = true)) {
                     if (sender.hasPermission("rpkit.chat.command.snoop.check")) {
                         if (snooperProvider.snoopers.contains(player)) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.snoop-check-on")))
+                            sender.sendMessage(plugin.messages["snoop-check-on"])
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.snoop-check-off")))
+                            sender.sendMessage(plugin.messages["snoop-check-off"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-snoop-check")))
+                        sender.sendMessage(plugin.messages["no-permission-snoop-check"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.snoop-usage")))
+                    sender.sendMessage(plugin.messages["snoop-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.snoop-usage")))
+                sender.sendMessage(plugin.messages["snoop-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

@@ -23,7 +23,6 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -40,12 +39,12 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
             .withModality(true)
             .withFirstPrompt(PlayerPrompt())
             .withEscapeSequence("cancel")
-            .thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
                 if (!event.gracefulExit()) {
                     val conversable = event.context.forWhom
                     if (conversable is Player) {
-                        conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                        conversable.sendMessage(plugin.messages["operation-cancelled"])
                     }
                 }
             }
@@ -61,7 +60,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                 val fromPlayer = playerProvider.getPlayer(fromBukkitPlayer)
                 val fromCharacter = characterProvider.getActiveCharacter(fromPlayer)
                 if (fromCharacter != null) {
-                    if (args.size > 0) {
+                    if (args.isNotEmpty()) {
                         val toBukkitPlayer = plugin.server.getPlayer(args[0])
                         if (toBukkitPlayer != null) {
                             val toPlayer = playerProvider.getPlayer(toBukkitPlayer)
@@ -81,58 +80,60 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                                                         if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
                                                             if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
                                                                 economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
-                                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-valid")))
-                                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-valid"))
-                                                                        .replace("\$amount", amount.toString())
-                                                                        .replace("\$currency", if (amount == 1) currency.nameSingular else currency.namePlural)
-                                                                        .replace("\$character", toCharacter.name)
-                                                                        .replace("\$player", toPlayer.name))
-                                                                toCharacter.player?.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-received"))
-                                                                        .replace("\$amount", amount.toString())
-                                                                        .replace("\$currency", if (amount == 1) currency.nameSingular else currency.namePlural)
-                                                                        .replace("\$character", fromCharacter.name)
-                                                                        .replace("\$player", fromPlayer.name))
+                                                                sender.sendMessage(plugin.messages["money-pay-amount-valid"])
+                                                                sender.sendMessage(plugin.messages["money-pay-valid", mapOf(
+                                                                        Pair("amount", amount.toString()),
+                                                                        Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
+                                                                        Pair("character", toCharacter.name),
+                                                                        Pair("player", toPlayer.name)
+                                                                )])
+                                                                toCharacter.player?.bukkitPlayer?.player?.sendMessage(plugin.messages["money-pay-received", mapOf(
+                                                                        Pair("amount", amount.toString()),
+                                                                        Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
+                                                                        Pair("character", fromCharacter.name),
+                                                                        Pair("player", fromPlayer.name)
+                                                                )])
                                                             } else {
-                                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-limit")))
+                                                                sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-limit"])
                                                             }
                                                         } else {
-                                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-balance")))
+                                                            sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-balance"])
                                                         }
                                                     } else {
-                                                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-player-invalid-player-distance")))
+                                                        sender.sendMessage(plugin.messages["money-pay-player-invalid-player-distance"])
                                                     }
                                                 } else {
-                                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-currency-invalid-currency")))
+                                                    sender.sendMessage(plugin.messages["money-pay-currency-invalid-currency"])
                                                 }
                                             } else {
                                                 conversationFactory.buildConversation(sender).begin()
                                             }
                                         } else {
-                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-negative")))
+                                            sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-negative"])
                                         }
                                     } catch (exception: NumberFormatException) {
-                                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-number")))
+                                        sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-number"])
                                     }
                                 } else {
                                     conversationFactory.buildConversation(sender).begin()
                                 }
                             } else {
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-character-invalid-character")))
+                                sender.sendMessage(plugin.messages["money-pay-character-invalid-character"])
                             }
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-player-invalid-player-offline")))
+                            sender.sendMessage(plugin.messages["money-pay-player-invalid-player-offline"])
                         }
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-money-pay")))
+                sender.sendMessage(plugin.messages["no-permission-money-pay"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -147,11 +148,11 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-player-prompt"))
+            return plugin.messages["money-pay-player-prompt"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-player-invalid-player-offline"))
+            return plugin.messages["money-pay-player-invalid-player-offline"]
         }
 
     }
@@ -162,7 +163,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-player-valid"))
+            return plugin.messages["money-pay-player-valid"]
         }
 
     }
@@ -178,14 +179,16 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-currency-prompt")) + "\n" +
+            return plugin.messages["money-pay-currency-prompt"] + "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
-                            .map { currency -> ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-currency-prompt-list-item")).replace("\$currency", currency.name) }
+                            .map { currency -> plugin.messages["money-pay-currency-prompt-list-item", mapOf(
+                                    Pair("currency", currency.name)
+                            )] }
                             .joinToString("\n")
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-currency-invalid-currency"))
+            return plugin.messages["money-pay-currency-invalid-currency"]
         }
     }
 
@@ -195,7 +198,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-currency-valid"))
+            return plugin.messages["money-pay-currency-valid"]
         }
 
     }
@@ -212,15 +215,15 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-prompt"))
+            return plugin.messages["money-pay-amount-prompt"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-negative"))
+            return plugin.messages["money-pay-amount-invalid-amount-negative"]
         }
 
         override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-number"))
+            return plugin.messages["money-pay-amount-invalid-amount-number"]
         }
 
     }
@@ -231,7 +234,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-valid"))
+            return plugin.messages["money-pay-amount-valid"]
         }
 
     }
@@ -260,33 +263,35 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                             if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
                                 if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
                                     economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
-                                    toCharacter.player?.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-received"))
-                                            .replace("\$amount", amount.toString())
-                                            .replace("\$currency", if (amount == 1) currency.nameSingular else currency.namePlural)
-                                            .replace("\$character", fromCharacter.name)
-                                            .replace("\$player", fromPlayer.name))
-                                    return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-valid"))
-                                            .replace("\$amount", amount.toString())
-                                            .replace("\$currency", if (amount == 1) currency.nameSingular else currency.namePlural)
-                                            .replace("\$character", toCharacter.name)
-                                            .replace("\$player", toPlayer.name)
+                                    toCharacter.player?.bukkitPlayer?.player?.sendMessage(plugin.messages["money-pay-received", mapOf(
+                                            Pair("amount", amount.toString()),
+                                            Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
+                                            Pair("character", fromCharacter.name),
+                                            Pair("player", fromPlayer.name)
+                                    )])
+                                    return plugin.messages["money-pay-valid", mapOf(
+                                            Pair("amount", amount.toString()),
+                                            Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
+                                            Pair("character", toCharacter.name),
+                                            Pair("player", toPlayer.name)
+                                    )]
                                 } else {
-                                    return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-limit"))
+                                    return plugin.messages["money-pay-amount-invalid-amount-limit"]
                                 }
                             } else {
-                                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-amount-invalid-amount-balance"))
+                                return plugin.messages["money-pay-amount-invalid-amount-balance"]
                             }
                         } else {
-                            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-player-invalid-player-distance"))
+                            return plugin.messages["money-pay-player-invalid-player-distance"]
                         }
                     } else {
-                        return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-pay-player-invalid-player-distance"))
+                        return plugin.messages["money-pay-player-invalid-player-distance"]
                     }
                 } else {
-                    return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.recipient-no-character"))
+                    return plugin.messages["recipient-no-character"]
                 }
             } else {
-                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character"))
+                return plugin.messages["no-character"]
             }
         }
 

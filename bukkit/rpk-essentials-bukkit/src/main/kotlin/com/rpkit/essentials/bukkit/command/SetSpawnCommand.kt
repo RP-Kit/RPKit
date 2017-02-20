@@ -13,13 +13,14 @@ class SetSpawnCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
         if (sender.hasPermission("rpkit.essentials.command.setspawn")) {
             if (sender is Player) {
                 sender.world.setSpawnLocation(sender.location.blockX, sender.location.blockY, sender.location.blockZ)
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.set-spawn-valid"))
-                        .replace("\$world", sender.world.name))
+                sender.sendMessage(plugin.messages["set-spawn-valid", mapOf(
+                        Pair("world", sender.world.name)
+                )])
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-set-spawn")))
+            sender.sendMessage(plugin.messages["no-permission-set-spawn"])
         }
         return true
     }

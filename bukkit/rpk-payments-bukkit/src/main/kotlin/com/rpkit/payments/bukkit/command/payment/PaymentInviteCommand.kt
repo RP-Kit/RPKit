@@ -22,7 +22,6 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -48,13 +47,14 @@ class PaymentInviteCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                     val character = characterProvider.getActiveCharacter(player)
                     if (character != null) {
                         paymentGroup.addInvite(character)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-invite-valid")))
+                        sender.sendMessage(plugin.messages["payment-invite-valid"])
                         val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
                         val now = System.currentTimeMillis()
-                        val notificationMessage = ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-notification-invite"))
-                                .replace("\$member", character.name)
-                                .replace("\$group", paymentGroup.name)
-                                .replace("\$date", dateFormat.format(Date(now)))
+                        val notificationMessage = plugin.messages["payment-notification-invite", mapOf(
+                                Pair("member", character.name),
+                                Pair("group", paymentGroup.name),
+                                Pair("date", dateFormat.format(Date(now)))
+                        )]
                         if (!(character.player?.bukkitPlayer?.isOnline?:false)) { // If offline
                             paymentNotificationProvider.addPaymentNotification(
                                     RPKPaymentNotificationImpl(
@@ -69,16 +69,16 @@ class PaymentInviteCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                             character.player?.bukkitPlayer?.player?.sendMessage(notificationMessage)
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-invite-invalid-character")))
+                        sender.sendMessage(plugin.messages["payment-invite-invalid-character"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-invite-invalid-group")))
+                    sender.sendMessage(plugin.messages["payment-invite-invalid-group"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-invite-usage")))
+                sender.sendMessage(plugin.messages["payment-invite-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-payment-invite")))
+            sender.sendMessage(plugin.messages["no-permission-payment-invite"])
         }
         return true
     }

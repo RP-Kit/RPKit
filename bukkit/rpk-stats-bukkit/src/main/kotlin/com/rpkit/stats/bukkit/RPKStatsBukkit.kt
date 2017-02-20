@@ -206,4 +206,12 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
         getCommand("stats").executor = StatsCommand(this)
     }
 
+    override fun setDefaultMessages() {
+        messages.setDefault("stats-list-title", "&fStats:")
+        messages.setDefault("stats-list-item", "&7\$stat: &f\$value")
+        messages.setDefault("no-character", "&cYou must have an active character in order to perform this command.")
+        messages.setDefault("not-from-console", "&cYou must be a player to perform this command.")
+        messages.setDefault("no-permission-stats", "&cYou do not have permission to view your stats.")
+    }
+
 }

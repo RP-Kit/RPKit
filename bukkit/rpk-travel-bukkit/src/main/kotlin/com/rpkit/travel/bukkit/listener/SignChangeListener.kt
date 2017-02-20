@@ -2,7 +2,6 @@ package com.rpkit.travel.bukkit.listener
 
 import com.rpkit.travel.bukkit.RPKTravelBukkit
 import com.rpkit.warp.bukkit.warp.RPKWarpProvider
-import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -19,13 +18,13 @@ class SignChangeListener(private val plugin: RPKTravelBukkit): Listener {
                 val warp = warpProvider.getWarp(event.getLine(1))
                 if (warp == null) {
                     event.block.breakNaturally()
-                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.warp-sign-invalid-warp")))
+                    event.player.sendMessage(plugin.messages["warp-sign-invalid-warp"])
                     return
                 }
                 event.setLine(0, "$GREEN[warp]")
-                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.warp-sign-valid")))
+                event.player.sendMessage(plugin.messages["warp-sign-valid"])
             } else {
-                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-warp-sign-create")))
+                event.player.sendMessage(plugin.messages["no-permission-warp-sign-create"])
             }
         }
     }

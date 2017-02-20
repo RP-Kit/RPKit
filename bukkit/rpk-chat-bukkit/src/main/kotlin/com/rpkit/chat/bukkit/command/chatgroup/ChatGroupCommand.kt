@@ -17,7 +17,6 @@
 package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -55,13 +54,13 @@ class ChatGroupCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                 } else if (args[0].equals("members", ignoreCase = true)) {
                     chatGroupMembersCommand.onCommand(sender, command, label, newArgs)
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-usage")))
+                    sender.sendMessage(plugin.messages["chat-group-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-usage")))
+                sender.sendMessage(plugin.messages["chat-group-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chat-group")))
+            sender.sendMessage(plugin.messages["no-permission-chat-group"])
         }
         return true
     }

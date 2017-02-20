@@ -31,15 +31,15 @@ class AccountLinkCommand(private val plugin: RPKPlayersBukkit): CommandExecutor 
     private val accountLinkIRCCommand = AccountLinkIRCCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.size > 0) {
+        if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("irc", ignoreCase = true)) {
                 return accountLinkIRCCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.account-link-usage")))
+                sender.sendMessage(plugin.messages["account-link-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.account-link-usage")))
+            sender.sendMessage(plugin.messages["account-link-usage"])
         }
         return true
     }

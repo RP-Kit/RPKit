@@ -31,9 +31,9 @@ class IRCVerifyCommand(private val plugin: RPKChatBukkit): IRCCommand("verify") 
         val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
         if (args.isNotEmpty()) {
             ircProvider.ircBot.sendIRC().message("NickServ", "VERIFY REGISTER " + ircProvider.ircBot.nick + " " + args[0])
-            sender.send().message(plugin.config.getString("messages.irc-verify-valid"))
+            sender.send().message(plugin.messages["irc-verify-valid"])
         } else {
-            sender.send().message(plugin.config.getString("messages.irc-verify-invalid-verification-code-not-specified"))
+            sender.send().message(plugin.messages["irc-verify-invalid-verification-code-not-specified"])
         }
     }
 

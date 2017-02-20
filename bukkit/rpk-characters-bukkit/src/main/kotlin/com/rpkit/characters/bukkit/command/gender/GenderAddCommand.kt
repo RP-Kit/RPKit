@@ -19,7 +19,6 @@ package com.rpkit.characters.bukkit.command.gender
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.gender.RPKGenderImpl
 import com.rpkit.characters.bukkit.gender.RPKGenderProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -34,11 +33,14 @@ class GenderAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor
     private val conversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(GenderPrompt()).withEscapeSequence("cancel").addConversationAbandonedListener { event ->
+        conversationFactory = ConversationFactory(plugin)
+                .withModality(true)
+                .withFirstPrompt(GenderPrompt())
+                .withEscapeSequence("cancel").addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -47,7 +49,7 @@ class GenderAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Conversable) {
             if (sender.hasPermission("rpkit.characters.command.gender.add")) {
-                if (args.size > 0) {
+                if (args.isNotEmpty()) {
                     val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
                     val genderBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
@@ -56,15 +58,15 @@ class GenderAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor
                     genderBuilder.append(args[args.size - 1])
                     if (genderProvider.getGender(genderBuilder.toString()) == null) {
                         genderProvider.addGender(RPKGenderImpl(name = genderBuilder.toString()))
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-add-valid")))
+                        sender.sendMessage(plugin.messages["gender-add-valid"])
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-add-invalid-gender")))
+                        sender.sendMessage(plugin.messages["gender-add-invalid-gender"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-gender-add")))
+                sender.sendMessage(plugin.messages["no-permission-gender-add"])
             }
         }
         return true
@@ -73,7 +75,7 @@ class GenderAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor
     private inner class GenderPrompt: ValidatingPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-add-prompt"))
+            return plugin.messages["gender-add-prompt"]
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
@@ -81,8 +83,8 @@ class GenderAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor
             return genderProvider.getGender(input) == null
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-add-invalid-gender"))
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
+            return plugin.messages["gender-add-invalid-gender"]
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
@@ -100,7 +102,7 @@ class GenderAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.gender-add-valid"))
+            return plugin.messages["gender-add-valid"]
         }
 
     }

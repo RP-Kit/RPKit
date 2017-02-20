@@ -3,7 +3,6 @@ package com.rpkit.essentials.bukkit.command
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -18,13 +17,14 @@ class ToggleLogMessagesCommand(private val plugin: RPKEssentialsBukkit) : Comman
                 val logMessageProvider = plugin.core.serviceManager.getServiceProvider(RPKLogMessageProvider::class)
                 val player = playerProvider.getPlayer(sender)
                 logMessageProvider.setLogMessagesEnabled(player, !logMessageProvider.isLogMessagesEnabled(player))
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.toggle-log-messages-valid"))
-                        .replace("\$enabled", if (logMessageProvider.isLogMessagesEnabled(player)) "enabled" else "disabled"))
+                sender.sendMessage(plugin.messages["toggle-log-messages-valid", mapOf(
+                        Pair("enabled", if (logMessageProvider.isLogMessagesEnabled(player)) "enabled" else "disabled")
+                )])
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-toggle-log-messages")))
+            sender.sendMessage(plugin.messages["no-permission-toggle-log-messages"])
         }
         return true
     }

@@ -50,13 +50,13 @@ class CharacterCardCommand(private val plugin: RPKCharactersBukkit): CommandExec
                     val senderPlayer = playerProvider.getPlayer(sender)
                     character.showCharacterCard(senderPlayer)
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-card-self")))
+                sender.sendMessage(plugin.messages["no-permission-character-card-self"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

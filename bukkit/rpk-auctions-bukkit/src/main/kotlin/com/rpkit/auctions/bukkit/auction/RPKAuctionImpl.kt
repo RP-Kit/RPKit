@@ -86,12 +86,12 @@ class RPKAuctionImpl(
                             if (bukkitPlayer.isOnline) {
                                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                                 if (characterProvider.getActiveCharacter(player) == character) {
-                                    bukkitPlayer.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-item-received"))
-                                            .replace("\$amount", item.amount.toString())
-                                            .replace("\$item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else "")
-                                            .replace("\$character", this.character.name)
-                                            .replace("\$auction_id", id.toString())
-                                    )
+                                    bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
+                                            Pair("amount", item.amount.toString()),
+                                            Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
+                                            Pair("character", this.character.name),
+                                            Pair("auction_id", id.toString())
+                                    )])
                                 }
                             }
                         }
@@ -105,12 +105,12 @@ class RPKAuctionImpl(
                             if (bukkitPlayer.isOnline) {
                                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                                 if (characterProvider.getActiveCharacter(player) == character) {
-                                    bukkitPlayer.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-item-received"))
-                                            .replace("\$amount", item.amount.toString())
-                                            .replace("\$item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else "")
-                                            .replace("\$character", this.character.name)
-                                            .replace("\$auction_id", id.toString())
-                                    )
+                                    bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
+                                            Pair("amount", item.amount.toString()),
+                                            Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
+                                            Pair("character", this.character.name),
+                                            Pair("auction_id", id.toString())
+                                    )])
                                 }
                             }
                         }
@@ -125,12 +125,12 @@ class RPKAuctionImpl(
                         if (bukkitPlayer.isOnline) {
                             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                             if (characterProvider.getActiveCharacter(player) == character) {
-                                bukkitPlayer.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-item-received"))
-                                        .replace("\$amount", item.amount.toString())
-                                        .replace("\$item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else "")
-                                        .replace("\$character", this.character.name)
-                                        .replace("\$auction_id", id.toString())
-                                )
+                                bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
+                                        Pair("amount", item.amount.toString()),
+                                        Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
+                                        Pair("character", this.character.name),
+                                        Pair("auction_id", id.toString())
+                                )])
                             }
                         }
                     }

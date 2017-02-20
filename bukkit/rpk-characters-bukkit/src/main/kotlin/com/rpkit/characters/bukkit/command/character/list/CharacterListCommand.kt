@@ -19,7 +19,6 @@ package com.rpkit.characters.bukkit.command.character.list
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -37,16 +36,17 @@ class CharacterListCommand(private val plugin: RPKCharactersBukkit): CommandExec
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                 val player = playerProvider.getPlayer(sender)
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-list-title")))
+                sender.sendMessage(plugin.messages["character-list-title"])
                 for (character in characterProvider.getCharacters(player)) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-list-item"))
-                            .replace("\$character", character.name))
+                    sender.sendMessage(plugin.messages["character-list-item", mapOf(
+                            Pair("character", character.name)
+                    )])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-list")))
+                sender.sendMessage(plugin.messages["no-permission-character-list"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

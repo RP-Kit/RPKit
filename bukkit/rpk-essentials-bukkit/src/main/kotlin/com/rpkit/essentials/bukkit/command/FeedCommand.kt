@@ -23,14 +23,15 @@ class FeedCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             if (player != null) {
                 player.foodLevel = 20
                 player.saturation = 10f
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.feed-notification")))
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.feed-valid"))
-                        .replace("\$player", player.name))
+                player.sendMessage(plugin.messages["feed-notification"])
+                sender.sendMessage(plugin.messages["feed-valid", mapOf(
+                        Pair("player", player.name)
+                )])
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.feed-usage-console")))
+                sender.sendMessage(plugin.messages["feed-usage-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-feed")))
+            sender.sendMessage(plugin.messages["no-permission-feed"])
         }
         return true
     }

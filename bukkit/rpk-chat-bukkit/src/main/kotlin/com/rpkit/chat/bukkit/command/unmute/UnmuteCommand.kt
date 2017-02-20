@@ -19,7 +19,6 @@ package com.rpkit.chat.bukkit.command.unmute
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,7 +32,7 @@ class UnmuteCommand(private val plugin: RPKChatBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender is Player) {
-            if (args.size > 0) {
+            if (args.isNotEmpty()) {
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                 val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
                 val player = playerProvider.getPlayer(sender)
@@ -41,20 +40,22 @@ class UnmuteCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                 if (chatChannel != null) {
                     if (sender.hasPermission("rpkit.chat.command.unmute.${chatChannel.name}")) {
                         chatChannel.addListener(player)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.unmute-valid"))
-                                .replace("\$channel", chatChannel.name))
+                        sender.sendMessage(plugin.messages["unmute-valid", mapOf(
+                                Pair("channel", chatChannel.name)
+                        )])
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-unmute"))
-                                .replace("\$channel", chatChannel.name))
+                        sender.sendMessage(plugin.messages["no-permission-unmute", mapOf(
+                                Pair("channel", chatChannel.name)
+                        )])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.unmute-invalid-chatchannel")))
+                    sender.sendMessage(plugin.messages["unmute-invalid-chatchannel"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.unmute-usage")))
+                sender.sendMessage(plugin.messages["unmute-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

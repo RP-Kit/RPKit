@@ -18,17 +18,18 @@ class DeleteWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
                     val warp = warpProvider.getWarp(args[0].toLowerCase())
                     if (warp != null) {
                         warpProvider.removeWarp(warp)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.delete-warp-valid"))
-                                .replace("\$warp", warp.name))
+                        sender.sendMessage(plugin.messages["delete-warp-valid", mapOf(
+                                Pair("warp", warp.name)
+                        )])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.delete-warp-usage")))
+                    sender.sendMessage(plugin.messages["delete-warp-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-delete-warp")))
+            sender.sendMessage(plugin.messages["no-permission-delete-warp"])
         }
         return true
     }

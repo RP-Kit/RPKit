@@ -19,7 +19,6 @@ package com.rpkit.chat.bukkit.command.listchatchannels
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
 import com.rpkit.core.bukkit.util.closestChatColor
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -31,14 +30,15 @@ import org.bukkit.command.CommandSender
 class ListChatChannelsCommand(private val plugin: RPKChatBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.chat.command.listchatchannels")) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.listchatchannels-title")))
+            sender.sendMessage(plugin.messages["listchatchannels-title"])
             plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class).chatChannels.forEach { chatChannel ->
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.listchatchannels-item"))
-                        .replace("\$channel", chatChannel.name)
-                        .replace("\$color", chatChannel.color.closestChatColor().toString()))
+                sender.sendMessage(plugin.messages["listchatchannels-item", mapOf(
+                        Pair("channel", chatChannel.name),
+                        Pair("color", chatChannel.color.closestChatColor().toString())
+                )])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-listchatchannels")))
+            sender.sendMessage(plugin.messages["no-permission-listchatchannels"])
         }
         return true
     }

@@ -2,7 +2,6 @@ package com.rpkit.rolling.bukkit
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -60,23 +59,24 @@ class RollCommand(private val plugin: RPKRollingBukkit): CommandExecutor {
                             sender.world.players
                                     .filter { player -> player.location.distanceSquared(sender.location) <= radius * radius }
                                     .forEach {
-                                        it.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.roll"))
-                                                .replace("\$character", character.name)
-                                                .replace("\$player", player.name)
-                                                .replace("\$roll", total.toString())
-                                                .replace("\$dice", parsedRoll))
+                                        it.sendMessage(plugin.messages["roll", mapOf(
+                                                Pair("character", character.name),
+                                                Pair("player", player.name),
+                                                Pair("roll", total.toString()),
+                                                Pair("dice", parsedRoll)
+                                        )])
                                     }
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                            sender.sendMessage(plugin.messages["no-character"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.roll-invalid-parse")))
+                        sender.sendMessage(plugin.messages["roll-invalid-parse"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.roll-usage")))
+                    sender.sendMessage(plugin.messages["roll-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         }
         return true

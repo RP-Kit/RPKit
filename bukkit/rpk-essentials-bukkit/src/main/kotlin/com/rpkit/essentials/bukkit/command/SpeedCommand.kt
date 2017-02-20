@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -21,43 +20,47 @@ class SpeedCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 try {
                     speed = java.lang.Float.parseFloat(args[1])
                 } catch (exception: NumberFormatException) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.speed-invalid-speed-number")))
+                    sender.sendMessage(plugin.messages["speed-invalid-speed-number"])
                 }
 
             } else if (args.isNotEmpty()) {
                 try {
                     speed = java.lang.Float.parseFloat(args[0])
                 } catch (exception: NumberFormatException) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.speed-invalid-speed-number")))
+                    sender.sendMessage(plugin.messages["speed-invalid-speed-number"])
                 }
 
             } else {
                 if (player != null) {
                     player.flySpeed = 0.1f
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.speed-reset-valid"))
-                            .replace("\$player", player.name))
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.speed-reset-notification"))
-                            .replace("\$player", sender.name))
+                    sender.sendMessage(plugin.messages["speed-reset-valid", mapOf(
+                            Pair("player", player.name)
+                    )])
+                    player.sendMessage(plugin.messages["speed-reset-notification", mapOf(
+                            Pair("player", sender.name)
+                    )])
                 }
                 return true
             }
             if (player != null) {
                 if (speed >= -1 && speed <= 1) {
                     player.flySpeed = speed
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.speed-set-valid"))
-                            .replace("\$player", player.name)
-                            .replace("\$speed", speed.toString()))
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.speed-set-notification"))
-                            .replace("\$player", sender.name)
-                            .replace("\$speed", speed.toString()))
+                    sender.sendMessage(plugin.messages["speed-set-valid", mapOf(
+                            Pair("player", player.name),
+                            Pair("speed", speed.toString())
+                    )])
+                    player.sendMessage(plugin.messages["speed-set-notification", mapOf(
+                            Pair("player", sender.name),
+                            Pair("speed", speed.toString())
+                    )])
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.speed-invalid-speed-bounds")))
+                    sender.sendMessage(plugin.messages["speed-invalid-speed-bounds"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.speed-usage-console")))
+                sender.sendMessage(plugin.messages["speed-usage-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-speed")))
+            sender.sendMessage(plugin.messages["no-permission-speed"])
         }
         return true
     }
