@@ -40,16 +40,16 @@ class CharacterUnhideAgeCommand(private val plugin: RPKCharactersBukkit): Comman
                 if (character != null) {
                     character.isAgeHidden = false
                     characterProvider.updateCharacter(character)
-                    sender.sendMessage(plugin.core.messages["character-unhide-age-valid"])
+                    sender.sendMessage(plugin.messages["character-unhide-age-valid"])
                     character.showCharacterCard(player)
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-unhide-age"])
+                sender.sendMessage(plugin.messages["no-permission-character-unhide-age"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

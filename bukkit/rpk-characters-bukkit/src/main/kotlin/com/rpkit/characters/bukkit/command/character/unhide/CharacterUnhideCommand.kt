@@ -50,10 +50,10 @@ class CharacterUnhideCommand(private val plugin: RPKCharactersBukkit): CommandEx
             } else if (args[0].equals("description", ignoreCase = true) || args[0].equals("desc", ignoreCase = true)) {
                 return characterUnhideDescriptionCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.core.messages["character-unhide-usage"])
+                sender.sendMessage(plugin.messages["character-unhide-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["character-unhide-usage"])
+            sender.sendMessage(plugin.messages["character-unhide-usage"])
         }
         return true
     }

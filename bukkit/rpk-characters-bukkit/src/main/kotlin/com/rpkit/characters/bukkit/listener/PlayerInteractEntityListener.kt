@@ -46,10 +46,10 @@ class PlayerInteractEntityListener(private val plugin: RPKCharactersBukkit): Lis
                             val rightClicker = playerProvider.getPlayer(event.player)
                             character.showCharacterCard(rightClicker)
                         } else {
-                            event.player.sendMessage(plugin.core.messages["no-character-other"])
+                            event.player.sendMessage(plugin.messages["no-character-other"])
                         }
                     } else {
-                        event.player.sendMessage(plugin.core.messages["no-permission-character-card-other"])
+                        event.player.sendMessage(plugin.messages["no-permission-character-card-other"])
                     }
                 }
             }

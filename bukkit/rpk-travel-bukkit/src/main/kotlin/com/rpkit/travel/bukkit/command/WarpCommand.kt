@@ -20,15 +20,15 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
                     val warp = warpProvider.getWarp(args[0].toLowerCase())
                     if (warp != null) {
                         sender.teleport(warp.location)
-                        sender.sendMessage(plugin.core.messages["warp-valid", mapOf(
+                        sender.sendMessage(plugin.messages["warp-valid", mapOf(
                                 Pair("warp", warp.name)
                         )])
                     } else {
-                        sender.sendMessage(plugin.core.messages["warp-invalid-warp"])
+                        sender.sendMessage(plugin.messages["warp-invalid-warp"])
                     }
                 } else {
                     if (warpProvider.warps.isNotEmpty()) {
-                        sender.sendMessage(plugin.core.messages["warp-list-title"])
+                        sender.sendMessage(plugin.messages["warp-list-title"])
                         val warps = warpProvider.warps.map(RPKWarp::name)
                         val warpMessages = ArrayList<String>()
                         var warpsBuilder = StringBuilder()
@@ -46,19 +46,19 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
                             warpMessages.add(warpsBuilder.delete(warpsBuilder.length - 2, warpsBuilder.length).toString())
                         }
                         for (message in warpMessages) {
-                            sender.sendMessage(plugin.core.messages["warp-list-item", mapOf(
+                            sender.sendMessage(plugin.messages["warp-list-item", mapOf(
                                     Pair("warps", message)
                             )])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["warp-list-invalid-empty"])
+                        sender.sendMessage(plugin.messages["warp-list-invalid-empty"])
                     }
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-warp"])
+            sender.sendMessage(plugin.messages["no-permission-warp"])
         }
         return true
     }

@@ -24,21 +24,21 @@ class RestockCommand(private val plugin: RPKShopsBukkit): CommandExecutor {
                             for (i in 0..chest.inventory.size - 1) {
                                 chest.inventory.setItem(i, ItemStack(material, material.maxStackSize))
                             }
-                            sender.sendMessage(plugin.core.messages["restock-valid"])
+                            sender.sendMessage(plugin.messages["restock-valid"])
                         } else {
-                            sender.sendMessage(plugin.core.messages["restock-invalid-material"])
+                            sender.sendMessage(plugin.messages["restock-invalid-material"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["restock-usage"])
+                        sender.sendMessage(plugin.messages["restock-usage"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["restock-invalid-chest"])
+                    sender.sendMessage(plugin.messages["restock-invalid-chest"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-restock"])
+            sender.sendMessage(plugin.messages["no-permission-restock"])
         }
         return true
     }

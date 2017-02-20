@@ -37,9 +37,9 @@ class RPKTravelBukkit: RPKBukkitPlugin() {
     }
 
     override fun setDefaultMessages() {
-        core.messages.setDefault("warp-sign-invalid-warp", "&cThere is no warp by that name.")
-        core.messages.setDefault("warp-sign-valid", "&aWarp sign created.")
-        core.messages.setDefault("no-permission-warp-sign-create", "&cYou do not have permission to create warp signs.")
+        messages.setDefault("warp-sign-invalid-warp", "&cThere is no warp by that name.")
+        messages.setDefault("warp-sign-valid", "&aWarp sign created.")
+        messages.setDefault("no-permission-warp-sign-create", "&cYou do not have permission to create warp signs.")
     }
 
 }

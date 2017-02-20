@@ -23,15 +23,15 @@ class FeedCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             if (player != null) {
                 player.foodLevel = 20
                 player.saturation = 10f
-                player.sendMessage(plugin.core.messages["feed-notification"])
-                sender.sendMessage(plugin.core.messages["feed-valid", mapOf(
+                player.sendMessage(plugin.messages["feed-notification"])
+                sender.sendMessage(plugin.messages["feed-valid", mapOf(
                         Pair("player", player.name)
                 )])
             } else {
-                sender.sendMessage(plugin.core.messages["feed-usage-console"])
+                sender.sendMessage(plugin.messages["feed-usage-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-feed"])
+            sender.sendMessage(plugin.messages["no-permission-feed"])
         }
         return true
     }

@@ -46,36 +46,36 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit): Listener {
                             event.player.world.dropItem(event.player.location, item)
                         }
                         event.player.updateInventory()
-                        event.player.sendMessage(plugin.core.messages["lock-successful"])
+                        event.player.sendMessage(plugin.messages["lock-successful"])
                     } else {
-                        event.player.sendMessage(plugin.core.messages["lock-invalid-already-locked"])
+                        event.player.sendMessage(plugin.messages["lock-invalid-already-locked"])
                     }
                     event.isCancelled = true
                 } else if (lockProvider.isUnclaiming(player)) {
                     if (block != null) {
                         if (hasKey(character, block)) {
                             lockProvider.setLocked(block, false)
-                            event.player.sendMessage(plugin.core.messages["unlock-successful"])
+                            event.player.sendMessage(plugin.messages["unlock-successful"])
                             removeKey(character, block)
                             event.player.inventory.addItem(lockProvider.lockItem)
                             event.player.updateInventory()
                         } else {
-                            event.player.sendMessage(plugin.core.messages["unlock-invalid-no-key"])
+                            event.player.sendMessage(plugin.messages["unlock-invalid-no-key"])
                         }
                     } else {
-                        event.player.sendMessage(plugin.core.messages["unlock-invalid-not-locked"])
+                        event.player.sendMessage(plugin.messages["unlock-invalid-not-locked"])
                     }
                     lockProvider.setUnclaiming(player, false)
                     event.isCancelled = true
                 } else if (lockProvider.isGettingKey(player)) {
                     if (block == null) {
-                        event.player.sendMessage(plugin.core.messages["get-key-invalid-not-locked"])
+                        event.player.sendMessage(plugin.messages["get-key-invalid-not-locked"])
                     } else {
                         for (item in event.player.inventory.addItem(lockProvider.getKeyFor(block)).values) {
                             event.player.world.dropItem(event.player.location, item)
                         }
                         event.player.updateInventory()
-                        event.player.sendMessage(plugin.core.messages["get-key-successful"])
+                        event.player.sendMessage(plugin.messages["get-key-successful"])
                     }
                     lockProvider.setGettingKey(player, false)
                     event.isCancelled = true
@@ -84,7 +84,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit): Listener {
                         if (hasKey(character, block)) return
                         if (!hasKey(character, block)) {
                             event.isCancelled = true
-                            event.player.sendMessage(plugin.core.messages["block-locked", mapOf(
+                            event.player.sendMessage(plugin.messages["block-locked", mapOf(
                                     Pair("block", block.type.toString().toLowerCase().replace('_', ' '))
                             )])
                         }

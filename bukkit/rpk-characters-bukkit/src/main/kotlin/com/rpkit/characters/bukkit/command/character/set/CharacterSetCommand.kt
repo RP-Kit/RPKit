@@ -63,10 +63,10 @@ class CharacterSetCommand(private val plugin: RPKCharactersBukkit): CommandExecu
             } else if (args[0].equals("dead", ignoreCase = true)) {
                 return characterSetDeadCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.core.messages["character-set-usage"])
+                sender.sendMessage(plugin.messages["character-set-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["character-set-usage"])
+            sender.sendMessage(plugin.messages["character-set-usage"])
         }
         return true
     }

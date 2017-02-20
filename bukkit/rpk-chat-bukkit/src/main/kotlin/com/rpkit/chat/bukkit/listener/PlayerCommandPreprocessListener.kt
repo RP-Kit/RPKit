@@ -48,13 +48,13 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit): Listen
                     chatChannel.sendMessage(player, event.message.split(Regex("\\s+")).drop(1).joinToString(" "))
                 } else if (event.message.startsWith("/$chatChannelName")) {
                     chatChannel.addSpeaker(player)
-                    event.player.sendMessage(plugin.core.messages["chatchannel-valid", mapOf(
+                    event.player.sendMessage(plugin.messages["chatchannel-valid", mapOf(
                             Pair("channel", chatChannel.name)
                     )])
                 }
             } else {
                 event.isCancelled = true
-                event.player.sendMessage(plugin.core.messages["no-permission-chatchannel", mapOf(
+                event.player.sendMessage(plugin.messages["no-permission-chatchannel", mapOf(
                         Pair("channel", chatChannel.name)
                 )])
             }
@@ -67,7 +67,7 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit): Listen
                 .filterNotNull()
                 .filter { bukkitPlayer -> bukkitPlayer.isOnline }
                 .map { bukkitPlayer -> bukkitPlayer.player }
-                .forEach { bukkitPlayer -> bukkitPlayer.sendMessage(plugin.core.messages["command-snoop", mapOf(
+                .forEach { bukkitPlayer -> bukkitPlayer.sendMessage(plugin.messages["command-snoop", mapOf(
                         Pair("sender-player", event.player.name),
                         Pair("command", event.message)
                 )]) }

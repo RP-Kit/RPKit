@@ -37,22 +37,22 @@ class ChatGroupDisbandCommand(private val plugin: RPKChatBukkit): CommandExecuto
                     val chatGroup = chatGroupProvider.getChatGroup(args[0])
                     if (chatGroup != null) {
                         for (player in chatGroup.members) {
-                            player.bukkitPlayer?.player?.sendMessage(plugin.core.messages["chat-group-disband-valid", mapOf(
+                            player.bukkitPlayer?.player?.sendMessage(plugin.messages["chat-group-disband-valid", mapOf(
                                     Pair("group", chatGroup.name)
                             )])
                         }
                         chatGroupProvider.removeChatGroup(chatGroup)
                     } else {
-                        sender.sendMessage(plugin.core.messages["chat-group-disband-invalid-nonexistent"])
+                        sender.sendMessage(plugin.messages["chat-group-disband-invalid-nonexistent"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["not-from-console"])
+                    sender.sendMessage(plugin.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["chat-group-disband-usage"])
+                sender.sendMessage(plugin.messages["chat-group-disband-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-chat-group-disband"])
+            sender.sendMessage(plugin.messages["no-permission-chat-group-disband"])
         }
         return true
     }

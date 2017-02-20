@@ -54,36 +54,36 @@ class PaymentDepositCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
                                                 bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - amount)
                                                 paymentGroup.balance = paymentGroup.balance + amount
                                                 paymentGroupProvider.updatePaymentGroup(paymentGroup)
-                                                sender.sendMessage(plugin.core.messages["payment-deposit-valid"])
+                                                sender.sendMessage(plugin.messages["payment-deposit-valid"])
                                             } else {
-                                                sender.sendMessage(plugin.core.messages["payment-deposit-invalid-balance"])
+                                                sender.sendMessage(plugin.messages["payment-deposit-invalid-balance"])
                                             }
                                         } else {
-                                            sender.sendMessage(plugin.core.messages["payment-deposit-invalid-amount"])
+                                            sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
                                         }
                                     } catch (exception: NumberFormatException) {
-                                        sender.sendMessage(plugin.core.messages["payment-deposit-invalid-amount"])
+                                        sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
                                     }
                                 } else {
-                                    sender.sendMessage(plugin.core.messages["payment-deposit-invalid-currency"])
+                                    sender.sendMessage(plugin.messages["payment-deposit-invalid-currency"])
                                 }
                             } else {
-                                sender.sendMessage(plugin.core.messages["payment-deposit-invalid-owner"])
+                                sender.sendMessage(plugin.messages["payment-deposit-invalid-owner"])
                             }
                         } else {
-                            sender.sendMessage(plugin.core.messages["payment-deposit-invalid-group"])
+                            sender.sendMessage(plugin.messages["payment-deposit-invalid-group"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["payment-deposit-invalid-character"])
+                        sender.sendMessage(plugin.messages["payment-deposit-invalid-character"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["payment-deposit-usage"])
+                    sender.sendMessage(plugin.messages["payment-deposit-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-deposit"])
+            sender.sendMessage(plugin.messages["no-permission-payment-deposit"])
         }
         return true
     }

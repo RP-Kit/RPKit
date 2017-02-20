@@ -38,12 +38,12 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
                 .withModality(true)
                 .withFirstPrompt(CharacterPrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
                 .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -81,18 +81,18 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
                         }
                     }
                     if (charFound) {
-                        sender.sendMessage(plugin.core.messages["character-switch-valid"])
+                        sender.sendMessage(plugin.messages["character-switch-valid"])
                     } else {
-                        sender.sendMessage(plugin.core.messages["character-switch-invalid-character"])
+                        sender.sendMessage(plugin.messages["character-switch-invalid-character"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-switch"])
+                sender.sendMessage(plugin.messages["no-permission-character-switch"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -144,7 +144,7 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return plugin.core.messages["character-switch-invalid-character"]
+            return plugin.messages["character-switch-invalid-character"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
@@ -154,11 +154,11 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
             val characterListBuilder = StringBuilder()
             for (character in characterProvider.getCharacters(player)) {
                 characterListBuilder.append("\n").append(
-                        plugin.core.messages["character-list-item", mapOf(
+                        plugin.messages["character-list-item", mapOf(
                                 Pair("character", character.name)
                         )])
             }
-            return plugin.core.messages["character-switch-prompt"] + characterListBuilder.toString()
+            return plugin.messages["character-switch-prompt"] + characterListBuilder.toString()
         }
 
     }
@@ -170,7 +170,7 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-switch-valid"]
+            return plugin.messages["character-switch-valid"]
         }
     }
 

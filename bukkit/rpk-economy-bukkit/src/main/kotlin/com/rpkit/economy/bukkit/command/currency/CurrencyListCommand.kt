@@ -31,14 +31,14 @@ class CurrencyListCommand(private val plugin: RPKEconomyBukkit): CommandExecutor
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.economy.command.currency.list")) {
             val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            sender.sendMessage(plugin.core.messages["currency-list-title"])
+            sender.sendMessage(plugin.messages["currency-list-title"])
             for (currency in currencyProvider.currencies) {
-                sender.sendMessage(plugin.core.messages["currency-list-item", mapOf(
+                sender.sendMessage(plugin.messages["currency-list-item", mapOf(
                         Pair("currency", currency.name)
                 )])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-currency-list"])
+            sender.sendMessage(plugin.messages["no-permission-currency-list"])
         }
         return true
     }

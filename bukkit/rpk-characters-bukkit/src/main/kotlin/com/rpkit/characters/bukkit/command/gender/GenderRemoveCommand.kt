@@ -40,7 +40,7 @@ class GenderRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecu
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -59,15 +59,15 @@ class GenderRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecu
                     val gender = genderProvider.getGender(genderBuilder.toString())
                     if (gender != null) {
                         genderProvider.removeGender(gender)
-                        sender.sendMessage(plugin.core.messages["gender-remove-valid"])
+                        sender.sendMessage(plugin.messages["gender-remove-valid"])
                     } else {
-                        sender.sendMessage(plugin.core.messages["gender-remove-invalid-gender"])
+                        sender.sendMessage(plugin.messages["gender-remove-invalid-gender"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-gender-remove"])
+                sender.sendMessage(plugin.messages["no-permission-gender-remove"])
             }
         }
         return true
@@ -86,11 +86,11 @@ class GenderRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecu
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return plugin.core.messages["gender-remove-invalid-gender"]
+            return plugin.messages["gender-remove-invalid-gender"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["gender-remove-prompt"]
+            return plugin.messages["gender-remove-prompt"]
         }
 
     }
@@ -102,7 +102,7 @@ class GenderRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecu
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["gender-remove-valid"]
+            return plugin.messages["gender-remove-valid"]
         }
 
     }

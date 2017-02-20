@@ -40,16 +40,16 @@ class CharacterUnhideRaceCommand(private val plugin: RPKCharactersBukkit): Comma
                 if (character != null) {
                     character.isRaceHidden = false
                     characterProvider.updateCharacter(character)
-                    sender.sendMessage(plugin.core.messages["character-unhide-race-valid"])
+                    sender.sendMessage(plugin.messages["character-unhide-race-valid"])
                     character.showCharacterCard(player)
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-unhide-race"])
+                sender.sendMessage(plugin.messages["no-permission-character-unhide-race"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

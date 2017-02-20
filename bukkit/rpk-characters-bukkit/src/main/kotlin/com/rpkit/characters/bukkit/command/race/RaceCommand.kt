@@ -46,10 +46,10 @@ class RaceCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
             } else if (args[0].equals("list", ignoreCase = true)) {
                 return raceListCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.core.messages["race-usage"])
+                sender.sendMessage(plugin.messages["race-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["race-usage"])
+            sender.sendMessage(plugin.messages["race-usage"])
         }
         return true
     }

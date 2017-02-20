@@ -40,7 +40,7 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -59,15 +59,15 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
                     val race = raceProvider.getRace(raceBuilder.toString())
                     if (race != null) {
                         raceProvider.removeRace(race)
-                        sender.sendMessage(plugin.core.messages["race-remove-valid"])
+                        sender.sendMessage(plugin.messages["race-remove-valid"])
                     } else {
-                        sender.sendMessage(plugin.core.messages["race-remove-invalid-race"])
+                        sender.sendMessage(plugin.messages["race-remove-invalid-race"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-race-remove"])
+                sender.sendMessage(plugin.messages["no-permission-race-remove"])
             }
         }
         return true
@@ -86,11 +86,11 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return plugin.core.messages["race-remove-invalid-race"]
+            return plugin.messages["race-remove-invalid-race"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["race-remove-prompt"]
+            return plugin.messages["race-remove-prompt"]
         }
 
     }
@@ -102,7 +102,7 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["race-remove-valid"]
+            return plugin.messages["race-remove-valid"]
         }
 
     }

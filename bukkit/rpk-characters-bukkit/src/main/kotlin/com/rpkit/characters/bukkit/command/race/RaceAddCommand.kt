@@ -41,7 +41,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -59,15 +59,15 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
                     raceBuilder.append(args[args.size - 1])
                     if (raceProvider.getRace(raceBuilder.toString()) == null) {
                         raceProvider.addRace(RPKRaceImpl(name = raceBuilder.toString()))
-                        sender.sendMessage(plugin.core.messages["race-add-valid"])
+                        sender.sendMessage(plugin.messages["race-add-valid"])
                     } else {
-                        sender.sendMessage(plugin.core.messages["race-add-invalid-race"])
+                        sender.sendMessage(plugin.messages["race-add-invalid-race"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-race-add"])
+                sender.sendMessage(plugin.messages["no-permission-race-add"])
             }
         }
         return true
@@ -76,7 +76,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
     private inner class RacePrompt: ValidatingPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["race-add-prompt"]
+            return plugin.messages["race-add-prompt"]
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
@@ -91,7 +91,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return plugin.core.messages["race-add-invalid-race"]
+            return plugin.messages["race-add-invalid-race"]
         }
 
     }
@@ -103,7 +103,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["race-add-valid"]
+            return plugin.messages["race-add-valid"]
         }
 
     }

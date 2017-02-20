@@ -22,21 +22,21 @@ class FlyCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             if (player != null) {
                 player.allowFlight = !player.allowFlight
                 if (player.allowFlight) {
-                    player.sendMessage(plugin.core.messages["fly-enable-notification"])
-                    sender.sendMessage(plugin.core.messages["fly-enable-valid", mapOf(
+                    player.sendMessage(plugin.messages["fly-enable-notification"])
+                    sender.sendMessage(plugin.messages["fly-enable-valid", mapOf(
                             Pair("player", player.name)
                     )])
                 } else {
-                    player.sendMessage(plugin.core.messages["fly-disable-notification"])
-                    sender.sendMessage(plugin.core.messages["fly-disable-valid", mapOf(
+                    player.sendMessage(plugin.messages["fly-disable-notification"])
+                    sender.sendMessage(plugin.messages["fly-disable-valid", mapOf(
                             Pair("player", player.name)
                     )])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["fly-usage-console"])
+                sender.sendMessage(plugin.messages["fly-usage-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-fly"])
+            sender.sendMessage(plugin.messages["no-permission-fly"])
         }
         return true
     }

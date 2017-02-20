@@ -15,12 +15,12 @@ class GetBookCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
             if (sender is Player) {
                 sender.inventory.addItem(ItemStack(Material.BOOK_AND_QUILL))
                 sender.updateInventory()
-                sender.sendMessage(plugin.core.messages["get-book-valid"])
+                sender.sendMessage(plugin.messages["get-book-valid"])
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-get-book"])
+            sender.sendMessage(plugin.messages["no-permission-get-book"])
         }
         return true
     }

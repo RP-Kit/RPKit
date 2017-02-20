@@ -75,10 +75,10 @@ class CharacterCommand(private val plugin: RPKCharactersBukkit): CommandExecutor
             } else if (args[0].equals("delete", ignoreCase = true)) {
                 return characterDeleteCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.core.messages["character-usage"])
+                sender.sendMessage(plugin.messages["character-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["character-usage"])
+            sender.sendMessage(plugin.messages["character-usage"])
         }
         return true
     }

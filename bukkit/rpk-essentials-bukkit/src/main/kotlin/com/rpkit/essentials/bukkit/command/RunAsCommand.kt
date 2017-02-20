@@ -17,15 +17,15 @@ class RunAsCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                         commandToRun.append(args[i]).append(" ")
                     }
                     plugin.server.dispatchCommand(player, commandToRun.toString())
-                    sender.sendMessage(plugin.core.messages["run-as-valid"])
+                    sender.sendMessage(plugin.messages["run-as-valid"])
                 } else {
-                    sender.sendMessage(plugin.core.messages["run-as-invalid-player"])
+                    sender.sendMessage(plugin.messages["run-as-invalid-player"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["run-as-usage"])
+                sender.sendMessage(plugin.messages["run-as-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-run-as"])
+            sender.sendMessage(plugin.messages["no-permission-run-as"])
         }
         return true
     }

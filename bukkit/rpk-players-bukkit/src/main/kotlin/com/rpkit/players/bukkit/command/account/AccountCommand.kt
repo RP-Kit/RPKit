@@ -35,10 +35,10 @@ class AccountCommand(private val plugin: RPKPlayersBukkit): CommandExecutor {
             if (args[0].equals("link", ignoreCase = true)) {
                 return accountLinkCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.core.messages["account-usage"])
+                sender.sendMessage(plugin.messages["account-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["account-usage"])
+            sender.sendMessage(plugin.messages["account-usage"])
         }
         return true
     }

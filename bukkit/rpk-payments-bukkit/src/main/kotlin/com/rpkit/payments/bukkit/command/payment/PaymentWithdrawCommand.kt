@@ -54,36 +54,36 @@ class PaymentWithdrawCommand(private val plugin: RPKPaymentsBukkit): CommandExec
                                                 bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) + amount)
                                                 paymentGroup.balance = paymentGroup.balance - amount
                                                 paymentGroupProvider.updatePaymentGroup(paymentGroup)
-                                                sender.sendMessage(plugin.core.messages["payment-withdraw-valid"])
+                                                sender.sendMessage(plugin.messages["payment-withdraw-valid"])
                                             } else {
-                                                sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-balance"])
+                                                sender.sendMessage(plugin.messages["payment-withdraw-invalid-balance"])
                                             }
                                         } else {
-                                            sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-amount"])
+                                            sender.sendMessage(plugin.messages["payment-withdraw-invalid-amount"])
                                         }
                                     } catch (exception: NumberFormatException) {
-                                        sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-amount"])
+                                        sender.sendMessage(plugin.messages["payment-withdraw-invalid-amount"])
                                     }
                                 } else {
-                                    sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-currency"])
+                                    sender.sendMessage(plugin.messages["payment-withdraw-invalid-currency"])
                                 }
                             } else {
-                                sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-owner"])
+                                sender.sendMessage(plugin.messages["payment-withdraw-invalid-owner"])
                             }
                         } else {
-                            sender.sendMessage(plugin.core.messages[".payment-withdraw-invalid-group"])
+                            sender.sendMessage(plugin.messages[".payment-withdraw-invalid-group"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["payment-withdraw-invalid-character"])
+                        sender.sendMessage(plugin.messages["payment-withdraw-invalid-character"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["payment-withdraw-usage"])
+                    sender.sendMessage(plugin.messages["payment-withdraw-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-withdraw"])
+            sender.sendMessage(plugin.messages["no-permission-payment-withdraw"])
         }
         return true
     }

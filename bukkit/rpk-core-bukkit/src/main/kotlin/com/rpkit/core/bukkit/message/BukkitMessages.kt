@@ -1,6 +1,6 @@
 package com.rpkit.core.bukkit.message
 
-import com.rpkit.core.bukkit.RPKCoreBukkit
+import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.message.Messages
 import org.bukkit.ChatColor
 import org.bukkit.configuration.file.FileConfiguration
@@ -11,7 +11,7 @@ import java.io.InputStreamReader
 import java.util.logging.Level.SEVERE
 
 
-class BukkitMessages(private val plugin: RPKCoreBukkit): Messages {
+class BukkitMessages(private val plugin: RPKBukkitPlugin): Messages {
 
     private val messagesConfigFile = File(plugin.dataFolder, "messages.yml")
     val messagesConfig: FileConfiguration

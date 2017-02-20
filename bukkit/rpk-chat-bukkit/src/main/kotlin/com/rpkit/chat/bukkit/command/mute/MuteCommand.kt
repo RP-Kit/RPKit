@@ -40,22 +40,22 @@ class MuteCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                 if (chatChannel != null) {
                     if (sender.hasPermission("rpkit.chat.command.mute.${chatChannel.name}")) {
                         chatChannel.removeListener(player)
-                        sender.sendMessage(plugin.core.messages["mute-valid", mapOf(
+                        sender.sendMessage(plugin.messages["mute-valid", mapOf(
                                 Pair("channel", chatChannel.name)
                         )])
                     } else {
-                        sender.sendMessage(plugin.core.messages["no-permission-mute", mapOf(
+                        sender.sendMessage(plugin.messages["no-permission-mute", mapOf(
                                 Pair("channel", chatChannel.name)
                         )])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["mute-invalid-chatchannel"])
+                    sender.sendMessage(plugin.messages["mute-invalid-chatchannel"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["mute-usage"])
+                sender.sendMessage(plugin.messages["mute-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

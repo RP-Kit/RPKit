@@ -18,13 +18,13 @@ class SignChangeListener(private val plugin: RPKTravelBukkit): Listener {
                 val warp = warpProvider.getWarp(event.getLine(1))
                 if (warp == null) {
                     event.block.breakNaturally()
-                    event.player.sendMessage(plugin.core.messages["warp-sign-invalid-warp"])
+                    event.player.sendMessage(plugin.messages["warp-sign-invalid-warp"])
                     return
                 }
                 event.setLine(0, "$GREEN[warp]")
-                event.player.sendMessage(plugin.core.messages["warp-sign-valid"])
+                event.player.sendMessage(plugin.messages["warp-sign-valid"])
             } else {
-                event.player.sendMessage(plugin.core.messages["no-permission-warp-sign-create"])
+                event.player.sendMessage(plugin.messages["no-permission-warp-sign-create"])
             }
         }
     }

@@ -46,10 +46,10 @@ class CurrencyCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
             } else if (args[0].equals("list", ignoreCase = true)) {
                 return currencyListCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.core.messages["currency-usage"])
+                sender.sendMessage(plugin.messages["currency-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["currency-usage"])
+            sender.sendMessage(plugin.messages["currency-usage"])
         }
         return true
     }

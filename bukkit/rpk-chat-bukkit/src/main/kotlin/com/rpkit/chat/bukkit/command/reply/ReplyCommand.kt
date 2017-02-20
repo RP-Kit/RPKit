@@ -45,16 +45,16 @@ class ReplyCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                         }
                         chatGroup.sendMessage(player, message.toString())
                     } else {
-                        sender.sendMessage(plugin.core.messages["reply-usage"])
+                        sender.sendMessage(plugin.messages["reply-usage"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["reply-invalid-chat-group"])
+                    sender.sendMessage(plugin.messages["reply-invalid-chat-group"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-reply"])
+            sender.sendMessage(plugin.messages["no-permission-reply"])
         }
         return true
     }

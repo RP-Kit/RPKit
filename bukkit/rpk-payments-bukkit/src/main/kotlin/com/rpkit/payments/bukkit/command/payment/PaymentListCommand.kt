@@ -39,12 +39,12 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                 val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
                 val player = playerProvider.getPlayer(sender)
                 val character = characterProvider.getActiveCharacter(player)
-                sender.sendMessage(plugin.core.messages["payment-list-title"])
+                sender.sendMessage(plugin.messages["payment-list-title"])
                 val paymentGroups = paymentGroupProvider.paymentGroups
                 paymentGroups.filter { it.owners.contains(character) }
                         .forEach {
                             sender.sendMessage(
-                                    plugin.core.messages["payment-list-item", mapOf(
+                                    plugin.messages["payment-list-item", mapOf(
                                             Pair("name", it.name),
                                             Pair("rank", "Owner")
                                     )]
@@ -53,7 +53,7 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                 paymentGroups.filter { it.members.contains(character) }
                         .forEach {
                             sender.sendMessage(
-                                    plugin.core.messages[".payment-list-item", mapOf(
+                                    plugin.messages[".payment-list-item", mapOf(
                                             Pair("name", it.name),
                                             Pair("rank", "Member")
                                     )]
@@ -62,7 +62,7 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                 paymentGroups.filter { it.invites.contains(character) }
                         .forEach {
                             sender.sendMessage(
-                                    plugin.core.messages["payment-list-item", mapOf(
+                                    plugin.messages["payment-list-item", mapOf(
                                             Pair("name", it.name),
                                             Pair("rank", "Invited")
                                     )]
@@ -70,7 +70,7 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                         }
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-list"])
+            sender.sendMessage(plugin.messages["no-permission-payment-list"])
         }
         return true
     }

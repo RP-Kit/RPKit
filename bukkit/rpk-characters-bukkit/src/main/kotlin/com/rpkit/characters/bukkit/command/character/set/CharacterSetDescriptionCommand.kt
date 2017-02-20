@@ -37,12 +37,12 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit): C
                 .withModality(true)
                 .withFirstPrompt(DescriptionPrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
                 .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -64,19 +64,19 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit): C
                         descriptionBuilder.append(args[args.size - 1])
                         character.description = descriptionBuilder.toString()
                         characterProvider.updateCharacter(character)
-                        sender.sendMessage(plugin.core.messages["character-set-description-valid"])
+                        sender.sendMessage(plugin.messages["character-set-description-valid"])
                         character.showCharacterCard(player)
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-set-description"])
+                sender.sendMessage(plugin.messages["no-permission-character-set-description"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -84,7 +84,7 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit): C
     private inner class DescriptionPrompt: StringPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-set-description-prompt"]
+            return plugin.messages["character-set-description-prompt"]
         }
 
         override fun acceptInput(context: ConversationContext, input: String): Prompt {
@@ -127,7 +127,7 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit): C
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-set-description-valid"]
+            return plugin.messages["character-set-description-valid"]
         }
 
     }

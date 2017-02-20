@@ -23,7 +23,7 @@ class SudoCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 sender.setOp(previousOpState)
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-sudo", mapOf(
+            sender.sendMessage(plugin.messages["no-permission-sudo", mapOf(
                     Pair("player", sender.name)
             )])
         }

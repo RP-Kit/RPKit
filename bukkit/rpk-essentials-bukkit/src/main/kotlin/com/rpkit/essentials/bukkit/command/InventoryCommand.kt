@@ -15,20 +15,20 @@ class InventoryCommand(private val plugin: RPKEssentialsBukkit) : CommandExecuto
                     if (plugin.server.getPlayer(args[0]) != null) {
                         val target = plugin.server.getPlayer(args[0])
                         sender.openInventory(target.inventory)
-                        sender.sendMessage(plugin.core.messages["inventory-valid", mapOf(
+                        sender.sendMessage(plugin.messages["inventory-valid", mapOf(
                                 Pair("player", target.name)
                         )])
                     } else {
-                        sender.sendMessage(plugin.core.messages["inventory-invalid-player"])
+                        sender.sendMessage(plugin.messages["inventory-invalid-player"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["not-from-console"])
+                    sender.sendMessage(plugin.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["inventory-usage"])
+                sender.sendMessage(plugin.messages["inventory-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-inventory"])
+            sender.sendMessage(plugin.messages["no-permission-inventory"])
         }
         return true
     }

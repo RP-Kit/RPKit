@@ -64,15 +64,15 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                             paymentGroup.addOwner(character)
                         }
                     }
-                    sender.sendMessage(plugin.core.messages["payment-create-valid"])
+                    sender.sendMessage(plugin.messages["payment-create-valid"])
                 } else{
-                    sender.sendMessage(plugin.core.messages["payment-create-invalid-name-already-exists"])
+                    sender.sendMessage(plugin.messages["payment-create-invalid-name-already-exists"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["payment-create-usage"])
+                sender.sendMessage(plugin.messages["payment-create-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-create"])
+            sender.sendMessage(plugin.messages["no-permission-payment-create"])
         }
         return true
     }

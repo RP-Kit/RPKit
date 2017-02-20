@@ -40,12 +40,12 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
                 .withModality(true)
                 .withFirstPrompt(PlayerPrompt(plugin))
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
                 .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -66,22 +66,22 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
                             character.player = newPlayer
                             characterProvider.updateCharacter(character)
                             characterProvider.setActiveCharacter(player, null)
-                            sender.sendMessage(plugin.core.messages["character-set-player-valid"])
+                            sender.sendMessage(plugin.messages["character-set-player-valid"])
                             character.showCharacterCard(player)
                         } else {
-                            sender.sendMessage(plugin.core.messages["character-set-player-invalid-player"])
+                            sender.sendMessage(plugin.messages["character-set-player-invalid-player"])
                         }
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-set-player"])
+                sender.sendMessage(plugin.messages["no-permission-character-set-player"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -105,11 +105,11 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return plugin.core.messages["character-set-player-invalid-player"]
+            return plugin.messages["character-set-player-invalid-player"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-set-player-prompt"]
+            return plugin.messages["character-set-player-prompt"]
         }
 
     }
@@ -128,7 +128,7 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-set-player-valid"]
+            return plugin.messages["character-set-player-valid"]
         }
 
     }

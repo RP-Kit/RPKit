@@ -62,7 +62,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
         if (chatChannel != null) {
             chatChannel.sendMessage(player, message)
         } else {
-            event.player.sendMessage(plugin.core.messages["no-chat-channel"])
+            event.player.sendMessage(plugin.messages["no-chat-channel"])
         }
     }
 

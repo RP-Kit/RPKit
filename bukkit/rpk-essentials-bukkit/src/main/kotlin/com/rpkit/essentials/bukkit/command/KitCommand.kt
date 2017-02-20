@@ -18,25 +18,25 @@ class KitCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                     val kit = kitProvider.getKit(args[0])
                     if (kit != null) {
                         sender.inventory.addItem(*kit.items.toTypedArray())
-                        sender.sendMessage(plugin.core.messages["kit-valid", mapOf(
+                        sender.sendMessage(plugin.messages["kit-valid", mapOf(
                                 Pair("kit", kit.name)
                         )])
                     } else {
-                        sender.sendMessage(plugin.core.messages["kit-invalid-kit"])
+                        sender.sendMessage(plugin.messages["kit-invalid-kit"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["kit-list-title"])
+                    sender.sendMessage(plugin.messages["kit-list-title"])
                     for (kitName in kitProvider.kits.map(RPKKit::name)) {
-                        sender.sendMessage(plugin.core.messages["kit-list-item", mapOf(
+                        sender.sendMessage(plugin.messages["kit-list-item", mapOf(
                                 Pair("kit", kitName)
                         )])
                     }
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-kit"])
+            sender.sendMessage(plugin.messages["no-permission-kit"])
         }
         return true
     }

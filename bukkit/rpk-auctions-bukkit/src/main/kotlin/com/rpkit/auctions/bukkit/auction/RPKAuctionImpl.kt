@@ -86,7 +86,7 @@ class RPKAuctionImpl(
                             if (bukkitPlayer.isOnline) {
                                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                                 if (characterProvider.getActiveCharacter(player) == character) {
-                                    bukkitPlayer.player.sendMessage(plugin.core.messages["auction-item-received", mapOf(
+                                    bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
                                             Pair("amount", item.amount.toString()),
                                             Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
                                             Pair("character", this.character.name),
@@ -105,7 +105,7 @@ class RPKAuctionImpl(
                             if (bukkitPlayer.isOnline) {
                                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                                 if (characterProvider.getActiveCharacter(player) == character) {
-                                    bukkitPlayer.player.sendMessage(plugin.core.messages["auction-item-received", mapOf(
+                                    bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
                                             Pair("amount", item.amount.toString()),
                                             Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
                                             Pair("character", this.character.name),
@@ -125,7 +125,7 @@ class RPKAuctionImpl(
                         if (bukkitPlayer.isOnline) {
                             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                             if (characterProvider.getActiveCharacter(player) == character) {
-                                bukkitPlayer.player.sendMessage(plugin.core.messages["auction-item-received", mapOf(
+                                bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
                                         Pair("amount", item.amount.toString()),
                                         Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
                                         Pair("character", this.character.name),

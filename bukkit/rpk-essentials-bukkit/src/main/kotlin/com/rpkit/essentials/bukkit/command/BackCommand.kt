@@ -19,15 +19,15 @@ class BackCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 val previousLocation = locationHistoryProvider.getPreviousLocation(player)
                 if (previousLocation != null) {
                     sender.teleport(previousLocation)
-                    sender.sendMessage(plugin.core.messages["back-valid"])
+                    sender.sendMessage(plugin.messages["back-valid"])
                 } else {
-                    sender.sendMessage(plugin.core.messages["back-invalid-no-locations"])
+                    sender.sendMessage(plugin.messages["back-invalid-no-locations"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-back"])
+                sender.sendMessage(plugin.messages["no-permission-back"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

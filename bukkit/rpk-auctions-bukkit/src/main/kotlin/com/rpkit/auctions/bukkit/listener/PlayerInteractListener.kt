@@ -66,7 +66,7 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
                                             )
                                             auction.addBid(bid)
                                             auctionProvider.updateAuction(auction)
-                                            event.player.sendMessage(plugin.core.messages["bid-valid", mapOf(
+                                            event.player.sendMessage(plugin.messages["bid-valid", mapOf(
                                                     Pair("amount", bid.amount.toString()),
                                                     Pair("currency", if (bid.amount == 1) auction.currency.nameSingular else auction.currency.namePlural),
                                                     Pair("item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else "")
@@ -82,7 +82,7 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
                                                     .filter { bukkitPlayer -> bukkitPlayer.isOnline }
                                                     .map { bukkitPlayer -> bukkitPlayer.player }
                                                     .forEach { player ->
-                                                        player.sendMessage(plugin.core.messages["bid-created", mapOf(
+                                                        player.sendMessage(plugin.messages["bid-created", mapOf(
                                                                 Pair("auction_id", bid.auction.id.toString()),
                                                                 Pair("character", bid.character.name),
                                                                 Pair("amount", bid.amount.toString()),
@@ -96,22 +96,22 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
                                                 event.clickedBlock.type = AIR
                                             }
                                         } else {
-                                            event.player.sendMessage(plugin.core.messages["bid-invalid-too-far-away"])
+                                            event.player.sendMessage(plugin.messages["bid-invalid-too-far-away"])
                                         }
                                     } else {
-                                        event.player.sendMessage(plugin.core.messages["bid-invalid-not-enough-money"])
+                                        event.player.sendMessage(plugin.messages["bid-invalid-not-enough-money"])
                                     }
                                 } else {
-                                    event.player.sendMessage(plugin.core.messages["no-character"])
+                                    event.player.sendMessage(plugin.messages["no-character"])
                                 }
                             } else {
-                                event.player.sendMessage(plugin.core.messages["bid-invalid-auction-not-open"])
+                                event.player.sendMessage(plugin.messages["bid-invalid-auction-not-open"])
                             }
                         } else {
-                            event.player.sendMessage(plugin.core.messages["bid-invalid-auction-not-existent"])
+                            event.player.sendMessage(plugin.messages["bid-invalid-auction-not-existent"])
                         }
                     } else {
-                        event.player.sendMessage(plugin.core.messages["no-permission-bid"])
+                        event.player.sendMessage(plugin.messages["no-permission-bid"])
                     }
                 }
             }

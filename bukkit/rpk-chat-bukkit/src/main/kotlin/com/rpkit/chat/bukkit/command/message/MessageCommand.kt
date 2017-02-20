@@ -46,10 +46,10 @@ class MessageCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                             }
                             chatGroup.sendMessage(senderPlayer, message.toString())
                         } else {
-                            sender.sendMessage(plugin.core.messages["chat-group-message-invalid-not-a-member"])
+                            sender.sendMessage(plugin.messages["chat-group-message-invalid-not-a-member"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["no-permission-chat-group-message"])
+                        sender.sendMessage(plugin.messages["no-permission-chat-group-message"])
                     }
                 } else if (plugin.server.getPlayer(args[0]) != null) {
                     if (sender.hasPermission("rpkit.chat.command.message")) {
@@ -74,19 +74,19 @@ class MessageCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                             }
                             chatGroup.sendMessage(senderPlayer, message.toString())
                         } else {
-                            sender.sendMessage(plugin.core.messages["message-invalid-self"])
+                            sender.sendMessage(plugin.messages["message-invalid-self"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["no-permission-message"])
+                        sender.sendMessage(plugin.messages["no-permission-message"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["message-invalid-target"])
+                    sender.sendMessage(plugin.messages["message-invalid-target"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["message-usage"])
+            sender.sendMessage(plugin.messages["message-usage"])
         }
         return true
     }

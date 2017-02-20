@@ -41,16 +41,16 @@ class CharacterUnhidePlayerCommand(private val plugin: RPKCharactersBukkit): Com
                     character.isPlayerHidden = false
                     characterProvider.updateCharacter(character)
                     characterProvider.setActiveCharacter(player, null)
-                    sender.sendMessage(plugin.core.messages["character-unhide-player-valid"])
+                    sender.sendMessage(plugin.messages["character-unhide-player-valid"])
                     character.showCharacterCard(player)
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-unhide-player"])
+                sender.sendMessage(plugin.messages["no-permission-character-unhide-player"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

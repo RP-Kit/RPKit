@@ -38,12 +38,12 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
                 .withModality(true)
                 .withFirstPrompt(GenderPrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
                 .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -63,22 +63,22 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
                         if (gender != null) {
                             character.gender = gender
                             characterProvider.updateCharacter(character)
-                            sender.sendMessage(plugin.core.messages["character-set-gender-valid"])
+                            sender.sendMessage(plugin.messages["character-set-gender-valid"])
                             character.showCharacterCard(player)
                         } else {
-                            sender.sendMessage(plugin.core.messages["character-set-gender-invalid-gender"])
+                            sender.sendMessage(plugin.messages["character-set-gender-invalid-gender"])
                         }
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-set-gender"])
+                sender.sendMessage(plugin.messages["no-permission-character-set-gender"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -106,18 +106,18 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return plugin.core.messages["character-set-gender-invalid-gender"]
+            return plugin.messages["character-set-gender-invalid-gender"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
             val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
             val genderListBuilder = StringBuilder()
             for (gender in genderProvider.genders) {
-                genderListBuilder.append(plugin.core.messages["gender-list-item", mapOf(
+                genderListBuilder.append(plugin.messages["gender-list-item", mapOf(
                         Pair("gender", gender.name)
                 )]).append("\n")
             }
-            return plugin.core.messages["character-set-gender-prompt"] + "\n" + genderListBuilder.toString()
+            return plugin.messages["character-set-gender-prompt"] + "\n" + genderListBuilder.toString()
         }
 
     }
@@ -136,7 +136,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-set-gender-valid"]
+            return plugin.messages["character-set-gender-valid"]
         }
 
     }

@@ -46,21 +46,21 @@ class AccountLinkIRCCommand(private val plugin: RPKPlayersBukkit): CommandExecut
                             bukkitPlayer.ircNick = ircUser.nick
                             playerProvider.updatePlayer(bukkitPlayer)
                             playerProvider.removePlayer(ircPlayer)
-                            sender.sendMessage(plugin.core.messages["account-link-irc-valid"])
+                            sender.sendMessage(plugin.messages["account-link-irc-valid"])
                         } else {
-                            sender.sendMessage(plugin.core.messages["account-link-irc-invalid-already-linked"])
+                            sender.sendMessage(plugin.messages["account-link-irc-invalid-already-linked"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["account-link-irc-invalid-nick"])
+                        sender.sendMessage(plugin.messages["account-link-irc-invalid-nick"])
                     }
                 } catch (exception: UnregisteredServiceException) {
-                    sender.sendMessage(plugin.core.messages["account-link-irc-invalid-no-irc-provider"])
+                    sender.sendMessage(plugin.messages["account-link-irc-invalid-no-irc-provider"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["account-link-irc-usage"])
+                sender.sendMessage(plugin.messages["account-link-irc-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

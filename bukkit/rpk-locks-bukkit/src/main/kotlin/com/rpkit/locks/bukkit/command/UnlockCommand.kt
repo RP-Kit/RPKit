@@ -17,12 +17,12 @@ class UnlockCommand(private val plugin: RPKLocksBukkit): CommandExecutor {
                 val lockProvider = plugin.core.serviceManager.getServiceProvider(RPKLockProvider::class)
                 val player = playerProvider.getPlayer(sender)
                 lockProvider.setUnclaiming(player, true)
-                sender.sendMessage(plugin.core.messages["unlock-valid"])
+                sender.sendMessage(plugin.messages["unlock-valid"])
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-unlock"])
+            sender.sendMessage(plugin.messages["no-permission-unlock"])
         }
         return true
     }

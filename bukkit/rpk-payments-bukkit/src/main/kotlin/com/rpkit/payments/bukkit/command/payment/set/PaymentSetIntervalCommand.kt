@@ -36,12 +36,12 @@ class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit): CommandE
             .withModality(true)
             .withFirstPrompt(IntervalPrompt())
             .withEscapeSequence("cancel")
-            .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+            .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
                 if (!event.gracefulExit()) {
                     val conversable = event.context.forWhom
                     if (conversable is Player) {
-                        conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                        conversable.sendMessage(plugin.messages["operation-cancelled"])
                     }
                 }
             }
@@ -61,19 +61,19 @@ class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit): CommandE
                             conversation.context.setSessionData("payment_group", paymentGroup)
                             conversation.begin()
                         } else {
-                            sender.sendMessage(plugin.core.messages["payment-set-interval-invalid-owner"])
+                            sender.sendMessage(plugin.messages["payment-set-interval-invalid-owner"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["payment-set-interval-invalid-group"])
+                        sender.sendMessage(plugin.messages["payment-set-interval-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["payment-set-interval-usage"])
+                    sender.sendMessage(plugin.messages["payment-set-interval-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-set-interval"])
+            sender.sendMessage(plugin.messages["no-permission-payment-set-interval"])
         }
         return true
     }
@@ -81,7 +81,7 @@ class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit): CommandE
     private inner class IntervalPrompt: NumericPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["payment-set-interval-prompt"]
+            return plugin.messages["payment-set-interval-prompt"]
         }
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
@@ -89,11 +89,11 @@ class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit): CommandE
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
-            return plugin.core.messages["payment-set-interval-invalid-validation"]
+            return plugin.messages["payment-set-interval-invalid-validation"]
         }
 
         override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
-            return plugin.core.messages["payment-set-interval-invalid-number"]
+            return plugin.messages["payment-set-interval-invalid-number"]
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
@@ -113,7 +113,7 @@ class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit): CommandE
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["payment-set-interval-valid"]
+            return plugin.messages["payment-set-interval-valid"]
         }
 
     }

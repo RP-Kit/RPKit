@@ -12,12 +12,12 @@ class SpawnCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
         if (sender.hasPermission("rpkit.essentials.command.spawn")) {
             if (sender is Player) {
                 sender.teleport(sender.world.spawnLocation)
-                sender.sendMessage(plugin.core.messages["spawn-valid"])
+                sender.sendMessage(plugin.messages["spawn-valid"])
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-spawn"])
+            sender.sendMessage(plugin.messages["no-permission-spawn"])
         }
         return true
     }

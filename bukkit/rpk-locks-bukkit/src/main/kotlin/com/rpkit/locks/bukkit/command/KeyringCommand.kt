@@ -25,13 +25,13 @@ class KeyringCommand(private val plugin: RPKLocksBukkit): CommandExecutor {
                     inventory.contents = keyring.toTypedArray()
                     sender.openInventory(inventory)
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-keyring"])
+            sender.sendMessage(plugin.messages["no-permission-keyring"])
         }
         return true
     }

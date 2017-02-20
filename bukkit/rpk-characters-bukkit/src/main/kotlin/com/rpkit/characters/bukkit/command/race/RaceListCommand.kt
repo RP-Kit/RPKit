@@ -31,14 +31,14 @@ class RaceListCommand(private val plugin: RPKCharactersBukkit): CommandExecutor 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.characters.command.race.list")) {
             val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
-            sender.sendMessage(plugin.core.messages["race-list-title"])
+            sender.sendMessage(plugin.messages["race-list-title"])
             for (race in raceProvider.races) {
-                sender.sendMessage(plugin.core.messages["race-list-item", mapOf(
+                sender.sendMessage(plugin.messages["race-list-item", mapOf(
                         Pair("race", race.name)
                 )])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-race-list"])
+            sender.sendMessage(plugin.messages["no-permission-race-list"])
         }
         return true
     }

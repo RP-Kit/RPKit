@@ -48,10 +48,10 @@ class PaymentKickCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                     if (character != null) {
                         paymentGroup.removeInvite(character)
                         paymentGroup.removeMember(character)
-                        sender.sendMessage(plugin.core.messages["payment-kick-valid"])
+                        sender.sendMessage(plugin.messages["payment-kick-valid"])
                         val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
                         val now = System.currentTimeMillis()
-                        val notificationMessage = plugin.core.messages["payment-notification-kick", mapOf(
+                        val notificationMessage = plugin.messages["payment-notification-kick", mapOf(
                                 Pair("member", character.name),
                                 Pair("group", paymentGroup.name),
                                 Pair("date", dateFormat.format(Date(now)))
@@ -70,16 +70,16 @@ class PaymentKickCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                             character.player?.bukkitPlayer?.player?.sendMessage(notificationMessage)
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["payment-kick-invalid-character"])
+                        sender.sendMessage(plugin.messages["payment-kick-invalid-character"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["payment-kick-invalid-group"])
+                    sender.sendMessage(plugin.messages["payment-kick-invalid-group"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["payment-kick-usage"])
+                sender.sendMessage(plugin.messages["payment-kick-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-kick"])
+            sender.sendMessage(plugin.messages["no-permission-payment-kick"])
         }
         return true
     }

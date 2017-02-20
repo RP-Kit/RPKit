@@ -38,12 +38,12 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit): CommandE
             .withModality(true)
             .withFirstPrompt(CurrencyPrompt())
             .withEscapeSequence("cancel")
-            .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+            .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
                 if (!event.gracefulExit()) {
                     val conversable = event.context.forWhom
                     if (conversable is Player) {
-                        conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                        conversable.sendMessage(plugin.messages["operation-cancelled"])
                     }
                 }
             }
@@ -64,19 +64,19 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit): CommandE
                             conversation.context.setSessionData("payment_group", paymentGroup)
                             conversation.begin()
                         } else {
-                            sender.sendMessage(plugin.core.messages["payment-set-currency-invalid-owner"])
+                            sender.sendMessage(plugin.messages["payment-set-currency-invalid-owner"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["payment-set-currency-invalid-group"])
+                        sender.sendMessage(plugin.messages["payment-set-currency-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["payment-set-currency-usage"])
+                    sender.sendMessage(plugin.messages["payment-set-currency-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-set-currency"])
+            sender.sendMessage(plugin.messages["no-permission-payment-set-currency"])
         }
         return true
     }
@@ -84,7 +84,7 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit): CommandE
     private inner class CurrencyPrompt: ValidatingPrompt() {
 
         override fun getPromptText(context: ConversationContext?): String {
-            return plugin.core.messages["payment-set-currency-prompt"]
+            return plugin.messages["payment-set-currency-prompt"]
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
@@ -92,7 +92,7 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit): CommandE
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String?): String {
-            return plugin.core.messages["payment-set-currency-invalid-currency"]
+            return plugin.messages["payment-set-currency-invalid-currency"]
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
@@ -113,7 +113,7 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit): CommandE
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["payment-set-currency-valid"]
+            return plugin.messages["payment-set-currency-valid"]
         }
 
     }

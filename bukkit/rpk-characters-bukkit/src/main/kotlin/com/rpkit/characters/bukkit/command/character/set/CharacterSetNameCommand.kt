@@ -37,12 +37,12 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit): CommandE
                 .withModality(true)
                 .withFirstPrompt(NamePrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
                 .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -64,19 +64,19 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit): CommandE
                         nameBuilder.append(args[args.size - 1])
                         character.name = nameBuilder.toString()
                         characterProvider.updateCharacter(character)
-                        sender.sendMessage(plugin.core.messages["character-set-name-valid"])
+                        sender.sendMessage(plugin.messages["character-set-name-valid"])
                         character.showCharacterCard(player)
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-set-name"])
+                sender.sendMessage(plugin.messages["no-permission-character-set-name"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -84,7 +84,7 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit): CommandE
     private inner class NamePrompt: StringPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-set-name-prompt"]
+            return plugin.messages["character-set-name-prompt"]
         }
 
         override fun acceptInput(context: ConversationContext, input: String): Prompt {
@@ -118,7 +118,7 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit): CommandE
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-set-name-valid"]
+            return plugin.messages["character-set-name-valid"]
         }
     }
 }

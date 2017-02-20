@@ -31,14 +31,14 @@ class GenderListCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.characters.command.gender.list")) {
             val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
-            sender.sendMessage(plugin.core.messages["gender-list-title"])
+            sender.sendMessage(plugin.messages["gender-list-title"])
             for (gender in genderProvider.genders) {
-                sender.sendMessage(plugin.core.messages["gender-list-item", mapOf(
+                sender.sendMessage(plugin.messages["gender-list-item", mapOf(
                         Pair("gender", gender.name)
                 )])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-gender-list"])
+            sender.sendMessage(plugin.messages["no-permission-gender-list"])
         }
         return true
     }

@@ -20,22 +20,22 @@ class SpawnMobCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                             for (i in 0..amount - 1) {
                                 sender.location.world.spawnEntity(sender.location, entityType)
                             }
-                            sender.sendMessage(plugin.core.messages["spawn-mob-valid"])
+                            sender.sendMessage(plugin.messages["spawn-mob-valid"])
                         } catch (exception: NumberFormatException) {
-                            sender.sendMessage(plugin.core.messages["spawn-mob-invalid-amount"])
+                            sender.sendMessage(plugin.messages["spawn-mob-invalid-amount"])
                         }
 
                     } catch (exception: IllegalArgumentException) {
-                        sender.sendMessage(plugin.core.messages["spawn-mob-invalid-mob"])
+                        sender.sendMessage(plugin.messages["spawn-mob-invalid-mob"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["not-from-console"])
+                    sender.sendMessage(plugin.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["spawn-mob-usage"])
+                sender.sendMessage(plugin.messages["spawn-mob-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-spawn-mob"])
+            sender.sendMessage(plugin.messages["no-permission-spawn-mob"])
         }
         return true
     }

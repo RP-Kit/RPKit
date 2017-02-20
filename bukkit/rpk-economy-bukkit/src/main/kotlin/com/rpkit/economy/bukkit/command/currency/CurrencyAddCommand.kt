@@ -39,7 +39,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         if (!event.gracefulExit()) {
             val conversable = event.context.forWhom
             if (conversable is Player) {
-                conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                conversable.sendMessage(plugin.messages["operation-cancelled"])
             }
         }
     }
@@ -49,7 +49,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
             if (sender.hasPermission("rpkit.economy.command.currency.add")) {
                 conversationFactory.buildConversation(sender).begin()
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-currency-add"])
+                sender.sendMessage(plugin.messages["no-permission-currency-add"])
             }
         }
         return true
@@ -58,7 +58,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
     private inner class NamePrompt: ValidatingPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-name-prompt"]
+            return plugin.messages["currency-set-name-prompt"]
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
@@ -67,7 +67,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return plugin.core.messages["currency-set-name-invalid-name"]
+            return plugin.messages["currency-set-name-invalid-name"]
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
@@ -84,14 +84,14 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-name-valid"]
+            return plugin.messages["currency-set-name-valid"]
         }
 
     }
 
     private inner class NameSingularPrompt: StringPrompt() {
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-name-singular-prompt"]
+            return plugin.messages["currency-set-name-singular-prompt"]
         }
 
         override fun acceptInput(context: ConversationContext, input: String): Prompt {
@@ -107,14 +107,14 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-name-singular-valid"]
+            return plugin.messages["currency-set-name-singular-valid"]
         }
 
     }
 
     private inner class NamePluralPrompt: StringPrompt() {
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-name-plural-prompt"]
+            return plugin.messages["currency-set-name-plural-prompt"]
         }
 
         override fun acceptInput(context: ConversationContext, input: String): Prompt {
@@ -130,7 +130,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-name-plural-valid"]
+            return plugin.messages["currency-set-name-plural-valid"]
         }
 
     }
@@ -142,7 +142,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-rate-prompt"]
+            return plugin.messages["currency-set-rate-prompt"]
         }
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
@@ -150,11 +150,11 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String? {
-            return plugin.core.messages["currency-set-rate-invalid-rate-negative"]
+            return plugin.messages["currency-set-rate-invalid-rate-negative"]
         }
 
         override fun getInputNotNumericText(context: ConversationContext?, invalidInput: String?): String? {
-            return plugin.core.messages["currency-set-rate-invalid-rate-number"]
+            return plugin.messages["currency-set-rate-invalid-rate-number"]
         }
     }
 
@@ -164,7 +164,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-rate-valid"]
+            return plugin.messages["currency-set-rate-valid"]
         }
 
     }
@@ -176,7 +176,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-default-amount-prompt"]
+            return plugin.messages["currency-set-default-amount-prompt"]
         }
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
@@ -184,11 +184,11 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
-            return plugin.core.messages["currency-set-default-amount-invalid-negative"]
+            return plugin.messages["currency-set-default-amount-invalid-negative"]
         }
 
         override fun getInputNotNumericText(context: ConversationContext?, invalidInput: String?): String? {
-            return plugin.core.messages["currency-set-default-amount-invalid-number"]
+            return plugin.messages["currency-set-default-amount-invalid-number"]
         }
     }
 
@@ -198,7 +198,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-default-amount-valid"]
+            return plugin.messages["currency-set-default-amount-valid"]
         }
 
     }
@@ -214,11 +214,11 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-material-prompt"]
+            return plugin.messages["currency-set-material-prompt"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return plugin.core.messages["currency-set-material-invalid-material"]
+            return plugin.messages["currency-set-material-invalid-material"]
         }
 
     }
@@ -229,7 +229,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-set-material-valid"]
+            return plugin.messages["currency-set-material-valid"]
         }
 
     }
@@ -251,7 +251,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["currency-add-valid"]
+            return plugin.messages["currency-add-valid"]
         }
 
     }

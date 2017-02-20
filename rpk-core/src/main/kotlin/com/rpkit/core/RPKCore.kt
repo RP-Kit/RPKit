@@ -17,7 +17,6 @@
 package com.rpkit.core
 
 import com.rpkit.core.database.Database
-import com.rpkit.core.message.Messages
 import com.rpkit.core.service.ServiceManager
 import com.rpkit.core.web.Web
 import java.util.logging.Logger
@@ -31,7 +30,7 @@ import java.util.logging.Logger
  * @property web The web instance to use
  * @property messages The messages instance to use
  */
-class RPKCore(val logger: Logger, val database: Database, val web: Web, val messages: Messages) {
+class RPKCore(val logger: Logger, val database: Database, val web: Web) {
 
     /**
      * The service manager.

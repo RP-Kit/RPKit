@@ -40,16 +40,16 @@ class CharacterHideAgeCommand(private val plugin: RPKCharactersBukkit): CommandE
                 if (character != null) {
                     character.isAgeHidden = true
                     characterProvider.updateCharacter(character)
-                    sender.sendMessage(plugin.core.messages["character-hide-age-valid"])
+                    sender.sendMessage(plugin.messages["character-hide-age-valid"])
                     character.showCharacterCard(player)
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-hide-age"])
+                sender.sendMessage(plugin.messages["no-permission-character-hide-age"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

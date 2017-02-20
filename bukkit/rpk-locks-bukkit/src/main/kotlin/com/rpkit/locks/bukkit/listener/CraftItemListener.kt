@@ -16,7 +16,7 @@ class CraftItemListener(private val plugin: RPKLocksBukkit): Listener {
                 val lockProvider = plugin.core.serviceManager.getServiceProvider(RPKLockProvider::class)
                 if (lockProvider.isKey(item)) {
                     event.isCancelled = true
-                    event.whoClicked.sendMessage(plugin.core.messages["crafting-no-keys"])
+                    event.whoClicked.sendMessage(plugin.messages["crafting-no-keys"])
                 }
             }
         }

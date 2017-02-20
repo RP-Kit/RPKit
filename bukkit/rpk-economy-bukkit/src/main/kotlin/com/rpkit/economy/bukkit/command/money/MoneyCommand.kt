@@ -50,7 +50,7 @@ class MoneyCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
             } else if (args[0].equals("wallet", ignoreCase = true)) {
                 return moneyWalletCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.core.messages["money-usage"])
+                sender.sendMessage(plugin.messages["money-usage"])
             }
         } else {
             return moneyViewCommand.onCommand(sender, command, label, arrayOf<String>())

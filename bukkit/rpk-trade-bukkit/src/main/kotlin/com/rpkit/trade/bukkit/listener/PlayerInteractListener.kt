@@ -61,7 +61,7 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                         if (economyProvider.getBalance(character, currency) >= buyPrice) {
                                             economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - buyPrice)
                                             event.player.inventory.addItem(ItemStack(material, amount))
-                                            event.player.sendMessage(plugin.core.messages["trader-buy", mapOf(
+                                            event.player.sendMessage(plugin.messages["trader-buy", mapOf(
                                                     Pair("quantity", amount.toString()),
                                                     Pair("material", material.toString().toLowerCase().replace('_', ' ')),
                                                     Pair("price", buyPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
@@ -77,13 +77,13 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                             sign.setLine(2, buyPrice.toString() + " | " + sellPrice.toString())
                                             sign.update()
                                         } else {
-                                            event.player.sendMessage(plugin.core.messages["trader-buy-insufficient-funds"])
+                                            event.player.sendMessage(plugin.messages["trader-buy-insufficient-funds"])
                                         }
                                     } else {
-                                        event.player.sendMessage(plugin.core.messages["no-permission-trader-buy"])
+                                        event.player.sendMessage(plugin.messages["no-permission-trader-buy"])
                                     }
                                 } else {
-                                    event.player.sendMessage(plugin.core.messages["no-character"])
+                                    event.player.sendMessage(plugin.messages["no-character"])
                                 }
                             } else if (event.action == LEFT_CLICK_BLOCK) {
                                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
@@ -113,7 +113,7 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                                             }
                                                         }
                                                 event.player.inventory.contents = contents
-                                                event.player.sendMessage(plugin.core.messages["trader-sell", mapOf(
+                                                event.player.sendMessage(plugin.messages["trader-sell", mapOf(
                                                         Pair("quantity", amount.toString()),
                                                         Pair("material", material.toString().toLowerCase().replace('_', ' ')),
                                                         Pair("price", sellPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
@@ -129,16 +129,16 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                                 sign.setLine(2, buyPrice.toString() + " | " + sellPrice.toString())
                                                 sign.update()
                                             } else {
-                                                event.player.sendMessage(plugin.core.messages["trader-sell-insufficient-wallet-space"])
+                                                event.player.sendMessage(plugin.messages["trader-sell-insufficient-wallet-space"])
                                             }
                                         } else {
-                                            event.player.sendMessage(plugin.core.messages["trader-sell-insufficient-items"])
+                                            event.player.sendMessage(plugin.messages["trader-sell-insufficient-items"])
                                         }
                                     } else {
-                                        event.player.sendMessage(plugin.core.messages["no-permission-trader-sell"])
+                                        event.player.sendMessage(plugin.messages["no-permission-trader-sell"])
                                     }
                                 } else {
-                                    event.player.sendMessage(plugin.core.messages["no-character"])
+                                    event.player.sendMessage(plugin.messages["no-character"])
                                 }
                             }
                         }

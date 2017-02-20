@@ -49,10 +49,10 @@ class PaymentLeaveCommand(private val plugin: RPKPaymentsBukkit): CommandExecuto
                         if (character != null) {
                             if (paymentGroup.members.contains(character)) {
                                 paymentGroup.removeMember(character)
-                                sender.sendMessage(plugin.core.messages["payment-leave-valid"])
+                                sender.sendMessage(plugin.messages["payment-leave-valid"])
                                 val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
                                 val now = System.currentTimeMillis()
-                                val ownerNotificationMessage = plugin.core.messages["payment-notification-member-leave", mapOf(
+                                val ownerNotificationMessage = plugin.messages["payment-notification-member-leave", mapOf(
                                         Pair("member", character.name),
                                         Pair("group", paymentGroup.name),
                                         Pair("date", dateFormat.format(Date(now)))
@@ -73,22 +73,22 @@ class PaymentLeaveCommand(private val plugin: RPKPaymentsBukkit): CommandExecuto
                                     }
                                 }
                             } else {
-                                sender.sendMessage(plugin.core.messages["payment-leave-invalid-member"])
+                                sender.sendMessage(plugin.messages["payment-leave-invalid-member"])
                             }
                         } else {
-                            sender.sendMessage(plugin.core.messages["payment-leave-invalid-character"])
+                            sender.sendMessage(plugin.messages["payment-leave-invalid-character"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["payment-leave-invalid-group"])
+                        sender.sendMessage(plugin.messages["payment-leave-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["not-from-console"])
+                    sender.sendMessage(plugin.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["payment-leave-usage"])
+                sender.sendMessage(plugin.messages["payment-leave-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-leave"])
+            sender.sendMessage(plugin.messages["no-permission-payment-leave"])
         }
         return true
     }

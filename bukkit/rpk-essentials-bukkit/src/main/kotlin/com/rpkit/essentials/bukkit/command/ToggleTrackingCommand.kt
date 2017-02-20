@@ -22,18 +22,18 @@ class ToggleTrackingCommand(private val plugin: RPKEssentialsBukkit) : CommandEx
                 if (character != null) {
                     trackingProvider.setTrackable(character, !trackingProvider.isTrackable(character))
                     if (trackingProvider.isTrackable(character)) {
-                        sender.sendMessage(plugin.core.messages["toggle-tracking-on-valid"])
+                        sender.sendMessage(plugin.messages["toggle-tracking-on-valid"])
                     } else {
-                        sender.sendMessage(plugin.core.messages["toggle-tracking-off-valid"])
+                        sender.sendMessage(plugin.messages["toggle-tracking-off-valid"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character-self"])
+                    sender.sendMessage(plugin.messages["no-character-self"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-toggle-tracking"])
+                sender.sendMessage(plugin.messages["no-permission-toggle-tracking"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

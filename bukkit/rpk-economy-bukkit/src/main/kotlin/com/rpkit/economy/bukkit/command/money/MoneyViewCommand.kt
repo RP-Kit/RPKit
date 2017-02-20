@@ -63,10 +63,10 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
             }
             val finalCharacter = character
             if (finalCharacter != null) {
-                sender.sendMessage(plugin.core.messages["money-view-valid"])
+                sender.sendMessage(plugin.messages["money-view-valid"])
                 sender.sendMessage(currencyProvider.currencies
                         .map { currency ->
-                            plugin.core.messages["money-view-valid-list-item", mapOf(
+                            plugin.messages["money-view-valid-list-item", mapOf(
                                     Pair("currency", currency.name),
                                     Pair("balance", economyProvider.getBalance(finalCharacter, currency).toString())
                             )]
@@ -74,10 +74,10 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                         .toTypedArray()
                 )
             } else {
-                sender.sendMessage(plugin.core.messages["no-character"])
+                sender.sendMessage(plugin.messages["no-character"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

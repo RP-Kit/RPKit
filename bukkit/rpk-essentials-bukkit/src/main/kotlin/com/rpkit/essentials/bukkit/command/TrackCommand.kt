@@ -24,15 +24,15 @@ class TrackCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                         val character = characterProvider.getActiveCharacter(player)
                         if (character != null) {
                             if (!trackingProvider.isTrackable(character)) {
-                                sender.sendMessage(plugin.core.messages["track-invalid-untrackable"])
-                                bukkitPlayer.sendMessage(plugin.core.messages["track-untrackable-notification", mapOf(
+                                sender.sendMessage(plugin.messages["track-invalid-untrackable"])
+                                bukkitPlayer.sendMessage(plugin.messages["track-untrackable-notification", mapOf(
                                         Pair("player", sender.name)
                                 )])
                                 return true
                             }
                             val itemRequirement = plugin.config.getItemStack("track-command.item-requirement")
                             if (itemRequirement != null && !bukkitPlayer.inventory.containsAtLeast(itemRequirement, itemRequirement.amount)) {
-                                sender.sendMessage(plugin.core.messages["track-invalid-item", mapOf(
+                                sender.sendMessage(plugin.messages["track-invalid-item", mapOf(
                                         Pair("amount", itemRequirement.amount.toString()),
                                         Pair("type", itemRequirement.type.toString().toLowerCase().replace('_', ' '))
                                 )])
@@ -41,28 +41,28 @@ class TrackCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                             val maximumDistance = plugin.config.getInt("track-command.maximum-distance")
                             val distanceSquared = bukkitPlayer.location.distanceSquared(sender.location)
                             if (maximumDistance >= 0 && distanceSquared > maximumDistance * maximumDistance) {
-                                sender.sendMessage(plugin.core.messages["track-invalid-distance"])
+                                sender.sendMessage(plugin.messages["track-invalid-distance"])
                                 return true
                             }
                             sender.compassTarget = bukkitPlayer.location
-                            sender.sendMessage(plugin.core.messages["track-valid", mapOf(
+                            sender.sendMessage(plugin.messages["track-valid", mapOf(
                                     Pair("player", player.name),
                                     Pair("character", if (character.isNameHidden) "[HIDDEN]" else character.name)
                             )])
                         } else {
-                            sender.sendMessage(plugin.core.messages["no-character-other"])
+                            sender.sendMessage(plugin.messages["no-character-other"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["track-invalid-player"])
+                        sender.sendMessage(plugin.messages["track-invalid-player"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["track-usage"])
+                    sender.sendMessage(plugin.messages["track-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-track"])
+            sender.sendMessage(plugin.messages["no-permission-track"])
         }
         return true
     }

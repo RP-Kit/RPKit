@@ -14,13 +14,13 @@ class SeenCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             if (args.isNotEmpty()) {
                 val player = plugin.server.getOfflinePlayer(args[0])
                 if (player.isOnline) {
-                    sender.sendMessage(plugin.core.messages["seen-online", mapOf(
+                    sender.sendMessage(plugin.messages["seen-online", mapOf(
                             Pair("player", player.name)
                     )])
                 } else {
                     if (player.lastPlayed != 0L) {
                         val lastPlayed = Date(player.lastPlayed)
-                        sender.sendMessage(plugin.core.messages["seen-date", mapOf(
+                        sender.sendMessage(plugin.messages["seen-date", mapOf(
                                 Pair("player", player.name),
                                 Pair("date", SimpleDateFormat("yyyy-MM-dd").format(lastPlayed)),
                                 Pair("time", SimpleDateFormat("HH:mm:ss").format(lastPlayed))
@@ -30,21 +30,21 @@ class SeenCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                         val minute = millis / (1000 * 60) % 60
                         val hour = millis / (1000 * 60 * 60) % 24
                         val day = millis / (1000 * 60 * 60 * 24)
-                        sender.sendMessage(plugin.core.messages["seen-diff", mapOf(
+                        sender.sendMessage(plugin.messages["seen-diff", mapOf(
                                 Pair("days", day.toString()),
                                 Pair("hours", hour.toString()),
                                 Pair("minutes", minute.toString()),
                                 Pair("seconds", second.toString())
                         )])
                     } else {
-                        sender.sendMessage(plugin.core.messages["seen-never"])
+                        sender.sendMessage(plugin.messages["seen-never"])
                     }
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["seen-usage"])
+                sender.sendMessage(plugin.messages["seen-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-seen"])
+            sender.sendMessage(plugin.messages["no-permission-seen"])
         }
         return true
     }

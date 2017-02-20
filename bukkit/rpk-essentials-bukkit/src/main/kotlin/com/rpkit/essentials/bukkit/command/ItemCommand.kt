@@ -20,7 +20,7 @@ class ItemCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                         try {
                             amount = Integer.parseInt(args[1])
                         } catch (exception: NumberFormatException) {
-                            sender.sendMessage(plugin.core.messages["item-invalid-amount"])
+                            sender.sendMessage(plugin.messages["item-invalid-amount"])
                             return true
                         }
                     }
@@ -28,27 +28,27 @@ class ItemCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                         val item = ItemStack(material, amount)
                         sender.inventory.addItem(item)
                         if (amount > 1) {
-                            sender.sendMessage(plugin.core.messages["item-valid-plural", mapOf(
+                            sender.sendMessage(plugin.messages["item-valid-plural", mapOf(
                                     Pair("type", material.toString()),
                                     Pair("amount", amount.toString())
                             )])
                         } else {
-                            sender.sendMessage(plugin.core.messages["item-valid-singular", mapOf(
+                            sender.sendMessage(plugin.messages["item-valid-singular", mapOf(
                                     Pair("type", material.toString()),
                                     Pair("amount", amount.toString())
                             )])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["item-invalid-material"])
+                        sender.sendMessage(plugin.messages["item-invalid-material"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["item-usage"])
+                    sender.sendMessage(plugin.messages["item-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-item"])
+            sender.sendMessage(plugin.messages["no-permission-item"])
         }
         return true
     }

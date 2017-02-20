@@ -21,15 +21,15 @@ class HealCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             }
             if (player != null) {
                 player.health = player.maxHealth
-                player.sendMessage(plugin.core.messages["heal-notification"])
-                sender.sendMessage(plugin.core.messages["heal-valid", mapOf(
+                player.sendMessage(plugin.messages["heal-notification"])
+                sender.sendMessage(plugin.messages["heal-valid", mapOf(
                         Pair("player", player.name)
                 )])
             } else {
-                sender.sendMessage(plugin.core.messages["heal-usage-console"])
+                sender.sendMessage(plugin.messages["heal-usage-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-heal"])
+            sender.sendMessage(plugin.messages["no-permission-heal"])
         }
         return true
     }

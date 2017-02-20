@@ -15,12 +15,12 @@ class GetSignCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
             if (sender is Player) {
                 sender.inventory.addItem(ItemStack(Material.SIGN))
                 sender.updateInventory()
-                sender.sendMessage(plugin.core.messages["get-sign-valid"])
+                sender.sendMessage(plugin.messages["get-sign-valid"])
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-get-sign"])
+            sender.sendMessage(plugin.messages["no-permission-get-sign"])
         }
         return true
     }

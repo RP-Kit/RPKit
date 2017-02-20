@@ -47,8 +47,7 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
         core = RPKCore(
                 logger,
                 Database(config.getString("database.url"), config.getString("database.username"), config.getString("database.password")),
-                Web(webServer, mutableListOf(NavigationLink("Home", "/"))),
-                BukkitMessages(this)
+                Web(webServer, mutableListOf(NavigationLink("Home", "/")))
         )
         try {
             createTables(core.database)
@@ -96,6 +95,7 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
      */
     fun initializePlugin(rpkitBukkitPlugin: RPKBukkitPlugin) {
         rpkitBukkitPlugin.core = core
+        rpkitBukkitPlugin.messages = BukkitMessages(rpkitBukkitPlugin)
         rpkitBukkitPlugin.setDefaultMessages()
         try {
             rpkitBukkitPlugin.createTables(core.database)

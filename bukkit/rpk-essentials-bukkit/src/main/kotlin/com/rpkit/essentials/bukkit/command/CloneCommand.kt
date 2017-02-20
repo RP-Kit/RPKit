@@ -15,15 +15,15 @@ class CloneCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 if (sender.inventory.itemInMainHand != null) {
                     sender.inventory.addItem(ItemStack(sender.inventory.itemInMainHand))
                     sender.updateInventory()
-                    sender.sendMessage(plugin.core.messages["clone-valid"])
+                    sender.sendMessage(plugin.messages["clone-valid"])
                 } else {
-                    sender.sendMessage(plugin.core.messages["clone-invalid-item"])
+                    sender.sendMessage(plugin.messages["clone-invalid-item"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-clone"])
+            sender.sendMessage(plugin.messages["no-permission-clone"])
         }
         return true
     }

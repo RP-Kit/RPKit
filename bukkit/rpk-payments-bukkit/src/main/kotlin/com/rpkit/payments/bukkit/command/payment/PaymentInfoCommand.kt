@@ -48,7 +48,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                     val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
                     if (paymentGroup != null) {
                         if (paymentGroup.owners.contains(character)) {
-                            for (line in plugin.core.messages.getList("payment-info-owner")) {
+                            for (line in plugin.messages.getList("payment-info-owner")) {
                                 val message = FancyMessage("")
                                 var chatColor: ChatColor? = null
                                 var chatFormat: ChatColor? = null
@@ -309,7 +309,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                 message.send(sender)
                             }
                         } else {
-                            for (line in plugin.core.messages.getList("payment-info-not-owner")) {
+                            for (line in plugin.messages.getList("payment-info-not-owner")) {
                                 val message = FancyMessage("")
                                 var chatColor: ChatColor? = null
                                 var chatFormat: ChatColor? = null
@@ -499,16 +499,16 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                             }
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["payment-info-invalid-group"])
+                        sender.sendMessage(plugin.messages["payment-info-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["payment-info-usage"])
+                    sender.sendMessage(plugin.messages["payment-info-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-info"])
+            sender.sendMessage(plugin.messages["no-permission-payment-info"])
         }
         return true
     }

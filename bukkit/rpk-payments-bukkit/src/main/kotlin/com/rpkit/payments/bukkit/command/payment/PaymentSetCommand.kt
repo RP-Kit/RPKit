@@ -48,10 +48,10 @@ class PaymentSetCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor 
             } else if (args[0].equals("interval", ignoreCase = true)) {
                 return paymentSetIntervalCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.core.messages["payment-set-usage"])
+                sender.sendMessage(plugin.messages["payment-set-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["payment-set-usage"])
+            sender.sendMessage(plugin.messages["payment-set-usage"])
         }
         return true
     }

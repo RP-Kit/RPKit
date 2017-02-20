@@ -37,12 +37,12 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
             .withModality(true)
             .withFirstPrompt(NamePrompt())
             .withEscapeSequence("cancel")
-            .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+            .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
                 if (!event.gracefulExit()) {
                     val conversable = event.context.forWhom
                     if (conversable is Player) {
-                        conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                        conversable.sendMessage(plugin.messages["operation-cancelled"])
                     }
                 }
             }
@@ -63,19 +63,19 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
                             conversation.context.setSessionData("payment_group", paymentGroup)
                             conversation.begin()
                         } else {
-                            sender.sendMessage(plugin.core.messages["payment-set-name-invalid-owner"])
+                            sender.sendMessage(plugin.messages["payment-set-name-invalid-owner"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["payment-set-name-invalid-group"])
+                        sender.sendMessage(plugin.messages["payment-set-name-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["payment-set-name-usage"])
+                    sender.sendMessage(plugin.messages["payment-set-name-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-set-name"])
+            sender.sendMessage(plugin.messages["no-permission-payment-set-name"])
         }
         return true
     }
@@ -88,7 +88,7 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return plugin.core.messages["payment-set-name-invalid-name-already-exists"]
+            return plugin.messages["payment-set-name-invalid-name-already-exists"]
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
@@ -100,7 +100,7 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["payment-set-name-prompt"]
+            return plugin.messages["payment-set-name-prompt"]
         }
 
     }
@@ -112,7 +112,7 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
         }
 
         override fun getPromptText(context: ConversationContext?): String {
-            return plugin.core.messages["payment-set-name-valid"]
+            return plugin.messages["payment-set-name-valid"]
         }
 
     }

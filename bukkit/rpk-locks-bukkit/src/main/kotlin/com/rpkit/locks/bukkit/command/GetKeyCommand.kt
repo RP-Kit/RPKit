@@ -16,12 +16,12 @@ class GetKeyCommand(private val plugin: RPKLocksBukkit): CommandExecutor {
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                 val lockProvider = plugin.core.serviceManager.getServiceProvider(RPKLockProvider::class)
                 lockProvider.setGettingKey(playerProvider.getPlayer(sender), true)
-                sender.sendMessage(plugin.core.messages["get-key-valid"])
+                sender.sendMessage(plugin.messages["get-key-valid"])
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-get-key"])
+            sender.sendMessage(plugin.messages["no-permission-get-key"])
         }
         return true
     }

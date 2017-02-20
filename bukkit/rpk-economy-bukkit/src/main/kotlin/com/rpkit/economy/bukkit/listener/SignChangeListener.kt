@@ -16,12 +16,12 @@ class SignChangeListener(private val plugin: RPKEconomyBukkit): Listener {
             event.setLine(0, GREEN.toString() + "[exchange]")
             if (!event.player.hasPermission("rpkit.economy.sign.exchange")) {
                 event.block.breakNaturally()
-                event.player.sendMessage(plugin.core.messages["no-permission-exchange-create"])
+                event.player.sendMessage(plugin.messages["no-permission-exchange-create"])
                 return
             }
             if (!event.getLine(1).matches(Regex("\\d+\\s+.*"))) {
                 event.block.breakNaturally()
-                event.player.sendMessage(plugin.core.messages["exchange-sign-invalid-format-from"])
+                event.player.sendMessage(plugin.messages["exchange-sign-invalid-format-from"])
                 return
             }
             val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
@@ -29,7 +29,7 @@ class SignChangeListener(private val plugin: RPKEconomyBukkit): Listener {
             val fromCurrency = currencyProvider.getCurrency(fromCurrencyName)
             if (fromCurrency == null) {
                 event.block.breakNaturally()
-                event.player.sendMessage(plugin.core.messages["exchange-sign-invalid-currency-from"])
+                event.player.sendMessage(plugin.messages["exchange-sign-invalid-currency-from"])
                 return
             }
             event.setLine(2, "for")
@@ -37,7 +37,7 @@ class SignChangeListener(private val plugin: RPKEconomyBukkit): Listener {
             val toCurrency = currencyProvider.getCurrency(toCurrencyName)
             if (toCurrency == null) {
                 event.block.breakNaturally()
-                event.player.sendMessage(plugin.core.messages["exchange-sign-invalid-currency-to"])
+                event.player.sendMessage(plugin.messages["exchange-sign-invalid-currency-to"])
                 return
             }
         }

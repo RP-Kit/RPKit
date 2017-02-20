@@ -38,12 +38,12 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
                 .withModality(true)
                 .withFirstPrompt(RacePrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
                 .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -68,22 +68,22 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
                         if (race != null) {
                             character.race = race
                             characterProvider.updateCharacter(character)
-                            sender.sendMessage(plugin.core.messages["character-set-race-valid"])
+                            sender.sendMessage(plugin.messages["character-set-race-valid"])
                             character.showCharacterCard(player)
                         } else {
-                            sender.sendMessage(plugin.core.messages["character-set-race-invalid-race"])
+                            sender.sendMessage(plugin.messages["character-set-race-invalid-race"])
                         }
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-set-race"])
+                sender.sendMessage(plugin.messages["no-permission-character-set-race"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -111,18 +111,18 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return plugin.core.messages["character-set-race-invalid-race"]
+            return plugin.messages["character-set-race-invalid-race"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
             val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
             val raceListBuilder = StringBuilder()
             for (race in raceProvider.races) {
-                raceListBuilder.append(plugin.core.messages["race-list-item", mapOf(
+                raceListBuilder.append(plugin.messages["race-list-item", mapOf(
                         Pair("race", race.name)
                 )]).append('\n')
             }
-            return plugin.core.messages["character-set-race-prompt"] + "\n" + raceListBuilder.toString()
+            return plugin.messages["character-set-race-prompt"] + "\n" + raceListBuilder.toString()
         }
 
     }
@@ -141,7 +141,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-set-race-valid"]
+            return plugin.messages["character-set-race-valid"]
         }
 
     }

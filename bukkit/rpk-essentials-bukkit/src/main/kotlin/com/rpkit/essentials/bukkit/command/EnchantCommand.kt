@@ -21,17 +21,17 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                                 try {
                                     val level = args[1].toInt()
                                     sender.inventory.itemInMainHand.addUnsafeEnchantment(enchantment, level)
-                                    sender.sendMessage(plugin.core.messages["enchant-valid", mapOf(
+                                    sender.sendMessage(plugin.messages["enchant-valid", mapOf(
                                             Pair("amount", sender.inventory.itemInMainHand.amount.toString()),
                                             Pair("type", sender.inventory.itemInMainHand.type.toString().toLowerCase().replace('_', ' ')),
                                             Pair("enchantment", enchantment.name),
                                             Pair("level", level.toString())
                                     )])
                                 } catch (exception: NumberFormatException) {
-                                    sender.sendMessage(plugin.core.messages["enchant-invalid-level"])
+                                    sender.sendMessage(plugin.messages["enchant-invalid-level"])
                                 }
                             } else {
-                                sender.sendMessage(plugin.core.messages["enchant-invalid-enchantment"])
+                                sender.sendMessage(plugin.messages["enchant-invalid-enchantment"])
                             }
                         } else {
                             val enchantment = Enchantment.getByName(args[0].toUpperCase())
@@ -39,32 +39,32 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                                 try {
                                     val level = args[1].toInt()
                                     sender.inventory.itemInMainHand.addEnchantment(Enchantment.getByName(args[0].toUpperCase()), Integer.parseInt(args[1]))
-                                    sender.sendMessage(plugin.core.messages["enchant-valid", mapOf(
+                                    sender.sendMessage(plugin.messages["enchant-valid", mapOf(
                                             Pair("amount", sender.inventory.itemInMainHand.amount.toString()),
                                             Pair("type", sender.inventory.itemInMainHand.type.toString().toLowerCase().replace('_', ' ')),
                                             Pair("enchantment", enchantment.name),
                                             Pair("level", level.toString())
                                     )])
                                 } catch (exception: NumberFormatException) {
-                                    sender.sendMessage(plugin.core.messages["enchant-invalid-level"])
+                                    sender.sendMessage(plugin.messages["enchant-invalid-level"])
                                 } catch (exception: IllegalArgumentException) {
-                                    sender.sendMessage(plugin.core.messages["enchant-invalid-illegal"])
+                                    sender.sendMessage(plugin.messages["enchant-invalid-illegal"])
                                 }
                             } else {
-                                sender.sendMessage(plugin.core.messages["enchant-invalid-enchantment"])
+                                sender.sendMessage(plugin.messages["enchant-invalid-enchantment"])
                             }
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["enchant-usage"])
+                        sender.sendMessage(plugin.messages["enchant-usage"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["enchant-invalid-item"])
+                    sender.sendMessage(plugin.messages["enchant-invalid-item"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-enchant"])
+            sender.sendMessage(plugin.messages["no-permission-enchant"])
         }
         return true
     }

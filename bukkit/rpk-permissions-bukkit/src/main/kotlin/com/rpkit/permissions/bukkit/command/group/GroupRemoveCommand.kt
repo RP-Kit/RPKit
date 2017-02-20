@@ -41,21 +41,21 @@ class GroupRemoveCommand(private val plugin: RPKPermissionsBukkit): CommandExecu
                     val group = groupProvider.getGroup(args[1])
                     if (group != null) {
                         groupProvider.removeGroup(player, group)
-                        sender.sendMessage(plugin.core.messages["group-remove-valid", mapOf(
+                        sender.sendMessage(plugin.messages["group-remove-valid", mapOf(
                                 Pair("group", group.name),
                                 Pair("player", player.name)
                         )])
                     } else {
-                        sender.sendMessage(plugin.core.messages["group-remove-invalid-group"])
+                        sender.sendMessage(plugin.messages["group-remove-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["group-remove-invalid-player"])
+                    sender.sendMessage(plugin.messages["group-remove-invalid-player"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["group-remove-usage"])
+                sender.sendMessage(plugin.messages["group-remove-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-group-remove-group"])
+            sender.sendMessage(plugin.messages["no-permission-group-remove-group"])
         }
         return true
     }

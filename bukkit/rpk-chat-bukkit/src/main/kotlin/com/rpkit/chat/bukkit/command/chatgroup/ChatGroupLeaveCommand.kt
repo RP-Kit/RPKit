@@ -44,23 +44,23 @@ class ChatGroupLeaveCommand(private val plugin: RPKChatBukkit): CommandExecutor 
                             if (chatGroup.members.isEmpty()) {
                                 chatGroupProvider.removeChatGroup(chatGroup)
                             }
-                            sender.sendMessage(plugin.core.messages["chat-group-leave-valid", mapOf(
+                            sender.sendMessage(plugin.messages["chat-group-leave-valid", mapOf(
                                     Pair("group", chatGroup.name)
                             )])
                         } else {
-                            sender.sendMessage(plugin.core.messages["chat-group-leave-invalid-not-a-member"])
+                            sender.sendMessage(plugin.messages["chat-group-leave-invalid-not-a-member"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["not-from-console"])
+                        sender.sendMessage(plugin.messages["not-from-console"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["chat-group-leave-invalid-chat-group"])
+                    sender.sendMessage(plugin.messages["chat-group-leave-invalid-chat-group"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["chat-group-leave-usage"])
+                sender.sendMessage(plugin.messages["chat-group-leave-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-chat-group-leave"])
+            sender.sendMessage(plugin.messages["no-permission-chat-group-leave"])
         }
         return true
     }

@@ -62,10 +62,10 @@ class PaymentCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
             } else if (args[0].equals("set", ignoreCase = true)) {
                 return paymentSetCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.core.messages["payment-usage"])
+                sender.sendMessage(plugin.messages["payment-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["payment-usage"])
+            sender.sendMessage(plugin.messages["payment-usage"])
         }
         return true
     }

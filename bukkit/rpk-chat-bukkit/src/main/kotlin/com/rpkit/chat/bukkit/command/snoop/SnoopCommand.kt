@@ -39,42 +39,42 @@ class SnoopCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                     if (sender.hasPermission("rpkit.chat.command.snoop.on")) {
                         if (!snooperProvider.snoopers.contains(player)) {
                             snooperProvider.addSnooper(player)
-                            sender.sendMessage(plugin.core.messages["snoop-enabled"])
+                            sender.sendMessage(plugin.messages["snoop-enabled"])
                         } else {
-                            sender.sendMessage(plugin.core.messages["snoop-already-enabled"])
+                            sender.sendMessage(plugin.messages["snoop-already-enabled"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["no-permission-snoop-on"])
+                        sender.sendMessage(plugin.messages["no-permission-snoop-on"])
                     }
                 } else if (args[0].equals("off", ignoreCase = true)) {
                     if (sender.hasPermission("rpkit.chat.command.snoop.off")) {
                         if (snooperProvider.snoopers.contains(player)) {
                             snooperProvider.removeSnooper(player)
-                            sender.sendMessage(plugin.core.messages["snoop-disabled"])
+                            sender.sendMessage(plugin.messages["snoop-disabled"])
                         } else {
-                            sender.sendMessage(plugin.core.messages["snoop-already-disabled"])
+                            sender.sendMessage(plugin.messages["snoop-already-disabled"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["no-permission-snoop-off"])
+                        sender.sendMessage(plugin.messages["no-permission-snoop-off"])
                     }
                 } else if (args[0].equals("check", ignoreCase = true)) {
                     if (sender.hasPermission("rpkit.chat.command.snoop.check")) {
                         if (snooperProvider.snoopers.contains(player)) {
-                            sender.sendMessage(plugin.core.messages["snoop-check-on"])
+                            sender.sendMessage(plugin.messages["snoop-check-on"])
                         } else {
-                            sender.sendMessage(plugin.core.messages["snoop-check-off"])
+                            sender.sendMessage(plugin.messages["snoop-check-off"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["no-permission-snoop-check"])
+                        sender.sendMessage(plugin.messages["no-permission-snoop-check"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["snoop-usage"])
+                    sender.sendMessage(plugin.messages["snoop-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["snoop-usage"])
+                sender.sendMessage(plugin.messages["snoop-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

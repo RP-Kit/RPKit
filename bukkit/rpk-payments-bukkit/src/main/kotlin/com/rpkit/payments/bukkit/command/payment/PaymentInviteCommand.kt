@@ -47,10 +47,10 @@ class PaymentInviteCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                     val character = characterProvider.getActiveCharacter(player)
                     if (character != null) {
                         paymentGroup.addInvite(character)
-                        sender.sendMessage(plugin.core.messages["payment-invite-valid"])
+                        sender.sendMessage(plugin.messages["payment-invite-valid"])
                         val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
                         val now = System.currentTimeMillis()
-                        val notificationMessage = plugin.core.messages["payment-notification-invite", mapOf(
+                        val notificationMessage = plugin.messages["payment-notification-invite", mapOf(
                                 Pair("member", character.name),
                                 Pair("group", paymentGroup.name),
                                 Pair("date", dateFormat.format(Date(now)))
@@ -69,16 +69,16 @@ class PaymentInviteCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                             character.player?.bukkitPlayer?.player?.sendMessage(notificationMessage)
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["payment-invite-invalid-character"])
+                        sender.sendMessage(plugin.messages["payment-invite-invalid-character"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["payment-invite-invalid-group"])
+                    sender.sendMessage(plugin.messages["payment-invite-invalid-group"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["payment-invite-usage"])
+                sender.sendMessage(plugin.messages["payment-invite-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-invite"])
+            sender.sendMessage(plugin.messages["no-permission-payment-invite"])
         }
         return true
     }

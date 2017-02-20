@@ -41,26 +41,26 @@ class GroupAddCommand(private val plugin: RPKPermissionsBukkit): CommandExecutor
                     if (group != null) {
                         if (sender.hasPermission("rpkit.permissions.command.group.add.${group.name}")) {
                             groupProvider.addGroup(player, group)
-                            sender.sendMessage(plugin.core.messages["group-add-valid", mapOf(
+                            sender.sendMessage(plugin.messages["group-add-valid", mapOf(
                                     Pair("group", group.name),
                                     Pair("player", player.name)
                             )])
                         } else {
-                            sender.sendMessage(plugin.core.messages["no-permission-group-add-group", mapOf(
+                            sender.sendMessage(plugin.messages["no-permission-group-add-group", mapOf(
                                     Pair("group", group.name)
                             )])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["group-add-invalid-group"])
+                        sender.sendMessage(plugin.messages["group-add-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["group-add-invalid-player"])
+                    sender.sendMessage(plugin.messages["group-add-invalid-player"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["group-add-usage"])
+                sender.sendMessage(plugin.messages["group-add-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-group-add"])
+            sender.sendMessage(plugin.messages["no-permission-group-add"])
         }
         return true
     }

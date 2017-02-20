@@ -34,26 +34,26 @@ class ChatGroupMembersCommand(private val plugin: RPKChatBukkit): CommandExecuto
                 val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
                 val chatGroup = chatGroupProvider.getChatGroup(args[0])
                 if (chatGroup != null) {
-                    sender.sendMessage(plugin.core.messages["chat-group-members-list-title"])
+                    sender.sendMessage(plugin.messages["chat-group-members-list-title"])
                     for (player in chatGroup.members) {
-                        sender.sendMessage(plugin.core.messages["chat-group-members-list-item", mapOf(
+                        sender.sendMessage(plugin.messages["chat-group-members-list-item", mapOf(
                                 Pair("player", player.name)
                         )])
                     }
-                    sender.sendMessage(plugin.core.messages["chat-group-invitations-list-title"])
+                    sender.sendMessage(plugin.messages["chat-group-invitations-list-title"])
                     for (player in chatGroup.invited) {
-                        sender.sendMessage(plugin.core.messages["chat-group-invitations-list-item", mapOf(
+                        sender.sendMessage(plugin.messages["chat-group-invitations-list-item", mapOf(
                                 Pair("player", player.name)
                         )])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["chat-group-members-invalid-chat-group"])
+                    sender.sendMessage(plugin.messages["chat-group-members-invalid-chat-group"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["chat-group-members-usage"])
+                sender.sendMessage(plugin.messages["chat-group-members-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-chat-group-members"])
+            sender.sendMessage(plugin.messages["no-permission-chat-group-members"])
         }
         return true
     }

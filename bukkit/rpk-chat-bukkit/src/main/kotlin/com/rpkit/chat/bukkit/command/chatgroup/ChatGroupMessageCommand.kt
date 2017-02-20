@@ -46,19 +46,19 @@ class ChatGroupMessageCommand(private val plugin: RPKChatBukkit): CommandExecuto
                             }
                             chatGroup.sendMessage(player, message.toString())
                         } else {
-                            sender.sendMessage(plugin.core.messages["chat-group-message-invalid-not-a-member"])
+                            sender.sendMessage(plugin.messages["chat-group-message-invalid-not-a-member"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["not-from-console"])
+                        sender.sendMessage(plugin.messages["not-from-console"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["chat-group-message-invalid-chat-group"])
+                    sender.sendMessage(plugin.messages["chat-group-message-invalid-chat-group"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["chat-group-message-usage"])
+                sender.sendMessage(plugin.messages["chat-group-message-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-chat-group-message"])
+            sender.sendMessage(plugin.messages["no-permission-chat-group-message"])
         }
         return true
     }

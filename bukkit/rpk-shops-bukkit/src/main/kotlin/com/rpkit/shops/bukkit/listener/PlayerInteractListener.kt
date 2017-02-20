@@ -90,25 +90,25 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit): Listener {
                                                     bankProvider.setBalance(ownerCharacter, currency, bankProvider.getBalance(ownerCharacter, currency) - price)
                                                     economyProvider.setBalance(customerCharacter, currency, economyProvider.getBalance(customerCharacter, currency) + price)
                                                 } else {
-                                                    event.player.sendMessage(plugin.core.messages["shop-sell-not-enough-money"])
+                                                    event.player.sendMessage(plugin.messages["shop-sell-not-enough-money"])
                                                 }
                                             } else {
-                                                event.player.sendMessage(plugin.core.messages["shop-character-invalid"])
+                                                event.player.sendMessage(plugin.messages["shop-character-invalid"])
                                             }
                                         } else {
-                                            event.player.sendMessage(plugin.core.messages["shop-sell-chest-not-found"])
+                                            event.player.sendMessage(plugin.messages["shop-sell-chest-not-found"])
                                         }
                                     } else {
-                                        event.player.sendMessage(plugin.core.messages["shop-sell-not-enough-items"])
+                                        event.player.sendMessage(plugin.messages["shop-sell-not-enough-items"])
                                     }
                                 } else {
-                                    event.player.sendMessage(plugin.core.messages["no-character"])
+                                    event.player.sendMessage(plugin.messages["no-character"])
                                 }
                             } else {
-                                event.player.sendMessage(plugin.core.messages["shop-character-invalid"])
+                                event.player.sendMessage(plugin.messages["shop-character-invalid"])
                             }
                         } else {
-                            event.player.sendMessage(plugin.core.messages["shop-currency-invalid"])
+                            event.player.sendMessage(plugin.messages["shop-currency-invalid"])
                         }
                     }
                 }

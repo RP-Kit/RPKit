@@ -20,7 +20,7 @@ class ItemMetaCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                         if (args[0].equals("setname", ignoreCase = true)) {
                             val name = ChatColor.translateAlternateColorCodes('&', args.drop(1).joinToString(" "))
                             meta.displayName = name
-                            sender.sendMessage(plugin.core.messages["item-meta-set-name-valid", mapOf(
+                            sender.sendMessage(plugin.messages["item-meta-set-name-valid", mapOf(
                                     Pair("name", name)
                             )])
                         } else if (args[0].equals("addlore", ignoreCase = true)) {
@@ -32,7 +32,7 @@ class ItemMetaCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                             }
                             val loreItem = ChatColor.translateAlternateColorCodes('&', args.drop(1).joinToString(" "))
                             lore.add(loreItem)
-                            sender.sendMessage(plugin.core.messages["item-meta-add-lore-valid", mapOf(
+                            sender.sendMessage(plugin.messages["item-meta-add-lore-valid", mapOf(
                                     Pair("lore", loreItem)
                             )])
                             meta.lore = lore
@@ -42,31 +42,31 @@ class ItemMetaCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                                 val loreItem = ChatColor.translateAlternateColorCodes('&', args.drop(1).joinToString(" "))
                                 if (lore.contains(loreItem)) {
                                     lore.remove(loreItem)
-                                    sender.sendMessage(plugin.core.messages["item-meta-remove-lore-valid", mapOf(
+                                    sender.sendMessage(plugin.messages["item-meta-remove-lore-valid", mapOf(
                                             Pair("lore", loreItem)
                                     )])
                                 } else {
-                                    sender.sendMessage(plugin.core.messages["item-meta-remove-lore-invalid-lore-item"])
+                                    sender.sendMessage(plugin.messages["item-meta-remove-lore-invalid-lore-item"])
                                 }
                                 meta.lore = lore
                             } else {
-                                sender.sendMessage(plugin.core.messages["item-meta-remove-lore-invalid-lore"])
+                                sender.sendMessage(plugin.messages["item-meta-remove-lore-invalid-lore"])
                             }
                         } else {
-                            sender.sendMessage(plugin.core.messages["item-meta-usage"])
+                            sender.sendMessage(plugin.messages["item-meta-usage"])
                         }
                         sender.inventory.itemInMainHand.itemMeta = meta
                     } else {
-                        sender.sendMessage(plugin.core.messages["item-meta-usage"])
+                        sender.sendMessage(plugin.messages["item-meta-usage"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["item-meta-invalid-item"])
+                    sender.sendMessage(plugin.messages["item-meta-invalid-item"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-item-meta"])
+            sender.sendMessage(plugin.messages["no-permission-item-meta"])
         }
         return true
     }

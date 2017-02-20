@@ -44,30 +44,30 @@ class ChatGroupInviteCommand(private val plugin: RPKChatBukkit): CommandExecutor
                                 val bukkitPlayer = plugin.server.getPlayer(args[1])
                                 val player = playerProvider.getPlayer(bukkitPlayer)
                                 chatGroup.invite(player)
-                                player.bukkitPlayer?.player?.sendMessage(plugin.core.messages["chat-group-invite-received", mapOf(
+                                player.bukkitPlayer?.player?.sendMessage(plugin.messages["chat-group-invite-received", mapOf(
                                         Pair("group", chatGroup.name)
                                 )])
-                                sender.sendMessage(plugin.core.messages["chat-group-invite-valid", mapOf(
+                                sender.sendMessage(plugin.messages["chat-group-invite-valid", mapOf(
                                         Pair("player", player.name),
                                         Pair("group", chatGroup.name)
                                 )])
                             } else {
-                                sender.sendMessage(plugin.core.messages["chat-group-invite-invalid-player"])
+                                sender.sendMessage(plugin.messages["chat-group-invite-invalid-player"])
                             }
                         } else {
-                            sender.sendMessage(plugin.core.messages["chat-group-invite-invalid-not-a-member"])
+                            sender.sendMessage(plugin.messages["chat-group-invite-invalid-not-a-member"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["not-from-console"])
+                        sender.sendMessage(plugin.messages["not-from-console"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["chat-group-invite-invalid-chat-group"])
+                    sender.sendMessage(plugin.messages["chat-group-invite-invalid-chat-group"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["chat-group-invite-usage"])
+                sender.sendMessage(plugin.messages["chat-group-invite-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-chat-group-invite"])
+            sender.sendMessage(plugin.messages["no-permission-chat-group-invite"])
         }
         return true
     }

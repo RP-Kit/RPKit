@@ -19,18 +19,18 @@ class UnsignCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                         val meta = sender.inventory.itemInMainHand.itemMeta as BookMeta
                         sender.inventory.itemInMainHand.type = Material.BOOK_AND_QUILL
                         sender.inventory.itemInMainHand.itemMeta = meta
-                        sender.sendMessage(plugin.core.messages["unsign-valid"])
+                        sender.sendMessage(plugin.messages["unsign-valid"])
                     } else {
-                        sender.sendMessage(plugin.core.messages["unsign-invalid-book"])
+                        sender.sendMessage(plugin.messages["unsign-invalid-book"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["unsign-invalid-book"])
+                    sender.sendMessage(plugin.messages["unsign-invalid-book"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-unsign"])
+            sender.sendMessage(plugin.messages["no-permission-unsign"])
         }
         return true
     }

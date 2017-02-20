@@ -36,23 +36,23 @@ class SignChangeListener(private val plugin: RPKTradeBukkit): Listener {
                 if ((Material.matchMaterial(event.getLine(1)) == null && !event.getLine(1).matches(Regex("\\d+\\s+.*")))
                         || Material.matchMaterial(event.getLine(1).replace(Regex("\\d+\\s+"), "")) == null) {
                     event.block.breakNaturally()
-                    event.player.sendMessage(plugin.core.messages["trader-sign-invalid-material"])
+                    event.player.sendMessage(plugin.messages["trader-sign-invalid-material"])
                     return
                 }
                 if (!event.getLine(2).matches(Regex("\\d+ \\| \\d+"))) {
                     event.block.breakNaturally()
-                    event.player.sendMessage(plugin.core.messages["trader-sign-invalid-price"])
+                    event.player.sendMessage(plugin.messages["trader-sign-invalid-price"])
                     return
                 }
                 if (plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(event.getLine(3)) == null) {
                     event.block.breakNaturally()
-                    event.player.sendMessage(plugin.core.messages["trader-sign-invalid-currency"])
+                    event.player.sendMessage(plugin.messages["trader-sign-invalid-currency"])
                     return
                 }
                 event.setLine(0, GREEN.toString() + "[trader]")
-                event.player.sendMessage(plugin.core.messages["trader-sign-valid"])
+                event.player.sendMessage(plugin.messages["trader-sign-valid"])
             } else {
-                event.player.sendMessage(plugin.core.messages["no-permission-trader-create"])
+                event.player.sendMessage(plugin.messages["no-permission-trader-create"])
             }
         }
     }

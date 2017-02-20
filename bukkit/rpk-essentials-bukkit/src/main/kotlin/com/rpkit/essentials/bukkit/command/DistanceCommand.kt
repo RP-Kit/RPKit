@@ -27,15 +27,15 @@ class DistanceCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                             val character = characterProvider.getActiveCharacter(player)
                             if (character != null) {
                                 if (!trackingProvider.isTrackable(character)) {
-                                    sender.sendMessage(plugin.core.messages["distance-invalid-untrackable"])
-                                    bukkitPlayer.sendMessage(plugin.core.messages["distance-untrackable-notification", mapOf(
+                                    sender.sendMessage(plugin.messages["distance-invalid-untrackable"])
+                                    bukkitPlayer.sendMessage(plugin.messages["distance-untrackable-notification", mapOf(
                                             Pair("player", player.name)
                                     )])
                                     return true
                                 }
                                 val itemRequirement = plugin.config.getItemStack("distance-command.item-requirement")
                                 if (itemRequirement != null && !bukkitPlayer.inventory.containsAtLeast(itemRequirement, itemRequirement.amount)) {
-                                    sender.sendMessage(plugin.core.messages["distance-invalid-item", mapOf(
+                                    sender.sendMessage(plugin.messages["distance-invalid-item", mapOf(
                                             Pair("amount", itemRequirement.amount.toString()),
                                             Pair("type", itemRequirement.type.toString().toLowerCase().replace('_', ' '))
                                     )])
@@ -44,29 +44,29 @@ class DistanceCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                                 val maximumDistance = plugin.config.getInt("distance-command.maximum-distance")
                                 val distance = MathUtils.fastSqrt(bukkitPlayer.location.distanceSquared(sender.location))
                                 if (maximumDistance >= 0 && distance > maximumDistance) {
-                                    sender.sendMessage(plugin.core.messages["distance-invalid-distance"])
+                                    sender.sendMessage(plugin.messages["distance-invalid-distance"])
                                     return true
                                 }
-                                sender.sendMessage(plugin.core.messages["distance-valid", mapOf(
+                                sender.sendMessage(plugin.messages["distance-valid", mapOf(
                                         Pair("character", character.name),
                                         Pair("player", player.name),
                                         Pair("distance", distance.toString())
                                 )])
                             }
                         } else {
-                            sender.sendMessage(plugin.core.messages["distance-invalid-world"])
+                            sender.sendMessage(plugin.messages["distance-invalid-world"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["distance-invalid-offline"])
+                        sender.sendMessage(plugin.messages["distance-invalid-offline"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["distance-usage"])
+                    sender.sendMessage(plugin.messages["distance-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-distance"])
+            sender.sendMessage(plugin.messages["no-permission-distance"])
         }
         return true
     }

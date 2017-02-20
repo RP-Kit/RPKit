@@ -24,7 +24,7 @@ class InventoryClickListener(private val plugin: RPKLocksBukkit): Listener {
                     event.isCancelled = false
                 }
                 if (event.isCancelled) {
-                    event.whoClicked.sendMessage(plugin.core.messages["keyring-invalid-item"])
+                    event.whoClicked.sendMessage(plugin.messages["keyring-invalid-item"])
                 }
             }
         }

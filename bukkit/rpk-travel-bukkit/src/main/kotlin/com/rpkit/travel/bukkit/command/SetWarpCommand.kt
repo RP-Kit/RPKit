@@ -17,7 +17,7 @@ class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
                     val warpProvider = plugin.core.serviceManager.getServiceProvider(RPKWarpProvider::class)
                     val warp = RPKWarpImpl(name = args[0], location = sender.location)
                     warpProvider.addWarp(warp)
-                    sender.sendMessage(plugin.core.messages["set-warp-valid", mapOf(
+                    sender.sendMessage(plugin.messages["set-warp-valid", mapOf(
                             Pair("warp", warp.name),
                             Pair("world", warp.location.world.name),
                             Pair("x", warp.location.blockX.toString()),
@@ -25,13 +25,13 @@ class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
                             Pair("z", warp.location.blockZ.toString())
                     )])
                 } else {
-                    sender.sendMessage(plugin.core.messages["set-warp-usage"])
+                    sender.sendMessage(plugin.messages["set-warp-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-set-warp"])
+            sender.sendMessage(plugin.messages["no-permission-set-warp"])
         }
         return true
     }

@@ -47,15 +47,15 @@ class RPKBanksBukkit: RPKBukkitPlugin() {
     }
 
     override fun setDefaultMessages() {
-        core.messages.setDefault("bank-sign-invalid-operation", "&cThat's not a valid operation. Please use withdraw, deposit, or balance. (Line 2)")
-        core.messages.setDefault("bank-sign-invalid-currency", "&cThat''s not a valid currency. Please use a valid currency. (Line 4)")
-        core.messages.setDefault("bank-withdraw-invalid-wallet-full", "&cYou cannot withdraw that amount, it would not fit in your wallet.")
-        core.messages.setDefault("bank-withdraw-invalid-not-enough-money", "&cYou cannot withdraw that amount, your bank balance is not high enough.")
-        core.messages.setDefault("bank-withdraw-valid", "&aWithdrew \$amount \$currency. Wallet balance: \$wallet-balance. Bank balance: \$bank-balance.")
-        core.messages.setDefault("bank-deposit-invalid-not-enough-money", "&cYou cannot deposit that amount, your wallet balance is not high enough.")
-        core.messages.setDefault("bank-deposit-valid", "&aDeposited \$amount \$currency. Wallet balance: \$wallet-balance. Bank balance: \$bank-balance.")
-        core.messages.setDefault("bank-balance-valid", "&aBalance: \$amount \$currency")
-        core.messages.setDefault("no-permission-bank-create", "&cYou do not have permission to create banks.")
+        messages.setDefault("bank-sign-invalid-operation", "&cThat's not a valid operation. Please use withdraw, deposit, or balance. (Line 2)")
+        messages.setDefault("bank-sign-invalid-currency", "&cThat''s not a valid currency. Please use a valid currency. (Line 4)")
+        messages.setDefault("bank-withdraw-invalid-wallet-full", "&cYou cannot withdraw that amount, it would not fit in your wallet.")
+        messages.setDefault("bank-withdraw-invalid-not-enough-money", "&cYou cannot withdraw that amount, your bank balance is not high enough.")
+        messages.setDefault("bank-withdraw-valid", "&aWithdrew \$amount \$currency. Wallet balance: \$wallet-balance. Bank balance: \$bank-balance.")
+        messages.setDefault("bank-deposit-invalid-not-enough-money", "&cYou cannot deposit that amount, your wallet balance is not high enough.")
+        messages.setDefault("bank-deposit-valid", "&aDeposited \$amount \$currency. Wallet balance: \$wallet-balance. Bank balance: \$bank-balance.")
+        messages.setDefault("bank-balance-valid", "&aBalance: \$amount \$currency")
+        messages.setDefault("no-permission-bank-create", "&cYou do not have permission to create banks.")
     }
 
 }

@@ -59,7 +59,7 @@ class RollCommand(private val plugin: RPKRollingBukkit): CommandExecutor {
                             sender.world.players
                                     .filter { player -> player.location.distanceSquared(sender.location) <= radius * radius }
                                     .forEach {
-                                        it.sendMessage(plugin.core.messages["roll", mapOf(
+                                        it.sendMessage(plugin.messages["roll", mapOf(
                                                 Pair("character", character.name),
                                                 Pair("player", player.name),
                                                 Pair("roll", total.toString()),
@@ -67,16 +67,16 @@ class RollCommand(private val plugin: RPKRollingBukkit): CommandExecutor {
                                         )])
                                     }
                         } else {
-                            sender.sendMessage(plugin.core.messages["no-character"])
+                            sender.sendMessage(plugin.messages["no-character"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["roll-invalid-parse"])
+                        sender.sendMessage(plugin.messages["roll-invalid-parse"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["roll-usage"])
+                    sender.sendMessage(plugin.messages["roll-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         }
         return true

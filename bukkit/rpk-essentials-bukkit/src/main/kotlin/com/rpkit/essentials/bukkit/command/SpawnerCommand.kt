@@ -22,21 +22,21 @@ class SpawnerCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                         try {
                             val entityType = EntityType.valueOf(args[0].toUpperCase())
                             spawner.spawnedType = entityType
-                            sender.sendMessage(plugin.core.messages["spawner-valid"])
+                            sender.sendMessage(plugin.messages["spawner-valid"])
                         } catch (exception: IllegalArgumentException) {
-                            sender.sendMessage(plugin.core.messages["spawner-invalid-entity"])
+                            sender.sendMessage(plugin.messages["spawner-invalid-entity"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["spawner-invalid-block"])
+                        sender.sendMessage(plugin.messages["spawner-invalid-block"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["not-from-console"])
+                    sender.sendMessage(plugin.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["spawner-usage"])
+                sender.sendMessage(plugin.messages["spawner-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-spawner"])
+            sender.sendMessage(plugin.messages["no-permission-spawner"])
         }
         return true
     }

@@ -30,15 +30,15 @@ import org.bukkit.command.CommandSender
 class ListChatChannelsCommand(private val plugin: RPKChatBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.chat.command.listchatchannels")) {
-            sender.sendMessage(plugin.core.messages["listchatchannels-title"])
+            sender.sendMessage(plugin.messages["listchatchannels-title"])
             plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class).chatChannels.forEach { chatChannel ->
-                sender.sendMessage(plugin.core.messages["listchatchannels-item", mapOf(
+                sender.sendMessage(plugin.messages["listchatchannels-item", mapOf(
                         Pair("channel", chatChannel.name),
                         Pair("color", chatChannel.color.closestChatColor().toString())
                 )])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-listchatchannels"])
+            sender.sendMessage(plugin.messages["no-permission-listchatchannels"])
         }
         return true
     }

@@ -40,16 +40,16 @@ class CharacterHideGenderCommand(private val plugin: RPKCharactersBukkit): Comma
                 if (character != null) {
                     character.isGenderHidden = true
                     characterProvider.updateCharacter(character)
-                    sender.sendMessage(plugin.core.messages["character-hide-gender-valid"])
+                    sender.sendMessage(plugin.messages["character-hide-gender-valid"])
                     character.showCharacterCard(player)
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-hide-gender"])
+                sender.sendMessage(plugin.messages["no-permission-character-hide-gender"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

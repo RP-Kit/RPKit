@@ -39,12 +39,12 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
             .withModality(true)
             .withFirstPrompt(CurrencyPrompt())
             .withEscapeSequence("cancel")
-            .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+            .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
                 if (!event.gracefulExit()) {
                     val conversable = event.context.forWhom
                     if (conversable is Player) {
-                        conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                        conversable.sendMessage(plugin.messages["operation-cancelled"])
                     }
                 }
             }
@@ -58,7 +58,7 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
                     if (currency != null) {
                         showWallet(sender, currency)
                     } else {
-                        sender.sendMessage(plugin.core.messages["money-wallet-currency-invalid-currency"])
+                        sender.sendMessage(plugin.messages["money-wallet-currency-invalid-currency"])
                     }
                 } else {
                     val currency = currencyProvider.defaultCurrency
@@ -69,10 +69,10 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
                     }
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-money-wallet"])
+            sender.sendMessage(plugin.messages["no-permission-money-wallet"])
         }
         return true
     }
@@ -109,7 +109,7 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
             }
             bukkitPlayer.openInventory(wallet)
         } else {
-            bukkitPlayer.sendMessage(plugin.core.messages["no-character"])
+            bukkitPlayer.sendMessage(plugin.messages["no-character"])
         }
     }
 
@@ -124,16 +124,16 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["money-subtract-currency-prompt"] + "\n" +
+            return plugin.messages["money-subtract-currency-prompt"] + "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
-                            .map { currency -> plugin.core.messages["money-subtract-currency-prompt-list-item", mapOf(
+                            .map { currency -> plugin.messages["money-subtract-currency-prompt-list-item", mapOf(
                                     Pair("currency", currency.name)
                             )] }
                             .joinToString("\n")
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return plugin.core.messages["money-subtract-currency-invalid-currency"]
+            return plugin.messages["money-subtract-currency-invalid-currency"]
         }
 
     }
@@ -145,7 +145,7 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["money-subtract-currency-valid"]
+            return plugin.messages["money-subtract-currency-valid"]
         }
 
     }

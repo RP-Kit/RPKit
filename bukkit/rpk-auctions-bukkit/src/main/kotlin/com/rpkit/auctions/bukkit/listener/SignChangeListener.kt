@@ -35,7 +35,7 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit): Listener {
             event.setLine(0, "$GREEN[auction]")
             if (!event.player.hasPermission("rpkit.auctions.sign.auction")) {
                 event.block.breakNaturally()
-                event.player.sendMessage(plugin.core.messages["no-permission-auction-sign-create"])
+                event.player.sendMessage(plugin.messages["no-permission-auction-sign-create"])
                 return
             }
             try {
@@ -43,7 +43,7 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit): Listener {
                 val auction = auctionProvider.getAuction(event.getLine(1).toInt())
                 if (auction == null) {
                     event.block.breakNaturally()
-                    event.player.sendMessage(plugin.core.messages["auction-sign-invalid-auction-does-not-exist"])
+                    event.player.sendMessage(plugin.messages["auction-sign-invalid-auction-does-not-exist"])
                     return
                 } else {
                     event.setLine(2, auction.item.amount.toString() + " x " + auction.item.type.toString().toLowerCase().replace('_', ' '))
@@ -54,7 +54,7 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit): Listener {
                 }
             } catch (exception: NumberFormatException) {
                 event.block.breakNaturally()
-                event.player.sendMessage(plugin.core.messages["auction-sign-invalid-id-not-a-number"])
+                event.player.sendMessage(plugin.messages["auction-sign-invalid-id-not-a-number"])
                 return
             }
         }

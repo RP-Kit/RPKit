@@ -37,12 +37,12 @@ class PaymentSetAmountCommand(private val plugin: RPKPaymentsBukkit): CommandExe
             .withModality(true)
             .withFirstPrompt(AmountPrompt())
             .withEscapeSequence("cancel")
-            .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+            .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
                 if (!event.gracefulExit()) {
                     val conversable = event.context.forWhom
                     if (conversable is Player) {
-                        conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                        conversable.sendMessage(plugin.messages["operation-cancelled"])
                     }
                 }
             }
@@ -63,19 +63,19 @@ class PaymentSetAmountCommand(private val plugin: RPKPaymentsBukkit): CommandExe
                             conversation.context.setSessionData("payment_group", paymentGroup)
                             conversation.begin()
                         } else {
-                            sender.sendMessage(plugin.core.messages["payment-set-amount-invalid-owner"])
+                            sender.sendMessage(plugin.messages["payment-set-amount-invalid-owner"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["payment-set-amount-invalid-group"])
+                        sender.sendMessage(plugin.messages["payment-set-amount-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["payment-set-amount-usage"])
+                    sender.sendMessage(plugin.messages["payment-set-amount-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-set-amount"])
+            sender.sendMessage(plugin.messages["no-permission-payment-set-amount"])
         }
         return true
     }
@@ -83,11 +83,11 @@ class PaymentSetAmountCommand(private val plugin: RPKPaymentsBukkit): CommandExe
     private inner class AmountPrompt: NumericPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["payment-set-amount-prompt"]
+            return plugin.messages["payment-set-amount-prompt"]
         }
 
         override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
-            return plugin.core.messages["payment-set-amount-invalid-number"]
+            return plugin.messages["payment-set-amount-invalid-number"]
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
@@ -107,7 +107,7 @@ class PaymentSetAmountCommand(private val plugin: RPKPaymentsBukkit): CommandExe
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["payment-set-amount-valid"]
+            return plugin.messages["payment-set-amount-valid"]
         }
 
     }

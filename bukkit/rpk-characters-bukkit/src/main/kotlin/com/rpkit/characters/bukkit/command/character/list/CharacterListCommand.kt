@@ -36,17 +36,17 @@ class CharacterListCommand(private val plugin: RPKCharactersBukkit): CommandExec
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                 val player = playerProvider.getPlayer(sender)
-                sender.sendMessage(plugin.core.messages["character-list-title"])
+                sender.sendMessage(plugin.messages["character-list-title"])
                 for (character in characterProvider.getCharacters(player)) {
-                    sender.sendMessage(plugin.core.messages["character-list-item", mapOf(
+                    sender.sendMessage(plugin.messages["character-list-item", mapOf(
                             Pair("character", character.name)
                     )])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-list"])
+                sender.sendMessage(plugin.messages["no-permission-character-list"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

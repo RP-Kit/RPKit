@@ -46,10 +46,10 @@ class GenderCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
             } else if (args[0].equals("list", ignoreCase = true)) {
                 return genderListCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.core.messages["gender-usage"])
+                sender.sendMessage(plugin.messages["gender-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["gender-usage"])
+            sender.sendMessage(plugin.messages["gender-usage"])
         }
         return true
     }

@@ -44,23 +44,23 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit): CommandExecutor
                             val senderPlayer = playerProvider.getPlayer(sender)
                             chatGroupProvider.addChatGroup(chatGroup)
                             chatGroup.addMember(senderPlayer)
-                            sender.sendMessage(plugin.core.messages["chat-group-create-valid", mapOf(
+                            sender.sendMessage(plugin.messages["chat-group-create-valid", mapOf(
                                     Pair("group", chatGroup.name)
                             )])
                         } else {
-                            sender.sendMessage(plugin.core.messages["chat-group-create-invalid-reserved"])
+                            sender.sendMessage(plugin.messages["chat-group-create-invalid-reserved"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["chat-group-create-invalid-taken"])
+                        sender.sendMessage(plugin.messages["chat-group-create-invalid-taken"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["not-from-console"])
+                    sender.sendMessage(plugin.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["chat-group-create-usage"])
+                sender.sendMessage(plugin.messages["chat-group-create-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-chat-group-create"])
+            sender.sendMessage(plugin.messages["no-permission-chat-group-create"])
         }
         return true
     }

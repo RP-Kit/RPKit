@@ -50,10 +50,10 @@ class PaymentJoinCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                             if (paymentGroup.invites.contains(character)) {
                                 paymentGroup.removeInvite(character)
                                 paymentGroup.addMember(character)
-                                sender.sendMessage(plugin.core.messages["payment-join-valid"])
+                                sender.sendMessage(plugin.messages["payment-join-valid"])
                                 val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
                                 val now = System.currentTimeMillis()
-                                val ownerNotificationMessage = plugin.core.messages["payment-notification-member-join", mapOf(
+                                val ownerNotificationMessage = plugin.messages["payment-notification-member-join", mapOf(
                                         Pair("member", character.name),
                                         Pair("group", paymentGroup.name),
                                         Pair("date", dateFormat.format(Date(now)))
@@ -74,22 +74,22 @@ class PaymentJoinCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                     }
                                 }
                             } else {
-                                sender.sendMessage(plugin.core.messages["payment-join-invalid-invite"])
+                                sender.sendMessage(plugin.messages["payment-join-invalid-invite"])
                             }
                         } else {
-                            sender.sendMessage(plugin.core.messages["payment-join-invalid-character"])
+                            sender.sendMessage(plugin.messages["payment-join-invalid-character"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["payment-join-invalid-group"])
+                        sender.sendMessage(plugin.messages["payment-join-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["not-from-console"])
+                    sender.sendMessage(plugin.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["payment-join-usage"])
+                sender.sendMessage(plugin.messages["payment-join-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-payment-join"])
+            sender.sendMessage(plugin.messages["no-permission-payment-join"])
         }
         return true
     }

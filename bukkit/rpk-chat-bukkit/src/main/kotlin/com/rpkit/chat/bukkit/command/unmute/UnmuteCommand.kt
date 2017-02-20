@@ -40,22 +40,22 @@ class UnmuteCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                 if (chatChannel != null) {
                     if (sender.hasPermission("rpkit.chat.command.unmute.${chatChannel.name}")) {
                         chatChannel.addListener(player)
-                        sender.sendMessage(plugin.core.messages["unmute-valid", mapOf(
+                        sender.sendMessage(plugin.messages["unmute-valid", mapOf(
                                 Pair("channel", chatChannel.name)
                         )])
                     } else {
-                        sender.sendMessage(plugin.core.messages["no-permission-unmute", mapOf(
+                        sender.sendMessage(plugin.messages["no-permission-unmute", mapOf(
                                 Pair("channel", chatChannel.name)
                         )])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["unmute-invalid-chatchannel"])
+                    sender.sendMessage(plugin.messages["unmute-invalid-chatchannel"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["unmute-usage"])
+                sender.sendMessage(plugin.messages["unmute-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

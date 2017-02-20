@@ -54,13 +54,13 @@ class ChatGroupCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                 } else if (args[0].equals("members", ignoreCase = true)) {
                     chatGroupMembersCommand.onCommand(sender, command, label, newArgs)
                 } else {
-                    sender.sendMessage(plugin.core.messages["chat-group-usage"])
+                    sender.sendMessage(plugin.messages["chat-group-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["chat-group-usage"])
+                sender.sendMessage(plugin.messages["chat-group-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-chat-group"])
+            sender.sendMessage(plugin.messages["no-permission-chat-group"])
         }
         return true
     }

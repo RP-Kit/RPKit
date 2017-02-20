@@ -40,29 +40,29 @@ class ChatGroupJoinCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                     if (sender is Player) {
                         val player = playerProvider.getPlayer(sender)
                         if (chatGroup.invited.contains(player)) {
-                            chatGroup.members.forEach { member -> member.bukkitPlayer?.player?.sendMessage(plugin.core.messages["chat-group-join-received", mapOf(
+                            chatGroup.members.forEach { member -> member.bukkitPlayer?.player?.sendMessage(plugin.messages["chat-group-join-received", mapOf(
                                     Pair("group", chatGroup.name),
                                     Pair("player", player.name)
                             )]) }
                             chatGroup.addMember(player)
                             chatGroup.uninvite(player)
-                            sender.sendMessage(plugin.core.messages["chat-group-join-valid", mapOf(
+                            sender.sendMessage(plugin.messages["chat-group-join-valid", mapOf(
                                     Pair("group", chatGroup.name)
                             )])
                         } else {
-                            sender.sendMessage(plugin.core.messages["chat-group-join-invalid-no-invite"])
+                            sender.sendMessage(plugin.messages["chat-group-join-invalid-no-invite"])
                         }
                     } else {
-                        sender.sendMessage(plugin.core.messages["not-from-console"])
+                        sender.sendMessage(plugin.messages["not-from-console"])
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["chat-group-join-invalid-chat-group"])
+                    sender.sendMessage(plugin.messages["chat-group-join-invalid-chat-group"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["chat-group-join-usage"])
+                sender.sendMessage(plugin.messages["chat-group-join-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-chat-group-join"])
+            sender.sendMessage(plugin.messages["no-permission-chat-group-join"])
         }
         return true
     }

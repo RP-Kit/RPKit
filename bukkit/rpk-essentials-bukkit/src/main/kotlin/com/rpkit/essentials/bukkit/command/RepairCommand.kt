@@ -13,15 +13,15 @@ class RepairCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             if (sender is Player) {
                 if (sender.inventory.itemInMainHand != null) {
                     sender.inventory.itemInMainHand.durability = 0.toShort()
-                    sender.sendMessage(plugin.core.messages["repair-valid"])
+                    sender.sendMessage(plugin.messages["repair-valid"])
                 } else {
-                    sender.sendMessage(plugin.core.messages["repair-invalid-item"])
+                    sender.sendMessage(plugin.messages["repair-invalid-item"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-repair"])
+            sender.sendMessage(plugin.messages["no-permission-repair"])
         }
         return true
     }

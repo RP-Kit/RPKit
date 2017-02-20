@@ -16,15 +16,15 @@ class JumpCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 val block = sender.getTargetBlock(transparent, 64)
                 if (block != null) {
                     sender.teleport(block.location)
-                    sender.sendMessage(plugin.core.messages["jump-valid"])
+                    sender.sendMessage(plugin.messages["jump-valid"])
                 } else {
-                    sender.sendMessage(plugin.core.messages["jump-invalid-block"])
+                    sender.sendMessage(plugin.messages["jump-invalid-block"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-jump"])
+            sender.sendMessage(plugin.messages["no-permission-jump"])
         }
         return true
     }

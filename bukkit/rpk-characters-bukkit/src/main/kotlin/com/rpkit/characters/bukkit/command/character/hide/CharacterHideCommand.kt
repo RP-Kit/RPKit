@@ -51,10 +51,10 @@ class CharacterHideCommand(private val plugin: RPKCharactersBukkit): CommandExec
             } else if (args[0].equals("description", ignoreCase = true) || args[0].equals("desc", ignoreCase = true)) {
                 return characterHideDescriptionCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.core.messages["character-hide-usage"])
+                sender.sendMessage(plugin.messages["character-hide-usage"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["character-hide-usage"])
+            sender.sendMessage(plugin.messages["character-hide-usage"])
         }
         return true
     }

@@ -38,12 +38,12 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit): CommandEx
                 .withModality(true)
                 .withFirstPrompt(AgePrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
                 .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -63,26 +63,26 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit): CommandEx
                             if (age >= plugin.config.getInt("characters.min-age") && age <= plugin.config.getInt("characters.max-age")) {
                                 character.age = age
                                 characterProvider.updateCharacter(character)
-                                sender.sendMessage(plugin.core.messages["character-set-age-valid"])
+                                sender.sendMessage(plugin.messages["character-set-age-valid"])
                                 character.showCharacterCard(player)
                             } else {
-                                sender.sendMessage(plugin.core.messages["character-set-age-invalid-validation"])
+                                sender.sendMessage(plugin.messages["character-set-age-invalid-validation"])
                             }
                         } catch (exception: NumberFormatException) {
-                            sender.sendMessage(plugin.core.messages["character-set-age-invalid-number"])
+                            sender.sendMessage(plugin.messages["character-set-age-invalid-number"])
                         }
 
                     } else {
                         conversationFactory.buildConversation(sender).begin()
                     }
                 } else {
-                    sender.sendMessage(plugin.core.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-set-age"])
+                sender.sendMessage(plugin.messages["no-permission-character-set-age"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -90,7 +90,7 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit): CommandEx
     private inner class AgePrompt: NumericPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-set-age-prompt"]
+            return plugin.messages["character-set-age-prompt"]
         }
 
         override fun isNumberValid(context: ConversationContext?, input: Number?): Boolean {
@@ -98,11 +98,11 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: Number?): String {
-            return plugin.core.messages["character-set-age-invalid-validation"]
+            return plugin.messages["character-set-age-invalid-validation"]
         }
 
         override fun getInputNotNumericText(context: ConversationContext?, invalidInput: String?): String {
-            return plugin.core.messages["character-set-age-invalid-number"]
+            return plugin.messages["character-set-age-invalid-number"]
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
@@ -136,7 +136,7 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-set-age-valid"]
+            return plugin.messages["character-set-age-valid"]
         }
 
     }

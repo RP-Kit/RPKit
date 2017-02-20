@@ -39,12 +39,12 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
                 .withModality(true)
                 .withFirstPrompt(CharacterPrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
                 .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -52,12 +52,12 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
                 .withModality(true)
                 .withFirstPrompt(ConfirmationPrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.core.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
                 .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(plugin.core.messages["operation-cancelled"])
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -99,18 +99,18 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
                         }
                     }
                     if (charFound) {
-                        sender.sendMessage(plugin.core.messages["character-delete-valid"])
+                        sender.sendMessage(plugin.messages["character-delete-valid"])
                     } else {
-                        sender.sendMessage(plugin.core.messages["character-delete-invalid-character"])
+                        sender.sendMessage(plugin.messages["character-delete-invalid-character"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(plugin.core.messages["no-permission-character-delete"])
+                sender.sendMessage(plugin.messages["no-permission-character-delete"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -166,7 +166,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return plugin.core.messages["character-delete-invalid-character"]
+            return plugin.messages["character-delete-invalid-character"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
@@ -176,11 +176,11 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
             val characterListBuilder = StringBuilder()
             for (character in characterProvider.getCharacters(player)) {
                 characterListBuilder.append("\n").append(
-                        plugin.core.messages["character-list-item", mapOf(
+                        plugin.messages["character-list-item", mapOf(
                                 Pair("character", character.name))]
                 )
             }
-            return plugin.core.messages["character-delete-prompt"] + characterListBuilder.toString()
+            return plugin.messages["character-delete-prompt"] + characterListBuilder.toString()
         }
 
     }
@@ -199,11 +199,11 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return plugin.core.messages["character-delete-confirmation-invalid-boolean"]
+            return plugin.messages["character-delete-confirmation-invalid-boolean"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-delete-confirmation"]
+            return plugin.messages["character-delete-confirmation"]
         }
 
     }
@@ -215,7 +215,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.core.messages["character-delete-valid"]
+            return plugin.messages["character-delete-valid"]
         }
     }
 

@@ -17,14 +17,14 @@ class ToggleLogMessagesCommand(private val plugin: RPKEssentialsBukkit) : Comman
                 val logMessageProvider = plugin.core.serviceManager.getServiceProvider(RPKLogMessageProvider::class)
                 val player = playerProvider.getPlayer(sender)
                 logMessageProvider.setLogMessagesEnabled(player, !logMessageProvider.isLogMessagesEnabled(player))
-                sender.sendMessage(plugin.core.messages["toggle-log-messages-valid", mapOf(
+                sender.sendMessage(plugin.messages["toggle-log-messages-valid", mapOf(
                         Pair("enabled", if (logMessageProvider.isLogMessagesEnabled(player)) "enabled" else "disabled")
                 )])
             } else {
-                sender.sendMessage(plugin.core.messages["not-from-console"])
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(plugin.core.messages["no-permission-toggle-log-messages"])
+            sender.sendMessage(plugin.messages["no-permission-toggle-log-messages"])
         }
         return true
     }
