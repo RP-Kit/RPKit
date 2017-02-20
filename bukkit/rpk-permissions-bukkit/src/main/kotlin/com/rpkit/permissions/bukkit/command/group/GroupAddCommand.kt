@@ -19,7 +19,6 @@ package com.rpkit.permissions.bukkit.command.group
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -42,24 +41,26 @@ class GroupAddCommand(private val plugin: RPKPermissionsBukkit): CommandExecutor
                     if (group != null) {
                         if (sender.hasPermission("rpkit.permissions.command.group.add.${group.name}")) {
                             groupProvider.addGroup(player, group)
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.group-add-valid"))
-                                    .replace("\$group", group.name)
-                                    .replace("\$player", player.name))
+                            sender.sendMessage(plugin.core.messages["group-add-valid", mapOf(
+                                    Pair("group", group.name),
+                                    Pair("player", player.name)
+                            )])
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-group-add-group"))
-                                    .replace("\$group", group.name))
+                            sender.sendMessage(plugin.core.messages["no-permission-group-add-group", mapOf(
+                                    Pair("group", group.name)
+                            )])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.group-add-invalid-group")))
+                        sender.sendMessage(plugin.core.messages["group-add-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.group-add-invalid-player")))
+                    sender.sendMessage(plugin.core.messages["group-add-invalid-player"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.group-add-usage")))
+                sender.sendMessage(plugin.core.messages["group-add-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-group-add")))
+            sender.sendMessage(plugin.core.messages["no-permission-group-add"])
         }
         return true
     }
