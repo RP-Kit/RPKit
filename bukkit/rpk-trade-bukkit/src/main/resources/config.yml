@@ -1,18 +1,3 @@
-messages:
-    trader-buy: '&fBought $quantity $material from the trader for $price'
-    trader-sell: '&fSold $quantity $material to the trader for $price'
-    trader-buy-insufficient-funds: '&cYou can not afford to buy that.'
-    trader-sell-insufficient-wallet-space: '&cYou could not fit the money from that in your wallet.'
-    trader-sell-insufficient-items: '&cYou do not have enough of the required item.'
-    trader-sign-invalid-material: '&cThat''s not a valid material. (Line 2)'
-    trader-sign-invalid-price: '&cPrice must be formatted "buy price | sell price" (Line 3)'
-    trader-sign-invalid-currency: '&cThat''s not a valid currency. (Line 4)'
-    trader-sign-valid: '&aCreated a trader sign.'
-    no-permission-trader-create: '&cYou do not have permission to create a trader.'
-    no-permission-trader-destroy: '&cYou do not have permission to destroy traders.'
-    no-permission-trader-buy: '&cYou do not have permission to buy from traders.'
-    no-permission-trader-sell: '&cYou do not have permission to sell to traders.'
-    no-character: '&cYou need a character to perform that action. Please create one.'
 traders:
     price-change: 3
     minimum-price:

@@ -50,4 +50,21 @@ class RPKTradeBukkit: RPKBukkitPlugin() {
         )
     }
 
+    override fun setDefaultMessages() {
+        core.messages.setDefault("trader-buy", "&fBought \$quantity \$material from the trader for \$price")
+        core.messages.setDefault("trader-sell", "&fSold \$quantity \$material to the trader for \$price")
+        core.messages.setDefault("trader-buy-insufficient-funds", "&cYou can not afford to buy that.")
+        core.messages.setDefault("trader-sell-insufficient-wallet-space", "&cYou could not fit the money from that in your wallet.")
+        core.messages.setDefault("trader-sell-insufficient-items", "&cYou do not have enough of the required item.")
+        core.messages.setDefault("trader-sign-invalid-material", "&cThat''s not a valid material. (Line 2)")
+        core.messages.setDefault("trader-sign-invalid-price", "&cPrice must be formatted \"buy price | sell price\" (Line 3)")
+        core.messages.setDefault("trader-sign-invalid-currency", "&cThat''s not a valid currency. (Line 4)")
+        core.messages.setDefault("trader-sign-valid", "&aCreated a trader sign.")
+        core.messages.setDefault("no-permission-trader-create", "&cYou do not have permission to create a trader.")
+        core.messages.setDefault("no-permission-trader-destroy", "&cYou do not have permission to destroy traders.")
+        core.messages.setDefault("no-permission-trader-buy", "&cYou do not have permission to buy from traders.")
+        core.messages.setDefault("no-permission-trader-sell", "&cYou do not have permission to sell to traders.")
+        core.messages.setDefault("no-character", "&cYou need a character to perform that action. Please create one.")
+    }
+
 }
