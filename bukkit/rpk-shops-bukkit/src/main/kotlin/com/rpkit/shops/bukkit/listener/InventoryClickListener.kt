@@ -55,7 +55,7 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
                     val buyerPlayer = playerProvider.getPlayer(buyerBukkitPlayer)
                     val buyerCharacter = characterProvider.getActiveCharacter(buyerPlayer)
                     if (buyerCharacter == null) {
-                        buyerBukkitPlayer.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                        buyerBukkitPlayer.sendMessage(plugin.core.messages["no-character"])
                         return
                     }
                     if (buyerCharacter == sellerCharacter) {
@@ -79,13 +79,13 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
                                 buyerBukkitPlayer.inventory.addItem(amtItem)
                                 chest.blockInventory.removeItem(amtItem)
                             } else {
-                                buyerBukkitPlayer.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-enough-money")))
+                                buyerBukkitPlayer.sendMessage(plugin.core.messages["not-enough-money"])
                             }
                         } else {
-                            buyerBukkitPlayer.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-enough-shop-items")))
+                            buyerBukkitPlayer.sendMessage(plugin.core.messages["not-enough-shop-items"])
                         }
                     } else if (sign.getLine(1).startsWith("sell")) {
-                        event.whoClicked.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-stealing")))
+                        event.whoClicked.sendMessage(plugin.core.messages["no-stealing"])
                     }
                 }
             }

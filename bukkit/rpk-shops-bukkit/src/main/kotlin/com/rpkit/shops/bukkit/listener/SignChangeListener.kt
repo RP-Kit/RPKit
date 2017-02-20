@@ -21,7 +21,6 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.shops.bukkit.RPKShopsBukkit
 import com.rpkit.shops.bukkit.shopcount.RPKShopCountProvider
-import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material
 import org.bukkit.Material.CHEST
@@ -54,12 +53,12 @@ class SignChangeListener(private val plugin: RPKShopsBukkit): Listener {
                                 || (event.getLine(1).matches(Regex("sell\\s+\\d+\\s+.+"))
                                 && Material.matchMaterial(event.getLine(1).replace(Regex("sell\\s+\\d+\\s+"), "")) != null))) {
                             event.block.breakNaturally()
-                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-line-1-invalid")))
+                            event.player.sendMessage(plugin.core.messages["shop-line-1-invalid"])
                             return
                         }
                         if (!(event.getLine(2).matches(Regex("for\\s+\\d+\\s+.+")) && currencyProvider.getCurrency(event.getLine(2).replace(Regex("for\\s+\\d+\\s+"), "")) != null)) {
                             event.block.breakNaturally()
-                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-line-2-invalid")))
+                            event.player.sendMessage(plugin.core.messages["shop-line-2-invalid"])
                             return
                         }
                         event.setLine(0, GREEN.toString() + "[shop]")
@@ -68,7 +67,7 @@ class SignChangeListener(private val plugin: RPKShopsBukkit): Listener {
                         } else {
                             if (!event.player.hasPermission("rpkit.shops.sign.shop.admin")) {
                                 event.block.breakNaturally()
-                                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-shop-admin")))
+                                event.player.sendMessage(plugin.core.messages["no-permission-shop-admin"])
                                 return
                             }
                         }
@@ -91,14 +90,14 @@ class SignChangeListener(private val plugin: RPKShopsBukkit): Listener {
                             shopCountProvider.setShopCount(character, shopCountProvider.getShopCount(character) + 1)
                         }
                     } else {
-                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-shop-limit")))
+                        event.player.sendMessage(plugin.core.messages["no-permission-shop-limit"])
                         event.block.breakNaturally()
                     }
                 } else {
-                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    event.player.sendMessage(plugin.core.messages["no-character"])
                 }
             } else {
-                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-shop")))
+                event.player.sendMessage(plugin.core.messages["no-permission-shop"])
                 event.block.breakNaturally()
             }
         }
