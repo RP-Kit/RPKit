@@ -21,7 +21,6 @@ import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.stats.bukkit.RPKStatsBukkit
 import com.rpkit.stats.bukkit.stat.RPKStatProvider
 import com.rpkit.stats.bukkit.stat.RPKStatVariableProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -43,23 +42,21 @@ class StatsCommand(private val plugin: RPKStatsBukkit): CommandExecutor {
                 if (character != null) {
                     val statsProvider = plugin.core.serviceManager.getServiceProvider(RPKStatProvider::class)
                     val statVariableProvider = plugin.core.serviceManager.getServiceProvider(RPKStatVariableProvider::class)
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.stats-list-title")))
+                    sender.sendMessage(plugin.core.messages["stats-list-title"])
                     statsProvider.stats.forEach { stat ->
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.stats-list-item"))
-                            .replace("\$stat", stat.name)
-                            .replace("\$value",
-                                    stat.get(character, statVariableProvider.statVariables).toString()
-                            )
-                        )
+                        sender.sendMessage(plugin.core.messages["stats-list-item", mapOf(
+                                Pair("stat", stat.name),
+                                Pair("value", stat.get(character, statVariableProvider.statVariables).toString())
+                        )])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    sender.sendMessage(plugin.core.messages["no-character"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.core.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-stats")))
+            sender.sendMessage(plugin.core.messages["no-permission-stats"])
         }
         return true
     }
