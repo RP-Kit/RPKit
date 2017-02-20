@@ -1,23 +1,2 @@
 shops:
     limit: 2
-messages:
-    restock-valid: '&aShop restocked.'
-    restock-invalid-material: '&cThere is no material by that name.'
-    restock-invalid-chest: '&cYou must be looking at a chest.'
-    restock-usage: '&cUsage: /restock [material]'
-    shop-line-1-invalid: '&cLine 1 format must be "buy [number]" or "sell [number] [type]'
-    shop-line-2-invalid: '&cLine 2 format must be "for [price] [currency]"'
-    no-permission-shop: '&cYou do not have permission to create shops.'
-    no-permission-shop-limit: '&cYou have surpassed the shop limit.'
-    no-permission-shop-admin: '&cYou do not have permission to create admin shops.'
-    no-permission-restock: '&cYou do not have permission to restock chests'
-    no-character: '&cYou need a character in order to perform this action.'
-    no-stealing: '&cYou cannot steal from this shop.'
-    not-enough-money: '&cYou do not have enough money to buy that.'
-    not-enough-shop-items: '&cThe shop does not contain enough items.'
-    shop-sell-not-enough-money: '&cThe shop''s owner does not have enough money to pay you.'
-    shop-sell-chest-not-found: '&cCould not find a chest below that shop to place your item into.'
-    shop-sell-not-enough-items: '&cYou do not have enough items to sell to that shop.'
-    shop-character-invalid: '&cThere is no character with that ID. Perhaps they have been deleted?'
-    shop-currency-invalid: '&cThere is no currency by that name.'
-    not-from-console: '&cYou must be a player to perform that command.'

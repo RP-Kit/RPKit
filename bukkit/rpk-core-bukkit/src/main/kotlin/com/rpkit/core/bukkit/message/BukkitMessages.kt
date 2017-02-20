@@ -7,7 +7,6 @@ import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 import java.io.IOException
-import java.io.InputStreamReader
 import java.util.logging.Level.SEVERE
 
 
@@ -18,9 +17,6 @@ class BukkitMessages(private val plugin: RPKBukkitPlugin): Messages {
 
     init {
         val finalMessagesConfig = YamlConfiguration.loadConfiguration(messagesConfigFile)
-        val defConfigStream = InputStreamReader(plugin.getResource("messages.yml"), "UTF8")
-        val defConfig = YamlConfiguration.loadConfiguration(defConfigStream)
-        finalMessagesConfig.defaults = defConfig
         messagesConfig = finalMessagesConfig
         saveDefaultMessagesConfig()
     }
@@ -35,12 +31,15 @@ class BukkitMessages(private val plugin: RPKBukkitPlugin): Messages {
 
     fun saveDefaultMessagesConfig() {
         if (!messagesConfigFile.exists()) {
-            plugin.saveResource("messages.yml", false)
+            if (!plugin.dataFolder.exists()) {
+                plugin.dataFolder.mkdirs()
+            }
+            messagesConfigFile.createNewFile()
         }
     }
 
     override fun get(key: String, vars: Map<String, String>): String {
-        var message = ChatColor.translateAlternateColorCodes('&', messagesConfig.getString(key ))
+        var message = ChatColor.translateAlternateColorCodes('&', messagesConfig.getString(key))
         vars.forEach { pair ->
             message = message.replace("\$${pair.key}", pair.value)
         }
@@ -57,12 +56,12 @@ class BukkitMessages(private val plugin: RPKBukkitPlugin): Messages {
             vars.forEach { pair ->
                 updatedMessage = updatedMessage.replace("\$${pair.key}", pair.value)
             }
-            updatedMessage
+            ChatColor.translateAlternateColorCodes('&', updatedMessage)
         }
     }
 
     override fun getList(key: String): List<String> {
-        return messagesConfig.getStringList(key)
+        return messagesConfig.getStringList(key).map { ChatColor.translateAlternateColorCodes('&', it) }
     }
 
     override fun set(key: String, value: String) {
