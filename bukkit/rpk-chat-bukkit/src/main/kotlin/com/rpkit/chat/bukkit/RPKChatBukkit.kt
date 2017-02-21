@@ -181,7 +181,7 @@ class RPKChatBukkit: RPKBukkitPlugin() {
         messages.setDefault("unmute-invalid-chatchannel", "&cNo chat channel by that name exists.")
         messages.setDefault("unmute-usage", "&cUsage: /unmute [channel]")
         messages.setDefault("listchatchannels-title", "&fChat channels:")
-        messages.setDefault("listchatchannels-item", "&f- \$color\$channel")
+        messages.setDefault("listchatchannels-item", "&f- \$color\$channel &f(&a&l\$mute&f)")
         messages.setDefault("irc-register-valid", "Registered. Please check your email for the verification code to complete the verification process.")
         messages.setDefault("irc-register-invalid-email-invalid", "You did not specify a valid email.")
         messages.setDefault("irc-register-invalid-email-not-specified", "You must specify an email.")
