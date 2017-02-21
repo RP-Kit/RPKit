@@ -58,6 +58,7 @@ project(":rpk-core") {
     def pircBotXVersion = "2.1"
     def jettyVersion = "9.4.0.M0"
     def velocityVersion = "1.7"
+    def hikariCPVersion = "2.6.0"
 
     dependencies {
         compile group: "mysql", name: "mysql-connector-java", version: mysqlConnectorVersion
@@ -74,6 +75,7 @@ project(":rpk-core") {
         compile group: "org.eclipse.jetty", name: "jetty-servlet", version: jettyVersion
         compile group: "org.eclipse.jetty", name: "jetty-webapp", version: jettyVersion
         compile group: "org.apache.velocity", name: "velocity", version: velocityVersion
+        compile group: "com.zaxxer", name: "HikariCP", version: hikariCPVersion
     }
 
     apply plugin: "com.github.johnrengelman.shadow"
