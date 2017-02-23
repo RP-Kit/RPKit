@@ -22,6 +22,7 @@ import com.rpkit.core.database.Table
 import com.rpkit.core.database.use
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.group.owner.RPKPaymentGroupOwner
 import org.ehcache.Cache
 import org.ehcache.CacheManager
@@ -114,15 +115,24 @@ class RPKPaymentGroupOwnerTable(
                 statement.setInt(1, id)
                 val resultSet = statement.executeQuery()
                 if (resultSet.next()) {
-                    val paymentGroupTable = plugin.core.database.getTable(RPKPaymentGroupTable::class)
+                    val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val finalPaymentGroupOwner = RPKPaymentGroupOwner(
-                            resultSet.getInt("id"),
-                            paymentGroupTable[resultSet.getInt("payment_group_id")]!!,
-                            characterProvider.getCharacter(resultSet.getInt("character_id"))!!
-                    )
-                    cache.put(id, finalPaymentGroupOwner)
-                    paymentGroupOwner = finalPaymentGroupOwner
+                    val paymentGroup = paymentGroupProvider.getPaymentGroup(resultSet.getInt("payment_group_id"))
+                    val character = characterProvider.getCharacter(resultSet.getInt("character_id"))
+                    if (paymentGroup == null || character == null) {
+                        connection.prepareStatement("DELETE FROM rpkit_payment_group_owner WHERE id = ?").use { statement ->
+                            statement.setInt(1, resultSet.getInt("id"))
+                            statement.executeUpdate()
+                        }
+                    } else {
+                        val finalPaymentGroupOwner = RPKPaymentGroupOwner(
+                                resultSet.getInt("id"),
+                                paymentGroup,
+                                character
+                        )
+                        cache.put(id, finalPaymentGroupOwner)
+                        paymentGroupOwner = finalPaymentGroupOwner
+                    }
                 }
             }
         }
