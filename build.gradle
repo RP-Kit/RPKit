@@ -747,9 +747,42 @@ project(":bukkit:rpk-feature-flag-lib-bukkit") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
-            pom.version = project(":bukkit:rpk-feature-flag-lib-bukkit")
-            pom.artifactId = project(":bukkit:rpk-feature-flag-lib-bukkit")
-            pom.groupId = project(":bukkit:rpk-feature-flag-lib-bukkit")
+            pom.version = project(":bukkit:rpk-feature-flag-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-feature-flag-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-feature-flag-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-experience-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+    
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+            
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-experience-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-experience-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-experience-lib-bukkit").group
 
         }
     }
@@ -1299,7 +1332,7 @@ project(":bukkit:rpk-feature-flags-bukkit") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repos.seventh-root.com/artifactory/libs-release-local/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
@@ -1333,13 +1366,47 @@ project(":bukkit:rpk-rolling-bukkit") {
     uploadArchives {
         repositories.mavenDeployer {
 
-            repository(url: "https://repos.seventh-root.com/artifactory/libs-release-local/") {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
                 authentication(userName: repoUserName, password: repoPassword)
             }
 
             pom.version = project(":bukkit:rpk-rolling-bukkit").version
             pom.artifactId = project(":bukkit:rpk-rolling-bukkit").name
             pom.groupId = project(":bukkit:rpk-rolling-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-experience-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
+        compile project(":bukkit:rpk-experience-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-experience-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-experience-bukkit").name
+            pom.groupId = project(":bukkit:rpk-experience-bukkit").group
 
         }
     }
