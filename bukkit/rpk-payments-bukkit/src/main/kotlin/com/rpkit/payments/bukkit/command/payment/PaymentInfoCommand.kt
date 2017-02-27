@@ -54,7 +54,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                 var chatFormat: ChatColor? = null
                                 var i = 0
                                 while (i < line.length) {
-                                    if (line[i] === '&') {
+                                    if (line[i] === ChatColor.COLOR_CHAR) {
                                         val colourOrFormat = ChatColor.getByChar(line[i + 1])
                                         if (colourOrFormat.isColor) {
                                             chatColor = colourOrFormat
@@ -315,7 +315,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                 var chatFormat: ChatColor? = null
                                 var i = 0
                                 while (i < line.length) {
-                                    if (line[i] === '&') {
+                                    if (line[i] === ChatColor.COLOR_CHAR) {
                                         val colourOrFormat = ChatColor.getByChar(line[i + 1])
                                         if (colourOrFormat.isColor) {
                                             chatColor = colourOrFormat
