@@ -21,7 +21,6 @@ import com.rpkit.payments.bukkit.command.payment.set.PaymentSetAmountCommand
 import com.rpkit.payments.bukkit.command.payment.set.PaymentSetCurrencyCommand
 import com.rpkit.payments.bukkit.command.payment.set.PaymentSetIntervalCommand
 import com.rpkit.payments.bukkit.command.payment.set.PaymentSetNameCommand
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -49,10 +48,10 @@ class PaymentSetCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor 
             } else if (args[0].equals("interval", ignoreCase = true)) {
                 return paymentSetIntervalCommand.onCommand(sender, command, label, newArgs)
             } else {
-                ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-set-usage"))
+                sender.sendMessage(plugin.messages["payment-set-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-set-usage")))
+            sender.sendMessage(plugin.messages["payment-set-usage"])
         }
         return true
     }

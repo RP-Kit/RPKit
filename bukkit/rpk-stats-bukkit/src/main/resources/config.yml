@@ -23,9 +23,3 @@ stats:
       + (characterHelmet == null ? 0 : characterHelmet.getType().toString() == "IRON_HELMET" ? 8 : 0)
     agility: '(minecraftLevel * 20) - characterAge + characterFoodLevel'
     intelligence: '(minecraftLevel * 5) + characterMana'
-messages:
-    stats-list-title: '&fStats:'
-    stats-list-item: '&7$stat: &f$value'
-    no-character: '&cYou must have an active character in order to perform this command.'
-    not-from-console: '&cYou must be a player to perform this command.'
-    no-permission-stats: '&cYou do not have permission to view your stats.'

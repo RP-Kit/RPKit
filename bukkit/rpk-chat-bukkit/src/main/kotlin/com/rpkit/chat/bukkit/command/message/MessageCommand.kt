@@ -20,7 +20,6 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupImpl
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -47,10 +46,10 @@ class MessageCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                             }
                             chatGroup.sendMessage(senderPlayer, message.toString())
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-message-invalid-not-a-member")))
+                            sender.sendMessage(plugin.messages["chat-group-message-invalid-not-a-member"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chat-group-message")))
+                        sender.sendMessage(plugin.messages["no-permission-chat-group-message"])
                     }
                 } else if (plugin.server.getPlayer(args[0]) != null) {
                     if (sender.hasPermission("rpkit.chat.command.message")) {
@@ -75,19 +74,19 @@ class MessageCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                             }
                             chatGroup.sendMessage(senderPlayer, message.toString())
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.message-invalid-self")))
+                            sender.sendMessage(plugin.messages["message-invalid-self"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-message")))
+                        sender.sendMessage(plugin.messages["no-permission-message"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.message-invalid-target")))
+                    sender.sendMessage(plugin.messages["message-invalid-target"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.message-usage")))
+            sender.sendMessage(plugin.messages["message-usage"])
         }
         return true
     }

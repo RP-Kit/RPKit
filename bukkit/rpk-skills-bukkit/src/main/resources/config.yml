@@ -1,0 +1,14 @@
+skill-types:
+- melee_offence
+- melee_defence
+- ranged_offence
+- ranged_defence
+- magic_offence
+- magic_defence
+- magic_healing
+- magic_nature
+- magic_illusion
+- magic_summoning
+- magic_sword
+- speed_nimble
+- support_perform

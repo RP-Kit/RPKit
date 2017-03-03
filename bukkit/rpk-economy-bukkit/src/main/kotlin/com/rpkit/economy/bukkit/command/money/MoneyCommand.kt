@@ -17,7 +17,6 @@
 package com.rpkit.economy.bukkit.command.money
 
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -36,7 +35,7 @@ class MoneyCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
     private val moneyWalletCommand = MoneyWalletCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.size > 0) {
+        if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("subtract", ignoreCase = true) || args[0].equals("sub", ignoreCase = true)) {
                 return moneySubtractCommand.onCommand(sender, command, label, newArgs)
@@ -51,7 +50,7 @@ class MoneyCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
             } else if (args[0].equals("wallet", ignoreCase = true)) {
                 return moneyWalletCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-usage")))
+                sender.sendMessage(plugin.messages["money-usage"])
             }
         } else {
             return moneyViewCommand.onCommand(sender, command, label, arrayOf<String>())

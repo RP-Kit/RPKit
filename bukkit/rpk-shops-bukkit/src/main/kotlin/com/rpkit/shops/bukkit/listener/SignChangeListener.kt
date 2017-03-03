@@ -21,7 +21,6 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.shops.bukkit.RPKShopsBukkit
 import com.rpkit.shops.bukkit.shopcount.RPKShopCountProvider
-import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material
 import org.bukkit.Material.CHEST
@@ -54,16 +53,24 @@ class SignChangeListener(private val plugin: RPKShopsBukkit): Listener {
                                 || (event.getLine(1).matches(Regex("sell\\s+\\d+\\s+.+"))
                                 && Material.matchMaterial(event.getLine(1).replace(Regex("sell\\s+\\d+\\s+"), "")) != null))) {
                             event.block.breakNaturally()
-                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-line-1-invalid")))
+                            event.player.sendMessage(plugin.messages["shop-line-1-invalid"])
                             return
                         }
                         if (!(event.getLine(2).matches(Regex("for\\s+\\d+\\s+.+")) && currencyProvider.getCurrency(event.getLine(2).replace(Regex("for\\s+\\d+\\s+"), "")) != null)) {
                             event.block.breakNaturally()
-                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-line-2-invalid")))
+                            event.player.sendMessage(plugin.messages["shop-line-2-invalid"])
                             return
                         }
                         event.setLine(0, GREEN.toString() + "[shop]")
-                        event.setLine(3, character.id.toString())
+                        if (!event.getLine(3).equals("admin", ignoreCase = true)) {
+                            event.setLine(3, character.id.toString())
+                        } else {
+                            if (!event.player.hasPermission("rpkit.shops.sign.shop.admin")) {
+                                event.block.breakNaturally()
+                                event.player.sendMessage(plugin.messages["no-permission-shop-admin"])
+                                return
+                            }
+                        }
                         event.block.getRelative(DOWN).type = CHEST
                         val chest = event.block.getRelative(DOWN).state
                         if (chest is Chest) {
@@ -79,16 +86,18 @@ class SignChangeListener(private val plugin: RPKShopsBukkit): Listener {
                                 }
                             }
                         }
-                        shopCountProvider.setShopCount(character, shopCountProvider.getShopCount(character) + 1)
+                        if (!event.getLine(3).equals("admin", ignoreCase = true)) {
+                            shopCountProvider.setShopCount(character, shopCountProvider.getShopCount(character) + 1)
+                        }
                     } else {
-                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-shop-limit")))
+                        event.player.sendMessage(plugin.messages["no-permission-shop-limit"])
                         event.block.breakNaturally()
                     }
                 } else {
-                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                    event.player.sendMessage(plugin.messages["no-character"])
                 }
             } else {
-                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-shop")))
+                event.player.sendMessage(plugin.messages["no-permission-shop"])
                 event.block.breakNaturally()
             }
         }

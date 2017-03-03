@@ -1,9 +1,0 @@
-messages:
-    account-usage: '&cUsage: /account [link]'
-    account-link-usage: '&cUsage: /account link [irc]'
-    account-link-irc-usage: '&cUsage: /account link irc [nick]'
-    account-link-irc-invalid-already-linked: '&cThat IRC user is already linked to a Minecraft user.'
-    account-link-irc-invalid-nick: '&cThere is no IRC user by that name online.'
-    account-link-irc-invalid-no-irc-provider: '&cThere is no IRC provider registered, so IRC accounts cannot be linked.'
-    account-link-irc-invalid-no-player-provider: '&cThere is no player provider registered, so IRC accounts cannot be linked.'
-    account-link-irc-valid: '&aAccount linked.'

@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -21,7 +20,7 @@ class ItemCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                         try {
                             amount = Integer.parseInt(args[1])
                         } catch (exception: NumberFormatException) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.item-invalid-amount")))
+                            sender.sendMessage(plugin.messages["item-invalid-amount"])
                             return true
                         }
                     }
@@ -29,25 +28,27 @@ class ItemCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                         val item = ItemStack(material, amount)
                         sender.inventory.addItem(item)
                         if (amount > 1) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.item-valid-plural"))
-                                    .replace("\$type", material.toString())
-                                    .replace("\$amount", amount.toString()))
+                            sender.sendMessage(plugin.messages["item-valid-plural", mapOf(
+                                    Pair("type", material.toString()),
+                                    Pair("amount", amount.toString())
+                            )])
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.item-valid-singular"))
-                                    .replace("\$type", material.toString())
-                                    .replace("\$amount", amount.toString()))
+                            sender.sendMessage(plugin.messages["item-valid-singular", mapOf(
+                                    Pair("type", material.toString()),
+                                    Pair("amount", amount.toString())
+                            )])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.item-invalid-material")))
+                        sender.sendMessage(plugin.messages["item-invalid-material"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.item-usage")))
+                    sender.sendMessage(plugin.messages["item-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-item")))
+            sender.sendMessage(plugin.messages["no-permission-item"])
         }
         return true
     }

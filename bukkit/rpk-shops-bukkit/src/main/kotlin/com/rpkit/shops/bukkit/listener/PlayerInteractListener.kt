@@ -22,7 +22,6 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.shops.bukkit.RPKShopsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material
 import org.bukkit.block.BlockFace.DOWN
@@ -65,8 +64,9 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit): Listener {
                         val currency = currencyProvider.getCurrency(currencyBuilder.toString())
                         if (currency != null) {
                             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                            val ownerCharacter = characterProvider.getCharacter(state.getLine(3).toInt())
-                            if (ownerCharacter != null) {
+                            val isAdminShop = state.getLine(3).equals("admin", ignoreCase = true)
+                            val ownerCharacter = if (isAdminShop) null else characterProvider.getCharacter(state.getLine(3).toInt())
+                            if (ownerCharacter != null || isAdminShop) {
                                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                                 val customerPlayer = playerProvider.getPlayer(event.player)
                                 val customerCharacter = characterProvider.getActiveCharacter(customerPlayer)
@@ -79,28 +79,36 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit): Listener {
                                         if (chestState != null) {
                                             val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
                                             val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
-                                            if (bankProvider.getBalance(ownerCharacter, currency) >= price) {
+                                            if (isAdminShop) {
                                                 event.player.inventory.removeItem(items)
                                                 chestState.blockInventory.addItem(items)
-                                                bankProvider.setBalance(ownerCharacter, currency, bankProvider.getBalance(ownerCharacter, currency) - price)
                                                 economyProvider.setBalance(customerCharacter, currency, economyProvider.getBalance(customerCharacter, currency) + price)
+                                            } else if (ownerCharacter != null) {
+                                                if (bankProvider.getBalance(ownerCharacter, currency) >= price) {
+                                                    event.player.inventory.removeItem(items)
+                                                    chestState.blockInventory.addItem(items)
+                                                    bankProvider.setBalance(ownerCharacter, currency, bankProvider.getBalance(ownerCharacter, currency) - price)
+                                                    economyProvider.setBalance(customerCharacter, currency, economyProvider.getBalance(customerCharacter, currency) + price)
+                                                } else {
+                                                    event.player.sendMessage(plugin.messages["shop-sell-not-enough-money"])
+                                                }
                                             } else {
-                                                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-sell-not-enough-money")))
+                                                event.player.sendMessage(plugin.messages["shop-character-invalid"])
                                             }
                                         } else {
-                                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-sell-chest-not-found")))
+                                            event.player.sendMessage(plugin.messages["shop-sell-chest-not-found"])
                                         }
                                     } else {
-                                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-sell-not-enough-items")))
+                                        event.player.sendMessage(plugin.messages["shop-sell-not-enough-items"])
                                     }
                                 } else {
-                                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                                    event.player.sendMessage(plugin.messages["no-character"])
                                 }
                             } else {
-                                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-character-invalid")))
+                                event.player.sendMessage(plugin.messages["shop-character-invalid"])
                             }
                         } else {
-                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.shop-currency-invalid")))
+                            event.player.sendMessage(plugin.messages["shop-currency-invalid"])
                         }
                     }
                 }

@@ -3,7 +3,6 @@ package com.rpkit.locks.bukkit.command
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.lock.RPKLockProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -18,12 +17,12 @@ class UnlockCommand(private val plugin: RPKLocksBukkit): CommandExecutor {
                 val lockProvider = plugin.core.serviceManager.getServiceProvider(RPKLockProvider::class)
                 val player = playerProvider.getPlayer(sender)
                 lockProvider.setUnclaiming(player, true)
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.unlock-valid")))
+                sender.sendMessage(plugin.messages["unlock-valid"])
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-unlock")))
+            sender.sendMessage(plugin.messages["no-permission-unlock"])
         }
         return true
     }

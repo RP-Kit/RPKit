@@ -50,12 +50,12 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
                     val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
                     val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
                     val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                    val sellerCharacter = characterProvider.getCharacter(sign.getLine(3).toInt()) ?: return
+                    val sellerCharacter = if (sign.getLine(3).equals("admin", ignoreCase = true)) null else characterProvider.getCharacter(sign.getLine(3).toInt()) ?: return
                     val buyerBukkitPlayer = event.whoClicked as? Player ?: return
                     val buyerPlayer = playerProvider.getPlayer(buyerBukkitPlayer)
                     val buyerCharacter = characterProvider.getActiveCharacter(buyerPlayer)
                     if (buyerCharacter == null) {
-                        buyerBukkitPlayer.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                        buyerBukkitPlayer.sendMessage(plugin.messages["no-character"])
                         return
                     }
                     if (buyerCharacter == sellerCharacter) {
@@ -73,17 +73,19 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
                         if (chest.blockInventory.containsAtLeast(item, amount)) {
                             if (economyProvider.getBalance(buyerCharacter, currency) >= price) {
                                 economyProvider.setBalance(buyerCharacter, currency, economyProvider.getBalance(buyerCharacter, currency) - price)
-                                bankProvider.setBalance(sellerCharacter, currency, bankProvider.getBalance(sellerCharacter, currency) + price)
+                                if (sellerCharacter != null) {
+                                    bankProvider.setBalance(sellerCharacter, currency, bankProvider.getBalance(sellerCharacter, currency) + price)
+                                }
                                 buyerBukkitPlayer.inventory.addItem(amtItem)
                                 chest.blockInventory.removeItem(amtItem)
                             } else {
-                                buyerBukkitPlayer.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-enough-money")))
+                                buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-money"])
                             }
                         } else {
-                            buyerBukkitPlayer.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-enough-shop-items")))
+                            buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-shop-items"])
                         }
                     } else if (sign.getLine(1).startsWith("sell")) {
-                        event.whoClicked.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-stealing")))
+                        event.whoClicked.sendMessage(plugin.messages["no-stealing"])
                     }
                 }
             }

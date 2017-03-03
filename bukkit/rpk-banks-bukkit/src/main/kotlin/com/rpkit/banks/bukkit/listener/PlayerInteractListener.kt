@@ -22,7 +22,6 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
@@ -77,37 +76,40 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit): Listener {
                             } else if (event.action == Action.LEFT_CLICK_BLOCK) {
                                 if (sign.getLine(1).equals("withdraw", ignoreCase = true)) {
                                     if (economyProvider.getBalance(character, currency) + sign.getLine(2).toInt() > 1728) {
-                                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bank-withdraw-invalid-wallet-full")))
+                                        event.player.sendMessage(plugin.messages["bank-withdraw-invalid-wallet-full"])
                                     } else if (sign.getLine(2).toInt() > bankProvider.getBalance(character, currency)) {
-                                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bank-withdraw-invalid-not-enough-money")))
+                                        event.player.sendMessage(plugin.messages["bank-withdraw-invalid-not-enough-money"])
                                     } else {
                                         bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - sign.getLine(2).toInt())
                                         economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + sign.getLine(2).toInt())
                                         event.player.sendMessage(
-                                                ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bank-withdraw-valid"))
-                                                        .replace("\$amount", sign.getLine(2))
-                                                        .replace("\$currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural)
-                                                        .replace("\$wallet-balance", economyProvider.getBalance(character, currency).toString())
-                                                        .replace("\$bank-balance", bankProvider.getBalance(character, currency).toString()))
+                                                plugin.messages["bank-withdraw-valid", mapOf(
+                                                        Pair("amount", sign.getLine(2)),
+                                                        Pair("currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural),
+                                                        Pair("wallet-balance", economyProvider.getBalance(character, currency).toString()),
+                                                        Pair("bank-balance", bankProvider.getBalance(character, currency).toString())
+                                                )]
+                                        )
                                     }
                                 } else if (sign.getLine(1).equals("deposit", ignoreCase = true)) {
                                     if (sign.getLine(2).toInt() > economyProvider.getBalance(character, currency)) {
-                                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bank-deposit-invalid-not-enough-money")))
+                                        event.player.sendMessage(plugin.messages["bank-deposit-invalid-not-enough-money"])
                                     } else {
                                         bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) + sign.getLine(2).toInt())
                                         economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - sign.getLine(2).toInt())
-                                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bank-deposit-valid"))
-                                                .replace("\$amount", sign.getLine(2))
-                                                .replace("\$currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural)
-                                                .replace("\$wallet-balance", economyProvider.getBalance(character, currency).toString())
-                                                .replace("\$bank-balance", bankProvider.getBalance(character, currency).toString()))
+                                        event.player.sendMessage(plugin.messages["bank-deposit-valid", mapOf(
+                                                Pair("amount", sign.getLine(2)),
+                                                Pair("currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural),
+                                                Pair("wallet-balance", economyProvider.getBalance(character, currency).toString()),
+                                                Pair("bank-balance", bankProvider.getBalance(character, currency).toString())
+                                        )])
                                     }
                                 } else if (sign.getLine(1).equals("balance", ignoreCase = true)) {
                                     val balance = bankProvider.getBalance(character, currency)
-                                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.bank-balance-valid"))
-                                            .replace("\$amount", balance.toString())
-                                            .replace("\$currency", if (balance == 1) currency.nameSingular else currency.namePlural))
-
+                                    event.player.sendMessage(plugin.messages["bank-balance-valid", mapOf(
+                                            Pair("amount", balance.toString()),
+                                            Pair("currency", if (balance == 1) currency.nameSingular else currency.namePlural)
+                                    )])
                                 }
                             }
                         }

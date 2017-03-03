@@ -41,12 +41,12 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
             .withModality(true)
             .withFirstPrompt(PlayerPrompt())
             .withEscapeSequence("cancel")
-            .thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
                 if (!event.gracefulExit()) {
                     val conversable = event.context.forWhom
                     if (conversable is Player) {
-                        conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                        conversable.sendMessage(plugin.messages["operation-cancelled"])
                     }
                 }
             }
@@ -58,7 +58,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
                 val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                if (args.size > 0) {
+                if (args.isNotEmpty()) {
                     val bukkitPlayer = plugin.server.getPlayer(args[0])
                     if (bukkitPlayer != null) {
                         val player = playerProvider.getPlayer(bukkitPlayer)
@@ -75,40 +75,40 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
                                                 val amount = args[3].toInt()
                                                 if (amount >= 0) {
                                                     economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - amount)
-                                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-value-valid")))
-                                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-valid")))
+                                                    sender.sendMessage(plugin.messages["money-subtract-value-valid"])
+                                                    sender.sendMessage(plugin.messages["money-subtract-valid"])
                                                 } else {
-                                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-value-invalid-value-negative")))
+                                                    sender.sendMessage(plugin.messages["money-subtract-value-invalid-value-negative"])
                                                 }
                                             } catch (exception: NumberFormatException) {
-                                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-value-invalid-value-number")))
+                                                sender.sendMessage(plugin.messages["money-subtract-value-invalid-value-number"])
                                             }
                                         } else {
                                             conversationFactory.buildConversation(sender).begin()
                                         }
                                     } else {
-                                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-currency-invalid-currency")))
+                                        sender.sendMessage(plugin.messages["money-subtract-currency-invalid-currency"])
                                     }
                                 } else {
                                     conversationFactory.buildConversation(sender).begin()
                                 }
                             } else {
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-character-invalid-character")))
+                                sender.sendMessage(plugin.messages["money-subtract-character-invalid-character"])
                             }
                         } else {
                             conversationFactory.buildConversation(sender).begin()
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-player-invalid-player")))
+                        sender.sendMessage(plugin.messages["money-subtract-player-invalid-player"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-money-subtract")))
+                sender.sendMessage(plugin.messages["no-permission-money-subtract"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }
@@ -123,11 +123,11 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-player-prompt"))
+            return plugin.messages["money-subtract-player-prompt"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-player-invalid-player"))
+            return plugin.messages["money-subtract-player-invalid-player"]
         }
 
     }
@@ -138,7 +138,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-player-valid"))
+            return plugin.messages["money-subtract-player-valid"]
         }
 
     }
@@ -147,30 +147,32 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             return plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     .getCharacters(context.getSessionData("player") as RPKPlayer)
-                    .filter { character -> character.name.equals(input) }
+                    .filter { character -> character.name == input }
                     .isNotEmpty()
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             context.setSessionData("character", plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     .getCharacters(context.getSessionData("player") as RPKPlayer)
-                    .filter { character -> character.name.equals(input) }
+                    .filter { character -> character.name == input }
                     .first()
             )
             return CharacterSetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-character-prompt")) +
+            return plugin.messages["money-subtract-character-prompt"] +
                     "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                             .getCharacters(context.getSessionData("player") as RPKPlayer)
-                            .map { character -> ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-character-prompt-list-item")).replace("\$character", character.name) }
+                            .map { character -> plugin.messages["money-subtract-character-prompt-list-item", mapOf(
+                                    Pair("character", character.name)
+                            )] }
                             .joinToString("\n")
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-character-invalid-character"))
+            return plugin.messages["money-subtract-character-invalid-character"]
         }
     }
 
@@ -180,7 +182,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-character-valid"))
+            return plugin.messages["money-subtract-character-valid"]
         }
 
     }
@@ -196,14 +198,16 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-currency-prompt")) + "\n" +
+            return plugin.messages["money-subtract-currency-prompt"] + "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
-                            .map { currency -> ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-currency-prompt-list-item")).replace("\$currency", currency.name) }
+                            .map { currency -> plugin.messages["money-subtract-currency-prompt-list-item", mapOf(
+                                    Pair("currency", currency.name)
+                            )] }
                             .joinToString("\n")
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-currency-invalid-currency"))
+            return plugin.messages["money-subtract-currency-invalid-currency"]
         }
     }
 
@@ -213,7 +217,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-currency-valid"))
+            return plugin.messages["money-subtract-currency-valid"]
         }
 
     }
@@ -232,19 +236,19 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-amount-prompt"))
+            return plugin.messages["money-subtract-amount-prompt"]
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
             if (invalidInput.toInt() <= 0) {
-                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-amount-invalid-amount-negative"))
+                return plugin.messages["money-subtract-amount-invalid-amount-negative"]
             } else {
-                return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-amount-invalid-amount-balance"))
+                return plugin.messages["money-subtract-amount-invalid-amount-balance"]
             }
         }
 
         override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-amount-invalid-amount-number"))
+            return plugin.messages["money-subtract-amount-invalid-amount-number"]
         }
 
     }
@@ -255,7 +259,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-amount-valid"))
+            return plugin.messages["money-subtract-amount-valid"]
         }
 
     }
@@ -271,7 +275,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
             val currency = context.getSessionData("currency") as RPKCurrency
             val amount = context.getSessionData("amount") as Int
             economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - amount)
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.money-subtract-valid"))
+            return plugin.messages["money-subtract-valid"]
         }
 
     }

@@ -46,9 +46,6 @@ class RPKPlayerProviderImpl(private val plugin: RPKPlayersBukkit): RPKPlayerProv
                     lastKnownIP = bukkitPlayer.player?.address?.address?.hostAddress
             )
             addPlayer(player)
-        } else {
-            player.lastKnownIP = bukkitPlayer.player?.address?.address?.hostAddress
-            updatePlayer(player)
         }
         return player
     }

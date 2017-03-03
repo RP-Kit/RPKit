@@ -48,13 +48,13 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                     val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
                     if (paymentGroup != null) {
                         if (paymentGroup.owners.contains(character)) {
-                            for (line in plugin.config.getStringList("messages.payment-info-owner")) {
+                            for (line in plugin.messages.getList("payment-info-owner")) {
                                 val message = FancyMessage("")
                                 var chatColor: ChatColor? = null
                                 var chatFormat: ChatColor? = null
                                 var i = 0
                                 while (i < line.length) {
-                                    if (line[i] === '&') {
+                                    if (line[i] === ChatColor.COLOR_CHAR) {
                                         val colourOrFormat = ChatColor.getByChar(line[i + 1])
                                         if (colourOrFormat.isColor) {
                                             chatColor = colourOrFormat
@@ -309,13 +309,13 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                 message.send(sender)
                             }
                         } else {
-                            for (line in plugin.config.getStringList("messages.payment-info-not-owner")) {
+                            for (line in plugin.messages.getList("payment-info-not-owner")) {
                                 val message = FancyMessage("")
                                 var chatColor: ChatColor? = null
                                 var chatFormat: ChatColor? = null
                                 var i = 0
                                 while (i < line.length) {
-                                    if (line[i] === '&') {
+                                    if (line[i] === ChatColor.COLOR_CHAR) {
                                         val colourOrFormat = ChatColor.getByChar(line[i + 1])
                                         if (colourOrFormat.isColor) {
                                             chatColor = colourOrFormat
@@ -499,16 +499,16 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                             }
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-info-invalid-group")))
+                        sender.sendMessage(plugin.messages["payment-info-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-info-usage")))
+                    sender.sendMessage(plugin.messages["payment-info-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("no-permission-payment-info")))
+            sender.sendMessage(plugin.messages["no-permission-payment-info"])
         }
         return true
     }

@@ -17,10 +17,10 @@
 package com.rpkit.core.database
 
 import com.rpkit.core.database.table.TableVersionTable
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import java.sql.Connection
-import java.sql.DriverManager
 import java.sql.SQLException
-import java.util.*
 import kotlin.reflect.KClass
 
 /**
@@ -33,10 +33,19 @@ import kotlin.reflect.KClass
  */
 class Database @JvmOverloads constructor(val url: String, val userName: String? = null, val password: String? = null) {
 
-    private val tables: MutableMap<KClass<out Table<*>>, Table<*>>
+    private val dataSource: HikariDataSource
+    private val tables: MutableMap<KClass<out Table<*>>, Table<*>> = mutableMapOf()
 
     init {
-        tables = HashMap<KClass<out Table<*>>, Table<*>>()
+        val hikariConfig = HikariConfig()
+        hikariConfig.jdbcUrl = url
+        if (userName != null) {
+            hikariConfig.username = userName
+        }
+        if (password != null) {
+            hikariConfig.password = password
+        }
+        dataSource = HikariDataSource(hikariConfig)
         addTable(TableVersionTable(this))
     }
 
@@ -47,11 +56,7 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
      */
     @Throws(SQLException::class)
     fun createConnection(): Connection {
-        if (userName == null && password == null) {
-            return DriverManager.getConnection(url)
-        } else {
-            return DriverManager.getConnection(url, userName, password)
-        }
+        return dataSource.connection
     }
 
     /**

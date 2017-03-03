@@ -19,7 +19,6 @@ package com.rpkit.chat.bukkit.command.reply
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -39,23 +38,23 @@ class ReplyCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                 val player = playerProvider.getPlayer(sender)
                 val chatGroup = chatGroupProvider.getLastUsedChatGroup(player)
                 if (chatGroup != null) {
-                    if (args.size >= 1) {
+                    if (args.isNotEmpty()) {
                         val message = StringBuilder()
                         for (arg in args) {
                             message.append(arg).append(" ")
                         }
                         chatGroup.sendMessage(player, message.toString())
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.reply-usage")))
+                        sender.sendMessage(plugin.messages["reply-usage"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.reply-invalid-chat-group")))
+                    sender.sendMessage(plugin.messages["reply-invalid-chat-group"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-reply")))
+            sender.sendMessage(plugin.messages["no-permission-reply"])
         }
         return true
     }

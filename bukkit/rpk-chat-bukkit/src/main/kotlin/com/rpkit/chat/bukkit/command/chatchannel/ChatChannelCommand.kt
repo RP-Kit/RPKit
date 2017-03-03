@@ -19,7 +19,6 @@ package com.rpkit.chat.bukkit.command.chatchannel
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -41,20 +40,22 @@ class ChatChannelCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                 if (chatChannel != null) {
                     if (sender.hasPermission("rpkit.chat.command.chatchannel.${chatChannel.name}")) {
                         chatChannel.addSpeaker(player)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-valid"))
-                                .replace("\$channel", chatChannel.name))
+                        sender.sendMessage(plugin.messages["chatchannel-valid", mapOf(
+                                Pair("channel", chatChannel.name)
+                        )])
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chatchannel"))
-                                .replace("\$channel", chatChannel.name))
+                        sender.sendMessage(plugin.messages["no-permission-chatchannel", mapOf(
+                                Pair("channel", chatChannel.name)
+                        )])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-invalid-chatchannel")))
+                    sender.sendMessage(plugin.messages["chatchannel-invalid-chatchannel"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chatchannel-usage")))
+                sender.sendMessage(plugin.messages["chatchannel-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

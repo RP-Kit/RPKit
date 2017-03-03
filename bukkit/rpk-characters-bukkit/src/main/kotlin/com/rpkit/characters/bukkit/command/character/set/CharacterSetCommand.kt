@@ -17,7 +17,6 @@
 package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -47,7 +46,7 @@ class CharacterSetCommand(private val plugin: RPKCharactersBukkit): CommandExecu
     }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (args.size > 0) {
+        if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("player", ignoreCase = true)) {
                 return characterSetPlayerCommand.onCommand(sender, command, label, newArgs)
@@ -64,10 +63,10 @@ class CharacterSetCommand(private val plugin: RPKCharactersBukkit): CommandExecu
             } else if (args[0].equals("dead", ignoreCase = true)) {
                 return characterSetDeadCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-usage")))
+                sender.sendMessage(plugin.messages["character-set-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-set-usage")))
+            sender.sendMessage(plugin.messages["character-set-usage"])
         }
         return true
     }

@@ -45,16 +45,16 @@ class CharacterNewCommand(private val plugin: RPKCharactersBukkit): CommandExecu
                     characterProvider.addCharacter(character)
                     characterProvider.setActiveCharacter(player, character)
                     newCharacterCooldownProvider.setNewCharacterCooldown(player, plugin.config.getLong("characters.new-character-cooldown"))
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-new-valid")))
+                    sender.sendMessage(plugin.messages["character-new-valid"])
                     character.showCharacterCard(player)
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-new-invalid-cooldown")))
+                    sender.sendMessage(plugin.messages["character-new-invalid-cooldown"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-character-new"))))
+                sender.sendMessage(plugin.messages["no-permission-character-new"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

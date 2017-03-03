@@ -1,0 +1,19 @@
+name: rpk-experience-bukkit
+version: @version@
+author: alyphen
+main: com.rpkit.experience.bukkit.RPKExperienceBukkit
+depend: [rpk-core-bukkit, rpk-character-lib-bukkit, rpk-experience-lib-bukkit]
+commands:
+    experience:
+        description: Experience command
+        usage: /<command> [add|set|setlevel]
+permissions:
+    rpkit.experience.command.experience.add:
+        description: Allows adding experience
+        default: op
+    rpkit.experience.command.experience.set:
+        description: Allows setting experience
+        default: op
+    rpkit.experience.command.experience.setlevel:
+        description: Allows setting level
+        default: op

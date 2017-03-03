@@ -1,0 +1,13 @@
+name: rpk-skills-bukkit
+version: @version@
+author: alyphen
+main: com.rpkit.skills.bukkit.RPKSkillsBukkit
+depend: [rpk-core-bukkit, rpk-character-lib-bukkit, rpk-skill-lib-bukkit]
+commands:
+    skill:
+        description: Uses a skill
+        usage: /<command> [skill]
+permissions:
+    rpkit.skills.command.skill:
+        description: Allows using skills
+        default: true

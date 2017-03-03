@@ -3,7 +3,6 @@ package com.rpkit.essentials.bukkit.command
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -20,15 +19,15 @@ class BackCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 val previousLocation = locationHistoryProvider.getPreviousLocation(player)
                 if (previousLocation != null) {
                     sender.teleport(previousLocation)
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.back-valid")))
+                    sender.sendMessage(plugin.messages["back-valid"])
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.back-invalid-no-locations")))
+                    sender.sendMessage(plugin.messages["back-invalid-no-locations"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-back")))
+                sender.sendMessage(plugin.messages["no-permission-back"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            sender.sendMessage(plugin.messages["not-from-console"])
         }
         return true
     }

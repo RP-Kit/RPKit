@@ -18,7 +18,6 @@ package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -32,26 +31,28 @@ class ChatGroupDisbandCommand(private val plugin: RPKChatBukkit): CommandExecuto
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.chat.command.chatgroup.disband")) {
-            if (args.size >= 1) {
+            if (args.isNotEmpty()) {
                 if (sender is Player) {
                     val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
                     val chatGroup = chatGroupProvider.getChatGroup(args[0])
                     if (chatGroup != null) {
                         for (player in chatGroup.members) {
-                            player.bukkitPlayer?.player?.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-disband-valid")).replace("\$group", chatGroup.name))
+                            player.bukkitPlayer?.player?.sendMessage(plugin.messages["chat-group-disband-valid", mapOf(
+                                    Pair("group", chatGroup.name)
+                            )])
                         }
                         chatGroupProvider.removeChatGroup(chatGroup)
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-disband-invalid-nonexistent")))
+                        sender.sendMessage(plugin.messages["chat-group-disband-invalid-nonexistent"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                    sender.sendMessage(plugin.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-disband-usage")))
+                sender.sendMessage(plugin.messages["chat-group-disband-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chat-group-disband")))
+            sender.sendMessage(plugin.messages["no-permission-chat-group-disband"])
         }
         return true
     }

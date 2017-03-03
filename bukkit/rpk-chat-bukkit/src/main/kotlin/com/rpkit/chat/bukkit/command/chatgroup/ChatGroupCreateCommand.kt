@@ -34,7 +34,7 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit): CommandExecutor
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.chat.command.chatgroup.create")) {
-            if (args.size >= 1) {
+            if (args.isNotEmpty()) {
                 if (sender is Player) {
                     val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
                     if (chatGroupProvider.getChatGroup(args[0]) == null) {
@@ -44,21 +44,23 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit): CommandExecutor
                             val senderPlayer = playerProvider.getPlayer(sender)
                             chatGroupProvider.addChatGroup(chatGroup)
                             chatGroup.addMember(senderPlayer)
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-create-valid")).replace("\$group", chatGroup.name))
+                            sender.sendMessage(plugin.messages["chat-group-create-valid", mapOf(
+                                    Pair("group", chatGroup.name)
+                            )])
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-create-invalid-reserved")))
+                            sender.sendMessage(plugin.messages["chat-group-create-invalid-reserved"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-create-invalid-taken")))
+                        sender.sendMessage(plugin.messages["chat-group-create-invalid-taken"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                    sender.sendMessage(plugin.messages["not-from-console"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.chat-group-create-usage")))
+                sender.sendMessage(plugin.messages["chat-group-create-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-chat-group-create")))
+            sender.sendMessage(plugin.messages["no-permission-chat-group-create"])
         }
         return true
     }

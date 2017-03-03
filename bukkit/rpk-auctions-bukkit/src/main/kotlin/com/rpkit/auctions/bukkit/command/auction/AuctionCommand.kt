@@ -17,7 +17,6 @@
 package com.rpkit.auctions.bukkit.command.auction
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -32,15 +31,15 @@ class AuctionCommand(private val plugin: RPKAuctionsBukkit): CommandExecutor {
     private val auctionCreateCommand = AuctionCreateCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.size > 0) {
+        if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("create", ignoreCase = true) || args[0].equals("new", ignoreCase = true)) {
                 return auctionCreateCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-usage")))
+                sender.sendMessage(plugin.messages["auction-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.auction-usage")))
+            sender.sendMessage(plugin.messages["auction-usage"])
         }
         return true
     }

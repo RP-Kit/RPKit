@@ -21,7 +21,6 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -45,40 +44,46 @@ class PaymentWithdrawCommand(private val plugin: RPKPaymentsBukkit): CommandExec
                     if (character != null) {
                         val paymentGroup = paymentGroupProvider.getPaymentGroup(args.dropLast(1).joinToString(" "))
                         if (paymentGroup != null) {
-                            val currency = paymentGroup.currency
-                            if (currency != null) {
-                                try {
-                                    val amount = args.last().toInt()
-                                    if (amount > 0) {
-                                        if (paymentGroup.balance >= amount) {
-                                            bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) + amount)
-                                            paymentGroup.balance = paymentGroup.balance - amount
-                                            paymentGroupProvider.updatePaymentGroup(paymentGroup)
-                                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-valid")))
+                            if (paymentGroup.owners.contains(character)) {
+                                val currency = paymentGroup.currency
+                                if (currency != null) {
+                                    try {
+                                        val amount = args.last().toInt()
+                                        if (amount > 0) {
+                                            if (paymentGroup.balance >= amount) {
+                                                bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) + amount)
+                                                paymentGroup.balance = paymentGroup.balance - amount
+                                                paymentGroupProvider.updatePaymentGroup(paymentGroup)
+                                                sender.sendMessage(plugin.messages["payment-withdraw-valid"])
+                                            } else {
+                                                sender.sendMessage(plugin.messages["payment-withdraw-invalid-balance"])
+                                            }
+                                        } else {
+                                            sender.sendMessage(plugin.messages["payment-withdraw-invalid-amount"])
                                         }
-                                    } else {
-                                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-invalid-amount")))
+                                    } catch (exception: NumberFormatException) {
+                                        sender.sendMessage(plugin.messages["payment-withdraw-invalid-amount"])
                                     }
-                                } catch (exception: NumberFormatException) {
-                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-invalid-amount")))
+                                } else {
+                                    sender.sendMessage(plugin.messages["payment-withdraw-invalid-currency"])
                                 }
                             } else {
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-invalid-currency")))
+                                sender.sendMessage(plugin.messages["payment-withdraw-invalid-owner"])
                             }
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-invalid-group")))
+                            sender.sendMessage(plugin.messages[".payment-withdraw-invalid-group"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-invalid-character")))
+                        sender.sendMessage(plugin.messages["payment-withdraw-invalid-character"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-withdraw-usage")))
+                    sender.sendMessage(plugin.messages["payment-withdraw-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-payment-withdraw")))
+            sender.sendMessage(plugin.messages["no-permission-payment-withdraw"])
         }
         return true
     }

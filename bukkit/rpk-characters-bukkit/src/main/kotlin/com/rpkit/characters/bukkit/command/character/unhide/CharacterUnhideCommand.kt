@@ -17,7 +17,6 @@
 package com.rpkit.characters.bukkit.command.character.unhide
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -36,7 +35,7 @@ class CharacterUnhideCommand(private val plugin: RPKCharactersBukkit): CommandEx
     private val characterUnhideDescriptionCommand = CharacterUnhideDescriptionCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.size > 0) {
+        if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("player", ignoreCase = true)) {
                 return characterUnhidePlayerCommand.onCommand(sender, command, label, newArgs)
@@ -51,10 +50,10 @@ class CharacterUnhideCommand(private val plugin: RPKCharactersBukkit): CommandEx
             } else if (args[0].equals("description", ignoreCase = true) || args[0].equals("desc", ignoreCase = true)) {
                 return characterUnhideDescriptionCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-unhide-usage")))
+                sender.sendMessage(plugin.messages["character-unhide-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.character-unhide-usage")))
+            sender.sendMessage(plugin.messages["character-unhide-usage"])
         }
         return true
     }

@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -22,14 +21,15 @@ class HealCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             }
             if (player != null) {
                 player.health = player.maxHealth
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.heal-notification")))
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.heal-valid"))
-                        .replace("\$player", player.name))
+                player.sendMessage(plugin.messages["heal-notification"])
+                sender.sendMessage(plugin.messages["heal-valid", mapOf(
+                        Pair("player", player.name)
+                )])
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.heal-usage-console")))
+                sender.sendMessage(plugin.messages["heal-usage-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-heal")))
+            sender.sendMessage(plugin.messages["no-permission-heal"])
         }
         return true
     }

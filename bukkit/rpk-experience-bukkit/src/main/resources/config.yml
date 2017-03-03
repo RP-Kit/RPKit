@@ -1,0 +1,4 @@
+levels:
+    max-level: 100
+experience:
+    equation: '(level - 1) * 1000'

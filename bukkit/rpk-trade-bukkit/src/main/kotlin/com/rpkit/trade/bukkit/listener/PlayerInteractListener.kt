@@ -21,7 +21,6 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.trade.bukkit.RPKTradeBukkit
-import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material
 import org.bukkit.block.Sign
@@ -62,26 +61,29 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                         if (economyProvider.getBalance(character, currency) >= buyPrice) {
                                             economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - buyPrice)
                                             event.player.inventory.addItem(ItemStack(material, amount))
-                                            event.player.sendMessage(
-                                                    ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-buy"))
-                                                            .replace("\$quantity", amount.toString())
-                                                            .replace("\$material", material.toString().toLowerCase().replace('_', ' '))
-                                                            .replace("\$price", buyPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
-                                            )
+                                            event.player.sendMessage(plugin.messages["trader-buy", mapOf(
+                                                    Pair("quantity", amount.toString()),
+                                                    Pair("material", material.toString().toLowerCase().replace('_', ' ')),
+                                                    Pair("price", buyPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
+                                            )])
                                             actualPrice += plugin.config.getDouble("traders.price-change")
-                                            actualPrice = Math.max(Math.min(actualPrice, plugin.config.getDouble("traders.maximum-price")), plugin.config.getDouble("traders.minimum-price")).toDouble()
+                                            val maximumPrice = plugin.config.getDouble("traders.maximum-price.$material",
+                                                    plugin.config.getDouble("traders.maximum-price.default"))
+                                            val minimumPrice = plugin.config.getDouble("traders.minimum-price.$material",
+                                                    plugin.config.getDouble("traders.minimum-price.default"))
+                                            actualPrice = Math.max(Math.min(actualPrice, maximumPrice), minimumPrice)
                                             buyPrice = (actualPrice + ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
                                             sellPrice = (actualPrice - ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
                                             sign.setLine(2, buyPrice.toString() + " | " + sellPrice.toString())
                                             sign.update()
                                         } else {
-                                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-buy-insufficient-funds")))
+                                            event.player.sendMessage(plugin.messages["trader-buy-insufficient-funds"])
                                         }
                                     } else {
-                                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-trader-buy")))
+                                        event.player.sendMessage(plugin.messages["no-permission-trader-buy"])
                                     }
                                 } else {
-                                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                                    event.player.sendMessage(plugin.messages["no-character"])
                                 }
                             } else if (event.action == LEFT_CLICK_BLOCK) {
                                 val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
@@ -111,29 +113,32 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                                             }
                                                         }
                                                 event.player.inventory.contents = contents
-                                                event.player.sendMessage(
-                                                        ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-sell"))
-                                                                .replace("\$quantity", amount.toString())
-                                                                .replace("\$material", material.toString().toLowerCase().replace('_', ' '))
-                                                                .replace("\$price", sellPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
-                                                )
+                                                event.player.sendMessage(plugin.messages["trader-sell", mapOf(
+                                                        Pair("quantity", amount.toString()),
+                                                        Pair("material", material.toString().toLowerCase().replace('_', ' ')),
+                                                        Pair("price", sellPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
+                                                )])
                                                 actualPrice -= plugin.config.getDouble("traders.price-change")
-                                                actualPrice = Math.max(Math.min(actualPrice, plugin.config.getDouble("traders.maximum-price")), plugin.config.getDouble("traders.minimum-price")).toDouble()
+                                                val maximumPrice = plugin.config.getDouble("traders.maximum-price.$material",
+                                                        plugin.config.getDouble("traders.maximum-price.default"))
+                                                val minimumPrice = plugin.config.getDouble("traders.minimum-price.$material",
+                                                        plugin.config.getDouble("traders.minimum-price.default"))
+                                                actualPrice = Math.max(Math.min(actualPrice, maximumPrice), minimumPrice)
                                                 buyPrice = (actualPrice + ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
                                                 sellPrice = (actualPrice - ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
                                                 sign.setLine(2, buyPrice.toString() + " | " + sellPrice.toString())
                                                 sign.update()
                                             } else {
-                                                event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-sell-insufficient-wallet-space")))
+                                                event.player.sendMessage(plugin.messages["trader-sell-insufficient-wallet-space"])
                                             }
                                         } else {
-                                            event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.trader-sell-insufficient-items")))
+                                            event.player.sendMessage(plugin.messages["trader-sell-insufficient-items"])
                                         }
                                     } else {
-                                        event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-trader-sell")))
+                                        event.player.sendMessage(plugin.messages["no-permission-trader-sell"])
                                     }
                                 } else {
-                                    event.player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-character")))
+                                    event.player.sendMessage(plugin.messages["no-character"])
                                 }
                             }
                         }

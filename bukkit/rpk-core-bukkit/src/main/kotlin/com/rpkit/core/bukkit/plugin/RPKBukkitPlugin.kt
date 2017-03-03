@@ -18,6 +18,7 @@ package com.rpkit.core.bukkit.plugin
 
 import com.rpkit.core.RPKCore
 import com.rpkit.core.database.Database
+import com.rpkit.core.message.Messages
 import com.rpkit.core.service.ServiceProvider
 import com.rpkit.core.web.RPKServlet
 import org.bukkit.event.Listener
@@ -32,6 +33,7 @@ import java.sql.SQLException
 abstract class RPKBukkitPlugin: JavaPlugin() {
 
     lateinit var core: RPKCore
+    lateinit var messages: Messages
 
     open fun onPostEnable() {
 
@@ -57,5 +59,9 @@ abstract class RPKBukkitPlugin: JavaPlugin() {
 
     var serviceProviders = arrayOf<ServiceProvider>()
     var servlets = arrayOf<RPKServlet>()
+
+    open fun setDefaultMessages() {
+
+    }
 
 }

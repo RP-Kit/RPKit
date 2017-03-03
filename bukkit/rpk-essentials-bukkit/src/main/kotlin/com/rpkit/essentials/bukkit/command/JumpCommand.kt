@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -17,15 +16,15 @@ class JumpCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 val block = sender.getTargetBlock(transparent, 64)
                 if (block != null) {
                     sender.teleport(block.location)
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.jump-valid")))
+                    sender.sendMessage(plugin.messages["jump-valid"])
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.jump-invalid-block")))
+                    sender.sendMessage(plugin.messages["jump-invalid-block"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-jump")))
+            sender.sendMessage(plugin.messages["no-permission-jump"])
         }
         return true
     }

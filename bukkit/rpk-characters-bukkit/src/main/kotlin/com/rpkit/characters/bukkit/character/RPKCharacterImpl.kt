@@ -84,14 +84,14 @@ class RPKCharacterImpl constructor(
             if (offlineBukkitPlayer.isOnline) {
                 val bukkitPlayer = offlineBukkitPlayer.player
                 val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterCardFieldProvider::class)
-                for (line in if (player == this.player) plugin.config.getStringList("messages.character-card-owner") else
-                    plugin.config.getStringList("messages.character-card-not-owner")) {
+                for (line in if (player == this.player) plugin.messages.getList("character-card-owner") else
+                    plugin.messages.getList("character-card-not-owner")) {
                     val message = FancyMessage("")
                     var chatColor: ChatColor? = null
                     var chatFormat: ChatColor? = null
                     var i = 0
                     while (i < line.length) {
-                        if (line[i] === '&') {
+                        if (line[i] === ChatColor.COLOR_CHAR) {
                             val colourOrFormat = ChatColor.getByChar(line[i + 1])
                             if (colourOrFormat.isColor) {
                                 chatColor = colourOrFormat

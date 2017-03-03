@@ -27,43 +27,46 @@ class DistanceCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                             val character = characterProvider.getActiveCharacter(player)
                             if (character != null) {
                                 if (!trackingProvider.isTrackable(character)) {
-                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.distance-invalid-untrackable")))
-                                    bukkitPlayer.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.distance-untrackable-notification"))
-                                            .replace("\$player", player.name))
+                                    sender.sendMessage(plugin.messages["distance-invalid-untrackable"])
+                                    bukkitPlayer.sendMessage(plugin.messages["distance-untrackable-notification", mapOf(
+                                            Pair("player", player.name)
+                                    )])
                                     return true
                                 }
                                 val itemRequirement = plugin.config.getItemStack("distance-command.item-requirement")
                                 if (itemRequirement != null && !bukkitPlayer.inventory.containsAtLeast(itemRequirement, itemRequirement.amount)) {
-                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.distance-invalid-item"))
-                                            .replace("\$amount", itemRequirement.amount.toString())
-                                            .replace("\$type", itemRequirement.type.toString().toLowerCase().replace('_', ' ')))
+                                    sender.sendMessage(plugin.messages["distance-invalid-item", mapOf(
+                                            Pair("amount", itemRequirement.amount.toString()),
+                                            Pair("type", itemRequirement.type.toString().toLowerCase().replace('_', ' '))
+                                    )])
                                     return true
                                 }
                                 val maximumDistance = plugin.config.getInt("distance-command.maximum-distance")
                                 val distance = MathUtils.fastSqrt(bukkitPlayer.location.distanceSquared(sender.location))
                                 if (maximumDistance >= 0 && distance > maximumDistance) {
-                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.distance-invalid-distance")))
+                                    sender.sendMessage(plugin.messages["distance-invalid-distance"])
                                     return true
                                 }
-                                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.distance-valid"))
-                                        .replace("\$character", character.name)
-                                        .replace("\$player", player.name)
-                                        .replace("\$distance", distance.toString()))
+                                sender.sendMessage(plugin.messages["distance-valid", mapOf(
+                                        Pair("character", character.name),
+                                        Pair("player", player.name),
+                                        Pair("distance", distance.toString())
+                                )])
                             }
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.distance-invalid-world")))
+                            sender.sendMessage(plugin.messages["distance-invalid-world"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.distance-invalid-offline")))
+                        sender.sendMessage(plugin.messages["distance-invalid-offline"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messsages.distance-usage")))
+                    sender.sendMessage(plugin.messages["distance-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-distance")))
+            sender.sendMessage(plugin.messages["no-permission-distance"])
         }
         return true
     }

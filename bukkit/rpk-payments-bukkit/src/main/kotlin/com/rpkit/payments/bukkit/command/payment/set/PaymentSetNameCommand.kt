@@ -21,7 +21,6 @@ import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -38,12 +37,12 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
             .withModality(true)
             .withFirstPrompt(NamePrompt())
             .withEscapeSequence("cancel")
-            .thatExcludesNonPlayersWithMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+            .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
                 if (!event.gracefulExit()) {
                     val conversable = event.context.forWhom
                     if (conversable is Player) {
-                        conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                        conversable.sendMessage(plugin.messages["operation-cancelled"])
                     }
                 }
             }
@@ -64,19 +63,19 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
                             conversation.context.setSessionData("payment_group", paymentGroup)
                             conversation.begin()
                         } else {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-set-name-invalid-owner")))
+                            sender.sendMessage(plugin.messages["payment-set-name-invalid-owner"])
                         }
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-set-name-invalid-group")))
+                        sender.sendMessage(plugin.messages["payment-set-name-invalid-group"])
                     }
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-set-name-usage")))
+                    sender.sendMessage(plugin.messages["payment-set-name-usage"])
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.not-from-console")))
+                sender.sendMessage(plugin.messages["not-from-console"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-payment-set-name")))
+            sender.sendMessage(plugin.messages["no-permission-payment-set-name"])
         }
         return true
     }
@@ -89,7 +88,7 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-set-name-invalid-name-already-exists"))
+            return plugin.messages["payment-set-name-invalid-name-already-exists"]
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
@@ -101,7 +100,7 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-set-name-prompt"))
+            return plugin.messages["payment-set-name-prompt"]
         }
 
     }
@@ -113,7 +112,7 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
         }
 
         override fun getPromptText(context: ConversationContext?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.payment-set-name-valid"))
+            return plugin.messages["payment-set-name-valid"]
         }
 
     }

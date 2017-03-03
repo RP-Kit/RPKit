@@ -19,7 +19,6 @@ package com.rpkit.characters.bukkit.command.race
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.race.RPKRaceImpl
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -34,11 +33,15 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(RacePrompt()).withEscapeSequence("cancel").addConversationAbandonedListener { event ->
+        conversationFactory = ConversationFactory(plugin)
+                .withModality(true)
+                .withFirstPrompt(RacePrompt())
+                .withEscapeSequence("cancel")
+                .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -47,7 +50,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Conversable) {
             if (sender.hasPermission("rpkit.characters.command.race.add")) {
-                if (args.size > 0) {
+                if (args.isNotEmpty()) {
                     val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
                     val raceBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
@@ -56,15 +59,15 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
                     raceBuilder.append(args[args.size - 1])
                     if (raceProvider.getRace(raceBuilder.toString()) == null) {
                         raceProvider.addRace(RPKRaceImpl(name = raceBuilder.toString()))
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-add-valid")))
+                        sender.sendMessage(plugin.messages["race-add-valid"])
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-add-")))
+                        sender.sendMessage(plugin.messages["race-add-invalid-race"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-race-add")))
+                sender.sendMessage(plugin.messages["no-permission-race-add"])
             }
         }
         return true
@@ -73,7 +76,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
     private inner class RacePrompt: ValidatingPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-add-prompt"))
+            return plugin.messages["race-add-prompt"]
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
@@ -88,7 +91,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-add-invalid-race"))
+            return plugin.messages["race-add-invalid-race"]
         }
 
     }
@@ -100,7 +103,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.race-add-valid"))
+            return plugin.messages["race-add-valid"]
         }
 
     }

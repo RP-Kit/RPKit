@@ -18,7 +18,6 @@ package com.rpkit.economy.bukkit.command.currency
 
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,11 +32,15 @@ class CurrencyRemoveCommand(private val plugin: RPKEconomyBukkit): CommandExecut
     private val conversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin).withModality(true).withFirstPrompt(CurrencyPrompt()).withEscapeSequence("cancel").addConversationAbandonedListener { event ->
+        conversationFactory = ConversationFactory(plugin)
+                .withModality(true)
+                .withFirstPrompt(CurrencyPrompt())
+                .withEscapeSequence("cancel")
+                .addConversationAbandonedListener { event ->
             if (!event.gracefulExit()) {
                 val conversable = event.context.forWhom
                 if (conversable is Player) {
-                    conversable.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.operation-cancelled")))
+                    conversable.sendMessage(plugin.messages["operation-cancelled"])
                 }
             }
         }
@@ -46,7 +49,7 @@ class CurrencyRemoveCommand(private val plugin: RPKEconomyBukkit): CommandExecut
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Conversable) {
             if (sender.hasPermission("rpkit.economy.command.currency.remove")) {
-                if (args.size > 0) {
+                if (args.isNotEmpty()) {
                     val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
                     val currencyBuilder = StringBuilder()
                     for (i in 0..args.size - 1 - 1) {
@@ -56,15 +59,15 @@ class CurrencyRemoveCommand(private val plugin: RPKEconomyBukkit): CommandExecut
                     val currency = currencyProvider.getCurrency(currencyBuilder.toString())
                     if (currency != null) {
                         currencyProvider.removeCurrency(currency)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.currency-remove-valid")))
+                        sender.sendMessage(plugin.messages["currency-remove-valid"])
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.currency-remove-invalid-currency")))
+                        sender.sendMessage(plugin.messages["currency-remove-invalid-currency"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.no-permission-currency-remove")))
+                sender.sendMessage(plugin.messages["no-permission-currency-remove"])
             }
         }
         return true
@@ -82,12 +85,12 @@ class CurrencyRemoveCommand(private val plugin: RPKEconomyBukkit): CommandExecut
             return CurrencySetPrompt()
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.currency-remove-invalid-currency"))
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
+            return plugin.messages["currency-remove-invalid-currency"]
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.currency-remove-prompt"))
+            return plugin.messages["currency-remove-prompt"]
         }
 
     }
@@ -99,7 +102,7 @@ class CurrencyRemoveCommand(private val plugin: RPKEconomyBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages.currency-remove-valid"))
+            return plugin.messages["currency-remove-valid"]
         }
 
     }

@@ -155,52 +155,54 @@ class RPKBankTable: Table<RPKBank> {
      */
     fun get(character: RPKCharacter, currency: RPKCurrency): RPKBank {
         if (characterCache.containsKey(character.id)) {
-            return get(characterCache[character.id][currency.id] as Int)!!
-        } else {
-            var bank: RPKBank? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, character_id, currency_id, balance FROM rpkit_bank WHERE character_id = ? AND currency_id = ?"
-                ).use { statement ->
-                    statement.setInt(1, character.id)
-                    statement.setInt(2, currency.id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val id = resultSet.getInt("id")
-                        val characterId = resultSet.getInt("character_id")
-                        val currencyId = resultSet.getInt("currency_id")
-                        val balance = resultSet.getInt("balance")
-                        bank = RPKBank(
-                                id = id,
-                                character = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getCharacter(characterId)!!,
-                                currency = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(currencyId)!!,
-                                balance = balance
-                        )
-                        val finalBank = bank!!
-                        cache.put(id, finalBank)
-                        val characterBanks: MutableMap<Int, Int>
-                        if (characterCache.containsKey(characterId)) {
-                            characterBanks = characterCache[characterId] as MutableMap<Int, Int>
-                        } else {
-                            characterBanks = HashMap<Int, Int>()
-                        }
-                        characterBanks.put(currencyId, finalBank.id)
-                        characterCache.put(characterId, characterBanks)
+            val characterBanks = characterCache[character.id]
+            if (characterBanks.containsKey(currency.id)) {
+                return get(characterCache[character.id][currency.id] as Int)!!
+            }
+        }
+        var bank: RPKBank? = null
+        database.createConnection().use { connection ->
+            connection.prepareStatement(
+                    "SELECT id, character_id, currency_id, balance FROM rpkit_bank WHERE character_id = ? AND currency_id = ?"
+            ).use { statement ->
+                statement.setInt(1, character.id)
+                statement.setInt(2, currency.id)
+                val resultSet = statement.executeQuery()
+                if (resultSet.next()) {
+                    val id = resultSet.getInt("id")
+                    val characterId = resultSet.getInt("character_id")
+                    val currencyId = resultSet.getInt("currency_id")
+                    val balance = resultSet.getInt("balance")
+                    bank = RPKBank(
+                            id = id,
+                            character = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getCharacter(characterId)!!,
+                            currency = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(currencyId)!!,
+                            balance = balance
+                    )
+                    val finalBank = bank!!
+                    cache.put(id, finalBank)
+                    val characterBanks: MutableMap<Int, Int>
+                    if (characterCache.containsKey(characterId)) {
+                        characterBanks = characterCache[characterId] as MutableMap<Int, Int>
+                    } else {
+                        characterBanks = HashMap<Int, Int>()
                     }
+                    characterBanks.put(currencyId, finalBank.id)
+                    characterCache.put(characterId, characterBanks)
                 }
             }
-            if (bank == null) {
-                val finalBank = RPKBank(
-                        character = character,
-                        currency = currency,
-                        balance = 0
-                )
-                insert(finalBank)
-                bank = finalBank
-            }
-            val finalBank = bank!!
-            return finalBank
         }
+        if (bank == null) {
+            val finalBank = RPKBank(
+                    character = character,
+                    currency = currency,
+                    balance = 0
+            )
+            insert(finalBank)
+            bank = finalBank
+        }
+        val finalBank = bank!!
+        return finalBank
     }
 
     /**
