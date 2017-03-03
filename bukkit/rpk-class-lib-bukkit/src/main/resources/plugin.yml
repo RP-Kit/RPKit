@@ -1,0 +1,10 @@
+name: rpk-class-lib-bukkit
+version: @version@
+author: alyphen
+main: com.rpkit.classes.bukkit.RPKClassLibBukkit
+depend:
+- rpk-core-bukkit
+- rpk-character-lib-bukkit
+- rpk-stat-lib-bukkit
+- rpk-skill-lib-bukkit
+- rpk-experience-lib-bukkit
