@@ -1,0 +1,22 @@
+name: rpk-classes-bukkit
+version: @version@
+author: alyphen
+main: com.rpkit.classes.bukkit.RPKClassesBukkit
+depend:
+- rpk-core-bukkit
+- rpk-character-lib-bukkit
+- rpk-stat-lib-bukkit
+- rpk-skill-lib-bukkit
+- rpk-experience-lib-bukkit
+- rpk-class-lib-bukkit
+commands:
+    class:
+        description: Class management command
+        usage: /<command> [set|list]
+permissions:
+    rpkit.classes.command.class.set:
+        description: Allows setting your class
+        default: true
+    rpkit.classes.command.class.list:
+        description: Allows listing classes
+        default: true
