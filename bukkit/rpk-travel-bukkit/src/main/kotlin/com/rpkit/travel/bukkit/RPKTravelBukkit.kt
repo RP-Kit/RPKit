@@ -37,9 +37,21 @@ class RPKTravelBukkit: RPKBukkitPlugin() {
     }
 
     override fun setDefaultMessages() {
+        messages.setDefault("delete-warp-valid", "&aDeleted warp \$warp.")
+        messages.setDefault("delete-warp-usage", "&cUsage: /deletewarp [warp]")
+        messages.setDefault("set-warp-valid", "&aWarp \$warp set in \$world at \$x, \$y, \$z")
+        messages.setDefault("set-warp-usage", "&cUsage: /setwarp [name]")
+        messages.setDefault("warp-valid", "&aWarped to \$warp.")
+        messages.setDefault("warp-invalid-warp", "&cThere is no warp by that name.")
+        messages.setDefault("warp-list-title", "&fWarps")
+        messages.setDefault("warp-list-item", "&7\$warps")
+        messages.setDefault("warp-list-invalid-empty", "&cNo warps are currently set. Set one using /setwarp [name].")
         messages.setDefault("warp-sign-invalid-warp", "&cThere is no warp by that name.")
         messages.setDefault("warp-sign-valid", "&aWarp sign created.")
+        messages.setDefault("no-permission-delete-warp", "&cYou do not have permission to delete warps.")
+        messages.setDefault("no-permission-set-warp", "&cYou do not have permission to set warps.")
         messages.setDefault("no-permission-warp-sign-create", "&cYou do not have permission to create warp signs.")
+        messages.setDefault("no-permission-warp", "&cYou do not have permission to warp.")
     }
 
 }
