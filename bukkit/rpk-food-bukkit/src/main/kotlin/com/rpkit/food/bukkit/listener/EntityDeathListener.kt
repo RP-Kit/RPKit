@@ -17,7 +17,7 @@
 package com.rpkit.food.bukkit.listener
 
 import com.rpkit.food.bukkit.RPKFoodBukkit
-import com.rpkit.food.bukkit.expiry.ExpiryProvider
+import com.rpkit.food.bukkit.expiry.RPKExpiryProviderImpl
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -32,13 +32,11 @@ class EntityDeathListener(private val plugin: RPKFoodBukkit): Listener {
     @EventHandler
     fun onEntityDeath(event: EntityDeathEvent) {
         if (event.entity is Player) return
-        val expiryProvider = plugin.core.serviceManager.getServiceProvider(ExpiryProvider::class)
+        val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProviderImpl::class)
         val newDrops = mutableListOf<ItemStack>()
         for (drop in event.drops) {
             if (drop.type.isEdible) {
-                expiryProvider.setExpiry(drop,
-                        System.currentTimeMillis() + (plugin.config.getLong("food-expiry.${drop.type}",
-                                plugin.config.getLong("food-expiry.default")) * 1000))
+                expiryProvider.setExpiry(drop)
             }
             newDrops.add(drop)
         }

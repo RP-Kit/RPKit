@@ -17,7 +17,7 @@
 package com.rpkit.food.bukkit.listener
 
 import com.rpkit.food.bukkit.RPKFoodBukkit
-import com.rpkit.food.bukkit.expiry.ExpiryProvider
+import com.rpkit.food.bukkit.expiry.RPKExpiryProviderImpl
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerPickupItemEvent
@@ -31,11 +31,9 @@ class PlayerPickupItemListener(private val plugin: RPKFoodBukkit): Listener {
     fun onPlayerPickupItem(event: PlayerPickupItemEvent) {
         val itemStack = event.item.itemStack
         if (itemStack.type.isEdible) {
-            val expiryProvider = plugin.core.serviceManager.getServiceProvider(ExpiryProvider::class)
+            val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProviderImpl::class)
             if (expiryProvider.getExpiry(itemStack) == null) {
-                expiryProvider.setExpiry(itemStack,
-                        System.currentTimeMillis() + (plugin.config.getLong("food-expiry.${itemStack.type}",
-                        plugin.config.getLong("food-expiry.default")) * 1000))
+                expiryProvider.setExpiry(itemStack)
             }
         }
     }
