@@ -2,7 +2,13 @@ name: rpk-trade-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.trade.bukkit.RPKTradeBukkit
-depend: [rpk-core-bukkit, rpk-character-lib-bukkit, rpk-player-lib-bukkit, rpk-economy-lib-bukkit]
+depend:
+- rpk-core-bukkit
+- rpk-character-lib-bukkit
+- rpk-player-lib-bukkit
+- rpk-economy-lib-bukkit
+softdepend:
+- rpk-food-bukkit
 permissions:
     rpkit.trade.sign.trader.buy:
         description: Allows buying from trader signs
