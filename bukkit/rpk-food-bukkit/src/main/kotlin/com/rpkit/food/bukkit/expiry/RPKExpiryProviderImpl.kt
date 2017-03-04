@@ -16,29 +16,32 @@
 
 package com.rpkit.food.bukkit.expiry
 
-import com.rpkit.core.service.ServiceProvider
 import com.rpkit.food.bukkit.RPKFoodBukkit
 import org.bukkit.inventory.ItemStack
 import java.text.SimpleDateFormat
 import java.util.*
 
 
-class ExpiryProvider(private val plugin: RPKFoodBukkit): ServiceProvider {
+class RPKExpiryProviderImpl(private val plugin: RPKFoodBukkit): RPKExpiryProvider {
 
     val dateFormat = SimpleDateFormat(plugin.config.getString("date-format"))
 
-    fun setExpiry(item: ItemStack, timestamp: Long) {
+    override fun setExpiry(item: ItemStack, expiryDate: Date) {
         if (!item.type.isEdible) return
         val itemMeta = item.itemMeta
         val lore = if (itemMeta.hasLore()) itemMeta.lore else mutableListOf<String>()
         lore.removeAll(lore.filter { it.startsWith("Expires: ") })
-        val expiryDate = Date(timestamp)
         lore.add("Expires: ${dateFormat.format(expiryDate)}")
         itemMeta.lore = lore
         item.itemMeta = itemMeta
     }
 
-    fun getExpiry(item: ItemStack): Long? {
+    override fun setExpiry(item: ItemStack) {
+        setExpiry(item, Date(System.currentTimeMillis() + (plugin.config.getLong("food-expiry.${item.type}",
+                plugin.config.getLong("food-expiry.default")) * 1000)))
+    }
+
+    override fun getExpiry(item: ItemStack): Date? {
         if (!item.type.isEdible) return null
         val itemMeta = item.itemMeta
         if (itemMeta.hasLore()) {
@@ -47,15 +50,15 @@ class ExpiryProvider(private val plugin: RPKFoodBukkit): ServiceProvider {
             if (expiryLore != null) {
                 val expiryDateString = expiryLore.drop("Expires: ".length)
                 val expiryDate = dateFormat.parse(expiryDateString)
-                return expiryDate.time
+                return expiryDate
             }
         }
         return null
     }
 
-    fun isExpired(item: ItemStack): Boolean {
+    override fun isExpired(item: ItemStack): Boolean {
         val expiryTimestamp = getExpiry(item) ?: return true
-        return expiryTimestamp <= System.currentTimeMillis()
+        return expiryTimestamp.time <= System.currentTimeMillis()
     }
 
 }

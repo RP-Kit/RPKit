@@ -17,8 +17,10 @@
 package com.rpkit.trade.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.core.exception.UnregisteredServiceException
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
+import com.rpkit.food.bukkit.expiry.RPKExpiryProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.trade.bukkit.RPKTradeBukkit
 import org.bukkit.ChatColor.GREEN
@@ -60,7 +62,12 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                     if (event.player.hasPermission("rpkit.trade.sign.trader.buy")) {
                                         if (economyProvider.getBalance(character, currency) >= buyPrice) {
                                             economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - buyPrice)
-                                            event.player.inventory.addItem(ItemStack(material, amount))
+                                            val item = ItemStack(material, amount)
+                                            try {
+                                                val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProvider::class)
+                                                expiryProvider.setExpiry(item)
+                                            } catch (ignore: UnregisteredServiceException) {}
+                                            event.player.inventory.addItem(item)
                                             event.player.sendMessage(plugin.messages["trader-buy", mapOf(
                                                     Pair("quantity", amount.toString()),
                                                     Pair("material", material.toString().toLowerCase().replace('_', ' ')),
