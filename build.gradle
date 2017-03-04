@@ -456,6 +456,38 @@ project(":bukkit:rpk-stat-lib-bukkit") {
 
 }
 
+project(":bukkit:rpk-food-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-food-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-food-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-food-lib-bukkit").group
+
+        }
+    }
+
+}
+
 project(":bukkit:rpk-payment-lib-bukkit") {
 
     dependencies {
@@ -1071,6 +1103,7 @@ project(":bukkit:rpk-trade-bukkit") {
         compile project(":bukkit:rpk-core-bukkit")
         compile project(":bukkit:rpk-character-lib-bukkit")
         compile project(":bukkit:rpk-economy-lib-bukkit")
+        compile project(":bukkit:rpk-food-lib-bukkit")
     }
 
     processResources {
@@ -1209,6 +1242,7 @@ project(":bukkit:rpk-food-bukkit") {
 
     dependencies {
         compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-food-lib-bukkit")
     }
 
     processResources {

@@ -1,0 +1,6 @@
+name: rpk-food-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.food.bukkit.RPKFoodLibBukkit
+depend:
+- rpk-core-bukkit

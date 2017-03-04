@@ -17,9 +17,7 @@
 package com.rpkit.food.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.food.bukkit.expiry.ExpiryProvider
-import com.rpkit.food.bukkit.listener.EntityDeathListener
-import com.rpkit.food.bukkit.listener.FurnaceSmeltListener
+import com.rpkit.food.bukkit.expiry.RPKExpiryProviderImpl
 import com.rpkit.food.bukkit.listener.*
 
 /**
@@ -30,7 +28,7 @@ class RPKFoodBukkit: RPKBukkitPlugin() {
     override fun onEnable() {
         saveDefaultConfig()
         serviceProviders = arrayOf(
-                ExpiryProvider(this)
+                RPKExpiryProviderImpl(this)
         )
     }
 
@@ -38,8 +36,10 @@ class RPKFoodBukkit: RPKBukkitPlugin() {
         registerListeners(
                 EntityDeathListener(this),
                 FurnaceSmeltListener(this),
+                InventoryOpenListener(this),
                 PlayerFishListener(this),
                 PlayerItemConsumeListener(this),
+                PlayerJoinListener(this),
                 PlayerPickupItemListener(this),
                 PrepareItemCraftListener(this)
         )
