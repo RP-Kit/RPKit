@@ -99,18 +99,28 @@ class PlayerServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
                         val alerts = mutableListOf<Alert>()
                         val name = req.getParameter("name")
                         val ircNick = req.getParameter("irc_nick")
-                        if (name != null && name.isNotBlank()) {
-                            player.name = name
+                        if (name != null) {
+                            if (name.isNotBlank()) {
+                                if (name.matches(Regex("[A-z0-9_]{3,16}"))) {
+                                    player.name = name
+                                } else {
+                                    alerts.add(Alert(DANGER, "Your name must be between 3 and 16 characters, including alphanumerics and underscores."))
+                                }
+                            } else {
+                                alerts.add(Alert(DANGER, "Your name may not be blank."))
+                            }
                         }
                         if (ircNick != null && ircNick.isNotBlank()) {
-                            val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
-                            val ircUser = ircProvider.getIRCUser(ircNick)
-                            if (ircUser != null) {
-                                val existingIRCPlayer = playerProvider.getPlayer(ircUser)
-                                playerProvider.removePlayer(existingIRCPlayer)
-                                player.ircNick = ircNick
-                            } else {
-                                alerts.add(Alert(DANGER, "There is no user online on IRC by that name, so your IRC account could not be linked."))
+                            if (player.ircNick == null) {
+                                val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
+                                val ircUser = ircProvider.getIRCUser(ircNick)
+                                if (ircUser != null) {
+                                    val existingIRCPlayer = playerProvider.getPlayer(ircUser)
+                                    playerProvider.removePlayer(existingIRCPlayer)
+                                    player.ircNick = ircNick
+                                } else {
+                                    alerts.add(Alert(DANGER, "There is no user online on IRC by that name, so your IRC account could not be linked."))
+                                }
                             }
                         }
                         playerProvider.updatePlayer(player)
