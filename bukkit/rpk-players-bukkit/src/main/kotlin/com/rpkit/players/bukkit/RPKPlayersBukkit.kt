@@ -27,7 +27,6 @@ import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProviderImpl
 import com.rpkit.players.bukkit.servlet.PlayerServlet
 import com.rpkit.players.bukkit.servlet.PlayersServlet
-import com.rpkit.players.bukkit.servlet.api.v0_4.PlayerAPIServlet
 import java.sql.SQLException
 
 /**
@@ -40,7 +39,14 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
     override fun onEnable() {
         playerProvider = RPKPlayerProviderImpl(this)
         serviceProviders = arrayOf<ServiceProvider>(playerProvider)
-        servlets = arrayOf(PlayersServlet(this), PlayerServlet(this), PlayerAPIServlet(this))
+        servlets = arrayOf(
+                PlayersServlet(this),
+                PlayerServlet(this),
+                // API v0.4
+                com.rpkit.players.bukkit.servlet.api.v0_4.PlayerAPIServlet(this),
+                // API v1
+                com.rpkit.players.bukkit.servlet.api.v1.PlayerAPIServlet(this)
+        )
     }
 
     override fun onPostEnable() {
