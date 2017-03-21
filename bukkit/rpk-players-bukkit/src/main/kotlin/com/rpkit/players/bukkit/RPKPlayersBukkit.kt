@@ -18,15 +18,21 @@ package com.rpkit.players.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
-import com.rpkit.core.service.ServiceProvider
 import com.rpkit.core.web.NavigationLink
 import com.rpkit.players.bukkit.command.account.AccountCommand
-import com.rpkit.players.bukkit.database.table.RPKPlayerTable
+import com.rpkit.players.bukkit.database.table.*
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.listener.PlayerLoginListener
 import com.rpkit.players.bukkit.player.RPKPlayerProviderImpl
-import com.rpkit.players.bukkit.servlet.PlayerServlet
-import com.rpkit.players.bukkit.servlet.PlayersServlet
+import com.rpkit.players.bukkit.profile.RPKGitHubProfileProviderImpl
+import com.rpkit.players.bukkit.profile.RPKIRCProfileProviderImpl
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProviderImpl
+import com.rpkit.players.bukkit.profile.RPKProfileProviderImpl
+import com.rpkit.players.bukkit.servlet.*
+import org.passay.*
+import org.passay.dictionary.WordListDictionary
+import org.passay.dictionary.WordLists
+import java.io.Reader
 import java.sql.SQLException
 
 /**
@@ -34,23 +40,60 @@ import java.sql.SQLException
  */
 class RPKPlayersBukkit: RPKBukkitPlugin() {
 
-    private lateinit var playerProvider: RPKPlayerProvider
+    lateinit var passwordValidator: PasswordValidator
 
     override fun onEnable() {
-        playerProvider = RPKPlayerProviderImpl(this)
-        serviceProviders = arrayOf<ServiceProvider>(playerProvider)
+        serviceProviders = arrayOf(
+                RPKPlayerProviderImpl(this),
+                RPKGitHubProfileProviderImpl(this),
+                RPKIRCProfileProviderImpl(this),
+                RPKMinecraftProfileProviderImpl(this),
+                RPKProfileProviderImpl(this)
+        )
         servlets = arrayOf(
                 PlayersServlet(this),
                 PlayerServlet(this),
+                ProfilesServlet(this),
+                ProfileServlet(this),
+                ProfileSignInServlet(this),
+                ProfileSignOutServlet(this),
+                ProfileSignUpServlet(this),
                 // API v0.4
                 com.rpkit.players.bukkit.servlet.api.v0_4.PlayerAPIServlet(this),
                 // API v1
-                com.rpkit.players.bukkit.servlet.api.v1.PlayerAPIServlet(this)
+                com.rpkit.players.bukkit.servlet.api.v1.PlayerAPIServlet(this),
+                com.rpkit.players.bukkit.servlet.api.v1.ProfileAPIServlet(this),
+                com.rpkit.players.bukkit.servlet.api.v1.GitHubProfileAPIServlet(this),
+                com.rpkit.players.bukkit.servlet.api.v1.IRCProfileAPIServlet(this),
+                com.rpkit.players.bukkit.servlet.api.v1.MinecraftProfileAPIServlet(this)
         )
+        passwordValidator = PasswordValidator(listOf(
+                LengthRule(8, 36),
+                CharacterRule(EnglishCharacterData.UpperCase, 2),
+                CharacterRule(EnglishCharacterData.LowerCase, 2),
+                CharacterRule(EnglishCharacterData.Digit, 2),
+                CharacterRule(EnglishCharacterData.Special, 2),
+                DictionarySubstringRule(
+                        WordListDictionary(
+                                WordLists.createFromReader(
+                                        arrayOf<Reader>(
+                                                getResource("words.txt").reader(Charsets.UTF_8)
+                                        ),
+                                        false
+                                )
+                        )
+                ),
+                IllegalSequenceRule(EnglishSequenceData.Alphabetical),
+                IllegalSequenceRule(EnglishSequenceData.Numerical),
+                IllegalSequenceRule(EnglishSequenceData.USQwerty),
+                UsernameRule(true, true),
+                RepeatCharacterRegexRule()
+        ))
     }
 
     override fun onPostEnable() {
         core.web.navigationBar.add(NavigationLink("Players", "/players/"))
+        core.web.navigationBar.add(NavigationLink("Profiles", "/profiles/"))
     }
 
     override fun registerCommands() {
@@ -58,12 +101,17 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerListeners() {
-        registerListeners(PlayerJoinListener(this))
+        registerListeners(PlayerJoinListener(this), PlayerLoginListener(this))
     }
 
     @Throws(SQLException::class)
     override fun createTables(database: Database) {
         database.addTable(RPKPlayerTable(this, database))
+        database.addTable(RPKGitHubProfileTable(database, this))
+        database.addTable(RPKIRCProfileTable(database, this))
+        database.addTable(RPKMinecraftProfileTable(database, this))
+        database.addTable(RPKMinecraftProfileTokenTable(database, this))
+        database.addTable(RPKProfileTable(database, this))
     }
 
     override fun setDefaultMessages() {
@@ -75,6 +123,9 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
         messages.setDefault("account-link-irc-invalid-no-irc-provider", "&cThere is no IRC provider registered, so IRC accounts cannot be linked.")
         messages.setDefault("account-link-irc-invalid-no-player-provider", "&cThere is no player provider registered, so IRC accounts cannot be linked.")
         messages.setDefault("account-link-irc-valid", "&aAccount linked.")
+        messages.setDefault("kick-no-profile", "&cYour account is not linked to a profile.\n" +
+                "Please visit the server's web UI and link your Minecraft account with the token:\n" +
+                "\$token")
     }
 
 }

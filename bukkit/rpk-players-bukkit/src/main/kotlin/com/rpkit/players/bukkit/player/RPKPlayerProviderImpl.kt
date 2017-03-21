@@ -26,6 +26,8 @@ import java.net.InetAddress
 /**
  * Player provider implementation.
  */
+@Deprecated("Old players API. Please move to new profiles APIs.",
+        replaceWith = ReplaceWith("RPKProfileProviderImpl", "com.rpkit.players.bukkit.profile.RPKProfileProviderImpl"))
 class RPKPlayerProviderImpl(private val plugin: RPKPlayersBukkit): RPKPlayerProvider {
 
     override fun getPlayer(id: Int): RPKPlayer? {
