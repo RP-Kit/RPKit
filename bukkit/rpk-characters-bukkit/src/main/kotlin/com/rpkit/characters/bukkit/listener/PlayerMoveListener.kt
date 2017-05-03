@@ -18,7 +18,7 @@ package com.rpkit.characters.bukkit.listener
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.Location
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -33,15 +33,17 @@ class PlayerMoveListener(private val plugin: RPKCharactersBukkit): Listener {
 
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val player = playerProvider.getPlayer(event.player)
-        val character = characterProvider.getActiveCharacter(player)
-        if (character != null && character.isDead) {
-            if (event.from.blockX != event.to.blockX || event.from.blockZ != event.to.blockZ) {
-                event.player.teleport(Location(event.from.world, event.from.blockX + 0.5, event.from.blockY + 0.5, event.from.blockZ.toDouble(), event.from.yaw, event.from.pitch))
-                event.player.sendMessage(plugin.messages["dead-character"])
-                event.player.addPotionEffect(PotionEffect(BLINDNESS, 60, 1))
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            if (character != null && character.isDead) {
+                if (event.from.blockX != event.to.blockX || event.from.blockZ != event.to.blockZ) {
+                    event.player.teleport(Location(event.from.world, event.from.blockX + 0.5, event.from.blockY + 0.5, event.from.blockZ.toDouble(), event.from.yaw, event.from.pitch))
+                    event.player.sendMessage(plugin.messages["dead-character"])
+                    event.player.addPotionEffect(PotionEffect(BLINDNESS, 60, 1))
+                }
             }
         }
     }

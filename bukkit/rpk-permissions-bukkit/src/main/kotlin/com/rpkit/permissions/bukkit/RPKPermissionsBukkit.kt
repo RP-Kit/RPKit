@@ -20,6 +20,7 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.permissions.bukkit.command.group.GroupCommand
 import com.rpkit.permissions.bukkit.database.table.PlayerGroupTable
+import com.rpkit.permissions.bukkit.database.table.RPKProfileGroupTable
 import com.rpkit.permissions.bukkit.group.RPKGroupImpl
 import com.rpkit.permissions.bukkit.group.RPKGroupProviderImpl
 import com.rpkit.permissions.bukkit.listener.PlayerJoinListener
@@ -63,6 +64,7 @@ class RPKPermissionsBukkit: RPKBukkitPlugin() {
 
     override fun createTables(database: Database) {
         database.addTable(PlayerGroupTable(database, this))
+        database.addTable(RPKProfileGroupTable(database, this))
     }
 
     override fun setDefaultMessages() {
@@ -75,6 +77,8 @@ class RPKPermissionsBukkit: RPKBukkitPlugin() {
         messages.setDefault("group-remove-invalid-group", "&cNo group by that name exists.")
         messages.setDefault("group-remove-invalid-player", "&cNo player by that name is online.")
         messages.setDefault("group-remove-usage", "&cUsage: /group remove [player] [group]")
+        messages.setDefault("no-profile", "&cYour Minecraft profile is not linked to a profile. Please link it on the server's web UI.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
         messages.setDefault("no-permission-group-add", "&cYou do not have permission to add groups to players.")
         messages.setDefault("no-permission-group-remove", "&cYou do not have permission to remove groups from players.")
         messages.setDefault("no-permission-group-add-group", "&cYou do not have permission to add \$group to players.")

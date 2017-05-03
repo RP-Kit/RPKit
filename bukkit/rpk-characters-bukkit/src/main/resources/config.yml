@@ -20,6 +20,7 @@ characters:
         food-level: 20
         thirst-level: 20
         player-hidden: false
+        profile-hidden: false
         name-hidden: false
         gender-hidden: false
         age-hidden: false

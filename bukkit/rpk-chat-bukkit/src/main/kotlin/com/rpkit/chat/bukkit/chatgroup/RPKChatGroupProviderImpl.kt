@@ -20,6 +20,8 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.database.table.RPKChatGroupTable
 import com.rpkit.chat.bukkit.database.table.LastUsedChatGroupTable
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 
 /**
  * Chat group provider implementation.
@@ -47,17 +49,40 @@ class RPKChatGroupProviderImpl(private val plugin: RPKChatBukkit): RPKChatGroupP
     }
 
     override fun getLastUsedChatGroup(player: RPKPlayer): RPKChatGroup? {
-        return plugin.core.database.getTable(LastUsedChatGroupTable::class).get(player)?.chatGroup?:null
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                return getLastUsedChatGroup(minecraftProfile)
+            }
+        }
+        return null
     }
 
-    override fun setLastUsedChatGroup(player: RPKPlayer, chatGroup: RPKChatGroup) {
+    override fun getLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile): RPKChatGroup? {
+        return plugin.core.database.getTable(LastUsedChatGroupTable::class).get(minecraftProfile)?.chatGroup
+    }
+
+    override fun setLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile, chatGroup: RPKChatGroup) {
         val lastUsedChatGroupTable = plugin.core.database.getTable(LastUsedChatGroupTable::class)
-        val lastUsedChatGroup = lastUsedChatGroupTable.get(player)
+        val lastUsedChatGroup = lastUsedChatGroupTable.get(minecraftProfile)
         if (lastUsedChatGroup != null) {
             lastUsedChatGroup.chatGroup = chatGroup
             lastUsedChatGroupTable.update(lastUsedChatGroup)
         } else {
-            lastUsedChatGroupTable.insert(LastUsedChatGroup(player = player, chatGroup = chatGroup))
+            lastUsedChatGroupTable.insert(LastUsedChatGroup(minecraftProfile = minecraftProfile, chatGroup = chatGroup))
+        }
+    }
+
+    override fun setLastUsedChatGroup(player: RPKPlayer, chatGroup: RPKChatGroup) {
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                setLastUsedChatGroup(minecraftProfile, chatGroup)
+            }
         }
     }
 

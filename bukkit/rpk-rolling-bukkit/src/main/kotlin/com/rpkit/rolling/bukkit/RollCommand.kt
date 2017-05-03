@@ -1,7 +1,7 @@
 package com.rpkit.rolling.bukkit
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -46,28 +46,32 @@ class RollCommand(private val plugin: RPKRollingBukkit): CommandExecutor {
                         parsedRollBuilder.append(sign + amount)
                     }
                     if (!parsedRollBuilder.isEmpty()) {
-                        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                        val player = playerProvider.getPlayer(sender)
-                        val character = characterProvider.getActiveCharacter(player)
-                        if (character != null) {
-                            val radius = plugin.config.getInt("rolls.radius")
-                            val parsedRoll = if (parsedRollBuilder.startsWith("+"))
-                                parsedRollBuilder.toString().drop(1)
-                            else
-                                parsedRollBuilder.toString()
-                            sender.world.players
-                                    .filter { player -> player.location.distanceSquared(sender.location) <= radius * radius }
-                                    .forEach {
-                                        it.sendMessage(plugin.messages["roll", mapOf(
-                                                Pair("character", character.name),
-                                                Pair("player", player.name),
-                                                Pair("roll", total.toString()),
-                                                Pair("dice", parsedRoll)
-                                        )])
-                                    }
+                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                        if (minecraftProfile != null) {
+                            val character = characterProvider.getActiveCharacter(minecraftProfile)
+                            if (character != null) {
+                                val radius = plugin.config.getInt("rolls.radius")
+                                val parsedRoll = if (parsedRollBuilder.startsWith("+"))
+                                    parsedRollBuilder.toString().drop(1)
+                                else
+                                    parsedRollBuilder.toString()
+                                sender.world.players
+                                        .filter { player -> player.location.distanceSquared(sender.location) <= radius * radius }
+                                        .forEach {
+                                            it.sendMessage(plugin.messages["roll", mapOf(
+                                                    Pair("character", character.name),
+                                                    Pair("player", minecraftProfile.minecraftUsername),
+                                                    Pair("roll", total.toString()),
+                                                    Pair("dice", parsedRoll)
+                                            )])
+                                        }
+                            } else {
+                                sender.sendMessage(plugin.messages["no-character"])
+                            }
                         } else {
-                            sender.sendMessage(plugin.messages["no-character"])
+                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
                         }
                     } else {
                         sender.sendMessage(plugin.messages["roll-invalid-parse"])

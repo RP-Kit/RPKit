@@ -22,7 +22,7 @@ import com.rpkit.auctions.bukkit.auction.RPKAuctionProvider
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -52,14 +52,18 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("rpkit.auctions.command.auction.create")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    conversationFactory.buildConversation(sender).begin()
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        conversationFactory.buildConversation(sender).begin()
+                    } else {
+                        sender.sendMessage(plugin.messages["no-character"])
+                    }
                 } else {
-                    sender.sendMessage(plugin.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["no-permission-auction-create"])
@@ -297,33 +301,37 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
     private inner class AuctionCreatedPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
             val auctionProvider = plugin.core.serviceManager.getServiceProvider(RPKAuctionProvider::class)
             val bukkitPlayer = context.forWhom as Player
-            val player = playerProvider.getPlayer(bukkitPlayer)
-            val character = characterProvider.getActiveCharacter(player)
-            if (character != null) {
-                val auction = RPKAuctionImpl(
-                        plugin,
-                        item = bukkitPlayer.inventory.itemInMainHand,
-                        currency = context.getSessionData("currency") as RPKCurrency,
-                        location = bukkitPlayer.location,
-                        character = character,
-                        duration = (context.getSessionData("duration") as Int) * 3600000L, // 60 mins * 60 secs * 1000 millisecs
-                        endTime = System.currentTimeMillis() + ((context.getSessionData("duration") as Int) * 3600000L),
-                        startPrice = context.getSessionData("start_price") as Int,
-                        buyOutPrice = context.getSessionData("buy_out_price") as Int,
-                        noSellPrice = context.getSessionData("no_sell_price") as Int,
-                        minimumBidIncrement = context.getSessionData("minimum_bid_increment") as Int
-                )
-                auctionProvider.addAuction(auction)
-                auction.openBidding()
-                auctionProvider.updateAuction(auction)
-                bukkitPlayer.inventory.itemInMainHand = null
-                context.setSessionData("id", auction.id)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                val character = characterProvider.getActiveCharacter(minecraftProfile)
+                if (character != null) {
+                    val auction = RPKAuctionImpl(
+                            plugin,
+                            item = bukkitPlayer.inventory.itemInMainHand,
+                            currency = context.getSessionData("currency") as RPKCurrency,
+                            location = bukkitPlayer.location,
+                            character = character,
+                            duration = (context.getSessionData("duration") as Int) * 3600000L, // 60 mins * 60 secs * 1000 millisecs
+                            endTime = System.currentTimeMillis() + ((context.getSessionData("duration") as Int) * 3600000L),
+                            startPrice = context.getSessionData("start_price") as Int,
+                            buyOutPrice = context.getSessionData("buy_out_price") as Int,
+                            noSellPrice = context.getSessionData("no_sell_price") as Int,
+                            minimumBidIncrement = context.getSessionData("minimum_bid_increment") as Int
+                    )
+                    auctionProvider.addAuction(auction)
+                    auction.openBidding()
+                    auctionProvider.updateAuction(auction)
+                    bukkitPlayer.inventory.itemInMainHand = null
+                    context.setSessionData("id", auction.id)
+                } else {
+                    context.setSessionData("id", -1)
+                }
             } else {
-                context.setSessionData("id", -1)
+                context.setSessionData("id", -2)
             }
             return AuctionIDPrompt()
         }
@@ -342,9 +350,13 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
 
         override fun getPromptText(context: ConversationContext): String {
             if (context.getSessionData("id") != -1) {
-                return plugin.messages["auction-create-id", mapOf(
-                        Pair("id", context.getSessionData("id").toString())
-                )]
+                if (context.getSessionData("id") != -2) {
+                    return plugin.messages["auction-create-id", mapOf(
+                            Pair("id", context.getSessionData("id").toString())
+                    )]
+                } else {
+                    return plugin.messages["no-minecraft-profile"]
+                }
             } else {
                 return plugin.messages["no-character"]
             }

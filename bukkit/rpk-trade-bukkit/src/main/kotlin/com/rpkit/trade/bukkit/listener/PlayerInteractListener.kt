@@ -21,7 +21,7 @@ import com.rpkit.core.exception.UnregisteredServiceException
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.food.bukkit.expiry.RPKExpiryProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.trade.bukkit.RPKTradeBukkit
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material
@@ -53,79 +53,28 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                         val currency = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(sign.getLine(3))
                         if (currency != null) {
                             if (event.action === RIGHT_CLICK_BLOCK) {
-                                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                                 val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-                                val player = playerProvider.getPlayer(event.player)
-                                val character = characterProvider.getActiveCharacter(player)
-                                if (character != null) {
-                                    if (event.player.hasPermission("rpkit.trade.sign.trader.buy")) {
-                                        if (economyProvider.getBalance(character, currency) >= buyPrice) {
-                                            economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - buyPrice)
-                                            val item = ItemStack(material, amount)
-                                            try {
-                                                val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProvider::class)
-                                                expiryProvider.setExpiry(item)
-                                            } catch (ignore: UnregisteredServiceException) {}
-                                            event.player.inventory.addItem(item)
-                                            event.player.sendMessage(plugin.messages["trader-buy", mapOf(
-                                                    Pair("quantity", amount.toString()),
-                                                    Pair("material", material.toString().toLowerCase().replace('_', ' ')),
-                                                    Pair("price", buyPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
-                                            )])
-                                            actualPrice += plugin.config.getDouble("traders.price-change")
-                                            val maximumPrice = plugin.config.getDouble("traders.maximum-price.$material",
-                                                    plugin.config.getDouble("traders.maximum-price.default"))
-                                            val minimumPrice = plugin.config.getDouble("traders.minimum-price.$material",
-                                                    plugin.config.getDouble("traders.minimum-price.default"))
-                                            actualPrice = Math.max(Math.min(actualPrice, maximumPrice), minimumPrice)
-                                            buyPrice = (actualPrice + ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
-                                            sellPrice = (actualPrice - ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
-                                            sign.setLine(2, buyPrice.toString() + " | " + sellPrice.toString())
-                                            sign.update()
-                                        } else {
-                                            event.player.sendMessage(plugin.messages["trader-buy-insufficient-funds"])
-                                        }
-                                    } else {
-                                        event.player.sendMessage(plugin.messages["no-permission-trader-buy"])
-                                    }
-                                } else {
-                                    event.player.sendMessage(plugin.messages["no-character"])
-                                }
-                            } else if (event.action == LEFT_CLICK_BLOCK) {
-                                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-                                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                                val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-                                val player = playerProvider.getPlayer(event.player)
-                                val character = characterProvider.getActiveCharacter(player)
-                                if (character != null) {
-                                    if (event.player.hasPermission("rpkit.trade.sign.trader.sell")) {
-                                        if (event.player.inventory.contains(material, amount)) {
-                                            if (economyProvider.getBalance(character, currency) + sellPrice <= 1728) {
-                                                economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + sellPrice)
-                                                var amountRemaining = amount
-                                                val contents = event.player.inventory.contents
-                                                contents
-                                                        .asSequence()
-                                                        .filter { it != null && it.type == material }
-                                                        .forEach {
-                                                            if (it.amount > amountRemaining) {
-                                                                it.amount = it.amount - amountRemaining
-                                                                amountRemaining = 0
-                                                            } else if (it.amount <= amountRemaining) {
-                                                                if (amountRemaining > 0) {
-                                                                    amountRemaining -= it.amount
-                                                                    it.type = Material.AIR
-                                                                }
-                                                            }
-                                                        }
-                                                event.player.inventory.contents = contents
-                                                event.player.sendMessage(plugin.messages["trader-sell", mapOf(
+                                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+                                if (minecraftProfile != null) {
+                                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                                    if (character != null) {
+                                        if (event.player.hasPermission("rpkit.trade.sign.trader.buy")) {
+                                            if (economyProvider.getBalance(character, currency) >= buyPrice) {
+                                                economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - buyPrice)
+                                                val item = ItemStack(material, amount)
+                                                try {
+                                                    val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProvider::class)
+                                                    expiryProvider.setExpiry(item)
+                                                } catch (ignore: UnregisteredServiceException) {}
+                                                event.player.inventory.addItem(item)
+                                                event.player.sendMessage(plugin.messages["trader-buy", mapOf(
                                                         Pair("quantity", amount.toString()),
                                                         Pair("material", material.toString().toLowerCase().replace('_', ' ')),
-                                                        Pair("price", sellPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
+                                                        Pair("price", buyPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
                                                 )])
-                                                actualPrice -= plugin.config.getDouble("traders.price-change")
+                                                actualPrice += plugin.config.getDouble("traders.price-change")
                                                 val maximumPrice = plugin.config.getDouble("traders.maximum-price.$material",
                                                         plugin.config.getDouble("traders.maximum-price.default"))
                                                 val minimumPrice = plugin.config.getDouble("traders.minimum-price.$material",
@@ -136,16 +85,75 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                                 sign.setLine(2, buyPrice.toString() + " | " + sellPrice.toString())
                                                 sign.update()
                                             } else {
-                                                event.player.sendMessage(plugin.messages["trader-sell-insufficient-wallet-space"])
+                                                event.player.sendMessage(plugin.messages["trader-buy-insufficient-funds"])
                                             }
                                         } else {
-                                            event.player.sendMessage(plugin.messages["trader-sell-insufficient-items"])
+                                            event.player.sendMessage(plugin.messages["no-permission-trader-buy"])
                                         }
                                     } else {
-                                        event.player.sendMessage(plugin.messages["no-permission-trader-sell"])
+                                        event.player.sendMessage(plugin.messages["no-character"])
                                     }
                                 } else {
-                                    event.player.sendMessage(plugin.messages["no-character"])
+                                    event.player.sendMessage(plugin.messages["no-minecraft-profile"])
+                                }
+                            } else if (event.action == LEFT_CLICK_BLOCK) {
+                                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                                val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
+                                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+                                if (minecraftProfile != null) {
+                                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                                    if (character != null) {
+                                        if (event.player.hasPermission("rpkit.trade.sign.trader.sell")) {
+                                            if (event.player.inventory.contains(material, amount)) {
+                                                if (economyProvider.getBalance(character, currency) + sellPrice <= 1728) {
+                                                    economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + sellPrice)
+                                                    var amountRemaining = amount
+                                                    val contents = event.player.inventory.contents
+                                                    contents
+                                                            .asSequence()
+                                                            .filter { it != null && it.type == material }
+                                                            .forEach {
+                                                                if (it.amount > amountRemaining) {
+                                                                    it.amount = it.amount - amountRemaining
+                                                                    amountRemaining = 0
+                                                                } else if (it.amount <= amountRemaining) {
+                                                                    if (amountRemaining > 0) {
+                                                                        amountRemaining -= it.amount
+                                                                        it.type = Material.AIR
+                                                                    }
+                                                                }
+                                                            }
+                                                    event.player.inventory.contents = contents
+                                                    event.player.sendMessage(plugin.messages["trader-sell", mapOf(
+                                                            Pair("quantity", amount.toString()),
+                                                            Pair("material", material.toString().toLowerCase().replace('_', ' ')),
+                                                            Pair("price", sellPrice.toString() + " " + if (sellPrice === 1) currency.nameSingular else currency.namePlural)
+                                                    )])
+                                                    actualPrice -= plugin.config.getDouble("traders.price-change")
+                                                    val maximumPrice = plugin.config.getDouble("traders.maximum-price.$material",
+                                                            plugin.config.getDouble("traders.maximum-price.default"))
+                                                    val minimumPrice = plugin.config.getDouble("traders.minimum-price.$material",
+                                                            plugin.config.getDouble("traders.minimum-price.default"))
+                                                    actualPrice = Math.max(Math.min(actualPrice, maximumPrice), minimumPrice)
+                                                    buyPrice = (actualPrice + ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
+                                                    sellPrice = (actualPrice - ((plugin.config.getDouble("traders.trade-fee-percentage") / 100.0) * actualPrice)).toInt()
+                                                    sign.setLine(2, buyPrice.toString() + " | " + sellPrice.toString())
+                                                    sign.update()
+                                                } else {
+                                                    event.player.sendMessage(plugin.messages["trader-sell-insufficient-wallet-space"])
+                                                }
+                                            } else {
+                                                event.player.sendMessage(plugin.messages["trader-sell-insufficient-items"])
+                                            }
+                                        } else {
+                                            event.player.sendMessage(plugin.messages["no-permission-trader-sell"])
+                                        }
+                                    } else {
+                                        event.player.sendMessage(plugin.messages["no-character"])
+                                    }
+                                } else {
+                                    event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                                 }
                             }
                         }

@@ -21,7 +21,7 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupImpl
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -56,13 +56,21 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                     )
                     paymentGroupProvider.addPaymentGroup(paymentGroup)
                     if (sender is Player) {
-                        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                        val player = playerProvider.getPlayer(sender)
-                        val character = characterProvider.getActiveCharacter(player)
-                        if (character != null) {
-                            paymentGroup.addOwner(character)
+                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                        if (minecraftProfile != null) {
+                            val character = characterProvider.getActiveCharacter(minecraftProfile)
+                            if (character != null) {
+                                paymentGroup.addOwner(character)
+                            } else {
+                                sender.sendMessage(plugin.messages["no-character"])
+                            }
+                        } else {
+                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
                         }
+                    } else {
+                        sender.sendMessage(plugin.messages["not-from-console"])
                     }
                     sender.sendMessage(plugin.messages["payment-create-valid"])
                 } else{

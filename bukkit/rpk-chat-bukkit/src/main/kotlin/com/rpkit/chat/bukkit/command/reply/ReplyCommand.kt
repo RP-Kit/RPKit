@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.command.reply
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,22 +33,26 @@ class ReplyCommand(private val plugin: RPKChatBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.chat.command.reply")) {
             if (sender is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                val chatGroup = chatGroupProvider.getLastUsedChatGroup(player)
-                if (chatGroup != null) {
-                    if (args.isNotEmpty()) {
-                        val message = StringBuilder()
-                        for (arg in args) {
-                            message.append(arg).append(" ")
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val chatGroup = chatGroupProvider.getLastUsedChatGroup(minecraftProfile)
+                    if (chatGroup != null) {
+                        if (args.isNotEmpty()) {
+                            val message = StringBuilder()
+                            for (arg in args) {
+                                message.append(arg).append(" ")
+                            }
+                            chatGroup.sendMessage(minecraftProfile, message.toString())
+                        } else {
+                            sender.sendMessage(plugin.messages["reply-usage"])
                         }
-                        chatGroup.sendMessage(player, message.toString())
                     } else {
-                        sender.sendMessage(plugin.messages["reply-usage"])
+                        sender.sendMessage(plugin.messages["reply-invalid-chat-group"])
                     }
                 } else {
-                    sender.sendMessage(plugin.messages["reply-invalid-chat-group"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["not-from-console"])

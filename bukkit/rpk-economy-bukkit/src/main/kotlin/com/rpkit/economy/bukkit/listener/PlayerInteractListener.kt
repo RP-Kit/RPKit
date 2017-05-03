@@ -4,7 +4,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.ChatColor
 import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
@@ -26,31 +26,35 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit): Listener {
                     val fromCurrency = currencyProvider.getCurrency(sign.getLine(1).replaceFirst(Regex("\\d+\\s+"), ""))
                     val toCurrency = currencyProvider.getCurrency(sign.getLine(3))
                     if (fromCurrency != null && toCurrency != null) {
-                        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                         val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-                        val player = playerProvider.getPlayer(event.player)
-                        val character = characterProvider.getActiveCharacter(player)
-                        if (character != null) {
-                            if (economyProvider.getBalance(character, fromCurrency) - amount >= 0) {
-                                val convertedAmount = fromCurrency.convert(amount, toCurrency)
-                                if (economyProvider.getBalance(character, toCurrency) + convertedAmount <= 1728) {
-                                    economyProvider.setBalance(character, fromCurrency, economyProvider.getBalance(character, fromCurrency) - amount)
-                                    economyProvider.setBalance(character, toCurrency, economyProvider.getBalance(character, toCurrency) + convertedAmount)
-                                    event.player.sendMessage(plugin.messages["exchange-valid", mapOf(
-                                            Pair("from-amount", amount.toString()),
-                                            Pair("to-amount", convertedAmount.toString()),
-                                            Pair("from-currency", if (amount == 1) fromCurrency.nameSingular else fromCurrency.namePlural),
-                                            Pair("to-currency", if (convertedAmount == 1) toCurrency.nameSingular else toCurrency.namePlural)
-                                    )])
+                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+                        if (minecraftProfile != null) {
+                            val character = characterProvider.getActiveCharacter(minecraftProfile)
+                            if (character != null) {
+                                if (economyProvider.getBalance(character, fromCurrency) - amount >= 0) {
+                                    val convertedAmount = fromCurrency.convert(amount, toCurrency)
+                                    if (economyProvider.getBalance(character, toCurrency) + convertedAmount <= 1728) {
+                                        economyProvider.setBalance(character, fromCurrency, economyProvider.getBalance(character, fromCurrency) - amount)
+                                        economyProvider.setBalance(character, toCurrency, economyProvider.getBalance(character, toCurrency) + convertedAmount)
+                                        event.player.sendMessage(plugin.messages["exchange-valid", mapOf(
+                                                Pair("from-amount", amount.toString()),
+                                                Pair("to-amount", convertedAmount.toString()),
+                                                Pair("from-currency", if (amount == 1) fromCurrency.nameSingular else fromCurrency.namePlural),
+                                                Pair("to-currency", if (convertedAmount == 1) toCurrency.nameSingular else toCurrency.namePlural)
+                                        )])
+                                    } else {
+                                        event.player.sendMessage(plugin.messages["exchange-invalid-wallet-balance-too-high"])
+                                    }
                                 } else {
-                                    event.player.sendMessage(plugin.messages["exchange-invalid-wallet-balance-too-high"])
+                                    event.player.sendMessage(plugin.messages["exchange-invalid-wallet-balance-too-low"])
                                 }
                             } else {
-                                event.player.sendMessage(plugin.messages["exchange-invalid-wallet-balance-too-low"])
+                                event.player.sendMessage(plugin.messages["no-character"])
                             }
                         } else {
-                            event.player.sendMessage(plugin.messages["no-character"])
+                            event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                         }
                     } else {
                         event.player.sendMessage(plugin.messages["exchange-invalid-format"])

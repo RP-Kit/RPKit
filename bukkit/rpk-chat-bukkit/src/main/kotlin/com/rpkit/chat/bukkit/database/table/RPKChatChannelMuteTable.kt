@@ -23,13 +23,14 @@ import com.rpkit.chat.bukkit.mute.RPKChatChannelMute
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.database.use
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
+import java.sql.PreparedStatement
 import java.sql.Statement.RETURN_GENERATED_KEYS
 
 /**
@@ -54,18 +55,29 @@ class RPKChatChannelMuteTable: Table<RPKChatChannelMute> {
             connection.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS rpkit_chat_channel_mute(" +
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "player_id INTEGER," +
+                            "minecraft_profile_id INTEGER," +
                             "chat_channel_id INTEGER" +
                     ")"
-            ).use { statement ->
-                statement.executeUpdate()
-            }
+            ).use(PreparedStatement::executeUpdate)
         }
     }
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.4.0")
+            database.setTableVersion(this, "1.3.0")
+        }
+        if (database.getTableVersion(this) == "0.4.0") {
+            database.createConnection().use { connection ->
+                connection.prepareStatement(
+                        "TRUNCATE rpkit_chat_channel_mute"
+                ).use(PreparedStatement::executeUpdate)
+                connection.prepareStatement(
+                        "ALTER TABLE rpkit_chat_channel_mute " +
+                                "DROP COLUMN player_id, " +
+                                "ADD COLUMN minecraft_profile_id INTEGER AFTER id"
+                ).use(PreparedStatement::executeUpdate)
+            }
+            database.setTableVersion(this, "1.3.0")
         }
     }
 
@@ -73,10 +85,10 @@ class RPKChatChannelMuteTable: Table<RPKChatChannelMute> {
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "INSERT INTO rpkit_chat_channel_mute(player_id, chat_channel_id) VALUES(?, ?)",
+                    "INSERT INTO rpkit_chat_channel_mute(minecraft_profile_id, chat_channel_id) VALUES(?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
-                statement.setInt(1, entity.player.id)
+                statement.setInt(1, entity.minecraftProfile.id)
                 statement.setInt(2, entity.chatChannel.id)
                 statement.executeUpdate()
                 val generatedKeys = statement.generatedKeys
@@ -93,9 +105,9 @@ class RPKChatChannelMuteTable: Table<RPKChatChannelMute> {
     override fun update(entity: RPKChatChannelMute) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "UPDATE rpkit_chat_channel_mute SET player_id = ?, chat_channel_id = ? WHERE id = ?"
+                    "UPDATE rpkit_chat_channel_mute SET minecraft_profile_id = ?, chat_channel_id = ? WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, entity.player.id)
+                statement.setInt(1, entity.minecraftProfile.id)
                 statement.setInt(2, entity.chatChannel.id)
                 statement.setInt(3, entity.id)
                 statement.executeUpdate()
@@ -111,16 +123,16 @@ class RPKChatChannelMuteTable: Table<RPKChatChannelMute> {
             var chatChannelMute: RPKChatChannelMute? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, player_id, chat_channel_id FROM rpkit_chat_channel_mute WHERE id = ?"
+                        "SELECT id, minecraft_profile_id, chat_channel_id FROM rpkit_chat_channel_mute WHERE id = ?"
                 ).use { statement ->
                     statement.setInt(1, id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
-                        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                         val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
                         chatChannelMute = RPKChatChannelMute(
                                 resultSet.getInt("id"),
-                                playerProvider.getPlayer(resultSet.getInt("player_id"))!!,
+                                minecraftProfileProvider.getMinecraftProfile(resultSet.getInt("minecraft_profile_id"))!!,
                                 chatChannelProvider.getChatChannel(resultSet.getInt("chat_channel_id"))!!
                         )
                         cache.put(id, chatChannelMute)
@@ -132,26 +144,26 @@ class RPKChatChannelMuteTable: Table<RPKChatChannelMute> {
     }
 
     /**
-     * Gets the chat channel mute instance for a player in a channel, or null if there is none.
+     * Gets the chat channel mute instance for a Minecraft profile in a channel, or null if there is none.
      *
-     * @param player The player
+     * @param minecraftProfile The Minecraft profile
      * @param chatChannel The chat channel
      * @return A chat channel mute instance, or null if none exists
      */
-    fun get(player: RPKPlayer, chatChannel: RPKChatChannel): RPKChatChannelMute? {
+    fun get(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): RPKChatChannelMute? {
         var chatChannelMute: RPKChatChannelMute? = null
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "SELECT id, player_id, chat_channel_id FROM rpkit_chat_channel_mute WHERE player_id = ? AND chat_channel_id = ?"
+                    "SELECT id, minecraft_profile_id, chat_channel_id FROM rpkit_chat_channel_mute WHERE minecraft_profile_id = ? AND chat_channel_id = ?"
             ).use { statement ->
-                statement.setInt(1, player.id)
+                statement.setInt(1, minecraftProfile.id)
                 statement.setInt(2, chatChannel.id)
                 val resultSet = statement.executeQuery()
                 if (resultSet.next()) {
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                     val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
                     val finalChatChannelMute = RPKChatChannelMute(resultSet.getInt("id"),
-                            playerProvider.getPlayer(resultSet.getInt("player_id"))!!,
+                            minecraftProfileProvider.getMinecraftProfile(resultSet.getInt("minecraft_profile_id"))!!,
                             chatChannelProvider.getChatChannel(resultSet.getInt("chat_channel_id"))!!
                     )
                     chatChannelMute = finalChatChannelMute

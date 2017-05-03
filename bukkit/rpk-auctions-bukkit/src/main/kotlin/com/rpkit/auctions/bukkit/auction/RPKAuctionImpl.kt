@@ -23,7 +23,6 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 
@@ -79,13 +78,13 @@ class RPKAuctionImpl(
                     val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
                     economyProvider.transfer(character, this.character, currency, highestBid.amount)
                     giveItem(character)
-                    val player = character.player
-                    if (player != null) {
-                        val bukkitPlayer = player.bukkitPlayer
+                    val minecraftProfile = character.minecraftProfile
+                    if (minecraftProfile != null) {
+                        val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
                         if (bukkitPlayer != null) {
                             if (bukkitPlayer.isOnline) {
                                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                                if (characterProvider.getActiveCharacter(player) == character) {
+                                if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
                                     bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
                                             Pair("amount", item.amount.toString()),
                                             Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
@@ -98,13 +97,13 @@ class RPKAuctionImpl(
                     }
                 } else {
                     giveItem(character)
-                    val player = character.player
-                    if (player != null) {
-                        val bukkitPlayer = player.bukkitPlayer
+                    val minecraftProfile = character.minecraftProfile
+                    if (minecraftProfile != null) {
+                        val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
                         if (bukkitPlayer != null) {
                             if (bukkitPlayer.isOnline) {
                                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                                if (characterProvider.getActiveCharacter(player) == character) {
+                                if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
                                     bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
                                             Pair("amount", item.amount.toString()),
                                             Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
@@ -118,13 +117,13 @@ class RPKAuctionImpl(
                 }
             } else {
                 giveItem(character)
-                val player = character.player
-                if (player != null) {
-                    val bukkitPlayer = player.bukkitPlayer
+                val minecraftProfile = character.minecraftProfile
+                if (minecraftProfile != null) {
+                    val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
                     if (bukkitPlayer != null) {
                         if (bukkitPlayer.isOnline) {
                             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                            if (characterProvider.getActiveCharacter(player) == character) {
+                            if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
                                 bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
                                         Pair("amount", item.amount.toString()),
                                         Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
@@ -141,13 +140,13 @@ class RPKAuctionImpl(
     }
 
     private fun giveItem(character: RPKCharacter) {
-        val player = character.player
-        if (player != null) {
-            val bukkitPlayer = player.bukkitPlayer
+        val minecraftProfile = character.minecraftProfile
+        if (minecraftProfile != null) {
+            val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
             if (bukkitPlayer != null) {
                 if (bukkitPlayer.isOnline) {
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    if (characterProvider.getActiveCharacter(player) == character) {
+                    if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
                         bukkitPlayer.player.inventory.addItem(item).values.forEach { item ->
                             bukkitPlayer.player.world.dropItem(bukkitPlayer.player.location, item)
                         }

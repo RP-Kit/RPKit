@@ -27,6 +27,7 @@ import com.rpkit.core.service.ServiceProvider
 import com.rpkit.core.web.NavigationLink
 import com.rpkit.core.web.Web
 import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
 import java.sql.SQLException
@@ -43,6 +44,7 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
         saveDefaultConfig()
         val webServer = Server(config.getInt("web-server.port"))
         servletContext = ServletContextHandler()
+        servletContext.sessionHandler = SessionHandler()
         webServer.handler = servletContext
         core = RPKCore(
                 logger,

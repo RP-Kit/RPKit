@@ -21,7 +21,7 @@ import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -78,38 +78,42 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
     }
 
     private fun showWallet(bukkitPlayer: Player, currency: RPKCurrency) {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-        val player = playerProvider.getPlayer(bukkitPlayer)
-        val character = characterProvider.getActiveCharacter(player)
-        if (character != null) {
-            val wallet = plugin.server.createInventory(null, 27, "Wallet [" + currency.name + "]")
-            val coin = ItemStack(currency.material)
-            val meta = coin.itemMeta
-            meta.displayName = currency.nameSingular
-            coin.itemMeta = meta
-            val coinStack = ItemStack(currency.material, 64)
-            val stackMeta = coinStack.itemMeta
-            stackMeta.displayName = currency.nameSingular
-            coinStack.itemMeta = stackMeta
-            val remainder = (economyProvider.getBalance(character, currency) % 64).toInt()
-            var i = 0
-            while (i < economyProvider.getBalance(character, currency)) {
-                val leftover = wallet.addItem(coinStack)
-                if (!leftover.isEmpty()) {
-                    bukkitPlayer.world.dropItem(bukkitPlayer.location, leftover.values.iterator().next())
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            if (character != null) {
+                val wallet = plugin.server.createInventory(null, 27, "Wallet [" + currency.name + "]")
+                val coin = ItemStack(currency.material)
+                val meta = coin.itemMeta
+                meta.displayName = currency.nameSingular
+                coin.itemMeta = meta
+                val coinStack = ItemStack(currency.material, 64)
+                val stackMeta = coinStack.itemMeta
+                stackMeta.displayName = currency.nameSingular
+                coinStack.itemMeta = stackMeta
+                val remainder = (economyProvider.getBalance(character, currency) % 64)
+                var i = 0
+                while (i < economyProvider.getBalance(character, currency)) {
+                    val leftover = wallet.addItem(coinStack)
+                    if (!leftover.isEmpty()) {
+                        bukkitPlayer.world.dropItem(bukkitPlayer.location, leftover.values.iterator().next())
+                    }
+                    i += 64
                 }
-                i += 64
+                if (remainder != 0) {
+                    val remove = ItemStack(coin)
+                    remove.amount = 64 - remainder
+                    wallet.removeItem(remove)
+                }
+                bukkitPlayer.openInventory(wallet)
+            } else {
+                bukkitPlayer.sendMessage(plugin.messages["no-character"])
             }
-            if (remainder != 0) {
-                val remove = ItemStack(coin)
-                remove.amount = 64 - remainder
-                wallet.removeItem(remove)
-            }
-            bukkitPlayer.openInventory(wallet)
         } else {
-            bukkitPlayer.sendMessage(plugin.messages["no-character"])
+            bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile"])
         }
     }
 

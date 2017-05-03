@@ -34,8 +34,8 @@ class SnoopComponent(private val plugin: RPKChatBukkit): DirectedChatChannelPipe
     override fun process(context: DirectedChatChannelMessageContext): DirectedChatChannelMessageContext {
         if (!context.isCancelled) return context
         val snooperProvider = plugin.core.serviceManager.getServiceProvider(RPKSnooperProvider::class)
-        if (snooperProvider.snoopers.contains(context.receiver)) {
-            context.receiver.bukkitPlayer?.player?.sendMessage(context.message)
+        if (snooperProvider.snooperMinecraftProfiles.contains(context.receiverMinecraftProfile)) {
+            context.receiverMinecraftProfile.sendMessage(context.message)
         }
         return context
     }

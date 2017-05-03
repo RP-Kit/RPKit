@@ -5,8 +5,8 @@ import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldown
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.database.use
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
@@ -21,7 +21,7 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
     private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKNewCharacterCooldown::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val playerCache = cacheManager.createCache("playerCache", CacheConfigurationBuilder
+    private val profileCache = cacheManager.createCache("profileCache", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKNewCharacterCooldown::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 
@@ -31,7 +31,7 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
             connection.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS rpkit_new_character_cooldown(" +
                             "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "player_id INTEGER," +
+                            "profile_id INTEGER," +
                             "cooldown_timestamp DATE" +
                     ")"
             ).use(PreparedStatement::executeUpdate)
@@ -40,7 +40,20 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.1.0")
+            database.setTableVersion(this, "1.3.0")
+        }
+        if (database.getTableVersion(this) == "1.1.0") {
+            database.createConnection().use { connection ->
+                connection.prepareStatement(
+                        "TRUNCATE TABLE rpkit_new_character_cooldown"
+                ).use(PreparedStatement::executeUpdate)
+                connection.prepareStatement(
+                        "ALTER TABLE rpkit_new_character_cooldown " +
+                                "DROP COLUMN player_id, " +
+                                "ADD COLUMN profile_id INTEGER AFTER id"
+                ).use(PreparedStatement::executeUpdate)
+            }
+            database.setTableVersion(this, "1.3.0")
         }
     }
 
@@ -48,10 +61,10 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
         var id = 0
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "INSERT INTO rpkit_new_character_cooldown(player_id, cooldown_timestamp) VALUES(?, ?)",
+                    "INSERT INTO rpkit_new_character_cooldown(profile_id, cooldown_timestamp) VALUES(?, ?)",
                     RETURN_GENERATED_KEYS
             ).use { statement ->
-                statement.setInt(1, entity.player.id)
+                statement.setInt(1, entity.profile.id)
                 statement.setDate(2, Date(entity.cooldownTimestamp))
                 statement.executeUpdate()
                 val generatedKeys = statement.generatedKeys
@@ -59,7 +72,7 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
                     id = generatedKeys.getInt(1)
                     entity.id = id
                     cache.put(id, entity)
-                    playerCache.put(entity.player.id, entity)
+                    profileCache.put(entity.profile.id, entity)
                 }
             }
         }
@@ -69,14 +82,14 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
     override fun update(entity: RPKNewCharacterCooldown) {
         database.createConnection().use { connection ->
             connection.prepareStatement(
-                    "UPDATE rpkit_new_character_cooldown SET player_id = ?, cooldown_timestamp = ? WHERE id = ?"
+                    "UPDATE rpkit_new_character_cooldown SET profile_id = ?, cooldown_timestamp = ? WHERE id = ?"
             ).use { statement ->
-                statement.setInt(1, entity.player.id)
+                statement.setInt(1, entity.profile.id)
                 statement.setDate(2, Date(entity.cooldownTimestamp))
                 statement.setInt(3, entity.id)
                 statement.executeUpdate()
                 cache.put(entity.id, entity)
-                playerCache.put(entity.player.id, entity)
+                profileCache.put(entity.profile.id, entity)
             }
         }
     }
@@ -88,18 +101,18 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
             var newCharacterCooldown: RPKNewCharacterCooldown? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, player_id, cooldown_timestamp FROM rpkit_new_character_cooldown WHERE id = ?"
+                        "SELECT id, profile_id, cooldown_timestamp FROM rpkit_new_character_cooldown WHERE id = ?"
                 ).use { statement ->
                     statement.setInt(1, id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
                         val finalNewCharacterCooldown = RPKNewCharacterCooldown(
                                 resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!,
+                                plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class).getProfile(resultSet.getInt("profile_id"))!!,
                                 resultSet.getDate("cooldown_timestamp").time
                         )
                         cache.put(finalNewCharacterCooldown.id, finalNewCharacterCooldown)
-                        playerCache.put(finalNewCharacterCooldown.player.id, finalNewCharacterCooldown)
+                        profileCache.put(finalNewCharacterCooldown.profile.id, finalNewCharacterCooldown)
                         newCharacterCooldown = finalNewCharacterCooldown
                     }
                 }
@@ -108,25 +121,25 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
         }
     }
 
-    fun get(player: RPKPlayer): RPKNewCharacterCooldown? {
-        if (playerCache.containsKey(player.id)) {
-            return playerCache[player.id]
+    fun get(profile: RPKProfile): RPKNewCharacterCooldown? {
+        if (profileCache.containsKey(profile.id)) {
+            return profileCache[profile.id]
         } else {
             var newCharacterCooldown: RPKNewCharacterCooldown? = null
             database.createConnection().use { connection ->
                 connection.prepareStatement(
-                        "SELECT id, player_id, cooldown_timestamp FROM rpkit_new_character_cooldown WHERE player_id = ?"
+                        "SELECT id, profile_id, cooldown_timestamp FROM rpkit_new_character_cooldown WHERE profile_id = ?"
                 ).use { statement ->
-                    statement.setInt(1, player.id)
+                    statement.setInt(1, profile.id)
                     val resultSet = statement.executeQuery()
                     if (resultSet.next()) {
                         val finalNewCharacterCooldown = RPKNewCharacterCooldown(
                                 resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!,
+                                plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class).getProfile(resultSet.getInt("profile_id"))!!,
                                 resultSet.getDate("cooldown_timestamp").time
                         )
                         cache.put(finalNewCharacterCooldown.id, finalNewCharacterCooldown)
-                        playerCache.put(finalNewCharacterCooldown.player.id, finalNewCharacterCooldown)
+                        profileCache.put(finalNewCharacterCooldown.profile.id, finalNewCharacterCooldown)
                         newCharacterCooldown = finalNewCharacterCooldown
                     }
                 }
@@ -143,7 +156,7 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
                 statement.setInt(1, entity.id)
                 statement.executeUpdate()
                 cache.remove(entity.id)
-                playerCache.remove(entity.player.id)
+                profileCache.remove(entity.profile.id)
             }
         }
     }

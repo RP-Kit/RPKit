@@ -17,16 +17,16 @@
 package com.rpkit.chat.bukkit.chatgroup
 
 import com.rpkit.core.database.Entity
-import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Represents a chat group invite.
  *
  * @property chatGroup The chat group the invite is for
- * @property player The player invited
+ * @property minecraftProfile The Minecraft profile invited
  */
 class ChatGroupInvite(
         override var id: Int = 0,
         val chatGroup: RPKChatGroup,
-        val player: RPKPlayer
+        val minecraftProfile: RPKMinecraftProfile
 ): Entity

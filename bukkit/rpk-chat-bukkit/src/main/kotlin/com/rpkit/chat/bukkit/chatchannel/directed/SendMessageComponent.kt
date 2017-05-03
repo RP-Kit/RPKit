@@ -30,7 +30,7 @@ class SendMessageComponent: DirectedChatChannelPipelineComponent, ConfigurationS
 
     override fun process(context: DirectedChatChannelMessageContext): DirectedChatChannelMessageContext {
         if (!context.isCancelled)
-            context.receiver.bukkitPlayer?.player?.sendMessage(context.message)
+            context.receiverMinecraftProfile.sendMessage(context.message)
         return context
     }
 

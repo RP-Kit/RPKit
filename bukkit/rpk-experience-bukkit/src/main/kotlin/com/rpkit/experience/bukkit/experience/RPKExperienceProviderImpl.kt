@@ -43,11 +43,17 @@ class RPKExperienceProviderImpl(private val plugin: RPKExperienceBukkit): RPKExp
             level++
         }
         val isMaxLevel = level == plugin.config.getInt("levels.max-level")
-        character.player?.bukkitPlayer?.player?.level = level
-        if (isMaxLevel) {
-            character.player?.bukkitPlayer?.player?.exp = 0F
-        } else {
-            character.player?.bukkitPlayer?.player?.exp = (experience - getExperienceNeededForLevel(level)).toFloat() / (getExperienceNeededForLevel(level + 1) - getExperienceNeededForLevel(level)).toFloat()
+        val minecraftProfile = character.minecraftProfile
+        if (minecraftProfile != null) {
+            val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
+            if (bukkitPlayer != null) {
+                bukkitPlayer.level = level
+                if (isMaxLevel) {
+                    bukkitPlayer.exp = 0F
+                } else {
+                    bukkitPlayer.exp = (experience - getExperienceNeededForLevel(level)).toFloat() / (getExperienceNeededForLevel(level + 1) - getExperienceNeededForLevel(level)).toFloat()
+                }
+            }
         }
     }
 

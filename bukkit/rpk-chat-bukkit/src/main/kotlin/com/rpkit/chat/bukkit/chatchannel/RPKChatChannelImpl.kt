@@ -27,6 +27,9 @@ import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteProvider
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import java.awt.Color
 
 /**
@@ -49,19 +52,42 @@ class RPKChatChannelImpl(
         get() = plugin.server.onlinePlayers
                 .map { player -> plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(player) }
                 .filter { player -> plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).getPlayerChannel(player) == this }
+    override val speakerMinecraftProfiles: List<RPKMinecraftProfile>
+        get() = plugin.server.onlinePlayers
+                .map { player -> plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class).getMinecraftProfile(player) }
+                .filterNotNull()
+                .filter { minecraftProfile -> plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).getMinecraftProfileChannel(minecraftProfile) == this }
     override val listeners: List<RPKPlayer>
         get() = plugin.server.onlinePlayers
                 .filter { player -> player.hasPermission("rpkit.chat.listen.$name") }
                 .map { player -> plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(player) }
                 .filter { player -> !plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).hasPlayerMutedChatChannel(player, this) }
+    override val listenerMinecraftProfiles: List<RPKMinecraftProfile>
+        get() = plugin.server.onlinePlayers
+                .filter { player -> player.hasPermission("rpkit.chat.listen.$name") }
+                .map { player -> plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class).getMinecraftProfile(player) }
+                .filterNotNull()
+                .filter { minecraftProfile -> !plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).hasMinecraftProfileMutedChatChannel(minecraftProfile, this) }
 
     override fun addSpeaker(speaker: RPKPlayer) {
         plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).setPlayerChannel(speaker, this)
     }
 
+    override fun addSpeaker(speaker: RPKMinecraftProfile) {
+        plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).setMinecraftProfileChannel(speaker, this)
+    }
+
     override fun removeSpeaker(speaker: RPKPlayer) {
-        if (plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).getPlayerChannel(speaker) == this) {
-            plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).removePlayerChannel(speaker)
+        val chatChannelSpeakerProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class)
+        if (chatChannelSpeakerProvider.getPlayerChannel(speaker) == this) {
+            chatChannelSpeakerProvider.removePlayerChannel(speaker)
+        }
+    }
+
+    override fun removeSpeaker(speaker: RPKMinecraftProfile) {
+        val chatChannelSpeakerProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class)
+        if (chatChannelSpeakerProvider.getMinecraftProfileChannel(speaker) == this) {
+            chatChannelSpeakerProvider.removeMinecraftProfileChannel(speaker)
         }
     }
 
@@ -69,31 +95,67 @@ class RPKChatChannelImpl(
         plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).removeChatChannelMute(listener, this)
     }
 
+    override fun addListener(listener: RPKMinecraftProfile) {
+        plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).removeChatChannelMute(listener, this)
+    }
+
     override fun removeListener(listener: RPKPlayer) {
         plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).addChatChannelMute(listener, this)
     }
 
+    override fun removeListener(listener: RPKMinecraftProfile) {
+        plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).addChatChannelMute(listener, this)
+    }
+
     override fun sendMessage(sender: RPKPlayer, message: String) {
-        listeners.forEach { listener ->
-            var context: DirectedChatChannelMessageContext = DirectedChatChannelMessageContextImpl(this, sender, listener, message)
+        val bukkitPlayer = sender.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                val profile = minecraftProfile.profile
+                if (profile != null) {
+                    sendMessage(profile, minecraftProfile, message)
+                }
+            }
+        }
+    }
+
+    override fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String) {
+        listenerMinecraftProfiles.forEach { listener ->
+            var context: DirectedChatChannelMessageContext = DirectedChatChannelMessageContextImpl(this, sender, senderMinecraftProfile, listener, message)
             directedPipeline.forEach { component ->
                 context = component.process(context)
             }
         }
-        var context: UndirectedChatChannelMessageContext = UndirectedChatChannelMessageContextImpl(this, sender, message)
+        var context: UndirectedChatChannelMessageContext = UndirectedChatChannelMessageContextImpl(this, sender, senderMinecraftProfile, message)
         undirectedPipeline.forEach { component ->
             context = component.process(context)
         }
     }
 
     override fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>) {
-        listeners.forEach { listener ->
-            var context: DirectedChatChannelMessageContext = DirectedChatChannelMessageContextImpl(this, sender, listener, message)
+        val bukkitPlayer = sender.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                val profile = minecraftProfile.profile
+                if (profile != null) {
+                    sendMessage(profile, minecraftProfile, message, directedPipeline, undirectedPipeline)
+                }
+            }
+        }
+    }
+
+    override fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>) {
+        listenerMinecraftProfiles.forEach { listener ->
+            var context: DirectedChatChannelMessageContext = DirectedChatChannelMessageContextImpl(this, sender, senderMinecraftProfile, listener, message)
             directedPipeline.forEach { component ->
                 context = component.process(context)
             }
         }
-        var context: UndirectedChatChannelMessageContext = UndirectedChatChannelMessageContextImpl(this, sender, message)
+        var context: UndirectedChatChannelMessageContext = UndirectedChatChannelMessageContextImpl(this, sender, senderMinecraftProfile, message)
         undirectedPipeline.forEach { component ->
             context = component.process(context)
         }

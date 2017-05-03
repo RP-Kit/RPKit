@@ -18,7 +18,7 @@ package com.rpkit.characters.bukkit.listener
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -38,15 +38,21 @@ class PlayerInteractEntityListener(private val plugin: RPKCharactersBukkit): Lis
                 if (event.rightClicked is Player) {
                     if (event.player.hasPermission("rpkit.characters.command.character.card.other")) {
                         val bukkitPlayer = event.rightClicked as Player
-                        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                        val player = playerProvider.getPlayer(bukkitPlayer)
-                        val character = characterProvider.getActiveCharacter(player)
-                        if (character != null) {
-                            val rightClicker = playerProvider.getPlayer(event.player)
-                            character.showCharacterCard(rightClicker)
+                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+                        if (minecraftProfile != null) {
+                            val character = characterProvider.getActiveCharacter(minecraftProfile)
+                            if (character != null) {
+                                val rightClicker = minecraftProfileProvider.getMinecraftProfile(event.player)
+                                if (rightClicker != null) {
+                                    character.showCharacterCard(rightClicker)
+                                }
+                            } else {
+                                event.player.sendMessage(plugin.messages["no-character-other"])
+                            }
                         } else {
-                            event.player.sendMessage(plugin.messages["no-character-other"])
+                            event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                         }
                     } else {
                         event.player.sendMessage(plugin.messages["no-permission-character-card-other"])

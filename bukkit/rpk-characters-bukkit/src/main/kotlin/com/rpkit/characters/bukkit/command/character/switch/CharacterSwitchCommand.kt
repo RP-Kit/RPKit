@@ -18,8 +18,7 @@ package com.rpkit.characters.bukkit.command.character.switch
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -59,31 +58,40 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
                     }
                     characterNameBuilder.append(args[args.size - 1])
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-                    val player = playerProvider.getPlayer(sender)
-                    var charFound = false
-                    // Prioritise exact matches...
-                    for (character in characterProvider.getCharacters(player)) {
-                        if (character.name.equals(characterNameBuilder.toString(), ignoreCase = true)) {
-                            characterProvider.setActiveCharacter(player, character)
-                            charFound = true
-                            break
-                        }
-                    }
-                    // And fall back to partial matches
-                    if (!charFound) {
-                        for (character in characterProvider.getCharacters(player)) {
-                            if (character.name.toLowerCase().contains(characterNameBuilder.toString().toLowerCase())) {
-                                characterProvider.setActiveCharacter(player, character)
-                                charFound = true
-                                break
+                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                    if (minecraftProfile != null) {
+                        val profile = minecraftProfile.profile
+                        if (profile != null) {
+                            var charFound = false
+                            // Prioritise exact matches...
+                            for (character in characterProvider.getCharacters(profile)) {
+                                if (character.name.equals(characterNameBuilder.toString(), ignoreCase = true)) {
+                                    characterProvider.setActiveCharacter(minecraftProfile, character)
+                                    charFound = true
+                                    break
+                                }
                             }
+                            // And fall back to partial matches
+                            if (!charFound) {
+                                for (character in characterProvider.getCharacters(profile)) {
+                                    if (character.name.toLowerCase().contains(characterNameBuilder.toString().toLowerCase())) {
+                                        characterProvider.setActiveCharacter(minecraftProfile, character)
+                                        charFound = true
+                                        break
+                                    }
+                                }
+                            }
+                            if (charFound) {
+                                sender.sendMessage(plugin.messages["character-switch-valid"])
+                            } else {
+                                sender.sendMessage(plugin.messages["character-switch-invalid-character"])
+                            }
+                        } else {
+                            sender.sendMessage(plugin.messages["no-profile"])
                         }
-                    }
-                    if (charFound) {
-                        sender.sendMessage(plugin.messages["character-switch-valid"])
                     } else {
-                        sender.sendMessage(plugin.messages["character-switch-invalid-character"])
+                        sender.sendMessage(plugin.messages["no-minecraft-profile"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
@@ -103,14 +111,19 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
             val conversable = context.forWhom
             if (conversable is Player) {
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-                val player = playerProvider.getPlayer(conversable)
-                characterProvider.getCharacters(player)
-                        .filter { it.name.equals(input, ignoreCase = true) }
-                        .forEach { return true }
-                characterProvider.getCharacters(player)
-                        .filter { it.name.toLowerCase().contains(input.toLowerCase()) }
-                        .forEach { return true }
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(conversable)
+                if (minecraftProfile != null) {
+                    val profile = minecraftProfile.profile
+                    if (profile != null) {
+                        characterProvider.getCharacters(profile)
+                                .filter { it.name.equals(input, ignoreCase = true) }
+                                .forEach { return true }
+                        characterProvider.getCharacters(profile)
+                                .filter { it.name.toLowerCase().contains(input.toLowerCase()) }
+                                .forEach { return true }
+                    }
+                }
             }
             return false
         }
@@ -119,28 +132,39 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
             val conversable = context.forWhom
             if (conversable is Player) {
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-                val player = playerProvider.getPlayer(conversable)
-                var charFound = false
-                // Prioritise exact matches...
-                for (character in characterProvider.getCharacters(player)) {
-                    if (character.name.equals(input, ignoreCase = true)) {
-                        characterProvider.setActiveCharacter(player, character)
-                        charFound = true
-                        break
-                    }
-                }
-                // And fall back to partial matches
-                if (!charFound) {
-                    for (character in characterProvider.getCharacters(player)) {
-                        if (character.name.toLowerCase().contains(input.toLowerCase())) {
-                            characterProvider.setActiveCharacter(player, character)
-                            break
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(conversable)
+                if (minecraftProfile != null) {
+                    val profile = minecraftProfile.profile
+                    if (profile != null) {
+                        var charFound = false
+                        // Prioritise exact matches...
+                        for (character in characterProvider.getCharacters(profile)) {
+                            if (character.name.equals(input, ignoreCase = true)) {
+                                characterProvider.setActiveCharacter(minecraftProfile, character)
+                                charFound = true
+                                break
+                            }
                         }
+                        // And fall back to partial matches
+                        if (!charFound) {
+                            for (character in characterProvider.getCharacters(profile)) {
+                                if (character.name.toLowerCase().contains(input.toLowerCase())) {
+                                    characterProvider.setActiveCharacter(minecraftProfile, character)
+                                    break
+                                }
+                            }
+                        }
+                        return CharacterSwitchedPrompt()
+                    } else {
+                        return END_OF_CONVERSATION
                     }
+                } else {
+                    return END_OF_CONVERSATION
                 }
+            } else {
+                return END_OF_CONVERSATION
             }
-            return CharacterSwitchedPrompt()
         }
 
         override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
@@ -148,17 +172,26 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-            val player = playerProvider.getPlayer(context.forWhom as Player)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val characterListBuilder = StringBuilder()
-            for (character in characterProvider.getCharacters(player)) {
-                characterListBuilder.append("\n").append(
-                        plugin.messages["character-list-item", mapOf(
-                                Pair("character", character.name)
-                        )])
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
+            if (minecraftProfile != null) {
+                val profile = minecraftProfile.profile
+                if (profile != null) {
+                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                    val characterListBuilder = StringBuilder()
+                    for (character in characterProvider.getCharacters(profile)) {
+                        characterListBuilder.append("\n").append(
+                                plugin.messages["character-list-item", mapOf(
+                                        Pair("character", character.name)
+                                )])
+                    }
+                    return plugin.messages["character-switch-prompt"] + characterListBuilder.toString()
+                } else {
+                    return plugin.messages["no-profile"]
+                }
+            } else {
+                return plugin.messages["no-minecraft-profile"]
             }
-            return plugin.messages["character-switch-prompt"] + characterListBuilder.toString()
         }
 
     }
@@ -166,7 +199,7 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
     private inner class CharacterSwitchedPrompt: MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
-            return Prompt.END_OF_CONVERSATION
+            return END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {

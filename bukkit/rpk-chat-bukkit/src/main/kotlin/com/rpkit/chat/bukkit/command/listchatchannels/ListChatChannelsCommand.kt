@@ -19,7 +19,7 @@ package com.rpkit.chat.bukkit.command.listchatchannels
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
 import com.rpkit.core.bukkit.util.closestChatColor
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import mkremins.fanciful.FancyMessage
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
@@ -36,86 +36,89 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit): CommandExecuto
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.chat.command.listchatchannels")) {
             if (sender is Player) {
-
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                sender.sendMessage(plugin.messages["listchatchannels-title"])
-                plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class).chatChannels.forEach { chatChannel ->
-                    val message = FancyMessage("")
-                    val pattern = Pattern.compile("(\\\$channel)|(\\\$mute)|(${ChatColor.COLOR_CHAR}[0-9a-f])")
-                    val template = plugin.messages["listchatchannels-item", mapOf(
-                            Pair("color", chatChannel.color.closestChatColor().toString())
-                    )]
-                    val matcher = pattern.matcher(template)
-                    var chatColor: ChatColor? = null
-                    var chatFormat: ChatColor? = null
-                    var index = 0
-                    while (matcher.find()) {
-                        if (index != matcher.start()) {
-                            message.then(template.substring(index, matcher.start()))
-                            if (chatColor != null) {
-                                message.color(chatColor)
-                            }
-                            if (chatFormat != null) {
-                                message.style(chatFormat)
-                            }
-                        }
-                        if (matcher.group() == "\$channel") {
-                            message.then(chatChannel.name)
-                                    .command("/chatchannel ${chatChannel.name}")
-                                    .tooltip("Click to talk in ${chatChannel.name}")
-                            if (chatColor != null) {
-                                message.color(chatColor)
-                            }
-                            if (chatFormat != null) {
-                                message.style(chatFormat)
-                            }
-                        } else if (matcher.group() == "\$mute") {
-                            if (chatChannel.listeners.contains(player)) {
-                                message.then("Mute")
-                                        .command("/mute ${chatChannel.name}")
-                                        .tooltip("Click to mute ${chatChannel.name}")
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    sender.sendMessage(plugin.messages["listchatchannels-title"])
+                    plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class).chatChannels.forEach { chatChannel ->
+                        val message = FancyMessage("")
+                        val pattern = Pattern.compile("(\\\$channel)|(\\\$mute)|(${ChatColor.COLOR_CHAR}[0-9a-f])")
+                        val template = plugin.messages["listchatchannels-item", mapOf(
+                                Pair("color", chatChannel.color.closestChatColor().toString())
+                        )]
+                        val matcher = pattern.matcher(template)
+                        var chatColor: ChatColor? = null
+                        var chatFormat: ChatColor? = null
+                        var index = 0
+                        while (matcher.find()) {
+                            if (index != matcher.start()) {
+                                message.then(template.substring(index, matcher.start()))
                                 if (chatColor != null) {
                                     message.color(chatColor)
                                 }
                                 if (chatFormat != null) {
                                     message.style(chatFormat)
+                                }
+                            }
+                            if (matcher.group() == "\$channel") {
+                                message.then(chatChannel.name)
+                                        .command("/chatchannel ${chatChannel.name}")
+                                        .tooltip("Click to talk in ${chatChannel.name}")
+                                if (chatColor != null) {
+                                    message.color(chatColor)
+                                }
+                                if (chatFormat != null) {
+                                    message.style(chatFormat)
+                                }
+                            } else if (matcher.group() == "\$mute") {
+                                if (chatChannel.listenerMinecraftProfiles.contains(minecraftProfile)) {
+                                    message.then("Mute")
+                                            .command("/mute ${chatChannel.name}")
+                                            .tooltip("Click to mute ${chatChannel.name}")
+                                    if (chatColor != null) {
+                                        message.color(chatColor)
+                                    }
+                                    if (chatFormat != null) {
+                                        message.style(chatFormat)
+                                    }
+                                } else {
+                                    message.then("Unmute")
+                                            .command("/unmute ${chatChannel.name}")
+                                            .tooltip("Click to unmute ${chatChannel.name}")
+                                    if (chatColor != null) {
+                                        message.color(chatColor)
+                                    }
+                                    if (chatFormat != null) {
+                                        message.style(chatFormat)
+                                    }
                                 }
                             } else {
-                                message.then("Unmute")
-                                        .command("/unmute ${chatChannel.name}")
-                                        .tooltip("Click to unmute ${chatChannel.name}")
-                                if (chatColor != null) {
-                                    message.color(chatColor)
+                                val colorOrFormat = ChatColor.getByChar(matcher.group().drop(1))
+                                if (colorOrFormat.isColor) {
+                                    chatColor = colorOrFormat
+                                    chatFormat = null
                                 }
-                                if (chatFormat != null) {
-                                    message.style(chatFormat)
+                                if (colorOrFormat.isFormat) {
+                                    chatFormat = colorOrFormat
+                                }
+                                if (colorOrFormat == ChatColor.RESET) {
+                                    chatColor = null
+                                    chatFormat = null
                                 }
                             }
-                        } else {
-                            val colorOrFormat = ChatColor.getByChar(matcher.group().drop(1))
-                            if (colorOrFormat.isColor) {
-                                chatColor = colorOrFormat
-                                chatFormat = null
-                            }
-                            if (colorOrFormat.isFormat) {
-                                chatFormat = colorOrFormat
-                            }
-                            if (colorOrFormat == ChatColor.RESET) {
-                                chatColor = null
-                                chatFormat = null
-                            }
+                            index = matcher.end()
                         }
-                        index = matcher.end()
+                        message.then(template.substring(index, template.length))
+                        if (chatColor != null) {
+                            message.color(chatColor)
+                        }
+                        if (chatFormat != null) {
+                            message.style(chatFormat)
+                        }
+                        message.send(sender)
                     }
-                    message.then(template.substring(index, template.length))
-                    if (chatColor != null) {
-                        message.color(chatColor)
-                    }
-                    if (chatFormat != null) {
-                        message.style(chatFormat)
-                    }
-                    message.send(sender)
+                } else {
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["not-from-console"])

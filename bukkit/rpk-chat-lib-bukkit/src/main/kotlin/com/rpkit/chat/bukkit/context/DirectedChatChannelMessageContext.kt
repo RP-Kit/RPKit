@@ -17,7 +17,8 @@
 package com.rpkit.chat.bukkit.context
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
-import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKProfile
 
 /**
  * A directed chat channel message context.
@@ -33,12 +34,17 @@ interface DirectedChatChannelMessageContext {
     /**
      * The sender of the message.
      */
-    val sender: RPKPlayer
+    val senderProfile: RPKProfile
+
+    /**
+     * Which Minecraft the sender used to send the message, if any.
+     */
+    val senderMinecraftProfile: RPKMinecraftProfile?
 
     /**
      * The receiver of the message.
      */
-    val receiver: RPKPlayer
+    val receiverMinecraftProfile: RPKMinecraftProfile
 
     /**
      * The message. Changing the message results in the updated message being propagated to all further pipeline

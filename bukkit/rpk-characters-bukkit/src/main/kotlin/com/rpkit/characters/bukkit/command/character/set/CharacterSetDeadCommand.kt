@@ -18,7 +18,7 @@ package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.apache.commons.lang.BooleanUtils
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -53,26 +53,30 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit): CommandE
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.set.dead")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    if (args.size > 0) {
-                        val dead = BooleanUtils.toBoolean(args[0])
-                        if (dead && sender.hasPermission("rpkit.characters.command.character.set.dead.yes") || !dead && sender.hasPermission("rpkit.characters.command.character.set.dead.no")) {
-                            character.isDead = dead
-                            characterProvider.updateCharacter(character)
-                            sender.sendMessage(plugin.messages["character-set-dead-valid"])
-                            character.showCharacterCard(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        if (args.isNotEmpty()) {
+                            val dead = BooleanUtils.toBoolean(args[0])
+                            if (dead && sender.hasPermission("rpkit.characters.command.character.set.dead.yes") || !dead && sender.hasPermission("rpkit.characters.command.character.set.dead.no")) {
+                                character.isDead = dead
+                                characterProvider.updateCharacter(character)
+                                sender.sendMessage(plugin.messages["character-set-dead-valid"])
+                                character.showCharacterCard(minecraftProfile)
+                            } else {
+                                sender.sendMessage(plugin.messages["no-permission-character-set-dead-" + if (dead) "yes" else "no"])
+                            }
                         } else {
-                            sender.sendMessage(plugin.messages["no-permission-character-set-dead-" + if (dead) "yes" else "no"])
+                            conversationFactory.buildConversation(sender).begin()
                         }
                     } else {
-                        conversationFactory.buildConversation(sender).begin()
+                        sender.sendMessage(plugin.messages["no-character"])
                     }
                 } else {
-                    sender.sendMessage(plugin.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["no-permission-character-set-dead"])
@@ -88,17 +92,19 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit): CommandE
         override fun acceptValidatedInput(context: ConversationContext, input: Boolean): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(conversable)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    if (input && conversable.hasPermission("rpkit.characters.command.character.set.dead.yes") || !input && conversable.hasPermission("rpkit.characters.command.character.set.dead.no")) {
-                        character.isDead = input
-                        characterProvider.updateCharacter(character)
-                        return DeadSetPrompt()
-                    } else {
-                        return DeadNotSetNoPermissionPrompt(input)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(conversable)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        if (input && conversable.hasPermission("rpkit.characters.command.character.set.dead.yes") || !input && conversable.hasPermission("rpkit.characters.command.character.set.dead.no")) {
+                            character.isDead = input
+                            characterProvider.updateCharacter(character)
+                            return DeadSetPrompt()
+                        } else {
+                            return DeadNotSetNoPermissionPrompt(input)
+                        }
                     }
                 }
             }
@@ -120,10 +126,12 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit): CommandE
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(context.forWhom as Player)
-                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
+                if (minecraftProfile != null) {
+                    characterProvider.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                }
             }
             return Prompt.END_OF_CONVERSATION
         }
@@ -139,10 +147,12 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit): CommandE
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(context.forWhom as Player)
-                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
+                if (minecraftProfile != null) {
+                    characterProvider.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                }
             }
             return Prompt.END_OF_CONVERSATION
         }

@@ -19,7 +19,7 @@ package com.rpkit.chat.bukkit.irc.listener
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKIRCProfileProvider
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.MessageEvent
 
@@ -34,14 +34,17 @@ class IRCMessageListener(private val plugin: RPKChatBukkit): ListenerAdapter() {
         // This stops commands from being sent to chat.
         if (event.message.startsWith("!")) return
 
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val ircProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProfileProvider::class)
         val user = event.user
         // According to PircBotX documentation, user can be null if the hostmask doesn't match a user at creation time.
         if (user != null) {
-            val sender = playerProvider.getPlayer(user)
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
-            val chatChannel = chatChannelProvider.getChatChannelFromIRCChannel(event.channel.name)
-            chatChannel?.sendMessage(sender, event.message, chatChannel.directedPipeline, chatChannel.undirectedPipeline.filter { it !is IRCComponent })
+            val senderIRCProfile = ircProfileProvider.getIRCProfile(user)
+            if (senderIRCProfile != null) {
+                val senderProfile = senderIRCProfile.profile
+                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
+                val chatChannel = chatChannelProvider.getChatChannelFromIRCChannel(event.channel.name)
+                chatChannel?.sendMessage(senderProfile, null, event.message, chatChannel.directedPipeline, chatChannel.undirectedPipeline.filter { it !is IRCComponent })
+            }
         }
     }
 

@@ -1,12 +1,12 @@
 package com.rpkit.featureflags.bukkit.featureflag
 
 import com.rpkit.core.database.Entity
-import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKProfile
 
 
-class RPKPlayerFeatureFlag(
+class RPKProfileFeatureFlag(
         override var id: Int = 0,
-        val player: RPKPlayer,
+        val profile: RPKProfile,
         val featureFlag: RPKFeatureFlag,
         var enabled: Boolean
 ) : Entity

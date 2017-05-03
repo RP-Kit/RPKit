@@ -18,7 +18,7 @@ package com.rpkit.characters.bukkit.listener
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -33,11 +33,13 @@ class PlayerJoinListener(val plugin: RPKCharactersBukkit): Listener {
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
         if (plugin.config.getBoolean("characters.set-player-display-name")) {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val player = playerProvider.getPlayer(event.player)
-            val character = characterProvider.getActiveCharacter(player)
-            event.player.displayName = character?.name?:event.player.name
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+            if (minecraftProfile != null) {
+                val character = characterProvider.getActiveCharacter(minecraftProfile)
+                event.player.displayName = character?.name ?: event.player.name
+            }
         }
     }
 

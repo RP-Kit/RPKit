@@ -21,7 +21,7 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -52,22 +52,26 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit): CommandE
         if (sender.hasPermission("rpkit.payments.command.payment.set.currency")) {
             if (sender is Player) {
                 if (args.isNotEmpty()) {
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val player = playerProvider.getPlayer(sender)
-                    val character = characterProvider.getActiveCharacter(player)
-                    val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-                    val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
-                    if (paymentGroup != null) {
-                        if (paymentGroup.owners.contains(character)) {
-                            val conversation = conversationFactory.buildConversation(sender)
-                            conversation.context.setSessionData("payment_group", paymentGroup)
-                            conversation.begin()
+                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                    if (minecraftProfile != null) {
+                        val character = characterProvider.getActiveCharacter(minecraftProfile)
+                        val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
+                        val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
+                        if (paymentGroup != null) {
+                            if (paymentGroup.owners.contains(character)) {
+                                val conversation = conversationFactory.buildConversation(sender)
+                                conversation.context.setSessionData("payment_group", paymentGroup)
+                                conversation.begin()
+                            } else {
+                                sender.sendMessage(plugin.messages["payment-set-currency-invalid-owner"])
+                            }
                         } else {
-                            sender.sendMessage(plugin.messages["payment-set-currency-invalid-owner"])
+                            sender.sendMessage(plugin.messages["payment-set-currency-invalid-group"])
                         }
                     } else {
-                        sender.sendMessage(plugin.messages["payment-set-currency-invalid-group"])
+                        sender.sendMessage(plugin.messages["no-minecraft-profile"])
                     }
                 } else {
                     sender.sendMessage(plugin.messages["payment-set-currency-usage"])

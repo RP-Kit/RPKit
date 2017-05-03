@@ -18,7 +18,7 @@ package com.rpkit.characters.bukkit.listener
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
@@ -31,14 +31,16 @@ class PlayerDeathListener(private val plugin: RPKCharactersBukkit): Listener {
 
     @EventHandler
     fun onPlayerDeath(event: PlayerDeathEvent) {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val player = playerProvider.getPlayer(event.entity)
-        val character = characterProvider.getActiveCharacter(player)
-        if (character != null) {
-            if (plugin.config.getBoolean("characters.kill-character-on-death")) {
-                    character.isDead = true
-                    characterProvider.updateCharacter(character)
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.entity)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            if (character != null) {
+                if (plugin.config.getBoolean("characters.kill-character-on-death")) {
+                        character.isDead = true
+                        characterProvider.updateCharacter(character)
+                }
             }
         }
     }

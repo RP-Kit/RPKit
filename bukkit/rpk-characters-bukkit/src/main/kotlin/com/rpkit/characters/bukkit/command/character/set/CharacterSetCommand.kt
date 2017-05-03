@@ -27,29 +27,22 @@ import org.bukkit.command.CommandSender
  */
 class CharacterSetCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
 
-    private val characterSetPlayerCommand: CharacterSetPlayerCommand
-    private val characterSetNameCommand: CharacterSetNameCommand
-    private val characterSetGenderCommand: CharacterSetGenderCommand
-    private val characterSetAgeCommand: CharacterSetAgeCommand
-    private val characterSetRaceCommand: CharacterSetRaceCommand
-    private val characterSetDescriptionCommand: CharacterSetDescriptionCommand
-    private val characterSetDeadCommand: CharacterSetDeadCommand
-
-    init {
-        characterSetPlayerCommand = CharacterSetPlayerCommand(plugin)
-        characterSetNameCommand = CharacterSetNameCommand(plugin)
-        characterSetGenderCommand = CharacterSetGenderCommand(plugin)
-        characterSetAgeCommand = CharacterSetAgeCommand(plugin)
-        characterSetRaceCommand = CharacterSetRaceCommand(plugin)
-        characterSetDescriptionCommand = CharacterSetDescriptionCommand(plugin)
-        characterSetDeadCommand = CharacterSetDeadCommand(plugin)
-    }
+    private val characterSetPlayerCommand = CharacterSetPlayerCommand(plugin)
+    private val characterSetProfileCommand = CharacterSetProfileCommand(plugin)
+    private val characterSetNameCommand = CharacterSetNameCommand(plugin)
+    private val characterSetGenderCommand = CharacterSetGenderCommand(plugin)
+    private val characterSetAgeCommand = CharacterSetAgeCommand(plugin)
+    private val characterSetRaceCommand = CharacterSetRaceCommand(plugin)
+    private val characterSetDescriptionCommand = CharacterSetDescriptionCommand(plugin)
+    private val characterSetDeadCommand = CharacterSetDeadCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("player", ignoreCase = true)) {
                 return characterSetPlayerCommand.onCommand(sender, command, label, newArgs)
+            } else if (args[0].equals("profile", ignoreCase = true)) {
+                return characterSetProfileCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("name", ignoreCase = true)) {
                 return characterSetNameCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("gender", ignoreCase = true)) {

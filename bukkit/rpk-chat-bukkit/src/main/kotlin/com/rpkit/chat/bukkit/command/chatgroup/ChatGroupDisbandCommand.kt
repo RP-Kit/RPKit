@@ -36,8 +36,8 @@ class ChatGroupDisbandCommand(private val plugin: RPKChatBukkit): CommandExecuto
                     val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
                     val chatGroup = chatGroupProvider.getChatGroup(args[0])
                     if (chatGroup != null) {
-                        for (player in chatGroup.members) {
-                            player.bukkitPlayer?.player?.sendMessage(plugin.messages["chat-group-disband-valid", mapOf(
+                        for (minecraftProfile in chatGroup.memberMinecraftProfiles) {
+                            minecraftProfile.sendMessage(plugin.messages["chat-group-disband-valid", mapOf(
                                     Pair("group", chatGroup.name)
                             )])
                         }

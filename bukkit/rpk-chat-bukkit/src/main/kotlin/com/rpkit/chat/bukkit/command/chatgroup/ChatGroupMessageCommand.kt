@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,20 +33,24 @@ class ChatGroupMessageCommand(private val plugin: RPKChatBukkit): CommandExecuto
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.chat.command.chatgroup.message")) {
             if (args.size >= 2) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
                 val chatGroup = chatGroupProvider.getChatGroup(args[0])
                 if (chatGroup != null) {
                     if (sender is Player) {
-                        val player = playerProvider.getPlayer(sender)
-                        if (chatGroup.members.contains(player)) {
-                            val message = StringBuilder()
-                            for (i in 1..args.size - 1) {
-                                message.append(args[i]).append(" ")
+                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                        if (minecraftProfile != null) {
+                            if (chatGroup.memberMinecraftProfiles.contains(minecraftProfile)) {
+                                val message = StringBuilder()
+                                for (i in 1..args.size - 1) {
+                                    message.append(args[i]).append(" ")
+                                }
+                                chatGroup.sendMessage(minecraftProfile, message.toString())
+                            } else {
+                                sender.sendMessage(plugin.messages["chat-group-message-invalid-not-a-member"])
                             }
-                            chatGroup.sendMessage(player, message.toString())
                         } else {
-                            sender.sendMessage(plugin.messages["chat-group-message-invalid-not-a-member"])
+                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
                         }
                     } else {
                         sender.sendMessage(plugin.messages["not-from-console"])

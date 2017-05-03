@@ -18,7 +18,7 @@ package com.rpkit.permissions.bukkit.command.group
 
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -32,26 +32,35 @@ class GroupAddCommand(private val plugin: RPKPermissionsBukkit): CommandExecutor
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.permissions.command.group.add")) {
             if (args.size > 1) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider= plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val groupProvider = plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class)
                 val bukkitPlayer = plugin.server.getPlayer(args[0])
                 if (bukkitPlayer != null) {
-                    val player = playerProvider.getPlayer(bukkitPlayer)
-                    val group = groupProvider.getGroup(args[1])
-                    if (group != null) {
-                        if (sender.hasPermission("rpkit.permissions.command.group.add.${group.name}")) {
-                            groupProvider.addGroup(player, group)
-                            sender.sendMessage(plugin.messages["group-add-valid", mapOf(
-                                    Pair("group", group.name),
-                                    Pair("player", player.name)
-                            )])
+                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+                    if (minecraftProfile != null) {
+                        val profile = minecraftProfile.profile
+                        if (profile != null) {
+                            val group = groupProvider.getGroup(args[1])
+                            if (group != null) {
+                                if (sender.hasPermission("rpkit.permissions.command.group.add.${group.name}")) {
+                                    groupProvider.addGroup(profile, group)
+                                    sender.sendMessage(plugin.messages["group-add-valid", mapOf(
+                                            Pair("group", group.name),
+                                            Pair("player", minecraftProfile.minecraftUsername)
+                                    )])
+                                } else {
+                                    sender.sendMessage(plugin.messages["no-permission-group-add-group", mapOf(
+                                            Pair("group", group.name)
+                                    )])
+                                }
+                            } else {
+                                sender.sendMessage(plugin.messages["group-add-invalid-group"])
+                            }
                         } else {
-                            sender.sendMessage(plugin.messages["no-permission-group-add-group", mapOf(
-                                    Pair("group", group.name)
-                            )])
+                            sender.sendMessage(plugin.messages["no-profile"])
                         }
                     } else {
-                        sender.sendMessage(plugin.messages["group-add-invalid-group"])
+                        sender.sendMessage(plugin.messages["no-minecraft-profile"])
                     }
                 } else {
                     sender.sendMessage(plugin.messages["group-add-invalid-player"])

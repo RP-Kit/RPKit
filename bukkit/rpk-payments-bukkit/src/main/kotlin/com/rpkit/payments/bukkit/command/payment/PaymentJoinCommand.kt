@@ -21,7 +21,7 @@ import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -42,42 +42,46 @@ class PaymentJoinCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                     val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
                     val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
                     if (paymentGroup != null) {
-                        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                        val player = playerProvider.getPlayer(sender)
-                        val character = characterProvider.getActiveCharacter(player)
-                        if (character != null) {
-                            if (paymentGroup.invites.contains(character)) {
-                                paymentGroup.removeInvite(character)
-                                paymentGroup.addMember(character)
-                                sender.sendMessage(plugin.messages["payment-join-valid"])
-                                val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
-                                val now = System.currentTimeMillis()
-                                val ownerNotificationMessage = plugin.messages["payment-notification-member-join", mapOf(
-                                        Pair("member", character.name),
-                                        Pair("group", paymentGroup.name),
-                                        Pair("date", dateFormat.format(Date(now)))
-                                )]
-                                paymentGroup.owners.forEach { owner ->
-                                    if (!(owner.player?.bukkitPlayer?.isOnline?:false)) {
-                                        paymentNotificationProvider.addPaymentNotification(
-                                                RPKPaymentNotificationImpl(
-                                                        group = paymentGroup,
-                                                        to = owner,
-                                                        character = character,
-                                                        date = now,
-                                                        text = ownerNotificationMessage
-                                                )
-                                        )
-                                    } else {
-                                        owner.player?.bukkitPlayer?.player?.sendMessage(ownerNotificationMessage)
+                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                        if (minecraftProfile != null) {
+                            val character = characterProvider.getActiveCharacter(minecraftProfile)
+                            if (character != null) {
+                                if (paymentGroup.invites.contains(character)) {
+                                    paymentGroup.removeInvite(character)
+                                    paymentGroup.addMember(character)
+                                    sender.sendMessage(plugin.messages["payment-join-valid"])
+                                    val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
+                                    val now = System.currentTimeMillis()
+                                    val ownerNotificationMessage = plugin.messages["payment-notification-member-join", mapOf(
+                                            Pair("member", character.name),
+                                            Pair("group", paymentGroup.name),
+                                            Pair("date", dateFormat.format(Date(now)))
+                                    )]
+                                    paymentGroup.owners.forEach { owner ->
+                                        if (!(owner.minecraftProfile?.isOnline?:false)) {
+                                            paymentNotificationProvider.addPaymentNotification(
+                                                    RPKPaymentNotificationImpl(
+                                                            group = paymentGroup,
+                                                            to = owner,
+                                                            character = character,
+                                                            date = now,
+                                                            text = ownerNotificationMessage
+                                                    )
+                                            )
+                                        } else {
+                                            owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
+                                        }
                                     }
+                                } else {
+                                    sender.sendMessage(plugin.messages["payment-join-invalid-invite"])
                                 }
                             } else {
-                                sender.sendMessage(plugin.messages["payment-join-invalid-invite"])
+                                sender.sendMessage(plugin.messages["payment-join-invalid-character"])
                             }
                         } else {
-                            sender.sendMessage(plugin.messages["payment-join-invalid-character"])
+                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
                         }
                     } else {
                         sender.sendMessage(plugin.messages["payment-join-invalid-group"])

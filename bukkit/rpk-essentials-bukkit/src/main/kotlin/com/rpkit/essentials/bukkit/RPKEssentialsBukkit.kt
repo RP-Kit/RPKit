@@ -209,6 +209,7 @@ class RPKEssentialsBukkit: RPKBukkitPlugin() {
         messages.setDefault("not-from-console", "&cYou must be a player to perform this command.")
         messages.setDefault("no-character-self", "&cYou must have a character to perform that command.")
         messages.setDefault("no-character-other", "&cThat player must have a character to perform that command.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
     }
 
 }

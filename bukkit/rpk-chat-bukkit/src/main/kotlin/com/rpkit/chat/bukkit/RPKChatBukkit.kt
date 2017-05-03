@@ -236,6 +236,7 @@ class RPKChatBukkit: RPKBukkitPlugin() {
         messages.setDefault("message-usage", "&cUsage: /message [target] [message]")
         messages.setDefault("not-from-console", "&cYou may not use this command from console.")
         messages.setDefault("no-character", "&cYou do not currently have an active character. Please create one with /character new, or switch to an old one using /character switch.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
         messages.setDefault("no-chat-channel", "&cYou are not currently speaking in a chat channel. Please list channels with /listchatchannels and then speak in one using /chatchannel [channel].")
         messages.setDefault("no-permission-chatchannel", "&cYou do not have permission to speak in \$channel.")
         messages.setDefault("no-permission-listchatchannels", "&cYou do not have permission to list chat channels.")

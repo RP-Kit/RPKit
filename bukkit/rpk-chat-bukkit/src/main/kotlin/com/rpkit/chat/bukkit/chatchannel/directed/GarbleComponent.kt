@@ -21,7 +21,6 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineCom
 import com.rpkit.chat.bukkit.context.DirectedChatChannelMessageContext
 import com.rpkit.chat.bukkit.snooper.RPKSnooperProvider
 import com.rpkit.core.util.MathUtils
-import com.rpkit.players.bukkit.player.RPKPlayer
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
@@ -37,23 +36,21 @@ class GarbleComponent(private val plugin: RPKChatBukkit, var clearRadius: Double
 
     override fun process(context: DirectedChatChannelMessageContext): DirectedChatChannelMessageContext {
         if (context.isCancelled) return context // Don't bother garbling if the receiver won't receive anyway
-        val sender = context.sender
-        val receiver = context.receiver
+        val senderMinecraftProfile = context.senderMinecraftProfile ?: return context // Prevent garble if the message wasn't sent from Minecraft
+        val receiverMinecraftProfile = context.receiverMinecraftProfile
         val snooperProvider = plugin.core.serviceManager.getServiceProvider(RPKSnooperProvider::class)
-        if (snooperProvider.isSnooping(receiver)) return context // Prevent garble if the receiver is snooping
-        if (sender is RPKPlayer && receiver is RPKPlayer) {
-            val senderOfflineBukkitPlayer = sender.bukkitPlayer
-            val receiverOfflineBukkitPlayer = receiver.bukkitPlayer
-            if (senderOfflineBukkitPlayer != null) {
-                if (receiverOfflineBukkitPlayer != null) {
-                    if (senderOfflineBukkitPlayer.isOnline && receiverOfflineBukkitPlayer.isOnline) {
-                        val senderBukkitPlayer = senderOfflineBukkitPlayer.player
-                        val receiverBukkitPlayer = receiverOfflineBukkitPlayer.player
-                        val distance = MathUtils.fastSqrt(senderBukkitPlayer.location.distanceSquared(receiverBukkitPlayer.location))
-                        val hearingRange = context.chatChannel.radius
-                        val clarity = 1.0 - (distance - clearRadius) / hearingRange
-                        context.message = garbleMessage(context.message, clarity)
-                    }
+        if (snooperProvider.isSnooping(receiverMinecraftProfile)) return context // Prevent garble if the receiver is snooping
+        val senderOfflineBukkitPlayer = Bukkit.getOfflinePlayer(senderMinecraftProfile.minecraftUUID)
+        val receiverOfflineBukkitPlayer = Bukkit.getOfflinePlayer(receiverMinecraftProfile.minecraftUUID)
+        if (senderOfflineBukkitPlayer != null) {
+            if (receiverOfflineBukkitPlayer != null) {
+                if (senderOfflineBukkitPlayer.isOnline && receiverOfflineBukkitPlayer.isOnline) {
+                    val senderBukkitPlayer = senderOfflineBukkitPlayer.player
+                    val receiverBukkitPlayer = receiverOfflineBukkitPlayer.player
+                    val distance = MathUtils.fastSqrt(senderBukkitPlayer.location.distanceSquared(receiverBukkitPlayer.location))
+                    val hearingRange = context.chatChannel.radius
+                    val clarity = 1.0 - (distance - clearRadius) / hearingRange
+                    context.message = garbleMessage(context.message, clarity)
                 }
             }
         }

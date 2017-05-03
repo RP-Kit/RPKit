@@ -17,7 +17,7 @@
 package com.rpkit.stats.bukkit.command.stats
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.stats.bukkit.RPKStatsBukkit
 import com.rpkit.stats.bukkit.stat.RPKStatProvider
 import com.rpkit.stats.bukkit.stat.RPKStatVariableProvider
@@ -35,22 +35,26 @@ class StatsCommand(private val plugin: RPKStatsBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.stats.command.stats")) {
             if (sender is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    val statsProvider = plugin.core.serviceManager.getServiceProvider(RPKStatProvider::class)
-                    val statVariableProvider = plugin.core.serviceManager.getServiceProvider(RPKStatVariableProvider::class)
-                    sender.sendMessage(plugin.messages["stats-list-title"])
-                    statsProvider.stats.forEach { stat ->
-                        sender.sendMessage(plugin.messages["stats-list-item", mapOf(
-                                Pair("stat", stat.name),
-                                Pair("value", stat.get(character, statVariableProvider.statVariables).toString())
-                        )])
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        val statsProvider = plugin.core.serviceManager.getServiceProvider(RPKStatProvider::class)
+                        val statVariableProvider = plugin.core.serviceManager.getServiceProvider(RPKStatVariableProvider::class)
+                        sender.sendMessage(plugin.messages["stats-list-title"])
+                        statsProvider.stats.forEach { stat ->
+                            sender.sendMessage(plugin.messages["stats-list-item", mapOf(
+                                    Pair("stat", stat.name),
+                                    Pair("value", stat.get(character, statVariableProvider.statVariables).toString())
+                            )])
+                        }
+                    } else {
+                        sender.sendMessage(plugin.messages["no-character"])
                     }
                 } else {
-                    sender.sendMessage(plugin.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["not-from-console"])

@@ -70,6 +70,7 @@ class RPKLocksBukkit: RPKBukkitPlugin() {
         messages.setDefault("unlock-valid", "&aPlease interact with the block you would like to unlock.")
         messages.setDefault("not-from-console", "&cYou must be a player to perform this command.")
         messages.setDefault("no-character", "&cYou must have a character to perform this action.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
         messages.setDefault("no-permission-get-key", "&cYou do not have permission to get keys.")
         messages.setDefault("no-permission-keyring", "&cYou do not have permission to view your keyring.")
         messages.setDefault("no-permission-unlock", "&cYou do not have permission to remove locks.")

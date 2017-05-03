@@ -110,16 +110,18 @@ class PlayerServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
                                 alerts.add(Alert(DANGER, "Your name may not be blank."))
                             }
                         }
-                        if (ircNick != null && ircNick.isNotBlank()) {
-                            if (player.ircNick == null) {
-                                val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
-                                val ircUser = ircProvider.getIRCUser(ircNick)
-                                if (ircUser != null) {
-                                    val existingIRCPlayer = playerProvider.getPlayer(ircUser)
-                                    playerProvider.removePlayer(existingIRCPlayer)
-                                    player.ircNick = ircNick
-                                } else {
-                                    alerts.add(Alert(DANGER, "There is no user online on IRC by that name, so your IRC account could not be linked."))
+                        if (ircNick != null) {
+                            if (ircNick.isNotBlank()) {
+                                if (player.ircNick == null) {
+                                    val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
+                                    val ircUser = ircProvider.getIRCUser(ircNick)
+                                    if (ircUser != null) {
+                                        val existingIRCPlayer = playerProvider.getPlayer(ircUser)
+                                        playerProvider.removePlayer(existingIRCPlayer)
+                                        player.ircNick = ircNick
+                                    } else {
+                                        alerts.add(Alert(DANGER, "There is no user online on IRC by that name, so your IRC account could not be linked."))
+                                    }
                                 }
                             }
                         }

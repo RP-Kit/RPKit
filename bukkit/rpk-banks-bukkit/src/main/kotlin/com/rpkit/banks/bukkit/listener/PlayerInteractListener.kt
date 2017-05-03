@@ -21,7 +21,7 @@ import com.rpkit.banks.bukkit.bank.RPKBankProvider
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
@@ -42,74 +42,76 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit): Listener {
                 val sign = event.clickedBlock.state as Sign
                 if (sign.getLine(0).equals(GREEN.toString() + "[bank]", ignoreCase = true)) {
                     event.isCancelled = true
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
                     val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
                     val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
-                    val player = playerProvider.getPlayer(event.player)
-                    val character = characterProvider.getActiveCharacter(player)
-                    if (character != null) {
-                        val currency = currencyProvider.getCurrency(sign.getLine(3))
-                        if (currency != null) {
-                            if (event.action == RIGHT_CLICK_BLOCK) {
-                                when (sign.getLine(2)) {
-                                    "1" -> {
-                                        sign.setLine(2, "10")
-                                        sign.update()
+                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+                    if (minecraftProfile != null) {
+                        val character = characterProvider.getActiveCharacter(minecraftProfile)
+                        if (character != null) {
+                            val currency = currencyProvider.getCurrency(sign.getLine(3))
+                            if (currency != null) {
+                                if (event.action == RIGHT_CLICK_BLOCK) {
+                                    when (sign.getLine(2)) {
+                                        "1" -> {
+                                            sign.setLine(2, "10")
+                                            sign.update()
+                                        }
+                                        "10" -> {
+                                            sign.setLine(2, "100")
+                                            sign.update()
+                                        }
+                                        "100" -> {
+                                            sign.setLine(2, "1000")
+                                            sign.update()
+                                        }
+                                        "1000" -> {
+                                            sign.setLine(2, "1")
+                                            sign.update()
+                                        }
+                                        else -> {
+                                        }
                                     }
-                                    "10" -> {
-                                        sign.setLine(2, "100")
-                                        sign.update()
-                                    }
-                                    "100" -> {
-                                        sign.setLine(2, "1000")
-                                        sign.update()
-                                    }
-                                    "1000" -> {
-                                        sign.setLine(2, "1")
-                                        sign.update()
-                                    }
-                                    else -> {
-                                    }
-                                }
-                            } else if (event.action == Action.LEFT_CLICK_BLOCK) {
-                                if (sign.getLine(1).equals("withdraw", ignoreCase = true)) {
-                                    if (economyProvider.getBalance(character, currency) + sign.getLine(2).toInt() > 1728) {
-                                        event.player.sendMessage(plugin.messages["bank-withdraw-invalid-wallet-full"])
-                                    } else if (sign.getLine(2).toInt() > bankProvider.getBalance(character, currency)) {
-                                        event.player.sendMessage(plugin.messages["bank-withdraw-invalid-not-enough-money"])
-                                    } else {
-                                        bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - sign.getLine(2).toInt())
-                                        economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + sign.getLine(2).toInt())
-                                        event.player.sendMessage(
-                                                plugin.messages["bank-withdraw-valid", mapOf(
-                                                        Pair("amount", sign.getLine(2)),
-                                                        Pair("currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural),
-                                                        Pair("wallet-balance", economyProvider.getBalance(character, currency).toString()),
-                                                        Pair("bank-balance", bankProvider.getBalance(character, currency).toString())
-                                                )]
-                                        )
-                                    }
-                                } else if (sign.getLine(1).equals("deposit", ignoreCase = true)) {
-                                    if (sign.getLine(2).toInt() > economyProvider.getBalance(character, currency)) {
-                                        event.player.sendMessage(plugin.messages["bank-deposit-invalid-not-enough-money"])
-                                    } else {
-                                        bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) + sign.getLine(2).toInt())
-                                        economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - sign.getLine(2).toInt())
-                                        event.player.sendMessage(plugin.messages["bank-deposit-valid", mapOf(
-                                                Pair("amount", sign.getLine(2)),
-                                                Pair("currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural),
-                                                Pair("wallet-balance", economyProvider.getBalance(character, currency).toString()),
-                                                Pair("bank-balance", bankProvider.getBalance(character, currency).toString())
+                                } else if (event.action == Action.LEFT_CLICK_BLOCK) {
+                                    if (sign.getLine(1).equals("withdraw", ignoreCase = true)) {
+                                        if (economyProvider.getBalance(character, currency) + sign.getLine(2).toInt() > 1728) {
+                                            event.player.sendMessage(plugin.messages["bank-withdraw-invalid-wallet-full"])
+                                        } else if (sign.getLine(2).toInt() > bankProvider.getBalance(character, currency)) {
+                                            event.player.sendMessage(plugin.messages["bank-withdraw-invalid-not-enough-money"])
+                                        } else {
+                                            bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - sign.getLine(2).toInt())
+                                            economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + sign.getLine(2).toInt())
+                                            event.player.sendMessage(
+                                                    plugin.messages["bank-withdraw-valid", mapOf(
+                                                            Pair("amount", sign.getLine(2)),
+                                                            Pair("currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural),
+                                                            Pair("wallet-balance", economyProvider.getBalance(character, currency).toString()),
+                                                            Pair("bank-balance", bankProvider.getBalance(character, currency).toString())
+                                                    )]
+                                            )
+                                        }
+                                    } else if (sign.getLine(1).equals("deposit", ignoreCase = true)) {
+                                        if (sign.getLine(2).toInt() > economyProvider.getBalance(character, currency)) {
+                                            event.player.sendMessage(plugin.messages["bank-deposit-invalid-not-enough-money"])
+                                        } else {
+                                            bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) + sign.getLine(2).toInt())
+                                            economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - sign.getLine(2).toInt())
+                                            event.player.sendMessage(plugin.messages["bank-deposit-valid", mapOf(
+                                                    Pair("amount", sign.getLine(2)),
+                                                    Pair("currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural),
+                                                    Pair("wallet-balance", economyProvider.getBalance(character, currency).toString()),
+                                                    Pair("bank-balance", bankProvider.getBalance(character, currency).toString())
+                                            )])
+                                        }
+                                    } else if (sign.getLine(1).equals("balance", ignoreCase = true)) {
+                                        val balance = bankProvider.getBalance(character, currency)
+                                        event.player.sendMessage(plugin.messages["bank-balance-valid", mapOf(
+                                                Pair("amount", balance.toString()),
+                                                Pair("currency", if (balance == 1) currency.nameSingular else currency.namePlural)
                                         )])
                                     }
-                                } else if (sign.getLine(1).equals("balance", ignoreCase = true)) {
-                                    val balance = bankProvider.getBalance(character, currency)
-                                    event.player.sendMessage(plugin.messages["bank-balance-valid", mapOf(
-                                            Pair("amount", balance.toString()),
-                                            Pair("currency", if (balance == 1) currency.nameSingular else currency.namePlural)
-                                    )])
                                 }
                             }
                         }

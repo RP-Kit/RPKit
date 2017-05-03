@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -36,7 +36,7 @@ class InventoryCloseListener(private val plugin: RPKEconomyBukkit): Listener {
         if (event.inventory.title.toLowerCase().contains("wallet")) {
             val bukkitPlayer = event.player
             if (bukkitPlayer is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
                 val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
@@ -48,14 +48,16 @@ class InventoryCloseListener(private val plugin: RPKEconomyBukkit): Listener {
                                         && item.type === currency.material
                                         && item.hasItemMeta()
                                         && item.itemMeta.hasDisplayName()
-                                        && item.itemMeta.displayName.equals(currency.nameSingular)
+                                        && item.itemMeta.displayName == currency.nameSingular
                             }
                             .map { item -> item.amount }
                             .sum()
-                    val player = playerProvider.getPlayer(bukkitPlayer)
-                    val character = characterProvider.getActiveCharacter(player)
-                    if (character != null) {
-                        economyProvider.setBalance(character, currency, amount)
+                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+                    if (minecraftProfile != null) {
+                        val character = characterProvider.getActiveCharacter(minecraftProfile)
+                        if (character != null) {
+                            economyProvider.setBalance(character, currency, amount)
+                        }
                     }
                 }
             }
