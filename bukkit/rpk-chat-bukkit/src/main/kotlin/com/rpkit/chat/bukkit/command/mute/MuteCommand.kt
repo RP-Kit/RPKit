@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.command.mute
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,23 +33,27 @@ class MuteCommand(private val plugin: RPKChatBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender is Player) {
             if (args.isNotEmpty()) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                val chatChannel = chatChannelProvider.getChatChannel(args[0])
-                if (chatChannel != null) {
-                    if (sender.hasPermission("rpkit.chat.command.mute.${chatChannel.name}")) {
-                        chatChannel.removeListener(player)
-                        sender.sendMessage(plugin.messages["mute-valid", mapOf(
-                                Pair("channel", chatChannel.name)
-                        )])
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val chatChannel = chatChannelProvider.getChatChannel(args[0])
+                    if (chatChannel != null) {
+                        if (sender.hasPermission("rpkit.chat.command.mute.${chatChannel.name}")) {
+                            chatChannel.removeListener(minecraftProfile)
+                            sender.sendMessage(plugin.messages["mute-valid", mapOf(
+                                    Pair("channel", chatChannel.name)
+                            )])
+                        } else {
+                            sender.sendMessage(plugin.messages["no-permission-mute", mapOf(
+                                    Pair("channel", chatChannel.name)
+                            )])
+                        }
                     } else {
-                        sender.sendMessage(plugin.messages["no-permission-mute", mapOf(
-                                Pair("channel", chatChannel.name)
-                        )])
+                        sender.sendMessage(plugin.messages["mute-invalid-chatchannel"])
                     }
                 } else {
-                    sender.sendMessage(plugin.messages["mute-invalid-chatchannel"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["mute-usage"])

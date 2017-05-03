@@ -18,7 +18,7 @@ package com.rpkit.permissions.bukkit.listener
 
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority.LOWEST
 import org.bukkit.event.Listener
@@ -32,9 +32,11 @@ class PlayerJoinListener(private val plugin: RPKPermissionsBukkit): Listener {
     @EventHandler(priority = LOWEST)
     fun onPlayerJoin(event: PlayerJoinEvent) {
         if (!event.player.isBanned) {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-            val player = playerProvider.getPlayer(event.player)
-            plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class).assignPermissions(player)
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+            if (minecraftProfile != null) {
+                plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class).assignPermissions(minecraftProfile)
+            }
         }
     }
 

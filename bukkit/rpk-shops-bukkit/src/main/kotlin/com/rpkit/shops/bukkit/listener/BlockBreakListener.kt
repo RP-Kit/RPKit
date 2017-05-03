@@ -17,7 +17,7 @@
 package com.rpkit.shops.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.shops.bukkit.RPKShopsBukkit
 import com.rpkit.shops.bukkit.shopcount.RPKShopCountProvider
 import org.bukkit.ChatColor.GREEN
@@ -45,18 +45,22 @@ class BlockBreakListener(val plugin: RPKShopsBukkit): Listener {
         }
         if (sign != null) {
             if (sign.getLine(0) == GREEN.toString() + "[shop]") {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val shopCountProvider = plugin.core.serviceManager.getServiceProvider(RPKShopCountProvider::class)
-                val player = playerProvider.getPlayer(event.player)
-                val character = characterProvider.getActiveCharacter(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+                if (minecraftProfile == null) {
+                    event.isCancelled = true
+                    return
+                }
+                val character = characterProvider.getActiveCharacter(minecraftProfile)
                 val shopCharacter = if (sign.getLine(3)?.equals("admin", ignoreCase = true) ?: false) null else characterProvider.getCharacter(sign.getLine(3).toInt())
                 if (character == null) {
                     event.isCancelled = true
                     return
                 }
                 if (shopCharacter == null) {
-                    event.isCancelled=  true
+                    event.isCancelled = true
                     return
                 }
                 if (shopCharacter.id != character.id) {

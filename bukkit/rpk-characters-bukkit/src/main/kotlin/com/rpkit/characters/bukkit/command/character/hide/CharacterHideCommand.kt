@@ -17,7 +17,6 @@
 package com.rpkit.characters.bukkit.command.character.hide
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -29,6 +28,7 @@ import org.bukkit.command.CommandSender
 class CharacterHideCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
 
     private val characterHidePlayerCommand = CharacterHidePlayerCommand(plugin)
+    private val characterHideProfileCommand = CharacterHideProfileCommand(plugin)
     private val characterHideNameCommand = CharacterHideNameCommand(plugin)
     private val characterHideGenderCommand = CharacterHideGenderCommand(plugin)
     private val characterHideAgeCommand = CharacterHideAgeCommand(plugin)
@@ -36,10 +36,12 @@ class CharacterHideCommand(private val plugin: RPKCharactersBukkit): CommandExec
     private val characterHideDescriptionCommand = CharacterHideDescriptionCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.size > 0) {
+        if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("player", ignoreCase = true)) {
                 return characterHidePlayerCommand.onCommand(sender, command, label, newArgs)
+            } else if (args[0].equals("profile", ignoreCase = true)) {
+                return characterHideProfileCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("name", ignoreCase = true)) {
                 return characterHideNameCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("gender", ignoreCase = true)) {

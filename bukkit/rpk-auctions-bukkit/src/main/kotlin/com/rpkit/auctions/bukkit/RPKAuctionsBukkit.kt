@@ -100,6 +100,7 @@ class RPKAuctionsBukkit: RPKBukkitPlugin() {
         messages.setDefault("auction-sign-invalid-id-not-a-number", "&cPlease write the auction ID on the second line.")
         messages.setDefault("auction-sign-invalid-auction-does-not-exist", "&cThere is no auction with that ID.")
         messages.setDefault("no-character", "&cYou need a character to perform this action.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
         messages.setDefault("not-from-console", "&cYou may not use this command from console.")
         messages.setDefault("operation-cancelled", "&cOperation cancelled.")
         messages.setDefault("no-permission-bid", "&cYou do not have permission to bid.")

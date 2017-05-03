@@ -20,8 +20,7 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterImpl
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -36,19 +35,28 @@ class CharacterNewCommand(private val plugin: RPKCharactersBukkit): CommandExecu
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.new")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val newCharacterCooldownProvider = plugin.core.serviceManager.getServiceProvider(RPKNewCharacterCooldownProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                if (sender.hasPermission("rpkit.characters.command.character.new.nocooldown") || newCharacterCooldownProvider.getNewCharacterCooldown(player) <= 0) {
-                    val character = RPKCharacterImpl(plugin, player = player)
-                    characterProvider.addCharacter(character)
-                    characterProvider.setActiveCharacter(player, character)
-                    newCharacterCooldownProvider.setNewCharacterCooldown(player, plugin.config.getLong("characters.new-character-cooldown"))
-                    sender.sendMessage(plugin.messages["character-new-valid"])
-                    character.showCharacterCard(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val profile = minecraftProfile.profile
+                    if (profile != null) {
+                        if (sender.hasPermission("rpkit.characters.command.character.new.nocooldown") || newCharacterCooldownProvider.getNewCharacterCooldown(profile) <= 0) {
+                            val character = RPKCharacterImpl(plugin, profile = profile)
+                            characterProvider.addCharacter(character)
+                            characterProvider.setActiveCharacter(minecraftProfile, character)
+                            newCharacterCooldownProvider.setNewCharacterCooldown(profile, plugin.config.getLong("characters.new-character-cooldown"))
+                            sender.sendMessage(plugin.messages["character-new-valid"])
+                            character.showCharacterCard(minecraftProfile)
+                        } else {
+                            sender.sendMessage(plugin.messages["character-new-invalid-cooldown"])
+                        }
+                    } else {
+                        sender.sendMessage(plugin.messages["no-profile"])
+                    }
                 } else {
-                    sender.sendMessage(plugin.messages["character-new-invalid-cooldown"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["no-permission-character-new"])

@@ -22,6 +22,8 @@ import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
 import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 
@@ -39,7 +41,23 @@ interface RPKCharacter: Entity {
      * It is important to remember the player may not always be playing the character, so operations like inventory
      * modification should be checked before directly modifying the player's inventory on platforms such as Bukkit.
      */
+    @Deprecated("Old players API. Please move to new profiles APIs.", replaceWith = ReplaceWith("profile"))
     var player: RPKPlayer?
+
+    /**
+     * The profile.
+     * Minecraft profiles associated with this profile may use the character.
+     * Some characters may not have a profile assigned, in which case this will be null.
+     */
+    var profile: RPKProfile?
+
+    /**
+     * The Minecraft profile currently playing this character.
+     * If this is null, no Minecraft account is currently playing this character.
+     * Only one Minecraft profile may play a character at the same time, to avoid conflicts like a player being online
+     * on two accounts.
+     */
+    var minecraftProfile: RPKMinecraftProfile?
 
     /**
      * The name of the character.
@@ -203,6 +221,12 @@ interface RPKCharacter: Entity {
     var isPlayerHidden: Boolean
 
     /**
+     * Whether the profile playing the character is hidden on the character's character card. If the profile is hidden,
+     * it is a good idea to maintain this behaviour in
+     */
+    var isProfileHidden: Boolean
+
+    /**
      * Whether the name of the character is hidden on the character's character card.
      * This may be done when a player wishes to conceal their character's identity, and allows easy hiding/unhiding
      * without having to rewrite the character's name.
@@ -240,6 +264,13 @@ interface RPKCharacter: Entity {
      * Shows the character card to the given player.
      * How this is done may be implementation-dependant, but the most common usage will be to show this in Minecraft.
      */
+    @Deprecated("Old players API. Please move to new profiles API.", ReplaceWith("showCharacterCard(minecraftProfile)"))
     fun showCharacterCard(player: RPKPlayer)
+
+    /**
+     * Shows the character card to the given Minecraft profile.
+     * How this is done may be implementation-dependant.
+     */
+    fun showCharacterCard(minecraftProfile: RPKMinecraftProfile)
 
 }

@@ -68,6 +68,7 @@ class RPKExperienceBukkit: RPKBukkitPlugin() {
         messages.setDefault("experience-add-player-invalid-player", "&cNo player by that name is online.")
         messages.setDefault("experience-add-valid", "&aExperience added.")
         messages.setDefault("no-character-other", "&cThat player does not currently have a character.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
         messages.setDefault("no-permission-experience-set", "&cYou do not have permission to set experience.")
         messages.setDefault("no-permission-experience-setlevel", "&cYou do not have permission to set level.")
         messages.setDefault("no-permission-experience-add", "&cYou do not have permission to add experience.")

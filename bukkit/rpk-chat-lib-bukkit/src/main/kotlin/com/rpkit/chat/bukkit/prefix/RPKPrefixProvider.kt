@@ -18,6 +18,7 @@ package com.rpkit.chat.bukkit.prefix
 
 import com.rpkit.core.service.ServiceProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKProfile
 
 /**
  * Provides prefix related operations.
@@ -36,7 +37,16 @@ interface RPKPrefixProvider: ServiceProvider {
      * @param player The player
      * @return The player's full prefix
      */
+    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("getPrefix(profile)"))
     fun getPrefix(player: RPKPlayer): String
+
+    /**
+     * Constructs a profile's prefix from all of the prefixes they have.
+     *
+     * @param profile The profile
+     * @return The profile's full prefix
+     */
+    fun getPrefix(profile: RPKProfile): String
 
     /**
      * Gets a prefix by name.

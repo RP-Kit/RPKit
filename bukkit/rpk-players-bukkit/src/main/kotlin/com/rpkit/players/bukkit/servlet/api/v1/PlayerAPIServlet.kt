@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletResponse.*
 
 /**
- * Player API v0.4 servlet.
+ * Player API v1 servlet.
  */
 class PlayerAPIServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
 

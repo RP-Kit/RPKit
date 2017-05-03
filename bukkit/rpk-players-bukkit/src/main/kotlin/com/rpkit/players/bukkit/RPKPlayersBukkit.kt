@@ -126,6 +126,8 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
         messages.setDefault("kick-no-profile", "&cYour account is not linked to a profile.\n" +
                 "Please visit the server's web UI and link your Minecraft account with the token:\n" +
                 "\$token")
+        messages.setDefault("no-profile", "&cYour Minecraft profile is not linked to a profile. Please link it on the server's web UI.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
     }
 
 }

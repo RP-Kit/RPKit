@@ -17,16 +17,16 @@
 package com.rpkit.chat.bukkit.chatgroup
 
 import com.rpkit.core.database.Entity
-import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Represents a chat group member
  *
  * @property chatGroup The chat group
- * @property player The player
+ * @property minecraftProfile The Minecraft profile
  */
 class ChatGroupMember(
         override var id: Int = 0,
         val chatGroup: RPKChatGroup,
-        val player: RPKPlayer
+        val minecraftProfile: RPKMinecraftProfile
 ): Entity

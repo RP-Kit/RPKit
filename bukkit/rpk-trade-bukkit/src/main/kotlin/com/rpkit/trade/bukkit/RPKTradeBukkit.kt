@@ -65,6 +65,8 @@ class RPKTradeBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-trader-buy", "&cYou do not have permission to buy from traders.")
         messages.setDefault("no-permission-trader-sell", "&cYou do not have permission to sell to traders.")
         messages.setDefault("no-character", "&cYou need a character to perform that action. Please create one.")
+        messages.setDefault("no-profile", "&cYour Minecraft profile is not linked to a profile. Please link it on the server's web UI.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
     }
 
 }

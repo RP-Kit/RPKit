@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.vault
 
 import com.rpkit.chat.bukkit.RPKChatLibBukkit
 import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.permission.Permission
 
@@ -57,11 +57,17 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit): Chat(plugin.server
     }
 
     override fun getPlayerPrefix(world: String, playerName: String): String {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val prefixProvider = plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        return prefixProvider.getPrefix(player)
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        if (minecraftProfile != null) {
+            val profile = minecraftProfile.profile
+            if (profile != null) {
+                return prefixProvider.getPrefix(profile)
+            }
+        }
+        return ""
     }
 
     override fun setGroupPrefix(world: String, group: String, prefix: String) {

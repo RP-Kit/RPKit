@@ -19,7 +19,7 @@ package com.rpkit.payments.bukkit.listener
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -31,15 +31,17 @@ class PlayerJoinListener(private val plugin: RPKPaymentsBukkit): Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
-        val player = playerProvider.getPlayer(event.player)
-        val character = characterProvider.getActiveCharacter(player)
-        if (character != null) {
-            paymentNotificationProvider.getPaymentNotificationsFor(character).forEach { notification ->
-                event.player.sendMessage(notification.text)
-                paymentNotificationProvider.removePaymentNotification(notification)
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            if (character != null) {
+                paymentNotificationProvider.getPaymentNotificationsFor(character).forEach { notification ->
+                    event.player.sendMessage(notification.text)
+                    paymentNotificationProvider.removePaymentNotification(notification)
+                }
             }
         }
     }

@@ -19,8 +19,8 @@ package com.rpkit.chat.bukkit.listener
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
 import com.rpkit.chat.bukkit.snooper.RPKSnooperProvider
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
@@ -42,15 +42,24 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit): Listen
         if (chatChannel != null) {
             if (event.player.hasPermission("rpkit.chat.command.chatchannel.${chatChannel.name}")) {
                 event.isCancelled = true
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-                val player = playerProvider.getPlayer(event.player)
-                if (event.message.startsWith("/$chatChannelName ")) {
-                    chatChannel.sendMessage(player, event.message.split(Regex("\\s+")).drop(1).joinToString(" "))
-                } else if (event.message.startsWith("/$chatChannelName")) {
-                    chatChannel.addSpeaker(player)
-                    event.player.sendMessage(plugin.messages["chatchannel-valid", mapOf(
-                            Pair("channel", chatChannel.name)
-                    )])
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+                if (minecraftProfile != null) {
+                    val profile = minecraftProfile.profile
+                    if (profile != null) {
+                        if (event.message.startsWith("/$chatChannelName ")) {
+                            chatChannel.sendMessage(profile, minecraftProfile, event.message.split(Regex("\\s+")).drop(1).joinToString(" "))
+                        } else if (event.message.startsWith("/$chatChannelName")) {
+                            chatChannel.addSpeaker(minecraftProfile)
+                            event.player.sendMessage(plugin.messages["chatchannel-valid", mapOf(
+                                    Pair("channel", chatChannel.name)
+                            )])
+                        }
+                    } else {
+                        event.player.sendMessage(plugin.messages["no-profile"])
+                    }
+                } else {
+                    event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 event.isCancelled = true
@@ -62,12 +71,9 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit): Listen
 
         // Snooping
         val snooperProvider = plugin.core.serviceManager.getServiceProvider(RPKSnooperProvider::class)
-        snooperProvider.snoopers
-                .map(RPKPlayer::bukkitPlayer)
-                .filterNotNull()
-                .filter { bukkitPlayer -> bukkitPlayer.isOnline }
-                .map { bukkitPlayer -> bukkitPlayer.player }
-                .forEach { bukkitPlayer -> bukkitPlayer.sendMessage(plugin.messages["command-snoop", mapOf(
+        snooperProvider.snooperMinecraftProfiles
+                .filter(RPKMinecraftProfile::isOnline)
+                .forEach { minecraftProfile -> minecraftProfile.sendMessage(plugin.messages["command-snoop", mapOf(
                         Pair("sender-player", event.player.name),
                         Pair("command", event.message)
                 )]) }

@@ -28,6 +28,7 @@ import org.bukkit.command.CommandSender
 class CharacterUnhideCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
 
     private val characterUnhidePlayerCommand = CharacterUnhidePlayerCommand(plugin)
+    private val characterUnhideProfileCommand = CharacterUnhideProfileCommand(plugin)
     private val characterUnhideNameCommand = CharacterUnhideNameCommand(plugin)
     private val characterUnhideGenderCommand = CharacterUnhideGenderCommand(plugin)
     private val characterUnhideAgeCommand = CharacterUnhideAgeCommand(plugin)
@@ -39,6 +40,8 @@ class CharacterUnhideCommand(private val plugin: RPKCharactersBukkit): CommandEx
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("player", ignoreCase = true)) {
                 return characterUnhidePlayerCommand.onCommand(sender, command, label, newArgs)
+            } else if (args[0].equals("profile", ignoreCase = true)) {
+                return characterUnhideProfileCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("name", ignoreCase = true)) {
                 return characterUnhideNameCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("gender", ignoreCase = true)) {

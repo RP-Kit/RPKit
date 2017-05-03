@@ -67,7 +67,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                     Pair("group", group.name),
                                                     Pair("date", dateFormat.format(Date(now)))
                                             )]
-                                            if (!(member.player?.bukkitPlayer?.isOnline?:false)) { // If offline
+                                            if (!(member.minecraftProfile?.isOnline?:false)) { // If offline
                                                 paymentNotificationProvider.addPaymentNotification(
                                                         RPKPaymentNotificationImpl(
                                                                 group = group,
@@ -78,7 +78,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                         )
                                                 )
                                             } else { // If online
-                                                member.player?.bukkitPlayer?.player?.sendMessage(notificationMessage)
+                                                member.minecraftProfile?.sendMessage(notificationMessage)
                                             }
                                             val ownerNotificationMessage = messages["payment-notification-owner-fail-to-pay", mapOf(
                                                     Pair("member", member.name),
@@ -86,7 +86,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                     Pair("date", dateFormat.format(Date(now)))
                                             )]
                                             group.owners.forEach { owner ->
-                                                if (!(owner.player?.bukkitPlayer?.isOnline?:false)) {
+                                                if (!(owner.minecraftProfile?.isOnline?:false)) {
                                                     paymentNotificationProvider.addPaymentNotification(
                                                             RPKPaymentNotificationImpl(
                                                                     group = group,
@@ -97,7 +97,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                             )
                                                     )
                                                 } else {
-                                                    owner.player?.bukkitPlayer?.player?.sendMessage(ownerNotificationMessage)
+                                                    owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
                                                 }
                                             }
                                         }
@@ -113,7 +113,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                     Pair("group", group.name),
                                                     Pair("date", dateFormat.format(Date(now)))
                                             )]
-                                            if (!(member.player?.bukkitPlayer?.isOnline?:false)) { // If offline
+                                            if (!(member.minecraftProfile?.isOnline?:false)) { // If offline
                                                 paymentNotificationProvider.addPaymentNotification(
                                                         RPKPaymentNotificationImpl(
                                                                 group = group,
@@ -124,7 +124,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                         )
                                                 )
                                             } else { // If online
-                                                member.player?.bukkitPlayer?.player?.sendMessage(notificationMessage)
+                                                member.minecraftProfile?.sendMessage(notificationMessage)
                                             }
                                             // Send notification to owners
                                             val ownerNotificationMessage = messages["payment-notification-owner-fail-to-be-paid", mapOf(
@@ -133,7 +133,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                     Pair("date", dateFormat.format(Date(now)))
                                             )]
                                             group.owners.forEach { owner ->
-                                                if (!(owner.player?.bukkitPlayer?.isOnline?:false)) { // If offline
+                                                if (!(owner.minecraftProfile?.isOnline?:false)) { // If offline
                                                     paymentNotificationProvider.addPaymentNotification(
                                                             RPKPaymentNotificationImpl(
                                                                     group = group,
@@ -144,7 +144,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                             )
                                                     )
                                                 } else { // If online
-                                                    owner.player?.bukkitPlayer?.player?.sendMessage(ownerNotificationMessage)
+                                                    owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
                                                 }
                                             }
                                         }
@@ -276,6 +276,8 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
         messages.setDefault("payment-notification-member-leave", "&a\$member left payment group \"\$group\" on \$date.")
         messages.setDefault("payment-notification-invite", "&aYou were invited to join payment group \"\$group\" on \$date.")
         messages.setDefault("payment-notification-kick", "&cYou were kicked from payment group \"\$group\" on \$date.")
+        messages.setDefault("no-profile", "&cYour Minecraft profile is not linked to a profile. Please link it on the server's web UI.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
         messages.setDefault("no-permission-payment-set-amount", "&cYou do not have permission to set payment group amounts.")
         messages.setDefault("no-permission-payment-set-currency", "&cYou do not have permission to set payment group currencies.")
         messages.setDefault("no-permission-payment-set-interval", "&cYou do not have permission to set payment group intervals.")

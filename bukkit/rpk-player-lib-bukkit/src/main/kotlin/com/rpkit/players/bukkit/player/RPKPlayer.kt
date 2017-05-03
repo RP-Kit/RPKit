@@ -23,7 +23,7 @@ import org.bukkit.OfflinePlayer
  * Represents a player
  */
 @Deprecated("Old players API. Please move to new profiles APIs.",
-        replaceWith = ReplaceWith("RPKProfile", "com.rpkit.players.bukkit.profile.RPKProfile"))
+        replaceWith = ReplaceWith("RPKMinecraftProfile", "com.rpkit.players.bukkit.profile.RPKMinecraftProfile"))
 interface RPKPlayer: Entity {
 
     /**

@@ -17,16 +17,16 @@
 package com.rpkit.chat.bukkit.chatgroup
 
 import com.rpkit.core.database.Entity
-import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Represents the last used chat group of a player.
  *
- * @property player The player
- * @property chatGroup The player's last used chat group
+ * @property minecraftProfile The Minecraft profile
+ * @property chatGroup The Minecraft profile's last used chat group
  */
 class LastUsedChatGroup(
         override var id: Int = 0,
-        val player: RPKPlayer,
+        val minecraftProfile: RPKMinecraftProfile,
         var chatGroup: RPKChatGroup
 ): Entity

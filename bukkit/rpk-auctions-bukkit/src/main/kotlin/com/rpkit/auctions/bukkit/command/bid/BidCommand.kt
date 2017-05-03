@@ -20,9 +20,11 @@ import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
 import com.rpkit.auctions.bukkit.auction.RPKAuctionProvider
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
+import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -42,73 +44,75 @@ class BidCommand(private val plugin: RPKAuctionsBukkit): CommandExecutor {
                         val id = args[0].toInt()
                         try {
                             val bidAmount = args[1].toInt()
-                            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                             val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
                             val auctionProvider = plugin.core.serviceManager.getServiceProvider(RPKAuctionProvider::class)
-                            val player = playerProvider.getPlayer(sender)
-                            val character = characterProvider.getActiveCharacter(player)
-                            if (character != null) {
-                                val auction = auctionProvider.getAuction(id)
-                                if (auction != null) {
-                                    if (System.currentTimeMillis() >= auction.endTime) {
-                                        auction.closeBidding()
-                                    }
-                                    if (auction.isBiddingOpen) {
-                                        if (bidAmount < economyProvider.getBalance(character, auction.currency)) {
-                                            if (bidAmount >= (auction.bids.sortedByDescending { bid -> bid.amount }.firstOrNull()?.amount?:auction.startPrice) + auction.minimumBidIncrement) {
-                                                val radius = plugin.config.getInt("auctions.radius")
-                                                if (radius < 0 || sender.location.distanceSquared(auction.location) <= radius * radius) {
-                                                    val bid = RPKBidImpl(
-                                                            auction = auction,
-                                                            character = character,
-                                                            amount = bidAmount
-                                                    )
-                                                    auction.addBid(bid)
-                                                    auctionProvider.updateAuction(auction)
-                                                    sender.sendMessage(plugin.messages["bid-valid", mapOf(
-                                                            Pair("amount", bid.amount.toString()),
-                                                            Pair("currency", if (bid.amount == 1) auction.currency.nameSingular else auction.currency.namePlural),
-                                                            Pair("item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else "")
-                                                    )])
-                                                    auction.bids
-                                                            .map(RPKBid::character)
-                                                            .toSet()
-                                                            .filter { character -> character != bid.character }
-                                                            .filter { character -> character.player != null }
-                                                            .map { character -> character.player!! }
-                                                            .filter { player -> player.bukkitPlayer != null }
-                                                            .map { player -> player.bukkitPlayer!! }
-                                                            .filter { bukkitPlayer -> bukkitPlayer.isOnline }
-                                                            .map { bukkitPlayer -> bukkitPlayer.player }
-                                                            .forEach { player ->
-                                                                player.sendMessage(plugin.messages["bid-created", mapOf(
-                                                                        Pair("auction_id", bid.auction.id.toString()),
-                                                                        Pair("character", bid.character.name),
-                                                                        Pair("amount", bid.amount.toString()),
-                                                                        Pair("currency", if (bid.amount == 1) auction.currency.nameSingular else auction.currency.namePlural),
-                                                                        Pair("item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else "")
-                                                                )])
-                                                            }
+                            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                            if (minecraftProfile != null) {
+                                val character = characterProvider.getActiveCharacter(minecraftProfile)
+                                if (character != null) {
+                                    val auction = auctionProvider.getAuction(id)
+                                    if (auction != null) {
+                                        if (System.currentTimeMillis() >= auction.endTime) {
+                                            auction.closeBidding()
+                                        }
+                                        if (auction.isBiddingOpen) {
+                                            if (bidAmount < economyProvider.getBalance(character, auction.currency)) {
+                                                if (bidAmount >= (auction.bids.sortedByDescending { bid -> bid.amount }.firstOrNull()?.amount ?: auction.startPrice) + auction.minimumBidIncrement) {
+                                                    val radius = plugin.config.getInt("auctions.radius")
+                                                    if (radius < 0 || sender.location.distanceSquared(auction.location) <= radius * radius) {
+                                                        val bid = RPKBidImpl(
+                                                                auction = auction,
+                                                                character = character,
+                                                                amount = bidAmount
+                                                        )
+                                                        auction.addBid(bid)
+                                                        auctionProvider.updateAuction(auction)
+                                                        sender.sendMessage(plugin.messages["bid-valid", mapOf(
+                                                                Pair("amount", bid.amount.toString()),
+                                                                Pair("currency", if (bid.amount == 1) auction.currency.nameSingular else auction.currency.namePlural),
+                                                                Pair("item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else "")
+                                                        )])
+                                                        auction.bids
+                                                                .map(RPKBid::character)
+                                                                .toSet()
+                                                                .filter { character -> character != bid.character }
+                                                                .map(RPKCharacter::minecraftProfile)
+                                                                .filterNotNull()
+                                                                .map { minecraftProfile -> Bukkit.getPlayer(minecraftProfile.minecraftUUID) }
+                                                                .filterNotNull()
+                                                                .forEach { player ->
+                                                                    player.sendMessage(plugin.messages["bid-created", mapOf(
+                                                                            Pair("auction_id", bid.auction.id.toString()),
+                                                                            Pair("character", bid.character.name),
+                                                                            Pair("amount", bid.amount.toString()),
+                                                                            Pair("currency", if (bid.amount == 1) auction.currency.nameSingular else auction.currency.namePlural),
+                                                                            Pair("item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else "")
+                                                                    )])
+                                                                }
+                                                    } else {
+                                                        sender.sendMessage(plugin.messages["bid-invalid-too-far-away"])
+                                                    }
                                                 } else {
-                                                    sender.sendMessage(plugin.messages["bid-invalid-too-far-away"])
+                                                    sender.sendMessage(plugin.messages["bid-invalid-not-high-enough", mapOf(
+                                                            Pair("amount", ((auction.bids.sortedByDescending(RPKBid::amount).firstOrNull()?.amount ?: auction.startPrice) + auction.minimumBidIncrement).toString())
+                                                    )])
                                                 }
                                             } else {
-                                                sender.sendMessage(plugin.messages["bid-invalid-not-high-enough", mapOf(
-                                                        Pair("amount", ((auction.bids.sortedByDescending(RPKBid::amount).firstOrNull()?.amount?:auction.startPrice) + auction.minimumBidIncrement).toString())
-                                                )])
+                                                sender.sendMessage(plugin.messages["bid-invalid-not-enough-money"])
                                             }
                                         } else {
-                                            sender.sendMessage(plugin.messages["bid-invalid-not-enough-money"])
+                                            sender.sendMessage(plugin.messages["bid-invalid-auction-not-open"])
                                         }
                                     } else {
-                                        sender.sendMessage(plugin.messages["bid-invalid-auction-not-open"])
+                                        sender.sendMessage(plugin.messages["bid-invalid-auction-not-existent"])
                                     }
                                 } else {
-                                    sender.sendMessage(plugin.messages["bid-invalid-auction-not-existent"])
+                                    sender.sendMessage(plugin.messages["no-character"])
                                 }
                             } else {
-                                sender.sendMessage(plugin.messages["no-character"])
+                                sender.sendMessage(plugin.messages["no-minecraft-profile"])
                             }
                         } catch (exception: NumberFormatException) {
                             sender.sendMessage(plugin.messages["bid-invalid-amount-not-a-number"])

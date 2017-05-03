@@ -37,9 +37,14 @@ class DirectedFormatComponent(private val plugin: RPKChatBukkit, val formatStrin
     override fun process(context: DirectedChatChannelMessageContext): DirectedChatChannelMessageContext {
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val prefixProvider = plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class)
-        val sender = context.sender
-        val receiver = context.receiver
-        val senderCharacter = characterProvider.getActiveCharacter(sender)
+        val senderProfile = context.senderProfile
+        val senderMinecraftProfile = context.senderMinecraftProfile
+        val receiver = context.receiverMinecraftProfile
+        val receiverProfile = receiver.profile
+        val senderCharacter = if (senderMinecraftProfile != null)
+            characterProvider.getActiveCharacter(senderMinecraftProfile)
+        else
+            null
         val receiverCharacter = characterProvider.getActiveCharacter(receiver)
         val chatChannel = context.chatChannel
         var formattedMessage = ChatColor.translateAlternateColorCodes('&', formatString)
@@ -47,10 +52,10 @@ class DirectedFormatComponent(private val plugin: RPKChatBukkit, val formatStrin
             formattedMessage = formattedMessage.replace("\$message", context.message)
         }
         if (formattedMessage.contains("\$sender-prefix")) {
-            formattedMessage = formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(sender))
+            formattedMessage = formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(senderProfile))
         }
         if (formattedMessage.contains("\$sender-player")) {
-            formattedMessage = formattedMessage.replace("\$sender-player", sender.name)
+            formattedMessage = formattedMessage.replace("\$sender-player", senderProfile.name)
         }
         if (formattedMessage.contains("\$sender-character")) {
             if (senderCharacter != null) {
@@ -60,10 +65,18 @@ class DirectedFormatComponent(private val plugin: RPKChatBukkit, val formatStrin
             }
         }
         if (formattedMessage.contains("\$receiver-prefix")) {
-            formattedMessage = formattedMessage.replace("\$receiver-prefix", prefixProvider.getPrefix(receiver))
+            if (receiverProfile != null) {
+                formattedMessage = formattedMessage.replace("\$receiver-prefix", prefixProvider.getPrefix(receiverProfile))
+            } else {
+                context.isCancelled = true
+            }
         }
         if (formattedMessage.contains("\$receiver-player")) {
-            formattedMessage = formattedMessage.replace("\$receiver-player", receiver.name)
+            if (receiverProfile != null) {
+                formattedMessage = formattedMessage.replace("\$receiver-player", receiverProfile.name)
+            } else {
+                context.isCancelled = true
+            }
         }
         if (formattedMessage.contains("\$receiver-character")) {
             if (receiverCharacter != null) {

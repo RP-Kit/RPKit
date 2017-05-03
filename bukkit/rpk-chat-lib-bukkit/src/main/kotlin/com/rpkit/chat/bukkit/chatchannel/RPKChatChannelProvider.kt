@@ -18,6 +18,7 @@ package com.rpkit.chat.bukkit.chatchannel
 
 import com.rpkit.core.service.ServiceProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Provides chat channel related operations.
@@ -78,6 +79,7 @@ interface RPKChatChannelProvider: ServiceProvider {
      * @return The chat channel the player is currently speaking in, or null if the player is not currently speaking in
      *         a channel.
      */
+    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("getMinecraftProfileChannel"))
     fun getPlayerChannel(player: RPKPlayer): RPKChatChannel?
 
     /**
@@ -86,7 +88,24 @@ interface RPKChatChannelProvider: ServiceProvider {
      * @param player The player
      * @param channel The channel to set
      */
+    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("setMinecraftProfileChannel"))
     fun setPlayerChannel(player: RPKPlayer, channel: RPKChatChannel)
+
+    /**
+     * Gets the chat channel a Minecraft profile is currently speaking in.
+     * If the Minecraft profile is not currently speaking in a channel, null is returned.
+     *
+     * @param minecraftProfile The Minecraft profile
+     */
+    fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel?
+
+    /**
+     * Sets the chat channel a Minecraft profile is currently speaking in.
+     *
+     * @param minecraftProfile The Minecraft profile
+     * @param channel The channel to set
+     */
+    fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?)
 
     /**
      * Gets a chat channel from the IRC channel it is linked to.

@@ -21,6 +21,8 @@ import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.chat.bukkit.database.table.RPKChatChannelSpeakerTable
 import com.rpkit.core.service.ServiceProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 
 /**
  * Provides chat channel speaker related operations.
@@ -34,8 +36,28 @@ class RPKChatChannelSpeakerProvider(private val plugin: RPKChatBukkit): ServiceP
      * @param player The player
      * @return The chat channel, or null if the player is not currently speaking
      */
+    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("getMinecraftProfileChannel"))
     fun getPlayerChannel(player: RPKPlayer): RPKChatChannel? {
-        return plugin.core.database.getTable(RPKChatChannelSpeakerTable::class).get(player)?.chatChannel
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                return getMinecraftProfileChannel(minecraftProfile)
+            }
+        }
+        return null
+    }
+
+    /**
+     * Gets which channel a Minecraft profile is speaking in.
+     * If the Minecraft profile is not currently speaking in a channel, null is returned
+     *
+     * @param minecraftProfile The Minecraft profile
+     * @return The chat channel, or null if the Minecraft profile is not currently speaking
+     */
+    fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel? {
+        return plugin.core.database.getTable(RPKChatChannelSpeakerTable::class).get(minecraftProfile)?.chatChannel
     }
 
     /**
@@ -44,15 +66,39 @@ class RPKChatChannelSpeakerProvider(private val plugin: RPKChatBukkit): ServiceP
      * @param player The player
      * @param chatChannel The chat channel to set
      */
+    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("setMinecraftProfileChannel"))
     fun setPlayerChannel(player: RPKPlayer, chatChannel: RPKChatChannel) {
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                setMinecraftProfileChannel(minecraftProfile, chatChannel)
+            }
+        }
+    }
+
+    /**
+     * Sets which channel a Minecraft profile is speaking in.
+     *
+     * @param minecraftProfile The Minecraft profile
+     * @param chatChannel The chat channel to set
+     */
+    fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel?) {
         val table = plugin.core.database.getTable(RPKChatChannelSpeakerTable::class)
-        var chatChannelSpeaker = table.get(player)
+        var chatChannelSpeaker = table.get(minecraftProfile)
         if (chatChannelSpeaker == null) {
-            chatChannelSpeaker = RPKChatChannelSpeaker(player = player, chatChannel = chatChannel)
-            table.insert(chatChannelSpeaker)
+            if (chatChannel != null) {
+                chatChannelSpeaker = RPKChatChannelSpeaker(minecraftProfile = minecraftProfile, chatChannel = chatChannel)
+                table.insert(chatChannelSpeaker)
+            }
         } else {
-            chatChannelSpeaker.chatChannel = chatChannel
-            table.update(chatChannelSpeaker)
+            if (chatChannel == null) {
+                table.delete(chatChannelSpeaker)
+            } else {
+                chatChannelSpeaker.chatChannel = chatChannel
+                table.update(chatChannelSpeaker)
+            }
         }
     }
 
@@ -61,9 +107,26 @@ class RPKChatChannelSpeakerProvider(private val plugin: RPKChatBukkit): ServiceP
      *
      * @param player The player to stop speaking
      */
+    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("removeMinecraftProfileChannel"))
     fun removePlayerChannel(player: RPKPlayer) {
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                removeMinecraftProfileChannel(minecraftProfile)
+            }
+        }
+    }
+
+    /**
+     * Stops a Minecraft profile speaking in any channels.
+     *
+     * @param minecraftProfile The Minecraft profile to stop speaking
+     */
+    fun removeMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile) {
         val table = plugin.core.database.getTable(RPKChatChannelSpeakerTable::class)
-        val chatChannelSpeaker = table.get(player)
+        val chatChannelSpeaker = table.get(minecraftProfile)
         if (chatChannelSpeaker != null) {
             table.delete(chatChannelSpeaker)
         }
