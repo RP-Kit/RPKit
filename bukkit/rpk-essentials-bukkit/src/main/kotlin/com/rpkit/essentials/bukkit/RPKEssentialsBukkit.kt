@@ -123,7 +123,7 @@ class RPKEssentialsBukkit: RPKBukkitPlugin() {
         messages.setDefault("item-valid-singular", "&aCreated a \$type.")
         messages.setDefault("item-invalid-material", "&cCould not find a material by that name.")
         messages.setDefault("item-usage", "&cUsage: /item [type] [amount]")
-        messages.setDefault("item-meta-set-name-valid", "&aSet item display name to $name.")
+        messages.setDefault("item-meta-set-name-valid", "&aSet item display name to \$name.")
         messages.setDefault("item-meta-add-lore-valid", "&aAdded lore: \"\$lore&a\".")
         messages.setDefault("item-meta-remove-lore-valid", "&cRemoved lore: \"\$lore&a\".")
         messages.setDefault("item-meta-remove-lore-invalid-lore-item", "&cThat item does not have that piece of lore.")
