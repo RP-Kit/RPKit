@@ -18,9 +18,6 @@ package com.rpkit.characters.bukkit.race
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.table.RPKRaceTable
-import com.rpkit.core.database.use
-import java.sql.SQLException
-import java.util.*
 
 /**
  * Race provider implementation.

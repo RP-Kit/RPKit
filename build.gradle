@@ -79,7 +79,7 @@ project(":rpk-core") {
         compile group: "com.google.guava", name: "guava", version: guavaVersion
         compile group: "com.google.code.gson", name: "gson", version: gsonVersion
         compile group: "org.ehcache", name: "ehcache", version: ehcacheVersion
-        compile group: "org.jetbrains.kotlin", name: "kotlin-stdlib", version: kotlinVersion
+        compile group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jre8", version: kotlinVersion
         compile group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: kotlinVersion
         compile group: "org.slf4j", name: "slf4j-jdk14", version: slf4jVersion
         compile group: "org.pircbotx", name: "pircbotx", version: pircBotXVersion

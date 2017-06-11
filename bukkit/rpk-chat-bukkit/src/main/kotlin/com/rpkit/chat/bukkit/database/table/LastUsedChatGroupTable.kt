@@ -22,7 +22,6 @@ import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
 import com.rpkit.chat.bukkit.database.jooq.rpkit.Tables.LAST_USED_CHAT_GROUP
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
