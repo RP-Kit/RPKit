@@ -20,6 +20,7 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterImpl
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownProvider
+import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -36,14 +37,16 @@ class CharacterNewCommand(private val plugin: RPKCharactersBukkit): CommandExecu
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.new")) {
                 val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val newCharacterCooldownProvider = plugin.core.serviceManager.getServiceProvider(RPKNewCharacterCooldownProvider::class)
                 val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                val player = playerProvider.getPlayer(sender)
                 if (minecraftProfile != null) {
                     val profile = minecraftProfile.profile
                     if (profile != null) {
                         if (sender.hasPermission("rpkit.characters.command.character.new.nocooldown") || newCharacterCooldownProvider.getNewCharacterCooldown(profile) <= 0) {
-                            val character = RPKCharacterImpl(plugin, profile = profile)
+                            val character = RPKCharacterImpl(plugin, player = player, profile = profile)
                             characterProvider.addCharacter(character)
                             characterProvider.setActiveCharacter(minecraftProfile, character)
                             newCharacterCooldownProvider.setNewCharacterCooldown(profile, plugin.config.getLong("characters.new-character-cooldown"))

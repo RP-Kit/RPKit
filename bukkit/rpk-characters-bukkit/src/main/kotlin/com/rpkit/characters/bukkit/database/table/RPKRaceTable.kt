@@ -16,52 +16,43 @@
 
 package com.rpkit.characters.bukkit.database.table
 
+import com.rpkit.characters.bukkit.database.jooq.rpkit.Tables.RPKIT_RACE
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceImpl
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.SQLException
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the race table.
  */
-class RPKRaceTable: Table<RPKRace> {
+class RPKRaceTable(database: Database): Table<RPKRace>(database, RPKRace::class) {
 
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, RPKRace>
-    private val nameCache: Cache<String, Int>
-
-    constructor(database: Database): super(database, RPKRace::class.java) {
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKRace::class.java,
-                        ResourcePoolsBuilder.heap(20L)).build())
-        nameCache = cacheManager.createCache("nameCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                        ResourcePoolsBuilder.heap(20L)).build())
-    }
+    private val cacheManager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache: Cache<Int, RPKRace> = cacheManager.createCache("cache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKRace::class.java,
+                    ResourcePoolsBuilder.heap(20L)).build())
+    private val nameCache: Cache<String, Int> = cacheManager.createCache("nameCache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                    ResourcePoolsBuilder.heap(20L)).build())
 
     override fun create() {
-        try {
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "CREATE TABLE IF NOT EXISTS rpkit_race(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "name VARCHAR(256)" +
-                        ")").use { statement ->
-                    statement.executeUpdate()
-                }
-            }
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_RACE)
+                .column(RPKIT_RACE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_RACE.NAME, SQLDataType.VARCHAR(256))
+                .constraints(
+                        constraint("pk_rpkit_race").primaryKey(RPKIT_RACE.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -71,73 +62,61 @@ class RPKRaceTable: Table<RPKRace> {
     }
 
     override fun insert(entity: RPKRace): Int {
-        try {
-            var id = 0
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "INSERT INTO rpkit_race(name) VALUES(?)",
-                        RETURN_GENERATED_KEYS).use { statement ->
-                    statement.setString(1, entity.name)
-                    statement.executeUpdate()
-                    val generatedKeys = statement.generatedKeys
-                    if (generatedKeys.next()) {
-                        id = generatedKeys.getInt(1)
-                        entity.id = id
-                        cache.put(id, entity)
-                        nameCache.put(entity.name, id)
-                    }
-                }
-            }
-            return id
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
-        }
-        return 0
+        database.create
+                .insertInto(
+                        RPKIT_RACE,
+                        RPKIT_RACE.NAME
+                )
+                .values(
+                        entity.name
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        cache.put(id, entity)
+        nameCache.put(entity.name, id)
+        return id
     }
 
     override fun update(entity: RPKRace) {
-        try {
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "UPDATE rpkit_race SET name = ? WHERE id = ?").use { statement ->
-                    statement.setString(1, entity.name)
-                    statement.setInt(2, entity.id)
-                    statement.executeUpdate()
-                    cache.put(entity.id, entity)
-                    nameCache.put(entity.name, entity.id)
-                }
-            }
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
-        }
+        database.create
+                .update(RPKIT_RACE)
+                .set(RPKIT_RACE.NAME, entity.name)
+                .where(RPKIT_RACE.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
+        nameCache.put(entity.name, entity.id)
     }
 
     override fun get(id: Int): RPKRace? {
         if (cache.containsKey(id)) {
-            return cache.get(id)
+            return cache[id]
         } else {
-            try {
-                var race: RPKRace? = null
-                database.createConnection().use { connection ->
-                    connection.prepareStatement(
-                            "SELECT id, name FROM rpkit_race WHERE id = ?").use { statement ->
-                        statement.setInt(1, id)
-                        val resultSet = statement.executeQuery()
-                        if (resultSet.next()) {
-                            val id1 = resultSet.getInt("id")
-                            val name = resultSet.getString("name")
-                            race = RPKRaceImpl(id1, name)
-                            cache.put(id, race)
-                            nameCache.put(name, id1)
-                        }
-                    }
-                }
-                return race
-            } catch (exception: SQLException) {
-                exception.printStackTrace()
-            }
+            val result = database.create
+                    .select(
+                            RPKIT_RACE.NAME
+                    )
+                    .from(
+                            RPKIT_RACE
+                    )
+                    .where(RPKIT_RACE.ID.eq(id))
+                    .fetchOne() ?: return null
+            val race = RPKRaceImpl(
+                    id,
+                    result.get(RPKIT_RACE.NAME)
+            )
+            cache.put(id, race)
+            nameCache.put(race.name, id)
+            return race
         }
-        return null
+    }
+
+    fun getAll(): List<RPKRace> {
+        val results = database.create
+                .select(RPKIT_RACE.ID)
+                .from(RPKIT_RACE)
+                .fetch()
+        return results.map { result -> get(result.get(RPKIT_RACE.ID)) }
+                .filterNotNull()
     }
 
     /**
@@ -151,44 +130,28 @@ class RPKRaceTable: Table<RPKRace> {
         if (nameCache.containsKey(name)) {
             return get(nameCache.get(name) as Int)
         } else {
-            try {
-                var race: RPKRace? = null
-                database.createConnection().use { connection ->
-                    connection.prepareStatement(
-                            "SELECT id, name FROM rpkit_race WHERE name = ?").use { statement ->
-                        statement.setString(1, name)
-                        val resultSet = statement.executeQuery()
-                        if (resultSet.next()) {
-                            val id = resultSet.getInt("id")
-                            val name1 = resultSet.getString("name")
-                            race = RPKRaceImpl(id, name1)
-                            cache.put(id, race)
-                            nameCache.put(name1, id)
-                        }
-                    }
-                }
-                return race
-            } catch (exception: SQLException) {
-                exception.printStackTrace()
-            }
+            val result = database.create
+                    .select(RPKIT_RACE.ID)
+                    .from(RPKIT_RACE)
+                    .where(RPKIT_RACE.NAME.eq(name))
+                    .fetchOne() ?: return null
+            val race = RPKRaceImpl(
+                    result.get(RPKIT_RACE.ID),
+                    name
+            )
+            cache.put(race.id, race)
+            nameCache.put(name, race.id)
+            return race
         }
-        return null
     }
 
     override fun delete(entity: RPKRace) {
-        try {
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "DELETE FROM rpkit_race WHERE id = ?").use { statement ->
-                    statement.setInt(1, entity.id)
-                    statement.executeUpdate()
-                    cache.remove(entity.id)
-                    nameCache.remove(entity.name)
-                }
-            }
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
-        }
+        database.create
+                .deleteFrom(RPKIT_RACE)
+                .where(RPKIT_RACE.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
+        nameCache.remove(entity.name)
     }
 
 }

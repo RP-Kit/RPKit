@@ -19,46 +19,42 @@ package com.rpkit.payments.bukkit.database.table
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
+import com.rpkit.payments.bukkit.database.jooq.rpkit.Tables.RPKIT_PAYMENT_GROUP_INVITE
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.group.invite.RPKPaymentGroupInvite
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.PreparedStatement
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents payment group invite table.
  */
 class RPKPaymentGroupInviteTable(
-        database: com.rpkit.core.database.Database,
-        private val plugin: com.rpkit.payments.bukkit.RPKPaymentsBukkit
-): com.rpkit.core.database.Table<com.rpkit.payments.bukkit.group.invite.RPKPaymentGroupInvite>(database, com.rpkit.payments.bukkit.group.invite.RPKPaymentGroupInvite::class) {
+        database: Database,
+        private val plugin: RPKPaymentsBukkit
+): Table<RPKPaymentGroupInvite>(database, RPKPaymentGroupInvite::class) {
 
-    private val cacheManager: org.ehcache.CacheManager
-    private val cache: org.ehcache.Cache<Int, com.rpkit.payments.bukkit.group.invite.RPKPaymentGroupInvite>
-
-    init {
-        cacheManager = org.ehcache.config.builders.CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", org.ehcache.config.builders.CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, com.rpkit.payments.bukkit.group.invite.RPKPaymentGroupInvite::class.java,
-                        org.ehcache.config.builders.ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong() * 20)))
-    }
+    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroupInvite::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong() * 20)))
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_payment_group_invite(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "payment_group_id INTEGER," +
-                            "character_id INTEGER" +
-                            ")"
-            ).use(java.sql.PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_PAYMENT_GROUP_INVITE)
+                .column(RPKIT_PAYMENT_GROUP_INVITE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID, SQLDataType.INTEGER)
+                .column(RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_rpkit_payment_group_invite").primaryKey(RPKIT_PAYMENT_GROUP_INVITE.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -68,93 +64,81 @@ class RPKPaymentGroupInviteTable(
     }
 
     override fun insert(entity: RPKPaymentGroupInvite): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_payment_group_invite(payment_group_id, character_id) VALUES(?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.paymentGroup.id)
-                statement.setInt(2, entity.character.id)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_PAYMENT_GROUP_INVITE,
+                        RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID,
+                        RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID
+                )
+                .values(
+                        entity.paymentGroup.id,
+                        entity.character.id
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKPaymentGroupInvite) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_payment_group_invite SET" +
-                            "payment_group_id = ?, " +
-                            "character_id = ? " +
-                            "WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.paymentGroup.id)
-                statement.setInt(2, entity.character.id)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(RPKIT_PAYMENT_GROUP_INVITE)
+                .set(RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID, entity.paymentGroup.id)
+                .set(RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID, entity.character.id)
+                .where(RPKIT_PAYMENT_GROUP_INVITE.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKPaymentGroupInvite? {
-        var paymentGroupInvite: RPKPaymentGroupInvite? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, payment_group_id, character_id FROM rpkit_payment_group_invite WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    val paymentGroupTable = plugin.core.database.getTable(RPKPaymentGroupTable::class)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val finalPaymentGroupInvite = RPKPaymentGroupInvite(
-                            resultSet.getInt("id"),
-                            paymentGroupTable[resultSet.getInt("payment_group_id")]!!,
-                            characterProvider.getCharacter(resultSet.getInt("character_id"))!!
-                    )
-                    cache.put(id, finalPaymentGroupInvite)
-                    paymentGroupInvite = finalPaymentGroupInvite
-                }
-            }
+        val result = database.create
+                .select(
+                        RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID,
+                        RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID
+                )
+                .from(RPKIT_PAYMENT_GROUP_INVITE)
+                .where(RPKIT_PAYMENT_GROUP_INVITE.ID.eq(id))
+                .fetchOne() ?: return null
+        val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
+        val paymentGroupId = result.get(RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID)
+        val paymentGroup = paymentGroupProvider.getPaymentGroup(paymentGroupId)
+        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+        val characterId = result.get(RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID)
+        val character = characterProvider.getCharacter(characterId)
+        if (paymentGroup != null && character != null) {
+            val paymentGroupInvite = RPKPaymentGroupInvite(
+                    id,
+                    paymentGroup,
+                    character
+            )
+            return paymentGroupInvite
+        } else {
+            database.create
+                    .deleteFrom(RPKIT_PAYMENT_GROUP_INVITE)
+                    .where(RPKIT_PAYMENT_GROUP_INVITE.ID.eq(id))
+                    .execute()
+            return null
         }
-        return paymentGroupInvite
     }
 
     fun get(paymentGroup: RPKPaymentGroup): List<RPKPaymentGroupInvite> {
-        val paymentGroupInvites = mutableListOf<RPKPaymentGroupInvite>()
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_payment_group_invite WHERE payment_group_id = ?"
-            ).use { statement ->
-                statement.setInt(1, paymentGroup.id)
-                val resultSet = statement.executeQuery()
-                while (resultSet.next()) {
-                    paymentGroupInvites.add(get(resultSet.getInt("id"))!!)
-                }
-            }
-        }
-        return paymentGroupInvites
+        val results = database.create
+                .select(RPKIT_PAYMENT_GROUP_INVITE.ID)
+                .from(RPKIT_PAYMENT_GROUP_INVITE)
+                .where(RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID.eq(paymentGroup.id))
+                .fetch()
+        return results
+                .map { result -> get(result.get(RPKIT_PAYMENT_GROUP_INVITE.ID)) }
+                .filterNotNull()
     }
 
     override fun delete(entity: RPKPaymentGroupInvite) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_payment_group_invite WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_PAYMENT_GROUP_INVITE)
+                .where(RPKIT_PAYMENT_GROUP_INVITE.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 }

@@ -2,8 +2,8 @@ package com.rpkit.permissions.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
+import com.rpkit.permissions.bukkit.database.jooq.rpkit.Tables.RPKIT_PROFILE_GROUP
 import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.permissions.bukkit.group.RPKProfileGroup
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -11,8 +11,10 @@ import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.PreparedStatement
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKProfileGroupTable(database: Database, private val plugin: RPKPermissionsBukkit): Table<RPKProfileGroup>(database, RPKProfileGroup::class) {
@@ -23,15 +25,15 @@ class RPKProfileGroupTable(database: Database, private val plugin: RPKPermission
                     ResourcePoolsBuilder.heap(20L)))
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_profile_group(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "profile_id INTEGER," +
-                            "group_name VARCHAR(256)" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_PROFILE_GROUP)
+                .column(RPKIT_PROFILE_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PROFILE_GROUP.PROFILE_ID, SQLDataType.INTEGER)
+                .column(RPKIT_PROFILE_GROUP.GROUP_NAME, SQLDataType.VARCHAR(256))
+                .constraints(
+                        constraint("pk_rpkit_profile_group").primaryKey(RPKIT_PROFILE_GROUP.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -41,108 +43,85 @@ class RPKProfileGroupTable(database: Database, private val plugin: RPKPermission
     }
 
     override fun insert(entity: RPKProfileGroup): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_profile_group(profile_id, group_name) VALUES(?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.profile.id)
-                statement.setString(2, entity.group.name)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_PROFILE_GROUP,
+                        RPKIT_PROFILE_GROUP.PROFILE_ID,
+                        RPKIT_PROFILE_GROUP.GROUP_NAME
+                )
+                .values(
+                        entity.profile.id,
+                        entity.group.name
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKProfileGroup) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_profile_group SET profile_id = ?, group_name = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.profile.id)
-                statement.setString(2, entity.group.name)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(RPKIT_PROFILE_GROUP)
+                .set(RPKIT_PROFILE_GROUP.PROFILE_ID, entity.profile.id)
+                .set(RPKIT_PROFILE_GROUP.GROUP_NAME, entity.group.name)
+                .where(RPKIT_PROFILE_GROUP.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKProfileGroup? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var profileGroup: RPKProfileGroup? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, profile_id, group_name FROM rpkit_profile_group WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-                        val profile = profileProvider.getProfile(resultSet.getInt("profile_id"))
-                        val groupProvider = plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class)
-                        val group = groupProvider.getGroup(resultSet.getString("group_name"))
-                        if (profile != null && group != null) {
-                            profileGroup = RPKProfileGroup(
-                                    resultSet.getInt("id"),
-                                    profile,
-                                    group
-                            )
-                            cache.put(id, profileGroup)
-                        } else {
-                            connection.prepareStatement(
-                                    "DELETE FROM rpkit_profile_group WHERE id = ?"
-                            ).use { statement ->
-                                statement.setInt(1, resultSet.getInt("id"))
-                                statement.executeUpdate()
-                                cache.remove(resultSet.getInt("id"))
-                            }
-                        }
-                    }
-                }
+            val result = database.create
+                    .select(
+                            RPKIT_PROFILE_GROUP.PROFILE_ID,
+                            RPKIT_PROFILE_GROUP.GROUP_NAME
+                    )
+                    .from(RPKIT_PROFILE_GROUP)
+                    .where(RPKIT_PROFILE_GROUP.ID.eq(id))
+                    .fetchOne() ?: return null
+            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
+            val profileId = result.get(RPKIT_PROFILE_GROUP.PROFILE_ID)
+            val profile = profileProvider.getProfile(profileId)
+            val groupProvider = plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class)
+            val groupName = result.get(RPKIT_PROFILE_GROUP.GROUP_NAME)
+            val group = groupProvider.getGroup(groupName)
+            if (profile != null && group != null) {
+                val profileGroup = RPKProfileGroup(
+                        id,
+                        profile,
+                        group
+                )
+                cache.put(id, profileGroup)
+                return profileGroup
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_PROFILE_GROUP)
+                        .where(RPKIT_PROFILE_GROUP.ID.eq(id))
+                        .execute()
+                return null
             }
-            return profileGroup
         }
     }
 
     fun get(profile: RPKProfile): List<RPKProfileGroup> {
-        val profileGroups = mutableListOf<RPKProfileGroup>()
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_profile_group WHERE profile_id = ?"
-            ).use { statement ->
-                statement.setInt(1, profile.id)
-                val resultSet = statement.executeQuery()
-                while (resultSet.next()) {
-                    val profileGroup = get(resultSet.getInt("id"))
-                    if (profileGroup != null) {
-                        profileGroups.add(profileGroup)
-                    }
-                }
-            }
-        }
-        return profileGroups
+        val results = database.create
+                .select(RPKIT_PROFILE_GROUP.ID)
+                .from(RPKIT_PROFILE_GROUP)
+                .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profile.id))
+                .fetch()
+        return results.map { result -> get(result.get(RPKIT_PROFILE_GROUP.ID)) }
+                .filterNotNull()
     }
 
     override fun delete(entity: RPKProfileGroup) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_profile_group WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_PROFILE_GROUP)
+                .where(RPKIT_PROFILE_GROUP.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 }

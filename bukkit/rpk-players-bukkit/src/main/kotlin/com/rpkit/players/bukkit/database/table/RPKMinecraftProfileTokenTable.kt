@@ -2,8 +2,8 @@ package com.rpkit.players.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.players.bukkit.RPKPlayersBukkit
+import com.rpkit.players.bukkit.database.jooq.rpkit.Tables.RPKIT_MINECRAFT_PROFILE_TOKEN
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileToken
@@ -11,8 +11,10 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfileTokenImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.PreparedStatement
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKMinecraftProfileToken>(database, RPKMinecraftProfileToken::class) {
@@ -23,15 +25,15 @@ class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKP
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_minecraft_profile_token(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "minecraft_profile_id INTEGER," +
-                            "token VARCHAR(36)" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_MINECRAFT_PROFILE_TOKEN)
+                .column(RPKIT_MINECRAFT_PROFILE_TOKEN.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_MINECRAFT_PROFILE_TOKEN.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                .column(RPKIT_MINECRAFT_PROFILE_TOKEN.TOKEN, SQLDataType.VARCHAR(36))
+                .constraints(
+                        constraint("pk_rpkit_minecraft_profile_token").primaryKey(RPKIT_MINECRAFT_PROFILE_TOKEN.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -41,105 +43,81 @@ class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKP
     }
 
     override fun insert(entity: RPKMinecraftProfileToken): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_minecraft_profile_token(minecraft_profile_id, token) VALUES(?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.minecraftProfile.id)
-                statement.setString(2, entity.token)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_MINECRAFT_PROFILE_TOKEN,
+                        RPKIT_MINECRAFT_PROFILE_TOKEN.MINECRAFT_PROFILE_ID,
+                        RPKIT_MINECRAFT_PROFILE_TOKEN.TOKEN
+                )
+                .values(
+                        entity.minecraftProfile.id,
+                        entity.token
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKMinecraftProfileToken) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_minecraft_profile_token SET minecraft_profile_id = ?, token = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.minecraftProfile.id)
-                statement.setString(2, entity.token)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(RPKIT_MINECRAFT_PROFILE_TOKEN)
+                .set(RPKIT_MINECRAFT_PROFILE_TOKEN.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
+                .set(RPKIT_MINECRAFT_PROFILE_TOKEN.TOKEN, entity.token)
+                .where(RPKIT_MINECRAFT_PROFILE_TOKEN.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKMinecraftProfileToken? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var minecraftProfileToken: RPKMinecraftProfileToken? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, minecraft_profile_id, token FROM rpkit_minecraft_profile_token WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val minecraftProfileId = resultSet.getInt("minecraft_profile_id")
-                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
-                        if (minecraftProfile != null) {
-                            val finalMinecraftProfileToken = RPKMinecraftProfileTokenImpl(
-                                    resultSet.getInt("id"),
-                                    minecraftProfile,
-                                    resultSet.getString("token")
-                            )
-                            cache.put(finalMinecraftProfileToken.id, finalMinecraftProfileToken)
-                            minecraftProfileToken = finalMinecraftProfileToken
-                        } else {
-                            connection.prepareStatement(
-                                    "DELETE FROM rpkit_minecraft_profile_token WHERE id = ?"
-                            ).use { statement ->
-                                statement.setInt(1, id)
-                                statement.executeUpdate()
-                                cache.remove(id)
-                            }
-                        }
-                    }
-                }
+            val result = database.create
+                    .select(
+                            RPKIT_MINECRAFT_PROFILE_TOKEN.MINECRAFT_PROFILE_ID,
+                            RPKIT_MINECRAFT_PROFILE_TOKEN.TOKEN
+                    )
+                    .from(RPKIT_MINECRAFT_PROFILE_TOKEN)
+                    .where(RPKIT_MINECRAFT_PROFILE_TOKEN.ID.eq(id))
+                    .fetchOne() ?: return null
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfileId = result.get(RPKIT_MINECRAFT_PROFILE_TOKEN.MINECRAFT_PROFILE_ID)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
+            if (minecraftProfile != null) {
+                val minecraftProfileToken = RPKMinecraftProfileTokenImpl(
+                        id,
+                        minecraftProfile,
+                        result.get(RPKIT_MINECRAFT_PROFILE_TOKEN.TOKEN)
+                )
+                cache.put(id, minecraftProfileToken)
+                return minecraftProfileToken
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_MINECRAFT_PROFILE_TOKEN)
+                        .where(RPKIT_MINECRAFT_PROFILE_TOKEN.ID.eq(id))
+                        .execute()
+                return null
             }
-            return minecraftProfileToken
         }
     }
 
     fun get(profile: RPKMinecraftProfile): RPKMinecraftProfileToken? {
-        var minecraftProfileToken: RPKMinecraftProfileToken? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_minecraft_profile_token WHERE minecraft_profile_id = ?"
-            ).use { statement ->
-                statement.setInt(1, profile.id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    minecraftProfileToken = get(resultSet.getInt("id"))
-                }
-            }
-        }
-        return minecraftProfileToken
+        val result = database.create
+                .select(RPKIT_MINECRAFT_PROFILE_TOKEN.ID)
+                .from(RPKIT_MINECRAFT_PROFILE_TOKEN)
+                .where(RPKIT_MINECRAFT_PROFILE_TOKEN.MINECRAFT_PROFILE_ID.eq(profile.id))
+                .fetchOne() ?: return null
+        return get(result.get(RPKIT_MINECRAFT_PROFILE_TOKEN.ID))
     }
 
     override fun delete(entity: RPKMinecraftProfileToken) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_minecraft_profile_token WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_MINECRAFT_PROFILE_TOKEN)
+                .where(RPKIT_MINECRAFT_PROFILE_TOKEN.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 }

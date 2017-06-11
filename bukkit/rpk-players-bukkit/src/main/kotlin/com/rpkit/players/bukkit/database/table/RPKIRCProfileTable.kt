@@ -2,8 +2,8 @@ package com.rpkit.players.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.players.bukkit.RPKPlayersBukkit
+import com.rpkit.players.bukkit.database.jooq.rpkit.Tables.RPKIT_IRC_PROFILE
 import com.rpkit.players.bukkit.profile.RPKIRCProfile
 import com.rpkit.players.bukkit.profile.RPKIRCProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -11,9 +11,11 @@ import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 import org.pircbotx.User
-import java.sql.PreparedStatement
-import java.sql.Statement.RETURN_GENERATED_KEYS
 
 
 class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKIRCProfile>(database, RPKIRCProfile::class) {
@@ -24,15 +26,15 @@ class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukki
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_irc_profile(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "profile_id INTEGER," +
-                            "nick VARCHAR(256)" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_IRC_PROFILE)
+                .column(RPKIT_IRC_PROFILE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_IRC_PROFILE.PROFILE_ID, SQLDataType.INTEGER)
+                .column(RPKIT_IRC_PROFILE.NICK, SQLDataType.VARCHAR(256))
+                .constraints(
+                        constraint("pk_rpkit_irc_profile").primaryKey(RPKIT_IRC_PROFILE.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -42,116 +44,93 @@ class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukki
     }
 
     override fun insert(entity: RPKIRCProfile): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_irc_profile(profile_id, nick) VALUES(?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.profile.id)
-                statement.setString(2, entity.nick)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_IRC_PROFILE,
+                        RPKIT_IRC_PROFILE.PROFILE_ID,
+                        RPKIT_IRC_PROFILE.NICK
+                )
+                .values(
+                        entity.profile.id,
+                        entity.nick
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKIRCProfile) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_irc_profile SET profile_id = ?, nick = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.profile.id)
-                statement.setString(2, entity.nick)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(RPKIT_IRC_PROFILE)
+                .set(RPKIT_IRC_PROFILE.PROFILE_ID, entity.profile.id)
+                .set(RPKIT_IRC_PROFILE.NICK, entity.nick)
+                .where(RPKIT_IRC_PROFILE.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKIRCProfile? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var ircProfile: RPKIRCProfile? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, profile_id, nick FROM rpkit_irc_profile WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val profileId = resultSet.getInt("profile_id")
-                        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-                        val profile = profileProvider.getProfile(profileId)
-                        if (profile != null) {
-                            val finalIrcProfile = RPKIRCProfileImpl(
-                                    resultSet.getInt("id"),
-                                    profile,
-                                    resultSet.getString("nick")
-                            )
-                            cache.put(finalIrcProfile.id, finalIrcProfile)
-                            ircProfile = finalIrcProfile
-                        }
-                    }
-                }
+            val result = database.create
+                    .select(
+                            RPKIT_IRC_PROFILE.PROFILE_ID,
+                            RPKIT_IRC_PROFILE.NICK
+                    )
+                    .from(RPKIT_IRC_PROFILE)
+                    .where(RPKIT_IRC_PROFILE.ID.eq(id))
+                    .fetchOne() ?: return null
+            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
+            val profileId = result.get(RPKIT_IRC_PROFILE.PROFILE_ID)
+            val profile = profileProvider.getProfile(profileId)
+            if (profile != null) {
+                val ircProfile = RPKIRCProfileImpl(
+                        id,
+                        profile,
+                        result.get(RPKIT_IRC_PROFILE.NICK)
+                )
+                cache.put(id, ircProfile)
+                return ircProfile
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_IRC_PROFILE)
+                        .where(RPKIT_IRC_PROFILE.ID.eq(id))
+                        .execute()
+                return null
             }
-            return ircProfile
         }
     }
 
     fun get(profile: RPKProfile): List<RPKIRCProfile> {
-        val ircProfiles = mutableListOf<RPKIRCProfile>()
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_irc_profile WHERE profile_id = ?"
-            ).use { statement ->
-                statement.setInt(1, profile.id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    val ircProfile = get(resultSet.getInt("id"))
-                    if (ircProfile != null) {
-                        ircProfiles.add(ircProfile)
-                    }
-                }
-            }
-        }
+        val results = database.create
+                .select(RPKIT_IRC_PROFILE.ID)
+                .from(RPKIT_IRC_PROFILE)
+                .where(RPKIT_IRC_PROFILE.PROFILE_ID.eq(profile.id))
+                .fetch()
+        val ircProfiles = results.map { result ->
+            get(result.get(RPKIT_IRC_PROFILE.ID))
+        }.filterNotNull()
         return ircProfiles
     }
 
     fun get(user: User): RPKIRCProfile? {
-        var ircProfile: RPKIRCProfile? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_irc_profile WHERE nick = ?"
-            ).use { statement ->
-                statement.setString(1, user.nick)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    ircProfile = get(resultSet.getInt("id"))
-                }
-            }
-        }
-        return ircProfile
+        val result = database.create
+                .select(RPKIT_IRC_PROFILE.ID)
+                .from(RPKIT_IRC_PROFILE)
+                .where(RPKIT_IRC_PROFILE.NICK.eq(user.nick))
+                .fetchOne() ?: return null
+        return get(result.get(RPKIT_IRC_PROFILE.ID))
     }
 
     override fun delete(entity: RPKIRCProfile) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_irc_profile WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_IRC_PROFILE)
+                .where(RPKIT_IRC_PROFILE.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 }

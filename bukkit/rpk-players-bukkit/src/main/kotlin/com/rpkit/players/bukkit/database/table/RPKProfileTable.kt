@@ -2,15 +2,17 @@ package com.rpkit.players.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.players.bukkit.RPKPlayersBukkit
+import com.rpkit.players.bukkit.database.jooq.rpkit.Tables.RPKIT_PROFILE
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.PreparedStatement
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKProfile>(database, RPKProfile::class) {
@@ -21,16 +23,17 @@ class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit):
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_profile(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "name VARCHAR(16) UNIQUE," +
-                            "password_hash BLOB," +
-                            "password_salt BLOB" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_PROFILE)
+                .column(RPKIT_PROFILE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PROFILE.NAME, SQLDataType.VARCHAR(16))
+                .column(RPKIT_PROFILE.PASSWORD_HASH, SQLDataType.BLOB)
+                .column(RPKIT_PROFILE.PASSWORD_SALT, SQLDataType.BLOB)
+                .constraints(
+                        constraint("pk_rpkit_profile").primaryKey(RPKIT_PROFILE.ID),
+                        constraint("uk_rpkit_profile_name").unique(RPKIT_PROFILE.NAME)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -40,95 +43,75 @@ class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit):
     }
 
     override fun insert(entity: RPKProfile): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_profile(name, password_hash, password_salt) VALUES(?, ?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setString(1, entity.name)
-                statement.setBytes(2, entity.passwordHash)
-                statement.setBytes(3, entity.passwordSalt)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_PROFILE,
+                        RPKIT_PROFILE.NAME,
+                        RPKIT_PROFILE.PASSWORD_HASH,
+                        RPKIT_PROFILE.PASSWORD_SALT
+                )
+                .values(
+                        entity.name,
+                        entity.passwordHash,
+                        entity.passwordSalt
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKProfile) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_profile SET name = ?, password_hash = ?, password_salt = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setString(1, entity.name)
-                statement.setBytes(2, entity.passwordHash)
-                statement.setBytes(3, entity.passwordSalt)
-                statement.setInt(4, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(RPKIT_PROFILE)
+                .set(RPKIT_PROFILE.NAME, entity.name)
+                .set(RPKIT_PROFILE.PASSWORD_HASH, entity.passwordHash)
+                .set(RPKIT_PROFILE.PASSWORD_SALT, entity.passwordSalt)
+                .where(RPKIT_PROFILE.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKProfile? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var profile: RPKProfile? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, name, password_hash, password_salt FROM rpkit_profile WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val finalProfile = RPKProfileImpl(
-                                resultSet.getInt("id"),
-                                resultSet.getString("name"),
-                                resultSet.getBytes("password_hash"),
-                                resultSet.getBytes("password_salt")
-                        )
-                        cache.put(finalProfile.id, finalProfile)
-                        profile = finalProfile
-                    }
-                }
-            }
+            val result = database.create
+                    .select(
+                            RPKIT_PROFILE.NAME,
+                            RPKIT_PROFILE.PASSWORD_HASH,
+                            RPKIT_PROFILE.PASSWORD_SALT
+                    )
+                    .from(RPKIT_PROFILE)
+                    .where(RPKIT_PROFILE.ID.eq(id))
+                    .fetchOne() ?: return null
+            val profile = RPKProfileImpl(
+                    id,
+                    result.get(RPKIT_PROFILE.NAME),
+                    result.get(RPKIT_PROFILE.PASSWORD_HASH),
+                    result.get(RPKIT_PROFILE.PASSWORD_SALT)
+            )
+            cache.put(id, profile)
             return profile
         }
     }
 
     fun get(name: String): RPKProfile? {
-        var profile: RPKProfile? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_profile WHERE name = ?"
-            ).use { statement ->
-                statement.setString(1, name)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    profile = get(resultSet.getInt("id"))
-                }
-            }
-        }
-        return profile
+        val result = database.create
+                .select(RPKIT_PROFILE.ID)
+                .from(RPKIT_PROFILE)
+                .where(RPKIT_PROFILE.NAME.eq(name))
+                .fetchOne() ?: return null
+        return get(result.get(RPKIT_PROFILE.ID))
     }
 
     override fun delete(entity: RPKProfile) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_profile WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_PROFILE)
+                .where(RPKIT_PROFILE.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 }

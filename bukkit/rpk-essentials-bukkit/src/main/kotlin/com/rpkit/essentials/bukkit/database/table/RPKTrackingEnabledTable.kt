@@ -4,24 +4,27 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
+import com.rpkit.essentials.bukkit.database.jooq.rpkit.Tables.RPKIT_TRACKING_ENABLED
 import com.rpkit.essentials.bukkit.tracking.RPKTrackingEnabled
-import java.sql.PreparedStatement
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKTrackingEnabledTable(database: Database, private val plugin: RPKEssentialsBukkit): Table<RPKTrackingEnabled>(database, RPKTrackingEnabled::class) {
+
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_tracking_enabled(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "character_id INTEGER," +
-                            "enabled BOOLEAN" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_TRACKING_ENABLED)
+                .column(RPKIT_TRACKING_ENABLED.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_TRACKING_ENABLED.CHARACTER_ID, SQLDataType.INTEGER)
+                .column(RPKIT_TRACKING_ENABLED.ENABLED, SQLDataType.TINYINT.length(1))
+                .constraints(
+                        constraint("pk_rpkit_tracking_enabled").primaryKey(RPKIT_TRACKING_ENABLED.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -31,86 +34,72 @@ class RPKTrackingEnabledTable(database: Database, private val plugin: RPKEssenti
     }
 
     override fun insert(entity: RPKTrackingEnabled): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_tracking_enabled(character_id, enabled) VALUES(?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.character.id)
-                statement.setBoolean(2, entity.enabled)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_TRACKING_ENABLED,
+                        RPKIT_TRACKING_ENABLED.CHARACTER_ID,
+                        RPKIT_TRACKING_ENABLED.ENABLED
+                )
+                .values(
+                        entity.character.id,
+                        if (entity.enabled) 1.toByte() else 0.toByte()
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
         return id
     }
 
     override fun update(entity: RPKTrackingEnabled) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_tracking_enabled SET character_id = ?, enabled = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.character.id)
-                statement.setBoolean(2, entity.enabled)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .update(RPKIT_TRACKING_ENABLED)
+                .set(RPKIT_TRACKING_ENABLED.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_TRACKING_ENABLED.ENABLED, if (entity.enabled) 1.toByte() else 0.toByte())
+                .where(RPKIT_TRACKING_ENABLED.ID.eq(entity.id))
+                .execute()
     }
 
     override fun get(id: Int): RPKTrackingEnabled? {
-        var trackingEnabled: RPKTrackingEnabled? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, character_id, enabled FROM rpkit_tracking_enabled WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    trackingEnabled = RPKTrackingEnabled(
-                            resultSet.getInt("id"),
-                            plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getCharacter(resultSet.getInt("character_id"))!!,
-                            resultSet.getBoolean("enabled")
-                    )
-                }
-            }
+        val result = database.create
+                .select(
+                        RPKIT_TRACKING_ENABLED.CHARACTER_ID,
+                        RPKIT_TRACKING_ENABLED.ENABLED
+                )
+                .from(RPKIT_TRACKING_ENABLED)
+                .where(RPKIT_TRACKING_ENABLED.ID.eq(id))
+                .fetchOne() ?: return null
+        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+        val characterId = result.get(RPKIT_TRACKING_ENABLED.CHARACTER_ID)
+        val character = characterProvider.getCharacter(characterId)
+        if (character != null) {
+            val trackingEnabled = RPKTrackingEnabled(
+                    id,
+                    character,
+                    result.get(RPKIT_TRACKING_ENABLED.ENABLED) == 1.toByte()
+            )
+            return trackingEnabled
+        } else {
+            database.create
+                    .deleteFrom(RPKIT_TRACKING_ENABLED)
+                    .where(RPKIT_TRACKING_ENABLED.ID.eq(id))
+                    .execute()
+            return null
         }
-        return trackingEnabled
     }
 
     fun get(character: RPKCharacter): RPKTrackingEnabled? {
-        var trackingEnabled: RPKTrackingEnabled? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, character_id, enabled FROM rpkit_tracking_enabled WHERE character_id = ?"
-            ).use { statement ->
-                statement.setInt(1, character.id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    trackingEnabled = RPKTrackingEnabled(
-                            resultSet.getInt("id"),
-                            plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getCharacter(resultSet.getInt("character_id"))!!,
-                            resultSet.getBoolean("enabled")
-                    )
-                }
-            }
-        }
-        return trackingEnabled
+        val result = database.create
+                .select(RPKIT_TRACKING_ENABLED.ID)
+                .from(RPKIT_TRACKING_ENABLED)
+                .where(RPKIT_TRACKING_ENABLED.CHARACTER_ID.eq(character.id))
+                .fetchOne()
+        return get(result.get(RPKIT_TRACKING_ENABLED.ID))
     }
 
     override fun delete(entity: RPKTrackingEnabled) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_tracking_enabled WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_TRACKING_ENABLED)
+                .where(RPKIT_TRACKING_ENABLED.ID.eq(entity.id))
+                .execute()
     }
 }

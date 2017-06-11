@@ -2,25 +2,28 @@ package com.rpkit.locks.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.locks.bukkit.RPKLocksBukkit
+import com.rpkit.locks.bukkit.database.jooq.rpkit.Tables.RPKIT_PLAYER_UNCLAIMING
 import com.rpkit.locks.bukkit.lock.RPKPlayerUnclaiming
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import java.sql.PreparedStatement
-import java.sql.Statement
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.DSL.field
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKPlayerUnclaimingTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKPlayerUnclaiming>(database, RPKPlayerUnclaiming::class) {
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_player_unclaiming(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "minecraft_profile_id INTEGER" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_PLAYER_UNCLAIMING)
+                .column(RPKIT_PLAYER_UNCLAIMING.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_rpkit_player_unclaiming").primaryKey(RPKIT_PLAYER_UNCLAIMING.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -28,105 +31,82 @@ class RPKPlayerUnclaimingTable(database: Database, private val plugin: RPKLocksB
             database.setTableVersion(this, "1.3.0")
         }
         if (database.getTableVersion(this) == "1.1.0") {
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "TRUNCATE rpkit_player_unclaiming"
-                ).use(PreparedStatement::executeUpdate)
-                connection.prepareStatement(
-                        "ALTER TABLE rpkit_player_unclaiming " +
-                                "DROP COLUMN player_id," +
-                                "ADD COLUMN minecraft_profile_id INTEGER AFTER id"
-                ).use(PreparedStatement::executeUpdate)
-            }
+            database.create
+                    .truncate(RPKIT_PLAYER_UNCLAIMING)
+                    .execute()
+            database.create
+                    .alterTable(RPKIT_PLAYER_UNCLAIMING)
+                    .dropColumn(field("player_id"))
+                    .execute()
+            database.create
+                    .alterTable(RPKIT_PLAYER_UNCLAIMING)
+                    .addColumn(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                    .execute()
             database.setTableVersion(this, "1.3.0")
         }
     }
 
     override fun insert(entity: RPKPlayerUnclaiming): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_player_unclaiming(minecraft_profile_id) VALUES(?)",
-                    Statement.RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.minecraftProfile.id)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_PLAYER_UNCLAIMING,
+                        RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID
+                )
+                .values(
+                        entity.minecraftProfile.id
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
         return id
     }
 
     override fun update(entity: RPKPlayerUnclaiming) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_player_unclaiming SET minecraft_profile_id = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.minecraftProfile.id)
-                statement.setInt(2, entity.id)
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .update(RPKIT_PLAYER_UNCLAIMING)
+                .set(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
+                .where(RPKIT_PLAYER_UNCLAIMING.ID.eq(entity.id))
+                .execute()
     }
 
     override fun get(id: Int): RPKPlayerUnclaiming? {
-        var minecraftProfileUnclaiming: RPKPlayerUnclaiming? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, minecraft_profile_id FROM rpkit_player_unclaiming WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    val minecraftProfile = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class).getMinecraftProfile(resultSet.getInt("minecraft_profile_id"))
-                    if (minecraftProfile != null) {
-                        minecraftProfileUnclaiming = RPKPlayerUnclaiming(
-                                resultSet.getInt("id"),
-                                minecraftProfile
-                        )
-                    } else {
-                        connection.prepareStatement(
-                                "DELETE FROM rpkit_player_unclaiming"
-                        )
-                    }
-                }
-            }
+        val result = database.create
+                .select(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID)
+                .from(RPKIT_PLAYER_UNCLAIMING)
+                .where(RPKIT_PLAYER_UNCLAIMING.ID.eq(id))
+                .fetchOne() ?: return null
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+        val minecraftProfileId = result.get(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID)
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
+        if (minecraftProfile != null) {
+            val playerUnclaiming = RPKPlayerUnclaiming(
+                    id,
+                    minecraftProfile
+            )
+            return playerUnclaiming
+        } else {
+            database.create
+                    .deleteFrom(RPKIT_PLAYER_UNCLAIMING)
+                    .where(RPKIT_PLAYER_UNCLAIMING.ID.eq(id))
+                    .execute()
+            return null
         }
-        return minecraftProfileUnclaiming
     }
 
     fun get(minecraftProfile: RPKMinecraftProfile): RPKPlayerUnclaiming? {
-        var minecraftProfileUnclaiming: RPKPlayerUnclaiming? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, minecraft_profile_id FROM rpkit_player_unclaiming WHERE minecraft_profile_id = ?"
-            ).use { statement ->
-                statement.setInt(1, minecraftProfile.id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    minecraftProfileUnclaiming = RPKPlayerUnclaiming(
-                            resultSet.getInt("id"),
-                            plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class).getMinecraftProfile(resultSet.getInt("minecraft_profile_id"))!!
-                    )
-                }
-            }
-        }
-        return minecraftProfileUnclaiming
+        val result = database.create
+                .select(RPKIT_PLAYER_UNCLAIMING.ID)
+                .from(RPKIT_PLAYER_UNCLAIMING)
+                .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                .fetchOne() ?: return null
+        return get(result.get(RPKIT_PLAYER_UNCLAIMING.ID))
     }
 
     override fun delete(entity: RPKPlayerUnclaiming) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_player_unclaiming WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_PLAYER_UNCLAIMING)
+                .where(RPKIT_PLAYER_UNCLAIMING.ID.eq(entity.id))
+                .execute()
     }
 
 }
