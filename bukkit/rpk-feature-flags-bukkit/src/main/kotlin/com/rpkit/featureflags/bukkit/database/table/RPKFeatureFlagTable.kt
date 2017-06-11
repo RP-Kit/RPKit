@@ -2,23 +2,27 @@ package com.rpkit.featureflags.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.featureflags.bukkit.RPKFeatureFlagsBukkit
+import com.rpkit.featureflags.bukkit.database.jooq.rpkit.Tables.RPKIT_FEATURE_FLAG
 import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlag
 import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlagImpl
-import java.sql.PreparedStatement
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKFeatureFlagTable(database: Database, private val plugin: RPKFeatureFlagsBukkit): Table<RPKFeatureFlag>(database, RPKFeatureFlag::class) {
     override fun create() {
-        database.createConnection().prepareStatement(
-                "CREATE TABLE IF NOT EXISTS rpkit_feature_flag(" +
-                        "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                        "name VARCHAR(256)," +
-                        "enabled_by_default BOOLEAN" +
-                ")"
-        ).use(PreparedStatement::executeUpdate)
+        database.create
+                .createTableIfNotExists(RPKIT_FEATURE_FLAG)
+                .column(RPKIT_FEATURE_FLAG.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_FEATURE_FLAG.NAME, SQLDataType.VARCHAR(256))
+                .column(RPKIT_FEATURE_FLAG.ENABLED_BY_DEFAULT, SQLDataType.TINYINT.length(1))
+                .constraints(
+                        constraint("pk_rpkit_feature_flag").primaryKey(RPKIT_FEATURE_FLAG.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -28,88 +32,62 @@ class RPKFeatureFlagTable(database: Database, private val plugin: RPKFeatureFlag
     }
 
     override fun insert(entity: RPKFeatureFlag): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_feature_flag(name, enabled_by_default) VALUES(?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setString(1, entity.name)
-                statement.setBoolean(2, entity.isEnabledByDefault)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_FEATURE_FLAG,
+                        RPKIT_FEATURE_FLAG.NAME,
+                        RPKIT_FEATURE_FLAG.ENABLED_BY_DEFAULT
+                )
+                .values(
+                        entity.name,
+                        if (entity.isEnabledByDefault) 1.toByte() else 0.toByte()
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
         return id
     }
 
     override fun update(entity: RPKFeatureFlag) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_feature_flag SET name = ?, enabled_by_default = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setString(1, entity.name)
-                statement.setBoolean(2, entity.isEnabledByDefault)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .update(RPKIT_FEATURE_FLAG)
+                .set(RPKIT_FEATURE_FLAG.NAME, entity.name)
+                .set(RPKIT_FEATURE_FLAG.ENABLED_BY_DEFAULT, if (entity.isEnabledByDefault) 1.toByte() else 0.toByte())
+                .where(RPKIT_FEATURE_FLAG.ID.eq(entity.id))
+                .execute()
     }
 
     override fun get(id: Int): RPKFeatureFlag? {
-        var featureFlag: RPKFeatureFlag? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, name, enabled_by_default FROM rpkit_feature_flag WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    featureFlag = RPKFeatureFlagImpl(
-                            plugin,
-                            resultSet.getInt("id"),
-                            resultSet.getString("name"),
-                            resultSet.getBoolean("enabled_by_default")
-                    )
-                }
-            }
-        }
+        val result = database.create
+                .select(
+                        RPKIT_FEATURE_FLAG.NAME,
+                        RPKIT_FEATURE_FLAG.ENABLED_BY_DEFAULT
+                )
+                .from(RPKIT_FEATURE_FLAG)
+                .where(RPKIT_FEATURE_FLAG.ID.eq(id))
+                .fetchOne() ?: return null
+        val featureFlag = RPKFeatureFlagImpl(
+                plugin,
+                id,
+                result.get(RPKIT_FEATURE_FLAG.NAME),
+                result.get(RPKIT_FEATURE_FLAG.ENABLED_BY_DEFAULT) == 1.toByte()
+        )
         return featureFlag
     }
 
     fun get(name: String): RPKFeatureFlag? {
-        var featureFlag: RPKFeatureFlag? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, name, enabled_by_default FROM rpkit_feature_flag WHERE name = ?"
-            ).use { statement ->
-                statement.setString(1, name)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    featureFlag = RPKFeatureFlagImpl(
-                            plugin,
-                            resultSet.getInt("id"),
-                            resultSet.getString("name"),
-                            resultSet.getBoolean("enabled_by_default")
-                    )
-                }
-            }
-        }
-        return featureFlag
+        val result = database.create
+                .select(RPKIT_FEATURE_FLAG.ID)
+                .from(RPKIT_FEATURE_FLAG)
+                .where(RPKIT_FEATURE_FLAG.NAME.eq(name))
+                .fetchOne() ?: return null
+        return get(result.get(RPKIT_FEATURE_FLAG.ID))
     }
 
     override fun delete(entity: RPKFeatureFlag) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_feature_flag WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_FEATURE_FLAG)
+                .where(RPKIT_FEATURE_FLAG.ID.eq(entity.id))
+                .execute()
     }
 }

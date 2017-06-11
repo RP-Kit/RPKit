@@ -1,7 +1,7 @@
 package com.rpkit.featureflags.bukkit.featureflag
 
 import com.rpkit.featureflags.bukkit.RPKFeatureFlagsBukkit
-import com.rpkit.featureflags.bukkit.database.table.RPKPlayerFeatureFlagTable
+import com.rpkit.featureflags.bukkit.database.table.RPKProfileFeatureFlagTable
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 
@@ -13,19 +13,19 @@ class RPKFeatureFlagImpl(
 ) : RPKFeatureFlag {
 
     override fun isEnabledFor(profile: RPKProfile): Boolean {
-        return plugin.core.database.getTable(RPKPlayerFeatureFlagTable::class).get(profile, this)?.enabled?:isEnabledByDefault
+        return plugin.core.database.getTable(RPKProfileFeatureFlagTable::class).get(profile, this)?.enabled?:isEnabledByDefault
     }
 
     override fun setEnabledFor(profile: RPKProfile, enabled: Boolean) {
-        val playerFeatureFlagTable = plugin.core.database.getTable(RPKPlayerFeatureFlagTable::class)
+        val profileFeatureFlagTable = plugin.core.database.getTable(RPKProfileFeatureFlagTable::class)
         if (isEnabledFor(profile) != enabled) {
-            var playerFeatureFlag = playerFeatureFlagTable.get(profile, this)
+            var playerFeatureFlag = profileFeatureFlagTable.get(profile, this)
             if (playerFeatureFlag == null) {
                 playerFeatureFlag = RPKProfileFeatureFlag(profile = profile, featureFlag = this, enabled = enabled)
-                playerFeatureFlagTable.insert(playerFeatureFlag)
+                profileFeatureFlagTable.insert(playerFeatureFlag)
             } else {
                 playerFeatureFlag.enabled = enabled
-                playerFeatureFlagTable.update(playerFeatureFlag)
+                profileFeatureFlagTable.update(playerFeatureFlag)
             }
         }
     }

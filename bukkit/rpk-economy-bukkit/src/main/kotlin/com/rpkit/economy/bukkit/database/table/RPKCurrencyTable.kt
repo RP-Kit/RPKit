@@ -18,57 +18,46 @@ package com.rpkit.economy.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyImpl
+import com.rpkit.economy.bukkit.database.jooq.rpkit.Tables.RPKIT_CURRENCY
 import org.bukkit.Material
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.Statement.RETURN_GENERATED_KEYS
-import java.util.*
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the currency table.
  */
-class RPKCurrencyTable: Table<RPKCurrency> {
+class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit): Table<RPKCurrency>(database, RPKCurrency::class) {
 
-    private val plugin: RPKEconomyBukkit
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, RPKCurrency>
-    private val nameCache: Cache<String, Int>
-
-    constructor(database: Database, plugin: RPKEconomyBukkit): super(database, RPKCurrency::class.java) {
-        this.plugin = plugin;
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-                .build(true)
-        cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCurrency::class.java,
-                        ResourcePoolsBuilder.heap(5L)).build())
-        nameCache = cacheManager.createCache("nameCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                        ResourcePoolsBuilder.heap(5L)).build())
-    }
+    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache = cacheManager.createCache("cache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCurrency::class.java,
+                    ResourcePoolsBuilder.heap(5L)).build())
+    private val nameCache = cacheManager.createCache("nameCache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                    ResourcePoolsBuilder.heap(5L)).build())
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_currency(" +
-                        "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                        "name VARCHAR(256)," +
-                        "name_singular VARCHAR(256)," +
-                        "name_plural VARCHAR(256)," +
-                        "rate DOUBLE," +
-                        "default_amount INTEGER," +
-                        "material VARCHAR(256)" +
-                    ")"
-            ).use { statement ->
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_CURRENCY)
+                .column(RPKIT_CURRENCY.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_CURRENCY.NAME, SQLDataType.VARCHAR(256))
+                .column(RPKIT_CURRENCY.NAME_SINGULAR, SQLDataType.VARCHAR(256))
+                .column(RPKIT_CURRENCY.NAME_PLURAL, SQLDataType.VARCHAR(256))
+                .column(RPKIT_CURRENCY.RATE, SQLDataType.DOUBLE)
+                .column(RPKIT_CURRENCY.DEFAULT_AMOUNT, SQLDataType.INTEGER)
+                .column(RPKIT_CURRENCY.MATERIAL, SQLDataType.VARCHAR(256))
+                .constraints(
+                        constraint("pk_rpkit_currency").primaryKey(RPKIT_CURRENCY.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -78,79 +67,74 @@ class RPKCurrencyTable: Table<RPKCurrency> {
     }
 
     override fun insert(entity: RPKCurrency): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_currency(name, name_singular, name_plural, rate, default_amount, material) VALUES(?, ?, ?, ?, ?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setString(1, entity.name)
-                statement.setString(2, entity.nameSingular)
-                statement.setString(3, entity.namePlural)
-                statement.setDouble(4, entity.rate)
-                statement.setInt(5, entity.defaultAmount)
-                statement.setString(6, entity.material.name)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                    nameCache.put(entity.name, id)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_CURRENCY,
+                        RPKIT_CURRENCY.NAME,
+                        RPKIT_CURRENCY.NAME_SINGULAR,
+                        RPKIT_CURRENCY.NAME_PLURAL,
+                        RPKIT_CURRENCY.RATE,
+                        RPKIT_CURRENCY.DEFAULT_AMOUNT,
+                        RPKIT_CURRENCY.MATERIAL
+                )
+                .values(
+                        entity.name,
+                        entity.nameSingular,
+                        entity.namePlural,
+                        entity.rate,
+                        entity.defaultAmount,
+                        entity.material.toString()
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
+        nameCache.put(entity.name, id)
         return id
     }
 
     override fun update(entity: RPKCurrency) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_currency SET name = ?, name_singular = ?, name_plural = ?, rate = ?, default_amount = ?, material = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setString(1, entity.name)
-                statement.setString(2, entity.nameSingular)
-                statement.setString(3, entity.namePlural)
-                statement.setDouble(4, entity.rate)
-                statement.setInt(5, entity.defaultAmount)
-                statement.setString(6, entity.material.name)
-                statement.setInt(7, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-                nameCache.put(entity.name, entity.id)
-            }
-        }
+        database.create
+                .update(RPKIT_CURRENCY)
+                .set(RPKIT_CURRENCY.NAME, entity.name)
+                .set(RPKIT_CURRENCY.NAME_SINGULAR, entity.nameSingular)
+                .set(RPKIT_CURRENCY.NAME_PLURAL, entity.namePlural)
+                .set(RPKIT_CURRENCY.RATE, entity.rate)
+                .set(RPKIT_CURRENCY.DEFAULT_AMOUNT, entity.defaultAmount)
+                .set(RPKIT_CURRENCY.MATERIAL, entity.material.toString())
+                .where(RPKIT_CURRENCY.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
+        nameCache.put(entity.name, entity.id)
     }
 
     override fun get(id: Int): RPKCurrency? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var currency: RPKCurrency? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, name, name_singular, name_plural, rate, default_amount, material FROM rpkit_currency WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        currency = RPKCurrencyImpl(
-                                resultSet.getInt("id"),
-                                resultSet.getString("name"),
-                                resultSet.getString("name_singular"),
-                                resultSet.getString("name_plural"),
-                                resultSet.getDouble("rate"),
-                                resultSet.getInt("default_amount"),
-                                Material.getMaterial(resultSet.getString("material"))
-                        )
-                        if (currency != null) {
-                            val finalCurrency = currency!!
-                            cache.put(id, finalCurrency)
-                            nameCache.put(finalCurrency.name, id)
-                        }
-                    }
-                }
-            }
+            val result = database.create
+                    .select(
+                            RPKIT_CURRENCY.NAME,
+                            RPKIT_CURRENCY.NAME_SINGULAR,
+                            RPKIT_CURRENCY.NAME_PLURAL,
+                            RPKIT_CURRENCY.RATE,
+                            RPKIT_CURRENCY.DEFAULT_AMOUNT,
+                            RPKIT_CURRENCY.MATERIAL
+                    )
+                    .from(RPKIT_CURRENCY)
+                    .where(RPKIT_CURRENCY.ID.eq(id))
+                    .fetchOne() ?: return null
+            val currency = RPKCurrencyImpl(
+                    id,
+                    result.get(RPKIT_CURRENCY.NAME),
+                    result.get(RPKIT_CURRENCY.NAME_SINGULAR),
+                    result.get(RPKIT_CURRENCY.NAME_PLURAL),
+                    result.get(RPKIT_CURRENCY.RATE),
+                    result.get(RPKIT_CURRENCY.DEFAULT_AMOUNT),
+                    Material.getMaterial(result.get(RPKIT_CURRENCY.MATERIAL))
+            )
+            cache.put(id, currency)
+            nameCache.put(currency.name, id)
             return currency
         }
     }
@@ -166,30 +150,12 @@ class RPKCurrencyTable: Table<RPKCurrency> {
         if (nameCache.containsKey(name)) {
             return get(nameCache.get(name) as Int)
         } else {
-            var currency: RPKCurrency? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, name, name_singular, name_plural, rate, default_amount, material FROM rpkit_currency WHERE name = ?"
-                ).use { statement ->
-                    statement.setString(1, name)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val finalCurrency = RPKCurrencyImpl(
-                                resultSet.getInt("id"),
-                                resultSet.getString("name"),
-                                resultSet.getString("name_singular"),
-                                resultSet.getString("name_plural"),
-                                resultSet.getDouble("rate"),
-                                resultSet.getInt("default_amount"),
-                                Material.getMaterial(resultSet.getString("material"))
-                        )
-                        currency = finalCurrency
-                        cache.put(finalCurrency.id, finalCurrency)
-                        nameCache.put(finalCurrency.name, finalCurrency.id)
-                    }
-                }
-            }
-            return currency
+            val result = database.create
+                    .select(RPKIT_CURRENCY.ID)
+                    .from(RPKIT_CURRENCY)
+                    .where(RPKIT_CURRENCY.NAME.eq(name))
+                    .fetchOne() ?: return null
+            return get(result.get(RPKIT_CURRENCY.ID))
         }
     }
 
@@ -199,33 +165,21 @@ class RPKCurrencyTable: Table<RPKCurrency> {
      * @return A collection containing all currencies.
      */
     fun getAll(): Collection<RPKCurrency> {
-        val currencies = ArrayList<RPKCurrency>()
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_currency"
-            ).use { statement ->
-                val resultSet = statement.executeQuery()
-                while (resultSet.next()) {
-                    val currency = get(resultSet.getInt("id"))
-                    if (currency != null) currencies.add(currency)
-                }
-            }
-        }
-        return currencies
+        val results = database.create
+                .select(RPKIT_CURRENCY.ID)
+                .from(RPKIT_CURRENCY)
+                .fetch()
+        return results.map { result ->
+            get(result.get(RPKIT_CURRENCY.ID))
+        }.filterNotNull()
     }
 
     override fun delete(entity: RPKCurrency) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_currency WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                if (cache.containsKey(entity.id)) {
-                    cache.remove(entity.id)
-                }
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_CURRENCY)
+                .where(RPKIT_CURRENCY.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 }

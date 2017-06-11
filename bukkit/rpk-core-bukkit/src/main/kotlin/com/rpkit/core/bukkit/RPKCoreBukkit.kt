@@ -30,6 +30,7 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
+import org.jooq.SQLDialect
 import java.sql.SQLException
 
 /**
@@ -48,7 +49,12 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
         webServer.handler = servletContext
         core = RPKCore(
                 logger,
-                Database(config.getString("database.url"), config.getString("database.username"), config.getString("database.password")),
+                Database(
+                        config.getString("database.url"),
+                        config.getString("database.username"),
+                        config.getString("database.password"),
+                        SQLDialect.valueOf(config.getString("database.dialect"))
+                ),
                 Web(webServer, mutableListOf(NavigationLink("Home", "/")))
         )
         try {

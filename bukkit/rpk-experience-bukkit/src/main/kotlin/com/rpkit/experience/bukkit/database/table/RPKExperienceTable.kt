@@ -4,16 +4,18 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.experience.bukkit.RPKExperienceBukkit
+import com.rpkit.experience.bukkit.database.jooq.rpkit.Tables.RPKIT_EXPERIENCE
 import com.rpkit.experience.bukkit.experience.RPKExperienceValue
 import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.PreparedStatement
-import java.sql.Statement
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKExperienceTable(database: Database, private val plugin: RPKExperienceBukkit) : Table<RPKExperienceValue>(database, RPKExperienceValue::class) {
@@ -27,15 +29,15 @@ class RPKExperienceTable(database: Database, private val plugin: RPKExperienceBu
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 2L)).build())
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_experience(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "character_id INTEGER," +
-                            "value INTEGER" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_EXPERIENCE)
+                .column(RPKIT_EXPERIENCE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_EXPERIENCE.CHARACTER_ID, SQLDataType.INTEGER)
+                .column(RPKIT_EXPERIENCE.VALUE, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_rpkit_experience").primaryKey(RPKIT_EXPERIENCE.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -45,39 +47,46 @@ class RPKExperienceTable(database: Database, private val plugin: RPKExperienceBu
     }
 
     override fun delete(entity: RPKExperienceValue) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_experience WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_EXPERIENCE)
+                .where(RPKIT_EXPERIENCE.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
+        characterCache.remove(entity.character.id)
     }
 
     override fun get(id: Int): RPKExperienceValue? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var experienceValue: RPKExperienceValue? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, character_id, value FROM rpkit_experience WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        experienceValue = RPKExperienceValue(
-                                resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class.java).getCharacter(resultSet.getInt("character_id"))!!,
-                                resultSet.getInt("value")
-                        )
-                        cache.put(id, experienceValue)
-                    }
-                }
+            val result = database.create
+                    .select(
+                            RPKIT_EXPERIENCE.CHARACTER_ID,
+                            RPKIT_EXPERIENCE.VALUE
+                    )
+                    .from(RPKIT_EXPERIENCE)
+                    .where(RPKIT_EXPERIENCE.ID.eq(id))
+                    .fetchOne()
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterId = result.get(RPKIT_EXPERIENCE.CHARACTER_ID)
+            val character = characterProvider.getCharacter(characterId)
+            if (character != null) {
+                val experienceValue = RPKExperienceValue(
+                        id,
+                        character,
+                        result.get(RPKIT_EXPERIENCE.VALUE)
+                )
+                cache.put(id, experienceValue)
+                characterCache.put(characterId, experienceValue)
+                return experienceValue
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_EXPERIENCE)
+                        .where(RPKIT_EXPERIENCE.ID.eq(id))
+                        .execute()
+                characterCache.remove(characterId)
+                return null
             }
-            return experienceValue
         }
     }
 
@@ -85,56 +94,43 @@ class RPKExperienceTable(database: Database, private val plugin: RPKExperienceBu
         if (characterCache.containsKey(character.id)) {
             return characterCache.get(character.id)
         } else {
-            var experienceValue: RPKExperienceValue? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id FROM rpkit_experience WHERE character_id = ?"
-                ).use { statement ->
-                    statement.setInt(1, character.id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        experienceValue = get(resultSet.getInt("id"))
-                        characterCache.put(character.id, experienceValue)
-                    }
-                }
-            }
-            return experienceValue
+            val result = database.create
+                    .select(RPKIT_EXPERIENCE.ID)
+                    .from(RPKIT_EXPERIENCE)
+                    .where(RPKIT_EXPERIENCE.CHARACTER_ID.eq(character.id))
+                    .fetchOne() ?: return null
+            return get(result.get(RPKIT_EXPERIENCE.ID))
         }
     }
 
     override fun insert(entity: RPKExperienceValue): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_experience(character_id, value) VALUES(?, ?)",
-                    Statement.RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.character.id)
-                statement.setInt(2, entity.value)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_EXPERIENCE,
+                        RPKIT_EXPERIENCE.CHARACTER_ID,
+                        RPKIT_EXPERIENCE.VALUE
+                )
+                .values(
+                        entity.character.id,
+                        entity.value
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
+        characterCache.put(entity.character.id, entity)
         return id
     }
 
     override fun update(entity: RPKExperienceValue) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_experience SET character_id = ?, value = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.character.id)
-                statement.setInt(2, entity.value)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(RPKIT_EXPERIENCE)
+                .set(RPKIT_EXPERIENCE.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_EXPERIENCE.VALUE, entity.value)
+                .where(RPKIT_EXPERIENCE.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
+        characterCache.put(entity.character.id, entity)
     }
 
 }

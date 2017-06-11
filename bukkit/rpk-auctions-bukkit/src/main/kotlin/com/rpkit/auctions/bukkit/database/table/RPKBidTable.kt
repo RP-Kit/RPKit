@@ -21,51 +21,39 @@ import com.rpkit.auctions.bukkit.auction.RPKAuction
 import com.rpkit.auctions.bukkit.auction.RPKAuctionProvider
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
+import com.rpkit.auctions.bukkit.database.jooq.rpkit.Tables.RPKIT_BID
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the bid table.
  */
-class RPKBidTable: Table<RPKBid> {
+class RPKBidTable(database: Database, private val plugin: RPKAuctionsBukkit): Table<RPKBid>(database, RPKBid::class) {
 
-    private val plugin: RPKAuctionsBukkit
-    val cacheManager: CacheManager
-    val cache: Cache<Int, RPKBid>
-    val auctionCache: Cache<Int, MutableList<*>>
-
-    constructor(database: Database, plugin: RPKAuctionsBukkit): super(database, RPKBid::class) {
-        this.plugin = plugin
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBid::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong() * plugin.server.maxPlayers.toLong())))
-        auctionCache = cacheManager.createCache("auctionCache", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    }
+    val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBid::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong() * plugin.server.maxPlayers.toLong())))
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_bid(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "auction_id INTEGER," +
-                            "character_id INTEGER," +
-                            "amount INTEGER" +
-                    ")"
-            ).use { statement ->
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_BID)
+                .column(RPKIT_BID.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_BID.AUCTION_ID, SQLDataType.INTEGER)
+                .column(RPKIT_BID.CHARACTER_ID, SQLDataType.INTEGER)
+                .column(RPKIT_BID.AMOUNT, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_rpkit_bid").primaryKey(RPKIT_BID.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -75,66 +63,71 @@ class RPKBidTable: Table<RPKBid> {
     }
 
     override fun insert(entity: RPKBid): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_bid(auction_id, character_id, amount) VALUES(?, ?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.auction.id)
-                statement.setInt(2, entity.character.id)
-                statement.setInt(3, entity.amount)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_BID,
+                        RPKIT_BID.AUCTION_ID,
+                        RPKIT_BID.CHARACTER_ID,
+                        RPKIT_BID.AMOUNT
+                )
+                .values(
+                        entity.auction.id,
+                        entity.character.id,
+                        entity.amount
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKBid) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_bid SET auction_id = ?, character_id = ?, amount = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.auction.id)
-                statement.setInt(2, entity.character.id)
-                statement.setInt(3, entity.amount)
-                statement.setInt(4, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(RPKIT_BID)
+                .set(RPKIT_BID.AUCTION_ID, entity.auction.id)
+                .set(RPKIT_BID.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_BID.AMOUNT, entity.amount)
+                .where(RPKIT_BID.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKBid? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var bid: RPKBid? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, auction_id, character_id, amount FROM rpkit_bid WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val finalBid = RPKBidImpl(
-                                resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(RPKAuctionProvider::class).getAuction(resultSet.getInt("auction_id"))!!,
-                                plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getCharacter(resultSet.getInt("character_id"))!!,
-                                resultSet.getInt("amount")
-                        )
-                        bid = finalBid
-                        cache.put(finalBid.id, finalBid)
-                    }
-                }
+            val result = database.create
+                    .select(
+                            RPKIT_BID.AUCTION_ID,
+                            RPKIT_BID.CHARACTER_ID,
+                            RPKIT_BID.AMOUNT
+                    )
+                    .from(RPKIT_BID)
+                    .where(RPKIT_BID.ID.eq(id))
+                    .fetchOne() ?: return null
+            val auctionProvider = plugin.core.serviceManager.getServiceProvider(RPKAuctionProvider::class)
+            val auctionId = result.get(RPKIT_BID.AUCTION_ID)
+            val auction = auctionProvider.getAuction(auctionId)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterId = result.get(RPKIT_BID.CHARACTER_ID)
+            val character = characterProvider.getCharacter(characterId)
+            if (auction != null && character != null) {
+                val bid = RPKBidImpl(
+                        id,
+                        auction,
+                        character,
+                        result.get(RPKIT_BID.AMOUNT)
+                )
+                cache.put(bid.id, bid)
+                return bid
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_BID)
+                        .where(RPKIT_BID.ID.eq(id))
+                        .execute()
+                return null
             }
-            return bid
         }
     }
 
@@ -144,40 +137,22 @@ class RPKBidTable: Table<RPKBid> {
      * @return A list of the bids made on the auction
      */
     fun get(auction: RPKAuction): List<RPKBid> {
-        if (auctionCache.containsKey(auction.id)) {
-            return auctionCache.get(auction.id) as List<RPKBid>
-        } else {
-            val bids = mutableListOf<RPKBid>()
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id FROM rpkit_bid WHERE auction_id = ?"
-                ).use { statement ->
-                    statement.setInt(1, auction.id)
-                    val resultSet = statement.executeQuery()
-                    while (resultSet.next()) {
-                        val bid = get(resultSet.getInt("id"))
-                        if (bid != null) {
-                            bids.add(bid)
-                        }
-                    }
-                }
-            }
-            return bids
-        }
+        val results = database.create
+                .select(RPKIT_BID.ID)
+                .from(RPKIT_BID)
+                .where(RPKIT_BID.AUCTION_ID.eq(auction.id))
+                .fetch()
+        val bids = results.map { result ->
+            get(result.get(RPKIT_BID.ID))
+        }.filterNotNull()
+        return bids
     }
 
     override fun delete(entity: RPKBid) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_bid WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-                val bids = auctionCache.get(entity.auction.id) as MutableList<RPKBid>
-                bids.remove(entity)
-                auctionCache.put(entity.auction.id, bids)
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_BID)
+                .where(RPKIT_BID.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 }

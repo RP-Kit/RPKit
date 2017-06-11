@@ -2,32 +2,34 @@ package com.rpkit.travel.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.travel.bukkit.RPKTravelBukkit
+import com.rpkit.travel.bukkit.database.jooq.rpkit.Tables.RPKIT_WARP
 import com.rpkit.travel.bukkit.warp.RPKWarpImpl
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import org.bukkit.Location
-import java.sql.PreparedStatement
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Table<RPKWarp>(database, RPKWarp::class) {
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_warp(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT, " +
-                            "name VARCHAR(256), " +
-                            "world VARCHAR(256)," +
-                            "x DOUBLE," +
-                            "y DOUBLE," +
-                            "z DOUBLE," +
-                            "yaw REAL," +
-                            "pitch REAL" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_WARP)
+                .column(RPKIT_WARP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_WARP.NAME, SQLDataType.VARCHAR(256))
+                .column(RPKIT_WARP.WORLD, SQLDataType.VARCHAR(256))
+                .column(RPKIT_WARP.X, SQLDataType.DOUBLE)
+                .column(RPKIT_WARP.Y, SQLDataType.DOUBLE)
+                .column(RPKIT_WARP.Z, SQLDataType.DOUBLE)
+                .column(RPKIT_WARP.YAW, SQLDataType.DOUBLE)
+                .column(RPKIT_WARP.PITCH, SQLDataType.DOUBLE)
+                .constraints(
+                        constraint("pk_rpkit_warp").primaryKey(RPKIT_WARP.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -37,129 +39,98 @@ class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Tab
     }
 
     override fun insert(entity: RPKWarp): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_warp(name, world, x, y, z, yaw, pitch) VALUES(?, ?, ?, ?, ?, ?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setString(1, entity.name)
-                statement.setString(2, entity.location.world.name)
-                statement.setDouble(3, entity.location.x)
-                statement.setDouble(4, entity.location.y)
-                statement.setDouble(5, entity.location.z)
-                statement.setFloat(6, entity.location.yaw)
-                statement.setFloat(7, entity.location.pitch)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_WARP,
+                        RPKIT_WARP.NAME,
+                        RPKIT_WARP.WORLD,
+                        RPKIT_WARP.X,
+                        RPKIT_WARP.Y,
+                        RPKIT_WARP.Z,
+                        RPKIT_WARP.YAW,
+                        RPKIT_WARP.PITCH
+                )
+                .values(
+                        entity.name,
+                        entity.location.world.name,
+                        entity.location.x,
+                        entity.location.y,
+                        entity.location.z,
+                        entity.location.yaw.toDouble(),
+                        entity.location.pitch.toDouble()
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
         return id
     }
 
     override fun update(entity: RPKWarp) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_warp SET name = ?, world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setString(1, entity.name)
-                statement.setString(2, entity.location.world.name)
-                statement.setDouble(3, entity.location.x)
-                statement.setDouble(4, entity.location.y)
-                statement.setDouble(5, entity.location.z)
-                statement.setFloat(6, entity.location.yaw)
-                statement.setFloat(7, entity.location.pitch)
-                statement.setInt(8, entity.id)
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .update(RPKIT_WARP)
+                .set(RPKIT_WARP.NAME, entity.name)
+                .set(RPKIT_WARP.WORLD, entity.location.world.name)
+                .set(RPKIT_WARP.X, entity.location.x)
+                .set(RPKIT_WARP.Y, entity.location.y)
+                .set(RPKIT_WARP.Z, entity.location.z)
+                .set(RPKIT_WARP.YAW, entity.location.yaw.toDouble())
+                .set(RPKIT_WARP.PITCH, entity.location.pitch.toDouble())
+                .where(RPKIT_WARP.ID.eq(entity.id))
+                .execute()
     }
 
     override fun get(id: Int): RPKWarp? {
-        var warp: RPKWarp? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, name, world, x, y, z, yaw, pitch FROM rpkit_warp WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    warp = RPKWarpImpl(
-                            resultSet.getInt("id"),
-                            resultSet.getString("name"),
-                            Location(
-                                    plugin.server.getWorld(resultSet.getString("world")),
-                                    resultSet.getDouble("x"),
-                                    resultSet.getDouble("y"),
-                                    resultSet.getDouble("z"),
-                                    resultSet.getFloat("yaw"),
-                                    resultSet.getFloat("pitch")
-                            )
-                    )
-                }
-            }
-        }
+        val result = database.create
+                .select(
+                        RPKIT_WARP.NAME,
+                        RPKIT_WARP.WORLD,
+                        RPKIT_WARP.X,
+                        RPKIT_WARP.Y,
+                        RPKIT_WARP.Z,
+                        RPKIT_WARP.YAW,
+                        RPKIT_WARP.PITCH
+                )
+                .from(RPKIT_WARP)
+                .where(RPKIT_WARP.ID.eq(id))
+                .fetchOne() ?: return null
+        val warp = RPKWarpImpl(
+                id,
+                result.get(RPKIT_WARP.NAME),
+                Location(
+                        plugin.server.getWorld(result.get(RPKIT_WARP.WORLD)),
+                        result.get(RPKIT_WARP.X),
+                        result.get(RPKIT_WARP.Y),
+                        result.get(RPKIT_WARP.Z),
+                        result.get(RPKIT_WARP.YAW).toFloat(),
+                        result.get(RPKIT_WARP.PITCH).toFloat()
+                )
+        )
         return warp
     }
 
     fun get(name: String): RPKWarp? {
-        var warp: RPKWarp? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, name, world, x, y, z, yaw, pitch FROM rpkit_warp WHERE name = ?"
-            ).use { statement ->
-                statement.setString(1, name)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    warp = RPKWarpImpl(
-                            resultSet.getInt("id"),
-                            resultSet.getString("name"),
-                            Location(
-                                    plugin.server.getWorld(resultSet.getString("world")),
-                                    resultSet.getDouble("x"),
-                                    resultSet.getDouble("y"),
-                                    resultSet.getDouble("z"),
-                                    resultSet.getFloat("yaw"),
-                                    resultSet.getFloat("pitch")
-                            )
-                    )
-                }
-            }
-        }
-        return warp
+        val result = database.create
+                .select(RPKIT_WARP.ID)
+                .from(RPKIT_WARP)
+                .where(RPKIT_WARP.NAME.eq(name))
+                .fetchOne() ?: return null
+        return get(result.get(RPKIT_WARP.ID))
     }
 
     fun getAll(): List<RPKWarp> {
-        val warps = mutableListOf<RPKWarp>()
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_warp"
-            ).use { statement ->
-                val resultSet = statement.executeQuery()
-                while (resultSet.next()) {
-                    val warp = get(resultSet.getInt(1))
-                    if (warp != null) {
-                        warps.add(warp)
-                    }
-                }
-            }
-        }
-        return warps
+        val results = database.create
+                .select(RPKIT_WARP.ID)
+                .from(RPKIT_WARP)
+                .fetch()
+        return results.map { result -> get(result.get(RPKIT_WARP.ID)) }
+                .filterNotNull()
     }
 
     override fun delete(entity: RPKWarp) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_warp WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_WARP)
+                .where(RPKIT_WARP.ID.eq(entity.id))
+                .execute()
     }
 
 }

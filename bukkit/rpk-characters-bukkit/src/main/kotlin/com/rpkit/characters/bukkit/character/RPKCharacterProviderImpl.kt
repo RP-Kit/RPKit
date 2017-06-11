@@ -18,14 +18,12 @@ package com.rpkit.characters.bukkit.character
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.table.RPKCharacterTable
-import com.rpkit.core.database.use
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.attribute.Attribute
-import java.util.*
 
 /**
  * Character provider implementation.
@@ -45,18 +43,9 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
                 return getActiveCharacter(minecraftProfile)
             }
         }
-        var character: RPKCharacter? = null
-        plugin.core.database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT character_id FROM player_character WHERE player_id = ?").use { statement ->
-                statement.setInt(1, player.id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    val characterId = resultSet.getInt("character_id")
-                    character = getCharacter(characterId)
-                }
-            }
-        }
+
+        val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
+        val character = characterTable.getActive(player)
         return character
     }
 
@@ -67,21 +56,10 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
         } else {
             val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
             val player = playerProvider.getPlayer(plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID))
-            plugin.core.database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT character_id FROM player_character WHERE player_id = ?").use { statement ->
-                    statement.setInt(1, player.id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val characterId = resultSet.getInt("character_id")
-                        character = getCharacter(characterId)
-                        if (character != null) {
-                            setActiveCharacter(minecraftProfile, character)
-                        }
-                    }
-                }
-            }
+            val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
+            character = characterTable.getActive(player)
             if (character != null) {
+                setActiveCharacter(minecraftProfile, character)
                 return character
             }
         }
@@ -154,44 +132,23 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
                 if (profile != null) {
-                    val characters = getCharacters(profile)
+                    val characters = getCharacters(profile).toMutableList()
+                    val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
+                    val oldCharacters = characterTable.get(player)
+                    oldCharacters.forEach { oldCharacter ->
+                        oldCharacter.profile = profile
+                        updateCharacter(oldCharacter)
+                    }
+                    characters.addAll(oldCharacters)
                     if (characters.isNotEmpty()) {
-                        return characters
-                    } else {
-                        val oldCharacters = mutableListOf<RPKCharacter>()
-                        plugin.core.database.createConnection().use { connection ->
-                            connection.prepareStatement(
-                                    "SELECT id FROM rpkit_character WHERE player_id = ? ORDER BY id").use { statement ->
-                                statement.setInt(1, player.id)
-                                val resultSet = statement.executeQuery()
-                                while (resultSet.next()) {
-                                    val character = getCharacter(resultSet.getInt("id"))
-                                    if (character != null) {
-                                        oldCharacters.add(character)
-                                    }
-                                }
-                            }
-                        }
-                        oldCharacters.forEach { oldCharacter ->
-
-                        }
+                        return characters.distinct()
                     }
                 }
             }
         }
-        val characters: MutableList<RPKCharacter> = ArrayList()
-        plugin.core.database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_character WHERE player_id = ? ORDER BY id").use { statement ->
-                statement.setInt(1, player.id)
-                val resultSet = statement.executeQuery()
-                while (resultSet.next()) {
-                    characters.add(getCharacter(resultSet.getInt("id"))!!)
-                }
-
-            }
-        }
-        return characters
+        val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
+        val oldCharacters = characterTable.get(player)
+        return oldCharacters
     }
 
     override fun getCharacters(profile: RPKProfile): List<RPKCharacter> {

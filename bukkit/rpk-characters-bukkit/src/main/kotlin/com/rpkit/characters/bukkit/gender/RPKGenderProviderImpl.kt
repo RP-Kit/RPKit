@@ -18,9 +18,6 @@ package com.rpkit.characters.bukkit.gender
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.table.RPKGenderTable
-import com.rpkit.core.database.use
-import java.sql.SQLException
-import java.util.*
 
 /**
  * Gender provider implementation.
@@ -40,24 +37,7 @@ class RPKGenderProviderImpl(private val plugin: RPKCharactersBukkit): RPKGenderP
     }
 
     override val genders: Collection<RPKGender>
-        get() {
-            try {
-                val genders: MutableList<RPKGender> = ArrayList()
-                plugin.core.database.createConnection().use { connection ->
-                    connection.prepareStatement(
-                            "SELECT id, name FROM rpkit_gender").use { statement ->
-                        val resultSet = statement.executeQuery()
-                        while (resultSet.next()) {
-                            genders.add(RPKGenderImpl(resultSet.getInt("id"), resultSet.getString("name")))
-                        }
-                    }
-                }
-                return genders
-            } catch (exception: SQLException) {
-                exception.printStackTrace()
-            }
-            return emptyList()
-        }
+        get() = plugin.core.database.getTable(RPKGenderTable::class).getAll()
 
     override fun addGender(gender: RPKGender) {
         plugin.core.database.getTable(RPKGenderTable::class).insert(gender)

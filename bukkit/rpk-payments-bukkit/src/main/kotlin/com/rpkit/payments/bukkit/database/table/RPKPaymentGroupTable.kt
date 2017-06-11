@@ -18,48 +18,43 @@ package com.rpkit.payments.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
+import com.rpkit.payments.bukkit.database.jooq.rpkit.Tables.RPKIT_PAYMENT_GROUP
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupImpl
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.Date
-import java.sql.PreparedStatement
-import java.sql.Statement.RETURN_GENERATED_KEYS
-import java.sql.Types.INTEGER
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
+import java.sql.Timestamp
 
 /**
  * Represents payment group table.
  */
 class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBukkit): Table<RPKPaymentGroup>(database, RPKPaymentGroup::class) {
 
-    val cacheManager: CacheManager
-    val cache: Cache<Int, RPKPaymentGroup>
-
-    init {
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroup::class.java, ResourcePoolsBuilder.heap(20L)))
-    }
+    val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroup::class.java, ResourcePoolsBuilder.heap(20L)))
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS `rpkit_payment_group`(" +
-                    "`id` INTEGER PRIMARY KEY AUTO_INCREMENT, " +
-                    "`name` VARCHAR(256), " +
-                    "`amount` INTEGER, " +
-                    "`currency_id` INTEGER, " +
-                    "`interval` BIGINT, " +
-                    "`last_payment_time` DATETIME, " +
-                    "`balance` INTEGER" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_PAYMENT_GROUP)
+                .column(RPKIT_PAYMENT_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PAYMENT_GROUP.NAME, SQLDataType.VARCHAR(256))
+                .column(RPKIT_PAYMENT_GROUP.AMOUNT, SQLDataType.INTEGER)
+                .column(RPKIT_PAYMENT_GROUP.CURRENCY_ID, SQLDataType.INTEGER)
+                .column(RPKIT_PAYMENT_GROUP.INTERVAL, SQLDataType.BIGINT)
+                .column(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME, SQLDataType.TIMESTAMP)
+                .column(RPKIT_PAYMENT_GROUP.BALANCE, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_rpkit_payment_group").primaryKey(RPKIT_PAYMENT_GROUP.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -69,147 +64,103 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
     }
 
     override fun insert(entity: RPKPaymentGroup): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO `rpkit_payment_group`(" +
-                            "`name`, " +
-                            "`amount`, " +
-                            "`currency_id`, " +
-                            "`interval`, " +
-                            "`last_payment_time`, " +
-                            "`balance`" +
-                    ") VALUES(?, ?, ?, ?, ?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setString(1, entity.name)
-                statement.setInt(2, entity.amount)
-                val currency = entity.currency
-                if (currency != null) {
-                    statement.setInt(3, currency.id)
-                } else {
-                    statement.setNull(3, INTEGER)
-                }
-                statement.setLong(4, entity.interval)
-                statement.setDate(5, Date(entity.lastPaymentTime))
-                statement.setInt(6, entity.balance)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_PAYMENT_GROUP,
+                        RPKIT_PAYMENT_GROUP.NAME,
+                        RPKIT_PAYMENT_GROUP.AMOUNT,
+                        RPKIT_PAYMENT_GROUP.CURRENCY_ID,
+                        RPKIT_PAYMENT_GROUP.INTERVAL,
+                        RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME,
+                        RPKIT_PAYMENT_GROUP.BALANCE
+                )
+                .values(
+                        entity.name,
+                        entity.amount,
+                        entity.currency?.id,
+                        entity.interval,
+                        Timestamp(entity.lastPaymentTime),
+                        entity.balance
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKPaymentGroup) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE `rpkit_payment_group` SET " +
-                            "`name` = ?, " +
-                            "`amount` = ?," +
-                            "`currency_id` = ?, " +
-                            "`interval` = ?, " +
-                            "`last_payment_time` = ?, " +
-                            "`balance` = ?" +
-                            " WHERE `id` = ?"
-            ).use { statement ->
-                statement.setString(1, entity.name)
-                statement.setInt(2, entity.amount)
-                val currency = entity.currency
-                if (currency != null) {
-                    statement.setInt(3, currency.id)
-                } else {
-                    statement.setNull(3, INTEGER)
-                }
-                statement.setLong(4, entity.interval)
-                statement.setDate(5, Date(entity.lastPaymentTime))
-                statement.setInt(6, entity.balance)
-                statement.setInt(7, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(RPKIT_PAYMENT_GROUP)
+                .set(RPKIT_PAYMENT_GROUP.NAME, entity.name)
+                .set(RPKIT_PAYMENT_GROUP.AMOUNT, entity.amount)
+                .set(RPKIT_PAYMENT_GROUP.CURRENCY_ID, entity.currency?.id)
+                .set(RPKIT_PAYMENT_GROUP.INTERVAL, entity.interval)
+                .set(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME, Timestamp(entity.lastPaymentTime))
+                .set(RPKIT_PAYMENT_GROUP.BALANCE, entity.balance)
+                .where(RPKIT_PAYMENT_GROUP.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKPaymentGroup? {
         if (cache.containsKey(id)) {
             return cache[id]
         } else {
-            var paymentGroup: RPKPaymentGroup? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT `id`, `name`, `amount`, `currency_id`, `interval`, `last_payment_time`, `balance`" +
-                                " FROM `rpkit_payment_group`" +
-                                " WHERE `id` = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                        val currencyId = resultSet.getInt("currency_id")
-                        val currency = if (currencyId == 0) null else currencyProvider.getCurrency(currencyId)
-                        val finalPaymentGroup = RPKPaymentGroupImpl(
-                                plugin,
-                                resultSet.getInt("id"),
-                                resultSet.getString("name"),
-                                resultSet.getInt("amount"),
-                                currency,
-                                resultSet.getLong("interval"),
-                                resultSet.getDate("last_payment_time").time,
-                                resultSet.getInt("balance")
-                        )
-                        cache.put(id, finalPaymentGroup)
-                        paymentGroup = finalPaymentGroup
-                    }
-                }
-            }
+            val result = database.create
+                    .select(
+                            RPKIT_PAYMENT_GROUP.NAME,
+                            RPKIT_PAYMENT_GROUP.AMOUNT,
+                            RPKIT_PAYMENT_GROUP.CURRENCY_ID,
+                            RPKIT_PAYMENT_GROUP.INTERVAL,
+                            RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME,
+                            RPKIT_PAYMENT_GROUP.BALANCE
+                    )
+                    .from(RPKIT_PAYMENT_GROUP)
+                    .where(RPKIT_PAYMENT_GROUP.ID.eq(id))
+                    .fetchOne()
+            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
+            val currencyId = result.get(RPKIT_PAYMENT_GROUP.CURRENCY_ID)
+            val currency = currencyProvider.getCurrency(currencyId)
+            val paymentGroup = RPKPaymentGroupImpl(
+                    plugin,
+                    id,
+                    result.get(RPKIT_PAYMENT_GROUP.NAME),
+                    result.get(RPKIT_PAYMENT_GROUP.AMOUNT),
+                    currency,
+                    result.get(RPKIT_PAYMENT_GROUP.INTERVAL),
+                    result.get(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME).time,
+                    result.get(RPKIT_PAYMENT_GROUP.BALANCE)
+            )
+            cache.put(id, paymentGroup)
             return paymentGroup
         }
     }
 
     fun get(name: String): RPKPaymentGroup? {
-        var paymentGroup: RPKPaymentGroup? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT `id` FROM `rpkit_payment_group` WHERE `name` = ?"
-            ).use { statement ->
-                statement.setString(1, name)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    paymentGroup = get(resultSet.getInt("id"))
-                }
-            }
-        }
-        return paymentGroup
+        val result = database.create
+                .select(RPKIT_PAYMENT_GROUP.ID)
+                .from(RPKIT_PAYMENT_GROUP)
+                .where(RPKIT_PAYMENT_GROUP.NAME.eq(name))
+                .fetchOne() ?: return null
+        return get(result.get(RPKIT_PAYMENT_GROUP.ID))
     }
 
     fun getAll(): List<RPKPaymentGroup> {
-        val paymentGroups = mutableListOf<RPKPaymentGroup>()
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT `id` FROM `rpkit_payment_group`"
-            ).use { statement ->
-                val resultSet = statement.executeQuery()
-                while (resultSet.next()) {
-                    paymentGroups.add(get(resultSet.getInt("id"))!!)
-                }
-            }
-        }
-        return paymentGroups
+        val results = database.create
+                .select(RPKIT_PAYMENT_GROUP.ID)
+                .from(RPKIT_PAYMENT_GROUP)
+                .fetch()
+        return results.map { result -> get(result.get(RPKIT_PAYMENT_GROUP.ID)) }
+                .filterNotNull()
     }
 
     override fun delete(entity: RPKPaymentGroup) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement("DELETE FROM `rpkit_payment_group` WHERE `id` = ?").use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_PAYMENT_GROUP)
+                .where(RPKIT_PAYMENT_GROUP.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 }

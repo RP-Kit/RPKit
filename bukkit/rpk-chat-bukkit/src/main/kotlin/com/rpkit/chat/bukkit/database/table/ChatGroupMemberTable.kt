@@ -20,54 +20,46 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.ChatGroupMember
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroup
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
+import com.rpkit.chat.bukkit.database.jooq.rpkit.Tables.CHAT_GROUP_MEMBER
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.PreparedStatement
-import java.sql.Statement
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.DSL.field
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the chat group member table.
  */
-class ChatGroupMemberTable: Table<ChatGroupMember> {
+class ChatGroupMemberTable(database: Database, private val plugin: RPKChatBukkit): Table<ChatGroupMember>(database, ChatGroupMember::class) {
 
-    private val plugin: RPKChatBukkit
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, ChatGroupMember>
-    private val chatGroupCache: Cache<Int, MutableList<*>>
-    private val minecraftProfileCache: Cache<Int, MutableList<*>>
-
-    constructor(database: Database, plugin: RPKChatBukkit): super(database, ChatGroupMember::class) {
-        this.plugin = plugin
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ChatGroupMember::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-        chatGroupCache = cacheManager.createCache("chatGroupCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-        minecraftProfileCache = cacheManager.createCache("minecraftProfileCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    }
+    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache = cacheManager.createCache("cache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ChatGroupMember::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val chatGroupCache = cacheManager.createCache("chatGroupCache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val minecraftProfileCache = cacheManager.createCache("minecraftProfileCache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS chat_group_member(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "chat_group_id INTEGER," +
-                            "minecraft_profile_id INTEGER" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(CHAT_GROUP_MEMBER)
+                .column(CHAT_GROUP_MEMBER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(CHAT_GROUP_MEMBER.CHAT_GROUP_ID, SQLDataType.INTEGER)
+                .column(CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_chat_group_member").primaryKey(CHAT_GROUP_MEMBER.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -75,108 +67,112 @@ class ChatGroupMemberTable: Table<ChatGroupMember> {
             database.setTableVersion(this, "1.3.0")
         }
         if (database.getTableVersion(this) == "0.4.0") {
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "TRUNCATE chat_group_member"
-                ).use(PreparedStatement::executeUpdate)
-                connection.prepareStatement(
-                        "ALTER TABLE chat_group_member " +
-                                "DROP COLUMN player_id, " +
-                                "ADD COLUMN minecraft_profile_id INTEGER"
-                ).use(PreparedStatement::executeUpdate)
-            }
+            database.create
+                    .truncate(CHAT_GROUP_MEMBER)
+                    .execute()
+            database.create
+                    .alterTable(CHAT_GROUP_MEMBER)
+                    .dropColumn(field("player_id"))
+                    .execute()
+            database.create
+                    .alterTable(CHAT_GROUP_MEMBER)
+                    .addColumn(CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                    .execute()
             database.setTableVersion(this, "1.3.0")
         }
     }
 
     override fun insert(entity: ChatGroupMember): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO chat_group_member(chat_group_id, minecraft_profile_id) VALUES(?, ?)",
-                    Statement.RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.chatGroup.id)
-                statement.setInt(2, entity.minecraftProfile.id)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                    val chatGroupMembers = chatGroupCache.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
-                    if (!chatGroupMembers.contains(entity.id)) {
-                        chatGroupMembers.add(entity.id)
-                    }
-                    chatGroupCache.put(entity.chatGroup.id, chatGroupMembers)
-                    val minecraftProfileMembers = minecraftProfileCache.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
-                    if (!minecraftProfileMembers.contains(entity.id)) {
-                        minecraftProfileMembers.add(entity.id)
-                    }
-                    minecraftProfileCache.put(entity.minecraftProfile.id, minecraftProfileMembers)
-                }
-            }
+        database.create
+                .insertInto(
+                        CHAT_GROUP_MEMBER,
+                        CHAT_GROUP_MEMBER.CHAT_GROUP_ID,
+                        CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID
+                )
+                .values(
+                        entity.chatGroup.id,
+                        entity.minecraftProfile.id
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
+        val chatGroupMembers = chatGroupCache.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        if (!chatGroupMembers.contains(entity.id)) {
+            chatGroupMembers.add(entity.id)
         }
+        chatGroupCache.put(entity.chatGroup.id, chatGroupMembers)
+        val minecraftProfileMembers = minecraftProfileCache.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        if (!minecraftProfileMembers.contains(entity.id)) {
+            minecraftProfileMembers.add(entity.id)
+        }
+        minecraftProfileCache.put(entity.minecraftProfile.id, minecraftProfileMembers)
         return id
     }
 
     override fun update(entity: ChatGroupMember) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE chat_group_member SET chat_group_id = ?, minecraft_profile_id = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.chatGroup.id)
-                statement.setInt(2, entity.minecraftProfile.id)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-                val chatGroupMembers = chatGroupCache.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
-                if (!chatGroupMembers.contains(entity.id)) {
-                    chatGroupMembers.add(entity.id)
-                }
-                chatGroupCache.put(entity.chatGroup.id, chatGroupMembers)
-                val minecraftProfileMembers = minecraftProfileCache.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
-                if (!minecraftProfileMembers.contains(entity.id)) {
-                    minecraftProfileMembers.add(entity.id)
-                }
-                minecraftProfileCache.put(entity.minecraftProfile.id, minecraftProfileMembers)
-            }
+        database.create
+                .update(CHAT_GROUP_MEMBER)
+                .set(CHAT_GROUP_MEMBER.CHAT_GROUP_ID, entity.chatGroup.id)
+                .set(CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
+                .where(CHAT_GROUP_MEMBER.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
+        val chatGroupMembers = chatGroupCache.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        if (!chatGroupMembers.contains(entity.id)) {
+            chatGroupMembers.add(entity.id)
         }
+        chatGroupCache.put(entity.chatGroup.id, chatGroupMembers)
+        val minecraftProfileMembers = minecraftProfileCache.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        if (!minecraftProfileMembers.contains(entity.id)) {
+            minecraftProfileMembers.add(entity.id)
+        }
+        minecraftProfileCache.put(entity.minecraftProfile.id, minecraftProfileMembers)
     }
 
     override fun get(id: Int): ChatGroupMember? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var chatGroupMember: ChatGroupMember? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, chat_group_id, minecraft_profile_id FROM chat_group_member WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val finalChatGroupMember = ChatGroupMember(
-                                resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class).getChatGroup(resultSet.getInt("chat_group_id"))!!,
-                                plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class).getMinecraftProfile(resultSet.getInt("minecraft_profile_id"))!!
-                        )
-                        chatGroupMember = finalChatGroupMember
-                        cache.put(finalChatGroupMember.id, finalChatGroupMember)
-                        val chatGroupMembers = chatGroupCache.get(finalChatGroupMember.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
-                        if (!chatGroupMembers.contains(finalChatGroupMember.id)) {
-                            chatGroupMembers.add(finalChatGroupMember.id)
-                        }
-                        chatGroupCache.put(finalChatGroupMember.chatGroup.id, chatGroupMembers)
-                        val minecraftProfileMembers = minecraftProfileCache.get(finalChatGroupMember.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
-                        if (!minecraftProfileMembers.contains(finalChatGroupMember.id)) {
-                            minecraftProfileMembers.add(finalChatGroupMember.id)
-                        }
-                        minecraftProfileCache.put(finalChatGroupMember.minecraftProfile.id, minecraftProfileMembers)
-                    }
+            val result = database.create
+                    .select(
+                            CHAT_GROUP_MEMBER.CHAT_GROUP_ID,
+                            CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID
+                    )
+                    .from(CHAT_GROUP_MEMBER)
+                    .where(CHAT_GROUP_MEMBER.ID.eq(id))
+                    .fetchOne() ?: return null
+            val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
+            val chatGroupId = result.get(CHAT_GROUP_MEMBER.CHAT_GROUP_ID)
+            val chatGroup = chatGroupProvider.getChatGroup(chatGroupId)
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfileId = result.get(CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
+            if (chatGroup != null && minecraftProfile != null) {
+                val chatGroupMember = ChatGroupMember(
+                        id,
+                        chatGroup,
+                        minecraftProfile
+                )
+                cache.put(chatGroupMember.id, chatGroupMember)
+                val chatGroupMembers = chatGroupCache.get(chatGroupMember.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
+                if (!chatGroupMembers.contains(chatGroupMember.id)) {
+                    chatGroupMembers.add(chatGroupMember.id)
                 }
+                chatGroupCache.put(chatGroupMember.chatGroup.id, chatGroupMembers)
+                val minecraftProfileMembers = minecraftProfileCache.get(chatGroupMember.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
+                if (!minecraftProfileMembers.contains(chatGroupMember.id)) {
+                    minecraftProfileMembers.add(chatGroupMember.id)
+                }
+                minecraftProfileCache.put(chatGroupMember.minecraftProfile.id, minecraftProfileMembers)
+                return chatGroupMember
+            } else {
+                database.create
+                        .deleteFrom(CHAT_GROUP_MEMBER)
+                        .where(CHAT_GROUP_MEMBER.ID.eq(id))
+                        .execute()
+                return null
             }
-            return chatGroupMember
         }
     }
 
@@ -190,22 +186,15 @@ class ChatGroupMemberTable: Table<ChatGroupMember> {
         if (chatGroupCache.containsKey(chatGroup.id)) {
             return (chatGroupCache.get(chatGroup.id) as List<Int>).map { id -> get(id)!! }
         } else {
-            val chatGroupMembers = mutableListOf<ChatGroupMember>()
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id FROM chat_group_member WHERE chat_group_id = ?"
-                ).use { statement ->
-                    statement.setInt(1, chatGroup.id)
-                    val resultSet = statement.executeQuery()
-                    while (resultSet.next()) {
-                        val chatGroupMember = get(resultSet.getInt("id"))
-                        if (chatGroupMember != null) {
-                            chatGroupMembers.add(chatGroupMember)
-                        }
-                    }
-                    chatGroupCache.put(chatGroup.id, chatGroupMembers.map { chatGroupMember -> chatGroupMember.id }.toMutableList())
-                }
-            }
+            val results = database.create
+                    .select(CHAT_GROUP_MEMBER.ID)
+                    .from(CHAT_GROUP_MEMBER)
+                    .where(CHAT_GROUP_MEMBER.CHAT_GROUP_ID.eq(chatGroup.id))
+                    .fetch()
+            val chatGroupMembers = results.map { result ->
+                get(result.get(CHAT_GROUP_MEMBER.ID))
+            }.filterNotNull()
+            chatGroupCache.put(chatGroup.id, chatGroupMembers.map(ChatGroupMember::id).toMutableList())
             return chatGroupMembers
         }
     }
@@ -220,42 +209,31 @@ class ChatGroupMemberTable: Table<ChatGroupMember> {
         if (minecraftProfileCache.containsKey(minecraftProfile.id)) {
             return (minecraftProfileCache.get(minecraftProfile.id) as List<Int>).map { id -> get(id)!! }
         } else {
-            val chatGroupMembers = mutableListOf<ChatGroupMember>()
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id FROM chat_group_member WHERE minecraft_profile_id = ?"
-                ).use { statement ->
-                    statement.setInt(1, minecraftProfile.id)
-                    val resultSet = statement.executeQuery()
-                    while (resultSet.next()) {
-                        val chatGroupMember = get(resultSet.getInt("id"))
-                        if (chatGroupMember != null) {
-                            chatGroupMembers.add(chatGroupMember)
-                        }
-                    }
-                    minecraftProfileCache.put(minecraftProfile.id, chatGroupMembers.map { chatGroupMember -> chatGroupMember.id }.toMutableList())
-                }
-            }
+            val results = database.create
+                    .select(CHAT_GROUP_MEMBER.ID)
+                    .from(CHAT_GROUP_MEMBER)
+                    .where(CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                    .fetch()
+            val chatGroupMembers = results.map { result ->
+                get(result.get(CHAT_GROUP_MEMBER.ID))
+            }.filterNotNull()
+            minecraftProfileCache.put(minecraftProfile.id, chatGroupMembers.map(ChatGroupMember::id).toMutableList())
             return chatGroupMembers
         }
     }
 
     override fun delete(entity: ChatGroupMember) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM chat_group_member WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-                val chatGroupMembers = chatGroupCache.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
-                chatGroupMembers.remove(entity.id)
-                chatGroupCache.put(entity.chatGroup.id, chatGroupMembers)
-                val minecraftProfileMembers = minecraftProfileCache.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
-                minecraftProfileMembers.remove(entity.id)
-                minecraftProfileCache.put(entity.minecraftProfile.id, minecraftProfileMembers)
-            }
-        }
+        database.create
+                .deleteFrom(CHAT_GROUP_MEMBER)
+                .where(CHAT_GROUP_MEMBER.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
+        val chatGroupMembers = chatGroupCache.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        chatGroupMembers.remove(entity.id)
+        chatGroupCache.put(entity.chatGroup.id, chatGroupMembers)
+        val minecraftProfileMembers = minecraftProfileCache.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        minecraftProfileMembers.remove(entity.id)
+        minecraftProfileCache.put(entity.minecraftProfile.id, minecraftProfileMembers)
     }
 
 }

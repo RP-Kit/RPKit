@@ -2,5 +2,6 @@ database:
     url: jdbc:mysql://localhost/rpkit
     username: rpkit
     password: secret
+    dialect: MYSQL
 web-server:
     port: 8089
