@@ -422,6 +422,17 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
         return characters
     }
 
+    fun get(name: String): List<RPKCharacter> {
+        val results = database.create
+                .select(RPKIT_CHARACTER.ID)
+                .from(RPKIT_CHARACTER)
+                .where(RPKIT_CHARACTER.NAME.likeIgnoreCase("%$name%"))
+                .fetch()
+        val characters = results.map { result -> get(result.get(RPKIT_CHARACTER.ID)) }
+                .filterNotNull()
+        return characters
+    }
+
     override fun delete(entity: RPKCharacter) {
         database.create
                 .deleteFrom(RPKIT_CHARACTER)
