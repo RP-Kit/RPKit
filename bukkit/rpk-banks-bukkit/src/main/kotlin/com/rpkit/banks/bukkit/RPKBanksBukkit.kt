@@ -21,8 +21,13 @@ import com.rpkit.banks.bukkit.bank.RPKBankProviderImpl
 import com.rpkit.banks.bukkit.database.table.RPKBankTable
 import com.rpkit.banks.bukkit.listener.PlayerInteractListener
 import com.rpkit.banks.bukkit.listener.SignChangeListener
+import com.rpkit.banks.bukkit.servlet.BankServlet
+import com.rpkit.banks.bukkit.servlet.BanksServlet
+import com.rpkit.banks.bukkit.servlet.CharacterServlet
+import com.rpkit.banks.bukkit.servlet.StaticServlet
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.web.NavigationLink
 
 /**
  * RPK banks plugin default implementation.
@@ -36,6 +41,17 @@ class RPKBanksBukkit: RPKBukkitPlugin() {
         serviceProviders = arrayOf(
                 bankProvider
         )
+        servlets = arrayOf(
+                BanksServlet(this),
+                CharacterServlet(this),
+                BankServlet(this),
+                StaticServlet(this),
+                com.rpkit.banks.bukkit.servlet.api.v1.BankAPIServlet(this)
+        )
+    }
+
+    override fun onPostEnable() {
+        core.web.navigationBar.add(NavigationLink("Banks", "/banks/"))
     }
 
     override fun registerListeners() {

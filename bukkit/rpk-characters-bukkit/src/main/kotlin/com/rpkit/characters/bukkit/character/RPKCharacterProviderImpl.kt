@@ -155,6 +155,10 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
         return plugin.core.database.getTable(RPKCharacterTable::class).get(profile)
     }
 
+    override fun getCharacters(name: String): List<RPKCharacter> {
+        return plugin.core.database.getTable(RPKCharacterTable::class).get(name)
+    }
+
     override fun addCharacter(character: RPKCharacter) {
         plugin.core.database.getTable(RPKCharacterTable::class).insert(character)
     }

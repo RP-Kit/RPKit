@@ -35,6 +35,7 @@ import com.rpkit.characters.bukkit.listener.PlayerMoveListener
 import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownProvider
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
 import com.rpkit.characters.bukkit.race.RPKRaceProviderImpl
+import com.rpkit.characters.bukkit.servlet.api.v1.CharacterAPIServlet
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import java.sql.SQLException
@@ -80,6 +81,9 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         characterCardFieldProvider.characterCardFields.add(MaxFoodField())
         characterCardFieldProvider.characterCardFields.add(ThirstField())
         characterCardFieldProvider.characterCardFields.add(MaxThirstField())
+        servlets = arrayOf(
+                CharacterAPIServlet(this)
+        )
     }
 
     override fun registerCommands() {

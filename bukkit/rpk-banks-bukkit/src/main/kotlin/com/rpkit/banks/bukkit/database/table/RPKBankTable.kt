@@ -104,6 +104,7 @@ class RPKBankTable(database: Database, private val plugin: RPKBanksBukkit): Tabl
                             RPKIT_BANK.BALANCE
                     )
                     .from(RPKIT_BANK)
+                    .where(RPKIT_BANK.ID.eq(id))
                     .fetchOne() ?: return null
             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
             val characterId = result.get(RPKIT_BANK.CHARACTER_ID)

@@ -91,6 +91,14 @@ interface RPKCharacterProvider: ServiceProvider {
     fun getCharacters(profile: RPKProfile): Collection<RPKCharacter>
 
     /**
+     * Gets all characters with a name similar to the given name.
+     *
+     * @param name The name
+     * @return All characters with a name similar to the given name.
+     */
+    fun getCharacters(name: String): List<RPKCharacter>
+
+    /**
      * Adds a character to be tracked by this character provider.
      *
      * @param character The character to add

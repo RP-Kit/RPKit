@@ -4,10 +4,10 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>$server | RPKit | Home</title>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-        <link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
-        <link href="/static/css/navbar.css" rel="stylesheet">
+        <title>$server | RPKit | Banks</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="/static/css/ie10-viewport-bug-workaround.css">
+        <link rel="stylesheet" href="/static/css/navbar.css">
         <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -36,12 +36,30 @@
                 </div>
             </nav>
             <div class="jumbotron">
-                <h1>Home</h1>
-                <p>Welcome to RPKit.</p>
+                <div class="row">
+                    <h1 class="col-sm-offset-4 col-sm-4">Banks</h1>
+                </div>
+                <div class="row">
+                    #if($activeProfile)
+                    <div class="col-sm-offset-2 col-sm-8">
+                        #foreach($character in $characters)
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <a href="/banks/bank/$currency.Id/$character.Id">$character.Name</a>
+                            </div>
+                        </div>
+                        #end
+                    </div>
+                    #else
+                    <div class="col-sm-offset-4 col-sm-4">
+                        <p>You must be logged in to see your banks.</p>
+                    </div>
+                    #end
+                </div>
             </div>
         </div>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         <script src="/static/js/ie10-viewport-bug-workaround.js"></script>
     </body>
 </html>
