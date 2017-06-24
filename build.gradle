@@ -85,6 +85,7 @@ project(":rpk-core") {
         compile group: "org.pircbotx", name: "pircbotx", version: pircBotXVersion
         compile group: "org.eclipse.jetty", name: "jetty-server", version: jettyVersion
         compile group: "org.eclipse.jetty", name: "jetty-servlet", version: jettyVersion
+        compile group: "org.eclipse.jetty", name: "jetty-servlet", version: jettyVersion
         compile group: "org.eclipse.jetty", name: "jetty-webapp", version: jettyVersion
         compile group: "org.apache.velocity", name: "velocity", version: velocityVersion
         compile group: "com.zaxxer", name: "HikariCP", version: hikariCPVersion
@@ -980,6 +981,7 @@ project(":bukkit:rpk-characters-bukkit") {
         compile project(":bukkit:rpk-core-bukkit")
         compile project(":bukkit:rpk-player-lib-bukkit")
         compile project(":bukkit:rpk-character-lib-bukkit")
+        compile project(":bukkit:rpk-permissions-lib-bukkit")
     }
 
     processResources {
