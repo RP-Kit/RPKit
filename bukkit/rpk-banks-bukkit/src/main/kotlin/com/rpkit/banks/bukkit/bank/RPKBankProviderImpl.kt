@@ -55,4 +55,8 @@ class RPKBankProviderImpl(private val plugin: RPKBanksBukkit): RPKBankProvider {
         }
     }
 
+    override fun getRichestCharacters(currency: RPKCurrency, amount: Int): List<RPKCharacter> {
+        return plugin.core.database.getTable(RPKBankTable::class).getTop(amount, currency)
+    }
+
 }

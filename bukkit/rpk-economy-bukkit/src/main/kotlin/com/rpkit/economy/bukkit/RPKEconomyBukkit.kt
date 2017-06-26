@@ -20,6 +20,7 @@ import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.exception.UnregisteredServiceException
+import com.rpkit.core.web.NavigationLink
 import com.rpkit.economy.bukkit.character.MoneyField
 import com.rpkit.economy.bukkit.command.currency.CurrencyCommand
 import com.rpkit.economy.bukkit.command.money.MoneyCommand
@@ -36,6 +37,9 @@ import com.rpkit.economy.bukkit.listener.InventoryCloseListener
 import com.rpkit.economy.bukkit.listener.PlayerInteractListener
 import com.rpkit.economy.bukkit.listener.PluginEnableListener
 import com.rpkit.economy.bukkit.listener.SignChangeListener
+import com.rpkit.economy.bukkit.servlet.CurrencyServlet
+import com.rpkit.economy.bukkit.servlet.MoneyServlet
+import com.rpkit.economy.bukkit.servlet.api.MoneyAPIServlet
 
 /**
  * RPK economy plugin default implementation.
@@ -54,9 +58,15 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
                 currencyProvider,
                 economyProvider
         )
+        servlets = arrayOf(
+                CurrencyServlet(this),
+                MoneyServlet(this),
+                MoneyAPIServlet(this)
+        )
     }
 
     override fun onPostEnable() {
+        core.web.navigationBar.add(NavigationLink("Money", "/money/"))
         attemptCharacterCardFieldInitialisation()
     }
 

@@ -49,10 +49,26 @@
                     <h2 class="col-sm-offset-4 col-sm-4">$currency.Name</h2>
                 </div>
                 <div class="row">
-                    #if($activeProfile)
+                    <h2 class="col-sm-offset-4 col-sm-4">Richest characters</h2>
+                </div>
+                <div class="row">
+                    #foreach($character in $top.entrySet())
+                    <div class="col-sm-offset-4 col-sm-4">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <strong>$character.Key.Name</strong> $character.Value
+                            </div>
+                        </div>
+                    </div>
+                    #end
+                </div>
+                #if($activeProfile)
+                <div class="row">
                     <div class="col-sm-offset-4 col-sm-4">
                         <h2>Balance: $balance</h2>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-sm-offset-4 col-sm-4">
                         <div class="panel panel-default">
                             <div class="panel-body">
@@ -74,12 +90,14 @@
                             </div>
                         </div>
                     </div>
-                    #else
+                </div>
+                #else
+                <div class="row">
                     <div class="col-sm-offset-4 col-sm-4">
                         <p>You must be logged in to see your banks.</p>
                     </div>
-                    #end
                 </div>
+                #end
             </div>
         </div>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
