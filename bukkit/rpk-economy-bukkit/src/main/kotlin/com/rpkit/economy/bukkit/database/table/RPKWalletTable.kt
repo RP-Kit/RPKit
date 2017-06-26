@@ -166,7 +166,7 @@ class RPKWalletTable(database: Database, private val plugin: RPKEconomyBukkit) :
                 .select(RPKIT_WALLET.ID)
                 .from(RPKIT_WALLET)
                 .where(RPKIT_WALLET.CURRENCY_ID.eq(currency.id))
-                .orderBy(RPKIT_WALLET.BALANCE)
+                .orderBy(RPKIT_WALLET.BALANCE.desc())
                 .limit(amount)
                 .fetch()
         return results

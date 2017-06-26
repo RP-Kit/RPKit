@@ -170,7 +170,7 @@ class RPKBankTable(database: Database, private val plugin: RPKBanksBukkit): Tabl
                 .select(RPKIT_BANK.ID)
                 .from(RPKIT_BANK)
                 .where(RPKIT_BANK.CURRENCY_ID.eq(currency.id))
-                .orderBy(RPKIT_BANK.BALANCE)
+                .orderBy(RPKIT_BANK.BALANCE.desc())
                 .limit(amount)
                 .fetch()
         return results

@@ -34,4 +34,5 @@ interface RPKBankProvider: ServiceProvider {
     fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int)
     fun deposit(character: RPKCharacter, currency: RPKCurrency, amount: Int)
     fun withdraw(character: RPKCharacter, currency: RPKCurrency, amount: Int)
+    fun getRichestCharacters(currency: RPKCurrency, amount: Int): List<RPKCharacter>
 }
