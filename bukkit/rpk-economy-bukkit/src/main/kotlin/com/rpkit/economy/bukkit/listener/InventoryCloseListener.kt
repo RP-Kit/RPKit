@@ -52,6 +52,19 @@ class InventoryCloseListener(private val plugin: RPKEconomyBukkit): Listener {
                             }
                             .map { item -> item.amount }
                             .sum()
+                    event.inventory.contents
+                            .filter { item ->
+                                item != null
+                                        && (
+                                            item.type !== currency.material
+                                                || !item.hasItemMeta()
+                                                || !item.itemMeta.hasDisplayName()
+                                                || item.itemMeta.displayName != currency.nameSingular
+                                        )
+                            }
+                            .forEach { item ->
+                                bukkitPlayer.world.dropItem(bukkitPlayer.location, item)
+                            }
                     val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
                     if (minecraftProfile != null) {
                         val character = characterProvider.getActiveCharacter(minecraftProfile)
