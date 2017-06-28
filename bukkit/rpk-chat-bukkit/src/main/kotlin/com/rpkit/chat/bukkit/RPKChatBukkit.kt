@@ -22,6 +22,7 @@ import com.rpkit.chat.bukkit.chatchannel.directed.*
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
 import com.rpkit.chat.bukkit.chatchannel.undirected.LogComponent
 import com.rpkit.chat.bukkit.chatchannel.undirected.UndirectedFormatComponent
+import com.rpkit.chat.bukkit.chatchannel.undirected.WebComponent
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProviderImpl
 import com.rpkit.chat.bukkit.command.chatchannel.ChatChannelCommand
 import com.rpkit.chat.bukkit.command.chatgroup.ChatGroupCommand
@@ -39,13 +40,19 @@ import com.rpkit.chat.bukkit.listener.PlayerCommandPreprocessListener
 import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteProvider
 import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
 import com.rpkit.chat.bukkit.prefix.RPKPrefixProviderImpl
+import com.rpkit.chat.bukkit.servlet.ChatServlet
+import com.rpkit.chat.bukkit.servlet.websocket.ChatWebSocketServlet
+import com.rpkit.chat.bukkit.servlet.websocket.RPKChatWebSocketProvider
 import com.rpkit.chat.bukkit.snooper.RPKSnooperProviderImpl
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.web.NavigationLink
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
+import org.eclipse.jetty.servlet.ServletContextHandler
+import org.eclipse.jetty.servlet.ServletHolder
 
 /**
  * RPK chat plugin default implementation.
@@ -61,6 +68,7 @@ class RPKChatBukkit: RPKBukkitPlugin() {
         ConfigurationSerialization.registerClass(IRCComponent::class.java, "IRCComponent")
         ConfigurationSerialization.registerClass(LogComponent::class.java, "LogComponent")
         ConfigurationSerialization.registerClass(UndirectedFormatComponent::class.java, "UndirectedFormatComponent")
+        ConfigurationSerialization.registerClass(WebComponent::class.java, "WebComponent")
         saveDefaultConfig()
         if (config.getBoolean("irc.enabled")) {
             val ircProvider = RPKIRCProviderImpl(this)
@@ -70,6 +78,7 @@ class RPKChatBukkit: RPKBukkitPlugin() {
             val chatChannelSpeakerProvider = RPKChatChannelSpeakerProvider(this)
             val chatGroupProvider = RPKChatGroupProviderImpl(this)
             val snooperProvider =  RPKSnooperProviderImpl(this)
+            val chatWebSocketProvider = RPKChatWebSocketProvider()
             serviceProviders = arrayOf(
                     ircProvider,
                     prefixProvider,
@@ -77,7 +86,8 @@ class RPKChatBukkit: RPKBukkitPlugin() {
                     chatChannelMuteProvider,
                     chatChannelSpeakerProvider,
                     chatGroupProvider,
-                    snooperProvider
+                    snooperProvider,
+                    chatWebSocketProvider
             )
             registerChatChannelPermissions(chatChannelProvider)
             registerPrefixPermissions(prefixProvider)
@@ -99,6 +109,17 @@ class RPKChatBukkit: RPKBukkitPlugin() {
             registerChatChannelPermissions(chatChannelProvider)
             registerPrefixPermissions(prefixProvider)
         }
+        servlets = arrayOf(
+                ChatServlet(this)
+        )
+    }
+
+    override fun onPostEnable() {
+        core.web.navigationBar.add(NavigationLink("Chat", "/chat/"))
+        val originalClassLoader = Thread.currentThread().contextClassLoader
+        Thread.currentThread().contextClassLoader = javaClass.classLoader
+        (core.web.server.handler as ServletContextHandler).addServlet(ServletHolder(ChatWebSocketServlet(this)), "/chat/ws")
+        Thread.currentThread().contextClassLoader = originalClassLoader
     }
 
     override fun onDisable() {
