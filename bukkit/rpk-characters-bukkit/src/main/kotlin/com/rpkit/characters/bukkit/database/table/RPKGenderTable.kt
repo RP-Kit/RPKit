@@ -16,52 +16,42 @@
 
 package com.rpkit.characters.bukkit.database.table
 
+import com.rpkit.characters.bukkit.database.jooq.rpkit.Tables.RPKIT_GENDER
 import com.rpkit.characters.bukkit.gender.RPKGender
 import com.rpkit.characters.bukkit.gender.RPKGenderImpl
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import org.ehcache.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.SQLException
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the gender table.
  */
-class RPKGenderTable: Table<RPKGender> {
+class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::class) {
 
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, RPKGender>
-    private val nameCache: Cache<String, Int>
-
-    constructor(database: Database): super(database, RPKGender::class.java) {
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKGender::class.java,
-                        ResourcePoolsBuilder.heap(10L)).build())
-        nameCache = cacheManager.createCache("nameCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                        ResourcePoolsBuilder.heap(10L)).build())
-    }
+    private val cacheManager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache: Cache<Int, RPKGender> = cacheManager.createCache("cache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKGender::class.java,
+                    ResourcePoolsBuilder.heap(10L)).build())
+    private val nameCache: Cache<String, Int> = cacheManager.createCache("nameCache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                    ResourcePoolsBuilder.heap(10L)).build())
 
     override fun create() {
-        try {
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "CREATE TABLE IF NOT EXISTS rpkit_gender(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "name VARCHAR(256)" +
-                        ")").use { statement ->
-                    statement.executeUpdate()
-                }
-            }
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
-        }
+        database.create.createTableIfNotExists(RPKIT_GENDER)
+                .column(RPKIT_GENDER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_GENDER.NAME, SQLDataType.VARCHAR(256))
+                .constraints(
+                        constraint("pk_rpkit_gender").primaryKey(RPKIT_GENDER.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -71,75 +61,59 @@ class RPKGenderTable: Table<RPKGender> {
     }
 
     override fun insert(entity: RPKGender): Int {
-        try {
-            var id = 0
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "INSERT INTO rpkit_gender(name) VALUES(?)",
-                        RETURN_GENERATED_KEYS).use { statement ->
-                    statement.setString(1, entity.name)
-                    statement.executeUpdate()
-                    val generatedKeys = statement.generatedKeys
-                    if (generatedKeys.next()) {
-                        id = generatedKeys.getInt(1)
-                        entity.id = id
-                        cache.put(id, entity)
-                        nameCache.put(entity.name, id)
-                    }
-                }
-            }
-            return id
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
-        }
-
-        return 0
+        database.create
+                .insertInto(
+                        RPKIT_GENDER,
+                        RPKIT_GENDER.NAME
+                )
+                .values(
+                        entity.name
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
+        nameCache.put(entity.name, id)
+        return id
     }
 
     override fun update(entity: RPKGender) {
-        try {
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "UPDATE rpkit_gender SET name = ? WHERE id = ?").use { statement ->
-                    statement.setString(1, entity.name)
-                    statement.setInt(2, entity.id)
-                    statement.executeUpdate()
-                    cache.put(entity.id, entity)
-                    nameCache.put(entity.name, entity.id)
-                }
-            }
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
-        }
-
+        database.create
+                .update(RPKIT_GENDER)
+                .set(RPKIT_GENDER.NAME, entity.name)
+                .where(RPKIT_GENDER.ID.eq(entity.id))
+                .execute()
     }
 
     override fun get(id: Int): RPKGender? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            try {
-                var gender: RPKGender? = null
-                database.createConnection().use { connection ->
-                    connection.prepareStatement(
-                            "SELECT id, name FROM rpkit_gender WHERE id = ?").use { statement ->
-                        statement.setInt(1, id)
-                        val resultSet = statement.executeQuery()
-                        if (resultSet.next()) {
-                            val id1 = resultSet.getInt("id")
-                            val name = resultSet.getString("name")
-                            gender = RPKGenderImpl(id1, name)
-                            cache.put(id, gender)
-                            nameCache.put(name, id1)
-                        }
-                    }
-                }
-                return gender
-            } catch (exception: SQLException) {
-                exception.printStackTrace()
-            }
+            val result = database.create
+                    .select(
+                            RPKIT_GENDER.ID,
+                            RPKIT_GENDER.NAME
+                    )
+                    .from(RPKIT_GENDER)
+                    .where(RPKIT_GENDER.ID.eq(id))
+                    .fetchOne() ?: return null
+            val gender = RPKGenderImpl(
+                    result.get(RPKIT_GENDER.ID),
+                    result.get(RPKIT_GENDER.NAME)
+            )
+            cache.put(id, gender)
+            nameCache.put(gender.name, id)
+            return gender
         }
-        return null
+    }
+
+    fun getAll(): List<RPKGender> {
+        val results = database.create
+                .select(RPKIT_GENDER.ID)
+                .from(RPKIT_GENDER)
+                .fetch()
+        return results.map { result -> get(result.get(RPKIT_GENDER.ID)) }
+                .filterNotNull()
     }
 
     /**
@@ -153,45 +127,31 @@ class RPKGenderTable: Table<RPKGender> {
         if (nameCache.containsKey(name)) {
             return get(nameCache.get(name) as Int)
         } else {
-            try {
-                var gender: RPKGender? = null
-                database.createConnection().use { connection ->
-                    connection.prepareStatement(
-                            "SELECT id, name FROM rpkit_gender WHERE name = ?").use { statement ->
-                        statement.setString(1, name)
-                        val resultSet = statement.executeQuery()
-                        if (resultSet.next()) {
-                            val id = resultSet.getInt("id")
-                            val name1 = resultSet.getString("name")
-                            gender = RPKGenderImpl(id, name1)
-                            cache.put(id, gender)
-                            nameCache.put(name1, id)
-                        }
-                    }
-                }
-                return gender
-            } catch (exception: SQLException) {
-                exception.printStackTrace()
-            }
+            val result = database.create
+                    .select(
+                            RPKIT_GENDER.ID,
+                            RPKIT_GENDER.NAME
+                    )
+                    .from(RPKIT_GENDER)
+                    .where(RPKIT_GENDER.NAME.eq(name))
+                    .fetchOne() ?: return null
+            val gender = RPKGenderImpl(
+                    result.get(RPKIT_GENDER.ID),
+                    result.get(RPKIT_GENDER.NAME)
+            )
+            cache.put(gender.id, gender)
+            nameCache.put(name, gender.id)
+            return gender
         }
-        return null
     }
 
     override fun delete(entity: RPKGender) {
-        try {
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "DELETE FROM rpkit_gender WHERE id = ?").use { statement ->
-                    statement.setInt(1, entity.id)
-                    statement.executeUpdate()
-                    cache.remove(entity.id)
-                    nameCache.remove(entity.name)
-                }
-            }
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
-        }
-
+        database.create
+                .deleteFrom(RPKIT_GENDER)
+                .where(RPKIT_GENDER.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
+        nameCache.remove(entity.name)
     }
 
 }

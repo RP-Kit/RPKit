@@ -19,7 +19,7 @@ package com.rpkit.characters.bukkit.command.character.set
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -52,32 +52,36 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.set.race")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    if (args.isNotEmpty()) {
-                        val raceBuilder = StringBuilder()
-                        for (i in 0..args.size - 1 - 1) {
-                            raceBuilder.append(args[i]).append(" ")
-                        }
-                        raceBuilder.append(args[args.size - 1])
-                        val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
-                        val race = raceProvider.getRace(raceBuilder.toString())
-                        if (race != null) {
-                            character.race = race
-                            characterProvider.updateCharacter(character)
-                            sender.sendMessage(plugin.messages["character-set-race-valid"])
-                            character.showCharacterCard(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        if (args.isNotEmpty()) {
+                            val raceBuilder = StringBuilder()
+                            for (i in 0..args.size - 1 - 1) {
+                                raceBuilder.append(args[i]).append(" ")
+                            }
+                            raceBuilder.append(args[args.size - 1])
+                            val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
+                            val race = raceProvider.getRace(raceBuilder.toString())
+                            if (race != null) {
+                                character.race = race
+                                characterProvider.updateCharacter(character)
+                                sender.sendMessage(plugin.messages["character-set-race-valid"])
+                                character.showCharacterCard(minecraftProfile)
+                            } else {
+                                sender.sendMessage(plugin.messages["character-set-race-invalid-race"])
+                            }
                         } else {
-                            sender.sendMessage(plugin.messages["character-set-race-invalid-race"])
+                            conversationFactory.buildConversation(sender).begin()
                         }
                     } else {
-                        conversationFactory.buildConversation(sender).begin()
+                        sender.sendMessage(plugin.messages["no-character"])
                     }
                 } else {
-                    sender.sendMessage(plugin.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["no-permission-character-set-race"])
@@ -97,14 +101,16 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
-                val player = playerProvider.getPlayer(conversable)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    character.race = raceProvider.getRace(input)!!
-                    characterProvider.updateCharacter(character)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(conversable)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        character.race = raceProvider.getRace(input)!!
+                        characterProvider.updateCharacter(character)
+                    }
                 }
             }
             return RaceSetPrompt()
@@ -132,10 +138,12 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(context.forWhom as Player)
-                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
+                if (minecraftProfile != null) {
+                    characterProvider.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                }
             }
             return Prompt.END_OF_CONVERSATION
         }

@@ -18,56 +18,42 @@ package com.rpkit.banks.bukkit.database.table
 
 import com.rpkit.banks.bukkit.RPKBanksBukkit
 import com.rpkit.banks.bukkit.bank.RPKBank
+import com.rpkit.banks.bukkit.database.jooq.rpkit.Tables.RPKIT_BANK
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.Statement.RETURN_GENERATED_KEYS
-import java.util.*
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the bank table.
  */
-class RPKBankTable: Table<RPKBank> {
+class RPKBankTable(database: Database, private val plugin: RPKBanksBukkit): Table<RPKBank>(database, RPKBank::class) {
 
-    private val plugin: RPKBanksBukkit
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, RPKBank>
-    private val characterCache: Cache<Int, MutableMap<*, *>>
-
-    constructor(database: Database, plugin: RPKBanksBukkit): super(database, RPKBank::class.java) {
-        this.plugin = plugin;
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBank::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-        characterCache = cacheManager.createCache("characterCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableMap::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    }
+    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache = cacheManager.createCache("cache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBank::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_bank(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "character_id INTEGER," +
-                            "currency_id INTEGER," +
-                            "balance INTEGER" +
-                    ")"
-            ).use { statement ->
-                statement.executeUpdate()
-            }
-        }
-
+        database.create
+                .createTableIfNotExists(RPKIT_BANK)
+                .column(RPKIT_BANK.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_BANK.CHARACTER_ID, SQLDataType.INTEGER)
+                .column(RPKIT_BANK.CURRENCY_ID, SQLDataType.INTEGER)
+                .column(RPKIT_BANK.BALANCE, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_rpkit_bank").primaryKey(RPKIT_BANK.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -77,71 +63,71 @@ class RPKBankTable: Table<RPKBank> {
     }
 
     override fun insert(entity: RPKBank): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_bank(character_id, currency_id, balance) VALUES(?, ?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.character.id)
-                statement.setInt(2, entity.currency.id)
-                statement.setInt(3, entity.balance)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                    val currencyBanks = characterCache.get(entity.character.id)?:mutableMapOf<Int, Int>()
-                    @Suppress("UNCHECKED_CAST") (currencyBanks as MutableMap<Int, Int>).put(entity.currency.id, entity.id)
-                    characterCache.put(entity.character.id, currencyBanks)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_BANK,
+                        RPKIT_BANK.CHARACTER_ID,
+                        RPKIT_BANK.CURRENCY_ID,
+                        RPKIT_BANK.BALANCE
+                )
+                .values(
+                        entity.character.id,
+                        entity.currency.id,
+                        entity.balance
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKBank) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_bank SET character_id = ?, currency_id = ?, balance = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.character.id)
-                statement.setInt(2, entity.currency.id)
-                statement.setInt(3, entity.balance)
-                statement.setInt(4, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-                val currencyBanks = characterCache.get(entity.character.id)?:mutableMapOf<Int, Int>()
-                @Suppress("UNCHECKED_CAST") (currencyBanks as MutableMap<Int, Int>).put(entity.currency.id, entity.id)
-                characterCache.put(entity.character.id, currencyBanks)
-            }
-        }
+        database.create
+                .update(RPKIT_BANK)
+                .set(RPKIT_BANK.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_BANK.CURRENCY_ID, entity.currency.id)
+                .set(RPKIT_BANK.BALANCE, entity.balance)
+                .where(RPKIT_BANK.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKBank? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var bank: RPKBank? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, character_id, currency_id, balance FROM rpkit_bank WHERE id = ? LIMIT 1"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        bank = RPKBank(
-                                id = resultSet.getInt("id"),
-                                character = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getCharacter(resultSet.getInt("character_id"))!!,
-                                currency = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(resultSet.getInt("currency_id"))!!,
-                                balance = resultSet.getInt("balance")
-                        )
-                        cache.put(id, bank)
-                    }
-                }
+            val result = database.create
+                    .select(
+                            RPKIT_BANK.CHARACTER_ID,
+                            RPKIT_BANK.CURRENCY_ID,
+                            RPKIT_BANK.BALANCE
+                    )
+                    .from(RPKIT_BANK)
+                    .where(RPKIT_BANK.ID.eq(id))
+                    .fetchOne() ?: return null
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterId = result.get(RPKIT_BANK.CHARACTER_ID)
+            val character = characterProvider.getCharacter(characterId)
+            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
+            val currencyId = result.get(RPKIT_BANK.CURRENCY_ID)
+            val currency = currencyProvider.getCurrency(currencyId)
+            if (character != null && currency != null) {
+                val bank = RPKBank(
+                        id,
+                        character,
+                        currency,
+                        result.get(RPKIT_BANK.BALANCE)
+                )
+                cache.put(id, bank)
+                return bank
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_BANK)
+                        .where(RPKIT_BANK.ID.eq(id))
+                        .execute()
+                return null
             }
-            return bank
         }
     }
 
@@ -154,55 +140,22 @@ class RPKBankTable: Table<RPKBank> {
      * @return The account of the character in the currency
      */
     fun get(character: RPKCharacter, currency: RPKCurrency): RPKBank {
-        if (characterCache.containsKey(character.id)) {
-            val characterBanks = characterCache[character.id]
-            if (characterBanks.containsKey(currency.id)) {
-                return get(characterCache[character.id][currency.id] as Int)!!
-            }
-        }
-        var bank: RPKBank? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, character_id, currency_id, balance FROM rpkit_bank WHERE character_id = ? AND currency_id = ?"
-            ).use { statement ->
-                statement.setInt(1, character.id)
-                statement.setInt(2, currency.id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    val id = resultSet.getInt("id")
-                    val characterId = resultSet.getInt("character_id")
-                    val currencyId = resultSet.getInt("currency_id")
-                    val balance = resultSet.getInt("balance")
-                    bank = RPKBank(
-                            id = id,
-                            character = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getCharacter(characterId)!!,
-                            currency = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(currencyId)!!,
-                            balance = balance
-                    )
-                    val finalBank = bank!!
-                    cache.put(id, finalBank)
-                    val characterBanks: MutableMap<Int, Int>
-                    if (characterCache.containsKey(characterId)) {
-                        characterBanks = characterCache[characterId] as MutableMap<Int, Int>
-                    } else {
-                        characterBanks = HashMap<Int, Int>()
-                    }
-                    characterBanks.put(currencyId, finalBank.id)
-                    characterCache.put(characterId, characterBanks)
-                }
-            }
-        }
+        val result = database.create
+                .select(RPKIT_BANK.ID)
+                .from(RPKIT_BANK)
+                .where(RPKIT_BANK.CHARACTER_ID.eq(character.id))
+                .and(RPKIT_BANK.CURRENCY_ID.eq(currency.id))
+                .fetchOne()
+        var bank = if (result == null) null else get(result.get(RPKIT_BANK.ID))
         if (bank == null) {
-            val finalBank = RPKBank(
+            bank = RPKBank(
                     character = character,
                     currency = currency,
                     balance = 0
             )
-            insert(finalBank)
-            bank = finalBank
+            insert(bank)
         }
-        val finalBank = bank!!
-        return finalBank
+        return bank
     }
 
     /**
@@ -213,40 +166,29 @@ class RPKBankTable: Table<RPKBank> {
      * @return A list of characters with the highest balance in the given currency
      */
     fun getTop(amount: Int = 5, currency: RPKCurrency): List<RPKCharacter> {
-        val top = ArrayList<RPKBank>()
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_bank WHERE currency_id = ? ORDER BY balance LIMIT ?"
-            ).use { statement ->
-                statement.setInt(1, currency.id)
-                statement.setInt(2, amount)
-                val resultSet = statement.executeQuery()
-                while (resultSet.next()) {
-                    val bank = get(resultSet.getInt("id"))
-                    if (bank != null) {
-                        top.add(bank)
-                    }
+        val results = database.create
+                .select(RPKIT_BANK.ID)
+                .from(RPKIT_BANK)
+                .where(RPKIT_BANK.CURRENCY_ID.eq(currency.id))
+                .orderBy(RPKIT_BANK.BALANCE.desc())
+                .limit(amount)
+                .fetch()
+        return results
+                .map { result ->
+                    get(result.get(RPKIT_BANK.ID))
                 }
-            }
-        }
-        return top.map { bank -> bank.character }
+                .filterNotNull()
+                .map { bank ->
+                    bank.character
+                }
     }
 
     override fun delete(entity: RPKBank) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_bank WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-                val characterId = entity.character.id
-                characterCache[characterId].remove(entity.currency.id)
-                if (characterCache[characterId].isEmpty()) {
-                    characterCache.remove(characterId)
-                }
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_BANK)
+                .where(RPKIT_BANK.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 }

@@ -18,14 +18,16 @@ package com.rpkit.chat.bukkit.chatchannel.context
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.chat.bukkit.context.UndirectedChatChannelMessageContext
-import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKProfile
 
 /**
  * Undirected chat channel message context implementation.
  */
 class UndirectedChatChannelMessageContextImpl(
         override val chatChannel: RPKChatChannel,
-        override val sender: RPKPlayer,
+        override val senderProfile: RPKProfile,
+        override val senderMinecraftProfile: RPKMinecraftProfile?,
         override var message: String,
         override var isCancelled: Boolean = false
 ) : UndirectedChatChannelMessageContext

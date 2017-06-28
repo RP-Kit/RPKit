@@ -17,6 +17,7 @@
 package com.rpkit.players.bukkit.servlet.api.v1
 
 import com.google.gson.Gson
+import com.rpkit.chat.bukkit.irc.RPKIRCProvider
 import com.rpkit.core.web.RPKServlet
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
@@ -25,7 +26,7 @@ import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletResponse.*
 
 /**
- * Player API v0.4 servlet.
+ * Player API v1 servlet.
  */
 class PlayerAPIServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
 
@@ -85,11 +86,25 @@ class PlayerAPIServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
                     resp.status = SC_OK
                     val name = req.getParameter("name")
                     val ircNick = req.getParameter("irc_nick")
-                    if (name != null && name.isNotBlank()) {
-                        player.name = name
+                    if (name != null) {
+                        if (name.isNotBlank()) {
+                            if (name.matches(Regex("[A-z0-9_]{3,16}"))) {
+                                player.name = name
+                            }
+                        }
                     }
-                    if (ircNick != null && ircNick.isNotBlank()) {
-                        player.ircNick = ircNick
+                    if (ircNick != null) {
+                        if (ircNick.isNotBlank()) {
+                            if (player.ircNick == null) {
+                                val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
+                                val ircUser = ircProvider.getIRCUser(ircNick)
+                                if (ircUser != null) {
+                                    val existingIRCPlayer = playerProvider.getPlayer(ircUser)
+                                    playerProvider.removePlayer(existingIRCPlayer)
+                                    player.ircNick = ircNick
+                                }
+                            }
+                        }
                     }
                     playerProvider.updatePlayer(player)
                     resp.writer.write(

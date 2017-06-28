@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,24 +33,30 @@ class ChatGroupJoinCommand(private val plugin: RPKChatBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.chat.command.chatgroup.join")) {
             if (args.isNotEmpty()) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
                 val chatGroup = chatGroupProvider.getChatGroup(args[0])
                 if (chatGroup != null) {
                     if (sender is Player) {
-                        val player = playerProvider.getPlayer(sender)
-                        if (chatGroup.invited.contains(player)) {
-                            chatGroup.members.forEach { member -> member.bukkitPlayer?.player?.sendMessage(plugin.messages["chat-group-join-received", mapOf(
-                                    Pair("group", chatGroup.name),
-                                    Pair("player", player.name)
-                            )]) }
-                            chatGroup.addMember(player)
-                            chatGroup.uninvite(player)
-                            sender.sendMessage(plugin.messages["chat-group-join-valid", mapOf(
-                                    Pair("group", chatGroup.name)
-                            )])
+                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                        if (minecraftProfile != null) {
+                            if (chatGroup.invitedMinecraftProfiles.contains(minecraftProfile)) {
+                                chatGroup.memberMinecraftProfiles.forEach { member ->
+                                    member.sendMessage(plugin.messages["chat-group-join-received", mapOf(
+                                            Pair("group", chatGroup.name),
+                                            Pair("player", minecraftProfile.minecraftUsername)
+                                    )])
+                                }
+                                chatGroup.addMember(minecraftProfile)
+                                chatGroup.uninvite(minecraftProfile)
+                                sender.sendMessage(plugin.messages["chat-group-join-valid", mapOf(
+                                        Pair("group", chatGroup.name)
+                                )])
+                            } else {
+                                sender.sendMessage(plugin.messages["chat-group-join-invalid-no-invite"])
+                            }
                         } else {
-                            sender.sendMessage(plugin.messages["chat-group-join-invalid-no-invite"])
+                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
                         }
                     } else {
                         sender.sendMessage(plugin.messages["not-from-console"])

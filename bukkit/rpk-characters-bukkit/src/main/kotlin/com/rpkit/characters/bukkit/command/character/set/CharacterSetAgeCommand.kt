@@ -18,8 +18,7 @@ package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -52,31 +51,35 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit): CommandEx
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.set.age")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    if (args.isNotEmpty()) {
-                        try {
-                            val age = args[0].toInt()
-                            if (age >= plugin.config.getInt("characters.min-age") && age <= plugin.config.getInt("characters.max-age")) {
-                                character.age = age
-                                characterProvider.updateCharacter(character)
-                                sender.sendMessage(plugin.messages["character-set-age-valid"])
-                                character.showCharacterCard(player)
-                            } else {
-                                sender.sendMessage(plugin.messages["character-set-age-invalid-validation"])
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        if (args.isNotEmpty()) {
+                            try {
+                                val age = args[0].toInt()
+                                if (age >= plugin.config.getInt("characters.min-age") && age <= plugin.config.getInt("characters.max-age")) {
+                                    character.age = age
+                                    characterProvider.updateCharacter(character)
+                                    sender.sendMessage(plugin.messages["character-set-age-valid"])
+                                    character.showCharacterCard(minecraftProfile)
+                                } else {
+                                    sender.sendMessage(plugin.messages["character-set-age-invalid-validation"])
+                                }
+                            } catch (exception: NumberFormatException) {
+                                sender.sendMessage(plugin.messages["character-set-age-invalid-number"])
                             }
-                        } catch (exception: NumberFormatException) {
-                            sender.sendMessage(plugin.messages["character-set-age-invalid-number"])
-                        }
 
+                        } else {
+                            conversationFactory.buildConversation(sender).begin()
+                        }
                     } else {
-                        conversationFactory.buildConversation(sender).begin()
+                        sender.sendMessage(plugin.messages["no-character"])
                     }
                 } else {
-                    sender.sendMessage(plugin.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["no-permission-character-set-age"])
@@ -108,13 +111,15 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit): CommandEx
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(conversable)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    character.age = input.toInt()
-                    characterProvider.updateCharacter(character)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(conversable)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        character.age = input.toInt()
+                        characterProvider.updateCharacter(character)
+                    }
                 }
             }
             return AgeSetPrompt()
@@ -127,10 +132,12 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit): CommandEx
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(context.forWhom as Player)
-                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
+                if (minecraftProfile != null) {
+                    characterProvider.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                }
             }
             return Prompt.END_OF_CONVERSATION
         }

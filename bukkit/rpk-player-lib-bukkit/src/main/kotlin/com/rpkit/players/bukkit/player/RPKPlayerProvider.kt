@@ -24,6 +24,8 @@ import java.net.InetAddress
 /**
  * Provides player related operations.
  */
+@Deprecated("Old players API. Please move to new profiles APIs.",
+        replaceWith = ReplaceWith("RPKMinecraftProfileProvider", "com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider"))
 interface RPKPlayerProvider: ServiceProvider {
 
     /**

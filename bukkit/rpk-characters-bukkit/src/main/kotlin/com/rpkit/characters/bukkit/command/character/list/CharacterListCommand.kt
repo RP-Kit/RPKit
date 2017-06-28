@@ -18,7 +18,7 @@ package com.rpkit.characters.bukkit.command.character.list
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -34,13 +34,20 @@ class CharacterListCommand(private val plugin: RPKCharactersBukkit): CommandExec
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.list")) {
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                sender.sendMessage(plugin.messages["character-list-title"])
-                for (character in characterProvider.getCharacters(player)) {
-                    sender.sendMessage(plugin.messages["character-list-item", mapOf(
-                            Pair("character", character.name)
-                    )])
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val profile = minecraftProfile.profile
+                    if (profile != null) {
+                        sender.sendMessage(plugin.messages["character-list-title"])
+                        for (character in characterProvider.getCharacters(profile)) {
+                            sender.sendMessage(plugin.messages["character-list-item", mapOf(
+                                    Pair("character", character.name)
+                            )])
+                        }
+                    }
+                } else {
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["no-permission-character-list"])

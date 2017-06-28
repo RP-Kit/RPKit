@@ -20,6 +20,7 @@ import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.exception.UnregisteredServiceException
+import com.rpkit.core.web.NavigationLink
 import com.rpkit.economy.bukkit.character.MoneyField
 import com.rpkit.economy.bukkit.command.currency.CurrencyCommand
 import com.rpkit.economy.bukkit.command.money.MoneyCommand
@@ -36,6 +37,9 @@ import com.rpkit.economy.bukkit.listener.InventoryCloseListener
 import com.rpkit.economy.bukkit.listener.PlayerInteractListener
 import com.rpkit.economy.bukkit.listener.PluginEnableListener
 import com.rpkit.economy.bukkit.listener.SignChangeListener
+import com.rpkit.economy.bukkit.servlet.CurrencyServlet
+import com.rpkit.economy.bukkit.servlet.MoneyServlet
+import com.rpkit.economy.bukkit.servlet.api.MoneyAPIServlet
 
 /**
  * RPK economy plugin default implementation.
@@ -54,9 +58,15 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
                 currencyProvider,
                 economyProvider
         )
+        servlets = arrayOf(
+                CurrencyServlet(this),
+                MoneyServlet(this),
+                MoneyAPIServlet(this)
+        )
     }
 
     override fun onPostEnable() {
+        core.web.navigationBar.add(NavigationLink("Money", "/money/"))
         attemptCharacterCardFieldInitialisation()
     }
 
@@ -94,12 +104,12 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
 
     override fun setDefaultMessages() {
         messages.setDefault("money-usage", "&cUsage: /money [subtract|add|set|view|pay|wallet]")
-        messages.setDefault("money-subtract-player-prompt", "&fWhich player would you like to subtract money from? &7(Type cancel to cancel)")
-        messages.setDefault("money-subtract-player-invalid-player", "&cThat player is not online.")
-        messages.setDefault("money-subtract-player-valid", "&aPlayer set.")
+        messages.setDefault("money-subtract-profile-prompt", "&fWhich profile would you like to subtract money from? &7(Type cancel to cancel)")
+        messages.setDefault("money-subtract-profile-invalid-profile", "&cThere is no profile by that name.")
+        messages.setDefault("money-subtract-profile-valid", "&aProfile set.")
         messages.setDefault("money-subtract-character-prompt", "&fWhich character would you like to subtract money from? &7(Type cancel to cancel)")
         messages.setDefault("money-subtract-character-prompt-list-item", "&f- &7\$character")
-        messages.setDefault("money-subtract-character-invalid-character", "&cThat player does not have a character by that name.")
+        messages.setDefault("money-subtract-character-invalid-character", "&cThat profile does not have a character by that name.")
         messages.setDefault("money-subtract-character-valid", "&aCharacter set.")
         messages.setDefault("money-subtract-currency-prompt", "&fWhich currency would you like to use? &7(Type cancel to cancel)")
         messages.setDefault("money-subtract-currency-prompt-list-item", "&f- &7\$currency")
@@ -111,12 +121,12 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
         messages.setDefault("money-subtract-amount-invalid-amount-number", "&cYou must specify a number to subtract.")
         messages.setDefault("money-subtract-amount-valid", "&aAmount set.")
         messages.setDefault("money-subtract-valid", "&aMoney subtracted.")
-        messages.setDefault("money-add-player-prompt", "&fWhich player would you like to add money to? &7(Type cancel to cancel)")
-        messages.setDefault("money-add-player-invalid-player", "&cThat player is not online.")
-        messages.setDefault("money-add-player-valid", "&aPlayer set.")
+        messages.setDefault("money-add-profile-prompt", "&fWhich profile would you like to add money to? &7(Type cancel to cancel)")
+        messages.setDefault("money-add-profile-invalid-profile", "&cNo profile was found by that name.")
+        messages.setDefault("money-add-profile-valid", "&aProfile set.")
         messages.setDefault("money-add-character-prompt", "&fWhich character would you like to add money to? &7(Type cancel to cancel)")
         messages.setDefault("money-add-character-prompt-list-item", "&f- &7\$character")
-        messages.setDefault("money-add-character-invalid-character", "&cThat player does not have a character by that name.")
+        messages.setDefault("money-add-character-invalid-character", "&cThat profile does not have a character by that name.")
         messages.setDefault("money-add-character-valid", "&aCharacter set.")
         messages.setDefault("money-add-currency-prompt", "&fWhich currency would you like to use? &7(Type cancel to cancel)")
         messages.setDefault("money-add-currency-prompt-list-item", "&f- &7\$currency")
@@ -128,12 +138,12 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
         messages.setDefault("money-add-amount-invalid-amount-limit", "&cThat amount would not fit in the receiver's wallet.")
         messages.setDefault("money-add-amount-valid", "&aAmount set.")
         messages.setDefault("money-add-valid", "&aMoney added.")
-        messages.setDefault("money-set-player-prompt", "&fWhich player would you like to set the balance of? &7(Type cancel to cancel)")
-        messages.setDefault("money-set-player-invalid-player", "&cThat player is not online.")
-        messages.setDefault("money-set-player-valid", "&aPlayer set.")
+        messages.setDefault("money-set-profile-prompt", "&fWhich profile would you like to set the balance of? &7(Type cancel to cancel)")
+        messages.setDefault("money-set-profile-invalid-profile", "&cThere is no profile by that name.")
+        messages.setDefault("money-set-profile-valid", "&aProfile set.")
         messages.setDefault("money-set-character-prompt", "&fWhich character would you like to set the balance of? &7(Type cancel to cancel)")
         messages.setDefault("money-set-character-prompt-list-item", "&f- &7\$character")
-        messages.setDefault("money-set-character-invalid-character", "&cThat player does not have a character by that name.")
+        messages.setDefault("money-set-character-invalid-character", "&cThat profile does not have a character by that name.")
         messages.setDefault("money-set-character-valid", "&aCharacter set.")
         messages.setDefault("money-set-currency-prompt", "&fWhich currency would you like to use? &7(Type cancel to cancel)")
         messages.setDefault("money-set-currency-prompt-list-item", "&f- &7\$currency")
@@ -145,12 +155,12 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
         messages.setDefault("money-set-amount-invalid-amount-limit", "&cThat amount would not fit in the receiver's wallet.")
         messages.setDefault("money-set-amount-valid", "&aAmount set.")
         messages.setDefault("money-set-valid", "&aBalance set.")
-        messages.setDefault("money-view-player-prompt", "&fWhich player would you like to view the balance of?")
-        messages.setDefault("money-view-player-invalid-player", "&cThat player is not online.")
-        messages.setDefault("money-view-player-valid", "&aPlayer set.")
+        messages.setDefault("money-view-profile-prompt", "&fWhich profile would you like to view the balance of?")
+        messages.setDefault("money-view-profile-invalid-profile", "&cThere is no profile by that name.")
+        messages.setDefault("money-view-profile-valid", "&aProfile set.")
         messages.setDefault("money-view-character-prompt", "&fWhich character would you like to view money of? &7(Type cancel to cancel)")
         messages.setDefault("money-view-character-prompt-list-item", "&f- &7\$character")
-        messages.setDefault("money-view-character-invalid-character", "&cThat player does not have a character by that name.")
+        messages.setDefault("money-view-character-invalid-character", "&cThat profile does not have a character by that name.")
         messages.setDefault("money-view-character-valid", "&aCharacter set.")
         messages.setDefault("money-view-currency-prompt", "&fWhich currency would you like to use? &7(Type cancel to cancel)")
         messages.setDefault("money-view-currency-prompt-list-item", "&f- &7\$currency")
@@ -162,7 +172,7 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
         messages.setDefault("money-pay-player-valid", "&aPlayer set.")
         messages.setDefault("money-pay-character-prompt", "&fWhich character would you like to pay? &7(Type cancel to cancel)")
         messages.setDefault("money-pay-character-prompt-list-item", "&f- &7\$character")
-        messages.setDefault("money-pay-character-invalid-character", "&cThat player does not have a character by that name.")
+        messages.setDefault("money-pay-character-invalid-character", "&cThat profile does not have a character by that name.")
         messages.setDefault("money-pay-character-valid", "&aCharacter set.")
         messages.setDefault("money-pay-currency-prompt", "&fWhich currency would you like to use? &7(Type cancel to cancel)")
         messages.setDefault("money-pay-currency-prompt-list-item", "&f- &7\$currency")
@@ -176,12 +186,12 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
         messages.setDefault("money-pay-amount-valid", "&aAmount set.")
         messages.setDefault("money-pay-valid", "&aPaid \$amount \$currency to \$character.")
         messages.setDefault("money-pay-received", "&aReceived \$amount \$currency from \$character.")
-        messages.setDefault("money-view-player-prompt", "&fWhich player would you like to view the money of? &7(Type cancel to cancel)")
-        messages.setDefault("money-view-player-invalid-player", "&cThat player is not online.")
-        messages.setDefault("money-view-player-valid", "&aPlayer set.")
+        messages.setDefault("money-view-profile-prompt", "&fWhich profile would you like to view the money of? &7(Type cancel to cancel)")
+        messages.setDefault("money-view-profile-invalid-profile", "&cThere is no profile by that name.")
+        messages.setDefault("money-view-profile-valid", "&aProfile set.")
         messages.setDefault("money-view-character-prompt", "&fWhich character would you like to view the money of? &7(Type cancel to cancel)")
         messages.setDefault("money-view-character-prompt-list-item", "&f- &7\$character")
-        messages.setDefault("money-view-character-invalid-character", "&cThat player does not have a character by that name.")
+        messages.setDefault("money-view-character-invalid-character", "&cThat profile does not have a character by that name.")
         messages.setDefault("money-view-valid", "&fBalance:")
         messages.setDefault("money-view-valid-list-item", "&7\$currency: &f\$balance")
         messages.setDefault("money-wallet-currency-prompt", "&fWhich currency would you like to use?")
@@ -236,6 +246,8 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-exchange-create", "&cYou do not have permission to create exchanges.")
         messages.setDefault("no-character", "&cYou need a character to transfer money. Please create one.")
         messages.setDefault("recipient-no-character", "&cThe recipient needs a character to transfer money to. Please get them to create one.")
+        messages.setDefault("no-profile", "&cYour Minecraft profile is not linked to a profile. Please link it on the server's web UI.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
     }
 
 }

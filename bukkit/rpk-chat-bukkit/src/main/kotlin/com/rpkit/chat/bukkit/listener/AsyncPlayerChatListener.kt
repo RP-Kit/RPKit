@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.listener
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
@@ -34,35 +34,44 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
     fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
         event.isCancelled = true
         val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-        val player = playerProvider.getPlayer(event.player)
-        var chatChannel = chatChannelProvider.getPlayerChannel(player)
-        var message = event.message
-        for (otherChannel in chatChannelProvider.chatChannels) {
-            val matchPattern = otherChannel.matchPattern
-            if (matchPattern != null) {
-                if (!matchPattern.isEmpty()) {
-                    if (message.matches(matchPattern.toRegex())) {
-                        chatChannel = otherChannel
-                        val pattern = Pattern.compile(matchPattern)
-                        val matcher = pattern.matcher(message)
-                        if (matcher.matches()) {
-                            if (matcher.groupCount() > 0) {
-                                message = matcher.group(1)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+        if (minecraftProfile != null) {
+            val profile = minecraftProfile.profile
+            if (profile != null) {
+                var chatChannel = chatChannelProvider.getMinecraftProfileChannel(minecraftProfile)
+                var message = event.message
+                for (otherChannel in chatChannelProvider.chatChannels) {
+                    val matchPattern = otherChannel.matchPattern
+                    if (matchPattern != null) {
+                        if (!matchPattern.isEmpty()) {
+                            if (message.matches(matchPattern.toRegex())) {
+                                chatChannel = otherChannel
+                                val pattern = Pattern.compile(matchPattern)
+                                val matcher = pattern.matcher(message)
+                                if (matcher.matches()) {
+                                    if (matcher.groupCount() > 0) {
+                                        message = matcher.group(1)
+                                    }
+                                }
+                                if (!chatChannel.listenerMinecraftProfiles.contains(minecraftProfile)) {
+                                    chatChannel.addListener(minecraftProfile)
+                                    chatChannelProvider.updateChatChannel(chatChannel)
+                                }
                             }
-                        }
-                        if (!chatChannel.listeners.contains(player)) {
-                            chatChannel.addListener(player)
-                            chatChannelProvider.updateChatChannel(chatChannel)
                         }
                     }
                 }
+                if (chatChannel != null) {
+                    chatChannel.sendMessage(profile, minecraftProfile, message)
+                } else {
+                    event.player.sendMessage(plugin.messages["no-chat-channel"])
+                }
+            } else {
+                event.player.sendMessage(plugin.messages["no-profile"])
             }
-        }
-        if (chatChannel != null) {
-            chatChannel.sendMessage(player, message)
         } else {
-            event.player.sendMessage(plugin.messages["no-chat-channel"])
+            event.player.sendMessage(plugin.messages["no-minecraft-profile"])
         }
     }
 

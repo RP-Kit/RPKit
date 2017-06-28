@@ -18,7 +18,7 @@ package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -51,26 +51,30 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit): C
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.set.description")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    if (args.isNotEmpty()) {
-                        val descriptionBuilder = StringBuilder()
-                        for (i in 0..args.size - 1 - 1) {
-                            descriptionBuilder.append(args[i]).append(" ")
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        if (args.isNotEmpty()) {
+                            val descriptionBuilder = StringBuilder()
+                            for (i in 0..args.size - 1 - 1) {
+                                descriptionBuilder.append(args[i]).append(" ")
+                            }
+                            descriptionBuilder.append(args[args.size - 1])
+                            character.description = descriptionBuilder.toString()
+                            characterProvider.updateCharacter(character)
+                            sender.sendMessage(plugin.messages["character-set-description-valid"])
+                            character.showCharacterCard(minecraftProfile)
+                        } else {
+                            conversationFactory.buildConversation(sender).begin()
                         }
-                        descriptionBuilder.append(args[args.size - 1])
-                        character.description = descriptionBuilder.toString()
-                        characterProvider.updateCharacter(character)
-                        sender.sendMessage(plugin.messages["character-set-description-valid"])
-                        character.showCharacterCard(player)
                     } else {
-                        conversationFactory.buildConversation(sender).begin()
+                        sender.sendMessage(plugin.messages["no-character"])
                     }
                 } else {
-                    sender.sendMessage(plugin.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["no-permission-character-set-description"])
@@ -94,13 +98,15 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit): C
             if (input.equals("end", ignoreCase = true)) {
                 val conversable = context.forWhom
                 if (conversable is Player) {
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val player = playerProvider.getPlayer(conversable)
-                    val character = characterProvider.getActiveCharacter(player)
-                    if (character != null) {
-                        character.description = context.getSessionData("description") as String
-                        characterProvider.updateCharacter(character)
+                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(conversable)
+                    if (minecraftProfile != null) {
+                        val character = characterProvider.getActiveCharacter(minecraftProfile)
+                        if (character != null) {
+                            character.description = context.getSessionData("description") as String
+                            characterProvider.updateCharacter(character)
+                        }
                     }
                 }
                 return DescriptionSetPrompt()
@@ -118,10 +124,12 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit): C
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(context.forWhom as Player)
-                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
+                if (minecraftProfile != null) {
+                    characterProvider.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                }
             }
             return Prompt.END_OF_CONVERSATION
         }

@@ -18,8 +18,8 @@ package com.rpkit.permissions.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
+import com.rpkit.permissions.bukkit.database.jooq.rpkit.Tables.PLAYER_GROUP
 import com.rpkit.permissions.bukkit.group.PlayerGroup
 import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
@@ -27,8 +27,10 @@ import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.PreparedStatement
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the player group table.
@@ -41,15 +43,15 @@ class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBuk
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS player_group(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "player_id INTEGER," +
-                            "group_name VARCHAR(256)" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(PLAYER_GROUP)
+                .column(PLAYER_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(PLAYER_GROUP.PLAYER_ID, SQLDataType.INTEGER)
+                .column(PLAYER_GROUP.GROUP_NAME, SQLDataType.VARCHAR(256))
+                .constraints(
+                        constraint("pk_player_group").primaryKey(PLAYER_GROUP.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -59,93 +61,85 @@ class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBuk
     }
 
     override fun insert(entity: PlayerGroup): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO player_group(player_id, group_name) VALUES(?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.player.id)
-                statement.setString(2, entity.group.name)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        PLAYER_GROUP,
+                        PLAYER_GROUP.PLAYER_ID,
+                        PLAYER_GROUP.GROUP_NAME
+                )
+                .values(
+                        entity.player.id,
+                        entity.group.name
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: PlayerGroup) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE player_group SET player_id = ?, group_name = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.player.id)
-                statement.setString(2, entity.group.name)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(PLAYER_GROUP)
+                .set(PLAYER_GROUP.PLAYER_ID, entity.player.id)
+                .set(PLAYER_GROUP.GROUP_NAME, entity.group.name)
+                .where(PLAYER_GROUP.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): PlayerGroup? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var playerGroup: PlayerGroup? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, player_id, group_name FROM player_group WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val finalPlayerGroup = PlayerGroup(
-                                resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!,
-                                plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class).getGroup(resultSet.getString("group_name"))!!
-                        )
-                        cache.put(finalPlayerGroup.id, finalPlayerGroup)
-                        playerGroup = finalPlayerGroup
-                    }
-                }
+            val result = database.create
+                    .select(
+                            PLAYER_GROUP.PLAYER_ID,
+                            PLAYER_GROUP.GROUP_NAME
+                    )
+                    .from(PLAYER_GROUP)
+                    .where(PLAYER_GROUP.ID.eq(id))
+                    .fetchOne() ?: return null
+            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+            val playerId = result.get(PLAYER_GROUP.PLAYER_ID)
+            val player = playerProvider.getPlayer(playerId)
+            val groupProvider = plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class)
+            val groupName = result.get(PLAYER_GROUP.GROUP_NAME)
+            val group = groupProvider.getGroup(groupName)
+            if (player != null && group != null) {
+                val playerGroup = PlayerGroup(
+                        id,
+                        player,
+                        group
+                )
+                cache.put(id, playerGroup)
+                return playerGroup
+            } else {
+                database.create
+                        .deleteFrom(PLAYER_GROUP)
+                        .where(PLAYER_GROUP.ID.eq(id))
+                        .execute()
+                return null
             }
-            return playerGroup
         }
     }
 
     fun get(player: RPKPlayer): List<PlayerGroup> {
-        val playerGroups = mutableListOf<PlayerGroup>()
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM player_group WHERE player_id = ?"
-            ).use { statement ->
-                statement.setInt(1, player.id)
-                val resultSet = statement.executeQuery()
-                while (resultSet.next()) {
-                    val playerGroup = get(resultSet.getInt("id"))
-                    if (playerGroup != null) playerGroups.add(playerGroup)
-                }
-            }
-        }
-        return playerGroups
+        val results = database.create
+                .select(PLAYER_GROUP.ID)
+                .from(PLAYER_GROUP)
+                .where(PLAYER_GROUP.PLAYER_ID.eq(player.id))
+                .fetch()
+        return results.map { result -> get(result.get(PLAYER_GROUP.ID)) }
+                .filterNotNull()
     }
 
     override fun delete(entity: PlayerGroup) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM player_group WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-            }
-        }
+        database.create
+                .deleteFrom(PLAYER_GROUP)
+                .where(PLAYER_GROUP.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 }

@@ -17,170 +17,161 @@
 package com.rpkit.chat.bukkit.database.table
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
 import com.rpkit.chat.bukkit.chatgroup.LastUsedChatGroup
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
+import com.rpkit.chat.bukkit.database.jooq.rpkit.Tables.LAST_USED_CHAT_GROUP
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.ehcache.Cache
-import org.ehcache.CacheManager
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.DSL.field
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the last used chat group table
  */
-class LastUsedChatGroupTable: Table<LastUsedChatGroup> {
+class LastUsedChatGroupTable(database: Database, private val plugin: RPKChatBukkit): Table<LastUsedChatGroup>(database, LastUsedChatGroup::class) {
 
-    private val plugin: RPKChatBukkit
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, LastUsedChatGroup>
-    private val playerCache: Cache<Int, Int>
-
-    constructor(database: Database, plugin: RPKChatBukkit): super(database, LastUsedChatGroup::class) {
-        this.plugin = plugin
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, LastUsedChatGroup::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
-        playerCache = cacheManager.createCache("playerCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
-    }
+    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache = cacheManager.createCache("cache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, LastUsedChatGroup::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val minecraftProfileCache = cacheManager.createCache("minecraftProfileCache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS last_used_chat_group(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "player_id INTEGER," +
-                            "chat_group_id INTEGER" +
-                    ")"
-            ).use { statement ->
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .createTableIfNotExists(LAST_USED_CHAT_GROUP)
+                .column(LAST_USED_CHAT_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                .column(LAST_USED_CHAT_GROUP.CHAT_GROUP_ID, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_last_used_chat_group").primaryKey(LAST_USED_CHAT_GROUP.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.4.0")
+            database.setTableVersion(this, "1.3.0")
+        }
+        if (database.getTableVersion(this) == "0.4.0") {
+            database.create
+                    .truncate(LAST_USED_CHAT_GROUP)
+                    .execute()
+            database.create
+                    .alterTable(LAST_USED_CHAT_GROUP)
+                    .dropColumn(field("player_id"))
+                    .execute()
+            database.create
+                    .alterTable(LAST_USED_CHAT_GROUP)
+                    .addColumn(LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                    .execute()
+            database.setTableVersion(this, "1.3.0")
         }
     }
 
     override fun insert(entity: LastUsedChatGroup): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO last_used_chat_group(player_id, chat_group_id) VALUES(?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.player.id)
-                statement.setInt(2, entity.chatGroup.id)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                    playerCache.put(entity.player.id, id)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        LAST_USED_CHAT_GROUP,
+                        LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID,
+                        LAST_USED_CHAT_GROUP.CHAT_GROUP_ID
+                )
+                .values(
+                        entity.minecraftProfile.id,
+                        entity.chatGroup.id
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
+        minecraftProfileCache.put(entity.minecraftProfile.id, id)
         return id
     }
 
     override fun update(entity: LastUsedChatGroup) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE last_used_chat_group SET player_id = ?, chat_group_id = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.player.id)
-                statement.setInt(2, entity.chatGroup.id)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-                playerCache.put(entity.player.id, entity.id)
-            }
-        }
+        database.create
+                .update(LAST_USED_CHAT_GROUP)
+                .set(LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
+                .set(LAST_USED_CHAT_GROUP.CHAT_GROUP_ID, entity.chatGroup.id)
+                .where(LAST_USED_CHAT_GROUP.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
+        minecraftProfileCache.put(entity.minecraftProfile.id, entity.id)
     }
 
     override fun get(id: Int): LastUsedChatGroup? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var lastUsedChatGroup: LastUsedChatGroup? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, player_id, chat_group_id FROM last_used_chat_group WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val finalLastUsedChatGroup = LastUsedChatGroup(
-                                resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!,
-                                plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class).getChatGroup(resultSet.getInt("chat_group_id"))!!
-                        )
-                        lastUsedChatGroup = finalLastUsedChatGroup
-                        cache.put(id, finalLastUsedChatGroup)
-                        playerCache.put(finalLastUsedChatGroup.player.id, id)
-                    }
-                }
+            val result = database.create
+                    .select(
+                            LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID,
+                            LAST_USED_CHAT_GROUP.CHAT_GROUP_ID
+                    )
+                    .from(LAST_USED_CHAT_GROUP)
+                    .where(LAST_USED_CHAT_GROUP.ID.eq(id))
+                    .fetchOne() ?: return null
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfileId = result.get(LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
+            val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
+            val chatGroupId = result.get(LAST_USED_CHAT_GROUP.CHAT_GROUP_ID)
+            val chatGroup = chatGroupProvider.getChatGroup(chatGroupId)
+            if (minecraftProfile != null && chatGroup != null) {
+                val lastUsedChatGroup = LastUsedChatGroup(
+                        id,
+                        minecraftProfile,
+                        chatGroup
+                )
+                cache.put(id, lastUsedChatGroup)
+                minecraftProfileCache.put(lastUsedChatGroup.minecraftProfile.id, id)
+                return lastUsedChatGroup
+            } else {
+                database.create
+                        .deleteFrom(LAST_USED_CHAT_GROUP)
+                        .where(LAST_USED_CHAT_GROUP.ID.eq(id))
+                        .execute()
+                return null
             }
-            return lastUsedChatGroup
         }
     }
 
     /**
-     * Gets the last used chat group of a player.
-     * If the player has never used a chat group, null is returned.
+     * Gets the last used chat group of a minecraftProfile.
+     * If the minecraftProfile has never used a chat group, null is returned.
      *
-     * @param player The player
-     * @return The player's last used chat group, or null if no chat group has been used
+     * @param minecraftProfile The minecraftProfile
+     * @return The minecraftProfile's last used chat group, or null if no chat group has been used
      */
-    fun get(player: RPKPlayer): LastUsedChatGroup? {
-        if (playerCache.containsKey(player.id)) {
-            return get(playerCache.get(player.id))
+    fun get(minecraftProfile: RPKMinecraftProfile): LastUsedChatGroup? {
+        if (minecraftProfileCache.containsKey(minecraftProfile.id)) {
+            return get(minecraftProfileCache.get(minecraftProfile.id))
         } else {
-            var lastUsedChatGroup: LastUsedChatGroup? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, player_id, chat_group_id FROM last_used_chat_group WHERE player_id = ?"
-                ).use { statement ->
-                    statement.setInt(1, player.id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val finalLastUsedChatGroup = LastUsedChatGroup(
-                                resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!,
-                                plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class).getChatGroup(resultSet.getInt("chat_group_id"))!!
-                        )
-                        lastUsedChatGroup = finalLastUsedChatGroup
-                        cache.put(finalLastUsedChatGroup.id, finalLastUsedChatGroup)
-                        playerCache.put(finalLastUsedChatGroup.player.id, finalLastUsedChatGroup.id)
-                    }
-                }
-            }
-            return lastUsedChatGroup
+            val result = database.create
+                    .select(LAST_USED_CHAT_GROUP.ID)
+                    .from(LAST_USED_CHAT_GROUP)
+                    .where(LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                    .fetchOne() ?: return null
+            return get(result.get(LAST_USED_CHAT_GROUP.ID))
         }
     }
 
     override fun delete(entity: LastUsedChatGroup) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM last_used_chat_group WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-                playerCache.remove(entity.player.id)
-            }
-        }
+        database.create
+                .deleteFrom(LAST_USED_CHAT_GROUP)
+                .where(LAST_USED_CHAT_GROUP.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
+        minecraftProfileCache.remove(entity.minecraftProfile.id)
     }
 
 }

@@ -27,8 +27,10 @@ import com.rpkit.core.service.ServiceProvider
 import com.rpkit.core.web.NavigationLink
 import com.rpkit.core.web.Web
 import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
+import org.jooq.SQLDialect
 import java.sql.SQLException
 
 /**
@@ -43,10 +45,16 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
         saveDefaultConfig()
         val webServer = Server(config.getInt("web-server.port"))
         servletContext = ServletContextHandler()
+        servletContext.sessionHandler = SessionHandler()
         webServer.handler = servletContext
         core = RPKCore(
                 logger,
-                Database(config.getString("database.url"), config.getString("database.username"), config.getString("database.password")),
+                Database(
+                        config.getString("database.url"),
+                        config.getString("database.username"),
+                        config.getString("database.password"),
+                        SQLDialect.valueOf(config.getString("database.dialect"))
+                ),
                 Web(webServer, mutableListOf(NavigationLink("Home", "/")))
         )
         try {

@@ -19,65 +19,57 @@ package com.rpkit.auctions.bukkit.database.table
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
 import com.rpkit.auctions.bukkit.auction.RPKAuction
 import com.rpkit.auctions.bukkit.auction.RPKAuctionImpl
+import com.rpkit.auctions.bukkit.database.jooq.rpkit.Tables.RPKIT_AUCTION
+import com.rpkit.auctions.bukkit.database.jooq.rpkit.Tables.RPKIT_BID
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.core.bukkit.util.itemStackFromByteArray
 import com.rpkit.core.bukkit.util.toByteArray
+import com.rpkit.core.bukkit.util.toItemStack
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import org.bukkit.Location
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.Statement.RETURN_GENERATED_KEYS
-import java.sql.Types.*
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the auction table.
  */
-class RPKAuctionTable: Table<RPKAuction> {
+class RPKAuctionTable(database: Database, private val plugin: RPKAuctionsBukkit): Table<RPKAuction>(database, RPKAuction::class) {
 
-    private val plugin: RPKAuctionsBukkit
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, RPKAuction>
-
-    constructor(database: Database, plugin: RPKAuctionsBukkit): super(database, RPKAuction::class) {
-        this.plugin = plugin
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKAuction::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    }
+    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKAuction::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_auction(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "item BLOB," +
-                            "currency_id INTEGER," +
-                            "world VARCHAR(256)," +
-                            "x DOUBLE," +
-                            "y DOUBLE," +
-                            "z DOUBLE," +
-                            "yaw REAL," +
-                            "pitch REAL," +
-                            "character_id INTEGER," +
-                            "duration BIGINT," +
-                            "end_time BIGINT," +
-                            "start_price INTEGER," +
-                            "buy_out_price INTEGER," +
-                            "no_sell_price INTEGER," +
-                            "minimum_bid_increment INTEGER," +
-                            "bidding_open BOOLEAN" +
-                    ")"
-            ).use { statement ->
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_AUCTION)
+                .column(RPKIT_AUCTION.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_AUCTION.ITEM, SQLDataType.BLOB)
+                .column(RPKIT_AUCTION.CURRENCY_ID, SQLDataType.INTEGER)
+                .column(RPKIT_AUCTION.WORLD, SQLDataType.VARCHAR(256))
+                .column(RPKIT_AUCTION.X, SQLDataType.DOUBLE)
+                .column(RPKIT_AUCTION.Y, SQLDataType.DOUBLE)
+                .column(RPKIT_AUCTION.Z, SQLDataType.DOUBLE)
+                .column(RPKIT_AUCTION.YAW, SQLDataType.DOUBLE)
+                .column(RPKIT_AUCTION.PITCH, SQLDataType.DOUBLE)
+                .column(RPKIT_AUCTION.CHARACTER_ID, SQLDataType.INTEGER)
+                .column(RPKIT_AUCTION.DURATION, SQLDataType.BIGINT)
+                .column(RPKIT_AUCTION.END_TIME, SQLDataType.BIGINT)
+                .column(RPKIT_AUCTION.START_PRICE, SQLDataType.INTEGER)
+                .column(RPKIT_AUCTION.BUY_OUT_PRICE, SQLDataType.INTEGER)
+                .column(RPKIT_AUCTION.NO_SELL_PRICE, SQLDataType.INTEGER)
+                .column(RPKIT_AUCTION.MINIMUM_BID_INCREMENT, SQLDataType.INTEGER)
+                .column(RPKIT_AUCTION.BIDDING_OPEN, SQLDataType.TINYINT.length(1))
+                .constraints(
+                        constraint("pk_rpkit_auction").primaryKey(RPKIT_AUCTION.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -87,148 +79,149 @@ class RPKAuctionTable: Table<RPKAuction> {
     }
 
     override fun insert(entity: RPKAuction): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_auction(item, currency_id, world, x, y, z, yaw, pitch, character_id, duration, end_time, start_price, buy_out_price, no_sell_price, minimum_bid_increment, bidding_open) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setBytes(1, entity.item.toByteArray())
-                statement.setInt(2, entity.currency.id)
-                val location = entity.location
-                if (location != null) {
-                    statement.setString(3, location.world.name)
-                    statement.setDouble(4, location.x)
-                    statement.setDouble(5, location.y)
-                    statement.setDouble(6, location.z)
-                    statement.setFloat(7, location.yaw)
-                    statement.setFloat(8, location.pitch)
-                } else {
-                    statement.setNull(3, VARCHAR)
-                    statement.setNull(4, DOUBLE)
-                    statement.setNull(5, DOUBLE)
-                    statement.setNull(6, DOUBLE)
-                    statement.setNull(7, FLOAT)
-                    statement.setNull(8, FLOAT)
-                }
-                statement.setInt(9, entity.character.id)
-                statement.setLong(10, entity.duration)
-                statement.setLong(11, entity.endTime)
-                statement.setInt(12, entity.startPrice)
-                val buyOutPrice = entity.buyOutPrice
-                if (buyOutPrice != null) {
-                    statement.setInt(13, buyOutPrice)
-                } else {
-                    statement.setNull(13, INTEGER)
-                }
-                val noSellPrice = entity.noSellPrice
-                if (noSellPrice != null) {
-                    statement.setInt(14, noSellPrice)
-                } else {
-                    statement.setNull(14, INTEGER)
-                }
-                statement.setInt(15, entity.minimumBidIncrement)
-                statement.setBoolean(16, entity.isBiddingOpen)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_AUCTION,
+                        RPKIT_AUCTION.ITEM,
+                        RPKIT_AUCTION.CURRENCY_ID,
+                        RPKIT_AUCTION.WORLD,
+                        RPKIT_AUCTION.X,
+                        RPKIT_AUCTION.Y,
+                        RPKIT_AUCTION.Z,
+                        RPKIT_AUCTION.YAW,
+                        RPKIT_AUCTION.PITCH,
+                        RPKIT_AUCTION.CHARACTER_ID,
+                        RPKIT_AUCTION.DURATION,
+                        RPKIT_AUCTION.END_TIME,
+                        RPKIT_AUCTION.START_PRICE,
+                        RPKIT_AUCTION.BUY_OUT_PRICE,
+                        RPKIT_AUCTION.NO_SELL_PRICE,
+                        RPKIT_AUCTION.MINIMUM_BID_INCREMENT,
+                        RPKIT_AUCTION.BIDDING_OPEN
+                )
+                .values(
+                        entity.item.toByteArray(),
+                        entity.currency.id,
+                        entity.location?.world?.name,
+                        entity.location?.x,
+                        entity.location?.y,
+                        entity.location?.z,
+                        entity.location?.yaw?.toDouble(),
+                        entity.location?.pitch?.toDouble(),
+                        entity.character.id,
+                        entity.duration,
+                        entity.endTime,
+                        entity.startPrice,
+                        entity.buyOutPrice,
+                        entity.noSellPrice,
+                        entity.minimumBidIncrement,
+                        if (entity.isBiddingOpen) 1.toByte() else 0.toByte()
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKAuction) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_auction SET item = ?, currency_id = ?, world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ?, character_id = ?, duration = ?, end_time = ?, start_price = ?, buy_out_price = ?, no_sell_price = ?, minimum_bid_increment = ?, bidding_open = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setBytes(1, entity.item.toByteArray())
-                statement.setInt(2, entity.currency.id)
-                val location = entity.location
-                if (location != null) {
-                    statement.setString(3, location.world.name)
-                    statement.setDouble(4, location.x)
-                    statement.setDouble(5, location.y)
-                    statement.setDouble(6, location.z)
-                    statement.setFloat(7, location.yaw)
-                    statement.setFloat(8, location.pitch)
-                } else {
-                    statement.setNull(3, VARCHAR)
-                    statement.setNull(4, DOUBLE)
-                    statement.setNull(5, DOUBLE)
-                    statement.setNull(6, DOUBLE)
-                    statement.setNull(7, FLOAT)
-                    statement.setNull(8, FLOAT)
-                }
-                statement.setInt(9, entity.character.id)
-                statement.setLong(10, entity.duration)
-                statement.setLong(11, entity.endTime)
-                statement.setInt(12, entity.startPrice)
-                val buyOutPrice = entity.buyOutPrice
-                if (buyOutPrice != null) {
-                    statement.setInt(13, buyOutPrice)
-                } else {
-                    statement.setNull(13, INTEGER)
-                }
-                val noSellPrice = entity.noSellPrice
-                if (noSellPrice != null) {
-                    statement.setInt(14, noSellPrice)
-                } else {
-                    statement.setNull(14, INTEGER)
-                }
-                statement.setInt(15, entity.minimumBidIncrement)
-                statement.setBoolean(16, entity.isBiddingOpen)
-                statement.setInt(17, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(RPKIT_AUCTION)
+                .set(RPKIT_AUCTION.ITEM, entity.item.toByteArray())
+                .set(RPKIT_AUCTION.CURRENCY_ID, entity.currency.id)
+                .set(RPKIT_AUCTION.WORLD, entity.location?.world?.name)
+                .set(RPKIT_AUCTION.X, entity.location?.x)
+                .set(RPKIT_AUCTION.Y, entity.location?.y)
+                .set(RPKIT_AUCTION.Z, entity.location?.z)
+                .set(RPKIT_AUCTION.YAW, entity.location?.yaw?.toDouble())
+                .set(RPKIT_AUCTION.PITCH, entity.location?.pitch?.toDouble())
+                .set(RPKIT_AUCTION.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_AUCTION.DURATION, entity.duration)
+                .set(RPKIT_AUCTION.END_TIME, entity.endTime)
+                .set(RPKIT_AUCTION.START_PRICE, entity.startPrice)
+                .set(RPKIT_AUCTION.BUY_OUT_PRICE, entity.buyOutPrice)
+                .set(RPKIT_AUCTION.NO_SELL_PRICE, entity.noSellPrice)
+                .set(RPKIT_AUCTION.MINIMUM_BID_INCREMENT, entity.minimumBidIncrement)
+                .set(RPKIT_AUCTION.BIDDING_OPEN, if (entity.isBiddingOpen) 1.toByte() else 0.toByte())
+                .where(RPKIT_AUCTION.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKAuction? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var auction: RPKAuction? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, item, currency_id, world, x, y, z, yaw, pitch, character_id, duration, end_time, start_price, buy_out_price, no_sell_price, minimum_bid_increment, bidding_open FROM rpkit_auction WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val finalAuction = RPKAuctionImpl(
-                                plugin,
-                                resultSet.getInt("id"),
-                                itemStackFromByteArray(resultSet.getBytes("item")),
-                                plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(resultSet.getInt("currency_id"))!!,
-                                Location(
-                                        plugin.server.getWorld(resultSet.getString("world")),
-                                        resultSet.getDouble("x"),
-                                        resultSet.getDouble("y"),
-                                        resultSet.getDouble("z"),
-                                        resultSet.getFloat("yaw"),
-                                        resultSet.getFloat("pitch")
-                                ),
-                                plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getCharacter(resultSet.getInt("character_id"))!!,
-                                resultSet.getLong("duration"),
-                                resultSet.getLong("end_time"),
-                                resultSet.getInt("start_price"),
-                                resultSet.getInt("buy_out_price"),
-                                resultSet.getInt("no_sell_price"),
-                                resultSet.getInt("minimum_bid_increment"),
-                                resultSet.getBoolean("bidding_open")
-                        )
-                        cache.put(finalAuction.id, finalAuction)
-                        auction = finalAuction
-                    }
-                }
+            val result = database.create
+                    .select(
+                            RPKIT_AUCTION.ITEM,
+                            RPKIT_AUCTION.CURRENCY_ID,
+                            RPKIT_AUCTION.WORLD,
+                            RPKIT_AUCTION.X,
+                            RPKIT_AUCTION.Y,
+                            RPKIT_AUCTION.Z,
+                            RPKIT_AUCTION.YAW,
+                            RPKIT_AUCTION.PITCH,
+                            RPKIT_AUCTION.CHARACTER_ID,
+                            RPKIT_AUCTION.DURATION,
+                            RPKIT_AUCTION.END_TIME,
+                            RPKIT_AUCTION.START_PRICE,
+                            RPKIT_AUCTION.BUY_OUT_PRICE,
+                            RPKIT_AUCTION.NO_SELL_PRICE,
+                            RPKIT_AUCTION.MINIMUM_BID_INCREMENT,
+                            RPKIT_AUCTION.BIDDING_OPEN
+                    )
+                    .from(RPKIT_AUCTION)
+                    .where(RPKIT_AUCTION.ID.eq(id))
+                    .fetchOne() ?: return null
+            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
+            val currencyId = result.get(RPKIT_AUCTION.CURRENCY_ID)
+            val currency = currencyProvider.getCurrency(currencyId)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterId = result.get(RPKIT_AUCTION.CHARACTER_ID)
+            val character = characterProvider.getCharacter(characterId)
+            if (currency != null && character != null) {
+                val auction = RPKAuctionImpl(
+                        plugin,
+                        id,
+                        result.get(RPKIT_AUCTION.ITEM).toItemStack(),
+                        currency,
+                        Location(
+                                plugin.server.getWorld(result.get(RPKIT_AUCTION.WORLD)),
+                                result.get(RPKIT_AUCTION.X),
+                                result.get(RPKIT_AUCTION.Y),
+                                result.get(RPKIT_AUCTION.Z),
+                                result.get(RPKIT_AUCTION.YAW).toFloat(),
+                                result.get(RPKIT_AUCTION.PITCH).toFloat()
+                        ),
+                        character,
+                        result.get(RPKIT_AUCTION.DURATION),
+                        result.get(RPKIT_AUCTION.END_TIME),
+                        result.get(RPKIT_AUCTION.START_PRICE),
+                        result.get(RPKIT_AUCTION.BUY_OUT_PRICE),
+                        result.get(RPKIT_AUCTION.NO_SELL_PRICE),
+                        result.get(RPKIT_AUCTION.MINIMUM_BID_INCREMENT),
+                        result.get(RPKIT_AUCTION.BIDDING_OPEN) == 1.toByte()
+                )
+                cache.put(id, auction)
+                return auction
+            } else {
+                val bidTable = database.getTable(RPKBidTable::class)
+                database.create
+                        .select(RPKIT_BID.ID)
+                        .from(RPKIT_BID)
+                        .where(RPKIT_BID.AUCTION_ID.eq(id))
+                        .fetch()
+                        .map { result -> result.get(RPKIT_BID.ID) }
+                        .map { bidId -> bidTable.get(bidId) }
+                        .filterNotNull()
+                        .forEach { bid -> bidTable.delete(bid) }
+                database.create
+                        .deleteFrom(RPKIT_AUCTION)
+                        .where(RPKIT_AUCTION.ID.eq(id))
+                        .execute()
+                return null
             }
-            return auction
         }
     }
 
@@ -238,36 +231,25 @@ class RPKAuctionTable: Table<RPKAuction> {
      * @return A list containing all auctions
      */
     fun getAll(): List<RPKAuction> {
-        val auctions = mutableListOf<RPKAuction>()
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_auction"
-            ).use { statement ->
-                val resultSet = statement.executeQuery()
-                while (resultSet.next()) {
-                    val auction = get(resultSet.getInt("id"))
-                    if (auction != null) {
-                        auctions.add(auction)
-                    }
-                }
-            }
-        }
+        val results = database.create
+                .select(RPKIT_AUCTION.ID)
+                .from(RPKIT_AUCTION)
+                .fetch()
+        val auctions = results.map { result ->
+            get(result.get(RPKIT_AUCTION.ID))
+        }.filterNotNull()
         return auctions
     }
 
     override fun delete(entity: RPKAuction) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_auction WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-            }
-        }
         for (bid in entity.bids) {
             database.getTable(RPKBidTable::class).delete(bid)
         }
+        database.create
+                .deleteFrom(RPKIT_AUCTION)
+                .where(RPKIT_AUCTION.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 }

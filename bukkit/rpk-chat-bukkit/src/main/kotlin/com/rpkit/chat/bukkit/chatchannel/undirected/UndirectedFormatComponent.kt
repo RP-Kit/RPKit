@@ -33,18 +33,22 @@ class UndirectedFormatComponent(private val plugin: RPKChatBukkit, var formatStr
     override fun process(context: UndirectedChatChannelMessageContext): UndirectedChatChannelMessageContext {
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val prefixProvider = plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class)
-        val sender = context.sender
-        val senderCharacter = characterProvider.getActiveCharacter(sender)
+        val senderMinecraftProfile = context.senderMinecraftProfile
+        val senderProfile = context.senderProfile
+        val senderCharacter = if (senderMinecraftProfile != null)
+            characterProvider.getActiveCharacter(senderMinecraftProfile)
+        else
+            null
         val chatChannel = context.chatChannel
         var formattedMessage = ChatColor.translateAlternateColorCodes('&', formatString)
         if (formattedMessage.contains("\$message")) {
             formattedMessage = formattedMessage.replace("\$message", context.message)
         }
         if (formattedMessage.contains("\$sender-prefix")) {
-            formattedMessage = formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(sender))
+            formattedMessage = formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(senderProfile))
         }
         if (formattedMessage.contains("\$sender-player")) {
-            formattedMessage = formattedMessage.replace("\$sender-player", sender.name)
+            formattedMessage = formattedMessage.replace("\$sender-player", senderProfile.name)
         }
         if (formattedMessage.contains("\$sender-character")) {
             if (senderCharacter != null) {
@@ -75,7 +79,7 @@ class UndirectedFormatComponent(private val plugin: RPKChatBukkit, var formatStr
         fun deserialize(serialized: MutableMap<String, Any>): UndirectedFormatComponent {
             return UndirectedFormatComponent(
                     Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
-                    serialized.get("format") as String
+                    serialized["format"] as String
             )
         }
     }

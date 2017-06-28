@@ -18,8 +18,7 @@ package com.rpkit.characters.bukkit.command.character.card
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -34,23 +33,31 @@ class CharacterCardCommand(private val plugin: RPKCharactersBukkit): CommandExec
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.card.self")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                var player = playerProvider.getPlayer(sender)
+                var minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                 if (sender.hasPermission("rpkit.characters.command.character.card.other")) {
-                    if (args.size > 0) {
+                    if (args.isNotEmpty()) {
                         val bukkitPlayer = plugin.server.getPlayer(args[0])
                         if (bukkitPlayer != null) {
-                            player = playerProvider.getPlayer(bukkitPlayer)
+                            minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
                         }
                     }
                 }
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    val senderPlayer = playerProvider.getPlayer(sender)
-                    character.showCharacterCard(senderPlayer)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                        if (senderMinecraftProfile != null) {
+                            character.showCharacterCard(senderMinecraftProfile)
+                        } else {
+                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                        }
+                    } else {
+                        sender.sendMessage(plugin.messages["no-character"])
+                    }
                 } else {
-                    sender.sendMessage(plugin.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["no-permission-character-card-self"])

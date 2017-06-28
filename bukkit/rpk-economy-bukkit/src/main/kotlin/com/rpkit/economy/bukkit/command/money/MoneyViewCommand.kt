@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -34,7 +34,7 @@ import org.bukkit.entity.Player
 class MoneyViewCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
@@ -46,35 +46,44 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
             bukkitPlayer = plugin.server.getPlayer(args[0])
         }
         if (bukkitPlayer != null) {
-            val player = playerProvider.getPlayer(bukkitPlayer)
-            val character: RPKCharacter?
-            if (args.size > 1) {
-                val nameBuilder = StringBuilder()
-                for (i in 1..args.size - 2) {
-                    nameBuilder.append(args[i]).append(' ')
-                }
-                nameBuilder.append(args[args.size - 1])
-                val name = nameBuilder.toString()
-                character = characterProvider.getCharacters(player)
-                        .filter { character -> character.name == name }
-                        .firstOrNull()
-            } else {
-                character = characterProvider.getActiveCharacter(player)
-            }
-            val finalCharacter = character
-            if (finalCharacter != null) {
-                sender.sendMessage(plugin.messages["money-view-valid"])
-                sender.sendMessage(currencyProvider.currencies
-                        .map { currency ->
-                            plugin.messages["money-view-valid-list-item", mapOf(
-                                    Pair("currency", currency.name),
-                                    Pair("balance", economyProvider.getBalance(finalCharacter, currency).toString())
-                            )]
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                val profile = minecraftProfile.profile
+                if (profile != null) {
+                    val character: RPKCharacter?
+                    if (args.size > 1) {
+                        val nameBuilder = StringBuilder()
+                        for (i in 1..args.size - 2) {
+                            nameBuilder.append(args[i]).append(' ')
                         }
-                        .toTypedArray()
-                )
+                        nameBuilder.append(args[args.size - 1])
+                        val name = nameBuilder.toString()
+                        character = characterProvider.getCharacters(profile)
+                                .filter { character -> character.name == name }
+                                .firstOrNull()
+                    } else {
+                        character = characterProvider.getActiveCharacter(minecraftProfile)
+                    }
+                    val finalCharacter = character
+                    if (finalCharacter != null) {
+                        sender.sendMessage(plugin.messages["money-view-valid"])
+                        sender.sendMessage(currencyProvider.currencies
+                                .map { currency ->
+                                    plugin.messages["money-view-valid-list-item", mapOf(
+                                            Pair("currency", currency.name),
+                                            Pair("balance", economyProvider.getBalance(finalCharacter, currency).toString())
+                                    )]
+                                }
+                                .toTypedArray()
+                        )
+                    } else {
+                        sender.sendMessage(plugin.messages["no-character"])
+                    }
+                } else {
+                    sender.sendMessage(plugin.messages["no-profile"])
+                }
             } else {
-                sender.sendMessage(plugin.messages["no-character"])
+                sender.sendMessage(plugin.messages["no-minecraft-profile"])
             }
         } else {
             sender.sendMessage(plugin.messages["not-from-console"])

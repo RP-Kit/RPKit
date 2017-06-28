@@ -23,6 +23,8 @@ import java.util.*
 /**
  * Player implementation.
  */
+@Deprecated("Old players API. Please move to new profiles APIs.",
+        replaceWith = ReplaceWith("RPKProfileImpl", "com.rpkit.players.bukkit.profile.RPKProfileImpl"))
 class RPKPlayerImpl(
         override var id: Int = 0,
         override var name: String,

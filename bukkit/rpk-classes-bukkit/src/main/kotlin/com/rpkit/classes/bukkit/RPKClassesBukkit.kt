@@ -61,6 +61,7 @@ class RPKClassesBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-class-list", "&cYou do not have permission to list classes.")
         messages.setDefault("class-list-title", "&fClasses:")
         messages.setDefault("class-list-item", "&f- &7\$class")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
     }
 
     fun attemptStatRegistration() {

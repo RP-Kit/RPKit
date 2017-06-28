@@ -24,6 +24,9 @@ import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import mkremins.fanciful.FancyMessage
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -36,7 +39,9 @@ import org.bukkit.inventory.ItemStack
 class RPKCharacterImpl constructor(
         val plugin: RPKCharactersBukkit,
         override var id: Int = 0,
-        override var player: RPKPlayer?,
+        override var player: RPKPlayer? = null,
+        override var profile: RPKProfile? = null,
+        override var minecraftProfile: RPKMinecraftProfile? = null,
         name: String = plugin.config.getString("characters.defaults.name"),
         override var gender: RPKGender? = if (plugin.config.getString("characters.defaults.gender") != null) plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class).getGender(plugin.config.getString("characters.defaults.gender")) else null,
         override var age: Int = plugin.config.getInt("characters.defaults.age"),
@@ -56,6 +61,7 @@ class RPKCharacterImpl constructor(
         override var foodLevel: Int = plugin.config.getInt("characters.defaults.food-level"),
         override var thirstLevel: Int = plugin.config.getInt("characters.defaults.thirst-level"),
         override var isPlayerHidden: Boolean = plugin.config.getBoolean("characters.defaults.player-hidden"),
+        override var isProfileHidden: Boolean = plugin.config.getBoolean("characters.defaults.profile-hidden"),
         override var isNameHidden: Boolean = plugin.config.getBoolean("characters.defaults.name-hidden"),
         override var isGenderHidden: Boolean = plugin.config.getBoolean("characters.defaults.gender-hidden"),
         override var isAgeHidden: Boolean = plugin.config.getBoolean("characters.defaults.age-hidden"),
@@ -66,8 +72,15 @@ class RPKCharacterImpl constructor(
     override var name = name
         set(name) {
             field = name
-            if (plugin.config.getBoolean("characters.set-player-display-name"))
-            (player as? RPKPlayer)?.bukkitPlayer?.player?.displayName = name
+            if (plugin.config.getBoolean("characters.set-player-display-name")) {
+                val minecraftProfile = minecraftProfile
+                if (minecraftProfile != null) {
+                    val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
+                    if (bukkitPlayer != null) {
+                        bukkitPlayer.displayName = name
+                    }
+                }
+            }
         }
     override var description = description
         set(description) {
@@ -81,17 +94,29 @@ class RPKCharacterImpl constructor(
     override fun showCharacterCard(player: RPKPlayer) {
         val offlineBukkitPlayer = player.bukkitPlayer
         if (offlineBukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(offlineBukkitPlayer)
+            if (minecraftProfile != null) {
+                showCharacterCard(minecraftProfile)
+            }
+        }
+    }
+
+    override fun showCharacterCard(minecraftProfile: RPKMinecraftProfile) {
+        val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
+        if (offlineBukkitPlayer != null) {
             if (offlineBukkitPlayer.isOnline) {
                 val bukkitPlayer = offlineBukkitPlayer.player
                 val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterCardFieldProvider::class)
-                for (line in if (player == this.player) plugin.messages.getList("character-card-owner") else
+                val profile = minecraftProfile.profile
+                for (line in if (profile != null && profile == this.profile) plugin.messages.getList("character-card-owner") else
                     plugin.messages.getList("character-card-not-owner")) {
                     val message = FancyMessage("")
                     var chatColor: ChatColor? = null
                     var chatFormat: ChatColor? = null
                     var i = 0
                     while (i < line.length) {
-                        if (line[i] === ChatColor.COLOR_CHAR) {
+                        if (line[i] == ChatColor.COLOR_CHAR) {
                             val colourOrFormat = ChatColor.getByChar(line[i + 1])
                             if (colourOrFormat.isColor) {
                                 chatColor = colourOrFormat
@@ -121,10 +146,10 @@ class RPKCharacterImpl constructor(
                                         .filter { field -> line.length >= i + "\$edit(${field.name})".length }
                                         .filter { field -> line.substring(i, i + "\$edit(${field.name})".length) == "\$edit(${field.name})" }
                                         .forEach { field ->
-                                            if (player == this.player) {
+                                            if (minecraftProfile == this.minecraftProfile) {
                                                 message.then("Edit")
-                                                            .command("/character set ${field.name}")
-                                                            .tooltip("Click to change your character's ${field.name}")
+                                                        .command("/character set ${field.name}")
+                                                        .tooltip("Click to change your character's ${field.name}")
                                                 if (chatColor != null) {
                                                     message.color(chatColor)
                                                 }
@@ -143,7 +168,7 @@ class RPKCharacterImpl constructor(
                                             .filter { it is HideableCharacterCardField }
                                             .map { field -> field as HideableCharacterCardField }
                                             .forEach { field ->
-                                                if (player == this.player) {
+                                                if (minecraftProfile == this.minecraftProfile) {
                                                     if (field.isHidden(this)) {
                                                         message.then("Unhide")
                                                                 .command("/character unhide ${field.name}")

@@ -5,6 +5,8 @@ import com.rpkit.locks.bukkit.database.table.RPKLockedBlockTable
 import com.rpkit.locks.bukkit.database.table.RPKPlayerGettingKeyTable
 import com.rpkit.locks.bukkit.database.table.RPKPlayerUnclaimingTable
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
 
@@ -34,7 +36,19 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
     }
 
     override fun isClaiming(player: RPKPlayer): Boolean {
-        val bukkitOfflinePlayer = player.bukkitPlayer
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                return isClaiming(minecraftProfile)
+            }
+        }
+        return false
+    }
+
+    override fun isClaiming(minecraftProfile: RPKMinecraftProfile): Boolean {
+        val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
         if (bukkitOfflinePlayer != null) {
             if (bukkitOfflinePlayer.isOnline) {
                 val bukkitPlayer = bukkitOfflinePlayer.player
@@ -51,18 +65,41 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
     }
 
     override fun isUnclaiming(player: RPKPlayer): Boolean {
-        return plugin.core.database.getTable(RPKPlayerUnclaimingTable::class).get(player) != null
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                return isUnclaiming(minecraftProfile)
+            }
+        }
+        return false
+    }
+
+    override fun isUnclaiming(minecraftProfile: RPKMinecraftProfile): Boolean {
+        return plugin.core.database.getTable(RPKPlayerUnclaimingTable::class).get(minecraftProfile) != null
     }
 
     override fun setUnclaiming(player: RPKPlayer, unclaiming: Boolean) {
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                setUnclaiming(minecraftProfile, unclaiming)
+            }
+        }
+    }
+
+    override fun setUnclaiming(minecraftProfile: RPKMinecraftProfile, unclaiming: Boolean) {
         val playerUnclaimingTable = plugin.core.database.getTable(RPKPlayerUnclaimingTable::class)
         if (unclaiming) {
-            val playerUnclaiming = playerUnclaimingTable.get(player)
+            val playerUnclaiming = playerUnclaimingTable.get(minecraftProfile)
             if (playerUnclaiming == null) {
-                playerUnclaimingTable.insert(RPKPlayerUnclaiming(player = player))
+                playerUnclaimingTable.insert(RPKPlayerUnclaiming(minecraftProfile = minecraftProfile))
             }
         } else {
-            val playerUnclaiming = playerUnclaimingTable.get(player)
+            val playerUnclaiming = playerUnclaimingTable.get(minecraftProfile)
             if (playerUnclaiming != null) {
                 playerUnclaimingTable.delete(playerUnclaiming)
             }
@@ -70,18 +107,41 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
     }
 
     override fun isGettingKey(player: RPKPlayer): Boolean {
-        return plugin.core.database.getTable(RPKPlayerGettingKeyTable::class).get(player) != null
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                return isGettingKey(minecraftProfile)
+            }
+        }
+        return false
+    }
+
+    override fun isGettingKey(minecraftProfile: RPKMinecraftProfile): Boolean {
+        return plugin.core.database.getTable(RPKPlayerGettingKeyTable::class).get(minecraftProfile) != null
     }
 
     override fun setGettingKey(player: RPKPlayer, gettingKey: Boolean) {
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                setGettingKey(minecraftProfile, gettingKey)
+            }
+        }
+    }
+
+    override fun setGettingKey(minecraftProfile: RPKMinecraftProfile, gettingKey: Boolean) {
         val playerGettingKeyTable = plugin.core.database.getTable(RPKPlayerGettingKeyTable::class)
         if (gettingKey) {
-            val playerGettingKey = playerGettingKeyTable.get(player)
+            val playerGettingKey = playerGettingKeyTable.get(minecraftProfile)
             if (playerGettingKey == null) {
-                playerGettingKeyTable.insert(RPKPlayerGettingKey(player = player))
+                playerGettingKeyTable.insert(RPKPlayerGettingKey(minecraftProfile = minecraftProfile))
             }
         } else {
-            val playerGettingKey = playerGettingKeyTable.get(player)
+            val playerGettingKey = playerGettingKeyTable.get(minecraftProfile)
             if (playerGettingKey != null) {
                 playerGettingKeyTable.delete(playerGettingKey)
             }

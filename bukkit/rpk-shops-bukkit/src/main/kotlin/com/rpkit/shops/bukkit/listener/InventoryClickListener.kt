@@ -20,9 +20,8 @@ import com.rpkit.banks.bukkit.bank.RPKBankProvider
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.shops.bukkit.RPKShopsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.block.BlockFace.UP
 import org.bukkit.block.Chest
@@ -45,47 +44,51 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
             val sign = chest.block.getRelative(UP).state
             if (sign is Sign) {
                 if (sign.getLine(0) == GREEN.toString() + "[shop]") {
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
                     val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
                     val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
                     val sellerCharacter = if (sign.getLine(3).equals("admin", ignoreCase = true)) null else characterProvider.getCharacter(sign.getLine(3).toInt()) ?: return
                     val buyerBukkitPlayer = event.whoClicked as? Player ?: return
-                    val buyerPlayer = playerProvider.getPlayer(buyerBukkitPlayer)
-                    val buyerCharacter = characterProvider.getActiveCharacter(buyerPlayer)
-                    if (buyerCharacter == null) {
-                        buyerBukkitPlayer.sendMessage(plugin.messages["no-character"])
-                        return
-                    }
-                    if (buyerCharacter == sellerCharacter) {
-                        return
-                    }
-                    event.isCancelled = true
-                    if (sign.getLine(1).startsWith("buy")) {
-                        val amount = sign.getLine(1).split(Regex("\\s+"))[1].toInt()
-                        val price = sign.getLine(2).split(Regex("\\s+"))[1].toInt()
-                        val currencyWords = sign.getLine(2).split(Regex("\\s+"))
-                        val currency = currencyProvider.getCurrency(currencyWords.subList(2, currencyWords.size).joinToString(" ")) ?: return
-                        val item = event.currentItem ?: return
-                        val amtItem = ItemStack(item)
-                        amtItem.amount = amount
-                        if (chest.blockInventory.containsAtLeast(item, amount)) {
-                            if (economyProvider.getBalance(buyerCharacter, currency) >= price) {
-                                economyProvider.setBalance(buyerCharacter, currency, economyProvider.getBalance(buyerCharacter, currency) - price)
-                                if (sellerCharacter != null) {
-                                    bankProvider.setBalance(sellerCharacter, currency, bankProvider.getBalance(sellerCharacter, currency) + price)
-                                }
-                                buyerBukkitPlayer.inventory.addItem(amtItem)
-                                chest.blockInventory.removeItem(amtItem)
-                            } else {
-                                buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-money"])
-                            }
-                        } else {
-                            buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-shop-items"])
+                    val buyerMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(buyerBukkitPlayer)
+                    if (buyerMinecraftProfile != null) {
+                        val buyerCharacter = characterProvider.getActiveCharacter(buyerMinecraftProfile)
+                        if (buyerCharacter == null) {
+                            buyerBukkitPlayer.sendMessage(plugin.messages["no-character"])
+                            return
                         }
-                    } else if (sign.getLine(1).startsWith("sell")) {
-                        event.whoClicked.sendMessage(plugin.messages["no-stealing"])
+                        if (buyerCharacter == sellerCharacter) {
+                            return
+                        }
+                        event.isCancelled = true
+                        if (sign.getLine(1).startsWith("buy")) {
+                            val amount = sign.getLine(1).split(Regex("\\s+"))[1].toInt()
+                            val price = sign.getLine(2).split(Regex("\\s+"))[1].toInt()
+                            val currencyWords = sign.getLine(2).split(Regex("\\s+"))
+                            val currency = currencyProvider.getCurrency(currencyWords.subList(2, currencyWords.size).joinToString(" ")) ?: return
+                            val item = event.currentItem ?: return
+                            val amtItem = ItemStack(item)
+                            amtItem.amount = amount
+                            if (chest.blockInventory.containsAtLeast(item, amount)) {
+                                if (economyProvider.getBalance(buyerCharacter, currency) >= price) {
+                                    economyProvider.setBalance(buyerCharacter, currency, economyProvider.getBalance(buyerCharacter, currency) - price)
+                                    if (sellerCharacter != null) {
+                                        bankProvider.setBalance(sellerCharacter, currency, bankProvider.getBalance(sellerCharacter, currency) + price)
+                                    }
+                                    buyerBukkitPlayer.inventory.addItem(amtItem)
+                                    chest.blockInventory.removeItem(amtItem)
+                                } else {
+                                    buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-money"])
+                                }
+                            } else {
+                                buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-shop-items"])
+                            }
+                        } else if (sign.getLine(1).startsWith("sell")) {
+                            event.whoClicked.sendMessage(plugin.messages["no-stealing"])
+                        }
+                    } else {
+                        event.whoClicked.sendMessage(plugin.messages["no-minecraft-profile"])
                     }
                 }
             }

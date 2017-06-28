@@ -19,7 +19,9 @@ package com.rpkit.players.bukkit.command.account
 import com.rpkit.chat.bukkit.irc.RPKIRCProvider
 import com.rpkit.core.exception.UnregisteredServiceException
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKIRCProfileImpl
+import com.rpkit.players.bukkit.profile.RPKIRCProfileProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,22 +35,34 @@ class AccountLinkIRCCommand(private val plugin: RPKPlayersBukkit): CommandExecut
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender is Player) {
-            if (args.size > 0) {
+            if (args.isNotEmpty()) {
                 val nick = args[0]
                 try {
                     val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
                     val ircUser = ircProvider.getIRCUser(nick)
                     if (ircUser != null) {
-                        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-                        val ircPlayer = playerProvider.getPlayer(ircUser)
-                        if (ircPlayer.bukkitPlayer == null) {
-                            val bukkitPlayer = playerProvider.getPlayer(sender)
-                            bukkitPlayer.ircNick = ircUser.nick
-                            playerProvider.updatePlayer(bukkitPlayer)
-                            playerProvider.removePlayer(ircPlayer)
-                            sender.sendMessage(plugin.messages["account-link-irc-valid"])
+                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                        if (minecraftProfile != null) {
+                            val profile = minecraftProfile.profile
+                            if (profile != null) {
+                                val ircProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProfileProvider::class)
+                                var ircProfile = ircProfileProvider.getIRCProfile(ircUser)
+                                if (ircProfile == null) {
+                                    ircProfile = RPKIRCProfileImpl(
+                                            profile = profile,
+                                            nick = ircUser.nick
+                                    )
+                                    ircProfileProvider.addIRCProfile(ircProfile)
+                                    sender.sendMessage(plugin.messages["account-link-irc-valid"])
+                                } else {
+                                    sender.sendMessage(plugin.messages["account-link-irc-invalid-already-linked"])
+                                }
+                            } else {
+                                sender.sendMessage(plugin.messages["account-link-irc-invalid-profile"])
+                            }
                         } else {
-                            sender.sendMessage(plugin.messages["account-link-irc-invalid-already-linked"])
+                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
                         }
                     } else {
                         sender.sendMessage(plugin.messages["account-link-irc-invalid-nick"])

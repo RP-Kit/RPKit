@@ -18,7 +18,7 @@ package com.rpkit.characters.bukkit.command.character.unhide
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,17 +33,21 @@ class CharacterUnhideNameCommand(private val plugin: RPKCharactersBukkit): Comma
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.unhide.name")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    character.isNameHidden = false
-                    characterProvider.updateCharacter(character)
-                    sender.sendMessage(plugin.messages["character-unhide-name-valid"])
-                    character.showCharacterCard(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        character.isNameHidden = false
+                        characterProvider.updateCharacter(character)
+                        sender.sendMessage(plugin.messages["character-unhide-name-valid"])
+                        character.showCharacterCard(minecraftProfile)
+                    } else {
+                        sender.sendMessage(plugin.messages["no-character"])
+                    }
                 } else {
-                    sender.sendMessage(plugin.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["no-permission-character-unhide-name"])

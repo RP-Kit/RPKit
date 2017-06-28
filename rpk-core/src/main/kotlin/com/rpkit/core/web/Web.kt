@@ -24,4 +24,7 @@ import org.eclipse.jetty.server.Server
  * @property server The [Server] instance
  * @property navigationBar A list of navigation links which will be displayed on the navigation bar on all pages.
  */
-class Web(val server: Server, val navigationBar: MutableList<NavigationLink>)
+class Web(
+        val server: Server,
+        val navigationBar: MutableList<NavigationLink>
+)

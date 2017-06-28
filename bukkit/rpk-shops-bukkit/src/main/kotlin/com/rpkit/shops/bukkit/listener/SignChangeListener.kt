@@ -18,7 +18,7 @@ package com.rpkit.shops.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.shops.bukkit.RPKShopsBukkit
 import com.rpkit.shops.bukkit.shopcount.RPKShopCountProvider
 import org.bukkit.ChatColor.GREEN
@@ -40,61 +40,65 @@ class SignChangeListener(private val plugin: RPKShopsBukkit): Listener {
     fun onSignChange(event: SignChangeEvent) {
         if (event.getLine(0) == "[shop]") {
             if (event.player.hasPermission("rpkit.shops.sign.shop")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
                 val shopCountProvider = plugin.core.serviceManager.getServiceProvider(RPKShopCountProvider::class)
-                val player = playerProvider.getPlayer(event.player)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    val shopCount = shopCountProvider.getShopCount(character)
-                    if (shopCount < plugin.config.getInt("shops.limit") || event.player.hasPermission("rpkit.shops.sign.shop.nolimit")) {
-                        if (!(event.getLine(1).matches(Regex("buy\\s+\\d+"))
-                                || (event.getLine(1).matches(Regex("sell\\s+\\d+\\s+.+"))
-                                && Material.matchMaterial(event.getLine(1).replace(Regex("sell\\s+\\d+\\s+"), "")) != null))) {
-                            event.block.breakNaturally()
-                            event.player.sendMessage(plugin.messages["shop-line-1-invalid"])
-                            return
-                        }
-                        if (!(event.getLine(2).matches(Regex("for\\s+\\d+\\s+.+")) && currencyProvider.getCurrency(event.getLine(2).replace(Regex("for\\s+\\d+\\s+"), "")) != null)) {
-                            event.block.breakNaturally()
-                            event.player.sendMessage(plugin.messages["shop-line-2-invalid"])
-                            return
-                        }
-                        event.setLine(0, GREEN.toString() + "[shop]")
-                        if (!event.getLine(3).equals("admin", ignoreCase = true)) {
-                            event.setLine(3, character.id.toString())
-                        } else {
-                            if (!event.player.hasPermission("rpkit.shops.sign.shop.admin")) {
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        val shopCount = shopCountProvider.getShopCount(character)
+                        if (shopCount < plugin.config.getInt("shops.limit") || event.player.hasPermission("rpkit.shops.sign.shop.nolimit")) {
+                            if (!(event.getLine(1).matches(Regex("buy\\s+\\d+"))
+                                    || (event.getLine(1).matches(Regex("sell\\s+\\d+\\s+.+"))
+                                    && Material.matchMaterial(event.getLine(1).replace(Regex("sell\\s+\\d+\\s+"), "")) != null))) {
                                 event.block.breakNaturally()
-                                event.player.sendMessage(plugin.messages["no-permission-shop-admin"])
+                                event.player.sendMessage(plugin.messages["shop-line-1-invalid"])
                                 return
                             }
-                        }
-                        event.block.getRelative(DOWN).type = CHEST
-                        val chest = event.block.getRelative(DOWN).state
-                        if (chest is Chest) {
-                            val chestData = chest.data
-                            if (chestData is org.bukkit.material.Chest) {
-                                val sign = event.block.state
-                                if (sign is Sign) {
-                                    val signData = sign.data
-                                    if (signData is org.bukkit.material.Sign) {
-                                        chestData.setFacingDirection(signData.facing)
-                                        chest.update()
+                            if (!(event.getLine(2).matches(Regex("for\\s+\\d+\\s+.+")) && currencyProvider.getCurrency(event.getLine(2).replace(Regex("for\\s+\\d+\\s+"), "")) != null)) {
+                                event.block.breakNaturally()
+                                event.player.sendMessage(plugin.messages["shop-line-2-invalid"])
+                                return
+                            }
+                            event.setLine(0, GREEN.toString() + "[shop]")
+                            if (!event.getLine(3).equals("admin", ignoreCase = true)) {
+                                event.setLine(3, character.id.toString())
+                            } else {
+                                if (!event.player.hasPermission("rpkit.shops.sign.shop.admin")) {
+                                    event.block.breakNaturally()
+                                    event.player.sendMessage(plugin.messages["no-permission-shop-admin"])
+                                    return
+                                }
+                            }
+                            event.block.getRelative(DOWN).type = CHEST
+                            val chest = event.block.getRelative(DOWN).state
+                            if (chest is Chest) {
+                                val chestData = chest.data
+                                if (chestData is org.bukkit.material.Chest) {
+                                    val sign = event.block.state
+                                    if (sign is Sign) {
+                                        val signData = sign.data
+                                        if (signData is org.bukkit.material.Sign) {
+                                            chestData.setFacingDirection(signData.facing)
+                                            chest.update()
+                                        }
                                     }
                                 }
                             }
-                        }
-                        if (!event.getLine(3).equals("admin", ignoreCase = true)) {
-                            shopCountProvider.setShopCount(character, shopCountProvider.getShopCount(character) + 1)
+                            if (!event.getLine(3).equals("admin", ignoreCase = true)) {
+                                shopCountProvider.setShopCount(character, shopCountProvider.getShopCount(character) + 1)
+                            }
+                        } else {
+                            event.player.sendMessage(plugin.messages["no-permission-shop-limit"])
+                            event.block.breakNaturally()
                         }
                     } else {
-                        event.player.sendMessage(plugin.messages["no-permission-shop-limit"])
-                        event.block.breakNaturally()
+                        event.player.sendMessage(plugin.messages["no-character"])
                     }
                 } else {
-                    event.player.sendMessage(plugin.messages["no-character"])
+                    event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 event.player.sendMessage(plugin.messages["no-permission-shop"])

@@ -17,151 +17,128 @@
 package com.rpkit.chat.bukkit.database.table
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.database.jooq.rpkit.Tables.RPKIT_SNOOPER
 import com.rpkit.chat.bukkit.snooper.RPKSnooper
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.ehcache.Cache
-import org.ehcache.CacheManager
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.DSL.field
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the snooper table.
  */
-class RPKSnooperTable: Table<RPKSnooper> {
+class RPKSnooperTable(database: Database, private val plugin: RPKChatBukkit): Table<RPKSnooper>(database, RPKSnooper::class) {
 
-    private val plugin: RPKChatBukkit
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, RPKSnooper>
-    private val playerCache: Cache<Int, Int>
-
-    constructor(database: Database, plugin: RPKChatBukkit) : super(database, RPKSnooper::class) {
-        this.plugin = plugin
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKSnooper::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-        playerCache = cacheManager.createCache("playerCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    }
+    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache = cacheManager.createCache("cache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKSnooper::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.3.0")
+            database.setTableVersion(this, "1.3.0")
+        }
+        if (database.getTableVersion(this) == "0.3.0") {
+            database.create
+                    .truncate(RPKIT_SNOOPER)
+                    .execute()
+            database.create
+                    .alterTable(RPKIT_SNOOPER)
+                    .dropColumn(field("player_id"))
+                    .execute()
+            database.create
+                    .alterTable(RPKIT_SNOOPER)
+                    .addColumn(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                    .execute()
+            database.setTableVersion(this, "1.3.0")
         }
     }
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_snooper(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "player_id INTEGER" +
-                    ")"
-            ).use { statement ->
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_SNOOPER)
+                .column(RPKIT_SNOOPER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_rpkit_snooper").primaryKey(RPKIT_SNOOPER.ID)
+                )
+                .execute()
     }
 
     override fun insert(entity: RPKSnooper): Int {
-        var id: Int = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_snooper(player_id) VALUES(?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.player.id)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                    playerCache.put(entity.player.id, entity.id)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_SNOOPER,
+                        RPKIT_SNOOPER.MINECRAFT_PROFILE_ID
+                )
+                .values(entity.minecraftProfile.id)
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKSnooper) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_snooper SET player_id = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.player.id)
-                statement.setInt(2, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-                playerCache.put(entity.player.id, entity.id)
-            }
-        }
+        database.create
+                .update(RPKIT_SNOOPER)
+                .set(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
+                .where(RPKIT_SNOOPER.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKSnooper? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var snooper: RPKSnooper? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, player_id FROM rpkit_snooper WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val finalSnooper = RPKSnooper(
-                                resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!
-                        )
-                        snooper = finalSnooper
-                        cache.put(id, finalSnooper)
-                        playerCache.put(finalSnooper.player.id, finalSnooper.id)
-                    }
-                }
+            val result = database.create
+                    .select(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)
+                    .from(RPKIT_SNOOPER)
+                    .where(RPKIT_SNOOPER.ID.eq(id))
+                    .fetchOne() ?: return null
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfileId = result.get(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
+            if (minecraftProfile != null) {
+                val snooper = RPKSnooper(
+                        id,
+                        minecraftProfile
+                )
+                cache.put(id, snooper)
+                return snooper
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_SNOOPER)
+                        .where(RPKIT_SNOOPER.ID.eq(id))
+                        .execute()
+                return null
             }
-            return snooper
         }
     }
 
     /**
-     * Gets the snooper instance for a player.
+     * Gets the snooper instance for a Minecraft profile.
      * If the player does not have a snooper entry, null is returned.
      *
-     * @param player The player
+     * @param minecraftProfile The player
      * @return The snooper instance, or null if none exists
      */
-    fun get(player: RPKPlayer): RPKSnooper? {
-        if (playerCache.containsKey(player.id)) {
-            return get(playerCache.get(player.id))
-        } else {
-            var snooper: RPKSnooper? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, player_id FROM rpkit_snooper WHERE player_id = ?"
-                ).use { statement ->
-                    statement.setInt(1, player.id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val finalSnooper = RPKSnooper(
-                                resultSet.getInt("id"),
-                                plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!
-                        )
-                        snooper = finalSnooper
-                        cache.put(finalSnooper.id, finalSnooper)
-                        playerCache.put(finalSnooper.player.id, finalSnooper.id)
-                    }
-                }
-            }
-            return snooper
-        }
+    fun get(minecraftProfile: RPKMinecraftProfile): RPKSnooper? {
+        val result = database.create
+                .select(RPKIT_SNOOPER.ID)
+                .from(RPKIT_SNOOPER)
+                .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                .fetchOne() ?: return null
+        return get(result.get(RPKIT_SNOOPER.ID))
     }
 
     /**
@@ -170,31 +147,22 @@ class RPKSnooperTable: Table<RPKSnooper> {
      * @return A list containing all snoopers
      */
     fun getAll(): List<RPKSnooper> {
-        val snoopers = mutableListOf<RPKSnooper>()
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id FROM rpkit_snooper"
-            ).use { statement ->
-                val resultSet = statement.executeQuery()
-                while (resultSet.next()) {
-                    snoopers.add(get(resultSet.getInt("id"))!!)
-                }
-            }
-        }
+        val results = database.create
+                .select(RPKIT_SNOOPER.ID)
+                .from(RPKIT_SNOOPER)
+                .fetch()
+        val snoopers = results.map { result ->
+            get(result.get(RPKIT_SNOOPER.ID))
+        }.filterNotNull()
         return snoopers
     }
 
     override fun delete(entity: RPKSnooper) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_snooper WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-                playerCache.remove(entity.player.id)
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_SNOOPER)
+                .where(RPKIT_SNOOPER.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 }

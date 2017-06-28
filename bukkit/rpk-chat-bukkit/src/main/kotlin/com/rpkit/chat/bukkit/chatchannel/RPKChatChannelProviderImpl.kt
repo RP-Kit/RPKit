@@ -22,6 +22,7 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineC
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import java.awt.Color
 
 /**
@@ -80,6 +81,22 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
         }
         channel.addSpeaker(player)
         updateChatChannel(channel)
+    }
+
+    override fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel? {
+        return plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).getMinecraftProfileChannel(minecraftProfile)
+    }
+
+    override fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?) {
+        val oldChannel = getMinecraftProfileChannel(minecraftProfile)
+        if (oldChannel != null) {
+            oldChannel.removeSpeaker(minecraftProfile)
+            updateChatChannel(oldChannel)
+        }
+        if (channel != null) {
+            channel.addSpeaker(minecraftProfile)
+            updateChatChannel(channel)
+        }
     }
 
     override fun getChatChannelFromIRCChannel(ircChannel: String): RPKChatChannel? {

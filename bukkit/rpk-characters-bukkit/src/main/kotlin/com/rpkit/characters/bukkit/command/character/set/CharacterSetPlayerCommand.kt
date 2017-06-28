@@ -19,7 +19,7 @@ package com.rpkit.characters.bukkit.command.character.set
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -54,28 +54,33 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
             if (sender.hasPermission("rpkit.characters.command.character.set.player")) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(sender)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    if (args.isNotEmpty()) {
-                        @Suppress("DEPRECATION") val newBukkitPlayer = plugin.server.getPlayer(args[0])
-                        if (newBukkitPlayer != null) {
-                            val newPlayer = playerProvider.getPlayer(newBukkitPlayer)
-                            character.player = newPlayer
-                            characterProvider.updateCharacter(character)
-                            characterProvider.setActiveCharacter(player, null)
-                            sender.sendMessage(plugin.messages["character-set-player-valid"])
-                            character.showCharacterCard(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        if (args.isNotEmpty()) {
+                            @Suppress("DEPRECATION") val newBukkitPlayer = plugin.server.getPlayer(args[0])
+                            if (newBukkitPlayer != null) {
+                                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                                val newPlayer = playerProvider.getPlayer(newBukkitPlayer)
+                                character.player = newPlayer
+                                characterProvider.updateCharacter(character)
+                                characterProvider.setActiveCharacter(minecraftProfile, null)
+                                sender.sendMessage(plugin.messages["character-set-player-valid"])
+                                character.showCharacterCard(minecraftProfile)
+                            } else {
+                                sender.sendMessage(plugin.messages["character-set-player-invalid-player"])
+                            }
                         } else {
-                            sender.sendMessage(plugin.messages["character-set-player-invalid-player"])
+                            conversationFactory.buildConversation(sender).begin()
                         }
                     } else {
-                        conversationFactory.buildConversation(sender).begin()
+                        sender.sendMessage(plugin.messages["no-character"])
                     }
                 } else {
-                    sender.sendMessage(plugin.messages["no-character"])
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["no-permission-character-set-player"])
@@ -91,14 +96,17 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
         override fun acceptValidatedInput(context: ConversationContext, input: Player): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(conversable)
-                val character = characterProvider.getActiveCharacter(player)
-                if (character != null) {
-                    character.player = playerProvider.getPlayer(input)
-                    characterProvider.updateCharacter(character)
-                    characterProvider.setActiveCharacter(player, null)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(conversable)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                        character.player = playerProvider.getPlayer(input)
+                        characterProvider.updateCharacter(character)
+                        characterProvider.setActiveCharacter(minecraftProfile, null)
+                    }
                 }
             }
             return PlayerSetPrompt()
@@ -119,10 +127,12 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val player = playerProvider.getPlayer(context.forWhom as Player)
-                characterProvider.getActiveCharacter(player)?.showCharacterCard(player)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
+                if (minecraftProfile != null) {
+                    characterProvider.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                }
             }
             return Prompt.END_OF_CONVERSATION
         }

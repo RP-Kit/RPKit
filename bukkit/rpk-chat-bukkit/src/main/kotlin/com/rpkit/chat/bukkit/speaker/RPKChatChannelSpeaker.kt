@@ -18,16 +18,16 @@ package com.rpkit.chat.bukkit.speaker
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.core.database.Entity
-import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Represents a chat channel speaker.
  *
- * @property player The player
+ * @property minecraftProfile The Minecraft profile
  * @property chatChannel The chat channel the player is speaking in
  */
 class RPKChatChannelSpeaker(
         override var id: Int = 0,
-        val player: RPKPlayer,
+        val minecraftProfile: RPKMinecraftProfile,
         var chatChannel: RPKChatChannel
 ) : Entity

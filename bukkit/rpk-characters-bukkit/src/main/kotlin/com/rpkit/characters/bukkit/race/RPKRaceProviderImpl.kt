@@ -18,9 +18,6 @@ package com.rpkit.characters.bukkit.race
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.table.RPKRaceTable
-import com.rpkit.core.database.use
-import java.sql.SQLException
-import java.util.*
 
 /**
  * Race provider implementation.
@@ -40,24 +37,7 @@ class RPKRaceProviderImpl(private val plugin: RPKCharactersBukkit): RPKRaceProvi
     }
 
     override val races: Collection<RPKRace>
-        get() {
-            try {
-                val races: MutableList<RPKRace> = ArrayList()
-                plugin.core.database.createConnection().use { connection ->
-                    connection.prepareStatement(
-                            "SELECT id, name FROM rpkit_race").use { statement ->
-                        val resultSet = statement.executeQuery()
-                        while (resultSet.next()) {
-                            races.add(RPKRaceImpl(resultSet.getInt("id"), resultSet.getString("name")))
-                        }
-                    }
-                }
-                return races
-            } catch (exception: SQLException) {
-                exception.printStackTrace()
-            }
-            return emptyList()
-        }
+        get() = plugin.core.database.getTable(RPKRaceTable::class).getAll()
 
     override fun addRace(race: RPKRace) {
         plugin.core.database.getTable(RPKRaceTable::class).insert(race)

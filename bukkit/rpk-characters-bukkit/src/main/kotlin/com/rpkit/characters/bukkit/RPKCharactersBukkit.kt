@@ -35,8 +35,12 @@ import com.rpkit.characters.bukkit.listener.PlayerMoveListener
 import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownProvider
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
 import com.rpkit.characters.bukkit.race.RPKRaceProviderImpl
+import com.rpkit.characters.bukkit.servlet.CharacterServlet
+import com.rpkit.characters.bukkit.servlet.CharactersServlet
+import com.rpkit.characters.bukkit.servlet.api.v1.CharacterAPIServlet
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.web.NavigationLink
 import java.sql.SQLException
 
 /**
@@ -66,6 +70,7 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         )
         characterCardFieldProvider.characterCardFields.add(NameField())
         characterCardFieldProvider.characterCardFields.add(PlayerField())
+        characterCardFieldProvider.characterCardFields.add(ProfileField())
         characterCardFieldProvider.characterCardFields.add(GenderField())
         characterCardFieldProvider.characterCardFields.add(AgeField())
         characterCardFieldProvider.characterCardFields.add(RaceField())
@@ -79,6 +84,15 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         characterCardFieldProvider.characterCardFields.add(MaxFoodField())
         characterCardFieldProvider.characterCardFields.add(ThirstField())
         characterCardFieldProvider.characterCardFields.add(MaxThirstField())
+        servlets = arrayOf(
+                CharactersServlet(this),
+                CharacterServlet(this),
+                CharacterAPIServlet(this)
+        )
+    }
+
+    override fun onPostEnable() {
+        core.web.navigationBar.add(NavigationLink("Characters", "/characters/"))
     }
 
     override fun registerCommands() {
@@ -117,6 +131,9 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         messages.setDefault("character-set-player-prompt", "&fWhat player do you want to assign this character to? &7(Type cancel to cancel)")
         messages.setDefault("character-set-player-invalid-player", "&cThat player is not online.")
         messages.setDefault("character-set-player-valid", "&aYour character was assigned to a different player. You will now be moved to a new character.")
+        messages.setDefault("character-set-profile-prompt", "&fWhat profile do you want to assign this character to? &7(Type cancel to cancel)")
+        messages.setDefault("character-set-profile-invalid-profile", "&cThere is no profile by that name.")
+        messages.setDefault("character-set-profile-valid", "&aYour character was assigned to a different profile. Please create a new character or switch to an old one.")
         messages.setDefault("character-set-name-prompt", "&fWhat is your character's name? &7(Type cancel to cancel)")
         messages.setDefault("character-set-name-valid", "&aName set.")
         messages.setDefault("character-set-gender-prompt", "&fWhat is your character's gender? &7(Type cancel to cancel)")
@@ -128,18 +145,20 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         messages.setDefault("character-hide-age-valid", "&aAge hidden.")
         messages.setDefault("character-hide-description-valid", "&aDescription hidden.")
         messages.setDefault("character-hide-player-valid", "&aPlayer hidden.")
+        messages.setDefault("character-hide-profile-valid", "&aProfile hidden.")
         messages.setDefault("character-hide-name-valid", "&aName hidden.")
         messages.setDefault("character-hide-gender-valid", "&aGender hidden.")
         messages.setDefault("character-hide-race-valid", "&aRace hidden.")
         messages.setDefault("character-unhide-age-valid", "&aAge unhidden.")
         messages.setDefault("character-unhide-description-valid", "&aDescription unhidden.")
         messages.setDefault("character-unhide-player-valid", "&aPlayer unhidden.")
+        messages.setDefault("character-unhide-profile-valid", "&aProfile unhidden.")
         messages.setDefault("character-unhide-name-valid", "&aName unhidden.")
         messages.setDefault("character-unhide-gender-valid", "&aGender unhidden.")
         messages.setDefault("character-unhide-race-valid", "&aRace unhidden.")
         messages.setDefault("character-card-owner", listOf(
                 "&7\$name (&a&l\$edit(name)&7/&a&l\$hide(name)&7)",
-                "&7Player: &f\$player",
+                "&7Profile: &f\$profile",
                 "&7Gender: &f\$gender &7(&a&l\$edit(gender)&7/&a&l\$hide(gender)&7)",
                 "&7Age: &f\$age &7(&a&l\$edit(age)&7/&a&l\$hide(age)&7)",
                 "&7Race: &f\$race &7(&a&l\$edit(race)&7/&a&l\$hide(race)&7)",
@@ -151,7 +170,7 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         ))
         messages.setDefault("character-card-not-owner", listOf(
                 "&7\$name",
-                "&7Player: &f\$player",
+                "&7Profile: &f\$profile",
                 "&7Gender: &f\$gender",
                 "&7Age: &f\$age",
                 "&7Race: &f\$race",
@@ -195,6 +214,8 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         messages.setDefault("operation-cancelled", "&cOperation cancelled.")
         messages.setDefault("no-character", "&cYou do not currently have an active character. Please create one with /character new, or switch to an old one using /character switch.")
         messages.setDefault("no-character-other", "&cThis player does not currently have a character.")
+        messages.setDefault("no-profile", "&cYour Minecraft profile is not linked to a profile. Please link it on the server's web UI.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
         messages.setDefault("no-permission-character-card-self", "&cYou do not have permission to view your own character card.")
         messages.setDefault("no-permission-character-card-other", "&cYou do not have permission to view other people's character cards.")
         messages.setDefault("no-permission-character-list", "&cYou do not have permission to view your character list.")
@@ -213,12 +234,14 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-character-hide-gender", "&cYou do not have permission to hide your character's gender.")
         messages.setDefault("no-permission-character-hide-name", "&cYou do not have permission to hide your character's name.")
         messages.setDefault("no-permission-character-hide-player", "&cYou do not have permission to hide your character's player.")
+        messages.setDefault("no-permission-character-hide-profile", "&cYou do not have permission to hide your character's profile.")
         messages.setDefault("no-permission-character-hide-race", "&cYou do not have permission to hide your character's race.")
         messages.setDefault("no-permission-character-unhide-age", "&cYou do not have permission to unhide your character's age.")
         messages.setDefault("no-permission-character-unhide-description", "&cYou do not have permission to unhide your character's description.")
         messages.setDefault("no-permission-character-unhide-gender", "&cYou do not have permission to unhide your character's gender.")
         messages.setDefault("no-permission-character-unhide-name", "&cYou do not have permission to unhide your character's name.")
         messages.setDefault("no-permission-character-unhide-player", "&cYou do not have permission to unhide your character's player.")
+        messages.setDefault("no-permission-character-unhide-profile", "&cYou do not have permission to unhide your character's profile.")
         messages.setDefault("no-permission-character-unhide-race", "&cYou do not have permission to unhide your character's race.")
         messages.setDefault("no-permission-character-switch", "&cYou do not have permission to switch characters.")
         messages.setDefault("no-permission-character-delete", "&cYou do not have permission to delete characters.")

@@ -19,8 +19,7 @@ package com.rpkit.chat.bukkit.command.chatgroup
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupImpl
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.bukkit.ChatColor
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -39,14 +38,18 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit): CommandExecutor
                     val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
                     if (chatGroupProvider.getChatGroup(args[0]) == null) {
                         if (!args[0].startsWith("_pm_")) {
-                            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+                            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                             val chatGroup = RPKChatGroupImpl(plugin = plugin, name = args[0])
-                            val senderPlayer = playerProvider.getPlayer(sender)
-                            chatGroupProvider.addChatGroup(chatGroup)
-                            chatGroup.addMember(senderPlayer)
-                            sender.sendMessage(plugin.messages["chat-group-create-valid", mapOf(
-                                    Pair("group", chatGroup.name)
-                            )])
+                            val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                            if (senderMinecraftProfile != null) {
+                                chatGroupProvider.addChatGroup(chatGroup)
+                                chatGroup.addMember(senderMinecraftProfile)
+                                sender.sendMessage(plugin.messages["chat-group-create-valid", mapOf(
+                                        Pair("group", chatGroup.name)
+                                )])
+                            } else {
+                                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                            }
                         } else {
                             sender.sendMessage(plugin.messages["chat-group-create-invalid-reserved"])
                         }

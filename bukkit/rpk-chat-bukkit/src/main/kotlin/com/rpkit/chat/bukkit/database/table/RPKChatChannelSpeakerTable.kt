@@ -18,157 +18,148 @@ package com.rpkit.chat.bukkit.database.table
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
+import com.rpkit.chat.bukkit.database.jooq.rpkit.Tables.RPKIT_CHAT_CHANNEL_SPEAKER
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeaker
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import org.ehcache.Cache
-import org.ehcache.CacheManager
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.DSL.field
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the chat channel speaker table
  */
-class RPKChatChannelSpeakerTable: Table<RPKChatChannelSpeaker> {
+class RPKChatChannelSpeakerTable(database: Database, private val plugin: RPKChatBukkit): Table<RPKChatChannelSpeaker>(database, RPKChatChannelSpeaker::class) {
 
-    private val plugin: RPKChatBukkit
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, RPKChatChannelSpeaker>
-
-    constructor(database: Database, plugin: RPKChatBukkit): super(database, RPKChatChannelSpeaker::class) {
-        this.plugin = plugin
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKChatChannelSpeaker::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    }
+    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache = cacheManager.createCache("cache",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKChatChannelSpeaker::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_chat_channel_speaker(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "player_id INTEGER," +
-                            "chat_channel_id INTEGER" +
-                    ")"
-            ).use { statement ->
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_CHAT_CHANNEL_SPEAKER)
+                .column(RPKIT_CHAT_CHANNEL_SPEAKER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                .column(RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_ID, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_rpkit_chat_channel_speaker").primaryKey(RPKIT_CHAT_CHANNEL_SPEAKER.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.4.0")
+            database.setTableVersion(this, "1.3.0")
+        }
+        if (database.getTableVersion(this) == "0.4.0") {
+            database.create
+                    .truncate(RPKIT_CHAT_CHANNEL_SPEAKER)
+                    .execute()
+            database.create
+                    .alterTable(RPKIT_CHAT_CHANNEL_SPEAKER)
+                    .dropColumn(field("player_id"))
+                    .execute()
+            database.create
+                    .alterTable(RPKIT_CHAT_CHANNEL_SPEAKER)
+                    .addColumn(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                    .execute()
+            database.setTableVersion(this, "1.3.0")
         }
     }
 
     override fun insert(entity: RPKChatChannelSpeaker): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_chat_channel_speaker(player_id, chat_channel_id) VALUES(?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.player.id)
-                statement.setInt(2, entity.chatChannel.id)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_CHAT_CHANNEL_SPEAKER,
+                        RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID,
+                        RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_ID
+                )
+                .values(
+                        entity.minecraftProfile.id,
+                        entity.chatChannel.id
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKChatChannelSpeaker) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_chat_channel_speaker SET player_id = ?, chat_channel_id = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.player.id)
-                statement.setInt(2, entity.chatChannel.id)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(RPKIT_CHAT_CHANNEL_SPEAKER)
+                .set(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
+                .set(RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_ID, entity.chatChannel.id)
+                .where(RPKIT_CHAT_CHANNEL_SPEAKER.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKChatChannelSpeaker? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var chatChannelSpeaker: RPKChatChannelSpeaker? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, player_id, chat_channel_id FROM rpkit_chat_channel_speaker WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-                        val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
-                        chatChannelSpeaker = RPKChatChannelSpeaker(
-                                resultSet.getInt("id"),
-                                playerProvider.getPlayer(resultSet.getInt("player_id"))!!,
-                                chatChannelProvider.getChatChannel(resultSet.getInt("chat_channel_id"))!!
-                        )
-                        cache.put(id, chatChannelSpeaker)
-                    }
-                }
+            val result = database.create
+                    .select(
+                            RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID,
+                            RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_ID
+                    )
+                    .from(RPKIT_CHAT_CHANNEL_SPEAKER)
+                    .where(RPKIT_CHAT_CHANNEL_SPEAKER.ID.eq(id))
+                    .fetchOne() ?: return null
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfileId = result.get(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
+            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
+            val chatChannelId = result.get(RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_ID)
+            val chatChannel = chatChannelProvider.getChatChannel(chatChannelId)
+            if (minecraftProfile != null && chatChannel != null) {
+                val chatChannelSpeaker = RPKChatChannelSpeaker(
+                        id,
+                        minecraftProfile,
+                        chatChannel
+                )
+                cache.put(id, chatChannelSpeaker)
+                return chatChannelSpeaker
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_CHAT_CHANNEL_SPEAKER)
+                        .where(RPKIT_CHAT_CHANNEL_SPEAKER.ID.eq(id))
+                        .execute()
+                return null
             }
-            return chatChannelSpeaker
         }
     }
 
     /**
-     * Gets the speaker instance for a player, or null if the player is not speaking in a channel.
+     * Gets the speaker instance for a Minecraft profile, or null if the Minecraft profile is not speaking in a channel.
      *
-     * @param player The player
-     * @return The chat channel speaker instance, or null if the player is not currently speaking in a channel.
+     * @param minecraftProfile The Minecraft profile
+     * @return The chat channel speaker instance, or null if the Minecraft profile is not currently speaking in a channel.
      */
-    fun get(player: RPKPlayer): RPKChatChannelSpeaker? {
-        var chatChannelSpeaker: RPKChatChannelSpeaker? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, player_id, chat_channel_id FROM rpkit_chat_channel_speaker WHERE player_id = ?"
-            ).use { statement ->
-                statement.setInt(1, player.id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-                    val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
-                    val finalChatChannelSpeaker = RPKChatChannelSpeaker(resultSet.getInt("id"),
-                            playerProvider.getPlayer(resultSet.getInt("player_id"))!!,
-                            chatChannelProvider.getChatChannel(resultSet.getInt("chat_channel_id"))!!
-                    )
-                    chatChannelSpeaker = finalChatChannelSpeaker
-                    cache.put(finalChatChannelSpeaker.id, finalChatChannelSpeaker)
-                }
-            }
-        }
-        return chatChannelSpeaker
+    fun get(minecraftProfile: RPKMinecraftProfile): RPKChatChannelSpeaker? {
+        val result = database.create
+                .select(RPKIT_CHAT_CHANNEL_SPEAKER.ID)
+                .from(RPKIT_CHAT_CHANNEL_SPEAKER)
+                .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                .fetchOne() ?: return null
+        return get(result.get(RPKIT_CHAT_CHANNEL_SPEAKER.ID))
     }
 
     override fun delete(entity: RPKChatChannelSpeaker) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_chat_channel_speaker WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_CHAT_CHANNEL_SPEAKER)
+                .where(RPKIT_CHAT_CHANNEL_SPEAKER.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
     }
 
 

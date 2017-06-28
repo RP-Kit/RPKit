@@ -20,6 +20,8 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineCom
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
 import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKProfile
 import java.awt.Color
 
 /**
@@ -50,14 +52,30 @@ interface RPKChatChannel: Entity {
      * If a speaker sends a message without indicating who it is directed to, it will be sent to this channel.
      * Players may only be speakers in a single channel.
      */
+    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("speakerParticipants"))
     val speakers: List<RPKPlayer>
+
+    /**
+     * A list of all speakers in the channel.
+     * If a speaker sends a message without indicating who it is directed to, it will be sent to this channel.
+     * Chat participants may only be speakers in a single channel.
+     */
+    val speakerMinecraftProfiles: List<RPKMinecraftProfile>
 
     /**
      * A list of all listeners in the channel.
      * If a message is sent to a channel, it will be heard by all listeners.
      * Players may listen to multiple channels.
      */
+    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("listenerMinecraftProfiles"))
     val listeners: List<RPKPlayer>
+
+    /**
+     * A list of all listeners in the channel.
+     * If a message is sent to a channel, it will be heard by all listeners.
+     * Chat participants may listen to multiple channels.
+     */
+    val listenerMinecraftProfiles: List<RPKMinecraftProfile>
 
     /**
      * The directed pipeline for the channel.
@@ -102,6 +120,20 @@ interface RPKChatChannel: Entity {
     fun removeSpeaker(speaker: RPKPlayer)
 
     /**
+     * Adds a speaker to the channel.
+     *
+     * @param speaker The chat participant to add
+     */
+    fun addSpeaker(speaker: RPKMinecraftProfile)
+
+    /**
+     * Removes a speaker from the channel.
+     *
+     * @param speaker The chat participant to remove
+     */
+    fun removeSpeaker(speaker: RPKMinecraftProfile)
+
+    /**
      * Adds a listener to the channel.
      *
      * @param listener The player to add
@@ -114,6 +146,20 @@ interface RPKChatChannel: Entity {
      * @param listener The player to remove
      */
     fun removeListener(listener: RPKPlayer)
+
+    /**
+     * Adds a listener to the channel.
+     *
+     * @param listener The Minecraft profile to add
+     */
+    fun addListener(listener: RPKMinecraftProfile)
+
+    /**
+     * Removes a listener from the channel.
+     *
+     * @param listener The Minecraft profile to remove
+     */
+    fun removeListener(listener: RPKMinecraftProfile)
 
     /**
      * Sends a message to the channel, passing it through the directed pipeline once for each listener, and the
@@ -133,8 +179,28 @@ interface RPKChatChannel: Entity {
      * @param directedPipeline The directed pipeline
      * @param undirectedPipeline The undirected pipeline
      */
-    fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>) {
-        sendMessage(sender, message)
-    }
+    fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>)
+
+    /**
+     * Sends a message to the channel, passing it through the directed pipeline once for each listener, and the
+     * undirected pipeline once.
+     *
+     * @param sender The profile sending the message
+     * @param senderMinecraftProfile The Minecraft profile used to send the message, or null if not sent from Minecraft
+     * @param message The message
+     */
+    fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String)
+
+    /**
+     * Sends a message to the channel, passing it through the specified directed pipeline once for each listener, and
+     * the specified undirected pipeline once.
+     *
+     * @param sender The profile sending the message
+     * @param senderMinecraftProfile The Minecraft profile used to send the message, or null if not sent from Minecraft
+     * @param message The message
+     * @param directedPipeline The directed pipeline
+     * @param undirectedPipeline The undirected pipeline
+     */
+    fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>)
 
 }

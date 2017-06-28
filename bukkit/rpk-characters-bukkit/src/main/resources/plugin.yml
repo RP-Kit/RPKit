@@ -55,6 +55,9 @@ permissions:
     rpkit.characters.command.character.set.player:
         description: Allows assigning your characters to a different player
         default: op
+    rpkit.characters.command.character.set.profile:
+        description: Allows assigning your characters to a different profile
+        default: op
     rpkit.characters.command.character.set.race:
         description: Allows setting your character''s race
         default: true
@@ -73,6 +76,9 @@ permissions:
     rpkit.characters.command.character.hide.player:
         description: Allows hiding your character''s player
         default: true
+    rpkit.characters.command.character.hide.profile:
+        description: Allows hiding your character''s profile
+        default: true
     rpkit.characters.command.character.hide.race:
         description: Allows hiding your character''s race
         default: true
@@ -89,7 +95,10 @@ permissions:
         description: Allows unhiding your character''s name
         default: true
     rpkit.characters.command.character.unhide.player:
-        description: ALlows unhiding your character''s player
+        description: Allows unhiding your character''s player
+        default: true
+    rpkit.characters.command.character.unhide.profile:
+        description: Allows unhiding your character''s profile
         default: true
     rpkit.characters.command.character.unhide.race:
         description: Allows unhiding your character''s race

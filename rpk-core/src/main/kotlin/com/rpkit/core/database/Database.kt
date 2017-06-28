@@ -19,6 +19,10 @@ package com.rpkit.core.database
 import com.rpkit.core.database.table.TableVersionTable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import org.jooq.DSLContext
+import org.jooq.SQLDialect
+import org.jooq.conf.Settings
+import org.jooq.impl.DSL
 import java.sql.Connection
 import java.sql.SQLException
 import kotlin.reflect.KClass
@@ -30,11 +34,21 @@ import kotlin.reflect.KClass
  * @property url The URL of the database
  * @property userName The username to connect to the database with. May be null to avoid authenticating.
  * @property password The password to connect to the database with. May be null to avoid authenticating.
+ * @property dialect The dialect of SQL to use
  */
-class Database @JvmOverloads constructor(val url: String, val userName: String? = null, val password: String? = null) {
+class Database @JvmOverloads constructor(val url: String, val userName: String? = null, val password: String? = null, val dialect: SQLDialect) {
 
     private val dataSource: HikariDataSource
     private val tables: MutableMap<KClass<out Table<*>>, Table<*>> = mutableMapOf()
+    private val settings = Settings().withRenderSchema(false)
+
+    /**
+     * DSL context for performing jOOQ queries. This is currently the preferred method of performing queries, introduced
+     * in v1.3.0. It allows queries to be database-agnostic, so plugins will work with SQLite backends, and require no
+     * porting work should support for other database backends be added in the future.
+     */
+    val create: DSLContext
+        get() = DSL.using(dataSource, dialect, settings)
 
     init {
         val hikariConfig = HikariConfig()

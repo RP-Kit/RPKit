@@ -18,6 +18,7 @@ package com.rpkit.chat.bukkit.chatgroup
 
 import com.rpkit.core.service.ServiceProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Provides chat group related operations.
@@ -70,7 +71,17 @@ interface RPKChatGroupProvider: ServiceProvider {
      * @param player The player
      * @return The last chat group used by the player, or null if the player has not used a chat group
      */
+    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("getLastUsedChatGroup(minecraftProfile)"))
     fun getLastUsedChatGroup(player: RPKPlayer): RPKChatGroup?
+
+    /**
+     * Gets a Minecraft profile's last used chat group.
+     * If the Minecraft profile has not used a chat group, null is returned.
+     *
+     * @param minecraftProfile The Minecraft profile
+     * @return The last used chat group used by the Minecraft profile, or null if the Minecraft profile has not used a chat group
+     */
+    fun getLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile): RPKChatGroup?
 
     /**
      * Sets a player's last used chat group.
@@ -78,5 +89,14 @@ interface RPKChatGroupProvider: ServiceProvider {
      * @param player The player
      * @param chatGroup The chat group to set
      */
+    @Deprecated("Old players API. Please move to new prfiles APIs.", ReplaceWith("setLastUsedChatGroup(minecraftProfile, chatGroup)"))
     fun setLastUsedChatGroup(player: RPKPlayer, chatGroup: RPKChatGroup)
+
+    /**
+     * Sets a Minecraft profile's last used chat group.
+     *
+     * @param minecraftProfile The Minecraft profile
+     * @param chatGroup The chat group to set
+     */
+    fun setLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile, chatGroup: RPKChatGroup)
 }

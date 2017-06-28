@@ -17,12 +17,12 @@
 package com.rpkit.chat.bukkit.snooper
 
 import com.rpkit.core.database.Entity
-import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Represents a snooper.
  */
 class RPKSnooper(
         override var id: Int = 0,
-        val player: RPKPlayer
+        val minecraftProfile: RPKMinecraftProfile
 ): Entity

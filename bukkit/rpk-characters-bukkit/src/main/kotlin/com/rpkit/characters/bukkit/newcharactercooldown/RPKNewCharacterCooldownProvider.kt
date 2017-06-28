@@ -3,21 +3,21 @@ package com.rpkit.characters.bukkit.newcharactercooldown
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.table.RPKNewCharacterCooldownTable
 import com.rpkit.core.service.ServiceProvider
-import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKProfile
 
 
 class RPKNewCharacterCooldownProvider(private val plugin: RPKCharactersBukkit): ServiceProvider {
 
-    fun getNewCharacterCooldown(player: RPKPlayer): Long {
-        val newCharacterCooldown = plugin.core.database.getTable(RPKNewCharacterCooldownTable::class).get(player) ?: return 0
+    fun getNewCharacterCooldown(profile: RPKProfile): Long {
+        val newCharacterCooldown = plugin.core.database.getTable(RPKNewCharacterCooldownTable::class).get(profile) ?: return 0
         return Math.max(newCharacterCooldown.cooldownTimestamp - System.currentTimeMillis(), 0)
     }
 
-    fun setNewCharacterCooldown(player: RPKPlayer, cooldown: Long) {
+    fun setNewCharacterCooldown(profile: RPKProfile, cooldown: Long) {
         val newCharacterCooldownTable = plugin.core.database.getTable(RPKNewCharacterCooldownTable::class)
-        var newCharacterCooldown = newCharacterCooldownTable.get(player)
+        var newCharacterCooldown = newCharacterCooldownTable.get(profile)
         if (newCharacterCooldown == null) {
-            newCharacterCooldown = RPKNewCharacterCooldown(player = player, cooldownTimestamp = System.currentTimeMillis() + cooldown)
+            newCharacterCooldown = RPKNewCharacterCooldown(profile = profile, cooldownTimestamp = System.currentTimeMillis() + cooldown)
             newCharacterCooldownTable.insert(newCharacterCooldown)
         } else {
             newCharacterCooldown.cooldownTimestamp = System.currentTimeMillis() + cooldown

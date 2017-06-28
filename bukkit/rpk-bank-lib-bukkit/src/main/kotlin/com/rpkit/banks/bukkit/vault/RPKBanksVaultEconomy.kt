@@ -21,7 +21,7 @@ import com.rpkit.banks.bukkit.bank.RPKBankProvider
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import net.milkbowl.vault.economy.AbstractEconomy
 import net.milkbowl.vault.economy.Economy
 import net.milkbowl.vault.economy.EconomyResponse
@@ -38,18 +38,22 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit): AbstractEconom
     }
 
     override fun getBalance(playerName: String): Double {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        val character = characterProvider.getActiveCharacter(player)
-        val currency = currencyProvider.defaultCurrency
-        if (character != null && currency != null) {
-            return economyProvider.getBalance(character, currency).toDouble()
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            val currency = currencyProvider.defaultCurrency
+            if (character != null && currency != null) {
+                return economyProvider.getBalance(character, currency).toDouble()
+            } else {
+                return 0.0
+            }
         } else {
-            return 0.toDouble()
+            return 0.0
         }
     }
 
@@ -62,26 +66,30 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit): AbstractEconom
     }
 
     override fun isBankOwner(name: String, playerName: String): EconomyResponse {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
         val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        val character = characterProvider.getActiveCharacter(player)
-        val currency = currencyProvider.defaultCurrency
-        if (character != null) {
-            if (currency != null) {
-                if (name == playerName) {
-                    return EconomyResponse(0.0, bankProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            val currency = currencyProvider.defaultCurrency
+            if (character != null) {
+                if (currency != null) {
+                    if (name == playerName) {
+                        return EconomyResponse(0.0, bankProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
+                    } else {
+                        return EconomyResponse(0.0, 0.0, FAILURE, "Bank is not owned by player.")
+                    }
                 } else {
-                    return EconomyResponse(0.0, 0.0, FAILURE, "Bank is not owned by player.")
+                    return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
                 }
             } else {
-                return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
             }
         } else {
-            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
+            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a Minecraft profile.")
         }
     }
 
@@ -94,105 +102,121 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit): AbstractEconom
     }
 
     override fun bankDeposit(name: String, amount: Double): EconomyResponse {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
         val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        val character = characterProvider.getActiveCharacter(player)
-        val currency = currencyProvider.defaultCurrency
-        if (character != null) {
-            if (currency != null) {
-                bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) + amount.toInt())
-                return EconomyResponse(
-                        amount.toInt().toDouble(),
-                        bankProvider.getBalance(character, currency).toDouble(),
-                        SUCCESS,
-                        ""
-                )
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            val currency = currencyProvider.defaultCurrency
+            if (character != null) {
+                if (currency != null) {
+                    bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) + amount.toInt())
+                    return EconomyResponse(
+                            amount.toInt().toDouble(),
+                            bankProvider.getBalance(character, currency).toDouble(),
+                            SUCCESS,
+                            ""
+                    )
+                } else {
+                    return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                }
             } else {
-                return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
             }
         } else {
-            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
+            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a Minecraft profile.")
         }
     }
 
     override fun bankWithdraw(name: String, amount: Double): EconomyResponse {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
         val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        val character = characterProvider.getActiveCharacter(player)
-        val currency = currencyProvider.defaultCurrency
-        if (character != null) {
-            if (currency != null) {
-                bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - amount.toInt())
-                return EconomyResponse(
-                        amount.toInt().toDouble(),
-                        bankProvider.getBalance(character, currency).toDouble(),
-                        SUCCESS,
-                        ""
-                )
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            val currency = currencyProvider.defaultCurrency
+            if (character != null) {
+                if (currency != null) {
+                    bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - amount.toInt())
+                    return EconomyResponse(
+                            amount.toInt().toDouble(),
+                            bankProvider.getBalance(character, currency).toDouble(),
+                            SUCCESS,
+                            ""
+                    )
+                } else {
+                    return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                }
             } else {
-                return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
             }
         } else {
-            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
+            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have Minecraft profile.")
         }
     }
 
     override fun deleteBank(name: String): EconomyResponse {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
         val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        val character = characterProvider.getActiveCharacter(player)
-        val currency = currencyProvider.defaultCurrency
-        if (character != null) {
-            if (currency != null) {
-                bankProvider.setBalance(character, currency, 0)
-                return EconomyResponse(
-                        0.0,
-                        bankProvider.getBalance(character, currency).toDouble(),
-                        SUCCESS,
-                        ""
-                )
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            val currency = currencyProvider.defaultCurrency
+            if (character != null) {
+                if (currency != null) {
+                    bankProvider.setBalance(character, currency, 0)
+                    return EconomyResponse(
+                            0.0,
+                            bankProvider.getBalance(character, currency).toDouble(),
+                            SUCCESS,
+                            ""
+                    )
+                } else {
+                    return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                }
             } else {
-                return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
             }
         } else {
-            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
+            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a Minecraft profile.")
         }
     }
 
     override fun depositPlayer(playerName: String, amount: Double): EconomyResponse {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        val character = characterProvider.getActiveCharacter(player)
-        val currency = currencyProvider.defaultCurrency
-        if (character != null) {
-            if (currency != null) {
-                if (economyProvider.getBalance(character, currency) + amount.toInt() <= 1720) {
-                    economyProvider.setBalance(character, currency, amount.toInt())
-                    return EconomyResponse(amount.toInt().toDouble(), economyProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            val currency = currencyProvider.defaultCurrency
+            if (character != null) {
+                if (currency != null) {
+                    if (economyProvider.getBalance(character, currency) + amount.toInt() <= 1720) {
+                        economyProvider.setBalance(character, currency, amount.toInt())
+                        return EconomyResponse(amount.toInt().toDouble(), economyProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
+                    } else {
+                        return EconomyResponse(0.0, economyProvider.getBalance(character, currency).toDouble(), FAILURE, "Can not hold more than 1720 in wallet.")
+                    }
                 } else {
-                    return EconomyResponse(0.0, economyProvider.getBalance(character, currency).toDouble(), FAILURE, "Can not hold more than 1720 in wallet.")
+                    return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
                 }
             } else {
-                return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
             }
         } else {
-            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
+            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a Minecraft profile.")
         }
     }
 
@@ -201,37 +225,41 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit): AbstractEconom
     }
 
     override fun createBank(name: String, playerName: String): EconomyResponse {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
         val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        val character = characterProvider.getActiveCharacter(player)
-        val currency = currencyProvider.defaultCurrency
-        if (character != null) {
-            if (currency != null) {
-                bankProvider.setBalance(character, currency, 0)
-                return EconomyResponse(
-                        0.0,
-                        bankProvider.getBalance(character, currency).toDouble(),
-                        SUCCESS,
-                        ""
-                )
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            val currency = currencyProvider.defaultCurrency
+            if (character != null) {
+                if (currency != null) {
+                    bankProvider.setBalance(character, currency, 0)
+                    return EconomyResponse(
+                            0.0,
+                            bankProvider.getBalance(character, currency).toDouble(),
+                            SUCCESS,
+                            ""
+                    )
+                } else {
+                    return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                }
             } else {
-                return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
             }
         } else {
-            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
+            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a Minecraft profile.")
         }
     }
 
     override fun hasAccount(playerName: String): Boolean {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        val character = characterProvider.getActiveCharacter(player)
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer) ?: return false
+        val character = characterProvider.getActiveCharacter(minecraftProfile)
         return character != null
     }
 
@@ -252,27 +280,31 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit): AbstractEconom
     }
 
     override fun withdrawPlayer(playerName: String, amount: Double): EconomyResponse {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        val character = characterProvider.getActiveCharacter(player)
-        val currency = currencyProvider.defaultCurrency
-        if (character != null) {
-            if (currency != null) {
-                if (economyProvider.getBalance(character, currency) - amount.toInt() >= 0) {
-                    economyProvider.setBalance(character, currency, amount.toInt())
-                    return EconomyResponse(amount.toInt().toDouble(), economyProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            val currency = currencyProvider.defaultCurrency
+            if (character != null) {
+                if (currency != null) {
+                    if (economyProvider.getBalance(character, currency) - amount.toInt() >= 0) {
+                        economyProvider.setBalance(character, currency, amount.toInt())
+                        return EconomyResponse(amount.toInt().toDouble(), economyProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
+                    } else {
+                        return EconomyResponse(0.0, economyProvider.getBalance(character, currency).toDouble(), FAILURE, "Wallet does not have enough money.")
+                    }
                 } else {
-                    return EconomyResponse(0.0, economyProvider.getBalance(character, currency).toDouble(), FAILURE, "Wallet does not have enough money.")
+                    return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
                 }
             } else {
-                return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
             }
         } else {
-            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
+            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a Minecraft profile.")
         }
     }
 
@@ -286,27 +318,31 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit): AbstractEconom
     }
 
     override fun bankHas(name: String, amount: Double): EconomyResponse {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
         val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        val character = characterProvider.getActiveCharacter(player)
-        val currency = currencyProvider.defaultCurrency
-        if (character != null) {
-            if (currency != null) {
-                if (bankProvider.getBalance(character, currency) >= amount.toInt()) {
-                    return EconomyResponse(0.0, economyProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            val currency = currencyProvider.defaultCurrency
+            if (character != null) {
+                if (currency != null) {
+                    if (bankProvider.getBalance(character, currency) >= amount.toInt()) {
+                        return EconomyResponse(0.0, economyProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
+                    } else {
+                        return EconomyResponse(0.0, economyProvider.getBalance(character, currency).toDouble(), FAILURE, "Bank does not have enough money.")
+                    }
                 } else {
-                    return EconomyResponse(0.0, economyProvider.getBalance(character, currency).toDouble(), FAILURE, "Bank does not have enough money.")
+                    return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
                 }
             } else {
-                return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
             }
         } else {
-            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
+            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a Minecraft profile.")
         }
     }
 
@@ -324,22 +360,26 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit): AbstractEconom
     }
 
     override fun bankBalance(name: String): EconomyResponse {
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
         val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val player = playerProvider.getPlayer(bukkitOfflinePlayer)
-        val character = characterProvider.getActiveCharacter(player)
-        val currency = currencyProvider.defaultCurrency
-        if (character != null) {
-            if (currency != null) {
-                return EconomyResponse(0.0, bankProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        if (minecraftProfile != null) {
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            val currency = currencyProvider.defaultCurrency
+            if (character != null) {
+                if (currency != null) {
+                    return EconomyResponse(0.0, bankProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
+                } else {
+                    return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                }
             } else {
-                return EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
+                return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
             }
         } else {
-            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a character.")
+            return EconomyResponse(0.0, 0.0, FAILURE, "Player does not have a Minecraft profile.")
         }
     }
 
@@ -347,7 +387,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit): AbstractEconom
         val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
         val currency = currencyProvider.defaultCurrency
         if (currency != null) {
-            return "${amount.toInt().toString()} ${(if (amount.toInt() == 1) currency.nameSingular else currency.namePlural)}"
+            return "${amount.toInt()} ${(if (amount.toInt() == 1) currency.nameSingular else currency.namePlural)}"
         } else {
             return amount.toInt().toString()
         }

@@ -76,6 +76,7 @@ class RPKShopsBukkit: RPKBukkitPlugin() {
         messages.setDefault("shop-character-invalid", "&cThere is no character with that ID. Perhaps they have been deleted?")
         messages.setDefault("shop-currency-invalid", "&cThere is no currency by that name.")
         messages.setDefault("not-from-console", "&cYou must be a player to perform that command.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
     }
 
 }

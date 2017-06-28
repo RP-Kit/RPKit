@@ -20,49 +20,40 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.shops.bukkit.RPKShopsBukkit
+import com.rpkit.shops.bukkit.database.jooq.rpkit.Tables.RPKIT_SHOP_COUNT
 import com.rpkit.shops.bukkit.shopcount.RPKShopCount
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the shop count table.
  */
-class RPKShopCountTable: Table<RPKShopCount> {
+class RPKShopCountTable(database: Database, private val plugin: RPKShopsBukkit): Table<RPKShopCount>(database, RPKShopCount::class) {
 
-    private val plugin: RPKShopsBukkit
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, RPKShopCount>
-    private val characterCache: Cache<Int, Int>
-
-    constructor(database: Database, plugin: RPKShopsBukkit): super(database, RPKShopCount::class.java) {
-        this.plugin = plugin
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKShopCount::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-        characterCache = cacheManager.createCache("characterCache", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    }
+    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
+    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKShopCount::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val characterCache = cacheManager.createCache("characterCache", CacheConfigurationBuilder
+            .newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_shop_count(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "character_id INTEGER," +
-                            "count INTEGER" +
-                    ")"
-            ).use { statement ->
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_SHOP_COUNT)
+                .column(RPKIT_SHOP_COUNT.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_SHOP_COUNT.CHARACTER_ID, SQLDataType.INTEGER)
+                .column(RPKIT_SHOP_COUNT.COUNT, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_rpkit_shop_count").primaryKey(RPKIT_SHOP_COUNT.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -72,67 +63,67 @@ class RPKShopCountTable: Table<RPKShopCount> {
     }
 
     override fun insert(entity: RPKShopCount): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_shop_count(character_id, count) VALUES(?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.character.id)
-                statement.setInt(2, entity.count)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                    cache.put(id, entity)
-                    characterCache.put(entity.character.id, id)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_SHOP_COUNT,
+                        RPKIT_SHOP_COUNT.CHARACTER_ID,
+                        RPKIT_SHOP_COUNT.COUNT
+                )
+                .values(
+                        entity.character.id,
+                        entity.count
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
+        characterCache.put(entity.character.id, id)
         return id
     }
 
     override fun update(entity: RPKShopCount) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_shop_count SET character_id = ?, count = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.character.id)
-                statement.setInt(2, entity.count)
-                statement.setInt(3, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-                characterCache.put(entity.character.id, entity.id)
-            }
-        }
+        database.create
+                .update(RPKIT_SHOP_COUNT)
+                .set(RPKIT_SHOP_COUNT.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_SHOP_COUNT.COUNT, entity.count)
+                .where(RPKIT_SHOP_COUNT.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
+        characterCache.put(entity.character.id, entity.id)
     }
 
     override fun get(id: Int): RPKShopCount? {
         if (cache.containsKey(id)) {
             return cache.get(id)
         } else {
-            var shopCount: RPKShopCount? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, character_id, count FROM rpkit_shop_count WHERE id = ?"
-                ).use { statement ->
-                    statement.setInt(1, id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val characterId = resultSet.getInt("character_id")
-                        shopCount = RPKShopCount(
-                                id,
-                                plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                                        .getCharacter(characterId)!!,
-                                resultSet.getInt("count")
-                        )
-                        cache.put(id, shopCount)
-                        characterCache.put(characterId, id)
-                    }
-                }
+            val result = database.create
+                    .select(
+                            RPKIT_SHOP_COUNT.CHARACTER_ID,
+                            RPKIT_SHOP_COUNT.COUNT
+                    )
+                    .from(RPKIT_SHOP_COUNT)
+                    .where(RPKIT_SHOP_COUNT.ID.eq(id))
+                    .fetchOne() ?: return null
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterId = result.get(RPKIT_SHOP_COUNT.CHARACTER_ID)
+            val character = characterProvider.getCharacter(characterId)
+            if (character != null) {
+                val shopCount = RPKShopCount(
+                        id,
+                        character,
+                        result.get(RPKIT_SHOP_COUNT.COUNT)
+                )
+                cache.put(id, shopCount)
+                characterCache.put(shopCount.character.id, id)
+                return shopCount
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_SHOP_COUNT)
+                        .where(RPKIT_SHOP_COUNT.ID.eq(id))
+                        .execute()
+                characterCache.remove(characterId)
+                return null
             }
-            return shopCount
         }
     }
 
@@ -147,39 +138,21 @@ class RPKShopCountTable: Table<RPKShopCount> {
         if (characterCache.containsKey(character.id)) {
             return get(characterCache.get(character.id) as Int)
         } else {
-            var shopCount: RPKShopCount? = null
-            database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id, character_id, count FROM rpkit_shop_count WHERE character_id = ?"
-                ).use { statement ->
-                    statement.setInt(1, character.id)
-                    val resultSet = statement.executeQuery()
-                    if (resultSet.next()) {
-                        val id = resultSet.getInt("id")
-                        shopCount = RPKShopCount(
-                                id,
-                                character,
-                                resultSet.getInt("count")
-                        )
-                        cache.put(id, shopCount)
-                        characterCache.put(character.id, id)
-                    }
-                }
-            }
-            return shopCount
+            val result = database.create
+                    .select(RPKIT_SHOP_COUNT.ID)
+                    .from(RPKIT_SHOP_COUNT)
+                    .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(character.id))
+                    .fetchOne() ?: return null
+            return get(result.get(RPKIT_SHOP_COUNT.ID))
         }
     }
 
     override fun delete(entity: RPKShopCount) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_shop_count WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-                cache.remove(entity.id)
-                characterCache.remove(entity.character.id)
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_SHOP_COUNT)
+                .where(RPKIT_SHOP_COUNT.ID.eq(entity.id))
+                .execute()
+        cache.remove(entity.id)
+        characterCache.remove(entity.character.id)
     }
 }

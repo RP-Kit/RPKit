@@ -22,10 +22,13 @@ import com.rpkit.characters.bukkit.gender.RPKGender
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.stats.bukkit.command.stats.StatsCommand
 import com.rpkit.stats.bukkit.stat.RPKStatProviderImpl
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
 import com.rpkit.stats.bukkit.stat.RPKStatVariableProviderImpl
+import org.bukkit.attribute.Attribute
 import org.bukkit.inventory.ItemStack
 
 /**
@@ -54,9 +57,25 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
             }
         })
         statVariableProvider.addStatVariable(object: RPKStatVariable {
+            override val name = "profile"
+            override fun get(character: RPKCharacter): RPKProfile? {
+                return character.profile
+            }
+        })
+        statVariableProvider.addStatVariable(object: RPKStatVariable {
+            override val name = "minecraftProfile"
+            override fun get(character: RPKCharacter): RPKMinecraftProfile? {
+                return character.minecraftProfile
+            }
+        })
+        statVariableProvider.addStatVariable(object: RPKStatVariable {
             override val name = "minecraftLevel"
             override fun get(character: RPKCharacter): Int {
-                return character.player?.bukkitPlayer?.player?.level?:0
+                val minecraftProfile = character.minecraftProfile
+                if (minecraftProfile != null) {
+                    return server.getPlayer(minecraftProfile.minecraftUUID)?.level?:0
+                }
+                return 0
             }
         })
         statVariableProvider.addStatVariable(object: RPKStatVariable {
@@ -80,10 +99,15 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
         statVariableProvider.addStatVariable(object: RPKStatVariable {
             override val name = "characterHelmet"
             override fun get(character: RPKCharacter): ItemStack? {
-                val player = character.player
-                if (player != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(player) == character) {
-                        return character.player?.bukkitPlayer?.player?.inventory?.helmet ?: character.helmet
+                val minecraftProfile = character.minecraftProfile
+                if (minecraftProfile != null) {
+                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
+                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
+                        if (bukkitPlayer != null) {
+                            return bukkitPlayer.inventory.helmet
+                        } else {
+                            return character.helmet
+                        }
                     } else {
                         return character.helmet
                     }
@@ -95,10 +119,15 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
         statVariableProvider.addStatVariable(object: RPKStatVariable {
             override val name = "characterChestplate"
             override fun get(character: RPKCharacter): ItemStack? {
-                val player = character.player
-                if (player != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(player) == character) {
-                        return character.player?.bukkitPlayer?.player?.inventory?.chestplate ?: character.chestplate
+                val minecraftProfile = character.minecraftProfile
+                if (minecraftProfile != null) {
+                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
+                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
+                        if (bukkitPlayer != null) {
+                            return bukkitPlayer.inventory.chestplate
+                        } else {
+                            return character.chestplate
+                        }
                     } else {
                         return character.chestplate
                     }
@@ -110,10 +139,15 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
         statVariableProvider.addStatVariable(object: RPKStatVariable {
             override val name = "characterLeggings"
             override fun get(character: RPKCharacter): ItemStack? {
-                val player = character.player
-                if (player != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(player) == character) {
-                        return character.player?.bukkitPlayer?.player?.inventory?.leggings ?: character.leggings
+                val minecraftProfile = character.minecraftProfile
+                if (minecraftProfile != null) {
+                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
+                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
+                        if (bukkitPlayer != null) {
+                            return bukkitPlayer.inventory.leggings
+                        } else {
+                            return character.leggings
+                        }
                     } else {
                         return character.leggings
                     }
@@ -125,10 +159,15 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
         statVariableProvider.addStatVariable(object: RPKStatVariable {
             override val name = "characterBoots"
             override fun get(character: RPKCharacter): ItemStack? {
-                val player = character.player
-                if (player != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(player) == character) {
-                        return character.player?.bukkitPlayer?.player?.inventory?.boots ?: character.boots
+                val minecraftProfile = character.minecraftProfile
+                if (minecraftProfile != null) {
+                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
+                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
+                        if (bukkitPlayer != null) {
+                            return bukkitPlayer.inventory.boots
+                        } else {
+                            return character.boots
+                        }
                     } else {
                         return character.boots
                     }
@@ -140,10 +179,15 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
         statVariableProvider.addStatVariable(object: RPKStatVariable {
             override val name = "characterHealth"
             override fun get(character: RPKCharacter): Double {
-                val player = character.player
-                if (player != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(player) == character) {
-                        return character.player?.bukkitPlayer?.player?.health ?: character.health
+                val minecraftProfile = character.minecraftProfile
+                if (minecraftProfile != null) {
+                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
+                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
+                        if (bukkitPlayer != null) {
+                            return bukkitPlayer.health
+                        } else {
+                            return character.health
+                        }
                     } else {
                         return character.health
                     }
@@ -155,10 +199,15 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
         statVariableProvider.addStatVariable(object: RPKStatVariable {
             override val name = "characterMaxHealth"
             override fun get(character: RPKCharacter): Double {
-                val player = character.player
-                if (player != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(player) == character) {
-                        return character.player?.bukkitPlayer?.player?.maxHealth ?: character.maxHealth
+                val minecraftProfile = character.minecraftProfile
+                if (minecraftProfile != null) {
+                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
+                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
+                        if (bukkitPlayer != null) {
+                            return bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH).value
+                        } else {
+                            return character.maxHealth
+                        }
                     } else {
                         return character.maxHealth
                     }
@@ -182,10 +231,15 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
         statVariableProvider.addStatVariable(object: RPKStatVariable {
             override val name = "characterFoodLevel"
             override fun get(character: RPKCharacter): Int {
-                val player = character.player
-                if (player != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(player) == character) {
-                        return character.player?.bukkitPlayer?.player?.foodLevel ?: character.foodLevel
+                val minecraftProfile = character.minecraftProfile
+                if (minecraftProfile != null) {
+                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
+                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
+                        if (bukkitPlayer != null) {
+                            return bukkitPlayer.foodLevel
+                        } else {
+                            return character.foodLevel
+                        }
                     } else {
                         return character.foodLevel
                     }
@@ -212,6 +266,7 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-character", "&cYou must have an active character in order to perform this command.")
         messages.setDefault("not-from-console", "&cYou must be a player to perform this command.")
         messages.setDefault("no-permission-stats", "&cYou do not have permission to view your stats.")
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
     }
 
 }

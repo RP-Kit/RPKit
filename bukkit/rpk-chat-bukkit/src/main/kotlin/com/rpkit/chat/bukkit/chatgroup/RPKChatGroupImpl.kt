@@ -22,6 +22,9 @@ import com.rpkit.chat.bukkit.database.table.ChatGroupInviteTable
 import com.rpkit.chat.bukkit.database.table.ChatGroupMemberTable
 import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
+import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.ChatColor
 
 /**
@@ -34,38 +37,105 @@ class RPKChatGroupImpl(
 ): RPKChatGroup {
 
     override val members: List<RPKPlayer>
-        get() = plugin.core.database.getTable(ChatGroupMemberTable::class).get(this).map { chatGroupMember -> chatGroupMember.player }
+        get() = memberMinecraftProfiles.map { minecraftProfile ->
+            plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(
+                    plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
+            )
+        }
+    override val memberMinecraftProfiles: List<RPKMinecraftProfile>
+        get() = plugin.core.database.getTable(ChatGroupMemberTable::class).get(this).map(ChatGroupMember::minecraftProfile)
     override val invited: List<RPKPlayer>
-        get() = plugin.core.database.getTable(ChatGroupInviteTable::class).get(this).map { chatGroupInvite -> chatGroupInvite.player }
+        get() = invitedMinecraftProfiles.map { minecraftProfile ->
+            plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(
+                    plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
+            )
+        }
+    override val invitedMinecraftProfiles: List<RPKMinecraftProfile>
+        get() = plugin.core.database.getTable(ChatGroupInviteTable::class).get(this).map(ChatGroupInvite::minecraftProfile)
 
     override fun addMember(player: RPKPlayer) {
-        if (!members.contains(player)) {
-            plugin.core.database.getTable(ChatGroupMemberTable::class).insert(ChatGroupMember(chatGroup = this, player = player))
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                addMember(minecraftProfile)
+            }
+        }
+    }
+
+    override fun addMember(minecraftProfile: RPKMinecraftProfile) {
+        if (!memberMinecraftProfiles.contains(minecraftProfile)) {
+            plugin.core.database.getTable(ChatGroupMemberTable::class).insert(ChatGroupMember(chatGroup = this, minecraftProfile = minecraftProfile))
         }
     }
 
     override fun removeMember(player: RPKPlayer) {
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                removeMember(minecraftProfile)
+            }
+        }
+    }
+
+    override fun removeMember(minecraftProfile: RPKMinecraftProfile) {
         val chatGroupMemberTable = plugin.core.database.getTable(ChatGroupMemberTable::class)
-        chatGroupMemberTable.get(player).filter { member -> member.chatGroup == this }.forEach { member -> chatGroupMemberTable.delete(member) }
+        chatGroupMemberTable.get(minecraftProfile).filter { member -> member.chatGroup == this }.forEach { member -> chatGroupMemberTable.delete(member) }
     }
 
     override fun invite(player: RPKPlayer) {
-        if (!invited.contains(player)) {
-            plugin.core.database.getTable(ChatGroupInviteTable::class).insert(ChatGroupInvite(chatGroup = this, player = player))
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                invite(minecraftProfile)
+            }
+        }
+    }
+
+    override fun invite(minecraftProfile: RPKMinecraftProfile) {
+        if (!invitedMinecraftProfiles.contains(minecraftProfile)) {
+            plugin.core.database.getTable(ChatGroupInviteTable::class).insert(ChatGroupInvite(chatGroup = this, minecraftProfile = minecraftProfile))
         }
     }
 
     override fun uninvite(player: RPKPlayer) {
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+        val bukkitPlayer = player.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                uninvite(minecraftProfile)
+            }
+        }
+    }
+
+    override fun uninvite(minecraftProfile: RPKMinecraftProfile) {
         val chatGroupInviteTable = plugin.core.database.getTable(ChatGroupInviteTable::class)
-        chatGroupInviteTable.get(player).filter { invite -> invite.chatGroup == this }.forEach { invite -> chatGroupInviteTable.delete(invite) }
+        chatGroupInviteTable.get(minecraftProfile).filter { invite -> invite.chatGroup == this }.forEach { invite -> chatGroupInviteTable.delete(invite) }
     }
 
     override fun sendMessage(sender: RPKPlayer, message: String) {
+        val bukkitPlayer = sender.bukkitPlayer
+        if (bukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile != null) {
+                sendMessage(minecraftProfile, message)
+            }
+        }
+    }
+
+    override fun sendMessage(sender: RPKMinecraftProfile, message: String) {
         val prefixProvider = plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
         val senderCharacter = characterProvider.getActiveCharacter(sender)
-        members.forEach { receiver ->
+        memberMinecraftProfiles.forEach { receiver ->
             val receiverCharacter = characterProvider.getActiveCharacter(receiver)
             val formatString = plugin.config.getString("chat-group.format")
             var formattedMessage = ChatColor.translateAlternateColorCodes('&', formatString)
@@ -73,21 +143,21 @@ class RPKChatGroupImpl(
                 formattedMessage = formattedMessage.replace("\$message", message)
             }
             if (formattedMessage.contains("\$sender-prefix")) {
-                formattedMessage = formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(sender))
+                val profile = sender.profile
+                if (profile != null) {
+                    formattedMessage = formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(profile))
+                }
             }
             if (formattedMessage.contains("\$sender-player")) {
-                formattedMessage = formattedMessage.replace("\$sender-player", sender.name)
+                formattedMessage = formattedMessage.replace("\$sender-player", sender.minecraftUsername)
             }
             if (formattedMessage.contains("\$sender-character")) {
                 if (senderCharacter != null) {
                     formattedMessage = formattedMessage.replace("\$sender-character", senderCharacter.name)
                 }
             }
-            if (formattedMessage.contains("\$receiver-prefix")) {
-                formattedMessage = formattedMessage.replace("\$receiver-prefix", prefixProvider.getPrefix(receiver))
-            }
             if (formattedMessage.contains("\$receiver-player")) {
-                formattedMessage = formattedMessage.replace("\$receiver-player", receiver.name)
+                formattedMessage = formattedMessage.replace("\$receiver-player", receiver.minecraftUsername)
             }
             if (formattedMessage.contains("\$receiver-character")) {
                 if (receiverCharacter != null) {
@@ -96,12 +166,12 @@ class RPKChatGroupImpl(
             }
             if (formattedMessage.contains("\$group")) {
                 if (name.startsWith("_pm_")) {
-                    formattedMessage = formattedMessage.replace("\$group", sender.name + " -> " + members.filter { member -> member != sender }.first().name)
+                    formattedMessage = formattedMessage.replace("\$group", sender.minecraftUsername + " -> " + memberMinecraftProfiles.filter { member -> member != sender }.first().minecraftUsername)
                 } else {
                     formattedMessage = formattedMessage.replace("\$group", name)
                 }
             }
-            receiver.bukkitPlayer?.player?.sendMessage(formattedMessage)
+            receiver.sendMessage(formattedMessage)
             chatGroupProvider.setLastUsedChatGroup(receiver, this)
         }
     }

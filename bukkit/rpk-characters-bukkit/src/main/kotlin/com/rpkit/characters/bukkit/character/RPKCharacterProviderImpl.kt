@@ -18,156 +18,145 @@ package com.rpkit.characters.bukkit.character
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.table.RPKCharacterTable
-import com.rpkit.core.database.use
 import com.rpkit.players.bukkit.player.RPKPlayer
-import org.ehcache.Cache
-import org.ehcache.CacheManager
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.SQLException
-import java.util.*
+import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
+import org.bukkit.attribute.Attribute
 
 /**
  * Character provider implementation.
  */
-class RPKCharacterProviderImpl: RPKCharacterProvider {
-
-    private val plugin: RPKCharactersBukkit
-    private val activeCharacterCacheManager: CacheManager
-    private val activeCharacterCache: Cache<Int, Int>
-
-    constructor(plugin: RPKCharactersBukkit) {
-        this.plugin = plugin
-        this.activeCharacterCacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        activeCharacterCache = activeCharacterCacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    }
+class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCharacterProvider {
 
     override fun getCharacter(id: Int): RPKCharacter? {
         return plugin.core.database.getTable(RPKCharacterTable::class)[id]
     }
 
     override fun getActiveCharacter(player: RPKPlayer): RPKCharacter? {
-        val playerId = player.id
-        if (activeCharacterCache.containsKey(playerId)) {
-            return getCharacter(activeCharacterCache.get(playerId) as Int)
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+        val offlineBukkitPlayer = player.bukkitPlayer
+        if (offlineBukkitPlayer != null) {
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(offlineBukkitPlayer)
+            if (minecraftProfile != null) {
+                return getActiveCharacter(minecraftProfile)
+            }
+        }
+
+        val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
+        val character = characterTable.getActive(player)
+        return character
+    }
+
+    override fun getActiveCharacter(minecraftProfile: RPKMinecraftProfile): RPKCharacter? {
+        var character = plugin.core.database.getTable(RPKCharacterTable::class).get(minecraftProfile)
+        if (character != null) {
+            return character
         } else {
-            try {
-                var character: RPKCharacter? = null
-                plugin.core.database.createConnection().use { connection ->
-                    connection.prepareStatement(
-                            "SELECT character_id FROM player_character WHERE player_id = ?").use { statement ->
-                        statement.setInt(1, player.id)
-                        val resultSet = statement.executeQuery()
-                        if (resultSet.next()) {
-                            val characterId = resultSet.getInt("character_id")
-                            character = getCharacter(characterId)
-                            activeCharacterCache.put(playerId, characterId)
-                        }
-                    }
-                }
+            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
+            val player = playerProvider.getPlayer(plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID))
+            val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
+            character = characterTable.getActive(player)
+            if (character != null) {
+                setActiveCharacter(minecraftProfile, character)
                 return character
-            } catch (exception: SQLException) {
-                exception.printStackTrace()
             }
         }
         return null
     }
 
     override fun setActiveCharacter(player: RPKPlayer, character: RPKCharacter?) {
-        val oldCharacter = getActiveCharacter(player)
-        if (oldCharacter != null) {
-            if (player is RPKPlayer) {
-                val offlineBukkitPlayer = player.bukkitPlayer
-                if (offlineBukkitPlayer != null) {
-                    if (offlineBukkitPlayer.isOnline) {
-                        val bukkitPlayer = offlineBukkitPlayer.player
-                        oldCharacter.inventoryContents = bukkitPlayer.inventory.contents
-                        oldCharacter.helmet = bukkitPlayer.inventory.helmet
-                        oldCharacter.chestplate = bukkitPlayer.inventory.chestplate
-                        oldCharacter.leggings = bukkitPlayer.inventory.leggings
-                        oldCharacter.boots = bukkitPlayer.inventory.boots
-                        oldCharacter.location = bukkitPlayer.location
-                        oldCharacter.health = bukkitPlayer.health
-                        oldCharacter.foodLevel = bukkitPlayer.foodLevel
-                        updateCharacter(oldCharacter)
-                    }
-                }
+        val offlineBukkitPlayer = player.bukkitPlayer
+        if (offlineBukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(offlineBukkitPlayer)
+            if (minecraftProfile != null) {
+                setActiveCharacter(minecraftProfile, character)
             }
         }
-        if (character != null) {
-            try {
-                plugin.core.database.createConnection().use { connection ->
-                    connection.prepareStatement(
-                            "INSERT INTO player_character(player_id, character_id) VALUES(?, ?) ON DUPLICATE KEY UPDATE character_id = VALUES(character_id)").use { statement ->
-                        statement.setInt(1, player.id)
-                        statement.setInt(2, character.id)
-                        statement.executeUpdate()
-                    }
-                }
-            } catch (exception: SQLException) {
-                exception.printStackTrace()
-            }
+    }
 
-            if (player is RPKPlayer) {
-                val offlineBukkitPlayer = player.bukkitPlayer
-                if (offlineBukkitPlayer != null) {
-                    if (offlineBukkitPlayer.isOnline) {
-                        val bukkitPlayer = offlineBukkitPlayer.player
-                        bukkitPlayer.inventory.contents = character.inventoryContents
-                        bukkitPlayer.inventory.helmet = character.helmet
-                        bukkitPlayer.inventory.chestplate = character.chestplate
-                        bukkitPlayer.inventory.leggings = character.leggings
-                        bukkitPlayer.inventory.boots = character.boots
-                        bukkitPlayer.teleport(character.location)
-                        bukkitPlayer.maxHealth = character.maxHealth
-                        bukkitPlayer.health = character.health
-                        bukkitPlayer.foodLevel = character.foodLevel
-                        if (plugin.config.getBoolean("characters.set-player-display-name")) {
-                            bukkitPlayer.displayName = character.name
-                        }
+    override fun setActiveCharacter(minecraftProfile: RPKMinecraftProfile, character: RPKCharacter?) {
+        val oldCharacter = getActiveCharacter(minecraftProfile)
+        if (oldCharacter != null) {
+            oldCharacter.minecraftProfile = null
+            val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
+            if (offlineBukkitPlayer != null) {
+                if (offlineBukkitPlayer.isOnline) {
+                    val bukkitPlayer = offlineBukkitPlayer.player
+                    oldCharacter.inventoryContents = bukkitPlayer.inventory.contents
+                    oldCharacter.helmet = bukkitPlayer.inventory.helmet
+                    oldCharacter.chestplate = bukkitPlayer.inventory.chestplate
+                    oldCharacter.leggings = bukkitPlayer.inventory.leggings
+                    oldCharacter.boots = bukkitPlayer.inventory.boots
+                    oldCharacter.location = bukkitPlayer.location
+                    oldCharacter.health = bukkitPlayer.health
+                    oldCharacter.foodLevel = bukkitPlayer.foodLevel
+                }
+            }
+            updateCharacter(oldCharacter)
+        }
+        if (character != null) {
+            val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
+            if (offlineBukkitPlayer != null) {
+                if (offlineBukkitPlayer.isOnline) {
+                    val bukkitPlayer = offlineBukkitPlayer.player
+                    bukkitPlayer.inventory.contents = character.inventoryContents
+                    bukkitPlayer.inventory.helmet = character.helmet
+                    bukkitPlayer.inventory.chestplate = character.chestplate
+                    bukkitPlayer.inventory.leggings = character.leggings
+                    bukkitPlayer.inventory.boots = character.boots
+                    bukkitPlayer.teleport(character.location)
+                    bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH).baseValue = character.maxHealth
+                    bukkitPlayer.health = character.health
+                    bukkitPlayer.foodLevel = character.foodLevel
+                    if (plugin.config.getBoolean("characters.set-player-display-name")) {
+                        bukkitPlayer.displayName = character.name
                     }
                 }
             }
-            activeCharacterCache.put(player.id, character.id)
+            character.minecraftProfile = minecraftProfile
+            updateCharacter(character)
         } else if (oldCharacter != null) {
-            try {
-                plugin.core.database.createConnection().use { connection ->
-                    connection.prepareStatement(
-                            "DELETE FROM player_character WHERE player_id = ? AND character_id = ?").use { statement ->
-                        statement.setInt(1, player.id)
-                        statement.setInt(2, oldCharacter.id)
-                        statement.executeUpdate()
-                    }
-                }
-            } catch (exception: SQLException) {
-                exception.printStackTrace()
-            }
-            activeCharacterCache.remove(player.id)
+            oldCharacter.minecraftProfile = null
+            updateCharacter(oldCharacter)
         }
     }
 
     override fun getCharacters(player: RPKPlayer): Collection<RPKCharacter> {
-        try {
-            val characters: MutableList<RPKCharacter> = ArrayList()
-            plugin.core.database.createConnection().use { connection ->
-                connection.prepareStatement(
-                        "SELECT id FROM rpkit_character WHERE player_id = ? ORDER BY id").use { statement ->
-                    statement.setInt(1, player.id)
-                    val resultSet = statement.executeQuery()
-                    while (resultSet.next()) {
-                        characters.add(getCharacter(resultSet.getInt("id"))!!)
+        val offlineBukkitPlayer = player.bukkitPlayer
+        if (offlineBukkitPlayer != null) {
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(offlineBukkitPlayer)
+            if (minecraftProfile != null) {
+                val profile = minecraftProfile.profile
+                if (profile != null) {
+                    val characters = getCharacters(profile).toMutableList()
+                    val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
+                    val oldCharacters = characterTable.get(player)
+                    oldCharacters.forEach { oldCharacter ->
+                        oldCharacter.profile = profile
+                        updateCharacter(oldCharacter)
                     }
-
+                    characters.addAll(oldCharacters)
+                    if (characters.isNotEmpty()) {
+                        return characters.distinct()
+                    }
                 }
             }
-            return characters
-        } catch (exception: SQLException) {
-            exception.printStackTrace()
         }
-        return emptyList()
+        val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
+        val oldCharacters = characterTable.get(player)
+        return oldCharacters
+    }
+
+    override fun getCharacters(profile: RPKProfile): List<RPKCharacter> {
+        return plugin.core.database.getTable(RPKCharacterTable::class).get(profile)
+    }
+
+    override fun getCharacters(name: String): List<RPKCharacter> {
+        return plugin.core.database.getTable(RPKCharacterTable::class).get(name)
     }
 
     override fun addCharacter(character: RPKCharacter) {
@@ -175,9 +164,9 @@ class RPKCharacterProviderImpl: RPKCharacterProvider {
     }
 
     override fun removeCharacter(character: RPKCharacter) {
-        val player = character.player
-        if (player != null)
-            setActiveCharacter(player, null)
+        val minecraftProfile = character.minecraftProfile
+        if (minecraftProfile != null)
+            setActiveCharacter(minecraftProfile, null)
         plugin.core.database.getTable(RPKCharacterTable::class).delete(character)
     }
 

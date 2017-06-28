@@ -4,8 +4,8 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.skills.bukkit.RPKSkillsBukkit
+import com.rpkit.skills.bukkit.database.jooq.rpkit.Tables.RPKIT_SKILL_COOLDOWN
 import com.rpkit.skills.bukkit.skills.RPKSkill
 import com.rpkit.skills.bukkit.skills.RPKSkillCooldown
 import com.rpkit.skills.bukkit.skills.RPKSkillProvider
@@ -14,8 +14,10 @@ import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import java.sql.PreparedStatement
-import java.sql.Statement.RETURN_GENERATED_KEYS
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Timestamp
 
 
@@ -28,16 +30,16 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
 
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_skill_cooldown(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "character_id INTEGER," +
-                            "skill_name VARCHAR(256)," +
-                            "cooldown_timestamp DATETIME" +
-                    ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_SKILL_COOLDOWN)
+                .column(RPKIT_SKILL_COOLDOWN.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_SKILL_COOLDOWN.CHARACTER_ID, SQLDataType.INTEGER)
+                .column(RPKIT_SKILL_COOLDOWN.SKILL_NAME, SQLDataType.VARCHAR(256))
+                .column(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP, SQLDataType.TIMESTAMP)
+                .constraints(
+                        constraint("pk_rpkit_skill_cooldown").primaryKey(RPKIT_SKILL_COOLDOWN.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
@@ -47,111 +49,89 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
     }
 
     override fun insert(entity: RPKSkillCooldown): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_skill_cooldown(character_id, skill_name, cooldown_timestamp) VALUES(?, ?, ?)",
-                    RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.character.id)
-                statement.setString(2, entity.skill.name)
-                statement.setTimestamp(3, Timestamp(entity.cooldownTimestamp))
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    entity.id = id
-                    id = generatedKeys.getInt(1)
-                    cache.put(id, entity)
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_SKILL_COOLDOWN,
+                        RPKIT_SKILL_COOLDOWN.CHARACTER_ID,
+                        RPKIT_SKILL_COOLDOWN.SKILL_NAME,
+                        RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP
+                )
+                .values(
+                        entity.character.id,
+                        entity.skill.name,
+                        Timestamp(entity.cooldownTimestamp)
+                )
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
+        cache.put(id, entity)
         return id
     }
 
     override fun update(entity: RPKSkillCooldown) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_skill_cooldown SET character_id = ?, skill_name = ?, cooldown_timestamp = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.character.id)
-                statement.setString(2, entity.skill.name)
-                statement.setTimestamp(3, Timestamp(entity.cooldownTimestamp))
-                statement.setInt(4, entity.id)
-                statement.executeUpdate()
-                cache.put(entity.id, entity)
-            }
-        }
+        database.create
+                .update(RPKIT_SKILL_COOLDOWN)
+                .set(RPKIT_SKILL_COOLDOWN.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_SKILL_COOLDOWN.SKILL_NAME, entity.skill.name)
+                .set(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP, Timestamp(entity.cooldownTimestamp))
+                .where(RPKIT_SKILL_COOLDOWN.ID.eq(entity.id))
+                .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKSkillCooldown? {
-        var skillCooldown: RPKSkillCooldown? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, character_id, skill_name, cooldown_timestamp FROM rpkit_skill_cooldown WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val skillProvider = plugin.core.serviceManager.getServiceProvider(RPKSkillProvider::class)
-                    val character = characterProvider.getCharacter(resultSet.getInt("character_id"))
-                    val skill = skillProvider.getSkill(resultSet.getString("skill_name"))
-                    val cooldownTimestamp = resultSet.getTimestamp("cooldown_timestamp")
-                    if (character != null && skill != null) {
-                        val finalSkillCooldown = RPKSkillCooldown(
-                                resultSet.getInt("id"),
-                                character,
-                                skill,
-                                cooldownTimestamp.time
-                        )
-                        skillCooldown = finalSkillCooldown
-                    } else {
-                        connection.prepareStatement(
-                                "DELETE FROM rpkit_skill_cooldown WHERE id = ?"
-                        ).use { statement ->
-                            statement.setInt(1, resultSet.getInt("id"))
-                            statement.executeUpdate()
-                        }
-                    }
-                }
+        if (cache.containsKey(id)) {
+            return cache.get(id)
+        } else {
+            val result = database.create
+                    .select(
+                            RPKIT_SKILL_COOLDOWN.CHARACTER_ID,
+                            RPKIT_SKILL_COOLDOWN.SKILL_NAME,
+                            RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP
+                    )
+                    .from(RPKIT_SKILL_COOLDOWN)
+                    .where(RPKIT_SKILL_COOLDOWN.ID.eq(id))
+                    .fetchOne() ?: return null
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterId = result.get(RPKIT_SKILL_COOLDOWN.CHARACTER_ID)
+            val character = characterProvider.getCharacter(characterId)
+            val skillProvider = plugin.core.serviceManager.getServiceProvider(RPKSkillProvider::class)
+            val skillName = result.get(RPKIT_SKILL_COOLDOWN.SKILL_NAME)
+            val skill = skillProvider.getSkill(skillName)
+            if (character != null && skill != null) {
+                val skillCooldown = RPKSkillCooldown(
+                        id,
+                        character,
+                        skill,
+                        result.get(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP).time
+                )
+                cache.put(id, skillCooldown)
+                return skillCooldown
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_SKILL_COOLDOWN)
+                        .where(RPKIT_SKILL_COOLDOWN.ID.eq(id))
+                        .execute()
+                return null
             }
         }
-        return skillCooldown
     }
 
     fun get(character: RPKCharacter, skill: RPKSkill): RPKSkillCooldown? {
-        var skillCooldown: RPKSkillCooldown? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, character_id, skill_name, cooldown_timestamp FROM rpkit_skill_cooldown WHERE character_id = ? AND skill_name = ?"
-            ).use { statement ->
-                statement.setInt(1, character.id)
-                statement.setString(2, skill.name)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    val cooldownTimestamp = resultSet.getTimestamp("cooldown_timestamp")
-                    val finalSkillCooldown = RPKSkillCooldown(
-                            resultSet.getInt("id"),
-                            character,
-                            skill,
-                            cooldownTimestamp.time
-                    )
-                    skillCooldown = finalSkillCooldown
-                }
-            }
-        }
-        return skillCooldown
+        val result = database.create
+                .select(RPKIT_SKILL_COOLDOWN.ID)
+                .from(RPKIT_SKILL_COOLDOWN)
+                .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(character.id))
+                .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(skill.name))
+                .fetchOne() ?: return null
+        return get(result.get(RPKIT_SKILL_COOLDOWN.ID))
     }
 
     override fun delete(entity: RPKSkillCooldown) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_skill_cooldown WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_SKILL_COOLDOWN)
+                .where(RPKIT_SKILL_COOLDOWN.ID.eq(entity.id))
+                .execute()
     }
 
 }

@@ -2,112 +2,110 @@ package com.rpkit.locks.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.core.database.use
 import com.rpkit.locks.bukkit.RPKLocksBukkit
+import com.rpkit.locks.bukkit.database.jooq.rpkit.Tables.RPKIT_PLAYER_GETTING_KEY
 import com.rpkit.locks.bukkit.lock.RPKPlayerGettingKey
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
-import java.sql.PreparedStatement
-import java.sql.Statement
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL.constraint
+import org.jooq.impl.DSL.field
+import org.jooq.impl.SQLDataType
+import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKPlayerGettingKey>(database, RPKPlayerGettingKey::class) {
 
     override fun create() {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS rpkit_player_getting_key(" +
-                            "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-                            "player_id INTEGER" +
-                            ")"
-            ).use(PreparedStatement::executeUpdate)
-        }
+        database.create
+                .createTableIfNotExists(RPKIT_PLAYER_GETTING_KEY)
+                .column(RPKIT_PLAYER_GETTING_KEY.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_rpkit_player_getting_key").primaryKey(RPKIT_PLAYER_GETTING_KEY.ID)
+                )
+                .execute()
     }
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.1.0")
+            database.setTableVersion(this, "1.3.0")
+        }
+        if (database.getTableVersion(this) == "1.1.0") {
+            database.create
+                    .truncate(RPKIT_PLAYER_GETTING_KEY)
+                    .execute()
+            database.create
+                    .alterTable(RPKIT_PLAYER_GETTING_KEY)
+                    .dropColumn(field("player_id"))
+                    .execute()
+            database.create
+                    .alterTable(RPKIT_PLAYER_GETTING_KEY)
+                    .addColumn(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
+                    .execute()
+            database.setTableVersion(this, "1.3.0")
         }
     }
 
     override fun insert(entity: RPKPlayerGettingKey): Int {
-        var id = 0
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "INSERT INTO rpkit_player_getting_key(player_id) VALUES(?)",
-                    Statement.RETURN_GENERATED_KEYS
-            ).use { statement ->
-                statement.setInt(1, entity.player.id)
-                statement.executeUpdate()
-                val generatedKeys = statement.generatedKeys
-                if (generatedKeys.next()) {
-                    id = generatedKeys.getInt(1)
-                    entity.id = id
-                }
-            }
-        }
+        database.create
+                .insertInto(
+                        RPKIT_PLAYER_GETTING_KEY,
+                        RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID
+                )
+                .values(entity.minecraftProfile.id)
+                .execute()
+        val id = database.create.lastID().toInt()
+        entity.id = id
         return id
     }
 
     override fun update(entity: RPKPlayerGettingKey) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "UPDATE rpkit_player_getting_key SET player_id = ? WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.player.id)
-                statement.setInt(2, entity.id)
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .update(RPKIT_PLAYER_GETTING_KEY)
+                .set(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
+                .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(entity.id))
+                .execute()
     }
 
     override fun get(id: Int): RPKPlayerGettingKey? {
-        var playerGettingKey: RPKPlayerGettingKey? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, player_id FROM rpkit_player_getting_key WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    playerGettingKey = RPKPlayerGettingKey(
-                            resultSet.getInt("id"),
-                            plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!
-                    )
-                }
-            }
+        val result = database.create
+                .select(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID)
+                .from(RPKIT_PLAYER_GETTING_KEY)
+                .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(id))
+                .fetchOne() ?: return null
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+        val minecraftProfileId = result.get(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID)
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
+        if (minecraftProfile != null) {
+            val playerGettingKey = RPKPlayerGettingKey(
+                    id,
+                    minecraftProfile
+            )
+            return playerGettingKey
+        } else {
+            database.create
+                    .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
+                    .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(id))
+                    .execute()
+            return null
         }
-        return playerGettingKey
     }
 
-    fun get(player: RPKPlayer): RPKPlayerGettingKey? {
-        var playerGettingKey: RPKPlayerGettingKey? = null
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "SELECT id, player_id FROM rpkit_player_getting_key WHERE player_id = ?"
-            ).use { statement ->
-                statement.setInt(1, player.id)
-                val resultSet = statement.executeQuery()
-                if (resultSet.next()) {
-                    playerGettingKey = RPKPlayerGettingKey(
-                            resultSet.getInt("id"),
-                            plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class).getPlayer(resultSet.getInt("player_id"))!!
-                    )
-                }
-            }
-        }
-        return playerGettingKey
+    fun get(minecraftProfile: RPKMinecraftProfile): RPKPlayerGettingKey? {
+        val result = database.create
+                .select(RPKIT_PLAYER_GETTING_KEY.ID)
+                .from(RPKIT_PLAYER_GETTING_KEY)
+                .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                .fetchOne() ?: return null
+        return get(result.get(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID))
     }
 
     override fun delete(entity: RPKPlayerGettingKey) {
-        database.createConnection().use { connection ->
-            connection.prepareStatement(
-                    "DELETE FROM rpkit_player_getting_key WHERE id = ?"
-            ).use { statement ->
-                statement.setInt(1, entity.id)
-                statement.executeUpdate()
-            }
-        }
+        database.create
+                .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
+                .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(entity.id))
+                .execute()
     }
     
 }

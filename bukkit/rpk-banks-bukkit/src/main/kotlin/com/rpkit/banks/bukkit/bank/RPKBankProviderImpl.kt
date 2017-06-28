@@ -51,8 +51,12 @@ class RPKBankProviderImpl(private val plugin: RPKBanksBukkit): RPKBankProvider {
         val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
         if (getBalance(character, currency) >= amount) {
             economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + amount)
-            setBalance(character, currency, getBalance(character, currency) + amount)
+            setBalance(character, currency, getBalance(character, currency) - amount)
         }
+    }
+
+    override fun getRichestCharacters(currency: RPKCurrency, amount: Int): List<RPKCharacter> {
+        return plugin.core.database.getTable(RPKBankTable::class).getTop(amount, currency)
     }
 
 }

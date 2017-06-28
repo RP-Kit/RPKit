@@ -15,6 +15,7 @@ chat-channels:
         - ==: IRCComponent
           irc-channel: '#rpkit-general'
           irc-whitelisted: false
+        - ==: WebComponent
         - ==: LogComponent
         joined-by-default: true
     support:
@@ -33,6 +34,7 @@ chat-channels:
         - ==: IRCComponent
           irc-channel: '#rpkit-support'
           irc-whitelisted: false
+        - ==: WebComponent
         - ==: LogComponent
         joined-by-default: true
     staff:
@@ -51,6 +53,7 @@ chat-channels:
         - ==: IRCComponent
           irc-channel: '#rpkit-staff'
           irc-whitelisted: false
+        - ==: WebComponent
         - ==: LogComponent
         joined-by-default: false
     say:
