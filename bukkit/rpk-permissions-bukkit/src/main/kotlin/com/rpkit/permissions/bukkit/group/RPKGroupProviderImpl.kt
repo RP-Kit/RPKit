@@ -190,12 +190,7 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
     override fun hasPermission(group: RPKGroup, node: String): Boolean {
         var hasPermission = plugin.server.pluginManager.getPermission(node).default.getValue(false)
         for (inheritedGroup in group.inheritance) {
-            if (node in group.allow) {
-                hasPermission = true
-            }
-            if (node in group.deny) {
-                hasPermission = false
-            }
+            hasPermission = hasPermission(inheritedGroup, node)
         }
         if (node in group.allow) {
             hasPermission = true
@@ -224,8 +219,13 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
 
     override fun hasPermission(profile: RPKProfile, node: String): Boolean {
         var hasPermission = plugin.server.pluginManager.getPermission(node).default.getValue(false)
-        for (group in getGroups(profile)) {
-            hasPermission = hasPermission(group, node)
+        val groups = getGroups(profile)
+        if (groups.isEmpty()) {
+            hasPermission = hasPermission(defaultGroup, node)
+        } else {
+            for (group in groups) {
+                hasPermission = hasPermission(group, node)
+            }
         }
         return hasPermission
     }
