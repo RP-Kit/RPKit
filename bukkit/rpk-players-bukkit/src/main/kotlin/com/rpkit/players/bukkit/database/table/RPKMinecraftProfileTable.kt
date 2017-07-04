@@ -85,7 +85,8 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
                     .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id))
                     .fetchOne() ?: return null
             val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-            val profile = profileProvider.getProfile(result.get(RPKIT_MINECRAFT_PROFILE.PROFILE_ID))
+            val profileId = result.get(RPKIT_MINECRAFT_PROFILE.PROFILE_ID)
+            val profile = if (profileId == null) null else profileProvider.getProfile(profileId)
             val minecraftProfile = RPKMinecraftProfileImpl(
                     id,
                     profile,
