@@ -98,13 +98,15 @@ class RPKChatBukkit: RPKBukkitPlugin() {
             val chatChannelSpeakerProvider = RPKChatChannelSpeakerProvider(this)
             val chatGroupProvider = RPKChatGroupProviderImpl(this)
             val snooperProvider =  RPKSnooperProviderImpl(this)
+            val chatWebSocketProvider = RPKChatWebSocketProvider()
             serviceProviders = arrayOf(
                     prefixProvider,
                     chatChannelProvider,
                     chatChannelMuteProvider,
                     chatChannelSpeakerProvider,
                     chatGroupProvider,
-                    snooperProvider
+                    snooperProvider,
+                    chatWebSocketProvider
             )
             registerChatChannelPermissions(chatChannelProvider)
             registerPrefixPermissions(prefixProvider)
