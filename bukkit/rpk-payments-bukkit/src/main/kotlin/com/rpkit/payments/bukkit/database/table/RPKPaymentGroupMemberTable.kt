@@ -30,6 +30,7 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.SQLDataType
 import org.jooq.util.sqlite.SQLiteDataType
+import org.jooq.impl.DSL.constraint
 
 /**
  * Represents payment group member table.
@@ -50,6 +51,9 @@ class RPKPaymentGroupMemberTable(
                 .column(RPKIT_PAYMENT_GROUP_MEMBER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID, SQLDataType.INTEGER)
                 .column(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID, SQLDataType.INTEGER)
+                .constraints(
+                        constraint("pk_rpkit_payment_group_member").primaryKey(RPKIT_PAYMENT_GROUP_MEMBER.ID)
+                )
                 .execute()
     }
 
