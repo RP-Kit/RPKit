@@ -4,7 +4,6 @@
 package com.rpkit.essentials.bukkit.database.jooq.rpkit;
 
 
-import com.rpkit.essentials.bukkit.database.jooq.rpkit.tables.RpkitDrunkenness;
 import com.rpkit.essentials.bukkit.database.jooq.rpkit.tables.RpkitLogMessagesEnabled;
 import com.rpkit.essentials.bukkit.database.jooq.rpkit.tables.RpkitPreviousLocation;
 import com.rpkit.essentials.bukkit.database.jooq.rpkit.tables.RpkitTrackingEnabled;
@@ -24,11 +23,6 @@ import javax.annotation.Generated;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
-
-    /**
-     * The table <code>rpkit.rpkit_drunkenness</code>.
-     */
-    public static final RpkitDrunkenness RPKIT_DRUNKENNESS = RpkitDrunkenness.RPKIT_DRUNKENNESS;
 
     /**
      * The table <code>rpkit.rpkit_log_messages_enabled</code>.
