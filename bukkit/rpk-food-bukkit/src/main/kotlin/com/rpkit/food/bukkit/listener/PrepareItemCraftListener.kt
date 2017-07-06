@@ -30,10 +30,12 @@ class PrepareItemCraftListener(private val plugin: RPKFoodBukkit): Listener {
     @EventHandler
     fun onPrepareItemCraft(event: PrepareItemCraftEvent) {
         val item = event.inventory.result
-        if (item.type.isEdible) {
-            val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProviderImpl::class)
-            expiryProvider.setExpiry(item)
-            event.inventory.result = item
+        if (item != null) {
+            if (item.type.isEdible) {
+                val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProviderImpl::class)
+                expiryProvider.setExpiry(item)
+                event.inventory.result = item
+            }
         }
     }
 
