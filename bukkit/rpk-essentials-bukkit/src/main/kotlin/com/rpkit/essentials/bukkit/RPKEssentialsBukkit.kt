@@ -4,11 +4,9 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.essentials.bukkit.command.*
 import com.rpkit.essentials.bukkit.dailyquote.RPKDailyQuoteProviderImpl
-import com.rpkit.essentials.bukkit.database.table.RPKDrunkennessTable
 import com.rpkit.essentials.bukkit.database.table.RPKLogMessagesEnabledTable
 import com.rpkit.essentials.bukkit.database.table.RPKPreviousLocationTable
 import com.rpkit.essentials.bukkit.database.table.RPKTrackingEnabledTable
-import com.rpkit.essentials.bukkit.drink.RPKDrinkProviderImpl
 import com.rpkit.essentials.bukkit.kit.RPKKitImpl
 import com.rpkit.essentials.bukkit.kit.RPKKitProviderImpl
 import com.rpkit.essentials.bukkit.listener.PlayerJoinListener
@@ -28,7 +26,6 @@ class RPKEssentialsBukkit: RPKBukkitPlugin() {
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKDailyQuoteProviderImpl(this),
-                RPKDrinkProviderImpl(this),
                 RPKKitProviderImpl(this),
                 RPKLocationHistoryProviderImpl(this),
                 RPKLogMessageProvider(this),
@@ -77,7 +74,6 @@ class RPKEssentialsBukkit: RPKBukkitPlugin() {
     }
 
     override fun createTables(database: Database) {
-        database.addTable(RPKDrunkennessTable(database, this))
         database.addTable(RPKLogMessagesEnabledTable(database, this))
         database.addTable(RPKPreviousLocationTable(database, this))
         database.addTable(RPKTrackingEnabledTable(database, this))

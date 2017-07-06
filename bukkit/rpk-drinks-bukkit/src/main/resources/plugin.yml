@@ -1,0 +1,8 @@
+name: rpk-drinks-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.drinks.bukkit.RPKDrinksBukkit
+depend:
+- rpk-core-bukkit
+- rpk-character-lib-bukkit
+- rpk-drink-lib-bukkit

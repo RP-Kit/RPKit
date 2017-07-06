@@ -7,12 +7,19 @@ package com.rpkit.essentials.bukkit.database.jooq.rpkit.tables;
 import com.rpkit.essentials.bukkit.database.jooq.rpkit.Keys;
 import com.rpkit.essentials.bukkit.database.jooq.rpkit.Rpkit;
 import com.rpkit.essentials.bukkit.database.jooq.rpkit.tables.records.RpkitPreviousLocationRecord;
-import org.jooq.*;
-import org.jooq.impl.TableImpl;
 
-import javax.annotation.Generated;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.annotation.Generated;
+
+import org.jooq.Field;
+import org.jooq.Identity;
+import org.jooq.Schema;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.UniqueKey;
+import org.jooq.impl.TableImpl;
 
 
 /**

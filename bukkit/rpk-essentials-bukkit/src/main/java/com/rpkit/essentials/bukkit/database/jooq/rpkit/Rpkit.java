@@ -5,7 +5,6 @@ package com.rpkit.essentials.bukkit.database.jooq.rpkit;
 
 
 import com.rpkit.essentials.bukkit.database.jooq.DefaultCatalog;
-import com.rpkit.essentials.bukkit.database.jooq.rpkit.tables.RpkitDrunkenness;
 import com.rpkit.essentials.bukkit.database.jooq.rpkit.tables.RpkitLogMessagesEnabled;
 import com.rpkit.essentials.bukkit.database.jooq.rpkit.tables.RpkitPreviousLocation;
 import com.rpkit.essentials.bukkit.database.jooq.rpkit.tables.RpkitTrackingEnabled;
@@ -34,17 +33,12 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Rpkit extends SchemaImpl {
 
-    private static final long serialVersionUID = 723052937;
+    private static final long serialVersionUID = 1632981976;
 
     /**
      * The reference instance of <code>rpkit</code>
      */
     public static final Rpkit RPKIT = new Rpkit();
-
-    /**
-     * The table <code>rpkit.rpkit_drunkenness</code>.
-     */
-    public final RpkitDrunkenness RPKIT_DRUNKENNESS = RpkitDrunkenness.RPKIT_DRUNKENNESS;
 
     /**
      * The table <code>rpkit.rpkit_log_messages_enabled</code>.
@@ -86,7 +80,6 @@ public class Rpkit extends SchemaImpl {
 
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
-            RpkitDrunkenness.RPKIT_DRUNKENNESS,
             RpkitLogMessagesEnabled.RPKIT_LOG_MESSAGES_ENABLED,
             RpkitPreviousLocation.RPKIT_PREVIOUS_LOCATION,
             RpkitTrackingEnabled.RPKIT_TRACKING_ENABLED);

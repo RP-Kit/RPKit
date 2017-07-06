@@ -1,19 +1,19 @@
-package com.rpkit.essentials.bukkit.database.table
+package com.rpkit.drinks.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import com.rpkit.essentials.bukkit.database.jooq.rpkit.Tables.RPKIT_DRUNKENNESS
-import com.rpkit.essentials.bukkit.drink.RPKDrunkenness
+import com.rpkit.drinks.bukkit.RPKDrinksBukkit
+import com.rpkit.drinks.bukkit.drink.RPKDrunkenness
+import com.rpkit.drinks.bukkit.database.jooq.rpkit.Tables.RPKIT_DRUNKENNESS
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
 import org.jooq.util.sqlite.SQLiteDataType
 
 
-class RPKDrunkennessTable(database: Database, private val plugin: RPKEssentialsBukkit): Table<RPKDrunkenness>(database, RPKDrunkenness::class) {
+class RPKDrunkennessTable(database: Database, private val plugin: RPKDrinksBukkit): Table<RPKDrunkenness>(database, RPKDrunkenness::class) {
 
     override fun create() {
         database.create
