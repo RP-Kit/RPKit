@@ -18,6 +18,7 @@ package com.rpkit.players.bukkit.listener
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -35,6 +36,16 @@ class PlayerJoinListener(private val plugin: RPKPlayersBukkit): Listener {
         val player = playerProvider.getPlayer(event.player)
         player.lastKnownIP = event.player.address?.address?.hostAddress
         playerProvider.updatePlayer(player)
+
+        // If the player's Minecraft profile is not linked to a profile, run the player through linking their profile.
+        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+        if (minecraftProfile != null) { // Minecraft profile should never be null due to the PlayerLoginListener creating these, but it doesn't hurt to be safe
+            val profile = minecraftProfile.profile
+            if (profile == null) {
+                minecraftProfile.sendMessage(plugin.messages["profile-link-info"])
+            }
+        }
     }
 
 }
