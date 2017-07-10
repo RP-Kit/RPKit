@@ -35,43 +35,47 @@ class AccountLinkIRCCommand(private val plugin: RPKPlayersBukkit): CommandExecut
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender is Player) {
-            if (args.isNotEmpty()) {
-                val nick = args[0]
-                try {
-                    val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
-                    val ircUser = ircProvider.getIRCUser(nick)
-                    if (ircUser != null) {
-                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                        if (minecraftProfile != null) {
-                            val profile = minecraftProfile.profile
-                            if (profile != null) {
-                                val ircProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProfileProvider::class)
-                                var ircProfile = ircProfileProvider.getIRCProfile(ircUser)
-                                if (ircProfile == null) {
-                                    ircProfile = RPKIRCProfileImpl(
-                                            profile = profile,
-                                            nick = ircUser.nick
-                                    )
-                                    ircProfileProvider.addIRCProfile(ircProfile)
-                                    sender.sendMessage(plugin.messages["account-link-irc-valid"])
+            if (sender.hasPermission("rpkit.players.command.account.link.irc")) {
+                if (args.isNotEmpty()) {
+                    val nick = args[0]
+                    try {
+                        val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
+                        val ircUser = ircProvider.getIRCUser(nick)
+                        if (ircUser != null) {
+                            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                            if (minecraftProfile != null) {
+                                val profile = minecraftProfile.profile
+                                if (profile != null) {
+                                    val ircProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProfileProvider::class)
+                                    var ircProfile = ircProfileProvider.getIRCProfile(ircUser)
+                                    if (ircProfile == null) {
+                                        ircProfile = RPKIRCProfileImpl(
+                                                profile = profile,
+                                                nick = ircUser.nick
+                                        )
+                                        ircProfileProvider.addIRCProfile(ircProfile)
+                                        sender.sendMessage(plugin.messages["account-link-irc-valid"])
+                                    } else {
+                                        sender.sendMessage(plugin.messages["account-link-irc-invalid-already-linked"])
+                                    }
                                 } else {
-                                    sender.sendMessage(plugin.messages["account-link-irc-invalid-already-linked"])
+                                    sender.sendMessage(plugin.messages["account-link-irc-invalid-profile"])
                                 }
                             } else {
-                                sender.sendMessage(plugin.messages["account-link-irc-invalid-profile"])
+                                sender.sendMessage(plugin.messages["no-minecraft-profile"])
                             }
                         } else {
-                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                            sender.sendMessage(plugin.messages["account-link-irc-invalid-nick"])
                         }
-                    } else {
-                        sender.sendMessage(plugin.messages["account-link-irc-invalid-nick"])
+                    } catch (exception: UnregisteredServiceException) {
+                        sender.sendMessage(plugin.messages["account-link-irc-invalid-no-irc-provider"])
                     }
-                } catch (exception: UnregisteredServiceException) {
-                    sender.sendMessage(plugin.messages["account-link-irc-invalid-no-irc-provider"])
+                } else {
+                    sender.sendMessage(plugin.messages["account-link-irc-usage"])
                 }
             } else {
-                sender.sendMessage(plugin.messages["account-link-irc-usage"])
+                sender.sendMessage(plugin.messages["no-permission-account-link-irc"])
             }
         } else {
             sender.sendMessage(plugin.messages["not-from-console"])

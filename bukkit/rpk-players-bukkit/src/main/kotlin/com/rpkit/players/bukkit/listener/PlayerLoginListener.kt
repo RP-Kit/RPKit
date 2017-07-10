@@ -22,27 +22,12 @@ class PlayerLoginListener(private val plugin: RPKPlayersBukkit): Listener {
                     minecraftUUID = event.player.uniqueId
             )
             minecraftProfileProvider.addMinecraftProfile(minecraftProfile)
-            // Generate new token so account can be linked via web UI
+            // Generate new token so account can be linked
             val minecraftProfileToken = RPKMinecraftProfileTokenImpl(
                     minecraftProfile = minecraftProfile,
                     token = UUID.randomUUID().toString()
             )
             minecraftProfileProvider.addMinecraftProfileToken(minecraftProfileToken)
-        }
-        if (minecraftProfile.profile == null) { // Either profile is new, or player has logged in before and still not linked account
-            var minecraftProfileToken = minecraftProfileProvider.getMinecraftProfileToken(minecraftProfile)
-            if (minecraftProfileToken == null) { // No token has been generated
-                minecraftProfileToken = RPKMinecraftProfileTokenImpl(
-                        minecraftProfile = minecraftProfile,
-                        token = UUID.randomUUID().toString()
-                )
-                minecraftProfileProvider.addMinecraftProfileToken(minecraftProfileToken)
-            }
-            // Kick the player and notify of them of the token they need to use in the web UI
-            event.kickMessage = plugin.messages["kick-no-profile", mapOf(
-                    Pair("token", minecraftProfileToken.token)
-            )]
-            event.result = PlayerLoginEvent.Result.KICK_OTHER
         }
     }
 }

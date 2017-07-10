@@ -17,7 +17,6 @@
 package com.rpkit.players.bukkit.command.account
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -29,12 +28,19 @@ import org.bukkit.command.CommandSender
 class AccountLinkCommand(private val plugin: RPKPlayersBukkit): CommandExecutor {
 
     private val accountLinkIRCCommand = AccountLinkIRCCommand(plugin)
+    private val accountLinkMinecraftCommand = AccountLinkMinecraftCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+        if (!sender.hasPermission("rpkit.players.command.account.link")) {
+            sender.sendMessage(plugin.messages["no-permission-account-link"])
+            return true
+        }
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("irc", ignoreCase = true)) {
                 return accountLinkIRCCommand.onCommand(sender, command, label, newArgs)
+            } else if (args[0].equals("minecraft", ignoreCase = true) || args[0].equals("mc", ignoreCase = true)) {
+                return accountLinkMinecraftCommand.onCommand(sender, command, label, newArgs)
             } else {
                 sender.sendMessage(plugin.messages["account-link-usage"])
             }
