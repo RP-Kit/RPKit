@@ -61,6 +61,7 @@ class RPKChatBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
         ConfigurationSerialization.registerClass(DirectedFormatComponent::class.java, "DirectedFormatComponent")
+        ConfigurationSerialization.registerClass(DrunkenSlurComponent::class.java, "DrunkenSlurComponent")
         ConfigurationSerialization.registerClass(GarbleComponent::class.java, "GarbleComponent")
         ConfigurationSerialization.registerClass(RadiusFilterComponent::class.java, "RadiusFilterComponent")
         ConfigurationSerialization.registerClass(SendMessageComponent::class.java, "SendMessageComponent")

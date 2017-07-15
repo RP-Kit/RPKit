@@ -3,7 +3,12 @@ version: @version@
 main: com.rpkit.chat.bukkit.RPKChatBukkit
 author: alyphen
 description: RPK Chat implementation for Bukkit
-depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-character-lib-bukkit, rpk-chat-lib-bukkit]
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+- rpk-chat-lib-bukkit
+- rpk-drink-lib-bukkit
 commands:
     chatchannel:
         description: Switches which chat channel you are speaking in

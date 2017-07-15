@@ -1017,6 +1017,7 @@ project(":bukkit:rpk-chat-bukkit") {
         compile project(":bukkit:rpk-player-lib-bukkit")
         compile project(":bukkit:rpk-character-lib-bukkit")
         compile project(":bukkit:rpk-permissions-lib-bukkit")
+        compile project(":bukkit:rpk-drink-lib-bukkit")
         compile project(":bukkit:rpk-chat-lib-bukkit")
     }
 
