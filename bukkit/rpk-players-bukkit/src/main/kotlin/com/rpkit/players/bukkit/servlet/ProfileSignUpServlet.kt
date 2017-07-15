@@ -59,7 +59,7 @@ class ProfileSignUpServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
                         )
                         profileProvider.addProfile(profile)
                         profileProvider.setActiveProfile(req, profile)
-                        resp.sendRedirect("/profiles/")
+                        resp.sendRedirect("/profile/${profile.name}")
                         return
                     } else {
                         passwordRuleResult.details.forEach { ruleResultDetail ->
