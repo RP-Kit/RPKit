@@ -2,3 +2,5 @@ payments:
     maximum-distance: 8
 currency:
     default: null
+dynamic-exchanges:
+    rate-change: 0.01
