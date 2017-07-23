@@ -98,7 +98,7 @@ class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksB
                 .from(RPKIT_PLAYER_GETTING_KEY)
                 .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
                 .fetchOne() ?: return null
-        return get(result.get(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID))
+        return get(result.get(RPKIT_PLAYER_GETTING_KEY.ID))
     }
 
     override fun delete(entity: RPKPlayerGettingKey) {
