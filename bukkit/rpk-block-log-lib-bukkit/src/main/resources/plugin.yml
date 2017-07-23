@@ -1,0 +1,8 @@
+name: rpk-block-log-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.blocklog.bukkit.RPKBlockLogLibBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
