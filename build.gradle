@@ -85,6 +85,7 @@ project(":rpk-core") {
         compile group: "org.pircbotx", name: "pircbotx", version: pircBotXVersion
         compile group: "org.eclipse.jetty", name: "jetty-server", version: jettyVersion
         compile group: "org.eclipse.jetty", name: "jetty-servlet", version: jettyVersion
+        compile group: "org.eclipse.jetty", name: "jetty-servlet", version: jettyVersion
         compile group: "org.eclipse.jetty", name: "jetty-webapp", version: jettyVersion
         compile group: "org.eclipse.jetty.websocket", name: "websocket-server", version: jettyVersion
         compile group: "org.apache.velocity", name: "velocity", version: velocityVersion
