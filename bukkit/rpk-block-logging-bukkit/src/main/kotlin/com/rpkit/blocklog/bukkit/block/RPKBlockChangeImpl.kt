@@ -7,7 +7,7 @@ import org.bukkit.Material
 
 
 class RPKBlockChangeImpl(
-        override var id: Int,
+        override var id: Int = 0,
         override val blockHistory: RPKBlockHistory,
         override val time: Long,
         override val profile: RPKProfile?,
