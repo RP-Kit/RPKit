@@ -68,7 +68,6 @@ project(":rpk-core") {
     def velocityVersion = "1.7"
     def hikariCPVersion = "2.6.0"
     def githubAPIVersion = "1.85"
-    def passayVersion = "1.2.0"
     def jooqVersion = "3.9.2"
 
     dependencies {
@@ -91,7 +90,6 @@ project(":rpk-core") {
         compile group: "org.apache.velocity", name: "velocity", version: velocityVersion
         compile group: "com.zaxxer", name: "HikariCP", version: hikariCPVersion
         compile group: "org.kohsuke", name: "github-api", version: githubAPIVersion
-        compile group: "org.passay", name: "passay", version: passayVersion
         compile group: "org.jooq", name: "jooq", version: jooqVersion
     }
 

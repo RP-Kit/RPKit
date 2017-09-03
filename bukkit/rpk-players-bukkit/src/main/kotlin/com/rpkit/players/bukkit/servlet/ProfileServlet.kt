@@ -9,7 +9,6 @@ import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.*
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.Velocity
-import org.passay.*
 import java.io.IOException
 import java.util.*
 import javax.servlet.http.HttpServletRequest
@@ -207,31 +206,9 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
         if (password != null) {
             if (password.isNotBlank()) {
                 if (password == confirmPassword) {
-                    val passwordRuleResult = plugin.passwordValidator.validate(PasswordData(profile.name, password))
-                    if (passwordRuleResult.isValid) {
-                        profile.setPassword(password.toCharArray())
-                        profileProvider.updateProfile(profile)
-                        alerts.add(Alert(SUCCESS, "Password successfully changed."))
-                    } else {
-                        passwordRuleResult.details.forEach { ruleResultDetail ->
-                            alerts.add(Alert(DANGER, when (ruleResultDetail.errorCode) {
-                                LengthRule.ERROR_CODE_MIN -> "Password must be at least ${ruleResultDetail.parameters["minimumLength"]} characters long."
-                                LengthRule.ERROR_CODE_MAX -> "Password may not be longer than ${ruleResultDetail.parameters["maximumLength"]} characters long."
-                                EnglishCharacterData.UpperCase.errorCode -> "Password must contain at least ${ruleResultDetail.parameters["minimumRequired"]} upper case characters."
-                                EnglishCharacterData.LowerCase.errorCode -> "Password must contain at least ${ruleResultDetail.parameters["minimumRequired"]} lower case characters."
-                                EnglishCharacterData.Digit.errorCode -> "Password must contain at least ${ruleResultDetail.parameters["minimumRequired"]} digits."
-                                EnglishCharacterData.Special.errorCode -> "Password must contain at least ${ruleResultDetail.parameters["minimumRequired"]} special characters."
-                                DictionarySubstringRule.ERROR_CODE -> "Password may not contain words. Found: ${ruleResultDetail.parameters["matchingWord"]}."
-                                EnglishSequenceData.Alphabetical.errorCode -> "Password must not contain alphabetical sequences."
-                                EnglishSequenceData.Numerical.errorCode -> "Password must not contain numerical sequences."
-                                EnglishSequenceData.USQwerty.errorCode -> "Password must not contain sequences of keyboard letters."
-                                UsernameRule.ERROR_CODE -> "Password must not contain your username."
-                                UsernameRule.ERROR_CODE_REVERSED -> "Password must not contain your username reversed."
-                                RepeatCharacterRegexRule.ERROR_CODE -> "Password must not contain repeated characters."
-                                else -> "Password does not meet complexity rules: ${ruleResultDetail.errorCode}"
-                            }))
-                        }
-                    }
+                    profile.setPassword(password.toCharArray())
+                    profileProvider.updateProfile(profile)
+                    alerts.add(Alert(SUCCESS, "Password successfully changed."))
                 } else {
                     alerts.add(Alert(DANGER, "Passwords do not match."))
                 }
