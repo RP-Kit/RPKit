@@ -30,18 +30,12 @@ import com.rpkit.players.bukkit.profile.RPKIRCProfileProviderImpl
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProviderImpl
 import com.rpkit.players.bukkit.profile.RPKProfileProviderImpl
 import com.rpkit.players.bukkit.servlet.*
-import org.passay.*
-import org.passay.dictionary.WordListDictionary
-import org.passay.dictionary.WordLists
-import java.io.Reader
 import java.sql.SQLException
 
 /**
  * RPK players plugin default implementation.
  */
 class RPKPlayersBukkit: RPKBukkitPlugin() {
-
-    lateinit var passwordValidator: PasswordValidator
 
     override fun onEnable() {
         serviceProviders = arrayOf(
@@ -68,28 +62,6 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
                 com.rpkit.players.bukkit.servlet.api.v1.IRCProfileAPIServlet(this),
                 com.rpkit.players.bukkit.servlet.api.v1.MinecraftProfileAPIServlet(this)
         )
-        passwordValidator = PasswordValidator(listOf(
-                LengthRule(8, 36),
-                CharacterRule(EnglishCharacterData.UpperCase, 2),
-                CharacterRule(EnglishCharacterData.LowerCase, 2),
-                CharacterRule(EnglishCharacterData.Digit, 2),
-                CharacterRule(EnglishCharacterData.Special, 2),
-                DictionarySubstringRule(
-                        WordListDictionary(
-                                WordLists.createFromReader(
-                                        arrayOf<Reader>(
-                                                getResource("words.txt").reader(Charsets.UTF_8)
-                                        ),
-                                        false
-                                )
-                        )
-                ),
-                IllegalSequenceRule(EnglishSequenceData.Alphabetical),
-                IllegalSequenceRule(EnglishSequenceData.Numerical),
-                IllegalSequenceRule(EnglishSequenceData.USQwerty),
-                UsernameRule(true, true),
-                RepeatCharacterRegexRule()
-        ))
     }
 
     override fun onPostEnable() {
