@@ -907,6 +907,40 @@ project(":bukkit:rpk-class-lib-bukkit") {
 
 }
 
+project(":bukkit:rpk-block-log-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-block-log-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-block-log-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-block-log-lib-bukkit").group
+
+        }
+    }
+
+}
+
 // Bukkit implementations
 
 project(":bukkit:rpk-players-bukkit") {
@@ -1634,6 +1668,42 @@ project(":bukkit:rpk-drinks-bukkit") {
 
             pom.version = project(":bukkit:rpk-drinks-bukkit").version
             pom.artifactId = project(":bukkit:rpk-drinks-bukkit").name
+            pom.groupId = project(":bukkit:rpk-drinks-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-block-logging-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-permissions-lib-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
+        compile project(":bukkit:rpk-block-log-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-block-logging-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-block-logging-bukkit").name
             pom.groupId = project(":bukkit:rpk-drinks-bukkit").group
 
         }
