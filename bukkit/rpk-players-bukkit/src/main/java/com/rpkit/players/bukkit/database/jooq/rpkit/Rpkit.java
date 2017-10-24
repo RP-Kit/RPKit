@@ -8,6 +8,7 @@ import com.rpkit.players.bukkit.database.jooq.DefaultCatalog;
 import com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitGithubProfile;
 import com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitIrcProfile;
 import com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitMinecraftProfile;
+import com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitMinecraftProfileLinkRequest;
 import com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitMinecraftProfileToken;
 import com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitPlayer;
 import com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitProfile;
@@ -36,7 +37,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Rpkit extends SchemaImpl {
 
-    private static final long serialVersionUID = -91433833;
+    private static final long serialVersionUID = 133398028;
 
     /**
      * The reference instance of <code>rpkit</code>
@@ -46,32 +47,37 @@ public class Rpkit extends SchemaImpl {
     /**
      * The table <code>rpkit.rpkit_github_profile</code>.
      */
-    public final RpkitGithubProfile RPKIT_GITHUB_PROFILE = RpkitGithubProfile.RPKIT_GITHUB_PROFILE;
+    public final RpkitGithubProfile RPKIT_GITHUB_PROFILE = com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitGithubProfile.RPKIT_GITHUB_PROFILE;
 
     /**
      * The table <code>rpkit.rpkit_irc_profile</code>.
      */
-    public final RpkitIrcProfile RPKIT_IRC_PROFILE = RpkitIrcProfile.RPKIT_IRC_PROFILE;
+    public final RpkitIrcProfile RPKIT_IRC_PROFILE = com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitIrcProfile.RPKIT_IRC_PROFILE;
 
     /**
      * The table <code>rpkit.rpkit_minecraft_profile</code>.
      */
-    public final RpkitMinecraftProfile RPKIT_MINECRAFT_PROFILE = RpkitMinecraftProfile.RPKIT_MINECRAFT_PROFILE;
+    public final RpkitMinecraftProfile RPKIT_MINECRAFT_PROFILE = com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitMinecraftProfile.RPKIT_MINECRAFT_PROFILE;
+
+    /**
+     * The table <code>rpkit.rpkit_minecraft_profile_link_request</code>.
+     */
+    public final RpkitMinecraftProfileLinkRequest RPKIT_MINECRAFT_PROFILE_LINK_REQUEST = com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitMinecraftProfileLinkRequest.RPKIT_MINECRAFT_PROFILE_LINK_REQUEST;
 
     /**
      * The table <code>rpkit.rpkit_minecraft_profile_token</code>.
      */
-    public final RpkitMinecraftProfileToken RPKIT_MINECRAFT_PROFILE_TOKEN = RpkitMinecraftProfileToken.RPKIT_MINECRAFT_PROFILE_TOKEN;
+    public final RpkitMinecraftProfileToken RPKIT_MINECRAFT_PROFILE_TOKEN = com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitMinecraftProfileToken.RPKIT_MINECRAFT_PROFILE_TOKEN;
 
     /**
      * The table <code>rpkit.rpkit_player</code>.
      */
-    public final RpkitPlayer RPKIT_PLAYER = RpkitPlayer.RPKIT_PLAYER;
+    public final RpkitPlayer RPKIT_PLAYER = com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitPlayer.RPKIT_PLAYER;
 
     /**
      * The table <code>rpkit.rpkit_profile</code>.
      */
-    public final RpkitProfile RPKIT_PROFILE = RpkitProfile.RPKIT_PROFILE;
+    public final RpkitProfile RPKIT_PROFILE = com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitProfile.RPKIT_PROFILE;
 
     /**
      * No further instances allowed
@@ -101,6 +107,7 @@ public class Rpkit extends SchemaImpl {
             RpkitGithubProfile.RPKIT_GITHUB_PROFILE,
             RpkitIrcProfile.RPKIT_IRC_PROFILE,
             RpkitMinecraftProfile.RPKIT_MINECRAFT_PROFILE,
+            RpkitMinecraftProfileLinkRequest.RPKIT_MINECRAFT_PROFILE_LINK_REQUEST,
             RpkitMinecraftProfileToken.RPKIT_MINECRAFT_PROFILE_TOKEN,
             RpkitPlayer.RPKIT_PLAYER,
             RpkitProfile.RPKIT_PROFILE);

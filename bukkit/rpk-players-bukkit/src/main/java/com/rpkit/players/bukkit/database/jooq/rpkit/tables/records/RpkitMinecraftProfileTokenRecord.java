@@ -28,7 +28,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitMinecraftProfileTokenRecord extends UpdatableRecordImpl<RpkitMinecraftProfileTokenRecord> implements Record3<Integer, Integer, String> {
 
-    private static final long serialVersionUID = 1426487974;
+    private static final long serialVersionUID = -1170032970;
 
     /**
      * Setter for <code>rpkit.rpkit_minecraft_profile_token.id</code>.

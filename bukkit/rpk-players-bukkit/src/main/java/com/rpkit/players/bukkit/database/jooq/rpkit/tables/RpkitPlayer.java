@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitPlayer extends TableImpl<RpkitPlayerRecord> {
 
-    private static final long serialVersionUID = 2093681136;
+    private static final long serialVersionUID = 2056960594;
 
     /**
      * The reference instance of <code>rpkit.rpkit_player</code>

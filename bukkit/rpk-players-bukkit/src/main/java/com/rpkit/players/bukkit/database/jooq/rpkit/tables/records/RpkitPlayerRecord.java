@@ -5,13 +5,14 @@ package com.rpkit.players.bukkit.database.jooq.rpkit.tables.records;
 
 
 import com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitPlayer;
+
+import javax.annotation.Generated;
+
 import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.Record5;
 import org.jooq.Row5;
 import org.jooq.impl.UpdatableRecordImpl;
-
-import javax.annotation.Generated;
 
 
 /**
@@ -27,7 +28,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitPlayerRecord extends UpdatableRecordImpl<RpkitPlayerRecord> implements Record5<Integer, String, String, String, String> {
 
-    private static final long serialVersionUID = -750920786;
+    private static final long serialVersionUID = -2074305602;
 
     /**
      * Setter for <code>rpkit.rpkit_player.id</code>.

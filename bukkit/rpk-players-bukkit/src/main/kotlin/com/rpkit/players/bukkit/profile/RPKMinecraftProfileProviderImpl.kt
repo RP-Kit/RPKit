@@ -1,6 +1,7 @@
 package com.rpkit.players.bukkit.profile
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
+import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileLinkRequestTable
 import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileTable
 import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileTokenTable
 import org.bukkit.OfflinePlayer
@@ -50,6 +51,22 @@ class RPKMinecraftProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPK
 
     override fun removeMinecraftProfileToken(token: RPKMinecraftProfileToken) {
         plugin.core.database.getTable(RPKMinecraftProfileTokenTable::class).delete(token)
+    }
+
+    override fun getMinecraftProfileLinkRequests(minecraftProfile: RPKMinecraftProfile): List<RPKMinecraftProfileLinkRequest> {
+        return plugin.core.database.getTable(RPKMinecraftProfileLinkRequestTable::class).get(minecraftProfile)
+    }
+
+    override fun addMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest) {
+        plugin.core.database.getTable(RPKMinecraftProfileLinkRequestTable::class).insert(minecraftProfileLinkRequest)
+    }
+
+    override fun removeMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest) {
+        plugin.core.database.getTable(RPKMinecraftProfileLinkRequestTable::class).delete(minecraftProfileLinkRequest)
+    }
+
+    override fun updateMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest) {
+        plugin.core.database.getTable(RPKMinecraftProfileLinkRequestTable::class).update(minecraftProfileLinkRequest)
     }
 
 }

@@ -125,7 +125,7 @@ project(":rpk-core") {
 project(":bukkit:rpk-core-bukkit") {
 
     dependencies {
-        compile group: "org.bukkit", name: "bukkit", version: "1.12-R0.1-SNAPSHOT"
+        compile group: "org.spigotmc", name: "spigot-api", version: "1.12.1-R0.1-SNAPSHOT"
         compile group: "net.milkbowl.vault", name: "VaultAPI", version: "1.6"
         compile group: "mkremins", name: "fanciful", version: "0.4.0-SNAPSHOT"
         compile project(":rpk-core")

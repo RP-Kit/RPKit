@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitProfile extends TableImpl<RpkitProfileRecord> {
 
-    private static final long serialVersionUID = 1019002174;
+    private static final long serialVersionUID = -792216120;
 
     /**
      * The reference instance of <code>rpkit.rpkit_profile</code>
@@ -121,7 +121,7 @@ public class RpkitProfile extends TableImpl<RpkitProfileRecord> {
      */
     @Override
     public List<UniqueKey<RpkitProfileRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitProfileRecord>>asList(Keys.KEY_RPKIT_PROFILE_PRIMARY, Keys.KEY_RPKIT_PROFILE_NAME);
+        return Arrays.<UniqueKey<RpkitProfileRecord>>asList(Keys.KEY_RPKIT_PROFILE_PRIMARY, Keys.KEY_RPKIT_PROFILE_UK_RPKIT_PROFILE_NAME);
     }
 
     /**
