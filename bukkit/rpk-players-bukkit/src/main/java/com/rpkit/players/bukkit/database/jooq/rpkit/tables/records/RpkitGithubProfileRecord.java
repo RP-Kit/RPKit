@@ -5,14 +5,13 @@ package com.rpkit.players.bukkit.database.jooq.rpkit.tables.records;
 
 
 import com.rpkit.players.bukkit.database.jooq.rpkit.tables.RpkitGithubProfile;
-
-import javax.annotation.Generated;
-
 import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.Record4;
 import org.jooq.Row4;
 import org.jooq.impl.UpdatableRecordImpl;
+
+import javax.annotation.Generated;
 
 
 /**
@@ -28,7 +27,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitGithubProfileRecord extends UpdatableRecordImpl<RpkitGithubProfileRecord> implements Record4<Integer, Integer, String, String> {
 
-    private static final long serialVersionUID = 1858984815;
+    private static final long serialVersionUID = 772484991;
 
     /**
      * Setter for <code>rpkit.rpkit_github_profile.id</code>.

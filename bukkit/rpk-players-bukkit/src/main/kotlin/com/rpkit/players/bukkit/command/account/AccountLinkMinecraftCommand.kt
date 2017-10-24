@@ -1,6 +1,8 @@
 package com.rpkit.players.bukkit.command.account
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileImpl
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileLinkRequestImpl
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -18,30 +20,16 @@ class AccountLinkMinecraftCommand(private val plugin: RPKPlayersBukkit): Command
             sender.sendMessage(plugin.messages["no-permission-account-link-minecraft"])
             return true
         }
-        if (args.size < 2) {
+        if (args.isEmpty()) {
             sender.sendMessage(plugin.messages["account-link-minecraft-usage"])
             return true
         }
         val minecraftUsername = args[0]
-        val providedToken = args[1]
-        val bukkitPlayer = plugin.server.getPlayer(minecraftUsername)
-        if (bukkitPlayer == null) {
-            sender.sendMessage(plugin.messages["account-link-minecraft-invalid-player"])
-            return true
-        }
+        val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftUsername)
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-        if (minecraftProfile == null) {
+        var minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+        if (minecraftProfile != null) {
             sender.sendMessage(plugin.messages["account-link-minecraft-invalid-minecraft-profile"])
-            return true
-        }
-        val requiredToken = minecraftProfileProvider.getMinecraftProfileToken(minecraftProfile)
-        if (requiredToken == null) {
-            sender.sendMessage(plugin.messages["account-link-minecraft-invalid-token"])
-            return true
-        }
-        if (requiredToken.token != providedToken) {
-            sender.sendMessage(plugin.messages["account-link-minecraft-invalid-token"])
             return true
         }
         val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
@@ -54,8 +42,10 @@ class AccountLinkMinecraftCommand(private val plugin: RPKPlayersBukkit): Command
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        minecraftProfile.profile = profile
-        minecraftProfileProvider.updateMinecraftProfile(minecraftProfile)
+        minecraftProfile = RPKMinecraftProfileImpl(profile = null, minecraftUUID = bukkitPlayer.uniqueId)
+        minecraftProfileProvider.addMinecraftProfile(minecraftProfile)
+        val minecraftProfileLinkRequest = RPKMinecraftProfileLinkRequestImpl(profile = profile, minecraftProfile = minecraftProfile)
+        minecraftProfileProvider.addMinecraftProfileLinkRequest(minecraftProfileLinkRequest)
         sender.sendMessage(plugin.messages["account-link-minecraft-valid"])
         return true
     }

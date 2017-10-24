@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitMinecraftProfile extends TableImpl<RpkitMinecraftProfileRecord> {
 
-    private static final long serialVersionUID = 1330868852;
+    private static final long serialVersionUID = -1017927594;
 
     /**
      * The reference instance of <code>rpkit.rpkit_minecraft_profile</code>

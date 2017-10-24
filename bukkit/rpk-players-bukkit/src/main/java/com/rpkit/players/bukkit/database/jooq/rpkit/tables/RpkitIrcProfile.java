@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitIrcProfile extends TableImpl<RpkitIrcProfileRecord> {
 
-    private static final long serialVersionUID = -390189392;
+    private static final long serialVersionUID = -962160754;
 
     /**
      * The reference instance of <code>rpkit.rpkit_irc_profile</code>

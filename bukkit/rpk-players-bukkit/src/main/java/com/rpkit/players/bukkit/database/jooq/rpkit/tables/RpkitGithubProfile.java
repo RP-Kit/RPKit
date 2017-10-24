@@ -7,12 +7,19 @@ package com.rpkit.players.bukkit.database.jooq.rpkit.tables;
 import com.rpkit.players.bukkit.database.jooq.rpkit.Keys;
 import com.rpkit.players.bukkit.database.jooq.rpkit.Rpkit;
 import com.rpkit.players.bukkit.database.jooq.rpkit.tables.records.RpkitGithubProfileRecord;
-import org.jooq.*;
-import org.jooq.impl.TableImpl;
 
-import javax.annotation.Generated;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.annotation.Generated;
+
+import org.jooq.Field;
+import org.jooq.Identity;
+import org.jooq.Schema;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.UniqueKey;
+import org.jooq.impl.TableImpl;
 
 
 /**
@@ -28,7 +35,7 @@ import java.util.List;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitGithubProfile extends TableImpl<RpkitGithubProfileRecord> {
 
-    private static final long serialVersionUID = -266948423;
+    private static final long serialVersionUID = -1375874281;
 
     /**
      * The reference instance of <code>rpkit.rpkit_github_profile</code>

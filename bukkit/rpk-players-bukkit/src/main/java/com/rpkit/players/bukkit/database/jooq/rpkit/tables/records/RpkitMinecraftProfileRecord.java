@@ -28,7 +28,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitMinecraftProfileRecord extends UpdatableRecordImpl<RpkitMinecraftProfileRecord> implements Record3<Integer, Integer, String> {
 
-    private static final long serialVersionUID = 1148787214;
+    private static final long serialVersionUID = 13805566;
 
     /**
      * Setter for <code>rpkit.rpkit_minecraft_profile.id</code>.

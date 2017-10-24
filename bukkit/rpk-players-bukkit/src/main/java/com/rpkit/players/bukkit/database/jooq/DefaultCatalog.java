@@ -29,7 +29,7 @@ import org.jooq.impl.CatalogImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class DefaultCatalog extends CatalogImpl {
 
-    private static final long serialVersionUID = -1515566447;
+    private static final long serialVersionUID = 333332213;
 
     /**
      * The reference instance of <code></code>
@@ -39,7 +39,7 @@ public class DefaultCatalog extends CatalogImpl {
     /**
      * The schema <code>rpkit</code>.
      */
-    public final Rpkit RPKIT = Rpkit.RPKIT;
+    public final Rpkit RPKIT = com.rpkit.players.bukkit.database.jooq.rpkit.Rpkit.RPKIT;
 
     /**
      * No further instances allowed

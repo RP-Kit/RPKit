@@ -2,22 +2,20 @@ package com.rpkit.players.bukkit.command.profile
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import com.rpkit.players.bukkit.profile.RPKProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-
-class ProfileCreateCommand(private val plugin: RPKPlayersBukkit): CommandExecutor {
+class ProfilePasswordCommand(private val plugin: RPKPlayersBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+        if (args.isEmpty()) {
+            sender.sendMessage(plugin.messages["profile-password-usage"])
             return true
         }
-        if (!sender.hasPermission("rpkit.players.command.profile.create")) {
-            sender.sendMessage(plugin.messages["no-permission-profile-create"])
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
@@ -27,22 +25,15 @@ class ProfileCreateCommand(private val plugin: RPKPlayersBukkit): CommandExecuto
             return true
         }
         val profile = minecraftProfile.profile
-        if (profile != null) {
-            sender.sendMessage(plugin.messages["profile-create-invalid-profile"])
+        if (profile == null) {
+            sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        if (args.size < 2) {
-            sender.sendMessage(plugin.messages["profile-create-usage"])
-            return true
-        }
+        val password = args.joinToString(" ")
         val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-        val name = args[0]
-        val password = args[1]
-        val newProfile = RPKProfileImpl(name, password)
-        profileProvider.addProfile(newProfile)
-        minecraftProfile.profile = newProfile
-        minecraftProfileProvider.updateMinecraftProfile(minecraftProfile)
-        sender.sendMessage(plugin.messages["profile-create-valid"])
+        profile.setPassword(password.toCharArray())
+        profileProvider.updateProfile(profile)
+        sender.sendMessage(plugin.messages["profile-password-valid"])
         return true
     }
 }
