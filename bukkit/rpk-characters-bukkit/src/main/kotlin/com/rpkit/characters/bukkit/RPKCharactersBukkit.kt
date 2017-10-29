@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2017 Ross Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,6 +184,7 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         messages.setDefault("character-list-item", "&f- \$character")
         messages.setDefault("character-switch-prompt", "&fWhat is the name of the character you would like to switch to? &7(Type cancel to cancel)")
         messages.setDefault("character-switch-invalid-character", "&cYou do not have a character by that name.")
+        messages.setDefault("character-switch-invalid-character-other-account", "&cThat character is currently being played on another account.")
         messages.setDefault("character-switch-valid", "&aCharacter switched.")
         messages.setDefault("character-new-valid", "&aCharacter created.")
         messages.setDefault("character-new-invalid-cooldown", "&cYou may not create another character until the cooldown has passed.")
