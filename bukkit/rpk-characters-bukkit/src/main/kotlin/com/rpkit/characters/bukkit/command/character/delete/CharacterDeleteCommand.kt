@@ -67,7 +67,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
             if (sender.hasPermission("rpkit.characters.command.character.delete")) {
                 if (args.isNotEmpty()) {
                     val characterNameBuilder = StringBuilder()
-                    for (i in 0..args.size - 1 - 1) {
+                    for (i in 0 until args.size - 1) {
                         characterNameBuilder.append(args[i]).append(" ")
                     }
                     characterNameBuilder.append(args[args.size - 1])
@@ -173,7 +173,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
                                 }
                             }
                         }
-                        return CharacterDeletedPrompt()
+                        return ConfirmationPrompt()
                     } else {
                         return END_OF_CONVERSATION
                     }
@@ -220,7 +220,9 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
             if (input) {
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val character = characterProvider.getCharacter(context.getSessionData("character_id") as Int)
-                characterProvider.removeCharacter(character!!)
+                if (character != null) {
+                    characterProvider.removeCharacter(character)
+                }
                 return CharacterDeletedPrompt()
             } else {
                 return END_OF_CONVERSATION
