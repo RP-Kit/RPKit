@@ -108,7 +108,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
                             sender.sendMessage(plugin.messages["no-profile"])
                         }
                     } else {
-                        sender.sendMessage(plugin.messages["money-subtract-player-invalid-player"])
+                        sender.sendMessage(plugin.messages["money-subtract-profile-invalid-profile"])
                     }
                 } else {
                     conversationFactory.buildConversation(sender).begin()
@@ -167,7 +167,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             context.setSessionData("character", plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    .getCharacters(context.getSessionData("player") as RPKProfile)
+                    .getCharacters(context.getSessionData("profile") as RPKProfile)
                     .filter { character -> character.name == input }
                     .first()
             )
