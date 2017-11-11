@@ -270,6 +270,9 @@ class BankServlet(private val plugin: RPKBanksBukkit): RPKServlet() {
         velocityContext.put("navigationBar", plugin.core.web.navigationBar)
         velocityContext.put("alerts", alerts)
         velocityContext.put("activeProfile", profile)
+        velocityContext.put("top", bankProvider.getRichestCharacters(currency, 5)
+                .map { Pair(it, bankProvider.getBalance(it, currency)) }
+                .toMap())
         velocityContext.put("character", character)
         velocityContext.put("currency", currency)
         velocityContext.put("balance", balance)
