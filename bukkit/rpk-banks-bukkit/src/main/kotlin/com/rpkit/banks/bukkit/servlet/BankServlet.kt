@@ -246,16 +246,16 @@ class BankServlet(private val plugin: RPKBanksBukkit): RPKServlet() {
         val toCharacterId = req.getParameter("character")
         val toCharacter = if (toCharacterId != null) characterProvider.getCharacter(toCharacterId.toInt()) else null
         val alerts = mutableListOf<Alert>()
-        if (amount > balance) {
+        if (amount < 1) {
+            alerts.add(Alert(Alert.Type.DANGER, "You must transfer at least 1 ${currency.nameSingular}."))
+        } else if (amount > balance) {
             alerts.add(Alert(Alert.Type.DANGER, "You do not have enough money to perform that transaction."))
+        } else if (toCharacter == null) {
+            alerts.add(Alert(Alert.Type.DANGER, "You must set a character to transfer to."))
         } else {
-            if (toCharacter == null) {
-                alerts.add(Alert(Alert.Type.DANGER, "You must set a character to transfer to."))
-            } else {
-                bankProvider.withdraw(character, currency, amount)
-                bankProvider.deposit(toCharacter, currency, amount)
-                balance -= amount
-            }
+            bankProvider.withdraw(character, currency, amount)
+            bankProvider.deposit(toCharacter, currency, amount)
+            balance -= amount
         }
         resp.contentType = "text/html"
         resp.status = SC_OK
