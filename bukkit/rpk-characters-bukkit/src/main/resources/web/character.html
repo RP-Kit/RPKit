@@ -43,35 +43,59 @@
                 </div>
                 #end
                 <div class="row">
+                    #if(!$character.NameHidden)
                     <h1>$character.Name</h1>
+                    #else
+                    <h1>(HIDDEN)</h1>
+                    #end
                 </div>
                 <div class="row">
                     <div class="col-sm-2"><strong>Profile</strong></div>
+                    #if(!$character.ProfileHidden)
                     <div class="col-sm-10">$character.Profile.Name</div>
+                    #else
+                    <div class="col-sm-10">(HIDDEN)</div>
+                    #end
                 </div>
                 <div class="row">
                     <div class="col-sm-2"><strong>Gender</strong></div>
+                    #if(!$character.GenderHidden)
                     #if($character.Gender)
                     <div class="col-sm-10">$character.Gender.Name</div>
                     #else
                     <div class="col-sm-10">unset</div>
                     #end
+                    #else
+                    <div class="col-sm-10">(HIDDEN)</div>
+                    #end
                 </div>
                 <div class="row">
                     <div class="col-sm-2"><strong>Age</strong></div>
+                    #if(!$character.AgeHidden)
                     <div class="col-sm-10">$character.Age</div>
+                    #else
+                    <div class="col-sm-10">(HIDDEN)</div>
+                    #end
                 </div>
                 <div class="row">
                     <div class="col-sm-2"><strong>Race</strong></div>
+                    #if(!$character.RaceHidden)
                     #if($character.Race)
                     <div class="col-sm-10">$character.Race.Name</div>
                     #else
                     <div class="col-sm-10">unset</div>
                     #end
+                    #else
+                    <div class="col-sm-10">(HIDDEN)</div>
+                    #end
                 </div>
                 <div class="row">
                     <div class="col-sm-2"><strong>Description</strong></div>
+                    #if(!$character.DescriptionHidden)
                     <div class="col-sm-10">$character.Description</div>
+                    #else
+                    <div class="col-sm-10">(HIDDEN)</div>
+                    #end
                 </div>
                 <div class="row">
                     <div class="col-sm-2"><strong>Dead</strong></div>
