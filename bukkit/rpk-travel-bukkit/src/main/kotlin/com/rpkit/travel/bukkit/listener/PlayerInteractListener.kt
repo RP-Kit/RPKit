@@ -2,11 +2,11 @@ package com.rpkit.travel.bukkit.listener
 
 import com.rpkit.travel.bukkit.RPKTravelBukkit
 import com.rpkit.warp.bukkit.warp.RPKWarpProvider
+import org.bukkit.ChatColor.GREEN
 import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.ChatColor.GREEN
 
 
 class PlayerInteractListener(private val plugin: RPKTravelBukkit): Listener {
@@ -20,6 +20,8 @@ class PlayerInteractListener(private val plugin: RPKTravelBukkit): Listener {
         val warp = warpProvider.getWarp(sign.getLine(1))
         if (warp != null) {
             event.player.teleport(warp.location)
+        } else {
+            event.player.sendMessage(plugin.messages["warp-invalid-warp"])
         }
     }
 
