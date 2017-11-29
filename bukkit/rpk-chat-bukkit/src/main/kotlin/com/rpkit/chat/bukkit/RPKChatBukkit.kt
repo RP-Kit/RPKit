@@ -227,6 +227,7 @@ class RPKChatBukkit: RPKBukkitPlugin() {
         messages.setDefault("chat-group-create-usage", "&cUsage: /chatgroup create [name]")
         messages.setDefault("chat-group-disband-valid", "&aChat group \$group disbanded.")
         messages.setDefault("chat-group-disband-invalid-nonexistent", "&cNo chat group by that name exists.")
+        messages.setDefault("chat-group-disband-invalid-not-a-member", "&cYou are not a member of that chat group.")
         messages.setDefault("chat-group-disband-usage", "&cUsage: /chatgroup disband [name]")
         messages.setDefault("chat-group-invite-received", "&aYou have been invited to chat group \$group. Use /chatgroup join \$group to join.")
         messages.setDefault("chat-group-invite-valid", "&aYou invited \$player to the chat group \$group.")
