@@ -188,7 +188,7 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
     }
 
     override fun hasPermission(group: RPKGroup, node: String): Boolean {
-        var hasPermission = plugin.server.pluginManager.getPermission(node).default.getValue(false)
+        var hasPermission = plugin.server.pluginManager.getPermission(node)?.default?.getValue(false)?:false
         for (inheritedGroup in group.inheritance) {
             hasPermission = hasPermission(inheritedGroup, node)
         }
@@ -202,7 +202,7 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
     }
 
     override fun hasPermission(player: RPKPlayer, node: String): Boolean {
-        var hasPermission = plugin.server.pluginManager.getPermission(node).default.getValue(false)
+        var hasPermission = plugin.server.pluginManager.getPermission(node)?.default?.getValue(false)?:false
         val bukkitPlayer = player.bukkitPlayer
         if (bukkitPlayer != null) {
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
@@ -218,7 +218,7 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
     }
 
     override fun hasPermission(profile: RPKProfile, node: String): Boolean {
-        var hasPermission = plugin.server.pluginManager.getPermission(node).default.getValue(false)
+        var hasPermission = plugin.server.pluginManager.getPermission(node)?.default?.getValue(false)?:false
         val groups = getGroups(profile)
         if (groups.isEmpty()) {
             hasPermission = hasPermission(defaultGroup, node)
