@@ -53,6 +53,7 @@ class RPKTradeBukkit: RPKBukkitPlugin() {
     override fun setDefaultMessages() {
         messages.setDefault("trader-buy", "&fBought \$quantity \$material from the trader for \$price")
         messages.setDefault("trader-sell", "&fSold \$quantity \$material to the trader for \$price")
+        messages.setDefault("trader-invalid-currency", "&cThat trader is not using a valid currency.")
         messages.setDefault("trader-buy-insufficient-funds", "&cYou can not afford to buy that.")
         messages.setDefault("trader-sell-insufficient-wallet-space", "&cYou could not fit the money from that in your wallet.")
         messages.setDefault("trader-sell-insufficient-items", "&cYou do not have enough of the required item.")
