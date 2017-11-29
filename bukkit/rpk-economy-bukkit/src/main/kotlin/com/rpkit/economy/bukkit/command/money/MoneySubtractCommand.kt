@@ -78,7 +78,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
                                                         val amount = args[3].toInt()
                                                         if (amount >= 0) {
                                                             economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - amount)
-                                                            sender.sendMessage(plugin.messages["money-subtract-value-valid"])
+                                                            sender.sendMessage(plugin.messages["money-subtract-amount-valid"])
                                                             sender.sendMessage(plugin.messages["money-subtract-valid"])
                                                         } else {
                                                             sender.sendMessage(plugin.messages["money-subtract-value-invalid-value-negative"])
