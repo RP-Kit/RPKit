@@ -7,6 +7,7 @@ commands:
     skill:
         description: Uses a skill
         usage: /<command> [skill]
+        aliases: [cast]
 permissions:
     rpkit.skills.command.skill:
         description: Allows using skills
