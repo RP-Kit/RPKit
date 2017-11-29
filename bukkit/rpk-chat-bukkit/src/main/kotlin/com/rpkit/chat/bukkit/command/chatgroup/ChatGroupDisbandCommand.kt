@@ -18,6 +18,7 @@ package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -33,15 +34,21 @@ class ChatGroupDisbandCommand(private val plugin: RPKChatBukkit): CommandExecuto
         if (sender.hasPermission("rpkit.chat.command.chatgroup.disband")) {
             if (args.isNotEmpty()) {
                 if (sender is Player) {
+                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                     val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
                     val chatGroup = chatGroupProvider.getChatGroup(args[0])
                     if (chatGroup != null) {
-                        for (minecraftProfile in chatGroup.memberMinecraftProfiles) {
-                            minecraftProfile.sendMessage(plugin.messages["chat-group-disband-valid", mapOf(
-                                    Pair("group", chatGroup.name)
-                            )])
+                        val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                        if (chatGroup.memberMinecraftProfiles.contains(senderMinecraftProfile)) {
+                            for (minecraftProfile in chatGroup.memberMinecraftProfiles) {
+                                minecraftProfile.sendMessage(plugin.messages["chat-group-disband-valid", mapOf(
+                                        Pair("group", chatGroup.name)
+                                )])
+                            }
+                            chatGroupProvider.removeChatGroup(chatGroup)
+                        } else {
+                            sender.sendMessage(plugin.messages["chat-group-disband-invalid-not-a-member"])
                         }
-                        chatGroupProvider.removeChatGroup(chatGroup)
                     } else {
                         sender.sendMessage(plugin.messages["chat-group-disband-invalid-nonexistent"])
                     }
