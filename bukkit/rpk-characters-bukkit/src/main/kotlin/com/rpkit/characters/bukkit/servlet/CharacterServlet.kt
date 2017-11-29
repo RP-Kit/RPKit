@@ -204,7 +204,7 @@ class CharacterServlet(private val plugin: RPKCharactersBukkit): RPKServlet() {
         val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
         val raceId = req.getParameter("race")?.toInt()
         if (raceId != null) {
-            if (permissionsProvider.hasPermission(profile, "rpkit.characters.command.set.race")) {
+            if (permissionsProvider.hasPermission(profile, "rpkit.characters.command.character.set.race")) {
                 val race = raceProvider.getRace(raceId)
                 character.race = race
             } else {
@@ -213,16 +213,16 @@ class CharacterServlet(private val plugin: RPKCharactersBukkit): RPKServlet() {
         }
         val description = req.getParameter("description")
         if (description != null) {
-            if (permissionsProvider.hasPermission(profile, "rpkit.characters.command.set.description")) {
+            if (permissionsProvider.hasPermission(profile, "rpkit.characters.command.character.set.description")) {
                 character.description = description
             } else {
                 alerts.add(Alert(Alert.Type.DANGER, "You do not have permission to set your character's description."))
             }
         }
         val dead = req.getParameter("dead")
-        if (permissionsProvider.hasPermission(profile, "rpkit.characters.command.set.dead")) {
-            if ((dead != null && permissionsProvider.hasPermission(profile, "rpkit.characters.command.set.dead.yes")
-                    || (dead == null && permissionsProvider.hasPermission(profile, "rpkit.characters.command.set.dead.no")))) {
+        if (permissionsProvider.hasPermission(profile, "rpkit.characters.command.character.set.dead")) {
+            if ((dead != null && permissionsProvider.hasPermission(profile, "rpkit.characters.command.character.set.dead.yes")
+                    || (dead == null && permissionsProvider.hasPermission(profile, "rpkit.characters.command.character.set.dead.no")))) {
                 character.isDead = dead != null
             } else {
                 alerts.add(Alert(Alert.Type.DANGER, "You do not have permission to set your character to be ${if (dead == null) "not" else ""} dead."))
