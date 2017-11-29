@@ -38,7 +38,7 @@ class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBl
                 .column(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_BLOCK_INVENTORY_CHANGE.FROM, SQLDataType.BLOB)
                 .column(RPKIT_BLOCK_INVENTORY_CHANGE.TO, SQLDataType.BLOB)
-                .column(RPKIT_BLOCK_INVENTORY_CHANGE.REASON, SQLDataType.VARCHAR)
+                .column(RPKIT_BLOCK_INVENTORY_CHANGE.REASON, SQLDataType.VARCHAR(256))
                 .constraints(
                         constraint("pk_rpkit_block_inventory_change").primaryKey(RPKIT_BLOCK_INVENTORY_CHANGE.ID)
                 )
