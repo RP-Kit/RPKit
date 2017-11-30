@@ -9,7 +9,7 @@ buildscript {
 
     dependencies {
         classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.2-2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.0"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.9"
     }
 
@@ -61,7 +61,7 @@ project(":rpk-core") {
     def guavaVersion = "17.0"
     def gsonVersion = "2.2.4"
     def ehcacheVersion = "3.0.2"
-    def kotlinVersion = "1.1.2-2"
+    def kotlinVersion = "1.2.0"
     def slf4jVersion = "1.7.20"
     def pircBotXVersion = "2.1"
     def jettyVersion = "9.4.2.v20170220"
