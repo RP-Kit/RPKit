@@ -55,7 +55,7 @@ def repoPassword = properties.getProperty("repo-password")
 project(":rpk-core") {
 
     def mysqlConnectorVersion = "5.1.45"
-    def sqliteConnectorVersion = "3.16.1"
+    def sqliteConnectorVersion = "3.21.0"
     def commonsCodecVersion = "1.9"
     def commonsLangVersion = "2.6"
     def guavaVersion = "17.0"
