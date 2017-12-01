@@ -66,7 +66,7 @@ project(":rpk-core") {
     def pircBotXVersion = "2.1"
     def jettyVersion = "9.4.8.v20171121"
     def velocityVersion = "1.7"
-    def hikariCPVersion = "2.6.0"
+    def hikariCPVersion = "2.7.4"
     def githubAPIVersion = "1.85"
     def jooqVersion = "3.9.2"
 
