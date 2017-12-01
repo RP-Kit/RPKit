@@ -64,7 +64,7 @@ project(":rpk-core") {
     def kotlinVersion = "1.2.0"
     def slf4jVersion = "1.7.25"
     def pircBotXVersion = "2.1"
-    def jettyVersion = "9.4.2.v20170220"
+    def jettyVersion = "9.4.8.v20171121"
     def velocityVersion = "1.7"
     def hikariCPVersion = "2.6.0"
     def githubAPIVersion = "1.85"
