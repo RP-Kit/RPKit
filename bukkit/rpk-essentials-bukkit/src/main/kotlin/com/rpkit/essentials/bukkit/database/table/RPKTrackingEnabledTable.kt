@@ -92,7 +92,7 @@ class RPKTrackingEnabledTable(database: Database, private val plugin: RPKEssenti
                 .select(RPKIT_TRACKING_ENABLED.ID)
                 .from(RPKIT_TRACKING_ENABLED)
                 .where(RPKIT_TRACKING_ENABLED.CHARACTER_ID.eq(character.id))
-                .fetchOne()
+                .fetchOne() ?: return null
         return get(result.get(RPKIT_TRACKING_ENABLED.ID))
     }
 

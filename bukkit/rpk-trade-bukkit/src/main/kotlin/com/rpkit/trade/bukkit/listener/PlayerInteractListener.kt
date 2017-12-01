@@ -156,6 +156,8 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                                     event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                                 }
                             }
+                        } else {
+                            event.player.sendMessage(plugin.messages["trader-invalid-currency"])
                         }
                     }
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2017 Ross Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,10 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import mkremins.fanciful.FancyMessage
+import net.md_5.bungee.api.chat.BaseComponent
+import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.HoverEvent
+import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -50,12 +53,12 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                         if (paymentGroup != null) {
                             if (paymentGroup.owners.contains(character)) {
                                 for (line in plugin.messages.getList("payment-info-owner")) {
-                                    val message = FancyMessage("")
+                                    val messageComponents = mutableListOf<BaseComponent>()
                                     var chatColor: ChatColor? = null
                                     var chatFormat: ChatColor? = null
                                     var i = 0
                                     while (i < line.length) {
-                                        if (line[i] === ChatColor.COLOR_CHAR) {
+                                        if (line[i] == ChatColor.COLOR_CHAR) {
                                             val colourOrFormat = ChatColor.getByChar(line[i + 1])
                                             if (colourOrFormat.isColor) {
                                                 chatColor = colourOrFormat
@@ -67,13 +70,18 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                             var fieldFound = false
                                             if (line.length >= i + "\$name".length) {
                                                 if (line.substring(i, i + "\$name".length) == "\$name") {
-                                                    message.then(paymentGroup.name)
+                                                    val textComponent = TextComponent(paymentGroup.name)
                                                     if (chatColor != null) {
-                                                        message.color(chatColor)
+                                                        textComponent.color = chatColor.asBungee()
                                                     }
                                                     if (chatFormat != null) {
-                                                        message.style(chatFormat)
+                                                        textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                        textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                        textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                        textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                        textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                     }
+                                                    messageComponents.add(textComponent)
                                                     i += "\$name".length - 1
                                                     fieldFound = true
                                                 }
@@ -82,17 +90,24 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                 if (line.length >= i + "\$owners".length) {
                                                     if (line.substring(i, i + "\$owners".length) == "\$owners") {
                                                         val hiddenOwners = paymentGroup.owners.filter { it.isNameHidden }.size
-                                                        message.then(paymentGroup.owners
-                                                                .filter { owner -> !owner.isNameHidden }
-                                                                .map(RPKCharacter::name)
-                                                                .joinToString(", ")
-                                                                + if (hiddenOwners > 0) " (plus $hiddenOwners hidden)" else "")
+                                                        val textComponent = TextComponent(
+                                                                paymentGroup.owners
+                                                                        .filter { owner -> !owner.isNameHidden }
+                                                                        .map(RPKCharacter::name)
+                                                                        .joinToString(", ")
+                                                                + if (hiddenOwners > 0) " (plus $hiddenOwners hidden)" else ""
+                                                        )
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$owners".length - 1
                                                         fieldFound = true
                                                     }
@@ -102,17 +117,24 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                 if (line.length >= i + "\$members".length) {
                                                     if (line.substring(i, i + "\$members".length) == "\$members") {
                                                         val hiddenMembers = paymentGroup.members.filter { it.isNameHidden }.size
-                                                        message.then(paymentGroup.members
-                                                                .filter { member -> !member.isNameHidden }
-                                                                .map(RPKCharacter::name)
-                                                                .joinToString(", ")
-                                                                + if (hiddenMembers > 0) " (plus $hiddenMembers hidden)" else "")
+                                                        val textComponent = TextComponent(
+                                                                paymentGroup.members
+                                                                        .filter { member -> !member.isNameHidden }
+                                                                        .map(RPKCharacter::name)
+                                                                        .joinToString(", ")
+                                                                + if (hiddenMembers > 0) " (plus $hiddenMembers hidden)" else ""
+                                                        )
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$members".length - 1
                                                         fieldFound = true
                                                     }
@@ -121,16 +143,23 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                             if (!fieldFound) {
                                                 if (line.length >= i + "\$invites".length) {
                                                     if (line.substring(i, i + "\$invites".length) == "\$invites") {
-                                                        message.then(paymentGroup.invites
-                                                                .filter { invite -> !invite.isNameHidden }
-                                                                .map(RPKCharacter::name)
-                                                                .joinToString(", "))
+                                                        val textComponent = TextComponent(
+                                                                paymentGroup.invites
+                                                                        .filter { invite -> !invite.isNameHidden }
+                                                                        .map(RPKCharacter::name)
+                                                                        .joinToString(", ")
+                                                        )
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$invites".length - 1
                                                         fieldFound = true
                                                     }
@@ -140,15 +169,26 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                 if (line.length >= i + "\$amount".length) {
                                                     if (line.substring(i, i + "\$amount".length) == "\$amount") {
                                                         if (paymentGroup.currency != null) {
-                                                            message.then("${paymentGroup.amount} ${if (paymentGroup.balance == 1) paymentGroup.currency?.nameSingular ?: "" else paymentGroup.currency?.namePlural ?: ""}")
+                                                            messageComponents.add(
+                                                                    TextComponent(
+                                                                            "${paymentGroup.amount} ${if (paymentGroup.balance == 1)
+                                                                                paymentGroup.currency?.nameSingular ?: ""
+                                                                            else
+                                                                                paymentGroup.currency?.namePlural ?: ""}"
+                                                                    )
+                                                            )
                                                         } else {
-                                                            message.then("(Currency unset)")
+                                                            messageComponents.add(TextComponent("(Currency unset)"))
                                                         }
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            messageComponents.last().color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            messageComponents.last().isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            messageComponents.last().isBold = chatFormat == ChatColor.BOLD
+                                                            messageComponents.last().isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            messageComponents.last().isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            messageComponents.last().isItalic = chatFormat == ChatColor.ITALIC
                                                         }
                                                         i += "\$amount".length - 1
                                                         fieldFound = true
@@ -160,15 +200,19 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                     if (line.substring(i, i + "\$currency".length) == "\$currency") {
                                                         val currency = paymentGroup.currency
                                                         if (currency != null) {
-                                                            message.then(currency.name)
+                                                            messageComponents.add(TextComponent(currency.name))
                                                         } else {
-                                                            message.then("unset")
+                                                            messageComponents.add(TextComponent("unset"))
                                                         }
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            messageComponents.last().color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            messageComponents.last().isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            messageComponents.last().isBold = chatFormat == ChatColor.BOLD
+                                                            messageComponents.last().isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            messageComponents.last().isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            messageComponents.last().isItalic = chatFormat == ChatColor.ITALIC
                                                         }
                                                         i += "\$currency".length - 1
                                                         fieldFound = true
@@ -178,13 +222,18 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                             if (!fieldFound) {
                                                 if (line.length >= i + "\$interval".length) {
                                                     if (line.substring(i, i + "\$interval".length) == "\$interval") {
-                                                        message.then("${paymentGroup.interval / 1000} seconds")
+                                                        val textComponent = TextComponent("${paymentGroup.interval / 1000} seconds")
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$interval".length - 1
                                                         fieldFound = true
                                                     }
@@ -193,13 +242,18 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                             if (!fieldFound) {
                                                 if (line.length >= i + "\$last-payment-time".length) {
                                                     if (line.substring(i, i + "\$last-payment-time".length) == "\$last-payment-time") {
-                                                        message.then(dateFormat.format(Date(paymentGroup.lastPaymentTime)))
+                                                        val textComponent = TextComponent(dateFormat.format(Date(paymentGroup.lastPaymentTime)))
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$last-payment-time".length - 1
                                                         fieldFound = true
                                                     }
@@ -208,7 +262,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                             if (!fieldFound) {
                                                 if (line.length >= i + "\$balance".length) {
                                                     if (line.substring(i, i + "\$balance".length) == "\$balance") {
-                                                        message.then(
+                                                        val textComponent = TextComponent(
                                                                 if (paymentGroup.currency != null) {
                                                                     "${paymentGroup.balance} ${if (paymentGroup.balance == 1) paymentGroup.currency?.nameSingular ?: "" else paymentGroup.currency?.namePlural ?: ""}"
                                                                 } else {
@@ -216,11 +270,16 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                                 }
                                                         )
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$balance".length - 1
                                                         fieldFound = true
                                                     }
@@ -230,15 +289,20 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                 var editFound = false
                                                 if (line.length >= i + "\$edit(name)".length) {
                                                     if (line.substring(i, i + "\$edit(name)".length) == "\$edit(name)") {
-                                                        message.then("Edit")
-                                                                .command("/payment set name ${paymentGroup.name}")
-                                                                .tooltip("Click here to change the payment group name")
+                                                        val textComponent = TextComponent("Edit")
+                                                        textComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/payment set name ${paymentGroup.name}")
+                                                        textComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, arrayOf(TextComponent("Click here to change the payment group name")))
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$edit(name)".length - 1
                                                         editFound = true
                                                     }
@@ -246,15 +310,20 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                 if (!editFound) {
                                                     if (line.length >= i + "\$edit(amount)".length) {
                                                         if (line.substring(i, i + "\$edit(amount)".length) == "\$edit(amount)") {
-                                                            message.then("Edit")
-                                                                    .command("/payment set amount ${paymentGroup.name}")
-                                                                    .tooltip("Click here to change the payment group amount")
+                                                            val textComponent = TextComponent("Edit")
+                                                            textComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/payment set amount ${paymentGroup.name}")
+                                                            textComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, arrayOf(TextComponent("Click here to change the payment group amount")))
                                                             if (chatColor != null) {
-                                                                message.color(chatColor)
+                                                                textComponent.color = chatColor.asBungee()
                                                             }
                                                             if (chatFormat != null) {
-                                                                message.style(chatFormat)
+                                                                textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                                textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                                textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                                textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                                textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                             }
+                                                            messageComponents.add(textComponent)
                                                             i += "\$edit(amount)".length - 1
                                                             editFound = true
                                                         }
@@ -263,15 +332,20 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                 if (!editFound) {
                                                     if (line.length >= i + "\$edit(currency)".length) {
                                                         if (line.substring(i, i + "\$edit(currency)".length) == "\$edit(currency)") {
-                                                            message.then("Edit")
-                                                                    .command("/payment set currency ${paymentGroup.name}")
-                                                                    .tooltip("Click here to change the payment group currency")
+                                                            val textComponent = TextComponent("Edit")
+                                                            textComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/payment set currency ${paymentGroup.name}")
+                                                            textComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, arrayOf(TextComponent("Click here to change the payment group currency")))
                                                             if (chatColor != null) {
-                                                                message.color(chatColor)
+                                                                textComponent.color = chatColor.asBungee()
                                                             }
                                                             if (chatFormat != null) {
-                                                                message.style(chatFormat)
+                                                                textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                                textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                                textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                                textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                                textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                             }
+                                                            messageComponents.add(textComponent)
                                                             i += "\$edit(currency)".length - 1
                                                             editFound = true
                                                         }
@@ -280,43 +354,53 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                 if (!editFound) {
                                                     if (line.length >= i + "\$edit(interval)".length) {
                                                         if (line.substring(i, i + "\$edit(interval)".length) == "\$edit(interval)") {
-                                                            message.then("Edit")
-                                                                    .command("/payment set interval ${paymentGroup.name}")
-                                                                    .tooltip("Click here to change the payment group interval")
+                                                            val textComponent = TextComponent("Edit")
+                                                            textComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/payment set interval ${paymentGroup.name}")
+                                                            textComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, arrayOf(TextComponent("Click here to change the payment group interval")))
                                                             if (chatColor != null) {
-                                                                message.color(chatColor)
+                                                                textComponent.color = chatColor.asBungee()
                                                             }
                                                             if (chatFormat != null) {
-                                                                message.style(chatFormat)
+                                                                textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                                textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                                textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                                textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                                textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                             }
+                                                            messageComponents.add(textComponent)
                                                             i += "\$edit(interval)".length - 1
                                                             editFound = true
                                                         }
                                                     }
                                                 }
                                                 if (!editFound) {
-                                                    message.then(Character.toString(line[i]))
+                                                    val textComponent = TextComponent(Character.toString(line[i]))
                                                     if (chatColor != null) {
-                                                        message.color(chatColor)
+                                                        textComponent.color = chatColor.asBungee()
                                                     }
                                                     if (chatFormat != null) {
-                                                        message.style(chatFormat)
+                                                        textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                        textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                        textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                        textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                        textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                     }
+                                                    messageComponents.add(textComponent)
                                                 }
                                             }
                                         }
                                         i++
                                     }
-                                    message.send(sender)
+                                    sender.spigot().sendMessage(*messageComponents.toTypedArray())
                                 }
                             } else {
                                 for (line in plugin.messages.getList("payment-info-not-owner")) {
-                                    val message = FancyMessage("")
+                                    val messageComponents = mutableListOf<BaseComponent>()
                                     var chatColor: ChatColor? = null
                                     var chatFormat: ChatColor? = null
                                     var i = 0
                                     while (i < line.length) {
-                                        if (line[i] === ChatColor.COLOR_CHAR) {
+                                        if (line[i] == ChatColor.COLOR_CHAR) {
                                             val colourOrFormat = ChatColor.getByChar(line[i + 1])
                                             if (colourOrFormat.isColor) {
                                                 chatColor = colourOrFormat
@@ -328,13 +412,18 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                             var fieldFound = false
                                             if (line.length >= i + "\$name".length) {
                                                 if (line.substring(i, i + "\$name".length) == "\$name") {
-                                                    message.then(paymentGroup.name)
+                                                    val textComponent = TextComponent(paymentGroup.name)
                                                     if (chatColor != null) {
-                                                        message.color(chatColor)
+                                                        textComponent.color = chatColor.asBungee()
                                                     }
                                                     if (chatFormat != null) {
-                                                        message.style(chatFormat)
+                                                        textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                        textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                        textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                        textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                        textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                     }
+                                                    messageComponents.add(textComponent)
                                                     i += "\$name".length - 1
                                                     fieldFound = true
                                                 }
@@ -343,17 +432,24 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                 if (line.length >= i + "\$owners".length) {
                                                     if (line.substring(i, i + "\$owners".length) == "\$owners") {
                                                         val hiddenOwners = paymentGroup.owners.filter { it.isNameHidden }.size
-                                                        message.then(paymentGroup.owners
-                                                                .filter { owner -> !owner.isNameHidden }
-                                                                .map(RPKCharacter::name)
-                                                                .joinToString(", ")
-                                                                + if (hiddenOwners > 0) " (plus $hiddenOwners hidden)" else "")
+                                                        val textComponent = TextComponent(
+                                                                paymentGroup.owners
+                                                                        .filter { owner -> !owner.isNameHidden }
+                                                                        .map(RPKCharacter::name)
+                                                                        .joinToString(", ")
+                                                                        + if (hiddenOwners > 0) " (plus $hiddenOwners hidden)" else ""
+                                                        )
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$owners".length - 1
                                                         fieldFound = true
                                                     }
@@ -363,17 +459,24 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                 if (line.length >= i + "\$members".length) {
                                                     if (line.substring(i, i + "\$members".length) == "\$members") {
                                                         val hiddenMembers = paymentGroup.members.filter { it.isNameHidden }.size
-                                                        message.then(paymentGroup.members
-                                                                .filter { member -> !member.isNameHidden }
-                                                                .map(RPKCharacter::name)
-                                                                .joinToString(", ")
-                                                                + if (hiddenMembers > 0) " (plus $hiddenMembers hidden)" else "")
+                                                        val textComponent = TextComponent(
+                                                                paymentGroup.members
+                                                                        .filter { member -> !member.isNameHidden }
+                                                                        .map(RPKCharacter::name)
+                                                                        .joinToString(", ")
+                                                                        + if (hiddenMembers > 0) " (plus $hiddenMembers hidden)" else ""
+                                                        )
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$members".length - 1
                                                         fieldFound = true
                                                     }
@@ -382,13 +485,18 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                             if (!fieldFound) {
                                                 if (line.length >= i + "\$invites".length) {
                                                     if (line.substring(i, i + "\$invites".length) == "\$invites") {
-                                                        message.then(paymentGroup.invites.joinToString(", "))
+                                                        val textComponent = TextComponent(paymentGroup.invites.joinToString(", "))
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$invites".length - 1
                                                         fieldFound = true
                                                     }
@@ -398,15 +506,19 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                 if (line.length >= i + "\$amount".length) {
                                                     if (line.substring(i, i + "\$amount".length) == "\$amount") {
                                                         if (paymentGroup.currency != null) {
-                                                            message.then("${paymentGroup.amount} ${if (paymentGroup.balance == 1) paymentGroup.currency?.nameSingular ?: "" else paymentGroup.currency?.namePlural ?: ""}")
+                                                            messageComponents.add(TextComponent("${paymentGroup.amount} ${if (paymentGroup.balance == 1) paymentGroup.currency?.nameSingular ?: "" else paymentGroup.currency?.namePlural ?: ""}"))
                                                         } else {
-                                                            message.then("(Currency unset)")
+                                                            messageComponents.add(TextComponent("(Currency unset)"))
                                                         }
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            messageComponents.last().color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            messageComponents.last().isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            messageComponents.last().isBold = chatFormat == ChatColor.BOLD
+                                                            messageComponents.last().isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            messageComponents.last().isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            messageComponents.last().isItalic = chatFormat == ChatColor.ITALIC
                                                         }
                                                         i += "\$amount".length - 1
                                                         fieldFound = true
@@ -418,15 +530,19 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                     if (line.substring(i, i + "\$currency".length) == "\$currency") {
                                                         val currency = paymentGroup.currency
                                                         if (currency != null) {
-                                                            message.then(currency.name)
+                                                            messageComponents.add(TextComponent(currency.name))
                                                         } else {
-                                                            message.then("unset")
+                                                            messageComponents.add(TextComponent("unset"))
                                                         }
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            messageComponents.last().color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            messageComponents.last().isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            messageComponents.last().isBold = chatFormat == ChatColor.BOLD
+                                                            messageComponents.last().isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            messageComponents.last().isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            messageComponents.last().isItalic = chatFormat == ChatColor.ITALIC
                                                         }
                                                         i += "\$currency".length - 1
                                                         fieldFound = true
@@ -436,13 +552,18 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                             if (!fieldFound) {
                                                 if (line.length >= i + "\$interval".length) {
                                                     if (line.substring(i, i + "\$interval".length) == "\$interval") {
-                                                        message.then("${paymentGroup.interval / 1000} seconds")
+                                                        val textComponent = TextComponent("${paymentGroup.interval / 1000} seconds")
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$interval".length - 1
                                                         fieldFound = true
                                                     }
@@ -451,13 +572,18 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                             if (!fieldFound) {
                                                 if (line.length >= i + "\$last-payment-time".length) {
                                                     if (line.substring(i, i + "\$last-payment-time".length) == "\$last-payment-time") {
-                                                        message.then(dateFormat.format(Date(paymentGroup.lastPaymentTime)))
+                                                        val textComponent = TextComponent(dateFormat.format(Date(paymentGroup.lastPaymentTime)))
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$last-payment-time".length - 1
                                                         fieldFound = true
                                                     }
@@ -466,7 +592,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                             if (!fieldFound) {
                                                 if (line.length >= i + "\$balance".length) {
                                                     if (line.substring(i, i + "\$balance".length) == "\$balance") {
-                                                        message.then(
+                                                        val textComponent = TextComponent(
                                                                 if (paymentGroup.currency != null) {
                                                                     "${paymentGroup.balance} ${if (paymentGroup.balance == 1) paymentGroup.currency?.nameSingular ?: "" else paymentGroup.currency?.namePlural ?: ""}"
                                                                 } else {
@@ -474,29 +600,39 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                                                 }
                                                         )
                                                         if (chatColor != null) {
-                                                            message.color(chatColor)
+                                                            textComponent.color = chatColor.asBungee()
                                                         }
                                                         if (chatFormat != null) {
-                                                            message.style(chatFormat)
+                                                            textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                            textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                            textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                            textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                            textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                         }
+                                                        messageComponents.add(textComponent)
                                                         i += "\$balance".length - 1
                                                         fieldFound = true
                                                     }
                                                 }
                                             }
                                             if (!fieldFound) {
-                                                message.then(Character.toString(line[i]))
+                                                val textComponent = TextComponent(Character.toString(line[i]))
                                                 if (chatColor != null) {
-                                                    message.color(chatColor)
+                                                    textComponent.color = chatColor.asBungee()
                                                 }
                                                 if (chatFormat != null) {
-                                                    message.style(chatFormat)
+                                                    textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                                    textComponent.isBold = chatFormat == ChatColor.BOLD
+                                                    textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                                    textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                    textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                                 }
+                                                messageComponents.add(textComponent)
                                             }
                                         }
                                         i++
                                     }
-                                    message.send(sender)
+                                    sender.spigot().sendMessage(*messageComponents.toTypedArray())
                                 }
                             }
                         } else {

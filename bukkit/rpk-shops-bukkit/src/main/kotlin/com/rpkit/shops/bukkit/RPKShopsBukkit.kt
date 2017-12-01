@@ -70,7 +70,7 @@ class RPKShopsBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-stealing", "&cYou cannot steal from this shop.")
         messages.setDefault("not-enough-money", "&cYou do not have enough money to buy that.")
         messages.setDefault("not-enough-shop-items", "&cThe shop does not contain enough items.")
-        messages.setDefault("shop-sell-not-enough-money", "&cThe shop''s owner does not have enough money to pay you.")
+        messages.setDefault("shop-sell-not-enough-money", "&cThe shop's owner does not have enough money to pay you.")
         messages.setDefault("shop-sell-chest-not-found", "&cCould not find a chest below that shop to place your item into.")
         messages.setDefault("shop-sell-not-enough-items", "&cYou do not have enough items to sell to that shop.")
         messages.setDefault("shop-character-invalid", "&cThere is no character with that ID. Perhaps they have been deleted?")

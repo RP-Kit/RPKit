@@ -28,14 +28,20 @@ import org.bukkit.command.CommandSender
 class AccountCommand(private val plugin: RPKPlayersBukkit): CommandExecutor {
 
     private val accountLinkCommand = AccountLinkCommand(plugin)
+    private val accountConfirmLinkCommand = AccountConfirmLinkCommand(plugin)
+    private val accountDenyLinkCommand = AccountDenyLinkCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
-            if (args[0].equals("link", ignoreCase = true)) {
-                return accountLinkCommand.onCommand(sender, command, label, newArgs)
-            } else {
-                sender.sendMessage(plugin.messages["account-usage"])
+            return when(args[0].toLowerCase()) {
+                "link" -> accountLinkCommand.onCommand(sender, command, label, newArgs)
+                "confirmlink" -> accountConfirmLinkCommand.onCommand(sender, command, label, newArgs)
+                "denylink" -> accountDenyLinkCommand.onCommand(sender, command, label, newArgs)
+                else -> {
+                    sender.sendMessage(plugin.messages["account-usage"])
+                    true
+                }
             }
         } else {
             sender.sendMessage(plugin.messages["account-usage"])

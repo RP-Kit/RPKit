@@ -39,7 +39,7 @@ abstract class Table<T: Entity>(val database: Database, val name: String, val ty
      * @param database The [Database] instance which manages the table
      * @param type The type of entity stored in the table
      */
-    constructor(database: Database, type: KClass<T>): this(database, UPPER_CAMEL.to(LOWER_UNDERSCORE, type.simpleName), type)
+    constructor(database: Database, type: KClass<T>): this(database, UPPER_CAMEL.to(LOWER_UNDERSCORE, type.java.simpleName), type)
 
     /**
      * Constructs a table with the given database, name and type.

@@ -165,8 +165,11 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
 
     override fun removeCharacter(character: RPKCharacter) {
         val minecraftProfile = character.minecraftProfile
-        if (minecraftProfile != null)
-            setActiveCharacter(minecraftProfile, null)
+        if (minecraftProfile != null) {
+            if (getActiveCharacter(minecraftProfile) == character) {
+                setActiveCharacter(minecraftProfile, null)
+            }
+        }
         plugin.core.database.getTable(RPKCharacterTable::class).delete(character)
     }
 

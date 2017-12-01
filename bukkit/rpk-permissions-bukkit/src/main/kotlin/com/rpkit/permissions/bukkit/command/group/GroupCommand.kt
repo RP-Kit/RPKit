@@ -17,7 +17,6 @@
 package com.rpkit.permissions.bukkit.command.group
 
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -38,10 +37,10 @@ class GroupCommand(private val plugin: RPKPermissionsBukkit): CommandExecutor {
             } else if (args[0].equals("remove", ignoreCase = true)) {
                 return groupRemoveCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages/group-usage")))
+                sender.sendMessage(plugin.messages["group-usage"])
             }
         } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.config.getString("messages/group-usage")))
+            sender.sendMessage(plugin.messages["group-usage"])
         }
         return true
     }

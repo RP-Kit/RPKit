@@ -64,7 +64,7 @@ class RPKBanksBukkit: RPKBukkitPlugin() {
 
     override fun setDefaultMessages() {
         messages.setDefault("bank-sign-invalid-operation", "&cThat's not a valid operation. Please use withdraw, deposit, or balance. (Line 2)")
-        messages.setDefault("bank-sign-invalid-currency", "&cThat''s not a valid currency. Please use a valid currency. (Line 4)")
+        messages.setDefault("bank-sign-invalid-currency", "&cThat's not a valid currency. Please use a valid currency. (Line 4)")
         messages.setDefault("bank-withdraw-invalid-wallet-full", "&cYou cannot withdraw that amount, it would not fit in your wallet.")
         messages.setDefault("bank-withdraw-invalid-not-enough-money", "&cYou cannot withdraw that amount, your bank balance is not high enough.")
         messages.setDefault("bank-withdraw-valid", "&aWithdrew \$amount \$currency. Wallet balance: \$wallet-balance. Bank balance: \$bank-balance.")

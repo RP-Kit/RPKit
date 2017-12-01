@@ -64,6 +64,8 @@ chat-channels:
         radius: 16
         directed-pipeline:
         - ==: RadiusFilterComponent
+        - ==: DrunkenSlurComponent
+          drunkenness: 5
         - ==: GarbleComponent
           clear-radius: 8
         - ==: DirectedFormatComponent
@@ -83,6 +85,8 @@ chat-channels:
         radius: 32
         directed-pipeline:
         - ==: RadiusFilterComponent
+        - ==: DrunkenSlurComponent
+          drunkenness: 5
         - ==: GarbleComponent
           clear-radius: 16
         - ==: DirectedFormatComponent
@@ -102,6 +106,8 @@ chat-channels:
         radius: 8
         directed-pipeline:
         - ==: RadiusFilterComponent
+        - ==: DrunkenSlurComponent
+          drunkenness: 5
         - ==: GarbleComponent
           clear-radius: 4
         - ==: DirectedFormatComponent

@@ -246,16 +246,16 @@ class BankServlet(private val plugin: RPKBanksBukkit): RPKServlet() {
         val toCharacterId = req.getParameter("character")
         val toCharacter = if (toCharacterId != null) characterProvider.getCharacter(toCharacterId.toInt()) else null
         val alerts = mutableListOf<Alert>()
-        if (amount > balance) {
+        if (amount < 1) {
+            alerts.add(Alert(Alert.Type.DANGER, "You must transfer at least 1 ${currency.nameSingular}."))
+        } else if (amount > balance) {
             alerts.add(Alert(Alert.Type.DANGER, "You do not have enough money to perform that transaction."))
+        } else if (toCharacter == null) {
+            alerts.add(Alert(Alert.Type.DANGER, "You must set a character to transfer to."))
         } else {
-            if (toCharacter == null) {
-                alerts.add(Alert(Alert.Type.DANGER, "You must set a character to transfer to."))
-            } else {
-                bankProvider.withdraw(character, currency, amount)
-                bankProvider.deposit(toCharacter, currency, amount)
-                balance -= amount
-            }
+            bankProvider.withdraw(character, currency, amount)
+            bankProvider.deposit(toCharacter, currency, amount)
+            balance -= amount
         }
         resp.contentType = "text/html"
         resp.status = SC_OK
@@ -270,6 +270,9 @@ class BankServlet(private val plugin: RPKBanksBukkit): RPKServlet() {
         velocityContext.put("navigationBar", plugin.core.web.navigationBar)
         velocityContext.put("alerts", alerts)
         velocityContext.put("activeProfile", profile)
+        velocityContext.put("top", bankProvider.getRichestCharacters(currency, 5)
+                .map { Pair(it, bankProvider.getBalance(it, currency)) }
+                .toMap())
         velocityContext.put("character", character)
         velocityContext.put("currency", currency)
         velocityContext.put("balance", balance)

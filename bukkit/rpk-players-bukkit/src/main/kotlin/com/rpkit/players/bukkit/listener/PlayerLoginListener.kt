@@ -3,11 +3,11 @@ package com.rpkit.players.bukkit.listener
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileImpl
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileTokenImpl
+import com.rpkit.players.bukkit.profile.RPKProfileImpl
+import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerLoginEvent
-import java.util.*
 
 
 class PlayerLoginListener(private val plugin: RPKPlayersBukkit): Listener {
@@ -22,27 +22,19 @@ class PlayerLoginListener(private val plugin: RPKPlayersBukkit): Listener {
                     minecraftUUID = event.player.uniqueId
             )
             minecraftProfileProvider.addMinecraftProfile(minecraftProfile)
-            // Generate new token so account can be linked via web UI
-            val minecraftProfileToken = RPKMinecraftProfileTokenImpl(
-                    minecraftProfile = minecraftProfile,
-                    token = UUID.randomUUID().toString()
-            )
-            minecraftProfileProvider.addMinecraftProfileToken(minecraftProfileToken)
+        } else if (minecraftProfileProvider.getMinecraftProfileLinkRequests(minecraftProfile).isNotEmpty()) { // Minecraft profile has a link request, so skip and let them know on join.
+            return
         }
-        if (minecraftProfile.profile == null) { // Either profile is new, or player has logged in before and still not linked account
-            var minecraftProfileToken = minecraftProfileProvider.getMinecraftProfileToken(minecraftProfile)
-            if (minecraftProfileToken == null) { // No token has been generated
-                minecraftProfileToken = RPKMinecraftProfileTokenImpl(
-                        minecraftProfile = minecraftProfile,
-                        token = UUID.randomUUID().toString()
-                )
-                minecraftProfileProvider.addMinecraftProfileToken(minecraftProfileToken)
-            }
-            // Kick the player and notify of them of the token they need to use in the web UI
-            event.kickMessage = plugin.messages["kick-no-profile", mapOf(
-                    Pair("token", minecraftProfileToken.token)
-            )]
-            event.result = PlayerLoginEvent.Result.KICK_OTHER
+        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
+        var profile = minecraftProfile.profile
+        if (profile == null) {
+            profile = RPKProfileImpl(
+                    minecraftProfile.minecraftUsername,
+                    ""
+            )
+            profileProvider.addProfile(profile)
+            minecraftProfile.profile = profile
+            minecraftProfileProvider.updateMinecraftProfile(minecraftProfile)
         }
     }
 }

@@ -17,5 +17,9 @@ interface RPKMinecraftProfileProvider: ServiceProvider {
     fun addMinecraftProfileToken(token: RPKMinecraftProfileToken)
     fun updateMinecraftProfileToken(token: RPKMinecraftProfileToken)
     fun removeMinecraftProfileToken(token: RPKMinecraftProfileToken)
+    fun getMinecraftProfileLinkRequests(minecraftProfile: RPKMinecraftProfile): List<RPKMinecraftProfileLinkRequest>
+    fun addMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest)
+    fun removeMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest)
+    fun updateMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest)
 
 }

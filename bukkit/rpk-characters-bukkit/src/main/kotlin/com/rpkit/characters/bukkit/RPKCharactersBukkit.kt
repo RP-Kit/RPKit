@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2017 Ross Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +142,7 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         messages.setDefault("character-set-race-prompt", "&fWhat is your character's race? &7(Type cancel to cancel)")
         messages.setDefault("character-set-race-invalid-race", "&cThat's not a valid race.")
         messages.setDefault("character-set-race-valid", "&aRace set.")
+        messages.setDefault("character-hide-usage", "&cUsage: /character hide [field]")
         messages.setDefault("character-hide-age-valid", "&aAge hidden.")
         messages.setDefault("character-hide-description-valid", "&aDescription hidden.")
         messages.setDefault("character-hide-player-valid", "&aPlayer hidden.")
@@ -149,6 +150,7 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         messages.setDefault("character-hide-name-valid", "&aName hidden.")
         messages.setDefault("character-hide-gender-valid", "&aGender hidden.")
         messages.setDefault("character-hide-race-valid", "&aRace hidden.")
+        messages.setDefault("character-unhide-usage", "&cUsage: /character unhide [field]")
         messages.setDefault("character-unhide-age-valid", "&aAge unhidden.")
         messages.setDefault("character-unhide-description-valid", "&aDescription unhidden.")
         messages.setDefault("character-unhide-player-valid", "&aPlayer unhidden.")
@@ -184,6 +186,7 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         messages.setDefault("character-list-item", "&f- \$character")
         messages.setDefault("character-switch-prompt", "&fWhat is the name of the character you would like to switch to? &7(Type cancel to cancel)")
         messages.setDefault("character-switch-invalid-character", "&cYou do not have a character by that name.")
+        messages.setDefault("character-switch-invalid-character-other-account", "&cThat character is currently being played on another account.")
         messages.setDefault("character-switch-valid", "&aCharacter switched.")
         messages.setDefault("character-new-valid", "&aCharacter created.")
         messages.setDefault("character-new-invalid-cooldown", "&cYou may not create another character until the cooldown has passed.")
