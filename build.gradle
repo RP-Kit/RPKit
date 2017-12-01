@@ -62,7 +62,7 @@ project(":rpk-core") {
     def gsonVersion = "2.8.2"
     def ehcacheVersion = "3.4.0"
     def kotlinVersion = "1.2.0"
-    def slf4jVersion = "1.7.20"
+    def slf4jVersion = "1.7.25"
     def pircBotXVersion = "2.1"
     def jettyVersion = "9.4.2.v20170220"
     def velocityVersion = "1.7"
