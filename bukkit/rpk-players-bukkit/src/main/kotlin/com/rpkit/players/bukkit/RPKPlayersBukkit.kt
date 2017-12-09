@@ -60,7 +60,8 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
                 com.rpkit.players.bukkit.servlet.api.v1.ProfileAPIServlet(this),
                 com.rpkit.players.bukkit.servlet.api.v1.GitHubProfileAPIServlet(this),
                 com.rpkit.players.bukkit.servlet.api.v1.IRCProfileAPIServlet(this),
-                com.rpkit.players.bukkit.servlet.api.v1.MinecraftProfileAPIServlet(this)
+                com.rpkit.players.bukkit.servlet.api.v1.MinecraftProfileAPIServlet(this),
+                com.rpkit.players.bukkit.servlet.api.v1.SignInServlet(this)
         )
     }
 
