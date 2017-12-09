@@ -6,8 +6,11 @@ depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-permissions-lib-bukkit]
 commands:
     group:
         description: Group management command
-        usage: /<command> [add|remove] [player] [group]
+        usage: /<command> [add|remove|list]
 permissions:
+    rpkit.permissions.command.group.list:
+        description: Allows listing groups
+        default: op
     rpkit.permissions.command.group.add:
         description: Allows adding groups to players
         default: op
