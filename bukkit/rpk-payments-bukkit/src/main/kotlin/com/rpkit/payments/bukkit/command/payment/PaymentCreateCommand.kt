@@ -45,16 +45,6 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                     currencyProvider.getCurrency(currencyName)
                 val name = args.joinToString(" ")
                 if (paymentGroupProvider.getPaymentGroup(name) == null) {
-                    val paymentGroup = RPKPaymentGroupImpl(
-                            plugin,
-                            name = name,
-                            amount = plugin.config.getInt("payment-groups.defaults.amount"),
-                            currency = currency,
-                            interval = plugin.config.getLong("payment-groups.defaults.interval"),
-                            lastPaymentTime = System.currentTimeMillis(),
-                            balance = 0
-                    )
-                    paymentGroupProvider.addPaymentGroup(paymentGroup)
                     if (sender is Player) {
                         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
@@ -62,7 +52,18 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                         if (minecraftProfile != null) {
                             val character = characterProvider.getActiveCharacter(minecraftProfile)
                             if (character != null) {
+                                val paymentGroup = RPKPaymentGroupImpl(
+                                        plugin,
+                                        name = name,
+                                        amount = plugin.config.getInt("payment-groups.defaults.amount"),
+                                        currency = currency,
+                                        interval = plugin.config.getLong("payment-groups.defaults.interval"),
+                                        lastPaymentTime = System.currentTimeMillis(),
+                                        balance = 0
+                                )
+                                paymentGroupProvider.addPaymentGroup(paymentGroup)
                                 paymentGroup.addOwner(character)
+                                sender.sendMessage(plugin.messages["payment-create-valid"])
                             } else {
                                 sender.sendMessage(plugin.messages["no-character"])
                             }
@@ -72,7 +73,6 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit): CommandExecut
                     } else {
                         sender.sendMessage(plugin.messages["not-from-console"])
                     }
-                    sender.sendMessage(plugin.messages["payment-create-valid"])
                 } else{
                     sender.sendMessage(plugin.messages["payment-create-invalid-name-already-exists"])
                 }
