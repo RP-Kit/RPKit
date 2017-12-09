@@ -28,6 +28,7 @@ import org.bukkit.command.CommandSender
 class PaymentCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
 
     private val paymentCreateCommand = PaymentCreateCommand(plugin)
+    private val paymentRemoveCommand = PaymentRemoveCommand(plugin)
     private val paymentInviteCommand = PaymentInviteCommand(plugin)
     private val paymentKickCommand = PaymentKickCommand(plugin)
     private val paymentJoinCommand = PaymentJoinCommand(plugin)
@@ -41,28 +42,20 @@ class PaymentCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
-            if (args[0].equals("create", ignoreCase = true)) {
-                return paymentCreateCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("invite", ignoreCase = true)) {
-                return paymentInviteCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("kick", ignoreCase = true)) {
-                return paymentKickCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("join", ignoreCase = true)) {
-                return paymentJoinCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("leave", ignoreCase = true)) {
-                return paymentLeaveCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("withdraw", ignoreCase = true)) {
-                return paymentWithdrawCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("deposit", ignoreCase = true)) {
-                return paymentDepositCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("list", ignoreCase = true)) {
-                return paymentListCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("info", ignoreCase = true)) {
-                return paymentInfoCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("set", ignoreCase = true)) {
-                return paymentSetCommand.onCommand(sender, command, label, newArgs)
-            } else {
-                sender.sendMessage(plugin.messages["payment-usage"])
+            when {
+                args[0].equals("create", ignoreCase = true) -> return paymentCreateCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("remove", ignoreCase = true)
+                        || args[0].equals("delete", ignoreCase = true) -> return paymentRemoveCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("invite", ignoreCase = true) -> return paymentInviteCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("kick", ignoreCase = true) -> return paymentKickCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("join", ignoreCase = true) -> return paymentJoinCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("leave", ignoreCase = true) -> return paymentLeaveCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("withdraw", ignoreCase = true) -> return paymentWithdrawCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("deposit", ignoreCase = true) -> return paymentDepositCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("list", ignoreCase = true) -> return paymentListCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("info", ignoreCase = true) -> return paymentInfoCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("set", ignoreCase = true) -> return paymentSetCommand.onCommand(sender, command, label, newArgs)
+                else -> sender.sendMessage(plugin.messages["payment-usage"])
             }
         } else {
             sender.sendMessage(plugin.messages["payment-usage"])

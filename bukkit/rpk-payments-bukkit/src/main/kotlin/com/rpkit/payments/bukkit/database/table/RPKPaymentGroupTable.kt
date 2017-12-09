@@ -47,7 +47,7 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                 .column(RPKIT_PAYMENT_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PAYMENT_GROUP.NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_PAYMENT_GROUP.AMOUNT, SQLDataType.INTEGER)
-                .column(RPKIT_PAYMENT_GROUP.CURRENCY_ID, SQLDataType.INTEGER)
+                .column(RPKIT_PAYMENT_GROUP.CURRENCY_ID, SQLDataType.INTEGER.nullable(true))
                 .column(RPKIT_PAYMENT_GROUP.INTERVAL, SQLDataType.BIGINT)
                 .column(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME, SQLDataType.TIMESTAMP)
                 .column(RPKIT_PAYMENT_GROUP.BALANCE, SQLDataType.INTEGER)
@@ -121,7 +121,7 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                     .fetchOne()
             val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
             val currencyId = result.get(RPKIT_PAYMENT_GROUP.CURRENCY_ID)
-            val currency = currencyProvider.getCurrency(currencyId)
+            val currency = if (currencyId == null) null else currencyProvider.getCurrency(currencyId)
             val paymentGroup = RPKPaymentGroupImpl(
                     plugin,
                     id,
