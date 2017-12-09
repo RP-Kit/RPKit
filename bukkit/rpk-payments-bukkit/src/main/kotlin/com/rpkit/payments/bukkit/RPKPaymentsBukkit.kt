@@ -280,6 +280,8 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
         messages.setDefault("payment-notification-member-leave", "&a\$member left payment group \"\$group\" on \$date.")
         messages.setDefault("payment-notification-invite", "&aYou were invited to join payment group \"\$group\" on \$date.")
         messages.setDefault("payment-notification-kick", "&cYou were kicked from payment group \"\$group\" on \$date.")
+        messages.setDefault("currency-list-title", "&fCurrencies: ")
+        messages.setDefault("currency-list-item", "&7- &f\$currency")
         messages.setDefault("no-profile", "&cYour Minecraft profile is not linked to a profile. Please link it on the server's web UI.")
         messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
         messages.setDefault("no-character", "&cYou need a character to perform this action.")
