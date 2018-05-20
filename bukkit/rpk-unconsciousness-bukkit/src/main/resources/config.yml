@@ -1,0 +1,5 @@
+# The amount of time a player should be unconscious in milliseconds
+unconscious-time: 600000
+# When a player is unconscious, which commands should be allowed (subject to permissions)?
+allowed-commands:
+- wake

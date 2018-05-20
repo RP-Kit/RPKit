@@ -1,0 +1,5 @@
+name: rpk-unconsciousness-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessLibBukkit
+depend: [rpk-player-lib-bukkit, rpk-character-lib-bukkit]
