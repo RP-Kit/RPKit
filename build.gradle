@@ -204,6 +204,7 @@ project(":bukkit:rpk-permissions-lib-bukkit") {
     dependencies {
         compile project(":bukkit:rpk-core-bukkit")
         compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
     }
 
     processResources {
@@ -1011,6 +1012,7 @@ project(":bukkit:rpk-permissions-bukkit") {
     dependencies {
         compile project(":bukkit:rpk-core-bukkit")
         compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
         compile project(":bukkit:rpk-permissions-lib-bukkit")
     }
 
