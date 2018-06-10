@@ -23,6 +23,7 @@ import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.shops.bukkit.RPKShopsBukkit
 import org.bukkit.ChatColor.GREEN
+import org.bukkit.block.Block
 import org.bukkit.block.BlockFace.UP
 import org.bukkit.block.Chest
 import org.bukkit.block.Sign
@@ -31,6 +32,8 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /**
  * Inventory click listener for shops.
@@ -53,6 +56,10 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
                     val buyerBukkitPlayer = event.whoClicked as? Player ?: return
                     val buyerMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(buyerBukkitPlayer)
                     if (buyerMinecraftProfile != null) {
+                        if (!validateRentSign(chest.block.getRelative(UP, 2))) {
+                            buyerBukkitPlayer.sendMessage(plugin.messages["rent-ended"])
+                            return
+                        }
                         val buyerCharacter = characterProvider.getActiveCharacter(buyerMinecraftProfile)
                         if (buyerCharacter == null) {
                             buyerBukkitPlayer.sendMessage(plugin.messages["no-character"])
@@ -93,6 +100,12 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
                 }
             }
         }
+    }
+
+    private fun validateRentSign(block: Block): Boolean {
+        val sign = block.state as? Sign ?: return true
+        if (sign.getLine(0) != GREEN.toString() + "[rent]") return true
+        return LocalDate.now().isBefore(LocalDate.parse(sign.getLine(3), DateTimeFormatter.ofPattern("yyyy-MM-dd")))
     }
 
 }
