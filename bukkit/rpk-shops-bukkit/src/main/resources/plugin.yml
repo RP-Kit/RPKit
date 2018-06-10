@@ -26,3 +26,6 @@ permissions:
     rpkit.shops.command.restock:
         description: Allows restocking shops
         default: op
+    rpkit.shops.sign.rent:
+        description: Allows creation of rented shops
+        default: op
