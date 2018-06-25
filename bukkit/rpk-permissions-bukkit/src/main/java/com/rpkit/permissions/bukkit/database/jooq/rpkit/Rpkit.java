@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Ross Binden
+ * Copyright 2018 Ross Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package com.rpkit.permissions.bukkit.database.jooq.rpkit;
 
 import com.rpkit.permissions.bukkit.database.jooq.DefaultCatalog;
 import com.rpkit.permissions.bukkit.database.jooq.rpkit.tables.PlayerGroup;
+import com.rpkit.permissions.bukkit.database.jooq.rpkit.tables.RpkitCharacterGroup;
 import com.rpkit.permissions.bukkit.database.jooq.rpkit.tables.RpkitProfileGroup;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Rpkit extends SchemaImpl {
 
-    private static final long serialVersionUID = 1993737233;
+    private static final long serialVersionUID = -423566310;
 
     /**
      * The reference instance of <code>rpkit</code>
@@ -59,6 +60,11 @@ public class Rpkit extends SchemaImpl {
      * The table <code>rpkit.player_group</code>.
      */
     public final PlayerGroup PLAYER_GROUP = PlayerGroup.PLAYER_GROUP;
+
+    /**
+     * The table <code>rpkit.rpkit_character_group</code>.
+     */
+    public final RpkitCharacterGroup RPKIT_CHARACTER_GROUP = RpkitCharacterGroup.RPKIT_CHARACTER_GROUP;
 
     /**
      * The table <code>rpkit.rpkit_profile_group</code>.
@@ -91,6 +97,7 @@ public class Rpkit extends SchemaImpl {
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
             PlayerGroup.PLAYER_GROUP,
+            RpkitCharacterGroup.RPKIT_CHARACTER_GROUP,
             RpkitProfileGroup.RPKIT_PROFILE_GROUP);
     }
 }

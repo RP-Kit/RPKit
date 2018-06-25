@@ -54,7 +54,7 @@ class BlockBreakListener(val plugin: RPKShopsBukkit): Listener {
                     return
                 }
                 val character = characterProvider.getActiveCharacter(minecraftProfile)
-                val shopCharacter = if (sign.getLine(3)?.equals("admin", ignoreCase = true) ?: false) null else characterProvider.getCharacter(sign.getLine(3).toInt())
+                val shopCharacter = if (sign.getLine(3)?.equals("admin", ignoreCase = true) == true) null else characterProvider.getCharacter(sign.getLine(3).toInt())
                 if (character == null) {
                     event.isCancelled = true
                     return
@@ -69,6 +69,28 @@ class BlockBreakListener(val plugin: RPKShopsBukkit): Listener {
                 }
                 val shopCount = shopCountProvider.getShopCount(character)
                 shopCountProvider.setShopCount(character, shopCount - 1)
+            } else if (sign.getLine(0) == GREEN.toString() + "[rent]") {
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+                if (minecraftProfile == null) {
+                    event.isCancelled = true
+                    return
+                }
+                val character = characterProvider.getActiveCharacter(minecraftProfile)
+                val rentCharacter = characterProvider.getCharacter(sign.getLine(1).toInt())
+                if (character == null) {
+                    event.isCancelled = true
+                    return
+                }
+                if (rentCharacter == null) {
+                    event.isCancelled = true
+                    return
+                }
+                if (rentCharacter.id != character.id) {
+                    event.isCancelled = true
+                    return
+                }
             }
         }
     }

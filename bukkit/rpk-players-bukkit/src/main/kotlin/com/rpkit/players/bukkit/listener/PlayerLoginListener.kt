@@ -29,7 +29,7 @@ class PlayerLoginListener(private val plugin: RPKPlayersBukkit): Listener {
         var profile = minecraftProfile.profile
         if (profile == null) {
             profile = RPKProfileImpl(
-                    minecraftProfile.minecraftUsername,
+                    event.player.name,
                     ""
             )
             profileProvider.addProfile(profile)

@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.1"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.0"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.9"
     }
@@ -20,7 +20,7 @@ allprojects {
     apply plugin: "maven"
     apply plugin: "org.jetbrains.dokka"
     group = "com.rpkit"
-    version = "1.4.0"
+    version = "1.5.0"
 }
 
 subprojects {
@@ -124,7 +124,7 @@ project(":rpk-core") {
 project(":bukkit:rpk-core-bukkit") {
 
     dependencies {
-        compile group: "org.spigotmc", name: "spigot-api", version: "1.12.1-R0.1-SNAPSHOT"
+        compile group: "org.spigotmc", name: "spigot-api", version: "1.12.2-R0.1-SNAPSHOT"
         compile group: "net.milkbowl.vault", name: "VaultAPI", version: "1.6"
         compile project(":rpk-core")
     }
@@ -204,6 +204,7 @@ project(":bukkit:rpk-permissions-lib-bukkit") {
     dependencies {
         compile project(":bukkit:rpk-core-bukkit")
         compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
     }
 
     processResources {
@@ -936,6 +937,73 @@ project(":bukkit:rpk-block-log-lib-bukkit") {
 
 }
 
+project(":bukkit:rpk-unconsciousness-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-unconsciousness-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-unconsciousness-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-unconsciousness-lib-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-moderation-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-moderation-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-moderation-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-moderation-lib-bukkit").group
+
+        }
+    }
+
+}
+
 // Bukkit implementations
 
 project(":bukkit:rpk-players-bukkit") {
@@ -977,6 +1045,7 @@ project(":bukkit:rpk-permissions-bukkit") {
     dependencies {
         compile project(":bukkit:rpk-core-bukkit")
         compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
         compile project(":bukkit:rpk-permissions-lib-bukkit")
     }
 
@@ -1699,7 +1768,76 @@ project(":bukkit:rpk-block-logging-bukkit") {
 
             pom.version = project(":bukkit:rpk-block-logging-bukkit").version
             pom.artifactId = project(":bukkit:rpk-block-logging-bukkit").name
-            pom.groupId = project(":bukkit:rpk-drinks-bukkit").group
+            pom.groupId = project(":bukkit:rpk-block-logging-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-unconsciousness-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-character-lib-bukkit")
+        compile project(":bukkit:rpk-unconsciousness-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-unconsciousness-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-unconsciousness-bukkit").name
+            pom.groupId = project(":bukkit:rpk-unconsciousness-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-moderation-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-moderation-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-moderation-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-moderation-bukkit").name
+            pom.groupId = project(":bukkit:rpk-moderation-bukkit").group
 
         }
     }

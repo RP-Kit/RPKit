@@ -30,6 +30,8 @@ import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.SignChangeEvent
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /**
  * Sign change listener for shops.
@@ -95,14 +97,53 @@ class SignChangeListener(private val plugin: RPKShopsBukkit): Listener {
                             event.block.breakNaturally()
                         }
                     } else {
+                        event.block.breakNaturally()
                         event.player.sendMessage(plugin.messages["no-character"])
                     }
                 } else {
+                    event.block.breakNaturally()
                     event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                 }
             } else {
-                event.player.sendMessage(plugin.messages["no-permission-shop"])
                 event.block.breakNaturally()
+                event.player.sendMessage(plugin.messages["no-permission-shop"])
+            }
+        } else if (event.getLine(0) == "[rent]") {
+            if (event.player.hasPermission("rpkit.shops.sign.rent")) {
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        event.setLine(1, character.id.toString())
+                        if (event.getLine(2).matches(Regex("\\d+\\s+.+"))) {
+                            val currencyName = event.getLine(2)
+                                    .split(Regex("\\s+"))
+                                    .drop(1)
+                                    .joinToString(" ")
+                            if (currencyProvider.getCurrency(currencyName) == null) {
+                                event.block.breakNaturally()
+                                event.player.sendMessage(plugin.messages["rent-line-2-invalid"])
+                            }
+                        } else {
+                            event.block.breakNaturally()
+                            event.player.sendMessage(plugin.messages["rent-line-2-invalid"])
+                        }
+                        event.setLine(3, LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        event.setLine(0, GREEN.toString() + "[rent]")
+                    } else {
+                        event.block.breakNaturally()
+                        event.player.sendMessage(plugin.messages["no-character"])
+                    }
+                } else {
+                    event.block.breakNaturally()
+                    event.player.sendMessage(plugin.messages["no-minecraft-profile"])
+                }
+            } else {
+                event.block.breakNaturally()
+                event.player.sendMessage(plugin.messages["no-permission-rent"])
             }
         }
     }

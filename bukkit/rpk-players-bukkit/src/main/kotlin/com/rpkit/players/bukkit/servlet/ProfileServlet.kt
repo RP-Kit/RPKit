@@ -186,7 +186,6 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
         val password = req.getParameter("password")
         val confirmPassword = req.getParameter("confirm_password")
         val minecraftUsername = req.getParameter("minecraft_username")
-        val givenMinecraftProfileToken = req.getParameter("minecraft_profile_token")
         val deleteMinecraftProfileId = req.getParameter("delete_minecraft_profile_id")
         val githubOauthToken = req.getParameter("github_oauth_token")
         val deleteGitHubProfileId = req.getParameter("delete_github_profile_id")
@@ -219,23 +218,21 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
                 if (minecraftUsername.matches(Regex("[A-z0-9_]{3,16}"))) {
                     val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftUsername)
                     val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-                    if (minecraftProfile != null) {
-                        val minecraftProfileToken = minecraftProfileProvider.getMinecraftProfileToken(minecraftProfile)
-                        if (minecraftProfileToken != null) {
-                            if (minecraftProfileToken.token == givenMinecraftProfileToken) {
-                                minecraftProfile.profile = profile
-                                minecraftProfileProvider.updateMinecraftProfile(minecraftProfile)
-                                minecraftProfileProvider.removeMinecraftProfileToken(minecraftProfileToken)
-                                alerts.add(Alert(SUCCESS, "Minecraft profile successfully linked."))
-                            } else {
-                                alerts.add(Alert(DANGER, "The specified Minecraft profile token was invalid. Be sure it exactly matches what was given to you upon login."))
-                            }
-                        } else {
-                            alerts.add(Alert(DANGER, "The specified Minecraft profile does not have any tokens. Is it linked to another profile?"))
-                        }
+                    val existingMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+                    if (existingMinecraftProfile == null) {
+                        val minecraftProfile = RPKMinecraftProfileImpl(profile = null, minecraftUUID = bukkitPlayer.uniqueId)
+                        minecraftProfileProvider.addMinecraftProfile(minecraftProfile)
+                        val minecraftProfileLinkRequest = RPKMinecraftProfileLinkRequestImpl(profile = profile, minecraftProfile = minecraftProfile)
+                        minecraftProfileProvider.addMinecraftProfileLinkRequest(minecraftProfileLinkRequest)
+                        alerts.add(Alert(SUCCESS, "Link request sent. Log in to the account and approve it to link the account."))
                     } else {
-                        alerts.add(Alert(DANGER, "There is no Minecraft profile by that name. Please make sure your username is entered correctly, and you have logged into the Minecraft server at least once."))
+                        if (existingMinecraftProfile.profile == null) {
+                            val minecraftProfileLinkRequest = RPKMinecraftProfileLinkRequestImpl(profile = profile, minecraftProfile = existingMinecraftProfile)
+                            minecraftProfileProvider.addMinecraftProfileLinkRequest(minecraftProfileLinkRequest = minecraftProfileLinkRequest)
+                            alerts.add(Alert(SUCCESS, "Link request sent. Log in to the account and approve it to link the account."))
+                        } else {
+                            alerts.add(Alert(DANGER, "That Minecraft profile is already linked to a profile."))
+                        }
                     }
                 } else {
                     alerts.add(Alert(DANGER, "The specified Minecraft username is invalid. Please make sure it is typed correctly."))

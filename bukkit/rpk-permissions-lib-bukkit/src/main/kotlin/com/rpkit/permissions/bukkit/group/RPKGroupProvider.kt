@@ -16,6 +16,7 @@
 
 package com.rpkit.permissions.bukkit.group
 
+import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.ServiceProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
@@ -58,6 +59,15 @@ interface RPKGroupProvider: ServiceProvider {
     fun addGroup(profile: RPKProfile, group: RPKGroup)
 
     /**
+     * Adds a group to a character.
+     * The group will only be applied while using this character.
+     *
+     * @param character The character
+     * @param group The group to add
+     */
+    fun addGroup(character: RPKCharacter, group: RPKGroup)
+
+    /**
      * Removes a group from a player.
      *
      * @param player The player
@@ -73,6 +83,16 @@ interface RPKGroupProvider: ServiceProvider {
      * @param group The group to remove
      */
     fun removeGroup(profile: RPKProfile, group: RPKGroup)
+
+    /**
+     * Removes a group from a character.
+     * The group will only be removed from the individual character - if applied at the profile level, this method will
+     * not do anything, and you should pass the profile instead of the character.
+     *
+     * @param character The character
+     * @param group The group to remove
+     */
+    fun removeGroup(character: RPKCharacter, group: RPKGroup)
 
     /**
      * Gets groups assigned to a player.
@@ -92,6 +112,14 @@ interface RPKGroupProvider: ServiceProvider {
     fun getGroups(profile: RPKProfile): List<RPKGroup>
 
     /**
+     * Gets groups assigned to a character.
+     *
+     * @oaram character: The character
+     * @return A list of groups assigned to the character
+     */
+    fun getGroups(character: RPKCharacter): List<RPKGroup>
+
+    /**
      * Checks whether a group has a permissions node
      *
      * @param group The group
@@ -99,6 +127,16 @@ interface RPKGroupProvider: ServiceProvider {
      * @return Whether the group has the given permissions node
      */
     fun hasPermission(group: RPKGroup, node: String): Boolean
+
+    /**
+     * Checks whether a group has a permissions node, using a specified default
+     *
+     * @param group The group
+     * @param node The permissions node to check
+     * @param default The default to use if the group does not have the node set
+     * @return Whether the group has the given permissions node when assuming the provided default
+     */
+    fun hasPermission(group: RPKGroup, node: String, default: Boolean): Boolean
 
     /**
      * Checks whether a player has a permissions node
@@ -114,6 +152,11 @@ interface RPKGroupProvider: ServiceProvider {
      * Checks whether a profile has a permissions node
      */
     fun hasPermission(profile: RPKProfile, node: String): Boolean
+
+    /**
+     * Checks whether a character has a permissions node
+     */
+    fun hasPermission(character: RPKCharacter, node: String): Boolean
 
     /**
      * Assigns permissions to a player in Minecraft

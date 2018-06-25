@@ -18,8 +18,10 @@ package com.rpkit.permissions.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.permissions.bukkit.command.charactergroup.CharacterGroupCommand
 import com.rpkit.permissions.bukkit.command.group.GroupCommand
 import com.rpkit.permissions.bukkit.database.table.PlayerGroupTable
+import com.rpkit.permissions.bukkit.database.table.RPKCharacterGroupTable
 import com.rpkit.permissions.bukkit.database.table.RPKProfileGroupTable
 import com.rpkit.permissions.bukkit.group.RPKGroupImpl
 import com.rpkit.permissions.bukkit.group.RPKGroupProviderImpl
@@ -56,6 +58,7 @@ class RPKPermissionsBukkit: RPKBukkitPlugin() {
 
     override fun registerCommands() {
         getCommand("group").executor = GroupCommand(this)
+        getCommand("charactergroup").executor = CharacterGroupCommand(this)
     }
 
     override fun registerListeners() {
@@ -65,10 +68,11 @@ class RPKPermissionsBukkit: RPKBukkitPlugin() {
     override fun createTables(database: Database) {
         database.addTable(PlayerGroupTable(database, this))
         database.addTable(RPKProfileGroupTable(database, this))
+        database.addTable(RPKCharacterGroupTable(database, this))
     }
 
     override fun setDefaultMessages() {
-        messages.setDefault("group-usage", "&cUsage: /group [add|remove]")
+        messages.setDefault("group-usage", "&cUsage: /group [add|remove|list]")
         messages.setDefault("group-add-valid", "&aGroup \$group added to \$player.")
         messages.setDefault("group-add-invalid-group", "&cNo group by that name exists.")
         messages.setDefault("group-add-invalid-player", "&cNo player by that name is online.")
@@ -77,11 +81,24 @@ class RPKPermissionsBukkit: RPKBukkitPlugin() {
         messages.setDefault("group-remove-invalid-group", "&cNo group by that name exists.")
         messages.setDefault("group-remove-invalid-player", "&cNo player by that name is online.")
         messages.setDefault("group-remove-usage", "&cUsage: /group remove [player] [group]")
+        messages.setDefault("group-list-title", "&fGroups:")
+        messages.setDefault("group-list-item", "&7- \$group")
+        messages.setDefault("character-group-usage", "&cUsage: /charactergroup [add|remove]")
+        messages.setDefault("character-group-add-valid", "&aGroup \$group added to \$character.")
+        messages.setDefault("character-group-add-invalid-group", "&cNo group by that name exists.")
+        messages.setDefault("character-group-add-invalid-player", "&cNo player by that name is online.")
+        messages.setDefault("character-group-add-usage", "&cUsage: /charactergroup add [player] [group]")
+        messages.setDefault("character-group-remove-valid", "&aGroup \$group removed from \$character.")
+        messages.setDefault("character-group-remove-invalid-group", "&cNo group by that name exists.")
+        messages.setDefault("character-group-remove-invalid-player", "&cNo player by that name is online.")
+        messages.setDefault("character-group-remove-usage", "&cUsage: /charactergroup remove [player] [group]")
         messages.setDefault("no-profile", "&cYour Minecraft profile is not linked to a profile. Please link it on the server's web UI.")
         messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
+        messages.setDefault("no-character", "&cThat player must have a character to perform this action.")
         messages.setDefault("no-permission-group-add", "&cYou do not have permission to add groups to players.")
         messages.setDefault("no-permission-group-remove", "&cYou do not have permission to remove groups from players.")
         messages.setDefault("no-permission-group-add-group", "&cYou do not have permission to add \$group to players.")
         messages.setDefault("no-permission-group-remove-group", "&cYou do not have permission to remove \$group from players.")
+        messages.setDefault("no-permission-group-list", "&cYou do not have permission to list groups.")
     }
 }

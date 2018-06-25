@@ -1,0 +1,7 @@
+name: rpk-moderation-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.moderation.bukkit.RPKModerationLibBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit

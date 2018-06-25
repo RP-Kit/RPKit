@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Ross Binden
+ * Copyright 2018 Ross Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package com.rpkit.permissions.bukkit.database.jooq.rpkit;
 
 
 import com.rpkit.permissions.bukkit.database.jooq.rpkit.tables.PlayerGroup;
+import com.rpkit.permissions.bukkit.database.jooq.rpkit.tables.RpkitCharacterGroup;
 import com.rpkit.permissions.bukkit.database.jooq.rpkit.tables.RpkitProfileGroup;
 
 import javax.annotation.Generated;
@@ -43,6 +44,11 @@ public class Tables {
      * The table <code>rpkit.player_group</code>.
      */
     public static final PlayerGroup PLAYER_GROUP = PlayerGroup.PLAYER_GROUP;
+
+    /**
+     * The table <code>rpkit.rpkit_character_group</code>.
+     */
+    public static final RpkitCharacterGroup RPKIT_CHARACTER_GROUP = RpkitCharacterGroup.RPKIT_CHARACTER_GROUP;
 
     /**
      * The table <code>rpkit.rpkit_profile_group</code>.

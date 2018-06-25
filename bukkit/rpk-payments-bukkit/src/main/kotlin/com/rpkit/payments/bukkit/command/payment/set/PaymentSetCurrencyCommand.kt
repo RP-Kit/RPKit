@@ -88,7 +88,11 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit): CommandE
     private inner class CurrencyPrompt: ValidatingPrompt() {
 
         override fun getPromptText(context: ConversationContext?): String {
-            return plugin.messages["payment-set-currency-prompt"]
+            return plugin.messages["payment-set-currency-prompt"] + "\n" +
+                    plugin.messages["currency-list-title"] + "\n" +
+                    plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
+                        .currencies.map { currency -> plugin.messages["currency-list-item", mapOf(Pair("currency", currency.name))] }
+                            .joinToString("\n")
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
