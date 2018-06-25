@@ -971,6 +971,39 @@ project(":bukkit:rpk-unconsciousness-lib-bukkit") {
 
 }
 
+project(":bukkit:rpk-moderation-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-moderation-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-moderation-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-moderation-lib-bukkit").group
+
+        }
+    }
+
+}
+
 // Bukkit implementations
 
 project(":bukkit:rpk-players-bukkit") {
@@ -1771,6 +1804,40 @@ project(":bukkit:rpk-unconsciousness-bukkit") {
             pom.version = project(":bukkit:rpk-unconsciousness-bukkit").version
             pom.artifactId = project(":bukkit:rpk-unconsciousness-bukkit").name
             pom.groupId = project(":bukkit:rpk-unconsciousness-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-moderation-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-moderation-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-moderation-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-moderation-bukkit").name
+            pom.groupId = project(":bukkit:rpk-moderation-bukkit").group
 
         }
     }
