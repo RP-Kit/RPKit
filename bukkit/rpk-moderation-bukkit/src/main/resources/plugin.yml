@@ -1,0 +1,106 @@
+name: rpk-moderation-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.moderation.bukkit.RPKModerationBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-moderation-lib-bukkit
+commands:
+    amivanished:
+        description: Checks if you''re vanished
+        usage: /<command>
+    onlinestaff:
+        description: Lists all online staff
+        usage: /<command>
+    ticket:
+        description: Ticket management command
+        usage: /<command> [create|close|list|teleport]
+    vanish:
+        description: Hides you from other players
+        usage: /<command>
+    unvanish:
+        description: Unhides you from other players
+        usage: /<command>
+    warning:
+        description: Warning management command
+        usage: /<command> [create|list|remove]
+    warn:
+        description: Issues a warning
+        usage: /<command [player] [reason]
+    unwarn:
+        description: Removes a warning
+        usage: /<command> [player] [index]
+permissions:
+    rpkit.moderation.command.amivanished:
+        description: Allows usage of amivanished command
+        default: op
+    rpkit.moderation.command.onlinestaff:
+        description: Allows listing online staff
+        default: true
+    rpkit.moderation.staff:
+        description: Causes the player to appear in the online staff list
+        default: op
+    rpkit.moderation.command.ticket.close:
+        description: Allows the player to close tickets that they did not open
+        default: op
+    rpkit.moderation.command.ticket.create:
+        description: Allows the player to create tickets
+        default: true
+    rpkit.moderation.command.ticket.teleport:
+        description: Allows the player to teleport to the place tickets were raised
+        default: op
+    rpkit.moderation.command.ticket.list.closed:
+        description: Allows the player to list closed tickets
+        default: op
+    rpkit.moderation.command.ticket.list:
+        description: Allows the player to list tickets
+        default: op
+    rpkit.moderation.command.ticket.list.open:
+        description: Allows the player to list open tickets
+        default: op
+    rpkit.moderation.command.unvanish:
+        description: Allows the player to unvanish
+        default: op
+    rpkit.moderation.command.vanish:
+        description: Allows the player to vanish
+        default: op
+    rpkit.moderation.command.warning:
+        description: Allows the player to use warning commands
+        default: true
+    rpkit.moderation.command.warning.create:
+        description: Allows the player to issue warnings
+        default: op
+    rpkit.moderation.command.warning.list:
+        description: Allows the player to list their warnings
+        default: true
+    rpkit.moderation.command.warning.remove:
+        description: Allows the player to remove warnings
+        default: op
+    rpkit.moderation.vanish.tier.1:
+        description: Allows seeing all vanished players
+        default: op
+    rpkit.moderation.vanish.tier.2:
+        description: Allows seeing vanished players with a tier of 2 or higher
+        default: false
+    rpkit.moderation.vanish.tier.3:
+        description: Allows seeing vanished players with a tier of 3 or higher
+        default: false
+    rpkit.moderation.vanish.tier.4:
+        description: Allows seeing vanished players with a tier of 4 or higher
+        default: false
+    rpkit.moderation.vanish.tier.5:
+        description: Allows seeing vanished players with a tier of 5 or higher
+        default: false
+    rpkit.moderation.vanish.tier.6:
+        description: Allows seeing vanished players with a tier of 6 or higher
+        default: false
+    rpkit.moderation.vanish.tier.7:
+        description: Allows seeing vanished players with a tier of 7 or higher
+        default: false
+    rpkit.moderation.vanish.tier.8:
+        description: Allows seeing vanished players with a tier of 8 or higher
+        default: false
+    rpkit.moderation.vanish.tier.9:
+        description: Allows seeing vanished players with a tier of 9 or higher
+        default: false
