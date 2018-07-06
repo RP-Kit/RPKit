@@ -1,15 +1,14 @@
 package com.rpkit.permissions.bukkit.database.table
 
+import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.database.jooq.rpkit.Tables.RPKIT_CHARACTER_GROUP
-import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.permissions.bukkit.group.RPKCharacterGroup
-import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -19,8 +18,7 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKCharacterGroupTable(database: Database, private val plugin: RPKPermissionsBukkit): Table<RPKCharacterGroup>(database, RPKCharacterGroup::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-permissions-bukkit.rpkit_character_group.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacterGroup::class.java,
                     ResourcePoolsBuilder.heap(20L)))
 

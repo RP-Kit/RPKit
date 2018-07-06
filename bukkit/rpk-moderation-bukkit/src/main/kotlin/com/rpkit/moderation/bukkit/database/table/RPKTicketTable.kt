@@ -25,7 +25,6 @@ import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.Location
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -36,8 +35,7 @@ import java.sql.Timestamp
 
 class RPKTicketTable(database: Database, private val plugin: RPKModerationBukkit): Table<RPKTicket>(database, RPKTicket::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+    private val cache = database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_ticket.id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKTicket::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 

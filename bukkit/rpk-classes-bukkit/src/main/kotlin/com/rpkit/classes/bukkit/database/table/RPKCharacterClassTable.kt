@@ -9,7 +9,6 @@ import com.rpkit.classes.bukkit.database.jooq.rpkit.Tables.RPKIT_CHARACTER_CLASS
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -19,8 +18,7 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKCharacterClassTable(database: Database, private val plugin: RPKClassesBukkit): Table<RPKCharacterClass>(database, RPKCharacterClass::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-classes-bukkit.rpkit_character_class.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacterClass::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 

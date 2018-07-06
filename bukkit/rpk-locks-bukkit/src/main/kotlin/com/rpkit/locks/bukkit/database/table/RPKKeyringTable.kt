@@ -9,6 +9,8 @@ import com.rpkit.core.database.Table
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.database.jooq.rpkit.Tables.RPKIT_KEYRING
 import com.rpkit.locks.bukkit.keyring.RPKKeyring
+import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
@@ -16,6 +18,11 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKKeyring>(database, RPKKeyring::class) {
+
+    private val cache = database.cacheManager.createCache("rpk-locks-bukkit.rpkit_keyring.id",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKKeyring::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_KEYRING)
@@ -48,6 +55,7 @@ class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): T
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
+        cache.put(id, entity)
         return id
     }
 
@@ -58,33 +66,40 @@ class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): T
                 .set(RPKIT_KEYRING.ITEMS, entity.items.toTypedArray().toByteArray())
                 .where(RPKIT_KEYRING.ID.eq(entity.id))
                 .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKKeyring? {
-        val result = database.create
-                .select(
-                        RPKIT_KEYRING.CHARACTER_ID,
-                        RPKIT_KEYRING.ITEMS
-                )
-                .from(RPKIT_KEYRING)
-                .where(RPKIT_KEYRING.ID.eq(id))
-                .fetchOne() ?: return null
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val characterId = result.get(RPKIT_KEYRING.CHARACTER_ID)
-        val character = characterProvider.getCharacter(characterId)
-        if (character != null) {
-            val keyring = RPKKeyring(
-                    id,
-                    character,
-                    result.get(RPKIT_KEYRING.ITEMS).toItemStackArray().toMutableList()
-            )
-            return keyring
+        if (cache.containsKey(id)) {
+            return cache[id]
         } else {
-            database.create
-                    .deleteFrom(RPKIT_KEYRING)
+            val result = database.create
+                    .select(
+                            RPKIT_KEYRING.CHARACTER_ID,
+                            RPKIT_KEYRING.ITEMS
+                    )
+                    .from(RPKIT_KEYRING)
                     .where(RPKIT_KEYRING.ID.eq(id))
-                    .execute()
-            return null
+                    .fetchOne() ?: return null
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterId = result.get(RPKIT_KEYRING.CHARACTER_ID)
+            val character = characterProvider.getCharacter(characterId)
+            if (character != null) {
+                val keyring = RPKKeyring(
+                        id,
+                        character,
+                        result.get(RPKIT_KEYRING.ITEMS).toItemStackArray().toMutableList()
+                )
+                cache.put(id, keyring)
+                return keyring
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_KEYRING)
+                        .where(RPKIT_KEYRING.ID.eq(id))
+                        .execute()
+                cache.remove(id)
+                return null
+            }
         }
     }
 
@@ -94,7 +109,7 @@ class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): T
                 .from(RPKIT_KEYRING)
                 .where(RPKIT_KEYRING.CHARACTER_ID.eq(character.id))
                 .fetchOne() ?: return null
-        return get(result.get(RPKIT_KEYRING.ID))
+        return get(result[RPKIT_KEYRING.ID])
     }
 
     override fun delete(entity: RPKKeyring) {
@@ -102,5 +117,6 @@ class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): T
                 .deleteFrom(RPKIT_KEYRING)
                 .where(RPKIT_KEYRING.ID.eq(entity.id))
                 .execute()
+        cache.remove(entity.id)
     }
 }

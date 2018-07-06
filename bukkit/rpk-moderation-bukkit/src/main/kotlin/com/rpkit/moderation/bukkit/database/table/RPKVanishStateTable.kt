@@ -24,7 +24,6 @@ import com.rpkit.moderation.bukkit.vanish.RPKVanishState
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -34,8 +33,7 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKVanishStateTable(database: Database, private val plugin: RPKModerationBukkit): Table<RPKVanishState>(database, RPKVanishState::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+    private val cache = database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_vanish_state.id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKVanishState::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 

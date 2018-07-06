@@ -7,6 +7,8 @@ import com.rpkit.locks.bukkit.database.jooq.rpkit.Tables.RPKIT_PLAYER_GETTING_KE
 import com.rpkit.locks.bukkit.lock.RPKPlayerGettingKey
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
@@ -15,6 +17,10 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKPlayerGettingKey>(database, RPKPlayerGettingKey::class) {
+
+    private val cache = database.cacheManager.createCache("rpk-locks-bukkit.rpkit_player_getting_key.id",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPlayerGettingKey::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 
     override fun create() {
         database.create
@@ -57,6 +63,7 @@ class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksB
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
+        cache.put(id, entity)
         return id
     }
 
@@ -66,29 +73,36 @@ class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksB
                 .set(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
                 .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(entity.id))
                 .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKPlayerGettingKey? {
-        val result = database.create
-                .select(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID)
-                .from(RPKIT_PLAYER_GETTING_KEY)
-                .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(id))
-                .fetchOne() ?: return null
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfileId = result.get(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
-        if (minecraftProfile != null) {
-            val playerGettingKey = RPKPlayerGettingKey(
-                    id,
-                    minecraftProfile
-            )
-            return playerGettingKey
+        if (cache.containsKey(id)) {
+            return cache[id]
         } else {
-            database.create
-                    .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
+            val result = database.create
+                    .select(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID)
+                    .from(RPKIT_PLAYER_GETTING_KEY)
                     .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(id))
-                    .execute()
-            return null
+                    .fetchOne() ?: return null
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfileId = result.get(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
+            if (minecraftProfile != null) {
+                val playerGettingKey = RPKPlayerGettingKey(
+                        id,
+                        minecraftProfile
+                )
+                cache.put(id, playerGettingKey)
+                return playerGettingKey
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
+                        .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(id))
+                        .execute()
+                cache.remove(id)
+                return null
+            }
         }
     }
 
@@ -98,7 +112,7 @@ class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksB
                 .from(RPKIT_PLAYER_GETTING_KEY)
                 .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
                 .fetchOne() ?: return null
-        return get(result.get(RPKIT_PLAYER_GETTING_KEY.ID))
+        return get(result[RPKIT_PLAYER_GETTING_KEY.ID])
     }
 
     override fun delete(entity: RPKPlayerGettingKey) {
@@ -106,6 +120,7 @@ class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksB
                 .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
                 .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(entity.id))
                 .execute()
+        cache.remove(entity.id)
     }
     
 }

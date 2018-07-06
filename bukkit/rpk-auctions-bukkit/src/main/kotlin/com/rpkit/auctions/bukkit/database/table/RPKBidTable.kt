@@ -26,7 +26,6 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -38,8 +37,7 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKBidTable(database: Database, private val plugin: RPKAuctionsBukkit): Table<RPKBid>(database, RPKBid::class) {
 
-    val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+    val cache = database.cacheManager.createCache("rpk-auctions-bukkit.rpkit_bid.id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBid::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong() * plugin.server.maxPlayers.toLong())))
 

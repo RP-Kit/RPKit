@@ -35,10 +35,7 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.Location
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -50,10 +47,9 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBukkit): Table<RPKCharacter>(database, RPKCharacter::class) {
 
-    private val cacheManager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache: Cache<Int, RPKCharacter> = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_character.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacter::class.java,
-            ResourcePoolsBuilder.heap((plugin.server.maxPlayers * 2).toLong())).build())
+                ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 2L)).build())
 
     override fun create() {
         database.create.createTableIfNotExists(RPKIT_CHARACTER)

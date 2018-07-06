@@ -26,7 +26,6 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotification
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -42,8 +41,7 @@ class RPKPaymentNotificationTable(
         private val plugin: RPKPaymentsBukkit
 ): Table<RPKPaymentNotification>(database, RPKPaymentNotification::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+    private val cache = database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_notification.id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentNotification::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 

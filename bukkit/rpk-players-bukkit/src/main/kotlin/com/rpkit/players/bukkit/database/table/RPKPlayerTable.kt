@@ -24,7 +24,6 @@ import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerImpl
 import org.bukkit.OfflinePlayer
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -39,20 +38,19 @@ import java.util.*
  */
 class RPKPlayerTable(plugin: RPKPlayersBukkit, database: Database): Table<RPKPlayer>(database, RPKPlayer::class.java) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPlayer::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val nameCache = cacheManager.createCache("nameCache",
+    private val nameCache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.name",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val minecraftCache = cacheManager.createCache("minecraftCache",
+    private val minecraftCache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.minecraft_uuid",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val ircCache = cacheManager.createCache("ircCache",
+    private val ircCache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.irc_nick",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val ipCache = cacheManager.createCache("ipCache",
+    private val ipCache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.last_known_ip",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 

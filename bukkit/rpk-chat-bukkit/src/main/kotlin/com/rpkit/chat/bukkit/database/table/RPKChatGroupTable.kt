@@ -23,7 +23,6 @@ import com.rpkit.chat.bukkit.database.jooq.rpkit.Tables.RPKIT_CHAT_GROUP
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -35,11 +34,10 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKChatGroupTable(database: Database, private val plugin: RPKChatBukkit): Table<RPKChatGroup>(database, RPKChatGroup::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-chat-bukkit.rpkit_chat_group.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKChatGroup::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
-    private val nameCache = cacheManager.createCache("nameCache",
+    private val nameCache = database.cacheManager.createCache("rpk-chat-bukkit.rpk_chat_group.name",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 

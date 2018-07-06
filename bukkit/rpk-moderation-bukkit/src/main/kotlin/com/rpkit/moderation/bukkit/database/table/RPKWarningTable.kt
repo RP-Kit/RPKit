@@ -25,7 +25,6 @@ import com.rpkit.moderation.bukkit.warning.RPKWarningImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -36,8 +35,7 @@ import java.sql.Timestamp
 
 class RPKWarningTable(database: Database, private val plugin: RPKModerationBukkit): Table<RPKWarning>(database, RPKWarning::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+    private val cache = database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_warning.id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKWarning::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 2L)))
 

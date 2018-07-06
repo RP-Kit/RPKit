@@ -24,7 +24,6 @@ import com.rpkit.payments.bukkit.database.jooq.rpkit.Tables.RPKIT_PAYMENT_GROUP
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -37,8 +36,7 @@ import java.sql.Timestamp
  */
 class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBukkit): Table<RPKPaymentGroup>(database, RPKPaymentGroup::class) {
 
-    val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+    val cache = database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_group.id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroup::class.java, ResourcePoolsBuilder.heap(20L)))
 
     override fun create() {

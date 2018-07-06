@@ -19,6 +19,7 @@ package com.rpkit.core.database
 import com.rpkit.core.database.table.TableVersionTable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import org.ehcache.config.builders.CacheManagerBuilder
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.conf.Settings
@@ -41,6 +42,7 @@ class Database @JvmOverloads constructor(val url: String, val userName: String? 
     private val dataSource: HikariDataSource
     private val tables: MutableMap<KClass<out Table<*>>, Table<*>> = mutableMapOf()
     private val settings = Settings().withRenderSchema(false)
+    val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
 
     /**
      * DSL context for performing jOOQ queries. This is currently the preferred method of performing queries, introduced

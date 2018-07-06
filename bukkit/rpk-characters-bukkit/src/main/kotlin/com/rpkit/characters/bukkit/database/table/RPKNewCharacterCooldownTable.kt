@@ -8,7 +8,6 @@ import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -20,12 +19,11 @@ import java.sql.Date
 
 class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCharactersBukkit): Table<RPKNewCharacterCooldown>(database, RPKNewCharacterCooldown::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKNewCharacterCooldown::class.java,
+    private val cache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_new_character_cooldown.id",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKNewCharacterCooldown::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val profileCache = cacheManager.createCache("profileCache", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
+    private val profileCache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_new_character_cooldown.profile_id",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 
 

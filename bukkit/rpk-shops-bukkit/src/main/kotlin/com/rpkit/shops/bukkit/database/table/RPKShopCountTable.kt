@@ -24,7 +24,6 @@ import com.rpkit.shops.bukkit.RPKShopsBukkit
 import com.rpkit.shops.bukkit.database.jooq.rpkit.Tables.RPKIT_SHOP_COUNT
 import com.rpkit.shops.bukkit.shopcount.RPKShopCount
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -36,11 +35,10 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKShopCountTable(database: Database, private val plugin: RPKShopsBukkit): Table<RPKShopCount>(database, RPKShopCount::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+    private val cache = database.cacheManager.createCache("rpk-shops-bukkit.rpkit_shop_count.id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKShopCount::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val characterCache = cacheManager.createCache("characterCache", CacheConfigurationBuilder
+    private val characterCache = database.cacheManager.createCache("rpk-shops-bukkit.rpkit_shop_count.character_id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 
@@ -136,7 +134,7 @@ class RPKShopCountTable(database: Database, private val plugin: RPKShopsBukkit):
      */
     fun get(character: RPKCharacter): RPKShopCount? {
         if (characterCache.containsKey(character.id)) {
-            return get(characterCache.get(character.id) as Int)
+            return get(characterCache.get(character.id))
         } else {
             val result = database.create
                     .select(RPKIT_SHOP_COUNT.ID)
