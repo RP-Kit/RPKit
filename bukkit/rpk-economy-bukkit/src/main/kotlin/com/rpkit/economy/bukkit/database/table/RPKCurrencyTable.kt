@@ -24,7 +24,6 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyImpl
 import com.rpkit.economy.bukkit.database.jooq.rpkit.Tables.RPKIT_CURRENCY
 import org.bukkit.Material
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -36,11 +35,10 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit): Table<RPKCurrency>(database, RPKCurrency::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-economy-bukkit.rpkit_currency.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCurrency::class.java,
                     ResourcePoolsBuilder.heap(5L)).build())
-    private val nameCache = cacheManager.createCache("nameCache",
+    private val nameCache = database.cacheManager.createCache("rpk-economy-bukkit.rpkit_currency.name",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(5L)).build())
 

@@ -7,7 +7,6 @@ import com.rpkit.players.bukkit.database.jooq.rpkit.Tables.RPKIT_PROFILE
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -17,8 +16,7 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKProfile>(database, RPKProfile::class) {
 
-    private val cacheManger = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManger.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_profile.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKProfile::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 

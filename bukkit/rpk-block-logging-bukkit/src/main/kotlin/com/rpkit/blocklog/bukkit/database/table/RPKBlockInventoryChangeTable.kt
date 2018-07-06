@@ -13,6 +13,8 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
+import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
@@ -21,6 +23,10 @@ import java.sql.Timestamp
 
 
 class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBlockLoggingBukkit): Table<RPKBlockInventoryChange>(database, RPKBlockInventoryChange::class) {
+
+    private val cache = database.cacheManager.createCache("rpk-block-logging-bukkit.rpk_block_inventory_change.id",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBlockInventoryChange::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 10L)))
 
     override fun create() {
         database.create
@@ -77,6 +83,7 @@ class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBl
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
+        cache.put(id, entity)
         return id
     }
 
@@ -93,53 +100,61 @@ class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBl
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.REASON, entity.reason)
                 .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(entity.id))
                 .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKBlockInventoryChange? {
-        val result = database.create
-                .select(
-                        RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.TIME,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.FROM,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.TO,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.REASON
-                )
-                .from(RPKIT_BLOCK_INVENTORY_CHANGE)
-                .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id))
-                .fetchOne() ?: return null
-        val blockHistoryProvider = plugin.core.serviceManager.getServiceProvider(RPKBlockHistoryProvider::class)
-        val blockHistoryId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID)
-        val blockHistory = blockHistoryProvider.getBlockHistory(blockHistoryId)
-        if (blockHistory == null) {
-            database.create
-                    .deleteFrom(RPKIT_BLOCK_INVENTORY_CHANGE)
+        if (cache.containsKey(id)) {
+            return cache[id]
+        } else {
+            val result = database.create
+                    .select(
+                            RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID,
+                            RPKIT_BLOCK_INVENTORY_CHANGE.TIME,
+                            RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID,
+                            RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID,
+                            RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID,
+                            RPKIT_BLOCK_INVENTORY_CHANGE.FROM,
+                            RPKIT_BLOCK_INVENTORY_CHANGE.TO,
+                            RPKIT_BLOCK_INVENTORY_CHANGE.REASON
+                    )
+                    .from(RPKIT_BLOCK_INVENTORY_CHANGE)
                     .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id))
-                    .execute()
-            return null
+                    .fetchOne() ?: return null
+            val blockHistoryProvider = plugin.core.serviceManager.getServiceProvider(RPKBlockHistoryProvider::class)
+            val blockHistoryId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID)
+            val blockHistory = blockHistoryProvider.getBlockHistory(blockHistoryId)
+            if (blockHistory == null) {
+                database.create
+                        .deleteFrom(RPKIT_BLOCK_INVENTORY_CHANGE)
+                        .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id))
+                        .execute()
+                cache.remove(id)
+                return null
+            }
+            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
+            val profileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID)
+            val profile = if (profileId == null) null else profileProvider.getProfile(profileId)
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID)
+            val minecraftProfile = if (minecraftProfileId == null) null else minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID)
+            val character = if (characterId == null) null else characterProvider.getCharacter(characterId)
+            val blockInventoryChange = RPKBlockInventoryChangeImpl(
+                    id,
+                    blockHistory,
+                    result.get(RPKIT_BLOCK_INVENTORY_CHANGE.TIME).time,
+                    profile,
+                    minecraftProfile,
+                    character,
+                    result.get(RPKIT_BLOCK_INVENTORY_CHANGE.FROM).toItemStackArray(),
+                    result.get(RPKIT_BLOCK_INVENTORY_CHANGE.TO).toItemStackArray(),
+                    result.get(RPKIT_BLOCK_INVENTORY_CHANGE.REASON)
+            )
+            cache.put(id, blockInventoryChange)
+            return blockInventoryChange
         }
-        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-        val profileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID)
-        val profile = if (profileId == null) null else profileProvider.getProfile(profileId)
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID)
-        val minecraftProfile = if (minecraftProfileId == null) null else minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val characterId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID)
-        val character = if (characterId == null) null else characterProvider.getCharacter(characterId)
-        return RPKBlockInventoryChangeImpl(
-                id,
-                blockHistory,
-                result.get(RPKIT_BLOCK_INVENTORY_CHANGE.TIME).time,
-                profile,
-                minecraftProfile,
-                character,
-                result.get(RPKIT_BLOCK_INVENTORY_CHANGE.FROM).toItemStackArray(),
-                result.get(RPKIT_BLOCK_INVENTORY_CHANGE.TO).toItemStackArray(),
-                result.get(RPKIT_BLOCK_INVENTORY_CHANGE.REASON)
-        )
     }
 
     fun get(blockHistory: RPKBlockHistory): List<RPKBlockInventoryChange> {
@@ -149,7 +164,7 @@ class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBl
                 .where(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID.eq(blockHistory.id))
                 .fetch()
         return results
-                .map { result -> get(result.get(RPKIT_BLOCK_INVENTORY_CHANGE.ID)) }
+                .map { result -> get(result[RPKIT_BLOCK_INVENTORY_CHANGE.ID]) }
                 .filterNotNull()
     }
 
@@ -158,5 +173,6 @@ class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBl
                 .deleteFrom(RPKIT_BLOCK_INVENTORY_CHANGE)
                 .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(entity.id))
                 .execute()
+        cache.remove(entity.id)
     }
 }

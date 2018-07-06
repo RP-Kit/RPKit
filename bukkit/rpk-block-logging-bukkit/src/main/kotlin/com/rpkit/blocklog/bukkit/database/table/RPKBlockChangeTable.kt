@@ -12,6 +12,8 @@ import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.Material
+import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
@@ -19,6 +21,10 @@ import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Timestamp
 
 class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggingBukkit): Table<RPKBlockChange>(database, RPKBlockChange::class) {
+
+    private val cache = database.cacheManager.createCache("rpk-block-logging-bukkit.rpkit_block_change.id",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBlockChange::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 10L)))
 
     override fun create() {
         database.create
@@ -81,6 +87,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
+        cache.put(id, entity)
         return id
     }
 
@@ -99,57 +106,65 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                 .set(RPKIT_BLOCK_CHANGE.REASON, entity.reason)
                 .where(RPKIT_BLOCK_CHANGE.ID.eq(entity.id))
                 .execute()
+        cache.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKBlockChange? {
-        val result = database.create
-                .select(
-                        RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID,
-                        RPKIT_BLOCK_CHANGE.TIME,
-                        RPKIT_BLOCK_CHANGE.PROFILE_ID,
-                        RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID,
-                        RPKIT_BLOCK_CHANGE.CHARACTER_ID,
-                        RPKIT_BLOCK_CHANGE.FROM,
-                        RPKIT_BLOCK_CHANGE.FROM_DATA,
-                        RPKIT_BLOCK_CHANGE.TO,
-                        RPKIT_BLOCK_CHANGE.TO_DATA,
-                        RPKIT_BLOCK_CHANGE.REASON
-                )
-                .from(RPKIT_BLOCK_CHANGE)
-                .where(RPKIT_BLOCK_CHANGE.ID.eq(id))
-                .fetchOne() ?: return null
-        val blockHistoryProvider = plugin.core.serviceManager.getServiceProvider(RPKBlockHistoryProvider::class)
-        val blockHistoryId = result.get(RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID)
-        val blockHistory = blockHistoryProvider.getBlockHistory(blockHistoryId)
-        if (blockHistory == null) {
-            database.create
-                    .deleteFrom(RPKIT_BLOCK_CHANGE)
+        if (cache.containsKey(id)) {
+            return cache[id]
+        } else {
+            val result = database.create
+                    .select(
+                            RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID,
+                            RPKIT_BLOCK_CHANGE.TIME,
+                            RPKIT_BLOCK_CHANGE.PROFILE_ID,
+                            RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID,
+                            RPKIT_BLOCK_CHANGE.CHARACTER_ID,
+                            RPKIT_BLOCK_CHANGE.FROM,
+                            RPKIT_BLOCK_CHANGE.FROM_DATA,
+                            RPKIT_BLOCK_CHANGE.TO,
+                            RPKIT_BLOCK_CHANGE.TO_DATA,
+                            RPKIT_BLOCK_CHANGE.REASON
+                    )
+                    .from(RPKIT_BLOCK_CHANGE)
                     .where(RPKIT_BLOCK_CHANGE.ID.eq(id))
-                    .execute()
-            return null
+                    .fetchOne() ?: return null
+            val blockHistoryProvider = plugin.core.serviceManager.getServiceProvider(RPKBlockHistoryProvider::class)
+            val blockHistoryId = result.get(RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID)
+            val blockHistory = blockHistoryProvider.getBlockHistory(blockHistoryId)
+            if (blockHistory == null) {
+                database.create
+                        .deleteFrom(RPKIT_BLOCK_CHANGE)
+                        .where(RPKIT_BLOCK_CHANGE.ID.eq(id))
+                        .execute()
+                cache.remove(id)
+                return null
+            }
+            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
+            val profileId = result.get(RPKIT_BLOCK_CHANGE.PROFILE_ID)
+            val profile = if (profileId == null) null else profileProvider.getProfile(profileId)
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfileId = result.get(RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID)
+            val minecraftProfile = if (minecraftProfileId == null) null else minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterId = result.get(RPKIT_BLOCK_CHANGE.CHARACTER_ID)
+            val character = if (characterId == null) null else characterProvider.getCharacter(characterId)
+            val blockChange =  RPKBlockChangeImpl(
+                    id,
+                    blockHistory,
+                    result.get(RPKIT_BLOCK_CHANGE.TIME).time,
+                    profile,
+                    minecraftProfile,
+                    character,
+                    Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM)),
+                    result.get(RPKIT_BLOCK_CHANGE.FROM_DATA),
+                    Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO)),
+                    result.get(RPKIT_BLOCK_CHANGE.TO_DATA),
+                    result.get(RPKIT_BLOCK_CHANGE.REASON)
+            )
+            cache.put(id, blockChange)
+            return blockChange
         }
-        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-        val profileId = result.get(RPKIT_BLOCK_CHANGE.PROFILE_ID)
-        val profile = if (profileId == null) null else profileProvider.getProfile(profileId)
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfileId = result.get(RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID)
-        val minecraftProfile = if (minecraftProfileId == null) null else minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val characterId = result.get(RPKIT_BLOCK_CHANGE.CHARACTER_ID)
-        val character = if (characterId == null) null else characterProvider.getCharacter(characterId)
-        return RPKBlockChangeImpl(
-                id,
-                blockHistory,
-                result.get(RPKIT_BLOCK_CHANGE.TIME).time,
-                profile,
-                minecraftProfile,
-                character,
-                Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM)),
-                result.get(RPKIT_BLOCK_CHANGE.FROM_DATA),
-                Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO)),
-                result.get(RPKIT_BLOCK_CHANGE.TO_DATA),
-                result.get(RPKIT_BLOCK_CHANGE.REASON)
-        )
     }
 
     fun get(blockHistory: RPKBlockHistory): List<RPKBlockChange> {
@@ -159,7 +174,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                 .where(RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID.eq(blockHistory.id))
                 .fetch()
         return results
-                .map { result -> get(result.get(RPKIT_BLOCK_CHANGE.ID)) }
+                .map { result -> get(result[RPKIT_BLOCK_CHANGE.ID]) }
                 .filterNotNull()
     }
 
@@ -168,5 +183,6 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                 .deleteFrom(RPKIT_BLOCK_CHANGE)
                 .where(RPKIT_BLOCK_CHANGE.ID.eq(entity.id))
                 .execute()
+        cache.remove(entity.id)
     }
 }

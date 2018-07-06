@@ -25,7 +25,6 @@ import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -38,11 +37,10 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class LastUsedChatGroupTable(database: Database, private val plugin: RPKChatBukkit): Table<LastUsedChatGroup>(database, LastUsedChatGroup::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-chat-bukkit.last_used_chat_group.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, LastUsedChatGroup::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
-    private val minecraftProfileCache = cacheManager.createCache("minecraftProfileCache",
+    private val minecraftProfileCache = database.cacheManager.createCache("rpk-chat-bukkit.last_used_chat_group.minecraft_profile_id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 

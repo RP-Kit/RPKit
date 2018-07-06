@@ -25,7 +25,6 @@ import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -37,8 +36,7 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBukkit) : Table<PlayerGroup>(database, PlayerGroup::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-permissions-bukkit.player_group.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, PlayerGroup::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 

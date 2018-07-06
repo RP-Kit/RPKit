@@ -9,7 +9,6 @@ import com.rpkit.players.bukkit.profile.RPKGitHubProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -20,8 +19,7 @@ import org.kohsuke.github.GHUser
 
 class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKGitHubProfile>(database, RPKGitHubProfile::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_github_profile.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKGitHubProfile::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 

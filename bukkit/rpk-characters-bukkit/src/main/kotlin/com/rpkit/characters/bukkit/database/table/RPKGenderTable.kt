@@ -21,10 +21,7 @@ import com.rpkit.characters.bukkit.gender.RPKGender
 import com.rpkit.characters.bukkit.gender.RPKGenderImpl
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -36,11 +33,10 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::class) {
 
-    private val cacheManager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache: Cache<Int, RPKGender> = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_gender.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKGender::class.java,
                     ResourcePoolsBuilder.heap(10L)).build())
-    private val nameCache: Cache<String, Int> = cacheManager.createCache("nameCache",
+    private val nameCache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_gender.name",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(10L)).build())
 

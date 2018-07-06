@@ -24,7 +24,6 @@ import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.character.MoneyHidden
 import com.rpkit.economy.bukkit.database.jooq.rpkit.Tables.MONEY_HIDDEN
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -36,11 +35,10 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class MoneyHiddenTable(database: Database, private val plugin: RPKEconomyBukkit): Table<MoneyHidden>(database, MoneyHidden::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-economy-bukkit.money_hidden.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MoneyHidden::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val characterCache = cacheManager.createCache("characterCache",
+    private val characterCache = database.cacheManager.createCache("rpk-economy-bukkit.money_hidden.character_id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 

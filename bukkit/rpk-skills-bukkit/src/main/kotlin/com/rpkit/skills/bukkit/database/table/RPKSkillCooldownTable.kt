@@ -9,10 +9,7 @@ import com.rpkit.skills.bukkit.database.jooq.rpkit.Tables.RPKIT_SKILL_COOLDOWN
 import com.rpkit.skills.bukkit.skills.RPKSkill
 import com.rpkit.skills.bukkit.skills.RPKSkillCooldown
 import com.rpkit.skills.bukkit.skills.RPKSkillProvider
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -23,8 +20,7 @@ import java.sql.Timestamp
 
 class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBukkit): Table<RPKSkillCooldown>(database, RPKSkillCooldown::class) {
 
-    private val cacheManager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache: Cache<Int, RPKSkillCooldown> = cacheManager.createCache("cache", CacheConfigurationBuilder
+    private val cache = database.cacheManager.createCache("rpk-skills-bukkit.rpkit_skill_cooldown.id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKSkillCooldown::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 
@@ -112,6 +108,7 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
                         .deleteFrom(RPKIT_SKILL_COOLDOWN)
                         .where(RPKIT_SKILL_COOLDOWN.ID.eq(id))
                         .execute()
+                cache.remove(id)
                 return null
             }
         }
@@ -132,6 +129,7 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
                 .deleteFrom(RPKIT_SKILL_COOLDOWN)
                 .where(RPKIT_SKILL_COOLDOWN.ID.eq(entity.id))
                 .execute()
+        cache.remove(entity.id)
     }
 
 }

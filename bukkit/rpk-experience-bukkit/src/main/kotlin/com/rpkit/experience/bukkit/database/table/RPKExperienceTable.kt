@@ -7,10 +7,7 @@ import com.rpkit.core.database.Table
 import com.rpkit.experience.bukkit.RPKExperienceBukkit
 import com.rpkit.experience.bukkit.database.jooq.rpkit.Tables.RPKIT_EXPERIENCE
 import com.rpkit.experience.bukkit.experience.RPKExperienceValue
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -20,11 +17,10 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKExperienceTable(database: Database, private val plugin: RPKExperienceBukkit) : Table<RPKExperienceValue>(database, RPKExperienceValue::class) {
 
-    private val cacheManager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache: Cache<Int, RPKExperienceValue> = cacheManager.createCache("cache", CacheConfigurationBuilder
+    private val cache = database.cacheManager.createCache("rpk-experience-bukkit.rpkit_experience.id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKExperienceValue::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 2L)).build())
-    private val characterCache: Cache<Int, RPKExperienceValue> = cacheManager.createCache("characterCache", CacheConfigurationBuilder
+    private val characterCache = database.cacheManager.createCache("rpk-experience-bukkit.rpkit_experience.character_id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKExperienceValue::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 2L)).build())
 

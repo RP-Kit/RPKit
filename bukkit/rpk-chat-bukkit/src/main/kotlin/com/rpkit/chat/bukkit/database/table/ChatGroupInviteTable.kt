@@ -25,10 +25,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -39,27 +36,17 @@ import org.jooq.util.sqlite.SQLiteDataType
 /**
  * Represents chat group invite table.
  */
-class ChatGroupInviteTable: Table<ChatGroupInvite> {
+class ChatGroupInviteTable(database: Database, private val plugin: RPKChatBukkit): Table<ChatGroupInvite>(database, ChatGroupInvite::class) {
 
-    private val plugin: RPKChatBukkit
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, ChatGroupInvite>
-    private val chatGroupCache: Cache<Int, MutableList<*>>
-    private val minecraftProfileCache: Cache<Int, MutableList<*>>
-
-    constructor(database: Database, plugin: RPKChatBukkit): super(database, ChatGroupInvite::class) {
-        this.plugin = plugin
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ChatGroupInvite::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-        chatGroupCache = cacheManager.createCache("chatGroupCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-        minecraftProfileCache = cacheManager.createCache("minecraftProfileCache",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    }
+    private val cache = database.cacheManager.createCache("rpk-chat-bukkit.chat_group_invite.id",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ChatGroupInvite::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val chatGroupCache = database.cacheManager.createCache("rpk-chat-bukkit.chat_group_invite.chat_group_id",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val minecraftProfileCache = database.cacheManager.createCache("rpk-chat-bukkit.chat_group_invite.minecraft_profile_id",
+            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 
     override fun create() {
         database.create

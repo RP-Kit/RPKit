@@ -9,7 +9,6 @@ import com.rpkit.players.bukkit.profile.RPKIRCProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -20,8 +19,7 @@ import org.pircbotx.User
 
 class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKIRCProfile>(database, RPKIRCProfile::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_irc_profile.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKIRCProfile::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 

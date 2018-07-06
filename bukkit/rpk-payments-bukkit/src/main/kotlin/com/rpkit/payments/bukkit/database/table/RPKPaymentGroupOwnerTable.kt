@@ -25,7 +25,6 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.group.owner.RPKPaymentGroupOwner
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -40,10 +39,9 @@ class RPKPaymentGroupOwnerTable(
         private val plugin: RPKPaymentsBukkit
 ): Table<RPKPaymentGroupOwner>(database, RPKPaymentGroupOwner::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
+    private val cache = database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_group_owner.id", CacheConfigurationBuilder
             .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroupOwner::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong() * 20)))
+                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 20L)))
 
     override fun create() {
         database.create
@@ -92,34 +90,39 @@ class RPKPaymentGroupOwnerTable(
     }
 
     override fun get(id: Int): RPKPaymentGroupOwner? {
-        val result = database.create
-                .select(
-                        RPKIT_PAYMENT_GROUP_OWNER.PAYMENT_GROUP_ID,
-                        RPKIT_PAYMENT_GROUP_OWNER.CHARACTER_ID
-                )
-                .from(RPKIT_PAYMENT_GROUP_OWNER)
-                .where(RPKIT_PAYMENT_GROUP_OWNER.ID.eq(id))
-                .fetchOne() ?: return null
-        val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-        val paymentGroupId = result.get(RPKIT_PAYMENT_GROUP_OWNER.PAYMENT_GROUP_ID)
-        val paymentGroup = paymentGroupProvider.getPaymentGroup(paymentGroupId)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val characterId = result.get(RPKIT_PAYMENT_GROUP_OWNER.CHARACTER_ID)
-        val character = characterProvider.getCharacter(characterId)
-        if (paymentGroup != null && character != null) {
-            val paymentGroupOwner = RPKPaymentGroupOwner(
-                    id,
-                    paymentGroup,
-                    character
-            )
-            cache.put(id, paymentGroupOwner)
-            return paymentGroupOwner
+        if (cache.containsKey(id)) {
+            return cache[id]
         } else {
-            database.create
-                    .deleteFrom(RPKIT_PAYMENT_GROUP_OWNER)
+            val result = database.create
+                    .select(
+                            RPKIT_PAYMENT_GROUP_OWNER.PAYMENT_GROUP_ID,
+                            RPKIT_PAYMENT_GROUP_OWNER.CHARACTER_ID
+                    )
+                    .from(RPKIT_PAYMENT_GROUP_OWNER)
                     .where(RPKIT_PAYMENT_GROUP_OWNER.ID.eq(id))
-                    .execute()
-            return null
+                    .fetchOne() ?: return null
+            val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
+            val paymentGroupId = result.get(RPKIT_PAYMENT_GROUP_OWNER.PAYMENT_GROUP_ID)
+            val paymentGroup = paymentGroupProvider.getPaymentGroup(paymentGroupId)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterId = result.get(RPKIT_PAYMENT_GROUP_OWNER.CHARACTER_ID)
+            val character = characterProvider.getCharacter(characterId)
+            if (paymentGroup != null && character != null) {
+                val paymentGroupOwner = RPKPaymentGroupOwner(
+                        id,
+                        paymentGroup,
+                        character
+                )
+                cache.put(id, paymentGroupOwner)
+                return paymentGroupOwner
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_PAYMENT_GROUP_OWNER)
+                        .where(RPKIT_PAYMENT_GROUP_OWNER.ID.eq(id))
+                        .execute()
+                cache.remove(id)
+                return null
+            }
         }
     }
 

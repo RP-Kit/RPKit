@@ -9,7 +9,6 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileToken
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileTokenImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -19,8 +18,7 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKMinecraftProfileToken>(database, RPKMinecraftProfileToken::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_minecraft_profile_token.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKMinecraftProfileToken::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
 

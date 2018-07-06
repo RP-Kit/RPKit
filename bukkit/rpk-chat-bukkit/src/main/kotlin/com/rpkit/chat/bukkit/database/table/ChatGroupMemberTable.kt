@@ -26,7 +26,6 @@ import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -39,14 +38,13 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class ChatGroupMemberTable(database: Database, private val plugin: RPKChatBukkit): Table<ChatGroupMember>(database, ChatGroupMember::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-chat-bukkit.chat_group_member.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ChatGroupMember::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val chatGroupCache = cacheManager.createCache("chatGroupCache",
+    private val chatGroupCache = database.cacheManager.createCache("rpk-chat-bukkit.chat_group_member.chat_group_id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val minecraftProfileCache = cacheManager.createCache("minecraftProfileCache",
+    private val minecraftProfileCache = database.cacheManager.createCache("rpk-chat-bukkit.chat_group_member.minecraft_profile_id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
                     ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
 

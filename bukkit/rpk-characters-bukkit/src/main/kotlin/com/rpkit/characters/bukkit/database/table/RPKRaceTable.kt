@@ -21,10 +21,7 @@ import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceImpl
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
@@ -36,11 +33,10 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKRaceTable(database: Database): Table<RPKRace>(database, RPKRace::class) {
 
-    private val cacheManager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache: Cache<Int, RPKRace> = cacheManager.createCache("cache",
+    private val cache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_race.id",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKRace::class.java,
                     ResourcePoolsBuilder.heap(20L)).build())
-    private val nameCache: Cache<String, Int> = cacheManager.createCache("nameCache",
+    private val nameCache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_race.name",
             CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
                     ResourcePoolsBuilder.heap(20L)).build())
 
