@@ -30,6 +30,7 @@ subprojects {
         maven { url "http://nexus.hc.to/content/repositories/pub_releases" }
         maven { url "https://jitpack.io" }
         maven { url "http://repo.jenkins-ci.org/public/" }
+        maven { url "https://maven.sk89q.com/repo/"}
     }
 
     dependencies {
@@ -1004,6 +1005,39 @@ project(":bukkit:rpk-moderation-lib-bukkit") {
 
 }
 
+project(":bukkit:rpk-selection-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-selection-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-selection-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-selection-lib-bukkit").group
+
+        }
+    }
+
+}
+
 // Bukkit implementations
 
 project(":bukkit:rpk-players-bukkit") {
@@ -1838,6 +1872,74 @@ project(":bukkit:rpk-moderation-bukkit") {
             pom.version = project(":bukkit:rpk-moderation-bukkit").version
             pom.artifactId = project(":bukkit:rpk-moderation-bukkit").name
             pom.groupId = project(":bukkit:rpk-moderation-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-selection-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-selection-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-selection-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-selection-bukkit").name
+            pom.groupId = project(":bukkit:rpk-selection-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-selection-worldedit-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-selection-lib-bukkit")
+        compile group: "com.sk89q.worldedit", name: "worldedit-bukkit", version: "6.1.5"
+        compile group: "com.sk89q.worldedit", name: "worldedit-core", version: "6.1.4-SNAPSHOT"
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-selection-worldedit-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-selection-worldedit-bukkit").name
+            pom.groupId = project(":bukkit:rpk-selection-worldedit-bukkit").group
 
         }
     }
