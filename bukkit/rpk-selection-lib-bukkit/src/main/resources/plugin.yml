@@ -1,0 +1,7 @@
+name: rpk-selection-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.selection.bukkit.RPKSelectionLibBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit

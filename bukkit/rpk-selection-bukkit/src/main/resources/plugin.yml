@@ -1,0 +1,16 @@
+name: rpk-selection-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.selection.bukkit.RPKSelectionBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-selection-lib-bukkit
+commands:
+    wand:
+        description: Gives you a wand item
+        usage: /<command>
+permissions:
+    rpkit.selection.command.wand:
+        description: Allows creating a wand
+        default: op
