@@ -37,6 +37,7 @@ class RPKBanksBukkit: RPKBukkitPlugin() {
     private lateinit var bankProvider: RPKBankProvider
 
     override fun onEnable() {
+        saveDefaultConfig()
         bankProvider = RPKBankProviderImpl(this)
         serviceProviders = arrayOf(
                 bankProvider

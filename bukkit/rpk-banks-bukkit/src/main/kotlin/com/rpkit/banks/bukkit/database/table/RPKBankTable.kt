@@ -37,9 +37,13 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKBankTable(database: Database, private val plugin: RPKBanksBukkit): Table<RPKBank>(database, RPKBank::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-banks-bukkit.rpkit_bank.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBank::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_bank.id.enabled")) {
+        database.cacheManager.createCache("rpk-banks-bukkit.rpkit_bank.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBank::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_bank.id.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -76,7 +80,7 @@ class RPKBankTable(database: Database, private val plugin: RPKBanksBukkit): Tabl
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -88,11 +92,11 @@ class RPKBankTable(database: Database, private val plugin: RPKBanksBukkit): Tabl
                 .set(RPKIT_BANK.BALANCE, entity.balance)
                 .where(RPKIT_BANK.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKBank? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -117,7 +121,7 @@ class RPKBankTable(database: Database, private val plugin: RPKBanksBukkit): Tabl
                         currency,
                         result.get(RPKIT_BANK.BALANCE)
                 )
-                cache.put(id, bank)
+                cache?.put(id, bank)
                 return bank
             } else {
                 database.create
@@ -186,7 +190,7 @@ class RPKBankTable(database: Database, private val plugin: RPKBanksBukkit): Tabl
                 .deleteFrom(RPKIT_BANK)
                 .where(RPKIT_BANK.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }
