@@ -1,2 +1,11 @@
 auctions:
     radius: 16
+caching:
+    rpkit_auction:
+        id:
+            enabled: true
+            size: 20
+    rpkit_bid:
+        columns:
+            enabled: true
+            size: 400
