@@ -24,9 +24,13 @@ import java.sql.Timestamp
 
 class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBlockLoggingBukkit): Table<RPKBlockInventoryChange>(database, RPKBlockInventoryChange::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-block-logging-bukkit.rpk_block_inventory_change.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBlockInventoryChange::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 10L)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_block_inventory_change.id.enabled")) {
+        database.cacheManager.createCache("rpk-block-logging-bukkit.rpkit_block_inventory_change.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBlockInventoryChange::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_block_inventory_change.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -83,7 +87,7 @@ class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBl
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -100,11 +104,11 @@ class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBl
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.REASON, entity.reason)
                 .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKBlockInventoryChange? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -129,7 +133,7 @@ class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBl
                         .deleteFrom(RPKIT_BLOCK_INVENTORY_CHANGE)
                         .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
             val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
@@ -152,7 +156,7 @@ class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBl
                     result.get(RPKIT_BLOCK_INVENTORY_CHANGE.TO).toItemStackArray(),
                     result.get(RPKIT_BLOCK_INVENTORY_CHANGE.REASON)
             )
-            cache.put(id, blockInventoryChange)
+            cache?.put(id, blockInventoryChange)
             return blockInventoryChange
         }
     }
@@ -173,6 +177,6 @@ class RPKBlockInventoryChangeTable(database: Database, private val plugin: RPKBl
                 .deleteFrom(RPKIT_BLOCK_INVENTORY_CHANGE)
                 .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 }
