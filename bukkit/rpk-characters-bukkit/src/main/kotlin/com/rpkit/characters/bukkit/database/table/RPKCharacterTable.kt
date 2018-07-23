@@ -47,9 +47,13 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBukkit): Table<RPKCharacter>(database, RPKCharacter::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_character.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacter::class.java,
-                ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 2L)).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_character.id.enabled")) {
+        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_character.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacter::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character.id.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create.createTableIfNotExists(RPKIT_CHARACTER)
@@ -222,7 +226,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -264,11 +268,11 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .set(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, if (entity.isDescriptionHidden) 1.toByte() else 0.toByte())
                 .where(RPKIT_CHARACTER.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKCharacter? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -374,7 +378,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                     isRaceHidden = result.get(RPKIT_CHARACTER.RACE_HIDDEN) == 1.toByte(),
                     isDescriptionHidden = result.get(RPKIT_CHARACTER.DESCRIPTION_HIDDEN) == 1.toByte()
             )
-            cache.put(id, character)
+            cache?.put(id, character)
             return character
         }
     }
@@ -434,7 +438,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .deleteFrom(RPKIT_CHARACTER)
                 .where(RPKIT_CHARACTER.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

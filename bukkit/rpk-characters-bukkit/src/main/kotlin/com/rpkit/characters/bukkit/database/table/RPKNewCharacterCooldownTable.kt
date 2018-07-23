@@ -19,12 +19,21 @@ import java.sql.Date
 
 class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCharactersBukkit): Table<RPKNewCharacterCooldown>(database, RPKNewCharacterCooldown::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_new_character_cooldown.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKNewCharacterCooldown::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val profileCache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_new_character_cooldown.profile_id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_new_character_cooldown.id.enabled")) {
+        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_new_character_cooldown.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKNewCharacterCooldown::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_new_character_cooldown.id.size"))).build())
+    } else {
+        null
+    }
+
+    private val profileCache = if (plugin.config.getBoolean("caching.rpkit_new_character_cooldown.profile_id.enabled")) {
+        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_new_character_cooldown.profile_id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_new_character_cooldown.profile_id.size"))).build())
+    } else {
+        null
+    }
 
 
     override fun create() {
@@ -73,8 +82,8 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
-        profileCache.put(entity.profile.id, id)
+        cache?.put(id, entity)
+        profileCache?.put(entity.profile.id, id)
         return id
     }
 
@@ -85,12 +94,12 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
                 .set(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP, Date(entity.cooldownTimestamp))
                 .where(RPKIT_NEW_CHARACTER_COOLDOWN.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
-        profileCache.put(entity.profile.id, entity.id)
+        cache?.put(entity.id, entity)
+        profileCache?.put(entity.profile.id, entity.id)
     }
 
     override fun get(id: Int): RPKNewCharacterCooldown? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -109,8 +118,8 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
                         profile,
                         result.get(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP).time
                 )
-                cache.put(id, newCharacterCooldown)
-                profileCache.put(newCharacterCooldown.profile.id, id)
+                cache?.put(id, newCharacterCooldown)
+                profileCache?.put(newCharacterCooldown.profile.id, id)
                 return newCharacterCooldown
             } else {
                 database.create
@@ -123,7 +132,7 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
     }
 
     fun get(profile: RPKProfile): RPKNewCharacterCooldown? {
-        if (profileCache.containsKey(profile.id)) {
+        if (profileCache?.containsKey(profile.id) == true) {
             return get(profileCache[profile.id])
         } else {
             val result = database.create
@@ -139,8 +148,8 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
                     profile,
                     result.get(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP).time
             )
-            cache.put(newCharacterCooldown.id, newCharacterCooldown)
-            profileCache.put(profile.id, newCharacterCooldown.id)
+            cache?.put(newCharacterCooldown.id, newCharacterCooldown)
+            profileCache?.put(profile.id, newCharacterCooldown.id)
             return newCharacterCooldown
         }
     }
@@ -150,8 +159,8 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
                 .deleteFrom(RPKIT_NEW_CHARACTER_COOLDOWN)
                 .where(RPKIT_NEW_CHARACTER_COOLDOWN.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
-        profileCache.remove(entity.profile.id)
+        cache?.remove(entity.id)
+        profileCache?.remove(entity.profile.id)
     }
 
 }

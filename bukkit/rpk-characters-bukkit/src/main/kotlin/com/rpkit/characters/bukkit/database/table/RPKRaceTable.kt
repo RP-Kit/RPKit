@@ -16,6 +16,7 @@
 
 package com.rpkit.characters.bukkit.database.table
 
+import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.jooq.rpkit.Tables.RPKIT_RACE
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceImpl
@@ -31,14 +32,23 @@ import org.jooq.util.sqlite.SQLiteDataType
 /**
  * Represents the race table.
  */
-class RPKRaceTable(database: Database): Table<RPKRace>(database, RPKRace::class) {
+class RPKRaceTable(database: Database, private val plugin: RPKCharactersBukkit): Table<RPKRace>(database, RPKRace::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_race.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKRace::class.java,
-                    ResourcePoolsBuilder.heap(20L)).build())
-    private val nameCache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_race.name",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(20L)).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_race.id.enabled")) {
+                database.cacheManager.createCache("rpk-characters-bukkit.rpkit_race.id",
+                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKRace::class.java,
+                                ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_race.id.size"))).build())
+    } else {
+        null
+    }
+
+    private val nameCache = if (plugin.config.getBoolean("caching.rpkit_race.name.enabled")) {
+        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_race.name",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_race.name.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -68,8 +78,8 @@ class RPKRaceTable(database: Database): Table<RPKRace>(database, RPKRace::class)
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        cache.put(id, entity)
-        nameCache.put(entity.name, id)
+        cache?.put(id, entity)
+        nameCache?.put(entity.name, id)
         return id
     }
 
@@ -79,12 +89,12 @@ class RPKRaceTable(database: Database): Table<RPKRace>(database, RPKRace::class)
                 .set(RPKIT_RACE.NAME, entity.name)
                 .where(RPKIT_RACE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
-        nameCache.put(entity.name, entity.id)
+        cache?.put(entity.id, entity)
+        nameCache?.put(entity.name, entity.id)
     }
 
     override fun get(id: Int): RPKRace? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -100,8 +110,8 @@ class RPKRaceTable(database: Database): Table<RPKRace>(database, RPKRace::class)
                     id,
                     result.get(RPKIT_RACE.NAME)
             )
-            cache.put(id, race)
-            nameCache.put(race.name, id)
+            cache?.put(id, race)
+            nameCache?.put(race.name, id)
             return race
         }
     }
@@ -123,7 +133,7 @@ class RPKRaceTable(database: Database): Table<RPKRace>(database, RPKRace::class)
      * @return The race, or null if no race is found with the given name
      */
     operator fun get(name: String): RPKRace? {
-        if (nameCache.containsKey(name)) {
+        if (nameCache?.containsKey(name) == true) {
             return get(nameCache.get(name) as Int)
         } else {
             val result = database.create
@@ -135,8 +145,8 @@ class RPKRaceTable(database: Database): Table<RPKRace>(database, RPKRace::class)
                     result.get(RPKIT_RACE.ID),
                     name
             )
-            cache.put(race.id, race)
-            nameCache.put(name, race.id)
+            cache?.put(race.id, race)
+            nameCache?.put(name, race.id)
             return race
         }
     }
@@ -146,8 +156,8 @@ class RPKRaceTable(database: Database): Table<RPKRace>(database, RPKRace::class)
                 .deleteFrom(RPKIT_RACE)
                 .where(RPKIT_RACE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
-        nameCache.remove(entity.name)
+        cache?.remove(entity.id)
+        nameCache?.remove(entity.name)
     }
 
 }

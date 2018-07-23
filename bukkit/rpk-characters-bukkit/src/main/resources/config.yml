@@ -31,3 +31,29 @@ characters:
     delete-character-on-death: false
     set-player-display-name: false
     new-character-cooldown: 604800000
+caching:
+    rpkit_character:
+        id:
+            enabled: true
+            size: 40
+    rpkit_gender:
+        id:
+            enabled: true
+            size: 10
+        name:
+            enabled: true
+            size: 10
+    rpkit_new_character_cooldown:
+        id:
+            enabled: true
+            size: 20
+        profile_id:
+            enabled: true
+            size: 20
+    rpkit_race:
+        id:
+            enabled: true
+            size: 20
+        name:
+            enabled: true
+            size: 20
