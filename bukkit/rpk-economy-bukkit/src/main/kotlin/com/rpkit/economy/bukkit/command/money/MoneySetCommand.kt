@@ -118,7 +118,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                                     sender.sendMessage(plugin.messages["no-minecraft-profile"])
                                 }
                             } else {
-                                sender.sendMessage(plugin.messages["money-set-player-invalid-player"])
+                                sender.sendMessage(plugin.messages["money-set-profile-invalid-profile"])
                             }
                         } else {
                             conversationFactory.buildConversation(sender).begin()
