@@ -99,8 +99,9 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit): AbstractE
             val currency = currencyProvider.defaultCurrency
             if (character != null) {
                 if (currency != null) {
-                    if (economyProvider.getBalance(character, currency) + amount.toInt() <= 1720) {
-                        economyProvider.setBalance(character, currency, amount.toInt())
+                    val balance = economyProvider.getBalance(character, currency)
+                    if (balance + amount.toInt() <= 1720) {
+                        economyProvider.setBalance(character, currency, balance + amount.toInt())
                         return EconomyResponse(amount.toInt().toDouble(), economyProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
                     } else {
                         return EconomyResponse(0.0, economyProvider.getBalance(character, currency).toDouble(), FAILURE, "Can not hold more than 1720 in wallet.")
@@ -161,8 +162,9 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit): AbstractE
             val currency = currencyProvider.defaultCurrency
             if (character != null) {
                 if (currency != null) {
-                    if (economyProvider.getBalance(character, currency) - amount.toInt() >= 0) {
-                        economyProvider.setBalance(character, currency, amount.toInt())
+                    val balance = economyProvider.getBalance(character, currency)
+                    if (balance - amount.toInt() >= 0) {
+                        economyProvider.setBalance(character, currency, balance - amount.toInt())
                         return EconomyResponse(amount.toInt().toDouble(), economyProvider.getBalance(character, currency).toDouble(), SUCCESS, "")
                     } else {
                         return EconomyResponse(0.0, economyProvider.getBalance(character, currency).toDouble(), FAILURE, "Wallet does not have enough money.")
