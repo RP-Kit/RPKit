@@ -18,6 +18,8 @@ class ChatWebSocket(private val plugin: RPKChatBukkit, val profile: RPKProfile):
 
     override fun onWebSocketClose(statusCode: Int, reason: String) {
         plugin.logger.info("${profile.name} disconnected from chat.")
+        val webSocketProvider = plugin.core.serviceManager.getServiceProvider(RPKChatWebSocketProvider::class)
+        webSocketProvider.unregisterWebSocket(this)
     }
 
     override fun onWebSocketConnect(session: Session) {
