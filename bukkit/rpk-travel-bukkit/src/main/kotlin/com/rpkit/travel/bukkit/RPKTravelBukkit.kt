@@ -39,6 +39,7 @@ class RPKTravelBukkit: RPKBukkitPlugin() {
     override fun setDefaultMessages() {
         messages.setDefault("delete-warp-valid", "&aDeleted warp \$warp.")
         messages.setDefault("delete-warp-usage", "&cUsage: /deletewarp [warp]")
+        messages.setDefault("set-warp-invalid-name-already-in-use", "&cA warp by that name already exists.")
         messages.setDefault("set-warp-valid", "&aWarp \$warp set in \$world at \$x, \$y, \$z")
         messages.setDefault("set-warp-usage", "&cUsage: /setwarp [name]")
         messages.setDefault("warp-valid", "&aWarped to \$warp.")

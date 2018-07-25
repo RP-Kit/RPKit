@@ -11,28 +11,32 @@ import org.bukkit.entity.Player
 class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender.hasPermission("rpkit.travel.command.setwarp")) {
-            if (sender is Player) {
-                if (args.isNotEmpty()) {
-                    val warpProvider = plugin.core.serviceManager.getServiceProvider(RPKWarpProvider::class)
-                    val warp = RPKWarpImpl(name = args[0], location = sender.location)
-                    warpProvider.addWarp(warp)
-                    sender.sendMessage(plugin.messages["set-warp-valid", mapOf(
-                            Pair("warp", warp.name),
-                            Pair("world", warp.location.world.name),
-                            Pair("x", warp.location.blockX.toString()),
-                            Pair("y", warp.location.blockY.toString()),
-                            Pair("z", warp.location.blockZ.toString())
-                    )])
-                } else {
-                    sender.sendMessage(plugin.messages["set-warp-usage"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["not-from-console"])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.travel.command.setwarp")) {
             sender.sendMessage(plugin.messages["no-permission-set-warp"])
+            return true
         }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        if (!args.isNotEmpty()) {
+            sender.sendMessage(plugin.messages["set-warp-usage"])
+            return true
+        }
+        val warpProvider = plugin.core.serviceManager.getServiceProvider(RPKWarpProvider::class)
+        if (warpProvider.getWarp(args[0]) != null) {
+            sender.sendMessage(plugin.messages["set-warp-invalid-name-already-in-use"])
+            return true
+        }
+        val warp = RPKWarpImpl(name = args[0], location = sender.location)
+        warpProvider.addWarp(warp)
+        sender.sendMessage(plugin.messages["set-warp-valid", mapOf(
+                Pair("warp", warp.name),
+                Pair("world", warp.location.world.name),
+                Pair("x", warp.location.blockX.toString()),
+                Pair("y", warp.location.blockY.toString()),
+                Pair("z", warp.location.blockZ.toString())
+        )])
         return true
     }
 
