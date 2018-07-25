@@ -13,6 +13,7 @@ class WebComponent(private val plugin: RPKChatBukkit): UndirectedChatChannelPipe
     override fun process(context: UndirectedChatChannelMessageContext): UndirectedChatChannelMessageContext {
         if (context.isCancelled) return context
         plugin.core.serviceManager.getServiceProvider(RPKChatWebSocketProvider::class).sockets
+                .filter { socket -> socket.value.session?.isOpen == true }
                 .forEach { socket -> socket.value.session?.remote
                         ?.sendStringByFuture("${context.chatChannel.name}:::${ChatColor.stripColor(context.message)}") }
         return context
