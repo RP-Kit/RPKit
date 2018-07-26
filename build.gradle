@@ -68,7 +68,7 @@ project(":rpk-core") {
     def velocityVersion = "1.7"
     def hikariCPVersion = "2.7.4"
     def githubAPIVersion = "1.90"
-    def jooqVersion = "3.10.2"
+    def jooqVersion = "3.11.3"
 
     dependencies {
         compile group: "mysql", name: "mysql-connector-java", version: mysqlConnectorVersion

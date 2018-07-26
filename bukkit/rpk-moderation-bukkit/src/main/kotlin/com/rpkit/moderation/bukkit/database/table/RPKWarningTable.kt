@@ -42,7 +42,7 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_WARNING)
-                .column(RPKIT_WARNING.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER else SQLDataType.INTEGER)
+                .column(RPKIT_WARNING.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_WARNING.REASON, SQLDataType.VARCHAR.length(1024))
                 .column(RPKIT_WARNING.PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_WARNING.ISSUER_ID, SQLDataType.INTEGER)
@@ -55,7 +55,15 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.5.0")
+            database.setTableVersion(this, "1.5.2")
+        }
+        if (database.getTableVersion(this) == "1.5.0") {
+            database.create
+                    .alterTable(RPKIT_WARNING)
+                    .alterColumn(RPKIT_WARNING.ID)
+                        .set(if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                    .execute()
+            database.setTableVersion(this, "1.5.2")
         }
     }
 

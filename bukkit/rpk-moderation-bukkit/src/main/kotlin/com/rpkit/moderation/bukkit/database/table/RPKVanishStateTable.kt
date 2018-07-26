@@ -19,6 +19,7 @@ package com.rpkit.moderation.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
+import com.rpkit.moderation.bukkit.database.jooq.rpkit.Tables
 import com.rpkit.moderation.bukkit.database.jooq.rpkit.Tables.RPKIT_VANISH_STATE
 import com.rpkit.moderation.bukkit.vanish.RPKVanishState
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
@@ -40,7 +41,7 @@ class RPKVanishStateTable(database: Database, private val plugin: RPKModerationB
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_VANISH_STATE)
-                .column(RPKIT_VANISH_STATE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER else SQLDataType.INTEGER)
+                .column(RPKIT_VANISH_STATE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_VANISH_STATE.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_VANISH_STATE.VANISHED, SQLDataType.TINYINT.length(1))
                 .constraints(
@@ -51,7 +52,15 @@ class RPKVanishStateTable(database: Database, private val plugin: RPKModerationB
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.5.0")
+            database.setTableVersion(this, "1.5.2")
+        }
+        if (database.getTableVersion(this) == "1.5.0") {
+            database.create
+                    .alterTable(Tables.RPKIT_VANISH_STATE)
+                    .alterColumn(Tables.RPKIT_VANISH_STATE.ID)
+                        .set(if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                    .execute()
+            database.setTableVersion(this, "1.5.2")
         }
     }
 
