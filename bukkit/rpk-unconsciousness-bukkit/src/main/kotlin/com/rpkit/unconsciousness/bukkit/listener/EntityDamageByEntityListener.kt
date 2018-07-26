@@ -49,10 +49,21 @@ class EntityDamageByEntityListener(private val plugin: RPKUnconsciousnessBukkit)
         } else if (damager is Projectile) {
             val shooter = damager.shooter
             if (shooter is Player) {
-                event.isCancelled = true
-                val target = event.entity
-                if (target is Creature) {
-                    target.target = shooter
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                val unconsciousnessProvider = plugin.core.serviceManager.getServiceProvider(RPKUnconsciousnessProvider::class)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(shooter)
+                if (minecraftProfile != null) {
+                    val character = characterProvider.getActiveCharacter(minecraftProfile)
+                    if (character != null) {
+                        if (unconsciousnessProvider.isUnconscious(character)) {
+                            event.isCancelled = true
+                            val target = event.entity
+                            if (target is Creature) {
+                                target.target = shooter
+                            }
+                        }
+                    }
                 }
             }
         }
