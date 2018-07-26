@@ -43,7 +43,7 @@ class RPKTicketTable(database: Database, private val plugin: RPKModerationBukkit
 
     override fun create() {
         database.create.createTableIfNotExists(RPKIT_TICKET)
-                .column(RPKIT_TICKET.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER else SQLDataType.INTEGER)
+                .column(RPKIT_TICKET.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_TICKET.REASON, SQLDataType.VARCHAR.length(1024))
                 .column(RPKIT_TICKET.ISSUER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_TICKET.RESOLVER_ID, SQLDataType.INTEGER)
@@ -64,7 +64,15 @@ class RPKTicketTable(database: Database, private val plugin: RPKModerationBukkit
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.5.0")
+            database.setTableVersion(this, "1.5.2")
+        }
+        if (database.getTableVersion(this) == "1.5.0") {
+            database.create
+                    .alterTable(RPKIT_TICKET)
+                    .alterColumn(RPKIT_TICKET.ID)
+                        .set(if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                    .execute()
+            database.setTableVersion(this, "1.5.2")
         }
     }
 
