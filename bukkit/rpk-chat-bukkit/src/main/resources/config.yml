@@ -154,3 +154,51 @@ prefixes:
     et: '&3[Event Team]'
 chat-group:
     format: '&8[$group] $sender-player: &f$message'
+caching:
+    chat_group_invite:
+        id:
+            enabled: true
+            size: 20
+        chat_group_id:
+            enabled: true
+            size: 20
+        minecraft_profile_id:
+            enabled: true
+            size: 20
+    chat_group_member:
+        id:
+            enabled: true
+            size: 20
+        chat_group_id:
+            enabled: true
+            size: 20
+        minecraft_profile_id:
+            enabled: true
+            size: 20
+    last_used_chat_group:
+        id:
+            enabled: true
+            size: 20
+        minecraft_profile_id:
+            enabled: true
+            size: 20
+    rpkit_chat_channel_mute:
+        id:
+            enabled: true
+            size: 20
+    rpkit_chat_channel_speaker:
+        id:
+            enabled: true
+            size: 20
+    rpkit_chat_group:
+        id:
+            enabled: true
+            size: 20
+        name:
+            enabled: true
+            size: 20
+    rpkit_snooper:
+        id:
+            enabled: true
+            size: 20
+

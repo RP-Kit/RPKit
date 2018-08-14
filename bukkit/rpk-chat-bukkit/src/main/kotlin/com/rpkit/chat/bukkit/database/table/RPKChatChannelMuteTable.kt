@@ -38,9 +38,13 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKChatChannelMuteTable(database: Database, private val plugin: RPKChatBukkit): Table<RPKChatChannelMute>(database, RPKChatChannelMute::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-chat-bukkit.rpkit_chat_channel_mute.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKChatChannelMute::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_chat_channel_mute.id.enabled")) {
+        database.cacheManager.createCache("rpk-chat-bukkit.rpkit_chat_channel_mute.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKChatChannelMute::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_chat_channel_mute.id.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -86,7 +90,7 @@ class RPKChatChannelMuteTable(database: Database, private val plugin: RPKChatBuk
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -97,11 +101,11 @@ class RPKChatChannelMuteTable(database: Database, private val plugin: RPKChatBuk
                 .set(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_ID, entity.chatChannel.id)
                 .where(RPKIT_CHAT_CHANNEL_MUTE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKChatChannelMute? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -124,7 +128,7 @@ class RPKChatChannelMuteTable(database: Database, private val plugin: RPKChatBuk
                         minecraftProfile,
                         chatChannel
                 )
-                cache.put(id, chatChannelMute)
+                cache?.put(id, chatChannelMute)
                 return chatChannelMute
             } else {
                 database.create
@@ -158,7 +162,7 @@ class RPKChatChannelMuteTable(database: Database, private val plugin: RPKChatBuk
                 .deleteFrom(RPKIT_CHAT_CHANNEL_MUTE)
                 .where(RPKIT_CHAT_CHANNEL_MUTE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 

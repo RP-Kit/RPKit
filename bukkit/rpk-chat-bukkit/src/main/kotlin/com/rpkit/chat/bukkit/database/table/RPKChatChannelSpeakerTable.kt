@@ -37,9 +37,13 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKChatChannelSpeakerTable(database: Database, private val plugin: RPKChatBukkit): Table<RPKChatChannelSpeaker>(database, RPKChatChannelSpeaker::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-chat-bukkit.rpkit_chat_channel_speaker.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKChatChannelSpeaker::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_chat_channel_speaker.id.enabled")) {
+        database.cacheManager.createCache("rpk-chat-bukkit.rpkit_chat_channel_speaker.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKChatChannelSpeaker::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_chat_channel_speaker.id.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -87,7 +91,7 @@ class RPKChatChannelSpeakerTable(database: Database, private val plugin: RPKChat
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -98,11 +102,11 @@ class RPKChatChannelSpeakerTable(database: Database, private val plugin: RPKChat
                 .set(RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_ID, entity.chatChannel.id)
                 .where(RPKIT_CHAT_CHANNEL_SPEAKER.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKChatChannelSpeaker? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -125,7 +129,7 @@ class RPKChatChannelSpeakerTable(database: Database, private val plugin: RPKChat
                         minecraftProfile,
                         chatChannel
                 )
-                cache.put(id, chatChannelSpeaker)
+                cache?.put(id, chatChannelSpeaker)
                 return chatChannelSpeaker
             } else {
                 database.create
@@ -157,7 +161,7 @@ class RPKChatChannelSpeakerTable(database: Database, private val plugin: RPKChat
                 .deleteFrom(RPKIT_CHAT_CHANNEL_SPEAKER)
                 .where(RPKIT_CHAT_CHANNEL_SPEAKER.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 
