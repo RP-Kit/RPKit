@@ -2,3 +2,11 @@ levels:
     max-level: 100
 experience:
     equation: '(level - 1) * 1000'
+caching:
+    rpkit_experience:
+        id:
+            enabled: true
+            size: 40
+        character_id:
+            enabled: true
+            size: 40
