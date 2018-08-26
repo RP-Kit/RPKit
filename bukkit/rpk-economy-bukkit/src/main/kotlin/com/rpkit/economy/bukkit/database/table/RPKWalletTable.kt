@@ -37,9 +37,13 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKWalletTable(database: Database, private val plugin: RPKEconomyBukkit) : Table<RPKWallet>(database, RPKWallet::class.java) {
 
-    private val cache = database.cacheManager.createCache("rpk-economy-bukkit.rpkit_wallet.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKWallet::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_wallet.id.enabled")) {
+        database.cacheManager.createCache("rpk-economy-bukkit.rpkit_wallet.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKWallet::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_wallet.id.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -76,7 +80,7 @@ class RPKWalletTable(database: Database, private val plugin: RPKEconomyBukkit) :
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -88,11 +92,11 @@ class RPKWalletTable(database: Database, private val plugin: RPKEconomyBukkit) :
                 .set(RPKIT_WALLET.BALANCE, entity.balance)
                 .where(RPKIT_WALLET.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKWallet? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -117,7 +121,7 @@ class RPKWalletTable(database: Database, private val plugin: RPKEconomyBukkit) :
                         currency,
                         result.get(RPKIT_WALLET.BALANCE)
                 )
-                cache.put(id, wallet)
+                cache?.put(id, wallet)
                 return wallet
             } else {
                 database.create
@@ -178,7 +182,7 @@ class RPKWalletTable(database: Database, private val plugin: RPKEconomyBukkit) :
                 .deleteFrom(RPKIT_WALLET)
                 .where(RPKIT_WALLET.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }
