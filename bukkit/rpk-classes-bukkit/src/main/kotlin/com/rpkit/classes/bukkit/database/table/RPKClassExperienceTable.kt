@@ -19,9 +19,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKClassExperienceTable(database: Database, private val plugin: RPKClassesBukkit): Table<RPKClassExperience>(database, RPKClassExperience::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-classes-bukkit.rpkit_class_experience.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKClassExperience::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_class_experience.id.enabled")) {
+        database.cacheManager.createCache("rpk-classes-bukkit.rpkit_class_experience.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKClassExperience::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_class_experience.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -58,7 +62,7 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -70,11 +74,11 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
                 .set(RPKIT_CLASS_EXPERIENCE.EXPERIENCE, entity.experience)
                 .where(RPKIT_CLASS_EXPERIENCE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKClassExperience? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -98,7 +102,7 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
                         clazz,
                         result.get(RPKIT_CLASS_EXPERIENCE.EXPERIENCE)
                 )
-                cache.put(id, classExperience)
+                cache?.put(id, classExperience)
                 return classExperience
             } else {
                 database.create
@@ -125,7 +129,7 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
                 .deleteFrom(RPKIT_CLASS_EXPERIENCE)
                 .where(RPKIT_CLASS_EXPERIENCE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }
