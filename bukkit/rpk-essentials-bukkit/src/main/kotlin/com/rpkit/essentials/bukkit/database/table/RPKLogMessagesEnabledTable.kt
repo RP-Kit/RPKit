@@ -18,9 +18,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKLogMessagesEnabledTable(database: Database, private val plugin: RPKEssentialsBukkit): Table<RPKLogMessagesEnabled>(database, RPKLogMessagesEnabled::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-essentials-bukkit.rpkit_log_messages_enabled.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKLogMessagesEnabled::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_log_messages_enabled.id.enabled")) {
+        database.cacheManager.createCache("rpk-essentials-bukkit.rpkit_log_messages_enabled.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKLogMessagesEnabled::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_log_messages_enabled.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -68,7 +72,7 @@ class RPKLogMessagesEnabledTable(database: Database, private val plugin: RPKEsse
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -79,11 +83,11 @@ class RPKLogMessagesEnabledTable(database: Database, private val plugin: RPKEsse
                 .set(RPKIT_LOG_MESSAGES_ENABLED.ENABLED, if (entity.enabled) 1.toByte() else 0.toByte())
                 .where(RPKIT_LOG_MESSAGES_ENABLED.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKLogMessagesEnabled? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -103,14 +107,14 @@ class RPKLogMessagesEnabledTable(database: Database, private val plugin: RPKEsse
                         minecraftProfile,
                         result.get(RPKIT_LOG_MESSAGES_ENABLED.ENABLED) == 1.toByte()
                 )
-                cache.put(id, logMessagesEnabled)
+                cache?.put(id, logMessagesEnabled)
                 return logMessagesEnabled
             } else {
                 database.create
                         .deleteFrom(RPKIT_LOG_MESSAGES_ENABLED)
                         .where(RPKIT_LOG_MESSAGES_ENABLED.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
         }
@@ -130,7 +134,7 @@ class RPKLogMessagesEnabledTable(database: Database, private val plugin: RPKEsse
                 .deleteFrom(RPKIT_LOG_MESSAGES_ENABLED)
                 .where(RPKIT_LOG_MESSAGES_ENABLED.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }
