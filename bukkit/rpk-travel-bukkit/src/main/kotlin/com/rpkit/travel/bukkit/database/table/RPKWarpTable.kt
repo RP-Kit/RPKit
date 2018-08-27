@@ -17,9 +17,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Table<RPKWarp>(database, RPKWarp::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-travel-bukkit.rpkit_warp.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKWarp::class.java,
-                    ResourcePoolsBuilder.heap(20L)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_warp.id.enabled")) {
+        database.cacheManager.createCache("rpk-travel-bukkit.rpkit_warp.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKWarp::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_warp.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -68,7 +72,7 @@ class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Tab
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -84,11 +88,11 @@ class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Tab
                 .set(RPKIT_WARP.PITCH, entity.location.pitch.toDouble())
                 .where(RPKIT_WARP.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKWarp? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -116,7 +120,7 @@ class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Tab
                             result.get(RPKIT_WARP.PITCH).toFloat()
                     )
             )
-            cache.put(id, warp)
+            cache?.put(id, warp)
             return warp
         }
     }
@@ -144,7 +148,7 @@ class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Tab
                 .deleteFrom(RPKIT_WARP)
                 .where(RPKIT_WARP.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }
