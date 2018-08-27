@@ -1,2 +1,10 @@
 shops:
     limit: 2
+caching:
+    rpkit_shop_count:
+        id:
+            enabled: true
+            size: 20
+        character_id:
+            enabled: true
+            size: 20

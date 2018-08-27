@@ -16,9 +16,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKLockedBlockTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKLockedBlock>(database, RPKLockedBlock::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-locks-bukkit.rpkit_locked_block.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKLockedBlock::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 5L)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_locked_block.id.enabled")) {
+        database.cacheManager.createCache("rpk-locks-bukkit.rpkit_locked_block.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKLockedBlock::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_locked_block.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -58,7 +62,7 @@ class RPKLockedBlockTable(database: Database, private val plugin: RPKLocksBukkit
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -71,11 +75,11 @@ class RPKLockedBlockTable(database: Database, private val plugin: RPKLocksBukkit
                 .set(RPKIT_LOCKED_BLOCK.Z, entity.block.z)
                 .where(RPKIT_LOCKED_BLOCK.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKLockedBlock? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -96,7 +100,7 @@ class RPKLockedBlockTable(database: Database, private val plugin: RPKLocksBukkit
                             result.get(RPKIT_LOCKED_BLOCK.Z)
                     )
             )
-            cache.put(id, lockedBlock)
+            cache?.put(id, lockedBlock)
             return lockedBlock
         }
     }
@@ -118,6 +122,6 @@ class RPKLockedBlockTable(database: Database, private val plugin: RPKLocksBukkit
                 .deleteFrom(RPKIT_LOCKED_BLOCK)
                 .where(RPKIT_LOCKED_BLOCK.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 }

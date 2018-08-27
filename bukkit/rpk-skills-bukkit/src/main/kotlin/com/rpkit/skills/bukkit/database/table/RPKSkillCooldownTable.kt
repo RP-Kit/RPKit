@@ -20,9 +20,13 @@ import java.sql.Timestamp
 
 class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBukkit): Table<RPKSkillCooldown>(database, RPKSkillCooldown::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-skills-bukkit.rpkit_skill_cooldown.id", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKSkillCooldown::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_skill_cooldown.id.enabled")) {
+        database.cacheManager.createCache("rpk-skills-bukkit.rpkit_skill_cooldown.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKSkillCooldown::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_skill_cooldown.id.size"))).build())
+    } else {
+        null
+    }
 
 
     override fun create() {
@@ -60,7 +64,7 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -72,11 +76,11 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
                 .set(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP, Timestamp(entity.cooldownTimestamp))
                 .where(RPKIT_SKILL_COOLDOWN.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKSkillCooldown? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -101,14 +105,14 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
                         skill,
                         result.get(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP).time
                 )
-                cache.put(id, skillCooldown)
+                cache?.put(id, skillCooldown)
                 return skillCooldown
             } else {
                 database.create
                         .deleteFrom(RPKIT_SKILL_COOLDOWN)
                         .where(RPKIT_SKILL_COOLDOWN.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
         }
@@ -129,7 +133,7 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
                 .deleteFrom(RPKIT_SKILL_COOLDOWN)
                 .where(RPKIT_SKILL_COOLDOWN.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

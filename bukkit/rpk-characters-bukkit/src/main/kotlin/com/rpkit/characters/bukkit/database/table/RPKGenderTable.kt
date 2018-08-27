@@ -16,6 +16,7 @@
 
 package com.rpkit.characters.bukkit.database.table
 
+import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.jooq.rpkit.Tables.RPKIT_GENDER
 import com.rpkit.characters.bukkit.gender.RPKGender
 import com.rpkit.characters.bukkit.gender.RPKGenderImpl
@@ -31,14 +32,23 @@ import org.jooq.util.sqlite.SQLiteDataType
 /**
  * Represents the gender table.
  */
-class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::class) {
+class RPKGenderTable(database: Database, private val plugin: RPKCharactersBukkit): Table<RPKGender>(database, RPKGender::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_gender.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKGender::class.java,
-                    ResourcePoolsBuilder.heap(10L)).build())
-    private val nameCache = database.cacheManager.createCache("rpk-characters-bukkit.rpkit_gender.name",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(10L)).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_gender.id.enabled")) {
+        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_gender.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKGender::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_gender.id.size"))).build())
+    } else {
+        null
+    }
+
+    private val nameCache = if (plugin.config.getBoolean("caching.rpkit_gender.name.enabled")) {
+        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_gender.name",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_gender.name.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create.createTableIfNotExists(RPKIT_GENDER)
@@ -68,8 +78,8 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
-        nameCache.put(entity.name, id)
+        cache?.put(id, entity)
+        nameCache?.put(entity.name, id)
         return id
     }
 
@@ -82,7 +92,7 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
     }
 
     override fun get(id: Int): RPKGender? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -97,8 +107,8 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
                     result.get(RPKIT_GENDER.ID),
                     result.get(RPKIT_GENDER.NAME)
             )
-            cache.put(id, gender)
-            nameCache.put(gender.name, id)
+            cache?.put(id, gender)
+            nameCache?.put(gender.name, id)
             return gender
         }
     }
@@ -120,7 +130,7 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
      * @return The gender, or null if no gender is found with the given name
      */
     operator fun get(name: String): RPKGender? {
-        if (nameCache.containsKey(name)) {
+        if (nameCache?.containsKey(name) == true) {
             return get(nameCache.get(name) as Int)
         } else {
             val result = database.create
@@ -135,8 +145,8 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
                     result.get(RPKIT_GENDER.ID),
                     result.get(RPKIT_GENDER.NAME)
             )
-            cache.put(gender.id, gender)
-            nameCache.put(name, gender.id)
+            cache?.put(gender.id, gender)
+            nameCache?.put(name, gender.id)
             return gender
         }
     }
@@ -146,8 +156,8 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
                 .deleteFrom(RPKIT_GENDER)
                 .where(RPKIT_GENDER.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
-        nameCache.remove(entity.name)
+        cache?.remove(entity.id)
+        nameCache?.remove(entity.name)
     }
 
 }

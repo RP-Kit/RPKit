@@ -10,6 +10,7 @@ import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlagProviderImpl
 class RPKFeatureFlagsBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKFeatureFlagProviderImpl(this)
         )

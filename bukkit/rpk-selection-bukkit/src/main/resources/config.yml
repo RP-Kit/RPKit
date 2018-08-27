@@ -7,3 +7,8 @@ wand-item:
         display-name: Wand
         lore:
         - Creates selections
+caching:
+    rpkit_selection:
+        id:
+            enabled: true
+            size: 20

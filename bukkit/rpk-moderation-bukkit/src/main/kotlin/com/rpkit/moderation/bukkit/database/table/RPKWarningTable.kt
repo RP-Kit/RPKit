@@ -35,9 +35,13 @@ import java.sql.Timestamp
 
 class RPKWarningTable(database: Database, private val plugin: RPKModerationBukkit): Table<RPKWarning>(database, RPKWarning::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_warning.id", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKWarning::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 2L)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_warning.id.enabled")) {
+        database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_warning.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKWarning::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_warning.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -85,7 +89,7 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -98,7 +102,7 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
                 .set(RPKIT_WARNING.TIME, Timestamp.valueOf(entity.time))
                 .where(RPKIT_WARNING.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKWarning? {
@@ -123,14 +127,14 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
                     issuer,
                     result[RPKIT_WARNING.TIME].toLocalDateTime()
             )
-            cache.put(id, warning)
+            cache?.put(id, warning)
             return warning
         } else {
             database.create
                     .deleteFrom(RPKIT_WARNING)
                     .where(RPKIT_WARNING.ID.eq(id))
                     .execute()
-            cache.remove(id)
+            cache?.remove(id)
             return null
         }
     }
@@ -149,6 +153,6 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
                 .deleteFrom(RPKIT_WARNING)
                 .where(RPKIT_WARNING.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 }

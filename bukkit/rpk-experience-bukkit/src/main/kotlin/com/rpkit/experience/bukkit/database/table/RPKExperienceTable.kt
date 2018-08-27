@@ -17,12 +17,21 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKExperienceTable(database: Database, private val plugin: RPKExperienceBukkit) : Table<RPKExperienceValue>(database, RPKExperienceValue::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-experience-bukkit.rpkit_experience.id", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKExperienceValue::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 2L)).build())
-    private val characterCache = database.cacheManager.createCache("rpk-experience-bukkit.rpkit_experience.character_id", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKExperienceValue::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 2L)).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_experience.id.enabled")) {
+        database.cacheManager.createCache("rpk-experience-bukkit.rpkit_experience.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKExperienceValue::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_experience.id.size"))).build())
+    } else {
+        null
+    }
+
+    private val characterCache = if (plugin.config.getBoolean("caching.rpkit_experience.character_id.enabled")) {
+        database.cacheManager.createCache("rpk-experience-bukkit.rpkit_experience.character_id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKExperienceValue::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_experience.character_id.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -47,12 +56,12 @@ class RPKExperienceTable(database: Database, private val plugin: RPKExperienceBu
                 .deleteFrom(RPKIT_EXPERIENCE)
                 .where(RPKIT_EXPERIENCE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
-        characterCache.remove(entity.character.id)
+        cache?.remove(entity.id)
+        characterCache?.remove(entity.character.id)
     }
 
     override fun get(id: Int): RPKExperienceValue? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -72,22 +81,22 @@ class RPKExperienceTable(database: Database, private val plugin: RPKExperienceBu
                         character,
                         result.get(RPKIT_EXPERIENCE.VALUE)
                 )
-                cache.put(id, experienceValue)
-                characterCache.put(characterId, experienceValue)
+                cache?.put(id, experienceValue)
+                characterCache?.put(characterId, experienceValue)
                 return experienceValue
             } else {
                 database.create
                         .deleteFrom(RPKIT_EXPERIENCE)
                         .where(RPKIT_EXPERIENCE.ID.eq(id))
                         .execute()
-                characterCache.remove(characterId)
+                characterCache?.remove(characterId)
                 return null
             }
         }
     }
 
     fun get(character: RPKCharacter): RPKExperienceValue? {
-        if (characterCache.containsKey(character.id)) {
+        if (characterCache?.containsKey(character.id) == true) {
             return characterCache.get(character.id)
         } else {
             val result = database.create
@@ -113,8 +122,8 @@ class RPKExperienceTable(database: Database, private val plugin: RPKExperienceBu
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
-        characterCache.put(entity.character.id, entity)
+        cache?.put(id, entity)
+        characterCache?.put(entity.character.id, entity)
         return id
     }
 
@@ -125,8 +134,8 @@ class RPKExperienceTable(database: Database, private val plugin: RPKExperienceBu
                 .set(RPKIT_EXPERIENCE.VALUE, entity.value)
                 .where(RPKIT_EXPERIENCE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
-        characterCache.put(entity.character.id, entity)
+        cache?.put(entity.id, entity)
+        characterCache?.put(entity.character.id, entity)
     }
 
 }

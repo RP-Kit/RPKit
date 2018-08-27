@@ -18,9 +18,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKPlayerGettingKey>(database, RPKPlayerGettingKey::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-locks-bukkit.rpkit_player_getting_key.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPlayerGettingKey::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_player_getting_key.id.enabled")) {
+        database.cacheManager.createCache("rpk-locks-bukkit.rpkit_player_getting_key.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPlayerGettingKey::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_player_getting_key.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -63,7 +67,7 @@ class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksB
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -73,11 +77,11 @@ class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksB
                 .set(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
                 .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKPlayerGettingKey? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -93,14 +97,14 @@ class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksB
                         id,
                         minecraftProfile
                 )
-                cache.put(id, playerGettingKey)
+                cache?.put(id, playerGettingKey)
                 return playerGettingKey
             } else {
                 database.create
                         .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
                         .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
         }
@@ -120,7 +124,7 @@ class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksB
                 .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
                 .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
     
 }

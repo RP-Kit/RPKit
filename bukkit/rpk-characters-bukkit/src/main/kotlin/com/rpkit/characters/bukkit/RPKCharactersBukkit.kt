@@ -110,8 +110,8 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
 
     @Throws(SQLException::class)
     override fun createTables(database: Database) {
-        database.addTable(RPKGenderTable(database))
-        database.addTable(RPKRaceTable(database))
+        database.addTable(RPKGenderTable(database, this))
+        database.addTable(RPKRaceTable(database, this))
         database.addTable(RPKCharacterTable(database, this))
         database.addTable(RPKNewCharacterCooldownTable(database, this))
     }

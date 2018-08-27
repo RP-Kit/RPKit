@@ -1,0 +1,5 @@
+caching:
+    rpkit_warp:
+        id:
+            enabled: true
+            size: 20

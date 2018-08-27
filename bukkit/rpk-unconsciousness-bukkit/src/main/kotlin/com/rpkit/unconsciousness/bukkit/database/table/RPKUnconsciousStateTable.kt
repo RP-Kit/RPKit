@@ -34,9 +34,13 @@ import java.sql.Timestamp
 
 class RPKUnconsciousStateTable(database: Database, private val plugin: RPKUnconsciousnessBukkit): Table<RPKUnconsciousState>(database, RPKUnconsciousState::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-unconsciousness-bukkit.rpkit_unconscious_state.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType,
-                    RPKUnconsciousState::class.java, ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_unconscious_state.id.enabled")) {
+        database.cacheManager.createCache("rpk-unconsciousness-bukkit.rpkit_unconscious_state.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType,
+                        RPKUnconsciousState::class.java, ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_unconscious_state.id.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -74,7 +78,7 @@ class RPKUnconsciousStateTable(database: Database, private val plugin: RPKUncons
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -84,11 +88,11 @@ class RPKUnconsciousStateTable(database: Database, private val plugin: RPKUncons
                 .set(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID, entity.character.id)
                 .set(RPKIT_UNCONSCIOUS_STATE.DEATH_TIME, Timestamp(entity.deathTime))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKUnconsciousState? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -108,14 +112,14 @@ class RPKUnconsciousStateTable(database: Database, private val plugin: RPKUncons
                         character,
                         deathTime.time
                 )
-                cache.put(id, unconsciousState)
+                cache?.put(id, unconsciousState)
                 return unconsciousState
             } else {
                 database.create
                         .deleteFrom(RPKIT_UNCONSCIOUS_STATE)
                         .where(RPKIT_UNCONSCIOUS_STATE.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
         }
@@ -135,7 +139,7 @@ class RPKUnconsciousStateTable(database: Database, private val plugin: RPKUncons
                 .deleteFrom(RPKIT_UNCONSCIOUS_STATE)
                 .where(RPKIT_UNCONSCIOUS_STATE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

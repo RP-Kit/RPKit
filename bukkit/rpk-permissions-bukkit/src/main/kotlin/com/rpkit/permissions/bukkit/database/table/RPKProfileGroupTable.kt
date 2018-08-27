@@ -18,9 +18,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKProfileGroupTable(database: Database, private val plugin: RPKPermissionsBukkit): Table<RPKProfileGroup>(database, RPKProfileGroup::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-permissions-bukkit.rpkit_profile_group.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKProfileGroup::class.java,
-                    ResourcePoolsBuilder.heap(20L)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_profile_group.id.enabled")) {
+        database.cacheManager.createCache("rpk-permissions-bukkit.rpkit_profile_group.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKProfileGroup::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_profile_group.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -54,7 +58,7 @@ class RPKProfileGroupTable(database: Database, private val plugin: RPKPermission
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -65,11 +69,11 @@ class RPKProfileGroupTable(database: Database, private val plugin: RPKPermission
                 .set(RPKIT_PROFILE_GROUP.GROUP_NAME, entity.group.name)
                 .where(RPKIT_PROFILE_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKProfileGroup? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -92,7 +96,7 @@ class RPKProfileGroupTable(database: Database, private val plugin: RPKPermission
                         profile,
                         group
                 )
-                cache.put(id, profileGroup)
+                cache?.put(id, profileGroup)
                 return profileGroup
             } else {
                 database.create
@@ -119,7 +123,7 @@ class RPKProfileGroupTable(database: Database, private val plugin: RPKPermission
                 .deleteFrom(RPKIT_PROFILE_GROUP)
                 .where(RPKIT_PROFILE_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

@@ -17,9 +17,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKDrunkennessTable(database: Database, private val plugin: RPKDrinksBukkit): Table<RPKDrunkenness>(database, RPKDrunkenness::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-drinks-bukkit.rpkit_drunkenness.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKDrunkenness::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_drunkenness.id.enabled")) {
+        database.cacheManager.createCache("rpk-drinks-bukkit.rpkit_drunkenness.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKDrunkenness::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_drunkenness.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -53,7 +57,7 @@ class RPKDrunkennessTable(database: Database, private val plugin: RPKDrinksBukki
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -64,11 +68,11 @@ class RPKDrunkennessTable(database: Database, private val plugin: RPKDrinksBukki
                 .set(RPKIT_DRUNKENNESS.DRUNKENNESS, entity.drunkenness)
                 .where(RPKIT_DRUNKENNESS.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKDrunkenness? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -88,14 +92,14 @@ class RPKDrunkennessTable(database: Database, private val plugin: RPKDrinksBukki
                         character,
                         result.get(RPKIT_DRUNKENNESS.DRUNKENNESS)
                 )
-                cache.put(id, drunkenness)
+                cache?.put(id, drunkenness)
                 return drunkenness
             } else {
                 database.create
                         .deleteFrom(RPKIT_DRUNKENNESS)
                         .where(RPKIT_DRUNKENNESS.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
         }
@@ -115,7 +119,7 @@ class RPKDrunkennessTable(database: Database, private val plugin: RPKDrinksBukki
                 .deleteFrom(RPKIT_DRUNKENNESS)
                 .where(RPKIT_DRUNKENNESS.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

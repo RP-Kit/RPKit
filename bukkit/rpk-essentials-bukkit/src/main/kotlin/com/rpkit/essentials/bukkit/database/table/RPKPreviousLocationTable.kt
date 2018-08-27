@@ -19,9 +19,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssentialsBukkit): Table<RPKPreviousLocation>(database, RPKPreviousLocation::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-essentials-bukkit.rpkit_previous_location.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPreviousLocation::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_previous_location.id.enabled")) {
+        database.cacheManager.createCache("rpk-essentials-bukkit.rpkit_previous_location.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPreviousLocation::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_previous_location.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -84,7 +88,7 @@ class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssent
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -100,11 +104,11 @@ class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssent
                 .set(RPKIT_PREVIOUS_LOCATION.PITCH, entity.location.pitch.toDouble())
                 .where(RPKIT_PREVIOUS_LOCATION.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKPreviousLocation? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -136,14 +140,14 @@ class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssent
                                 result.get(RPKIT_PREVIOUS_LOCATION.PITCH).toFloat()
                         )
                 )
-                cache.put(id, previousLocation)
+                cache?.put(id, previousLocation)
                 return previousLocation
             } else {
                 database.create
                         .deleteFrom(RPKIT_PREVIOUS_LOCATION)
                         .where(RPKIT_PREVIOUS_LOCATION.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
         }
@@ -163,7 +167,7 @@ class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssent
                 .deleteFrom(RPKIT_PREVIOUS_LOCATION)
                 .where(RPKIT_PREVIOUS_LOCATION.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

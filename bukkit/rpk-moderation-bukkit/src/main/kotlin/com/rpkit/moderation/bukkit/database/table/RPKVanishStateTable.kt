@@ -34,9 +34,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKVanishStateTable(database: Database, private val plugin: RPKModerationBukkit): Table<RPKVanishState>(database, RPKVanishState::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_vanish_state.id", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKVanishState::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_vanish_state.id.enabled")) {
+        database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_vanish_state.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKVanishState::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_vanish_state.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -78,7 +82,7 @@ class RPKVanishStateTable(database: Database, private val plugin: RPKModerationB
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -89,11 +93,11 @@ class RPKVanishStateTable(database: Database, private val plugin: RPKModerationB
                 .set(RPKIT_VANISH_STATE.VANISHED, if (entity.isVanished) 1.toByte() else 0.toByte())
                 .where(RPKIT_VANISH_STATE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKVanishState? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -112,14 +116,14 @@ class RPKVanishStateTable(database: Database, private val plugin: RPKModerationB
                         minecraftProfile,
                         result[RPKIT_VANISH_STATE.VANISHED] == 1.toByte()
                 )
-                cache.put(id, vanishState)
+                cache?.put(id, vanishState)
                 return vanishState
             } else {
                 database.create
                         .deleteFrom(RPKIT_VANISH_STATE)
                         .where(RPKIT_VANISH_STATE.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
         }
@@ -130,7 +134,7 @@ class RPKVanishStateTable(database: Database, private val plugin: RPKModerationB
                 .deleteFrom(RPKIT_VANISH_STATE)
                 .where(RPKIT_VANISH_STATE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
     fun get(minecraftProfile: RPKMinecraftProfile): RPKVanishState? {

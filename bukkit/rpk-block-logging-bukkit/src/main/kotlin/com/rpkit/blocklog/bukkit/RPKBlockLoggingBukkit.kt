@@ -15,6 +15,7 @@ import com.rpkit.core.database.Database
 class RPKBlockLoggingBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
+        saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKBlockHistoryProviderImpl(this)
         )

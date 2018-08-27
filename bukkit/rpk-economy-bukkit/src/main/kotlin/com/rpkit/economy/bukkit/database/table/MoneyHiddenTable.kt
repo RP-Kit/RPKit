@@ -35,12 +35,21 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class MoneyHiddenTable(database: Database, private val plugin: RPKEconomyBukkit): Table<MoneyHidden>(database, MoneyHidden::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-economy-bukkit.money_hidden.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MoneyHidden::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val characterCache = database.cacheManager.createCache("rpk-economy-bukkit.money_hidden.character_id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val cache = if (plugin.config.getBoolean("caching.money_hidden.id.enabled")) {
+        database.cacheManager.createCache("rpk-economy-bukkit.money_hidden.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MoneyHidden::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.money_hidden.id.size"))).build())
+    } else {
+        null
+    }
+
+    private val characterCache = if (plugin.config.getBoolean("caching.money_hidden.character_id.enabled")) {
+        database.cacheManager.createCache("rpk-economy-bukkit.money_hidden.character_id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.money_hidden.character_id.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -71,8 +80,8 @@ class MoneyHiddenTable(database: Database, private val plugin: RPKEconomyBukkit)
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
-        characterCache.put(entity.character.id, id)
+        cache?.put(id, entity)
+        characterCache?.put(entity.character.id, id)
         return id
     }
 
@@ -82,12 +91,12 @@ class MoneyHiddenTable(database: Database, private val plugin: RPKEconomyBukkit)
                 .set(MONEY_HIDDEN.CHARACTER_ID, entity.character.id)
                 .where(MONEY_HIDDEN.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
-        characterCache.put(entity.character.id, entity.id)
+        cache?.put(entity.id, entity)
+        characterCache?.put(entity.character.id, entity.id)
     }
 
     override fun get(id: Int): MoneyHidden? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -103,11 +112,11 @@ class MoneyHiddenTable(database: Database, private val plugin: RPKEconomyBukkit)
                         id,
                         character
                 )
-                cache.put(id, moneyHidden)
-                characterCache.put(moneyHidden.character.id, id)
+                cache?.put(id, moneyHidden)
+                characterCache?.put(moneyHidden.character.id, id)
                 return moneyHidden
             } else {
-                characterCache.remove(characterId)
+                characterCache?.remove(characterId)
                 database.create
                         .deleteFrom(MONEY_HIDDEN)
                         .where(MONEY_HIDDEN.ID.eq(id))
@@ -125,7 +134,7 @@ class MoneyHiddenTable(database: Database, private val plugin: RPKEconomyBukkit)
      * @return The money hidden instance, or null if there is no money hidden instance for the character
      */
     fun get(character: RPKCharacter): MoneyHidden? {
-        if (characterCache.containsKey(character.id)) {
+        if (characterCache?.containsKey(character.id) == true) {
             return get(characterCache.get(character.id))
         } else {
             val result = database.create
@@ -142,8 +151,8 @@ class MoneyHiddenTable(database: Database, private val plugin: RPKEconomyBukkit)
                 .deleteFrom(MONEY_HIDDEN)
                 .where(MONEY_HIDDEN.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
-        characterCache.remove(entity.character.id)
+        cache?.remove(entity.id)
+        characterCache?.remove(entity.character.id)
     }
 
 }

@@ -22,9 +22,13 @@ import java.sql.Timestamp
 
 class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggingBukkit): Table<RPKBlockChange>(database, RPKBlockChange::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-block-logging-bukkit.rpkit_block_change.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBlockChange::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 10L)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_block_change.id.enabled")) {
+        database.cacheManager.createCache("rpk-block-logging-bukkit.rpkit_block_change.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBlockChange::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_block_change.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -87,7 +91,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -106,11 +110,11 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                 .set(RPKIT_BLOCK_CHANGE.REASON, entity.reason)
                 .where(RPKIT_BLOCK_CHANGE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKBlockChange? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -137,7 +141,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                         .deleteFrom(RPKIT_BLOCK_CHANGE)
                         .where(RPKIT_BLOCK_CHANGE.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
             val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
@@ -162,7 +166,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                     result.get(RPKIT_BLOCK_CHANGE.TO_DATA),
                     result.get(RPKIT_BLOCK_CHANGE.REASON)
             )
-            cache.put(id, blockChange)
+            cache?.put(id, blockChange)
             return blockChange
         }
     }
@@ -183,6 +187,6 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                 .deleteFrom(RPKIT_BLOCK_CHANGE)
                 .where(RPKIT_BLOCK_CHANGE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 }

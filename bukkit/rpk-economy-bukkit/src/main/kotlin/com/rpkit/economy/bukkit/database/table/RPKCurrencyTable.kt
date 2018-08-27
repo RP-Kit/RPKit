@@ -35,12 +35,21 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit): Table<RPKCurrency>(database, RPKCurrency::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-economy-bukkit.rpkit_currency.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCurrency::class.java,
-                    ResourcePoolsBuilder.heap(5L)).build())
-    private val nameCache = database.cacheManager.createCache("rpk-economy-bukkit.rpkit_currency.name",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(5L)).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_currency.id.enabled")) {
+        database.cacheManager.createCache("rpk-economy-bukkit.rpkit_currency.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCurrency::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_currency.id.size"))).build())
+    } else {
+        null
+    }
+
+    private val nameCache = if (plugin.config.getBoolean("caching.rpkit_currency.name.enabled")) {
+        database.cacheManager.createCache("rpk-economy-bukkit.rpkit_currency.name",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_currency.name.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -86,8 +95,8 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
-        nameCache.put(entity.name, id)
+        cache?.put(id, entity)
+        nameCache?.put(entity.name, id)
         return id
     }
 
@@ -102,12 +111,12 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
                 .set(RPKIT_CURRENCY.MATERIAL, entity.material.toString())
                 .where(RPKIT_CURRENCY.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
-        nameCache.put(entity.name, entity.id)
+        cache?.put(entity.id, entity)
+        nameCache?.put(entity.name, entity.id)
     }
 
     override fun get(id: Int): RPKCurrency? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -131,8 +140,8 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
                     result.get(RPKIT_CURRENCY.DEFAULT_AMOUNT),
                     Material.getMaterial(result.get(RPKIT_CURRENCY.MATERIAL))
             )
-            cache.put(id, currency)
-            nameCache.put(currency.name, id)
+            cache?.put(id, currency)
+            nameCache?.put(currency.name, id)
             return currency
         }
     }
@@ -145,7 +154,7 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
      * @return The currency, or null if no currency is found with the given name
      */
     fun get(name: String): RPKCurrency? {
-        if (nameCache.containsKey(name)) {
+        if (nameCache?.containsKey(name) == true) {
             return get(nameCache.get(name) as Int)
         } else {
             val result = database.create
@@ -177,7 +186,7 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
                 .deleteFrom(RPKIT_CURRENCY)
                 .where(RPKIT_CURRENCY.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

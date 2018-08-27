@@ -34,12 +34,21 @@ import org.jooq.util.sqlite.SQLiteDataType
  */
 class RPKChatGroupTable(database: Database, private val plugin: RPKChatBukkit): Table<RPKChatGroup>(database, RPKChatGroup::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-chat-bukkit.rpkit_chat_group.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKChatGroup::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
-    private val nameCache = database.cacheManager.createCache("rpk-chat-bukkit.rpk_chat_group.name",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_chat_group.id.enabled")) {
+        database.cacheManager.createCache("rpk-chat-bukkit.rpkit_chat_group.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKChatGroup::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_chat_group.id.size"))))
+    } else {
+        null
+    }
+
+    private val nameCache = if (plugin.config.getBoolean("caching.rpkit_chat_group.name.enabled")) {
+        database.cacheManager.createCache("rpk-chat-bukkit.rpkit_chat_group.name",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_chat_group.name.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -68,8 +77,8 @@ class RPKChatGroupTable(database: Database, private val plugin: RPKChatBukkit): 
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
-        nameCache.put(entity.name, id)
+        cache?.put(id, entity)
+        nameCache?.put(entity.name, id)
         return id
     }
 
@@ -79,12 +88,12 @@ class RPKChatGroupTable(database: Database, private val plugin: RPKChatBukkit): 
                 .set(RPKIT_CHAT_GROUP.NAME, entity.name)
                 .where(RPKIT_CHAT_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
-        nameCache.put(entity.name, entity.id)
+        cache?.put(entity.id, entity)
+        nameCache?.put(entity.name, entity.id)
     }
 
     override fun get(id: Int): RPKChatGroup? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -97,8 +106,8 @@ class RPKChatGroupTable(database: Database, private val plugin: RPKChatBukkit): 
                     id,
                     result.get(RPKIT_CHAT_GROUP.NAME)
             )
-            cache.put(id, chatGroup)
-            nameCache.put(chatGroup.name, id)
+            cache?.put(id, chatGroup)
+            nameCache?.put(chatGroup.name, id)
             return chatGroup
         }
     }
@@ -111,7 +120,7 @@ class RPKChatGroupTable(database: Database, private val plugin: RPKChatBukkit): 
      * @return The chat group, or null if there is no chat group with the given name
      */
     fun get(name: String): RPKChatGroup? {
-        if (nameCache.containsKey(name)) {
+        if (nameCache?.containsKey(name) == true) {
             return get(nameCache.get(name))
         } else {
             val result = database.create
@@ -124,8 +133,8 @@ class RPKChatGroupTable(database: Database, private val plugin: RPKChatBukkit): 
                     result.get(RPKIT_CHAT_GROUP.ID),
                     name
             )
-            cache.put(chatGroup.id, chatGroup)
-            nameCache.put(name, chatGroup.id)
+            cache?.put(chatGroup.id, chatGroup)
+            nameCache?.put(name, chatGroup.id)
             return chatGroup
         }
     }
@@ -135,7 +144,7 @@ class RPKChatGroupTable(database: Database, private val plugin: RPKChatBukkit): 
                 .deleteFrom(RPKIT_CHAT_GROUP)
                 .where(RPKIT_CHAT_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
-        nameCache.remove(entity.name)
+        cache?.remove(entity.id)
+        nameCache?.remove(entity.name)
     }
 }

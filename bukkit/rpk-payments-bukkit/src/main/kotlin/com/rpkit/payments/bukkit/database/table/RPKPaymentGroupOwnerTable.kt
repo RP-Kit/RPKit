@@ -39,9 +39,13 @@ class RPKPaymentGroupOwnerTable(
         private val plugin: RPKPaymentsBukkit
 ): Table<RPKPaymentGroupOwner>(database, RPKPaymentGroupOwner::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_group_owner.id", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroupOwner::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 20L)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_payment_group_owner.id.enabled")) {
+        database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_group_owner.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroupOwner::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_payment_group_owner.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -75,7 +79,7 @@ class RPKPaymentGroupOwnerTable(
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -86,11 +90,11 @@ class RPKPaymentGroupOwnerTable(
                 .set(RPKIT_PAYMENT_GROUP_OWNER.CHARACTER_ID, entity.character.id)
                 .where(RPKIT_PAYMENT_GROUP_OWNER.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKPaymentGroupOwner? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -113,14 +117,14 @@ class RPKPaymentGroupOwnerTable(
                         paymentGroup,
                         character
                 )
-                cache.put(id, paymentGroupOwner)
+                cache?.put(id, paymentGroupOwner)
                 return paymentGroupOwner
             } else {
                 database.create
                         .deleteFrom(RPKIT_PAYMENT_GROUP_OWNER)
                         .where(RPKIT_PAYMENT_GROUP_OWNER.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
         }
@@ -141,7 +145,7 @@ class RPKPaymentGroupOwnerTable(
                 .deleteFrom(RPKIT_PAYMENT_GROUP_OWNER)
                 .where(RPKIT_PAYMENT_GROUP_OWNER.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

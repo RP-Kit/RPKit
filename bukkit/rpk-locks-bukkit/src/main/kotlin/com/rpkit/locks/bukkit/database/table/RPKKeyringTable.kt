@@ -19,9 +19,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKKeyring>(database, RPKKeyring::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-locks-bukkit.rpkit_keyring.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKKeyring::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_keyring.id.enabled")) {
+        database.cacheManager.createCache("rpk-locks-bukkit.rpkit_keyring.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKKeyring::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_keyring.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -55,7 +59,7 @@ class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): T
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -66,11 +70,11 @@ class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): T
                 .set(RPKIT_KEYRING.ITEMS, entity.items.toTypedArray().toByteArray())
                 .where(RPKIT_KEYRING.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKKeyring? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -90,14 +94,14 @@ class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): T
                         character,
                         result.get(RPKIT_KEYRING.ITEMS).toItemStackArray().toMutableList()
                 )
-                cache.put(id, keyring)
+                cache?.put(id, keyring)
                 return keyring
             } else {
                 database.create
                         .deleteFrom(RPKIT_KEYRING)
                         .where(RPKIT_KEYRING.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
         }
@@ -117,6 +121,6 @@ class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): T
                 .deleteFrom(RPKIT_KEYRING)
                 .where(RPKIT_KEYRING.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 }

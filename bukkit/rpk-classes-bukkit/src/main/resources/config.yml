@@ -127,3 +127,12 @@ classes:
                 magic_sword: 5
                 speed_nimble: 5
                 support_perform: 5
+caching:
+    rpkit_character_class:
+        id:
+            enabled: true
+            size: 20
+    rpkit_class_experience:
+        id:
+            enabled: true
+            size: 20

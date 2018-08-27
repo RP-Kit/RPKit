@@ -16,9 +16,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKFeatureFlagTable(database: Database, private val plugin: RPKFeatureFlagsBukkit): Table<RPKFeatureFlag>(database, RPKFeatureFlag::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-feature-flags-bukkit.rpkit_feature_flag.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKFeatureFlag::class.java,
-                    ResourcePoolsBuilder.heap(50L)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_feature_flag.id.enabled")) {
+        database.cacheManager.createCache("rpk-feature-flags-bukkit.rpkit_feature_flag.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKFeatureFlag::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_feature_flag.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -52,7 +56,7 @@ class RPKFeatureFlagTable(database: Database, private val plugin: RPKFeatureFlag
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -63,26 +67,30 @@ class RPKFeatureFlagTable(database: Database, private val plugin: RPKFeatureFlag
                 .set(RPKIT_FEATURE_FLAG.ENABLED_BY_DEFAULT, if (entity.isEnabledByDefault) 1.toByte() else 0.toByte())
                 .where(RPKIT_FEATURE_FLAG.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKFeatureFlag? {
-        val result = database.create
-                .select(
-                        RPKIT_FEATURE_FLAG.NAME,
-                        RPKIT_FEATURE_FLAG.ENABLED_BY_DEFAULT
-                )
-                .from(RPKIT_FEATURE_FLAG)
-                .where(RPKIT_FEATURE_FLAG.ID.eq(id))
-                .fetchOne() ?: return null
-        val featureFlag = RPKFeatureFlagImpl(
-                plugin,
-                id,
-                result.get(RPKIT_FEATURE_FLAG.NAME),
-                result.get(RPKIT_FEATURE_FLAG.ENABLED_BY_DEFAULT) == 1.toByte()
-        )
-        cache.put(id, featureFlag)
-        return featureFlag
+        if (cache?.containsKey(id) == true) {
+            return cache[id]
+        } else {
+            val result = database.create
+                    .select(
+                            RPKIT_FEATURE_FLAG.NAME,
+                            RPKIT_FEATURE_FLAG.ENABLED_BY_DEFAULT
+                    )
+                    .from(RPKIT_FEATURE_FLAG)
+                    .where(RPKIT_FEATURE_FLAG.ID.eq(id))
+                    .fetchOne() ?: return null
+            val featureFlag = RPKFeatureFlagImpl(
+                    plugin,
+                    id,
+                    result.get(RPKIT_FEATURE_FLAG.NAME),
+                    result.get(RPKIT_FEATURE_FLAG.ENABLED_BY_DEFAULT) == 1.toByte()
+            )
+            cache?.put(id, featureFlag)
+            return featureFlag
+        }
     }
 
     fun get(name: String): RPKFeatureFlag? {
@@ -99,6 +107,6 @@ class RPKFeatureFlagTable(database: Database, private val plugin: RPKFeatureFlag
                 .deleteFrom(RPKIT_FEATURE_FLAG)
                 .where(RPKIT_FEATURE_FLAG.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 }

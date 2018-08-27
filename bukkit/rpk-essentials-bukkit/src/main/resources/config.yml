@@ -79,3 +79,16 @@ kits:
   items:
   - ==: org.bukkit.inventory.ItemStack
     type: EGG
+caching:
+    rpkit_log_messages_enabled:
+        id:
+            enabled: true
+            size: 20
+    rpkit_previous_location:
+        id:
+            enabled: true
+            size: 20
+    rpkit_tracking_enabled:
+        id:
+            enabled: true
+            size: 20
