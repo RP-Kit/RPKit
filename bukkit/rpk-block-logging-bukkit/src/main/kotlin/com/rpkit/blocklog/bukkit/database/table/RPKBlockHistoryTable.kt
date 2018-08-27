@@ -9,10 +9,8 @@ import com.rpkit.core.database.Table
 import org.bukkit.block.Block
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKBlockHistoryTable(database: Database, private val plugin: RPKBlockLoggingBukkit): Table<RPKBlockHistory>(database, RPKBlockHistory::class) {
@@ -28,12 +26,7 @@ class RPKBlockHistoryTable(database: Database, private val plugin: RPKBlockLoggi
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_BLOCK_HISTORY)
-                .column(RPKIT_BLOCK_HISTORY.ID,
-                        if (database.dialect == SQLDialect.SQLITE)
-                            SQLiteDataType.INTEGER.identity(true)
-                        else
-                            SQLDataType.INTEGER.identity(true)
-                )
+                .column(RPKIT_BLOCK_HISTORY.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_BLOCK_HISTORY.WORLD, SQLDataType.VARCHAR(256))
                 .column(RPKIT_BLOCK_HISTORY.X, SQLDataType.INTEGER)
                 .column(RPKIT_BLOCK_HISTORY.Y, SQLDataType.INTEGER)

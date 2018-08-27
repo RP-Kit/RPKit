@@ -10,10 +10,8 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import org.pircbotx.User
 
 
@@ -30,7 +28,7 @@ class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukki
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_IRC_PROFILE)
-                .column(RPKIT_IRC_PROFILE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_IRC_PROFILE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_IRC_PROFILE.PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_IRC_PROFILE.NICK, SQLDataType.VARCHAR(256))
                 .constraints(

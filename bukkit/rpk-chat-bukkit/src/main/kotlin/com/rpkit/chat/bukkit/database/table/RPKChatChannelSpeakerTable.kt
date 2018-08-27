@@ -26,11 +26,9 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the chat channel speaker table
@@ -48,7 +46,7 @@ class RPKChatChannelSpeakerTable(database: Database, private val plugin: RPKChat
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_CHAT_CHANNEL_SPEAKER)
-                .column(RPKIT_CHAT_CHANNEL_SPEAKER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_CHAT_CHANNEL_SPEAKER.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_ID, SQLDataType.INTEGER)
                 .constraints(

@@ -37,10 +37,8 @@ import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.Location
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the character table.
@@ -57,7 +55,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
 
     override fun create() {
         database.create.createTableIfNotExists(RPKIT_CHARACTER)
-                    .column(RPKIT_CHARACTER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                    .column(RPKIT_CHARACTER.ID, SQLDataType.INTEGER.identity(true))
                     .column(RPKIT_CHARACTER.PLAYER_ID, SQLDataType.INTEGER)
                     .column(RPKIT_CHARACTER.PROFILE_ID, SQLDataType.INTEGER)
                     .column(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)

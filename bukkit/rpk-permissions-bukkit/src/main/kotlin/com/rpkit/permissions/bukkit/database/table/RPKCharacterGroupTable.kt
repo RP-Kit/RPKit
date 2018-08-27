@@ -10,10 +10,8 @@ import com.rpkit.permissions.bukkit.group.RPKCharacterGroup
 import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKCharacterGroupTable(database: Database, private val plugin: RPKPermissionsBukkit): Table<RPKCharacterGroup>(database, RPKCharacterGroup::class) {
@@ -29,7 +27,7 @@ class RPKCharacterGroupTable(database: Database, private val plugin: RPKPermissi
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_CHARACTER_GROUP)
-                .column(RPKIT_CHARACTER_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_CHARACTER_GROUP.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_CHARACTER_GROUP.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_CHARACTER_GROUP.GROUP_NAME, SQLDataType.VARCHAR(256))
                 .constraints(

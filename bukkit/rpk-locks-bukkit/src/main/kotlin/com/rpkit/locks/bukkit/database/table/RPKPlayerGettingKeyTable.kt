@@ -9,11 +9,9 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKPlayerGettingKey>(database, RPKPlayerGettingKey::class) {
@@ -29,7 +27,7 @@ class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksB
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PLAYER_GETTING_KEY)
-                .column(RPKIT_PLAYER_GETTING_KEY.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PLAYER_GETTING_KEY.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .constraints(
                         constraint("pk_rpkit_player_getting_key").primaryKey(RPKIT_PLAYER_GETTING_KEY.ID)

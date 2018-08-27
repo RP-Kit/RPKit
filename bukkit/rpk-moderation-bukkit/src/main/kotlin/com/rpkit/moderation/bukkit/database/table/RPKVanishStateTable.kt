@@ -26,10 +26,8 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKVanishStateTable(database: Database, private val plugin: RPKModerationBukkit): Table<RPKVanishState>(database, RPKVanishState::class) {
@@ -45,7 +43,7 @@ class RPKVanishStateTable(database: Database, private val plugin: RPKModerationB
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_VANISH_STATE)
-                .column(RPKIT_VANISH_STATE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_VANISH_STATE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_VANISH_STATE.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_VANISH_STATE.VANISHED, SQLDataType.TINYINT.length(1))
                 .constraints(
@@ -62,7 +60,7 @@ class RPKVanishStateTable(database: Database, private val plugin: RPKModerationB
             database.create
                     .alterTable(Tables.RPKIT_VANISH_STATE)
                     .alterColumn(Tables.RPKIT_VANISH_STATE.ID)
-                        .set(if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                        .set(SQLDataType.INTEGER.identity(true))
                     .execute()
             database.setTableVersion(this, "1.5.2")
         }

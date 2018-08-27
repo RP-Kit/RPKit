@@ -25,10 +25,8 @@ import com.rpkit.unconsciousness.bukkit.database.jooq.rpkit.Tables.RPKIT_UNCONSC
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousState
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Timestamp
 
 
@@ -45,11 +43,7 @@ class RPKUnconsciousStateTable(database: Database, private val plugin: RPKUncons
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_UNCONSCIOUS_STATE)
-                .column(RPKIT_UNCONSCIOUS_STATE.ID,
-                        if (database.dialect == SQLDialect.SQLITE)
-                            SQLiteDataType.INTEGER.identity(true)
-                        else
-                            SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_UNCONSCIOUS_STATE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_UNCONSCIOUS_STATE.DEATH_TIME, SQLDataType.TIMESTAMP)
                 .constraints(

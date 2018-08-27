@@ -11,10 +11,8 @@ import com.rpkit.locks.bukkit.database.jooq.rpkit.Tables.RPKIT_KEYRING
 import com.rpkit.locks.bukkit.keyring.RPKKeyring
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKKeyring>(database, RPKKeyring::class) {
@@ -30,7 +28,7 @@ class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): T
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_KEYRING)
-                .column(RPKIT_KEYRING.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_KEYRING.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_KEYRING.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_KEYRING.ITEMS, SQLDataType.BLOB)
                 .constraints(

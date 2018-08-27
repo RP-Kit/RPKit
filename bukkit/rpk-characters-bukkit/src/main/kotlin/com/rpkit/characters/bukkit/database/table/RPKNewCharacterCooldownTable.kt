@@ -9,11 +9,9 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Date
 
 
@@ -39,7 +37,7 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_NEW_CHARACTER_COOLDOWN)
-                .column(RPKIT_NEW_CHARACTER_COOLDOWN.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_NEW_CHARACTER_COOLDOWN.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP, SQLDataType.DATE)
                 .constraints(

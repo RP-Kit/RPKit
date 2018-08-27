@@ -27,10 +27,8 @@ import com.rpkit.payments.bukkit.notification.RPKPaymentNotification
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Date
 
 /**
@@ -52,7 +50,7 @@ class RPKPaymentNotificationTable(
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PAYMENT_NOTIFICATION)
-                .column(RPKIT_PAYMENT_NOTIFICATION.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PAYMENT_NOTIFICATION.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PAYMENT_NOTIFICATION.GROUP_ID, SQLDataType.INTEGER)
                 .column(RPKIT_PAYMENT_NOTIFICATION.TO_ID, SQLDataType.INTEGER)
                 .column(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID, SQLDataType.INTEGER)

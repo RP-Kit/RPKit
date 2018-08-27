@@ -24,10 +24,8 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the race table.
@@ -53,7 +51,7 @@ class RPKRaceTable(database: Database, private val plugin: RPKCharactersBukkit):
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_RACE)
-                .column(RPKIT_RACE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_RACE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_RACE.NAME, SQLDataType.VARCHAR(256))
                 .constraints(
                         constraint("pk_rpkit_race").primaryKey(RPKIT_RACE.ID)

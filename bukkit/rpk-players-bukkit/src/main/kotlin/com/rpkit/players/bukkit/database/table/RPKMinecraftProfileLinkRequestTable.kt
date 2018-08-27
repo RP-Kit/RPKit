@@ -7,10 +7,8 @@ import com.rpkit.players.bukkit.database.jooq.rpkit.Tables.RPKIT_MINECRAFT_PROFI
 import com.rpkit.players.bukkit.profile.*
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKMinecraftProfileLinkRequestTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKMinecraftProfileLinkRequest>(database, RPKMinecraftProfileLinkRequest::class) {
 
@@ -25,7 +23,7 @@ class RPKMinecraftProfileLinkRequestTable(database: Database, private val plugin
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST)
-                .column(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .constraints(

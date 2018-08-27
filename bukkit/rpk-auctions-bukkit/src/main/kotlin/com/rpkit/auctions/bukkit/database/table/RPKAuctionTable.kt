@@ -30,10 +30,8 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import org.bukkit.Location
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the auction table.
@@ -52,7 +50,7 @@ class RPKAuctionTable(database: Database, private val plugin: RPKAuctionsBukkit)
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_AUCTION)
-                .column(RPKIT_AUCTION.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_AUCTION.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_AUCTION.ITEM, SQLDataType.BLOB)
                 .column(RPKIT_AUCTION.CURRENCY_ID, SQLDataType.INTEGER)
                 .column(RPKIT_AUCTION.WORLD, SQLDataType.VARCHAR(256))

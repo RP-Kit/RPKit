@@ -8,10 +8,8 @@ import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlag
 import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlagImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKFeatureFlagTable(database: Database, private val plugin: RPKFeatureFlagsBukkit): Table<RPKFeatureFlag>(database, RPKFeatureFlag::class) {
@@ -27,7 +25,7 @@ class RPKFeatureFlagTable(database: Database, private val plugin: RPKFeatureFlag
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_FEATURE_FLAG)
-                .column(RPKIT_FEATURE_FLAG.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_FEATURE_FLAG.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_FEATURE_FLAG.NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_FEATURE_FLAG.ENABLED_BY_DEFAULT, SQLDataType.TINYINT.length(1))
                 .constraints(

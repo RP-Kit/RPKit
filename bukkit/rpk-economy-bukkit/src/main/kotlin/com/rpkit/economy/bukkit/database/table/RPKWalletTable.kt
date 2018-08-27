@@ -27,10 +27,8 @@ import com.rpkit.economy.bukkit.database.jooq.rpkit.Tables.RPKIT_WALLET
 import com.rpkit.economy.bukkit.wallet.RPKWallet
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the wallet table.
@@ -48,7 +46,7 @@ class RPKWalletTable(database: Database, private val plugin: RPKEconomyBukkit) :
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_WALLET)
-                .column(RPKIT_WALLET.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_WALLET.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_WALLET.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_WALLET.CURRENCY_ID, SQLDataType.INTEGER)
                 .column(RPKIT_WALLET.BALANCE, SQLDataType.INTEGER)

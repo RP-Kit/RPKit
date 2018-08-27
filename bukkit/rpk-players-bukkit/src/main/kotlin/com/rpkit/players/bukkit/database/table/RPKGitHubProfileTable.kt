@@ -10,10 +10,8 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import org.kohsuke.github.GHUser
 
 
@@ -30,7 +28,7 @@ class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBu
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_GITHUB_PROFILE)
-                .column(RPKIT_GITHUB_PROFILE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_GITHUB_PROFILE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_GITHUB_PROFILE.PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_GITHUB_PROFILE.NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_GITHUB_PROFILE.OAUTH_TOKEN, SQLDataType.VARCHAR(1024))

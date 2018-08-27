@@ -9,11 +9,9 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKPlayerUnclaimingTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKPlayerUnclaiming>(database, RPKPlayerUnclaiming::class) {
@@ -29,7 +27,7 @@ class RPKPlayerUnclaimingTable(database: Database, private val plugin: RPKLocksB
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PLAYER_UNCLAIMING)
-                .column(RPKIT_PLAYER_UNCLAIMING.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PLAYER_UNCLAIMING.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .constraints(
                         constraint("pk_rpkit_player_unclaiming").primaryKey(RPKIT_PLAYER_UNCLAIMING.ID)

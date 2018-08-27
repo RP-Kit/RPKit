@@ -26,10 +26,8 @@ import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the player group table.
@@ -47,7 +45,7 @@ class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBuk
     override fun create() {
         database.create
                 .createTableIfNotExists(PLAYER_GROUP)
-                .column(PLAYER_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(PLAYER_GROUP.ID, SQLDataType.INTEGER.identity(true))
                 .column(PLAYER_GROUP.PLAYER_ID, SQLDataType.INTEGER)
                 .column(PLAYER_GROUP.GROUP_NAME, SQLDataType.VARCHAR(256))
                 .constraints(

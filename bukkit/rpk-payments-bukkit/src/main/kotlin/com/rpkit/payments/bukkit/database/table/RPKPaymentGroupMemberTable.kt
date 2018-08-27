@@ -26,10 +26,8 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.group.member.RPKPaymentGroupMember
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents payment group member table.
@@ -50,7 +48,7 @@ class RPKPaymentGroupMemberTable(
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PAYMENT_GROUP_MEMBER)
-                .column(RPKIT_PAYMENT_GROUP_MEMBER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PAYMENT_GROUP_MEMBER.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID, SQLDataType.INTEGER)
                 .column(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID, SQLDataType.INTEGER)
                 .constraints(

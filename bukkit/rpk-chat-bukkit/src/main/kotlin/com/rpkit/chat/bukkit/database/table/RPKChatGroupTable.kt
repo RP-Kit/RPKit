@@ -24,10 +24,8 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the chat group table.
@@ -53,7 +51,7 @@ class RPKChatGroupTable(database: Database, private val plugin: RPKChatBukkit): 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_CHAT_GROUP)
-                .column(RPKIT_CHAT_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_CHAT_GROUP.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_CHAT_GROUP.NAME, SQLDataType.VARCHAR(256))
                 .constraints(
                         constraint("pk_rpkit_chat_group").primaryKey(RPKIT_CHAT_GROUP.ID)
