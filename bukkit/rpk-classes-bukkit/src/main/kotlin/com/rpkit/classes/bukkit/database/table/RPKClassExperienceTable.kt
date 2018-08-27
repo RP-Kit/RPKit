@@ -11,10 +11,8 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKClassExperienceTable(database: Database, private val plugin: RPKClassesBukkit): Table<RPKClassExperience>(database, RPKClassExperience::class) {
@@ -30,7 +28,7 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_CLASS_EXPERIENCE)
-                .column(RPKIT_CLASS_EXPERIENCE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_CLASS_EXPERIENCE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_CLASS_EXPERIENCE.CLASS_NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_CLASS_EXPERIENCE.EXPERIENCE, SQLDataType.INTEGER)

@@ -9,10 +9,8 @@ import com.rpkit.drinks.bukkit.database.jooq.rpkit.Tables.RPKIT_DRUNKENNESS
 import com.rpkit.drinks.bukkit.drink.RPKDrunkenness
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKDrunkennessTable(database: Database, private val plugin: RPKDrinksBukkit): Table<RPKDrunkenness>(database, RPKDrunkenness::class) {
@@ -28,7 +26,7 @@ class RPKDrunkennessTable(database: Database, private val plugin: RPKDrinksBukki
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_DRUNKENNESS)
-                .column(RPKIT_DRUNKENNESS.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_DRUNKENNESS.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_DRUNKENNESS.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_DRUNKENNESS.DRUNKENNESS, SQLDataType.INTEGER)
                 .constraints(

@@ -25,11 +25,9 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the snooper table.
@@ -67,7 +65,7 @@ class RPKSnooperTable(database: Database, private val plugin: RPKChatBukkit): Ta
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_SNOOPER)
-                .column(RPKIT_SNOOPER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_SNOOPER.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .constraints(
                         constraint("pk_rpkit_snooper").primaryKey(RPKIT_SNOOPER.ID)

@@ -27,10 +27,8 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the bid table.
@@ -48,7 +46,7 @@ class RPKBidTable(database: Database, private val plugin: RPKAuctionsBukkit): Ta
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_BID)
-                .column(RPKIT_BID.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_BID.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_BID.AUCTION_ID, SQLDataType.INTEGER)
                 .column(RPKIT_BID.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_BID.AMOUNT, SQLDataType.INTEGER)

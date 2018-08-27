@@ -10,10 +10,8 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfileToken
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileTokenImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKMinecraftProfileToken>(database, RPKMinecraftProfileToken::class) {
@@ -29,7 +27,7 @@ class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKP
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_MINECRAFT_PROFILE_TOKEN)
-                .column(RPKIT_MINECRAFT_PROFILE_TOKEN.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_MINECRAFT_PROFILE_TOKEN.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_MINECRAFT_PROFILE_TOKEN.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_MINECRAFT_PROFILE_TOKEN.TOKEN, SQLDataType.VARCHAR(36))
                 .constraints(

@@ -25,10 +25,8 @@ import com.rpkit.economy.bukkit.character.MoneyHidden
 import com.rpkit.economy.bukkit.database.jooq.rpkit.Tables.MONEY_HIDDEN
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the money hidden table.
@@ -54,7 +52,7 @@ class MoneyHiddenTable(database: Database, private val plugin: RPKEconomyBukkit)
     override fun create() {
         database.create
                 .createTableIfNotExists(MONEY_HIDDEN)
-                .column(MONEY_HIDDEN.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(MONEY_HIDDEN.ID, SQLDataType.INTEGER.identity(true))
                 .column(MONEY_HIDDEN.CHARACTER_ID, SQLDataType.INTEGER)
                 .constraints(
                         constraint("pk_money_hidden").primaryKey(MONEY_HIDDEN.ID)

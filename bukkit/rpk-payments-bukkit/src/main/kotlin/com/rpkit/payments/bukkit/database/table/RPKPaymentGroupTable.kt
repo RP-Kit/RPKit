@@ -25,10 +25,8 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Timestamp
 
 /**
@@ -47,7 +45,7 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PAYMENT_GROUP)
-                .column(RPKIT_PAYMENT_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PAYMENT_GROUP.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PAYMENT_GROUP.NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_PAYMENT_GROUP.AMOUNT, SQLDataType.INTEGER)
                 .column(RPKIT_PAYMENT_GROUP.CURRENCY_ID, SQLDataType.INTEGER.nullable(true))

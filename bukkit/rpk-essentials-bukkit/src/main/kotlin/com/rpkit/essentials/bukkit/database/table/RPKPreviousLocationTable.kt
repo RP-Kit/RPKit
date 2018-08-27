@@ -10,11 +10,9 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.Location
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssentialsBukkit): Table<RPKPreviousLocation>(database, RPKPreviousLocation::class) {
@@ -30,7 +28,7 @@ class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssent
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PREVIOUS_LOCATION)
-                .column(RPKIT_PREVIOUS_LOCATION.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PREVIOUS_LOCATION.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_PREVIOUS_LOCATION.WORLD, SQLDataType.VARCHAR(256))
                 .column(RPKIT_PREVIOUS_LOCATION.X, SQLDataType.DOUBLE)

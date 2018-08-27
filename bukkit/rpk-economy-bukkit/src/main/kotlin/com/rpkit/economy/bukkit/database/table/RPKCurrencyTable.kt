@@ -25,10 +25,8 @@ import com.rpkit.economy.bukkit.database.jooq.rpkit.Tables.RPKIT_CURRENCY
 import org.bukkit.Material
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the currency table.
@@ -54,7 +52,7 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_CURRENCY)
-                .column(RPKIT_CURRENCY.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_CURRENCY.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_CURRENCY.NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_CURRENCY.NAME_SINGULAR, SQLDataType.VARCHAR(256))
                 .column(RPKIT_CURRENCY.NAME_PLURAL, SQLDataType.VARCHAR(256))

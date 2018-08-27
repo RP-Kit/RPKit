@@ -9,10 +9,8 @@ import com.rpkit.warp.bukkit.warp.RPKWarp
 import org.bukkit.Location
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Table<RPKWarp>(database, RPKWarp::class) {
@@ -28,7 +26,7 @@ class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Tab
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_WARP)
-                .column(RPKIT_WARP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_WARP.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_WARP.NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_WARP.WORLD, SQLDataType.VARCHAR(256))
                 .column(RPKIT_WARP.X, SQLDataType.DOUBLE)

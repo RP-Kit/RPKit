@@ -26,10 +26,8 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.group.owner.RPKPaymentGroupOwner
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents payment group owner table.
@@ -50,7 +48,7 @@ class RPKPaymentGroupOwnerTable(
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PAYMENT_GROUP_OWNER)
-                .column(RPKIT_PAYMENT_GROUP_OWNER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PAYMENT_GROUP_OWNER.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PAYMENT_GROUP_OWNER.PAYMENT_GROUP_ID, SQLDataType.INTEGER)
                 .column(RPKIT_PAYMENT_GROUP_OWNER.CHARACTER_ID, SQLDataType.INTEGER)
                 .constraints(

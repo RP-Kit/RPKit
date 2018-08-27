@@ -26,10 +26,8 @@ import com.rpkit.selection.bukkit.selection.RPKSelection
 import com.rpkit.selection.bukkit.selection.RPKSelectionImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKSelectionTable(database: Database, private val plugin: RPKSelectionBukkit): Table<RPKSelection>(database, RPKSelection::class) {
@@ -45,7 +43,7 @@ class RPKSelectionTable(database: Database, private val plugin: RPKSelectionBukk
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_SELECTION)
-                .column(RPKIT_SELECTION.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER else SQLDataType.INTEGER)
+                .column(RPKIT_SELECTION.ID, SQLDataType.INTEGER)
                 .column(RPKIT_SELECTION.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_SELECTION.WORLD, SQLDataType.VARCHAR(256))
                 .column(RPKIT_SELECTION.X_1, SQLDataType.INTEGER)

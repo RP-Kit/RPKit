@@ -26,10 +26,8 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Timestamp
 
 
@@ -46,7 +44,7 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_WARNING)
-                .column(RPKIT_WARNING.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_WARNING.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_WARNING.REASON, SQLDataType.VARCHAR.length(1024))
                 .column(RPKIT_WARNING.PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_WARNING.ISSUER_ID, SQLDataType.INTEGER)
@@ -65,7 +63,7 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
             database.create
                     .alterTable(RPKIT_WARNING)
                     .alterColumn(RPKIT_WARNING.ID)
-                        .set(if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                        .set(SQLDataType.INTEGER.identity(true))
                     .execute()
             database.setTableVersion(this, "1.5.2")
         }

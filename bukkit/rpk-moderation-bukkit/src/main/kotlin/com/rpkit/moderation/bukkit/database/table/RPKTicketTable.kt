@@ -26,10 +26,8 @@ import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.Location
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Timestamp
 
 
@@ -45,7 +43,7 @@ class RPKTicketTable(database: Database, private val plugin: RPKModerationBukkit
 
     override fun create() {
         database.create.createTableIfNotExists(RPKIT_TICKET)
-                .column(RPKIT_TICKET.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_TICKET.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_TICKET.REASON, SQLDataType.VARCHAR.length(1024))
                 .column(RPKIT_TICKET.ISSUER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_TICKET.RESOLVER_ID, SQLDataType.INTEGER)
@@ -72,7 +70,7 @@ class RPKTicketTable(database: Database, private val plugin: RPKModerationBukkit
             database.create
                     .alterTable(RPKIT_TICKET)
                     .alterColumn(RPKIT_TICKET.ID)
-                        .set(if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                        .set(SQLDataType.INTEGER.identity(true))
                     .execute()
             database.setTableVersion(this, "1.5.2")
         }

@@ -27,11 +27,9 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the chat channel mute table
@@ -49,7 +47,7 @@ class RPKChatChannelMuteTable(database: Database, private val plugin: RPKChatBuk
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_CHAT_CHANNEL_MUTE)
-                .column(RPKIT_CHAT_CHANNEL_MUTE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_CHAT_CHANNEL_MUTE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_ID, SQLDataType.INTEGER)
                 .constraints(

@@ -27,10 +27,8 @@ import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the bank table.
@@ -48,7 +46,7 @@ class RPKBankTable(database: Database, private val plugin: RPKBanksBukkit): Tabl
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_BANK)
-                .column(RPKIT_BANK.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_BANK.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_BANK.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_BANK.CURRENCY_ID, SQLDataType.INTEGER)
                 .column(RPKIT_BANK.BALANCE, SQLDataType.INTEGER)

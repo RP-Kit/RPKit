@@ -25,10 +25,8 @@ import com.rpkit.players.bukkit.player.RPKPlayerImpl
 import org.bukkit.OfflinePlayer
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import org.pircbotx.User
 import java.net.InetAddress
 import java.util.*
@@ -81,7 +79,7 @@ class RPKPlayerTable(plugin: RPKPlayersBukkit, database: Database): Table<RPKPla
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PLAYER)
-                .column(RPKIT_PLAYER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PLAYER.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PLAYER.NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_PLAYER.MINECRAFT_UUID, SQLDataType.VARCHAR(36))
                 .column(RPKIT_PLAYER.IRC_NICK, SQLDataType.VARCHAR(256))

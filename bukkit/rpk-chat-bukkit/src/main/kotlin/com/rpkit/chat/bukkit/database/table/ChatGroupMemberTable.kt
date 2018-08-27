@@ -27,11 +27,9 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the chat group member table.
@@ -65,7 +63,7 @@ class ChatGroupMemberTable(database: Database, private val plugin: RPKChatBukkit
     override fun create() {
         database.create
                 .createTableIfNotExists(CHAT_GROUP_MEMBER)
-                .column(CHAT_GROUP_MEMBER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(CHAT_GROUP_MEMBER.ID, SQLDataType.INTEGER.identity(true))
                 .column(CHAT_GROUP_MEMBER.CHAT_GROUP_ID, SQLDataType.INTEGER)
                 .column(CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .constraints(

@@ -26,11 +26,9 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the last used chat group table
@@ -56,7 +54,7 @@ class LastUsedChatGroupTable(database: Database, private val plugin: RPKChatBukk
     override fun create() {
         database.create
                 .createTableIfNotExists(LAST_USED_CHAT_GROUP)
-                .column(LAST_USED_CHAT_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(LAST_USED_CHAT_GROUP.ID, SQLDataType.INTEGER.identity(true))
                 .column(LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(LAST_USED_CHAT_GROUP.CHAT_GROUP_ID, SQLDataType.INTEGER)
                 .constraints(

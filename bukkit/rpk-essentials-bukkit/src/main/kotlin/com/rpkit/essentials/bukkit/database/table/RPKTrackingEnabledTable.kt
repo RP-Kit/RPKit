@@ -9,10 +9,8 @@ import com.rpkit.essentials.bukkit.database.jooq.rpkit.Tables.RPKIT_TRACKING_ENA
 import com.rpkit.essentials.bukkit.tracking.RPKTrackingEnabled
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKTrackingEnabledTable(database: Database, private val plugin: RPKEssentialsBukkit): Table<RPKTrackingEnabled>(database, RPKTrackingEnabled::class) {
@@ -28,7 +26,7 @@ class RPKTrackingEnabledTable(database: Database, private val plugin: RPKEssenti
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_TRACKING_ENABLED)
-                .column(RPKIT_TRACKING_ENABLED.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_TRACKING_ENABLED.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_TRACKING_ENABLED.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_TRACKING_ENABLED.ENABLED, SQLDataType.TINYINT.length(1))
                 .constraints(

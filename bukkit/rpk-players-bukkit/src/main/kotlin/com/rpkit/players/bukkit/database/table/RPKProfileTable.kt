@@ -8,10 +8,8 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKProfile>(database, RPKProfile::class) {
@@ -27,7 +25,7 @@ class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit):
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PROFILE)
-                .column(RPKIT_PROFILE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PROFILE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PROFILE.NAME, SQLDataType.VARCHAR(16))
                 .column(RPKIT_PROFILE.PASSWORD_HASH, SQLDataType.BLOB)
                 .column(RPKIT_PROFILE.PASSWORD_SALT, SQLDataType.BLOB)

@@ -14,10 +14,8 @@ import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.Material
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Timestamp
 
 class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggingBukkit): Table<RPKBlockChange>(database, RPKBlockChange::class) {
@@ -33,12 +31,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_BLOCK_CHANGE)
-                .column(RPKIT_BLOCK_CHANGE.ID,
-                        if (database.dialect == SQLDialect.SQLITE)
-                            SQLiteDataType.INTEGER.identity(true)
-                        else
-                            SQLDataType.INTEGER.identity(true)
-                )
+                .column(RPKIT_BLOCK_CHANGE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID, SQLDataType.INTEGER)
                 .column(RPKIT_BLOCK_CHANGE.TIME, SQLDataType.TIMESTAMP)
                 .column(RPKIT_BLOCK_CHANGE.PROFILE_ID, SQLDataType.INTEGER)

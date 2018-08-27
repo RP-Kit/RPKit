@@ -8,10 +8,8 @@ import com.rpkit.locks.bukkit.lock.RPKLockedBlock
 import org.bukkit.block.Block
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKLockedBlockTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKLockedBlock>(database, RPKLockedBlock::class) {
@@ -27,7 +25,7 @@ class RPKLockedBlockTable(database: Database, private val plugin: RPKLocksBukkit
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_LOCKED_BLOCK)
-                .column(RPKIT_LOCKED_BLOCK.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_LOCKED_BLOCK.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_LOCKED_BLOCK.WORLD, SQLDataType.VARCHAR(256))
                 .column(RPKIT_LOCKED_BLOCK.X, SQLDataType.INTEGER)
                 .column(RPKIT_LOCKED_BLOCK.Y, SQLDataType.INTEGER)

@@ -11,10 +11,8 @@ import com.rpkit.skills.bukkit.skills.RPKSkillCooldown
 import com.rpkit.skills.bukkit.skills.RPKSkillProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Timestamp
 
 
@@ -32,7 +30,7 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_SKILL_COOLDOWN)
-                .column(RPKIT_SKILL_COOLDOWN.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_SKILL_COOLDOWN.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_SKILL_COOLDOWN.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_SKILL_COOLDOWN.SKILL_NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP, SQLDataType.TIMESTAMP)

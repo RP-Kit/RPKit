@@ -25,10 +25,8 @@ import com.rpkit.shops.bukkit.database.jooq.rpkit.Tables.RPKIT_SHOP_COUNT
 import com.rpkit.shops.bukkit.shopcount.RPKShopCount
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the shop count table.
@@ -54,7 +52,7 @@ class RPKShopCountTable(database: Database, private val plugin: RPKShopsBukkit):
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_SHOP_COUNT)
-                .column(RPKIT_SHOP_COUNT.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_SHOP_COUNT.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_SHOP_COUNT.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_SHOP_COUNT.COUNT, SQLDataType.INTEGER)
                 .constraints(
