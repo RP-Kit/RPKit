@@ -16,9 +16,13 @@ import org.jooq.util.sqlite.SQLiteDataType
 
 class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKProfile>(database, RPKProfile::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_profile.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKProfile::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_profile.id.enabled")) {
+        database.cacheManager.createCache("rpk-players-bukkit.rpkit_profile.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKProfile::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_profile.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -56,7 +60,7 @@ class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit):
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -68,11 +72,11 @@ class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit):
                 .set(RPKIT_PROFILE.PASSWORD_SALT, entity.passwordSalt)
                 .where(RPKIT_PROFILE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKProfile? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -90,7 +94,7 @@ class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit):
                     result.get(RPKIT_PROFILE.PASSWORD_HASH),
                     result.get(RPKIT_PROFILE.PASSWORD_SALT)
             )
-            cache.put(id, profile)
+            cache?.put(id, profile)
             return profile
         }
     }
@@ -109,7 +113,7 @@ class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit):
                 .deleteFrom(RPKIT_PROFILE)
                 .where(RPKIT_PROFILE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

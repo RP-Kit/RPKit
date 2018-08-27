@@ -19,9 +19,13 @@ import org.kohsuke.github.GHUser
 
 class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKGitHubProfile>(database, RPKGitHubProfile::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_github_profile.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKGitHubProfile::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_github_profile.id.enabled")) {
+        database.cacheManager.createCache("rpk-players-bukkit.rpkit_github_profile.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKGitHubProfile::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_github_profile.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -58,7 +62,7 @@ class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBu
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -70,11 +74,11 @@ class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBu
                 .set(RPKIT_GITHUB_PROFILE.OAUTH_TOKEN, entity.oauthToken)
                 .where(RPKIT_GITHUB_PROFILE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKGitHubProfile? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -96,7 +100,7 @@ class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBu
                         result.get(RPKIT_GITHUB_PROFILE.NAME),
                         result.get(RPKIT_GITHUB_PROFILE.OAUTH_TOKEN)
                 )
-                cache.put(githubProfile.id, githubProfile)
+                cache?.put(githubProfile.id, githubProfile)
                 return githubProfile
             } else {
                 database.create
@@ -134,7 +138,7 @@ class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBu
                 .deleteFrom(RPKIT_GITHUB_PROFILE)
                 .where(RPKIT_GITHUB_PROFILE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

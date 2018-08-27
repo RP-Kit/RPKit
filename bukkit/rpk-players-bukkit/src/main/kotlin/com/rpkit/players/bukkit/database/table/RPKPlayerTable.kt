@@ -38,21 +38,45 @@ import java.util.*
  */
 class RPKPlayerTable(plugin: RPKPlayersBukkit, database: Database): Table<RPKPlayer>(database, RPKPlayer::class.java) {
 
-    private val cache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPlayer::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val nameCache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.name",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val minecraftCache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.minecraft_uuid",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val ircCache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.irc_nick",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-    private val ipCache = database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.last_known_ip",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_player.id.enabled")) {
+        database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPlayer::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_player.id.size"))).build())
+    } else {
+        null
+    }
+
+    private val nameCache = if (plugin.config.getBoolean("caching.rpkit_player.name.enabled")) {
+        database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.name",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_player.name.size"))).build())
+    } else {
+        null
+    }
+
+    private val minecraftCache = if (plugin.config.getBoolean("caching.rpkit_player.minecraft_uuid.enabled")) {
+        database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.minecraft_uuid",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_player.minecraft_uuid.size"))).build())
+    } else {
+        null
+    }
+
+    private val ircCache = if (plugin.config.getBoolean("caching.rpkit_player.irc_nick.enabled")) {
+        database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.irc_nick",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_player.irc_nick.size"))).build())
+    } else {
+        null
+    }
+
+    private val ipCache = if (plugin.config.getBoolean("caching.rpkit_player.last_known_ip.enabled")) {
+        database.cacheManager.createCache("rpk-players-bukkit.rpkit_player.last_known_ip",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_player.last_known_ip.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -110,15 +134,15 @@ class RPKPlayerTable(plugin: RPKPlayersBukkit, database: Database): Table<RPKPla
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
-        nameCache.put(entity.name, id)
+        cache?.put(id, entity)
+        nameCache?.put(entity.name, id)
         val bukkitPlayer = entity.bukkitPlayer
         if (bukkitPlayer != null) {
-            minecraftCache.put(bukkitPlayer.uniqueId.toString(), id)
+            minecraftCache?.put(bukkitPlayer.uniqueId.toString(), id)
         }
         val ircNick = entity.ircNick
         if (ircNick != null) {
-            ircCache.put(ircNick, id)
+            ircCache?.put(ircNick, id)
         }
         return id
     }
@@ -132,24 +156,24 @@ class RPKPlayerTable(plugin: RPKPlayersBukkit, database: Database): Table<RPKPla
                 .set(RPKIT_PLAYER.LAST_KNOWN_IP, entity.lastKnownIP)
                 .where(RPKIT_PLAYER.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
-        nameCache.put(entity.name, entity.id)
+        cache?.put(entity.id, entity)
+        nameCache?.put(entity.name, entity.id)
         val bukkitPlayer = entity.bukkitPlayer
         if (bukkitPlayer != null) {
-            minecraftCache.put(bukkitPlayer.uniqueId.toString(), entity.id)
+            minecraftCache?.put(bukkitPlayer.uniqueId.toString(), entity.id)
         }
         val ircNick = entity.ircNick
         if (ircNick != null) {
-            ircCache.put(ircNick, entity.id)
+            ircCache?.put(ircNick, entity.id)
         }
         val lastKnownIP = entity.lastKnownIP
         if (lastKnownIP != null) {
-            ipCache.put(lastKnownIP, entity.id)
+            ipCache?.put(lastKnownIP, entity.id)
         }
     }
 
     override fun get(id: Int): RPKPlayer? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -173,16 +197,16 @@ class RPKPlayerTable(plugin: RPKPlayersBukkit, database: Database): Table<RPKPla
                     ircNick,
                     lastKnownIP
             )
-            cache.put(id, player)
-            nameCache.put(name, id)
+            cache?.put(id, player)
+            nameCache?.put(name, id)
             if (minecraftUUID != null) {
-                minecraftCache.put(minecraftUUID, id)
+                minecraftCache?.put(minecraftUUID, id)
             }
             if (ircNick != null) {
-                ircCache.put(ircNick, id)
+                ircCache?.put(ircNick, id)
             }
             if (lastKnownIP != null) {
-                ipCache.put(lastKnownIP, id)
+                ipCache?.put(lastKnownIP, id)
             }
             return player
         }
@@ -196,7 +220,7 @@ class RPKPlayerTable(plugin: RPKPlayersBukkit, database: Database): Table<RPKPla
      * @return The player, or null if no player is found with the given name
      */
     fun get(name: String): RPKPlayer? {
-        if (nameCache.containsKey(name)) {
+        if (nameCache?.containsKey(name) == true) {
             return get(nameCache.get(name))
         } else {
             val result = database.create
@@ -216,7 +240,7 @@ class RPKPlayerTable(plugin: RPKPlayersBukkit, database: Database): Table<RPKPla
      * @return The player, or null if no player is found linked to the Bukkit player instance
      */
     fun get(bukkitPlayer: OfflinePlayer): RPKPlayer? {
-        if (minecraftCache.containsKey(bukkitPlayer.uniqueId.toString())) {
+        if (minecraftCache?.containsKey(bukkitPlayer.uniqueId.toString()) == true) {
             return get(minecraftCache[bukkitPlayer.uniqueId.toString()])
         } else {
             val result = database.create
@@ -237,7 +261,7 @@ class RPKPlayerTable(plugin: RPKPlayersBukkit, database: Database): Table<RPKPla
      * @return The player, or null if no player is found linked to the IRC user instance
      */
     fun get(ircUser: User): RPKPlayer? {
-        if (ircCache.containsKey(ircUser.nick)) {
+        if (ircCache?.containsKey(ircUser.nick) == true) {
             return get(ircCache.get(ircUser.nick))
         } else {
             val result = database.create
@@ -257,7 +281,7 @@ class RPKPlayerTable(plugin: RPKPlayersBukkit, database: Database): Table<RPKPla
      * @return The player that last used the IP, or null if no player is found that last used the IP
      */
     fun get(lastKnownIP: InetAddress): RPKPlayer? {
-        if (ipCache.containsKey(lastKnownIP.hostAddress)) {
+        if (ipCache?.containsKey(lastKnownIP.hostAddress) == true) {
             return get(ipCache.get(lastKnownIP.hostAddress))!!
         } else {
             val result = database.create
@@ -274,19 +298,19 @@ class RPKPlayerTable(plugin: RPKPlayersBukkit, database: Database): Table<RPKPla
                 .deleteFrom(RPKIT_PLAYER)
                 .where(RPKIT_PLAYER.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
-        nameCache.remove(entity.name)
+        cache?.remove(entity.id)
+        nameCache?.remove(entity.name)
         val bukkitPlayer = entity.bukkitPlayer
         if (bukkitPlayer != null) {
-            minecraftCache.remove(bukkitPlayer.uniqueId.toString())
+            minecraftCache?.remove(bukkitPlayer.uniqueId.toString())
         }
         val ircNick = entity.ircNick
         if (ircNick != null) {
-            ircCache.remove(ircNick)
+            ircCache?.remove(ircNick)
         }
         val lastKnownIP = entity.lastKnownIP
         if (lastKnownIP != null) {
-            ipCache.remove(lastKnownIP)
+            ipCache?.remove(lastKnownIP)
         }
     }
 
