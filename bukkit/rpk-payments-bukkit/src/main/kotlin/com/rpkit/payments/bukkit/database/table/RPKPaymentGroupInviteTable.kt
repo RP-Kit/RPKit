@@ -39,9 +39,13 @@ class RPKPaymentGroupInviteTable(
         private val plugin: RPKPaymentsBukkit
 ): Table<RPKPaymentGroupInvite>(database, RPKPaymentGroupInvite::class) {
 
-    private val cache = database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_group_invite.id", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroupInvite::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 20L)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_payment_group_invite.id.enabled")) {
+        database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_group_invite.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroupInvite::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_payment_group_invite.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
@@ -75,7 +79,7 @@ class RPKPaymentGroupInviteTable(
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -86,11 +90,11 @@ class RPKPaymentGroupInviteTable(
                 .set(RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID, entity.character.id)
                 .where(RPKIT_PAYMENT_GROUP_INVITE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKPaymentGroupInvite? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -113,14 +117,14 @@ class RPKPaymentGroupInviteTable(
                         paymentGroup,
                         character
                 )
-                cache.put(id, paymentGroupInvite)
+                cache?.put(id, paymentGroupInvite)
                 return paymentGroupInvite
             } else {
                 database.create
                         .deleteFrom(RPKIT_PAYMENT_GROUP_INVITE)
                         .where(RPKIT_PAYMENT_GROUP_INVITE.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
         }
@@ -142,7 +146,7 @@ class RPKPaymentGroupInviteTable(
                 .deleteFrom(RPKIT_PAYMENT_GROUP_INVITE)
                 .where(RPKIT_PAYMENT_GROUP_INVITE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }
