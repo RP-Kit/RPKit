@@ -12,3 +12,8 @@ skill-types:
 - magic_sword
 - speed_nimble
 - support_perform
+caching:
+    rpkit_skill_cooldown:
+        id:
+            enabled: true
+            size: 20
