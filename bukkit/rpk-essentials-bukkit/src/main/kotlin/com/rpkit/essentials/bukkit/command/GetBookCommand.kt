@@ -13,7 +13,7 @@ class GetBookCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.essentials.command.getbook")) {
             if (sender is Player) {
-                sender.inventory.addItem(ItemStack(Material.BOOK_AND_QUILL))
+                sender.inventory.addItem(ItemStack(Material.WRITABLE_BOOK))
                 sender.updateInventory()
                 sender.sendMessage(plugin.messages["get-book-valid"])
             } else {

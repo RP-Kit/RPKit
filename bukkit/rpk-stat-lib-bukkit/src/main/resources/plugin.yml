@@ -3,3 +3,4 @@ author: alyphen
 version: @version@
 main: com.rpkit.stats.bukkit.RPKStatLibBukkit
 depend: [rpk-core-bukkit, rpk-players-bukkit, rpk-characters-bukkit]
+api-version: 1.13

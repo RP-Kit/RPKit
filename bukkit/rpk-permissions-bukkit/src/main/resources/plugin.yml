@@ -3,6 +3,7 @@ author: alyphen
 version: @version@
 main: com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-permissions-lib-bukkit]
+api-version: 1.13
 commands:
     group:
         description: Group management command

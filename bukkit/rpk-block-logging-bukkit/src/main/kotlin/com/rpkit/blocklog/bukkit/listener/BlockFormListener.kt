@@ -22,9 +22,7 @@ class BlockFormListener(private val plugin: RPKBlockLoggingBukkit): Listener {
                 minecraftProfile = null,
                 character = null,
                 from = event.block.type,
-                fromData = event.block.data,
                 to = event.newState.type,
-                toData = event.newState.rawData,
                 reason = "FORM"
         )
         blockHistoryProvider.addBlockChange(blockChange)

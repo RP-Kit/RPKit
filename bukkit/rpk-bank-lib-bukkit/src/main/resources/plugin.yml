@@ -4,3 +4,4 @@ version: @version@
 main: com.rpkit.banks.bukkit.RPKBankLibBukkit
 depend: [rpk-core-bukkit, rpk-character-lib-bukkit, rpk-economy-lib-bukkit]
 softdepend: [Vault]
+api-version: 1.13

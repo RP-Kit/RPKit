@@ -6,3 +6,4 @@ depend:
 - rpk-core-bukkit
 - rpk-character-lib-bukkit
 - rpk-drink-lib-bukkit
+api-version: 1.13

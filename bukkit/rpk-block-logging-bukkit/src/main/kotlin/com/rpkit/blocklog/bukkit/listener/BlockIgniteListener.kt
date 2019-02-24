@@ -30,9 +30,7 @@ class BlockIgniteListener(private val plugin: RPKBlockLoggingBukkit): Listener {
                 minecraftProfile = minecraftProfile,
                 character = character,
                 from = event.block.type,
-                fromData = event.block.data,
                 to = event.block.type,
-                toData = event.block.data,
                 reason = "IGNITE"
         )
         blockHistoryProvider.addBlockChange(blockChange)

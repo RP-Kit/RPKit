@@ -3,3 +3,4 @@ author: alyphen
 version: @version@
 main: com.rpkit.permissions.bukkit.RPKPermissionsLibBukkit
 depend: [rpk-core-bukkit, rpk-player-lib-bukkit]
+api-version: 1.13

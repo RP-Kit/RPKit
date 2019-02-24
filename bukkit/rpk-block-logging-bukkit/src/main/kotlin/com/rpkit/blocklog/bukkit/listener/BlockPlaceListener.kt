@@ -29,9 +29,7 @@ class BlockPlaceListener(private val plugin: RPKBlockLoggingBukkit): Listener {
                 minecraftProfile = minecraftProfile,
                 character = character,
                 from = event.blockReplacedState.type,
-                fromData = event.blockReplacedState.rawData,
                 to = event.block.type,
-                toData = event.block.data,
                 reason = "PLACE"
         )
         blockHistoryProvider.addBlockChange(blockChange)

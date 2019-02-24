@@ -3,3 +3,4 @@ version: @version@
 author: alyphen
 main: com.rpkit.skills.bukkit.RPKSkillLibBukkit
 depend: [rpk-core-bukkit, rpk-character-lib-bukkit]
+api-version: 1.13

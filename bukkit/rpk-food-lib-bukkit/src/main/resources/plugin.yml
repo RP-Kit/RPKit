@@ -4,3 +4,4 @@ version: @version@
 main: com.rpkit.food.bukkit.RPKFoodLibBukkit
 depend:
 - rpk-core-bukkit
+api-version: 1.13

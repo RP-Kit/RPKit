@@ -14,8 +14,6 @@ class RPKBlockChangeImpl(
         override val minecraftProfile: RPKMinecraftProfile?,
         override val character: RPKCharacter?,
         override val from: Material,
-        override val fromData: Byte,
         override val to: Material,
-        override val toData: Byte,
         override val reason: String
 ) : RPKBlockChange

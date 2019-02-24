@@ -22,9 +22,7 @@ class EntityBlockFormListener(private val plugin: RPKBlockLoggingBukkit): Listen
                 minecraftProfile = null,
                 character = null,
                 from = event.block.type,
-                fromData = event.block.data,
                 to = event.newState.type,
-                toData = event.newState.rawData,
                 reason = "ENTITY_FORM"
         )
         blockHistoryProvider.addBlockChange(blockChange)

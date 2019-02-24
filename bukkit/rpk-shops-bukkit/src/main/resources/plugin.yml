@@ -9,6 +9,7 @@ depend:
 - rpk-economy-lib-bukkit
 - rpk-bank-lib-bukkit
 - rpk-shop-lib-bukkit
+api-version: 1.13
 commands:
     restock:
         description: Restocks the stock in your line of sight with the given item

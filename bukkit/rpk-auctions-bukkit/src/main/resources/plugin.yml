@@ -3,6 +3,7 @@ author: alyphen
 version: @version@
 main: com.rpkit.auctions.bukkit.RPKAuctionsBukkit
 depend: [rpk-core-bukkit, rpk-character-lib-bukkit, rpk-economy-lib-bukkit, rpk-auction-lib-bukkit]
+api-version: 1.13
 commands:
     auction:
         description: Auction management command

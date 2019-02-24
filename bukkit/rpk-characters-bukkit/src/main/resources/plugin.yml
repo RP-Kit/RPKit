@@ -4,6 +4,7 @@ main: com.rpkit.characters.bukkit.RPKCharactersBukkit
 author: alyphen
 description: RPK Characters implementation for Bukkit
 depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-character-lib-bukkit]
+api-version: 1.13
 commands:
     character:
         description: Character management command

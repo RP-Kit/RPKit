@@ -42,7 +42,6 @@ class RollbackCommand(private val plugin: RPKBlockLoggingBukkit): CommandExecuto
                 for (z in (sender.location.blockZ - radius)..(sender.location.blockZ + radius)) {
                     val block = sender.world.getBlockAt(x, y, z)
                     block.type = blockHistoryProvider.getBlockTypeAtTime(block, time)
-                    block.data = blockHistoryProvider.getBlockDataAtTime(block, time)
                     val state = block.state
                     if (state is InventoryHolder) {
                         state.inventory.contents = blockHistoryProvider.getBlockInventoryAtTime(block, time)

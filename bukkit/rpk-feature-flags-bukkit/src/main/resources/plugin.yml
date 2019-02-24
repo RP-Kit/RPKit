@@ -5,3 +5,4 @@ main: com.rpkit.featureflags.bukkit.RPKFeatureFlagsBukkit
 depend:
 - rpk-core-bukkit
 - rpk-feature-flag-lib-bukkit
+api-version: 1.13

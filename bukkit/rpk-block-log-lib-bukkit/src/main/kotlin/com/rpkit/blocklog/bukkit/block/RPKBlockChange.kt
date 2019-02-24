@@ -15,9 +15,7 @@ interface RPKBlockChange: Entity {
     val minecraftProfile: RPKMinecraftProfile?
     val character: RPKCharacter?
     val from: Material
-    val fromData: Byte
     val to: Material
-    val toData: Byte
     val reason: String
 
 }

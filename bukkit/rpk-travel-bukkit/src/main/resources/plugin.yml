@@ -5,6 +5,7 @@ main: com.rpkit.travel.bukkit.RPKTravelBukkit
 depend:
 - rpk-core-bukkit
 - rpk-warp-lib-bukkit
+api-version: 1.13
 commands:
     deletewarp:
         description: Deletes a warp

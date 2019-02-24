@@ -56,7 +56,7 @@ class RPKBlockLoggingBukkit : RPKBukkitPlugin() {
         messages.setDefault("no-permission-history", "&cYou do not have permission to view the history of blocks.")
         messages.setDefault("history-no-target-block", "&cYou must be looking at a block to view the history of.")
         messages.setDefault("history-no-changes", "&cThat block has no recorded changes.")
-        messages.setDefault("history-change", "&f\$time - \$profile/\$minecraft-profile/\$character - \$from:\$from-data to \$to:\$to-data - \$reason")
+        messages.setDefault("history-change", "&f\$time - \$profile/\$minecraft-profile/\$character - \$from to \$to - \$reason")
         messages.setDefault("no-permission-inventory-history", "&cYou do not have permission to view the inventory history of blocks.")
         messages.setDefault("inventory-history-no-target-block", "&cYou must be looking at a block to view the history of its inventory.")
         messages.setDefault("inventory-history-no-changes", "&cThat block has no recorded inventory changes.")

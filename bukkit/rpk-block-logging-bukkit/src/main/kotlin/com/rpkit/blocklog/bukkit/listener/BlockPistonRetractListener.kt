@@ -22,9 +22,7 @@ class BlockPistonRetractListener(private val plugin: RPKBlockLoggingBukkit): Lis
                 minecraftProfile = null,
                 character = null,
                 from = event.block.type,
-                fromData = event.block.data,
                 to = Material.AIR,
-                toData = 0,
                 reason = "PISTON"
         )
         blockHistoryProvider.addBlockChange(blockChange)

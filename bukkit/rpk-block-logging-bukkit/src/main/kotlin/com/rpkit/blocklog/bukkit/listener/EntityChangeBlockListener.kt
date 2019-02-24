@@ -22,9 +22,7 @@ class EntityChangeBlockListener(private val plugin: RPKBlockLoggingBukkit): List
                 minecraftProfile = null,
                 character = null,
                 from = event.block.type,
-                fromData = event.block.data,
                 to = event.to,
-                toData = event.data,
                 reason = "ENTITY_CHANGE"
         )
         blockHistoryProvider.addBlockChange(blockChange)
