@@ -18,6 +18,9 @@ package com.rpkit.auctions.bukkit.auction
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
 import com.rpkit.auctions.bukkit.database.table.RPKAuctionTable
+import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionCreateEvent
+import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionDeleteEvent
+import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionUpdateEvent
 
 /**
  * Auction provider implementation.
@@ -28,16 +31,28 @@ class RPKAuctionProviderImpl(private val plugin: RPKAuctionsBukkit): RPKAuctionP
         return plugin.core.database.getTable(RPKAuctionTable::class)[id]
     }
 
-    override fun addAuction(auction: RPKAuction) {
-        plugin.core.database.getTable(RPKAuctionTable::class).insert(auction)
+    override fun addAuction(auction: RPKAuction): Boolean {
+        val event = RPKBukkitAuctionCreateEvent(auction)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return false
+        plugin.core.database.getTable(RPKAuctionTable::class).insert(event.auction)
+        return true
     }
 
-    override fun updateAuction(auction: RPKAuction) {
-        plugin.core.database.getTable(RPKAuctionTable::class).update(auction)
+    override fun updateAuction(auction: RPKAuction): Boolean {
+        val event = RPKBukkitAuctionUpdateEvent(auction)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return false
+        plugin.core.database.getTable(RPKAuctionTable::class).update(event.auction)
+        return true
     }
 
-    override fun removeAuction(auction: RPKAuction) {
-        plugin.core.database.getTable(RPKAuctionTable::class).delete(auction)
+    override fun removeAuction(auction: RPKAuction): Boolean {
+        val event = RPKBukkitAuctionDeleteEvent(auction)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return false
+        plugin.core.database.getTable(RPKAuctionTable::class).delete(event.auction)
+        return true
     }
 
     override fun getAuctions(): List<RPKAuction> {
