@@ -24,9 +24,7 @@ class EntityExplodeListener(private val plugin: RPKBlockLoggingBukkit): Listener
                     minecraftProfile = null,
                     character = null,
                     from = block.type,
-                    fromData = block.data,
                     to = Material.AIR,
-                    toData = 0,
                     reason = "ENTITY_EXPLODE"
             )
             blockHistoryProvider.addBlockChange(blockChange)

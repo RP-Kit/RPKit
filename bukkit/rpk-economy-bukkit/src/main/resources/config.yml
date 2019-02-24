@@ -4,3 +4,22 @@ currency:
     default: null
 dynamic-exchanges:
     rate-change: 0.01
+caching:
+    money_hidden:
+        id:
+            enabled: true
+            size: 20
+        character_id:
+            enabled: true
+            size: 20
+    rpkit_currency:
+        id:
+            enabled: true
+            size: 5
+        name:
+            enabled: true
+            size: 5
+    rpkit_wallet:
+        id:
+            enabled: true
+            size: 20

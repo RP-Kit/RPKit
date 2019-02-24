@@ -25,31 +25,36 @@ import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the last used chat group table
  */
 class LastUsedChatGroupTable(database: Database, private val plugin: RPKChatBukkit): Table<LastUsedChatGroup>(database, LastUsedChatGroup::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, LastUsedChatGroup::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
-    private val minecraftProfileCache = cacheManager.createCache("minecraftProfileCache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.last_used_chat_group.id.enabled")) {
+        database.cacheManager.createCache("rpk-chat-bukkit.last_used_chat_group.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, LastUsedChatGroup::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.last_used_chat_group.id.size"))))
+    } else {
+        null
+    }
+
+    private val minecraftProfileCache = if (plugin.config.getBoolean("caching.last_used_chat_group.minecraft_profile_id.enabled")) {
+        database.cacheManager.createCache("rpk-chat-bukkit.last_used_chat_group.minecraft_profile_id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.last_used_chat_group.minecraft_profile_id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(LAST_USED_CHAT_GROUP)
-                .column(LAST_USED_CHAT_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(LAST_USED_CHAT_GROUP.ID, SQLDataType.INTEGER.identity(true))
                 .column(LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(LAST_USED_CHAT_GROUP.CHAT_GROUP_ID, SQLDataType.INTEGER)
                 .constraints(
@@ -92,8 +97,8 @@ class LastUsedChatGroupTable(database: Database, private val plugin: RPKChatBukk
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
-        minecraftProfileCache.put(entity.minecraftProfile.id, id)
+        cache?.put(id, entity)
+        minecraftProfileCache?.put(entity.minecraftProfile.id, id)
         return id
     }
 
@@ -104,12 +109,12 @@ class LastUsedChatGroupTable(database: Database, private val plugin: RPKChatBukk
                 .set(LAST_USED_CHAT_GROUP.CHAT_GROUP_ID, entity.chatGroup.id)
                 .where(LAST_USED_CHAT_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
-        minecraftProfileCache.put(entity.minecraftProfile.id, entity.id)
+        cache?.put(entity.id, entity)
+        minecraftProfileCache?.put(entity.minecraftProfile.id, entity.id)
     }
 
     override fun get(id: Int): LastUsedChatGroup? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -132,8 +137,8 @@ class LastUsedChatGroupTable(database: Database, private val plugin: RPKChatBukk
                         minecraftProfile,
                         chatGroup
                 )
-                cache.put(id, lastUsedChatGroup)
-                minecraftProfileCache.put(lastUsedChatGroup.minecraftProfile.id, id)
+                cache?.put(id, lastUsedChatGroup)
+                minecraftProfileCache?.put(lastUsedChatGroup.minecraftProfile.id, id)
                 return lastUsedChatGroup
             } else {
                 database.create
@@ -153,7 +158,7 @@ class LastUsedChatGroupTable(database: Database, private val plugin: RPKChatBukk
      * @return The minecraftProfile's last used chat group, or null if no chat group has been used
      */
     fun get(minecraftProfile: RPKMinecraftProfile): LastUsedChatGroup? {
-        if (minecraftProfileCache.containsKey(minecraftProfile.id)) {
+        if (minecraftProfileCache?.containsKey(minecraftProfile.id) == true) {
             return get(minecraftProfileCache.get(minecraftProfile.id))
         } else {
             val result = database.create
@@ -170,8 +175,8 @@ class LastUsedChatGroupTable(database: Database, private val plugin: RPKChatBukk
                 .deleteFrom(LAST_USED_CHAT_GROUP)
                 .where(LAST_USED_CHAT_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
-        minecraftProfileCache.remove(entity.minecraftProfile.id)
+        cache?.remove(entity.id)
+        minecraftProfileCache?.remove(entity.minecraftProfile.id)
     }
 
 }

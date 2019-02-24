@@ -7,18 +7,26 @@ import com.rpkit.travel.bukkit.database.jooq.rpkit.Tables.RPKIT_WARP
 import com.rpkit.travel.bukkit.warp.RPKWarpImpl
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import org.bukkit.Location
-import org.jooq.SQLDialect
+import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Table<RPKWarp>(database, RPKWarp::class) {
 
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_warp.id.enabled")) {
+        database.cacheManager.createCache("rpk-travel-bukkit.rpkit_warp.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKWarp::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_warp.id.size"))))
+    } else {
+        null
+    }
+
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_WARP)
-                .column(RPKIT_WARP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_WARP.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_WARP.NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_WARP.WORLD, SQLDataType.VARCHAR(256))
                 .column(RPKIT_WARP.X, SQLDataType.DOUBLE)
@@ -62,6 +70,7 @@ class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Tab
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
+        cache?.put(id, entity)
         return id
     }
 
@@ -77,35 +86,41 @@ class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Tab
                 .set(RPKIT_WARP.PITCH, entity.location.pitch.toDouble())
                 .where(RPKIT_WARP.ID.eq(entity.id))
                 .execute()
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKWarp? {
-        val result = database.create
-                .select(
-                        RPKIT_WARP.NAME,
-                        RPKIT_WARP.WORLD,
-                        RPKIT_WARP.X,
-                        RPKIT_WARP.Y,
-                        RPKIT_WARP.Z,
-                        RPKIT_WARP.YAW,
-                        RPKIT_WARP.PITCH
-                )
-                .from(RPKIT_WARP)
-                .where(RPKIT_WARP.ID.eq(id))
-                .fetchOne() ?: return null
-        val warp = RPKWarpImpl(
-                id,
-                result.get(RPKIT_WARP.NAME),
-                Location(
-                        plugin.server.getWorld(result.get(RPKIT_WARP.WORLD)),
-                        result.get(RPKIT_WARP.X),
-                        result.get(RPKIT_WARP.Y),
-                        result.get(RPKIT_WARP.Z),
-                        result.get(RPKIT_WARP.YAW).toFloat(),
-                        result.get(RPKIT_WARP.PITCH).toFloat()
-                )
-        )
-        return warp
+        if (cache?.containsKey(id) == true) {
+            return cache[id]
+        } else {
+            val result = database.create
+                    .select(
+                            RPKIT_WARP.NAME,
+                            RPKIT_WARP.WORLD,
+                            RPKIT_WARP.X,
+                            RPKIT_WARP.Y,
+                            RPKIT_WARP.Z,
+                            RPKIT_WARP.YAW,
+                            RPKIT_WARP.PITCH
+                    )
+                    .from(RPKIT_WARP)
+                    .where(RPKIT_WARP.ID.eq(id))
+                    .fetchOne() ?: return null
+            val warp = RPKWarpImpl(
+                    id,
+                    result.get(RPKIT_WARP.NAME),
+                    Location(
+                            plugin.server.getWorld(result.get(RPKIT_WARP.WORLD)),
+                            result.get(RPKIT_WARP.X),
+                            result.get(RPKIT_WARP.Y),
+                            result.get(RPKIT_WARP.Z),
+                            result.get(RPKIT_WARP.YAW).toFloat(),
+                            result.get(RPKIT_WARP.PITCH).toFloat()
+                    )
+            )
+            cache?.put(id, warp)
+            return warp
+        }
     }
 
     fun get(name: String): RPKWarp? {
@@ -131,6 +146,7 @@ class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Tab
                 .deleteFrom(RPKIT_WARP)
                 .where(RPKIT_WARP.ID.eq(entity.id))
                 .execute()
+        cache?.remove(entity.id)
     }
 
 }

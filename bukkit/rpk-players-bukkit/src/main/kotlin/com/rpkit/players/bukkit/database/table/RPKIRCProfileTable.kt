@@ -9,26 +9,26 @@ import com.rpkit.players.bukkit.profile.RPKIRCProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import org.pircbotx.User
 
 
 class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKIRCProfile>(database, RPKIRCProfile::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKIRCProfile::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_irc_profile.id.enabled")) {
+        database.cacheManager.createCache("rpk-players-bukkit.rpkit_irc_profile.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKIRCProfile::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_irc_profile.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_IRC_PROFILE)
-                .column(RPKIT_IRC_PROFILE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_IRC_PROFILE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_IRC_PROFILE.PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_IRC_PROFILE.NICK, SQLDataType.VARCHAR(256))
                 .constraints(
@@ -57,7 +57,7 @@ class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukki
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -68,11 +68,11 @@ class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukki
                 .set(RPKIT_IRC_PROFILE.NICK, entity.nick)
                 .where(RPKIT_IRC_PROFILE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKIRCProfile? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -92,7 +92,7 @@ class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukki
                         profile,
                         result.get(RPKIT_IRC_PROFILE.NICK)
                 )
-                cache.put(id, ircProfile)
+                cache?.put(id, ircProfile)
                 return ircProfile
             } else {
                 database.create
@@ -130,7 +130,7 @@ class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukki
                 .deleteFrom(RPKIT_IRC_PROFILE)
                 .where(RPKIT_IRC_PROFILE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

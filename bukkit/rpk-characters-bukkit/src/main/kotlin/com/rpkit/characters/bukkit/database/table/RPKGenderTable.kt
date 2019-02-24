@@ -16,37 +16,41 @@
 
 package com.rpkit.characters.bukkit.database.table
 
+import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.jooq.rpkit.Tables.RPKIT_GENDER
 import com.rpkit.characters.bukkit.gender.RPKGender
 import com.rpkit.characters.bukkit.gender.RPKGenderImpl
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the gender table.
  */
-class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::class) {
+class RPKGenderTable(database: Database, private val plugin: RPKCharactersBukkit): Table<RPKGender>(database, RPKGender::class) {
 
-    private val cacheManager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache: Cache<Int, RPKGender> = cacheManager.createCache("cache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKGender::class.java,
-                    ResourcePoolsBuilder.heap(10L)).build())
-    private val nameCache: Cache<String, Int> = cacheManager.createCache("nameCache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                    ResourcePoolsBuilder.heap(10L)).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_gender.id.enabled")) {
+        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_gender.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKGender::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_gender.id.size"))).build())
+    } else {
+        null
+    }
+
+    private val nameCache = if (plugin.config.getBoolean("caching.rpkit_gender.name.enabled")) {
+        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_gender.name",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_gender.name.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create.createTableIfNotExists(RPKIT_GENDER)
-                .column(RPKIT_GENDER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_GENDER.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_GENDER.NAME, SQLDataType.VARCHAR(256))
                 .constraints(
                         constraint("pk_rpkit_gender").primaryKey(RPKIT_GENDER.ID)
@@ -72,8 +76,8 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
-        nameCache.put(entity.name, id)
+        cache?.put(id, entity)
+        nameCache?.put(entity.name, id)
         return id
     }
 
@@ -86,7 +90,7 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
     }
 
     override fun get(id: Int): RPKGender? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -101,8 +105,8 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
                     result.get(RPKIT_GENDER.ID),
                     result.get(RPKIT_GENDER.NAME)
             )
-            cache.put(id, gender)
-            nameCache.put(gender.name, id)
+            cache?.put(id, gender)
+            nameCache?.put(gender.name, id)
             return gender
         }
     }
@@ -124,7 +128,7 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
      * @return The gender, or null if no gender is found with the given name
      */
     operator fun get(name: String): RPKGender? {
-        if (nameCache.containsKey(name)) {
+        if (nameCache?.containsKey(name) == true) {
             return get(nameCache.get(name) as Int)
         } else {
             val result = database.create
@@ -139,8 +143,8 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
                     result.get(RPKIT_GENDER.ID),
                     result.get(RPKIT_GENDER.NAME)
             )
-            cache.put(gender.id, gender)
-            nameCache.put(name, gender.id)
+            cache?.put(gender.id, gender)
+            nameCache?.put(name, gender.id)
             return gender
         }
     }
@@ -150,8 +154,8 @@ class RPKGenderTable(database: Database): Table<RPKGender>(database, RPKGender::
                 .deleteFrom(RPKIT_GENDER)
                 .where(RPKIT_GENDER.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
-        nameCache.remove(entity.name)
+        cache?.remove(entity.id)
+        nameCache?.remove(entity.name)
     }
 
 }

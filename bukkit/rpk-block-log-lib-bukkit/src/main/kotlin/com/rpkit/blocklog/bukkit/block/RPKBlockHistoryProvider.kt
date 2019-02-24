@@ -22,7 +22,6 @@ interface RPKBlockHistoryProvider: ServiceProvider {
     fun removeBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange)
     fun getBlockHistory(block: Block): RPKBlockHistory
     fun getBlockTypeAtTime(block: Block, time: Long): Material
-    fun getBlockDataAtTime(block: Block, time: Long): Byte
     fun getBlockInventoryAtTime(block: Block, time: Long): Array<ItemStack>
 
 }

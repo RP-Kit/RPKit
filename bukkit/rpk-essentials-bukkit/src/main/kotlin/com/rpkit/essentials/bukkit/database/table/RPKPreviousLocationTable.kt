@@ -8,19 +8,27 @@ import com.rpkit.essentials.bukkit.locationhistory.RPKPreviousLocation
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.Location
-import org.jooq.SQLDialect
+import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssentialsBukkit): Table<RPKPreviousLocation>(database, RPKPreviousLocation::class) {
 
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_previous_location.id.enabled")) {
+        database.cacheManager.createCache("rpk-essentials-bukkit.rpkit_previous_location.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPreviousLocation::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_previous_location.id.size"))))
+    } else {
+        null
+    }
+
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PREVIOUS_LOCATION)
-                .column(RPKIT_PREVIOUS_LOCATION.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PREVIOUS_LOCATION.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_PREVIOUS_LOCATION.WORLD, SQLDataType.VARCHAR(256))
                 .column(RPKIT_PREVIOUS_LOCATION.X, SQLDataType.DOUBLE)
@@ -78,6 +86,7 @@ class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssent
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
+        cache?.put(id, entity)
         return id
     }
 
@@ -93,45 +102,52 @@ class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssent
                 .set(RPKIT_PREVIOUS_LOCATION.PITCH, entity.location.pitch.toDouble())
                 .where(RPKIT_PREVIOUS_LOCATION.ID.eq(entity.id))
                 .execute()
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKPreviousLocation? {
-        val result = database.create
-                .select(
-                        RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID,
-                        RPKIT_PREVIOUS_LOCATION.WORLD,
-                        RPKIT_PREVIOUS_LOCATION.X,
-                        RPKIT_PREVIOUS_LOCATION.Y,
-                        RPKIT_PREVIOUS_LOCATION.Z,
-                        RPKIT_PREVIOUS_LOCATION.YAW,
-                        RPKIT_PREVIOUS_LOCATION.PITCH
-                )
-                .from(RPKIT_PREVIOUS_LOCATION)
-                .where(RPKIT_PREVIOUS_LOCATION.ID.eq(id))
-                .fetchOne() ?: return null
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfileId = result.get(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
-        if (minecraftProfile != null) {
-            val previousLocation = RPKPreviousLocation(
-                    id,
-                    minecraftProfile,
-                    Location(
-                            plugin.server.getWorld(result.get(RPKIT_PREVIOUS_LOCATION.WORLD)),
-                            result.get(RPKIT_PREVIOUS_LOCATION.X),
-                            result.get(RPKIT_PREVIOUS_LOCATION.Y),
-                            result.get(RPKIT_PREVIOUS_LOCATION.Z),
-                            result.get(RPKIT_PREVIOUS_LOCATION.YAW).toFloat(),
-                            result.get(RPKIT_PREVIOUS_LOCATION.PITCH).toFloat()
-                    )
-            )
-            return previousLocation
+        if (cache?.containsKey(id) == true) {
+            return cache[id]
         } else {
-            database.create
-                    .deleteFrom(RPKIT_PREVIOUS_LOCATION)
+            val result = database.create
+                    .select(
+                            RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID,
+                            RPKIT_PREVIOUS_LOCATION.WORLD,
+                            RPKIT_PREVIOUS_LOCATION.X,
+                            RPKIT_PREVIOUS_LOCATION.Y,
+                            RPKIT_PREVIOUS_LOCATION.Z,
+                            RPKIT_PREVIOUS_LOCATION.YAW,
+                            RPKIT_PREVIOUS_LOCATION.PITCH
+                    )
+                    .from(RPKIT_PREVIOUS_LOCATION)
                     .where(RPKIT_PREVIOUS_LOCATION.ID.eq(id))
-                    .execute()
-            return null
+                    .fetchOne() ?: return null
+            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+            val minecraftProfileId = result.get(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID)
+            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
+            if (minecraftProfile != null) {
+                val previousLocation = RPKPreviousLocation(
+                        id,
+                        minecraftProfile,
+                        Location(
+                                plugin.server.getWorld(result.get(RPKIT_PREVIOUS_LOCATION.WORLD)),
+                                result.get(RPKIT_PREVIOUS_LOCATION.X),
+                                result.get(RPKIT_PREVIOUS_LOCATION.Y),
+                                result.get(RPKIT_PREVIOUS_LOCATION.Z),
+                                result.get(RPKIT_PREVIOUS_LOCATION.YAW).toFloat(),
+                                result.get(RPKIT_PREVIOUS_LOCATION.PITCH).toFloat()
+                        )
+                )
+                cache?.put(id, previousLocation)
+                return previousLocation
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_PREVIOUS_LOCATION)
+                        .where(RPKIT_PREVIOUS_LOCATION.ID.eq(id))
+                        .execute()
+                cache?.remove(id)
+                return null
+            }
         }
     }
 
@@ -141,7 +157,7 @@ class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssent
                 .from(RPKIT_PREVIOUS_LOCATION)
                 .where(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
                 .fetchOne() ?: return null
-        return get(result.get(RPKIT_PREVIOUS_LOCATION.ID))
+        return get(result[RPKIT_PREVIOUS_LOCATION.ID])
     }
 
     override fun delete(entity: RPKPreviousLocation) {
@@ -149,6 +165,7 @@ class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssent
                 .deleteFrom(RPKIT_PREVIOUS_LOCATION)
                 .where(RPKIT_PREVIOUS_LOCATION.ID.eq(entity.id))
                 .execute()
+        cache?.remove(entity.id)
     }
 
 }

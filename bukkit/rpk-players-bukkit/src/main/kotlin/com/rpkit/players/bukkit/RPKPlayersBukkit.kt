@@ -38,6 +38,7 @@ import java.sql.SQLException
 class RPKPlayersBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKPlayerProviderImpl(this),
                 RPKGitHubProfileProviderImpl(this),

@@ -12,7 +12,7 @@ drinks:
         recipe:
             WHEAT: 1
             POTION: 1
-            POTATO_ITEM: 1
+            POTATO: 1
             SUGAR: 1
         drunkenness: 3
     wine:
@@ -85,3 +85,8 @@ drinks:
             APPLE: 1
             POTION: 1
         drunkenness: 3
+caching:
+    rpkit_drunkenness:
+        id:
+            enabled: true
+            size: 20

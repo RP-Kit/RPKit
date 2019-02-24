@@ -9,25 +9,25 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileToken
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileTokenImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKMinecraftProfileToken>(database, RPKMinecraftProfileToken::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKMinecraftProfileToken::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_minecraft_profile_token.id.enabled")) {
+        database.cacheManager.createCache("rpk-players-bukkit.rpkit_minecraft_profile_token.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKMinecraftProfileToken::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_minecraft_profile_token.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_MINECRAFT_PROFILE_TOKEN)
-                .column(RPKIT_MINECRAFT_PROFILE_TOKEN.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_MINECRAFT_PROFILE_TOKEN.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_MINECRAFT_PROFILE_TOKEN.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_MINECRAFT_PROFILE_TOKEN.TOKEN, SQLDataType.VARCHAR(36))
                 .constraints(
@@ -56,7 +56,7 @@ class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKP
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -67,11 +67,11 @@ class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKP
                 .set(RPKIT_MINECRAFT_PROFILE_TOKEN.TOKEN, entity.token)
                 .where(RPKIT_MINECRAFT_PROFILE_TOKEN.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKMinecraftProfileToken? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -91,7 +91,7 @@ class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKP
                         minecraftProfile,
                         result.get(RPKIT_MINECRAFT_PROFILE_TOKEN.TOKEN)
                 )
-                cache.put(id, minecraftProfileToken)
+                cache?.put(id, minecraftProfileToken)
                 return minecraftProfileToken
             } else {
                 database.create
@@ -117,7 +117,7 @@ class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKP
                 .deleteFrom(RPKIT_MINECRAFT_PROFILE_TOKEN)
                 .where(RPKIT_MINECRAFT_PROFILE_TOKEN.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

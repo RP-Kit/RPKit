@@ -9,30 +9,28 @@ import com.rpkit.skills.bukkit.database.jooq.rpkit.Tables.RPKIT_SKILL_COOLDOWN
 import com.rpkit.skills.bukkit.skills.RPKSkill
 import com.rpkit.skills.bukkit.skills.RPKSkillCooldown
 import com.rpkit.skills.bukkit.skills.RPKSkillProvider
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Timestamp
 
 
 class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBukkit): Table<RPKSkillCooldown>(database, RPKSkillCooldown::class) {
 
-    private val cacheManager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache: Cache<Int, RPKSkillCooldown> = cacheManager.createCache("cache", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKSkillCooldown::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_skill_cooldown.id.enabled")) {
+        database.cacheManager.createCache("rpk-skills-bukkit.rpkit_skill_cooldown.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKSkillCooldown::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_skill_cooldown.id.size"))).build())
+    } else {
+        null
+    }
 
 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_SKILL_COOLDOWN)
-                .column(RPKIT_SKILL_COOLDOWN.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_SKILL_COOLDOWN.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_SKILL_COOLDOWN.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_SKILL_COOLDOWN.SKILL_NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP, SQLDataType.TIMESTAMP)
@@ -64,7 +62,7 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -76,11 +74,11 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
                 .set(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP, Timestamp(entity.cooldownTimestamp))
                 .where(RPKIT_SKILL_COOLDOWN.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKSkillCooldown? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -105,13 +103,14 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
                         skill,
                         result.get(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP).time
                 )
-                cache.put(id, skillCooldown)
+                cache?.put(id, skillCooldown)
                 return skillCooldown
             } else {
                 database.create
                         .deleteFrom(RPKIT_SKILL_COOLDOWN)
                         .where(RPKIT_SKILL_COOLDOWN.ID.eq(id))
                         .execute()
+                cache?.remove(id)
                 return null
             }
         }
@@ -132,6 +131,7 @@ class RPKSkillCooldownTable(database: Database, private val plugin: RPKSkillsBuk
                 .deleteFrom(RPKIT_SKILL_COOLDOWN)
                 .where(RPKIT_SKILL_COOLDOWN.ID.eq(entity.id))
                 .execute()
+        cache?.remove(entity.id)
     }
 
 }

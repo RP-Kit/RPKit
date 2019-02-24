@@ -10,25 +10,25 @@ import com.rpkit.classes.bukkit.database.jooq.rpkit.Tables.RPKIT_CLASS_EXPERIENC
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKClassExperienceTable(database: Database, private val plugin: RPKClassesBukkit): Table<RPKClassExperience>(database, RPKClassExperience::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKClassExperience::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_class_experience.id.enabled")) {
+        database.cacheManager.createCache("rpk-classes-bukkit.rpkit_class_experience.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKClassExperience::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_class_experience.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_CLASS_EXPERIENCE)
-                .column(RPKIT_CLASS_EXPERIENCE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_CLASS_EXPERIENCE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_CLASS_EXPERIENCE.CLASS_NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_CLASS_EXPERIENCE.EXPERIENCE, SQLDataType.INTEGER)
@@ -60,7 +60,7 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -72,11 +72,11 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
                 .set(RPKIT_CLASS_EXPERIENCE.EXPERIENCE, entity.experience)
                 .where(RPKIT_CLASS_EXPERIENCE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKClassExperience? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -100,7 +100,7 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
                         clazz,
                         result.get(RPKIT_CLASS_EXPERIENCE.EXPERIENCE)
                 )
-                cache.put(id, classExperience)
+                cache?.put(id, classExperience)
                 return classExperience
             } else {
                 database.create
@@ -127,7 +127,7 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
                 .deleteFrom(RPKIT_CLASS_EXPERIENCE)
                 .where(RPKIT_CLASS_EXPERIENCE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

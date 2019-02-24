@@ -25,25 +25,25 @@ import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.Location
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Timestamp
 
 
 class RPKTicketTable(database: Database, private val plugin: RPKModerationBukkit): Table<RPKTicket>(database, RPKTicket::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKTicket::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_ticket.id.enabled")) {
+        database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_ticket.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKTicket::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_ticket.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create.createTableIfNotExists(RPKIT_TICKET)
-                .column(RPKIT_TICKET.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_TICKET.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_TICKET.REASON, SQLDataType.VARCHAR.length(1024))
                 .column(RPKIT_TICKET.ISSUER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_TICKET.RESOLVER_ID, SQLDataType.INTEGER)
@@ -70,7 +70,7 @@ class RPKTicketTable(database: Database, private val plugin: RPKModerationBukkit
             database.create
                     .alterTable(RPKIT_TICKET)
                     .alterColumn(RPKIT_TICKET.ID)
-                        .set(if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                        .set(SQLDataType.INTEGER.identity(true))
                     .execute()
             database.setTableVersion(this, "1.5.2")
         }
@@ -110,7 +110,7 @@ class RPKTicketTable(database: Database, private val plugin: RPKModerationBukkit
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -131,11 +131,11 @@ class RPKTicketTable(database: Database, private val plugin: RPKModerationBukkit
                 .set(RPKIT_TICKET.CLOSED, if (entity.isClosed) 1.toByte() else 0.toByte())
                 .where(RPKIT_TICKET.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKTicket? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -190,14 +190,14 @@ class RPKTicketTable(database: Database, private val plugin: RPKModerationBukkit
                         result[RPKIT_TICKET.CLOSE_DATE]?.toLocalDateTime(),
                         result[RPKIT_TICKET.CLOSED] == 1.toByte()
                 )
-                cache.put(id, ticket)
+                cache?.put(id, ticket)
                 return ticket
             } else {
                 database.create
                         .deleteFrom(RPKIT_TICKET)
                         .where(RPKIT_TICKET.ID.eq(id))
                         .execute()
-                cache.remove(id)
+                cache?.remove(id)
                 return null
             }
         }
@@ -208,7 +208,7 @@ class RPKTicketTable(database: Database, private val plugin: RPKModerationBukkit
                 .deleteFrom(RPKIT_TICKET)
                 .where(RPKIT_TICKET.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
     fun getOpenTickets(): List<RPKTicket> {

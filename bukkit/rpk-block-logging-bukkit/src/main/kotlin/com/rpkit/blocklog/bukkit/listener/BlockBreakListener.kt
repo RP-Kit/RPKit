@@ -30,9 +30,7 @@ class BlockBreakListener(private val plugin: RPKBlockLoggingBukkit): Listener {
                 minecraftProfile = minecraftProfile,
                 character = character,
                 from = event.block.type,
-                fromData = event.block.data,
                 to = Material.AIR,
-                toData = 0,
                 reason = "BREAK"
         )
         blockHistoryProvider.addBlockChange(blockChange)

@@ -6,6 +6,7 @@ depend:
 - rpk-core-bukkit
 - rpk-character-lib-bukkit
 - rpk-lock-lib-bukkit
+api-version: 1.13
 commands:
     getkey:
         description: Gets a key for a lock

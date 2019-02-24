@@ -29,27 +29,28 @@ import com.rpkit.core.database.Table
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import org.bukkit.Location
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the auction table.
  */
 class RPKAuctionTable(database: Database, private val plugin: RPKAuctionsBukkit): Table<RPKAuction>(database, RPKAuction::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKAuction::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_auction.id.enabled")) {
+        database.cacheManager.createCache("rpk-auctions-bukkit.rpkit_auction.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKAuction::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_auction.id.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_AUCTION)
-                .column(RPKIT_AUCTION.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_AUCTION.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_AUCTION.ITEM, SQLDataType.BLOB)
                 .column(RPKIT_AUCTION.CURRENCY_ID, SQLDataType.INTEGER)
                 .column(RPKIT_AUCTION.WORLD, SQLDataType.VARCHAR(256))
@@ -120,7 +121,7 @@ class RPKAuctionTable(database: Database, private val plugin: RPKAuctionsBukkit)
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -145,11 +146,11 @@ class RPKAuctionTable(database: Database, private val plugin: RPKAuctionsBukkit)
                 .set(RPKIT_AUCTION.BIDDING_OPEN, if (entity.isBiddingOpen) 1.toByte() else 0.toByte())
                 .where(RPKIT_AUCTION.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKAuction? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -203,7 +204,7 @@ class RPKAuctionTable(database: Database, private val plugin: RPKAuctionsBukkit)
                         result.get(RPKIT_AUCTION.MINIMUM_BID_INCREMENT),
                         result.get(RPKIT_AUCTION.BIDDING_OPEN) == 1.toByte()
                 )
-                cache.put(id, auction)
+                cache?.put(id, auction)
                 return auction
             } else {
                 val bidTable = database.getTable(RPKBidTable::class)
@@ -212,8 +213,8 @@ class RPKAuctionTable(database: Database, private val plugin: RPKAuctionsBukkit)
                         .from(RPKIT_BID)
                         .where(RPKIT_BID.AUCTION_ID.eq(id))
                         .fetch()
-                        .map { result -> result.get(RPKIT_BID.ID) }
-                        .map { bidId -> bidTable.get(bidId) }
+                        .map { it[RPKIT_BID.ID] }
+                        .map { bidId -> bidTable[bidId] }
                         .filterNotNull()
                         .forEach { bid -> bidTable.delete(bid) }
                 database.create
@@ -249,7 +250,7 @@ class RPKAuctionTable(database: Database, private val plugin: RPKAuctionsBukkit)
                 .deleteFrom(RPKIT_AUCTION)
                 .where(RPKIT_AUCTION.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

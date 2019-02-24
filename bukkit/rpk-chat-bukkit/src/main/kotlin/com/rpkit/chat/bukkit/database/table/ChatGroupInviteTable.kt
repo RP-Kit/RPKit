@@ -25,46 +25,45 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.DSL.field
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents chat group invite table.
  */
-class ChatGroupInviteTable: Table<ChatGroupInvite> {
+class ChatGroupInviteTable(database: Database, private val plugin: RPKChatBukkit): Table<ChatGroupInvite>(database, ChatGroupInvite::class) {
 
-    private val plugin: RPKChatBukkit
-    private val cacheManager: CacheManager
-    private val cache: Cache<Int, ChatGroupInvite>
-    private val chatGroupCache: Cache<Int, MutableList<*>>
-    private val minecraftProfileCache: Cache<Int, MutableList<*>>
-
-    constructor(database: Database, plugin: RPKChatBukkit): super(database, ChatGroupInvite::class) {
-        this.plugin = plugin
-        cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-        cache = cacheManager.createCache("cache",
+    private val cache = if (plugin.config.getBoolean("caching.chat_group_invite.id.enabled")) {
+        database.cacheManager.createCache("rpk-chat-bukkit.chat_group_invite.id",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, ChatGroupInvite::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-        chatGroupCache = cacheManager.createCache("chatGroupCache",
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.chat_group_invite.id.size"))).build())
+    } else {
+        null
+    }
+
+    private val chatGroupCache = if (plugin.config.getBoolean("caching.chat_group_invite.chat_group_id.enabled")) {
+        database.cacheManager.createCache("rpk-chat-bukkit.chat_group_invite.chat_group_id",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
-        minecraftProfileCache = cacheManager.createCache("minecraftProfileCache",
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.chat_group_invite.chat_group_id.size"))).build())
+    } else {
+        null
+    }
+
+    private val minecraftProfileCache = if (plugin.config.getBoolean("caching.chat_group_invite.minecraft_profile_id.enabled")) {
+        database.cacheManager.createCache("rpk-chat-bukkit.chat_group_invite.minecraft_profile_id",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableList::class.java,
-                        ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())).build())
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.chat_group_invite.minecraft_profile_id.size"))).build())
+    } else {
+        null
     }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(CHAT_GROUP_INVITE)
-                .column(CHAT_GROUP_INVITE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(CHAT_GROUP_INVITE.ID, SQLDataType.INTEGER.identity(true))
                 .column(CHAT_GROUP_INVITE.CHAT_GROUP_ID, SQLDataType.INTEGER)
                 .column(CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .constraints(
@@ -107,17 +106,17 @@ class ChatGroupInviteTable: Table<ChatGroupInvite> {
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
-        val chatGroupInvites = chatGroupCache.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        cache?.put(id, entity)
+        val chatGroupInvites = chatGroupCache?.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
         if (!chatGroupInvites.contains(entity.minecraftProfile.id)) {
             chatGroupInvites.add(id)
         }
-        chatGroupCache.put(entity.chatGroup.id, chatGroupInvites)
-        val minecraftProfileInvites = minecraftProfileCache.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        chatGroupCache?.put(entity.chatGroup.id, chatGroupInvites)
+        val minecraftProfileInvites = minecraftProfileCache?.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
         if (!minecraftProfileInvites.contains(entity.minecraftProfile.id)) {
             minecraftProfileInvites.add(id)
         }
-        minecraftProfileCache.put(entity.minecraftProfile.id, minecraftProfileInvites)
+        minecraftProfileCache?.put(entity.minecraftProfile.id, minecraftProfileInvites)
         return id
     }
 
@@ -128,21 +127,21 @@ class ChatGroupInviteTable: Table<ChatGroupInvite> {
                 .set(CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
                 .where(CHAT_GROUP_INVITE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
-        val chatGroupInvites = chatGroupCache.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        cache?.put(entity.id, entity)
+        val chatGroupInvites = chatGroupCache?.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
         if (!chatGroupInvites.contains(entity.id)) {
             chatGroupInvites.add(entity.id)
         }
-        chatGroupCache.put(entity.chatGroup.id, chatGroupInvites)
-        val minecraftProfileInvites = minecraftProfileCache.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        chatGroupCache?.put(entity.chatGroup.id, chatGroupInvites)
+        val minecraftProfileInvites = minecraftProfileCache?.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
         if (!minecraftProfileInvites.contains(entity.minecraftProfile.id)) {
             minecraftProfileInvites.add(entity.id)
         }
-        minecraftProfileCache.put(entity.minecraftProfile.id, minecraftProfileInvites)
+        minecraftProfileCache?.put(entity.minecraftProfile.id, minecraftProfileInvites)
     }
 
     override fun get(id: Int): ChatGroupInvite? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -165,17 +164,17 @@ class ChatGroupInviteTable: Table<ChatGroupInvite> {
                         chatGroup,
                         minecraftProfile
                 )
-                cache.put(id, chatGroupInvite)
-                val chatGroupInvites = chatGroupCache.get(chatGroupInvite.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
+                cache?.put(id, chatGroupInvite)
+                val chatGroupInvites = chatGroupCache?.get(chatGroupInvite.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
                 if (!chatGroupInvites.contains(chatGroupInvite.id)) {
                     chatGroupInvites.add(chatGroupInvite.id)
                 }
-                chatGroupCache.put(chatGroupInvite.chatGroup.id, chatGroupInvites)
-                val minecraftProfileInvites = minecraftProfileCache.get(chatGroupInvite.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
+                chatGroupCache?.put(chatGroupInvite.chatGroup.id, chatGroupInvites)
+                val minecraftProfileInvites = minecraftProfileCache?.get(chatGroupInvite.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
                 if (!minecraftProfileInvites.contains(chatGroupInvite.minecraftProfile.id)) {
                     minecraftProfileInvites.add(chatGroupInvite.id)
                 }
-                minecraftProfileCache.put(chatGroupInvite.minecraftProfile.id, minecraftProfileInvites)
+                minecraftProfileCache?.put(chatGroupInvite.minecraftProfile.id, minecraftProfileInvites)
                 return chatGroupInvite
             } else {
                 database.create
@@ -194,7 +193,7 @@ class ChatGroupInviteTable: Table<ChatGroupInvite> {
      * @return A list of chat group invites
      */
     fun get(chatGroup: RPKChatGroup): List<ChatGroupInvite> {
-        if (chatGroupCache.containsKey(chatGroup.id)) {
+        if (chatGroupCache?.containsKey(chatGroup.id) == true) {
             return (chatGroupCache.get(chatGroup.id) as List<Int>).map { id -> get(id)!! }
         } else {
             val results = database.create
@@ -205,7 +204,7 @@ class ChatGroupInviteTable: Table<ChatGroupInvite> {
             val chatGroupInvites = results.map { result ->
                 get(result.get(CHAT_GROUP_INVITE.ID))
             }.filterNotNull()
-            chatGroupCache.put(chatGroup.id, chatGroupInvites.map(ChatGroupInvite::id).toMutableList())
+            chatGroupCache?.put(chatGroup.id, chatGroupInvites.map(ChatGroupInvite::id).toMutableList())
             return chatGroupInvites
         }
     }
@@ -217,7 +216,7 @@ class ChatGroupInviteTable: Table<ChatGroupInvite> {
      * @return A list of chat group invites for the Minecraft profile
      */
     fun get(minecraftProfile: RPKMinecraftProfile): List<ChatGroupInvite> {
-        if (minecraftProfileCache.containsKey(minecraftProfile.id)) {
+        if (minecraftProfileCache?.containsKey(minecraftProfile.id) == true) {
             return (minecraftProfileCache.get(minecraftProfile.id) as List<Int>).map { id -> get(id)!! }
         } else {
             val results = database.create
@@ -228,7 +227,7 @@ class ChatGroupInviteTable: Table<ChatGroupInvite> {
             val chatGroupInvites = results.map { result ->
                 get(result.get(CHAT_GROUP_INVITE.ID))
             }.filterNotNull()
-            minecraftProfileCache.put(minecraftProfile.id, chatGroupInvites.map(ChatGroupInvite::id).toMutableList())
+            minecraftProfileCache?.put(minecraftProfile.id, chatGroupInvites.map(ChatGroupInvite::id).toMutableList())
             return chatGroupInvites
         }
     }
@@ -238,13 +237,13 @@ class ChatGroupInviteTable: Table<ChatGroupInvite> {
                 .deleteFrom(CHAT_GROUP_INVITE)
                 .where(CHAT_GROUP_INVITE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
-        val chatGroupMembers = chatGroupCache.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        cache?.remove(entity.id)
+        val chatGroupMembers = chatGroupCache?.get(entity.chatGroup.id) as? MutableList<Int> ?: mutableListOf<Int>()
         chatGroupMembers.remove(entity.id)
-        chatGroupCache.put(entity.chatGroup.id, chatGroupMembers)
-        val minecraftProfileMembers = minecraftProfileCache.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
+        chatGroupCache?.put(entity.chatGroup.id, chatGroupMembers)
+        val minecraftProfileMembers = minecraftProfileCache?.get(entity.minecraftProfile.id) as? MutableList<Int> ?: mutableListOf<Int>()
         minecraftProfileMembers.remove(entity.id)
-        minecraftProfileCache.put(entity.minecraftProfile.id, minecraftProfileMembers)
+        minecraftProfileCache?.put(entity.minecraftProfile.id, minecraftProfileMembers)
     }
 
 }

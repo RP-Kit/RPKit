@@ -1,33 +1,33 @@
 package com.rpkit.permissions.bukkit.database.table
 
+import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.database.jooq.rpkit.Tables.RPKIT_CHARACTER_GROUP
-import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.permissions.bukkit.group.RPKCharacterGroup
-import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 
 class RPKCharacterGroupTable(database: Database, private val plugin: RPKPermissionsBukkit): Table<RPKCharacterGroup>(database, RPKCharacterGroup::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacterGroup::class.java,
-                    ResourcePoolsBuilder.heap(20L)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_character_group.id.enabled")) {
+        database.cacheManager.createCache("rpk-permissions-bukkit.rpkit_character_group.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacterGroup::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character_group.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_CHARACTER_GROUP)
-                .column(RPKIT_CHARACTER_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_CHARACTER_GROUP.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_CHARACTER_GROUP.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_CHARACTER_GROUP.GROUP_NAME, SQLDataType.VARCHAR(256))
                 .constraints(
@@ -56,7 +56,7 @@ class RPKCharacterGroupTable(database: Database, private val plugin: RPKPermissi
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -67,11 +67,11 @@ class RPKCharacterGroupTable(database: Database, private val plugin: RPKPermissi
                 .set(RPKIT_CHARACTER_GROUP.GROUP_NAME, entity.group.name)
                 .where(RPKIT_CHARACTER_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKCharacterGroup? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -94,7 +94,7 @@ class RPKCharacterGroupTable(database: Database, private val plugin: RPKPermissi
                         character,
                         group
                 )
-                cache.put(id, characterGroup)
+                cache?.put(id, characterGroup)
                 return characterGroup
             } else {
                 database.create
@@ -121,7 +121,7 @@ class RPKCharacterGroupTable(database: Database, private val plugin: RPKPermissi
                 .deleteFrom(RPKIT_CHARACTER_GROUP)
                 .where(RPKIT_CHARACTER_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

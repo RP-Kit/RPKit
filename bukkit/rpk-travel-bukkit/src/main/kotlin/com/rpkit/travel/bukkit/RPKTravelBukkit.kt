@@ -14,6 +14,7 @@ import com.rpkit.travel.bukkit.warp.RPKWarpProviderImpl
 class RPKTravelBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKWarpProviderImpl(this)
         )

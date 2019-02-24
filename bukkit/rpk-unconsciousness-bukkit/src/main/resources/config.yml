@@ -3,3 +3,8 @@ unconscious-time: 600000
 # When a player is unconscious, which commands should be allowed (subject to permissions)?
 allowed-commands:
 - wake
+caching:
+    rpkit_unconscious_state:
+        id:
+            enabled: true
+            size: 20

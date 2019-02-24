@@ -1,0 +1,9 @@
+name: rpk-selection-worldedit-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.selection.bukkit.worldedit.RPKSelectionWorldEditBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-selection-lib-bukkit
+api-version: 1.13

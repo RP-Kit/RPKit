@@ -3,6 +3,7 @@ author: alyphen
 version: @version@
 main: com.rpkit.stats.bukkit.RPKStatsBukkit
 depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-character-lib-bukkit, rpk-stat-lib-bukkit]
+api-version: 1.13
 commands:
     stats:
         description: Shows your stats

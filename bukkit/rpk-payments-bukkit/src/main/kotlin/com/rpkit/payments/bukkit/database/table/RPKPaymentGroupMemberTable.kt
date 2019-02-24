@@ -25,12 +25,9 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.group.member.RPKPaymentGroupMember
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
-import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import org.jooq.impl.DSL.constraint
+import org.jooq.impl.SQLDataType
 
 /**
  * Represents payment group member table.
@@ -40,15 +37,18 @@ class RPKPaymentGroupMemberTable(
         private val plugin: RPKPaymentsBukkit
 ): Table<RPKPaymentGroupMember>(database, RPKPaymentGroupMember::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroupMember::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong() * 20)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_payment_group_member.id.enabled")) {
+        database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_group_member.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroupMember::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_payment_group_member.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PAYMENT_GROUP_MEMBER)
-                .column(RPKIT_PAYMENT_GROUP_MEMBER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PAYMENT_GROUP_MEMBER.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID, SQLDataType.INTEGER)
                 .column(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID, SQLDataType.INTEGER)
                 .constraints(
@@ -77,7 +77,7 @@ class RPKPaymentGroupMemberTable(
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -88,38 +88,43 @@ class RPKPaymentGroupMemberTable(
                 .set(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID, entity.character.id)
                 .where(RPKIT_PAYMENT_GROUP_MEMBER.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKPaymentGroupMember? {
-        val result = database.create
-                .select(
-                        RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID,
-                        RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID
-                )
-                .from(RPKIT_PAYMENT_GROUP_MEMBER)
-                .where(RPKIT_PAYMENT_GROUP_MEMBER.ID.eq(id))
-                .fetchOne() ?: return null
-        val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-        val paymentGroupId = result.get(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID)
-        val paymentGroup = paymentGroupProvider.getPaymentGroup(paymentGroupId)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val characterId = result.get(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID)
-        val character = characterProvider.getCharacter(characterId)
-        if (paymentGroup != null && character != null) {
-            val paymentGroupMember = RPKPaymentGroupMember(
-                    id,
-                    paymentGroup,
-                    character
-            )
-            cache.put(id, paymentGroupMember)
-            return paymentGroupMember
+        if (cache?.containsKey(id) == true) {
+            return cache[id]
         } else {
-            database.create
-                    .deleteFrom(RPKIT_PAYMENT_GROUP_MEMBER)
+            val result = database.create
+                    .select(
+                            RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID,
+                            RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID
+                    )
+                    .from(RPKIT_PAYMENT_GROUP_MEMBER)
                     .where(RPKIT_PAYMENT_GROUP_MEMBER.ID.eq(id))
-                    .execute()
-            return null
+                    .fetchOne() ?: return null
+            val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
+            val paymentGroupId = result.get(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID)
+            val paymentGroup = paymentGroupProvider.getPaymentGroup(paymentGroupId)
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterId = result.get(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID)
+            val character = characterProvider.getCharacter(characterId)
+            if (paymentGroup != null && character != null) {
+                val paymentGroupMember = RPKPaymentGroupMember(
+                        id,
+                        paymentGroup,
+                        character
+                )
+                cache?.put(id, paymentGroupMember)
+                return paymentGroupMember
+            } else {
+                database.create
+                        .deleteFrom(RPKIT_PAYMENT_GROUP_MEMBER)
+                        .where(RPKIT_PAYMENT_GROUP_MEMBER.ID.eq(id))
+                        .execute()
+                cache?.remove(id)
+                return null
+            }
         }
     }
 
@@ -138,7 +143,7 @@ class RPKPaymentGroupMemberTable(
                 .deleteFrom(RPKIT_PAYMENT_GROUP_MEMBER)
                 .where(RPKIT_PAYMENT_GROUP_MEMBER.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

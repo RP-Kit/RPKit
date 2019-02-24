@@ -26,12 +26,9 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotification
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Date
 
 /**
@@ -42,15 +39,18 @@ class RPKPaymentNotificationTable(
         private val plugin: RPKPaymentsBukkit
 ): Table<RPKPaymentNotification>(database, RPKPaymentNotification::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentNotification::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_payment_notification.id.enabled")) {
+        database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_notification.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentNotification::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_payment_notification.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PAYMENT_NOTIFICATION)
-                .column(RPKIT_PAYMENT_NOTIFICATION.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PAYMENT_NOTIFICATION.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PAYMENT_NOTIFICATION.GROUP_ID, SQLDataType.INTEGER)
                 .column(RPKIT_PAYMENT_NOTIFICATION.TO_ID, SQLDataType.INTEGER)
                 .column(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID, SQLDataType.INTEGER)
@@ -88,7 +88,7 @@ class RPKPaymentNotificationTable(
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -102,11 +102,11 @@ class RPKPaymentNotificationTable(
                 .set(RPKIT_PAYMENT_NOTIFICATION.TEXT, entity.text)
                 .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKPaymentNotification? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -137,7 +137,7 @@ class RPKPaymentNotificationTable(
                         result.get(RPKIT_PAYMENT_NOTIFICATION.DATE).time,
                         result.get(RPKIT_PAYMENT_NOTIFICATION.TEXT)
                 )
-                cache.put(id, paymentNotification)
+                cache?.put(id, paymentNotification)
                 return paymentNotification
             } else {
                 database.create
@@ -173,7 +173,7 @@ class RPKPaymentNotificationTable(
                 .deleteFrom(RPKIT_PAYMENT_NOTIFICATION)
                 .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

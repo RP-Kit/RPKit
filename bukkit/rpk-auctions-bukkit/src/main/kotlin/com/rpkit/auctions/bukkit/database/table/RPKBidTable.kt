@@ -26,27 +26,27 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the bid table.
  */
 class RPKBidTable(database: Database, private val plugin: RPKAuctionsBukkit): Table<RPKBid>(database, RPKBid::class) {
 
-    val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBid::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong() * plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_bid.id.enabled")) {
+                database.cacheManager.createCache("rpk-auctions-bukkit.rpkit_bid.id", CacheConfigurationBuilder
+                        .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBid::class.java,
+                                ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_bid.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_BID)
-                .column(RPKIT_BID.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_BID.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_BID.AUCTION_ID, SQLDataType.INTEGER)
                 .column(RPKIT_BID.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_BID.AMOUNT, SQLDataType.INTEGER)
@@ -78,7 +78,7 @@ class RPKBidTable(database: Database, private val plugin: RPKAuctionsBukkit): Ta
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -90,11 +90,11 @@ class RPKBidTable(database: Database, private val plugin: RPKAuctionsBukkit): Ta
                 .set(RPKIT_BID.AMOUNT, entity.amount)
                 .where(RPKIT_BID.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKBid? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -119,7 +119,7 @@ class RPKBidTable(database: Database, private val plugin: RPKAuctionsBukkit): Ta
                         character,
                         result.get(RPKIT_BID.AMOUNT)
                 )
-                cache.put(bid.id, bid)
+                cache?.put(bid.id, bid)
                 return bid
             } else {
                 database.create
@@ -153,6 +153,6 @@ class RPKBidTable(database: Database, private val plugin: RPKAuctionsBukkit): Ta
                 .deleteFrom(RPKIT_BID)
                 .where(RPKIT_BID.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 }

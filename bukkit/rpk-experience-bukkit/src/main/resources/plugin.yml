@@ -3,6 +3,7 @@ version: @version@
 author: alyphen
 main: com.rpkit.experience.bukkit.RPKExperienceBukkit
 depend: [rpk-core-bukkit, rpk-character-lib-bukkit, rpk-experience-lib-bukkit]
+api-version: 1.13
 commands:
     experience:
         description: Experience command

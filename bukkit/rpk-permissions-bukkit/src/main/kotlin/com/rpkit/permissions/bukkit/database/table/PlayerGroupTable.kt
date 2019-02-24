@@ -25,27 +25,27 @@ import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the player group table.
  */
 class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBukkit) : Table<PlayerGroup>(database, PlayerGroup::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, PlayerGroup::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.player_group.id.enabled")) {
+        database.cacheManager.createCache("rpk-permissions-bukkit.player_group.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, PlayerGroup::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.player_group.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(PLAYER_GROUP)
-                .column(PLAYER_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(PLAYER_GROUP.ID, SQLDataType.INTEGER.identity(true))
                 .column(PLAYER_GROUP.PLAYER_ID, SQLDataType.INTEGER)
                 .column(PLAYER_GROUP.GROUP_NAME, SQLDataType.VARCHAR(256))
                 .constraints(
@@ -74,7 +74,7 @@ class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBuk
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -85,11 +85,11 @@ class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBuk
                 .set(PLAYER_GROUP.GROUP_NAME, entity.group.name)
                 .where(PLAYER_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): PlayerGroup? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -112,7 +112,7 @@ class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBuk
                         player,
                         group
                 )
-                cache.put(id, playerGroup)
+                cache?.put(id, playerGroup)
                 return playerGroup
             } else {
                 database.create
@@ -139,7 +139,7 @@ class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBuk
                 .deleteFrom(PLAYER_GROUP)
                 .where(PLAYER_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

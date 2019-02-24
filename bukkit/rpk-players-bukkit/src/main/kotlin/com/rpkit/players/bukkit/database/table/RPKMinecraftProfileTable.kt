@@ -10,26 +10,26 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.OfflinePlayer
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.util.*
 
 
 class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKMinecraftProfile>(database, RPKMinecraftProfile::class) {
 
-    private val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache = cacheManager.createCache("cache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKMinecraftProfile::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers.toLong())))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_minecraft_profile.id.enabled")) {
+        database.cacheManager.createCache("rpk-players-bukkit.rpkit_minecraft_profile.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKMinecraftProfile::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_minecraft_profile.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_MINECRAFT_PROFILE)
-                .column(RPKIT_MINECRAFT_PROFILE.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_MINECRAFT_PROFILE.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_MINECRAFT_PROFILE.PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID, SQLDataType.VARCHAR(36))
                 .constraints(
@@ -58,7 +58,7 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -69,11 +69,11 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
                 .set(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID, entity.minecraftUUID.toString())
                 .where(RPKIT_MINECRAFT_PROFILE.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKMinecraftProfile? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -92,7 +92,7 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
                     profile,
                     UUID.fromString(result.get(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID))
             )
-            cache.put(id, minecraftProfile)
+            cache?.put(id, minecraftProfile)
             return minecraftProfile
         }
     }
@@ -123,6 +123,6 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
                 .deleteFrom(RPKIT_MINECRAFT_PROFILE)
                 .where(RPKIT_MINECRAFT_PROFILE.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 }

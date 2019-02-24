@@ -24,12 +24,9 @@ import com.rpkit.payments.bukkit.database.jooq.rpkit.Tables.RPKIT_PAYMENT_GROUP
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 import java.sql.Timestamp
 
 /**
@@ -37,14 +34,18 @@ import java.sql.Timestamp
  */
 class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBukkit): Table<RPKPaymentGroup>(database, RPKPaymentGroup::class) {
 
-    val cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    val cache = cacheManager.createCache("cache", CacheConfigurationBuilder
-            .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroup::class.java, ResourcePoolsBuilder.heap(20L)))
+    val cache = if (plugin.config.getBoolean("caching.rpkit_payment_group.id.enabled")) {
+        database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_group.id", CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentGroup::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_payment_group.id.size"))))
+    } else {
+        null
+    }
 
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PAYMENT_GROUP)
-                .column(RPKIT_PAYMENT_GROUP.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(RPKIT_PAYMENT_GROUP.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PAYMENT_GROUP.NAME, SQLDataType.VARCHAR(256))
                 .column(RPKIT_PAYMENT_GROUP.AMOUNT, SQLDataType.INTEGER)
                 .column(RPKIT_PAYMENT_GROUP.CURRENCY_ID, SQLDataType.INTEGER.nullable(true))
@@ -85,7 +86,7 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -100,11 +101,11 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                 .set(RPKIT_PAYMENT_GROUP.BALANCE, entity.balance)
                 .where(RPKIT_PAYMENT_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKPaymentGroup? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
             val result = database.create
@@ -132,7 +133,7 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                     result.get(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME).time,
                     result.get(RPKIT_PAYMENT_GROUP.BALANCE)
             )
-            cache.put(id, paymentGroup)
+            cache?.put(id, paymentGroup)
             return paymentGroup
         }
     }
@@ -160,7 +161,7 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                 .deleteFrom(RPKIT_PAYMENT_GROUP)
                 .where(RPKIT_PAYMENT_GROUP.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

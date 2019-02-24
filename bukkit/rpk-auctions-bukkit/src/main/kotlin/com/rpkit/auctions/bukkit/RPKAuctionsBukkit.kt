@@ -34,6 +34,7 @@ class RPKAuctionsBukkit: RPKBukkitPlugin() {
 
 
     override fun onEnable() {
+        saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKAuctionProviderImpl(this),
                 RPKBidProviderImpl(this)

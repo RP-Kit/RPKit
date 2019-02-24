@@ -5,6 +5,7 @@ author: alyphen
 description: RPK Players implementation for Bukkit
 depend: [rpk-core-bukkit, rpk-player-lib-bukkit]
 softdepend: [rpk-chat-lib-bukkit]
+api-version: 1.13
 commands:
     account:
         description: |

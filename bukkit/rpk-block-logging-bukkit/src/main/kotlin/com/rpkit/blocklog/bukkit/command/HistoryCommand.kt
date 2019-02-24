@@ -41,9 +41,7 @@ class HistoryCommand(private val plugin: RPKBlockLoggingBukkit): CommandExecutor
                     Pair("profile", change.profile?.name?:"None"),
                     Pair("minecraft-profile", change.minecraftProfile?.minecraftUsername?:"None"),
                     Pair("character", change.character?.name?:"None"),
-                    Pair("from-data", change.fromData.toString()),
                     Pair("from", change.from.toString().toLowerCase().replace('_', ' ')),
-                    Pair("to-data", change.toData.toString()),
                     Pair("to", change.to.toString().toLowerCase().replace('_', ' ')),
                     Pair("reason", change.reason)
             )])

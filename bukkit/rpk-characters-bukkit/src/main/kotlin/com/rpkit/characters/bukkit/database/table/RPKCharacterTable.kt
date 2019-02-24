@@ -35,29 +35,27 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.Location
-import org.ehcache.Cache
-import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the character table.
  */
 class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBukkit): Table<RPKCharacter>(database, RPKCharacter::class) {
 
-    private val cacheManager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-    private val cache: Cache<Int, RPKCharacter> = cacheManager.createCache("cache",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacter::class.java,
-            ResourcePoolsBuilder.heap((plugin.server.maxPlayers * 2).toLong())).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_character.id.enabled")) {
+        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_character.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacter::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character.id.size"))).build())
+    } else {
+        null
+    }
 
     override fun create() {
         database.create.createTableIfNotExists(RPKIT_CHARACTER)
-                    .column(RPKIT_CHARACTER.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                    .column(RPKIT_CHARACTER.ID, SQLDataType.INTEGER.identity(true))
                     .column(RPKIT_CHARACTER.PLAYER_ID, SQLDataType.INTEGER)
                     .column(RPKIT_CHARACTER.PROFILE_ID, SQLDataType.INTEGER)
                     .column(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
@@ -226,7 +224,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache.put(id, entity)
+        cache?.put(id, entity)
         return id
     }
 
@@ -268,11 +266,11 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .set(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, if (entity.isDescriptionHidden) 1.toByte() else 0.toByte())
                 .where(RPKIT_CHARACTER.ID.eq(entity.id))
                 .execute()
-        cache.put(entity.id, entity)
+        cache?.put(entity.id, entity)
     }
 
     override fun get(id: Int): RPKCharacter? {
-        if (cache.containsKey(id)) {
+        if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
@@ -378,7 +376,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                     isRaceHidden = result.get(RPKIT_CHARACTER.RACE_HIDDEN) == 1.toByte(),
                     isDescriptionHidden = result.get(RPKIT_CHARACTER.DESCRIPTION_HIDDEN) == 1.toByte()
             )
-            cache.put(id, character)
+            cache?.put(id, character)
             return character
         }
     }
@@ -438,7 +436,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .deleteFrom(RPKIT_CHARACTER)
                 .where(RPKIT_CHARACTER.ID.eq(entity.id))
                 .execute()
-        cache.remove(entity.id)
+        cache?.remove(entity.id)
     }
 
 }

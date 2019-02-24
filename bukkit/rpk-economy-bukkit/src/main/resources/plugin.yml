@@ -4,6 +4,7 @@ main: com.rpkit.economy.bukkit.RPKEconomyBukkit
 author: alyphen
 description: RPK Economy implementation for Bukkit
 depend: [rpk-core-bukkit, rpk-character-lib-bukkit, rpk-economy-lib-bukkit]
+api-version: 1.13
 commands:
     money:
         description: Money management command

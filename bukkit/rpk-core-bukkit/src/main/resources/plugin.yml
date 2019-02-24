@@ -3,3 +3,4 @@ version: @version@
 main: com.rpkit.core.bukkit.RPKCoreBukkit
 author: alyphen
 description: RPK Core implementation for Bukkit
+api-version: 1.13

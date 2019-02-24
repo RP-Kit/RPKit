@@ -14,3 +14,20 @@ key-item:
         ==: ItemMeta
         meta-type: UNSPECIFIC
         display-name: Key
+caching:
+    rpkit_keyring:
+        id:
+            enabled: true
+            size: 20
+    rpkit_locked_block:
+        id:
+            enabled: true
+            size: 100
+    rpkit_player_getting_key:
+        id:
+            enabled: true
+            size: 20
+    rpkit_player_unclaiming:
+        id:
+            enabled: true
+            size: 20

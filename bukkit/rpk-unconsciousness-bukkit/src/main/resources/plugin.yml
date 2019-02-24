@@ -3,6 +3,7 @@ author: alyphen
 version: @version@
 main: com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
 depend: [rpk-player-lib-bukkit, rpk-character-lib-bukkit, rpk-unconsciousness-lib-bukkit]
+api-version: 1.13
 commands:
     wake:
         description: Wakes a player from being unconscious

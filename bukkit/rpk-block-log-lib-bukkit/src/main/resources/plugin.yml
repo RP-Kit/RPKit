@@ -6,3 +6,4 @@ depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
+api-version: 1.13
