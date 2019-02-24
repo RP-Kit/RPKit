@@ -20,7 +20,6 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.database.TableVersion
 import com.rpkit.core.database.jooq.rpkit.Tables.TABLE_VERSION
-import org.jooq.SQLDialect
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
 import org.jooq.util.sqlite.SQLiteDataType
@@ -34,7 +33,7 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
     override fun create() {
         database.create
                 .createTableIfNotExists(TABLE_VERSION)
-                .column(TABLE_VERSION.ID, if (database.dialect == SQLDialect.SQLITE) SQLiteDataType.INTEGER.identity(true) else SQLDataType.INTEGER.identity(true))
+                .column(TABLE_VERSION.ID, SQLDataType.INTEGER.identity(true))
                 .column(TABLE_VERSION.TABLE_NAME, SQLDataType.VARCHAR(256))
                 .column(TABLE_VERSION.VERSION, SQLDataType.VARCHAR(32))
                 .constraints(
