@@ -63,7 +63,7 @@ project(":rpk-core") {
     def commonsCodecVersion = "1.12"
     def commonsLangVersion = "2.6"
     def guavaVersion = "27.0.1-jre"
-    def gsonVersion = "2.8.2"
+    def gsonVersion = "2.8.5"
     def ehcacheVersion = "3.4.0"
     def kotlinVersion = "1.3.21"
     def slf4jVersion = "1.7.25"
