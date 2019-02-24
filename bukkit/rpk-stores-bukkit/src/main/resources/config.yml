@@ -1,0 +1,35 @@
+caching:
+    rpkit_consumable_purchase:
+        id:
+            enabled: true
+            size: 20
+    rpkit_consumable_store_item:
+        id:
+            enabled: true
+            size: 20
+    rpkit_permanent_purchase:
+        id:
+            enabled: true
+            size: 20
+    rpkit_permanent_store_item:
+        id:
+            enabled: true
+            size: 20
+    rpkit_purchase:
+        id:
+            enabled: true
+            size: 20
+    rpkit_store_item:
+        id:
+            enabled: true
+            size: 20
+    rpkit_timed_purchase:
+        id:
+            enabled: true
+            size: 20
+    rpkit_timed_store_item:
+        id:
+            enabled: true
+            size: 20
+payments:
+    currency: GBP

@@ -27,7 +27,7 @@ subprojects {
     repositories {
         mavenCentral()
         maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
-        maven { url "http://nexus.hc.to/content/repositories/pub_releases" }
+        maven { url "https://ci.ender.zone/plugin/repository/everything/" }
         maven { url "https://jitpack.io" }
         maven { url "http://repo.jenkins-ci.org/public/" }
         maven { url "https://maven.sk89q.com/repo/"}
@@ -68,7 +68,7 @@ project(":rpk-core") {
     def velocityVersion = "1.7"
     def hikariCPVersion = "2.7.4"
     def githubAPIVersion = "1.90"
-    def jooqVersion = "3.11.3"
+    def jooqVersion = "3.11.5"
 
     dependencies {
         compile group: "mysql", name: "mysql-connector-java", version: mysqlConnectorVersion
@@ -1038,6 +1038,39 @@ project(":bukkit:rpk-selection-lib-bukkit") {
 
 }
 
+project(":bukkit:rpk-store-lib-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    artifacts {
+        archives jar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-store-lib-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-store-lib-bukkit").name
+            pom.groupId = project(":bukkit:rpk-store-lib-bukkit").group
+
+        }
+    }
+
+}
+
 // Bukkit implementations
 
 project(":bukkit:rpk-players-bukkit") {
@@ -1940,6 +1973,52 @@ project(":bukkit:rpk-selection-worldedit-bukkit") {
             pom.version = project(":bukkit:rpk-selection-worldedit-bukkit").version
             pom.artifactId = project(":bukkit:rpk-selection-worldedit-bukkit").name
             pom.groupId = project(":bukkit:rpk-selection-worldedit-bukkit").group
+
+        }
+    }
+
+}
+
+project(":bukkit:rpk-stores-bukkit") {
+
+    dependencies {
+        compile project(":bukkit:rpk-core-bukkit")
+        compile project(":bukkit:rpk-player-lib-bukkit")
+        compile project(":bukkit:rpk-store-lib-bukkit")
+        compile group: "com.paypal.sdk", name: "checkout-sdk", version: "1.0.0"
+    }
+
+    processResources {
+        filter ReplaceTokens, tokens: [
+                "version": version
+        ]
+    }
+
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("com.paypal.sdk:checkout-sdk"))
+        }
+
+        classifier = ""
+        from sourceSets.main.output
+    }
+
+    artifacts {
+        archives shadowJar
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+            repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+                authentication(userName: repoUserName, password: repoPassword)
+            }
+
+            pom.version = project(":bukkit:rpk-stores-bukkit").version
+            pom.artifactId = project(":bukkit:rpk-stores-bukkit").name
+            pom.groupId = project(":bukkit:rpk-stores-bukkit").group
 
         }
     }
