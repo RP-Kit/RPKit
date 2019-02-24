@@ -38,9 +38,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                 .column(RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_BLOCK_CHANGE.CHARACTER_ID, SQLDataType.INTEGER)
                 .column(RPKIT_BLOCK_CHANGE.FROM, SQLDataType.VARCHAR(256))
-                .column(RPKIT_BLOCK_CHANGE.FROM_DATA, SQLDataType.TINYINT)
                 .column(RPKIT_BLOCK_CHANGE.TO, SQLDataType.VARCHAR(256))
-                .column(RPKIT_BLOCK_CHANGE.TO_DATA, SQLDataType.TINYINT)
                 .column(RPKIT_BLOCK_CHANGE.REASON, SQLDataType.VARCHAR(256))
                 .constraints(
                         constraint("pk_rpkit_block_change").primaryKey(RPKIT_BLOCK_CHANGE.ID)
@@ -50,7 +48,18 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.4.0")
+            database.setTableVersion(this, "1.6.0")
+        }
+        if (database.getTableVersion(this) == "1.4.0") {
+            database.create
+                    .alterTable(RPKIT_BLOCK_CHANGE)
+                    .dropColumn(RPKIT_BLOCK_CHANGE.FROM_DATA)
+                    .execute()
+            database.create
+                    .alterTable(RPKIT_BLOCK_CHANGE)
+                    .dropColumn(RPKIT_BLOCK_CHANGE.TO_DATA)
+                    .execute()
+            database.setTableVersion(this, "1.6.0")
         }
     }
 
@@ -64,9 +73,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                         RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID,
                         RPKIT_BLOCK_CHANGE.CHARACTER_ID,
                         RPKIT_BLOCK_CHANGE.FROM,
-                        RPKIT_BLOCK_CHANGE.FROM_DATA,
                         RPKIT_BLOCK_CHANGE.TO,
-                        RPKIT_BLOCK_CHANGE.TO_DATA,
                         RPKIT_BLOCK_CHANGE.REASON
                 )
                 .values(
@@ -76,9 +83,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                         entity.minecraftProfile?.id,
                         entity.character?.id,
                         entity.from.toString(),
-                        entity.fromData,
                         entity.to.toString(),
-                        entity.toData,
                         entity.reason
                 )
                 .execute()
@@ -97,9 +102,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                 .set(RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id)
                 .set(RPKIT_BLOCK_CHANGE.CHARACTER_ID, entity.character?.id)
                 .set(RPKIT_BLOCK_CHANGE.FROM, entity.from.toString())
-                .set(RPKIT_BLOCK_CHANGE.FROM_DATA, entity.fromData)
                 .set(RPKIT_BLOCK_CHANGE.TO, entity.to.toString())
-                .set(RPKIT_BLOCK_CHANGE.TO_DATA, entity.toData)
                 .set(RPKIT_BLOCK_CHANGE.REASON, entity.reason)
                 .where(RPKIT_BLOCK_CHANGE.ID.eq(entity.id))
                 .execute()
@@ -118,9 +121,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                             RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID,
                             RPKIT_BLOCK_CHANGE.CHARACTER_ID,
                             RPKIT_BLOCK_CHANGE.FROM,
-                            RPKIT_BLOCK_CHANGE.FROM_DATA,
                             RPKIT_BLOCK_CHANGE.TO,
-                            RPKIT_BLOCK_CHANGE.TO_DATA,
                             RPKIT_BLOCK_CHANGE.REASON
                     )
                     .from(RPKIT_BLOCK_CHANGE)
@@ -154,9 +155,7 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                     minecraftProfile,
                     character,
                     Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM)),
-                    result.get(RPKIT_BLOCK_CHANGE.FROM_DATA),
                     Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO)),
-                    result.get(RPKIT_BLOCK_CHANGE.TO_DATA),
                     result.get(RPKIT_BLOCK_CHANGE.REASON)
             )
             cache?.put(id, blockChange)

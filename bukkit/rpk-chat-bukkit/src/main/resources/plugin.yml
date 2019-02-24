@@ -9,6 +9,7 @@ depend:
 - rpk-character-lib-bukkit
 - rpk-chat-lib-bukkit
 - rpk-drink-lib-bukkit
+api-version: 1.13
 commands:
     chatchannel:
         description: Switches which chat channel you are speaking in

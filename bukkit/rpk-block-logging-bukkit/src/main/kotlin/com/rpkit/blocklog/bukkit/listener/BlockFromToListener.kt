@@ -22,9 +22,7 @@ class BlockFromToListener(private val plugin: RPKBlockLoggingBukkit): Listener {
                 minecraftProfile = null,
                 character = null,
                 from = event.toBlock.type,
-                fromData = event.toBlock.data,
                 to = event.block.type,
-                toData = event.block.data,
                 reason = "FROM_TO"
         )
         blockHistoryProvider.addBlockChange(blockChange)

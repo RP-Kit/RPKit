@@ -26,9 +26,7 @@ class BlockPistonExtendListener(private val plugin: RPKBlockLoggingBukkit): List
                     minecraftProfile = null,
                     character = null,
                     from = block.type,
-                    fromData = block.data,
                     to = block.getRelative(event.direction.oppositeFace).type,
-                    toData = block.getRelative(event.direction.oppositeFace).data,
                     reason = "PISTON"
             )
             blockHistoryProvider.addBlockChange(blockChange)

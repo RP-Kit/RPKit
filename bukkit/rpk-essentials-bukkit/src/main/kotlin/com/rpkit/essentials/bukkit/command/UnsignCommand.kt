@@ -1,7 +1,6 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -17,7 +16,7 @@ class UnsignCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 if (sender.inventory.itemInMainHand != null) {
                     if (sender.inventory.itemInMainHand.type == Material.WRITTEN_BOOK) {
                         val meta = sender.inventory.itemInMainHand.itemMeta as BookMeta
-                        sender.inventory.itemInMainHand.type = Material.BOOK_AND_QUILL
+                        sender.inventory.itemInMainHand.type = Material.WRITABLE_BOOK
                         sender.inventory.itemInMainHand.itemMeta = meta
                         sender.sendMessage(plugin.messages["unsign-valid"])
                     } else {

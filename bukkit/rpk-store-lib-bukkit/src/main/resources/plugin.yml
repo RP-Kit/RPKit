@@ -5,3 +5,4 @@ main: com.rpkit.store.bukkit.RPKStoreLibBukkit
 depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
+api-version: 1.13

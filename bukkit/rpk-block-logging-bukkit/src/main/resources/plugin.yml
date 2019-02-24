@@ -2,6 +2,7 @@ name: rpk-block-logging-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
+api-version: 1.13
 commands:
     history:
         description: Shows block change history on the block in front of the player

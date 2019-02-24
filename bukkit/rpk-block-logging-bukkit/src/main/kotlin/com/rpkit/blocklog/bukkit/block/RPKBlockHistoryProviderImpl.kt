@@ -85,16 +85,6 @@ class RPKBlockHistoryProviderImpl(private val plugin: RPKBlockLoggingBukkit): RP
         return type
     }
 
-    override fun getBlockDataAtTime(block: Block, time: Long): Byte {
-        val history = getBlockHistory(block)
-        var data = block.data
-        history.changes
-                .asReversed()
-                .takeWhile { time <= it.time }
-                .forEach { data = it.fromData }
-        return data
-    }
-
     override fun getBlockInventoryAtTime(block: Block, time: Long): Array<ItemStack> {
         val history = getBlockHistory(block)
         var inventoryContents = (block.state as? InventoryHolder)?.inventory?.contents?:emptyArray<ItemStack>()
