@@ -71,7 +71,7 @@ project(":rpk-core") {
     def jettyVersion = "9.4.15.v20190215"
     def velocityVersion = "1.7"
     def hikariCPVersion = "3.3.1"
-    def githubAPIVersion = "1.90"
+    def githubAPIVersion = "1.95"
     def jooqVersion = "3.11.5"
 
     dependencies {
