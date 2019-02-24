@@ -62,6 +62,7 @@ class RPKStoresBukkit: RPKBukkitPlugin() {
         messages.setDefault("claim-purchase-id-invalid-integer", "&cYou must specify a valid purchase ID.")
         messages.setDefault("claim-purchase-id-invalid-purchase", "&cYou must specify a valid purchase ID.")
         messages.setDefault("claim-purchase-id-invalid-consumable", "&cThat purchase is not consumable.")
+        messages.setDefault("claim-purchase-id-invalid-profile", "&cThat purchase is not yours to claim.")
         messages.setDefault("claim-plugin-not-installed", "&cThe plugin that purchase is associated with is not currently installed. Please contact a member of staff for support.")
         messages.setDefault("claim-plugin-cannot-claim", "&cThe plugin that purchase is associated with does not support claiming purchases. Please contact a member of staff for support.")
         messages.setDefault("claim-successful", "&aSuccessfully claimed your purchase.")
