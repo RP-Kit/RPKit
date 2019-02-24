@@ -1,0 +1,25 @@
+name: rpk-stores-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.store.bukkit.RPKStoresBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-store-lib-bukkit
+commands:
+    claim:
+        description: Claims a consumable purchase
+        usage: /<command> [purchase id]
+    purchase:
+        description: Adds a purchase to an account
+        usage: /<command> [uuid|name] [store item id]
+    purchases:
+        description: Shows all purchases on your account
+        usage: /<command>
+permissions:
+    rpkit.stores.command.purchases:
+        description: Allows the listing of purchases
+        default: true
+    rpkit.stores.command.claim:
+        description: Allows the claiming of purchases
+        default: true
