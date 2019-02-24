@@ -58,6 +58,10 @@ class ClaimCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
             sender.sendMessage(plugin.messages["claim-purchase-id-invalid-purchase"])
             return true
         }
+        if (purchase.profile != minecraftProfile.profile) {
+            sender.sendMessage(plugin.messages["claim-purchase-id-invalid-profile"])
+            return true
+        }
         if (purchase !is RPKConsumablePurchase) {
             sender.sendMessage(plugin.messages["claim-purchase-id-invalid-consumable"])
             return true
