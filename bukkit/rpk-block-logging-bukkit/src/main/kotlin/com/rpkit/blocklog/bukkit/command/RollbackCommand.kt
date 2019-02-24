@@ -2,6 +2,7 @@ package com.rpkit.blocklog.bukkit.command
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryProvider
+import com.rpkit.blocklog.bukkit.event.blocklog.RPKBukkitBlockRollbackEvent
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -41,10 +42,13 @@ class RollbackCommand(private val plugin: RPKBlockLoggingBukkit): CommandExecuto
             for (y in (sender.location.blockY - radius)..(sender.location.blockY + radius)) {
                 for (z in (sender.location.blockZ - radius)..(sender.location.blockZ + radius)) {
                     val block = sender.world.getBlockAt(x, y, z)
-                    block.type = blockHistoryProvider.getBlockTypeAtTime(block, time)
+                    val event = RPKBukkitBlockRollbackEvent(block, time)
+                    plugin.server.pluginManager.callEvent(event)
+                    if (event.isCancelled) continue
+                    block.type = blockHistoryProvider.getBlockTypeAtTime(event.block, event.time)
                     val state = block.state
                     if (state is InventoryHolder) {
-                        state.inventory.contents = blockHistoryProvider.getBlockInventoryAtTime(block, time)
+                        state.inventory.contents = blockHistoryProvider.getBlockInventoryAtTime(event.block, event.time)
                         state.update()
                     }
                 }
