@@ -1989,7 +1989,6 @@ project(":bukkit:rpk-stores-bukkit") {
         compile project(":bukkit:rpk-core-bukkit")
         compile project(":bukkit:rpk-player-lib-bukkit")
         compile project(":bukkit:rpk-store-lib-bukkit")
-        compile group: "com.paypal.sdk", name: "checkout-sdk", version: "1.0.0"
     }
 
     processResources {
@@ -1998,20 +1997,8 @@ project(":bukkit:rpk-stores-bukkit") {
         ]
     }
 
-    apply plugin: "com.github.johnrengelman.shadow"
-
-    shadowJar {
-
-        dependencies {
-            include(dependency("com.paypal.sdk:checkout-sdk"))
-        }
-
-        classifier = ""
-        from sourceSets.main.output
-    }
-
     artifacts {
-        archives shadowJar
+        archives jar
     }
 
     uploadArchives {
