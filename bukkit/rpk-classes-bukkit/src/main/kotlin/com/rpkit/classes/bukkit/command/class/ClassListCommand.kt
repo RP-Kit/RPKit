@@ -16,8 +16,8 @@ class ClassListCommand(private val plugin: RPKClassesBukkit): CommandExecutor {
         }
         val classProvider = plugin.core.serviceManager.getServiceProvider(RPKClassProvider::class)
         sender.sendMessage(plugin.messages["class-list-title"])
-        for (clazz in classProvider.classes) {
-            sender.sendMessage(plugin.messages["class-list-item", mapOf(Pair("class", clazz.name))])
+        for (`class` in classProvider.classes) {
+            sender.sendMessage(plugin.messages["class-list-item", mapOf(Pair("class", `class`.name))])
         }
         return true
     }

@@ -54,7 +54,7 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
                 )
                 .values(
                         entity.character.id,
-                        entity.clazz.name,
+                        entity.`class`.name,
                         entity.experience
                 )
                 .execute()
@@ -68,7 +68,7 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
         database.create
                 .update(RPKIT_CLASS_EXPERIENCE)
                 .set(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID, entity.character.id)
-                .set(RPKIT_CLASS_EXPERIENCE.CLASS_NAME, entity.clazz.name)
+                .set(RPKIT_CLASS_EXPERIENCE.CLASS_NAME, entity.`class`.name)
                 .set(RPKIT_CLASS_EXPERIENCE.EXPERIENCE, entity.experience)
                 .where(RPKIT_CLASS_EXPERIENCE.ID.eq(entity.id))
                 .execute()
@@ -92,12 +92,12 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
             val character = characterProvider.getCharacter(characterId)
             val classProvider = plugin.core.serviceManager.getServiceProvider(RPKClassProvider::class)
             val className = result.get(RPKIT_CLASS_EXPERIENCE.CLASS_NAME)
-            val clazz = classProvider.getClass(className)
-            if (character != null && clazz != null) {
+            val `class` = classProvider.getClass(className)
+            if (character != null && `class` != null) {
                 val classExperience = RPKClassExperience(
                         id,
                         character,
-                        clazz,
+                        `class`,
                         result.get(RPKIT_CLASS_EXPERIENCE.EXPERIENCE)
                 )
                 cache?.put(id, classExperience)
@@ -112,12 +112,12 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
         }
     }
 
-    fun get(character: RPKCharacter, clazz: RPKClass): RPKClassExperience? {
+    fun get(character: RPKCharacter, `class`: RPKClass): RPKClassExperience? {
         val result = database.create
                 .select(RPKIT_CLASS_EXPERIENCE.ID)
                 .from(RPKIT_CLASS_EXPERIENCE)
                 .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(character.id))
-                .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(clazz.name))
+                .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(`class`.name))
                 .fetchOne() ?: return null
         return get(result.get(RPKIT_CLASS_EXPERIENCE.ID))
     }
