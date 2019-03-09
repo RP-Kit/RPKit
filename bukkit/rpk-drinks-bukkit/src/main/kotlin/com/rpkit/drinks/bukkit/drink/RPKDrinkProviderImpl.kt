@@ -3,6 +3,7 @@ package com.rpkit.drinks.bukkit.drink
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.drink.bukkit.drink.RPKDrink
 import com.rpkit.drink.bukkit.drink.RPKDrinkProvider
+import com.rpkit.drink.bukkit.event.drink.RPKBukkitDrunkennessChangeEvent
 import com.rpkit.drinks.bukkit.RPKDrinksBukkit
 import com.rpkit.drinks.bukkit.database.table.RPKDrunkennessTable
 import org.bukkit.Material
@@ -31,6 +32,9 @@ class RPKDrinkProviderImpl(private val plugin: RPKDrinksBukkit): RPKDrinkProvide
     }
 
     override fun setDrunkenness(character: RPKCharacter, drunkenness: Int) {
+        val event = RPKBukkitDrunkennessChangeEvent(character, getDrunkenness(character), drunkenness)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         val drunkennessTable = plugin.core.database.getTable(RPKDrunkennessTable::class)
         var charDrunkenness = drunkennessTable.get(character)
         if (charDrunkenness != null) {

@@ -2,6 +2,7 @@ package com.rpkit.drinks.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.drink.bukkit.drink.RPKDrinkProvider
+import com.rpkit.drink.bukkit.event.drink.RPKBukkitDrinkEvent
 import com.rpkit.drinks.bukkit.RPKDrinksBukkit
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.event.EventHandler
@@ -19,7 +20,13 @@ class PlayerItemConsumeListener(private val plugin: RPKDrinksBukkit): Listener {
         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player) ?: return
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val character = characterProvider.getActiveCharacter(minecraftProfile) ?: return
-        drinkProvider.setDrunkenness(character, drinkProvider.getDrunkenness(character) + drink.drunkenness)
+        val drinkEvent = RPKBukkitDrinkEvent(character, drink)
+        plugin.server.pluginManager.callEvent(drinkEvent)
+        if (drinkEvent.isCancelled) {
+            event.isCancelled = true
+            return
+        }
+        drinkProvider.setDrunkenness(drinkEvent.character, drinkProvider.getDrunkenness(drinkEvent.character) + drinkEvent.drink.drunkenness)
     }
 
 }
