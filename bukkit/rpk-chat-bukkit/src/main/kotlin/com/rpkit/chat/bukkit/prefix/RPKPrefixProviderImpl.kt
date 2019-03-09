@@ -17,6 +17,9 @@
 package com.rpkit.chat.bukkit.prefix
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixCreateEvent
+import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixDeleteEvent
+import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixUpdateEvent
 import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -34,29 +37,38 @@ class RPKPrefixProviderImpl(private val plugin: RPKChatBukkit): RPKPrefixProvide
             }
 
     override fun addPrefix(prefix: RPKPrefix) {
-        plugin.config.set("prefixes.${prefix.name}", prefix.prefix)
+        val event = RPKBukkitPrefixCreateEvent(prefix)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.config.set("prefixes.${event.prefix.name}", event.prefix.prefix)
         plugin.saveConfig()
     }
 
     override fun updatePrefix(prefix: RPKPrefix) {
-        plugin.config.set("prefixes.${prefix.name}", prefix.prefix)
+        val event = RPKBukkitPrefixUpdateEvent(prefix)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.config.set("prefixes.${event.prefix.name}", event.prefix.prefix)
         plugin.saveConfig()
     }
 
     override fun removePrefix(prefix: RPKPrefix) {
-        plugin.config.set("prefixes.${prefix.name}", null)
+        val event = RPKBukkitPrefixDeleteEvent(prefix)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.config.set("prefixes.${event.prefix.name}", null)
         plugin.saveConfig()
     }
 
     override fun getPrefix(name: String): RPKPrefix? {
-        return prefixes.filter { prefix -> prefix.name == name }.firstOrNull()
+        return prefixes.firstOrNull { prefix -> prefix.name == name }
     }
 
     override fun getPrefix(player: RPKPlayer): String {
         val prefixBuilder = StringBuilder()
         for (prefix in prefixes) {
-            if (player.bukkitPlayer?.isOnline?:false) {
-                if (player.bukkitPlayer?.player?.hasPermission("rpkit.chat.prefix.${prefix.name}")?:false) {
+            if (player.bukkitPlayer?.isOnline == true) {
+                if (player.bukkitPlayer?.player?.hasPermission("rpkit.chat.prefix.${prefix.name}") == true) {
                     prefixBuilder.append(prefix.prefix).append(' ')
                 }
             }

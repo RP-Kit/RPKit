@@ -22,7 +22,6 @@ import com.rpkit.core.database.TableVersion
 import com.rpkit.core.database.jooq.rpkit.Tables.TABLE_VERSION
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the database table used to record versions of tables.
@@ -40,7 +39,6 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
                         constraint("pk_table_version").primaryKey(TABLE_VERSION.ID)
                 )
                 .execute()
-        SQLiteDataType.INTEGER
     }
 
     override fun applyMigrations() {
