@@ -16,7 +16,9 @@
 
 package com.rpkit.moderation.bukkit.ticket
 
+import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketCloseEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import java.time.LocalDateTime
 
@@ -44,8 +46,11 @@ class RPKTicketImpl(
     )
 
     override fun close(resolver: RPKProfile) {
+        val event = RPKBukkitTicketCloseEvent(resolver, this)
+        Bukkit.getServer().pluginManager.callEvent(event)
+        if (event.isCancelled) return
         isClosed = true
-        this.resolver = resolver
+        this.resolver = event.profile
         closeDate = LocalDateTime.now()
     }
 }

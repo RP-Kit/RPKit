@@ -18,6 +18,9 @@ package com.rpkit.moderation.bukkit.ticket
 
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.database.table.RPKTicketTable
+import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketCreateEvent
+import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketDeleteEvent
+import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketUpdateEvent
 
 
 class RPKTicketProviderImpl(private val plugin: RPKModerationBukkit): RPKTicketProvider {
@@ -35,15 +38,24 @@ class RPKTicketProviderImpl(private val plugin: RPKModerationBukkit): RPKTicketP
     }
 
     override fun addTicket(ticket: RPKTicket) {
-        plugin.core.database.getTable(RPKTicketTable::class).insert(ticket)
+        val event = RPKBukkitTicketCreateEvent(ticket)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKTicketTable::class).insert(event.ticket)
     }
 
     override fun updateTicket(ticket: RPKTicket) {
-        plugin.core.database.getTable(RPKTicketTable::class).update(ticket)
+        val event = RPKBukkitTicketUpdateEvent(ticket)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKTicketTable::class).update(event.ticket)
     }
 
     override fun removeTicket(ticket: RPKTicket) {
-        plugin.core.database.getTable(RPKTicketTable::class).delete(ticket)
+        val event = RPKBukkitTicketDeleteEvent(ticket)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKTicketTable::class).delete(event.ticket)
     }
 
 }
