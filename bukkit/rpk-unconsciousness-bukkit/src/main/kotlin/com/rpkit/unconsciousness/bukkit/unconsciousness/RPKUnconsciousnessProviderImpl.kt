@@ -19,6 +19,7 @@ package com.rpkit.unconsciousness.bukkit.unconsciousness
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
 import com.rpkit.unconsciousness.bukkit.database.table.RPKUnconsciousStateTable
+import com.rpkit.unconsciousness.bukkit.event.unconsciousness.RPKBukkitUnconsciousnessStateChangeEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 
@@ -36,20 +37,23 @@ class RPKUnconsciousnessProviderImpl(private val plugin: RPKUnconsciousnessBukki
     }
 
     override fun setUnconscious(character: RPKCharacter, unconscious: Boolean) {
+        val event = RPKBukkitUnconsciousnessStateChangeEvent(character, unconscious)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         val unconsciousStateTable = plugin.core.database.getTable(RPKUnconsciousStateTable::class)
-        var unconsciousState = unconsciousStateTable.get(character)
+        var unconsciousState = unconsciousStateTable.get(event.character)
         if (unconsciousState != null) {
-            if (unconscious) {
+            if (event.isUnconscious) {
                 unconsciousState.deathTime = System.currentTimeMillis()
                 unconsciousStateTable.update(unconsciousState)
-                plugin.server.getPlayer(character.minecraftProfile?.minecraftUUID).addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0), true)
+                plugin.server.getPlayer(event.character.minecraftProfile?.minecraftUUID).addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0), true)
             } else {
                 unconsciousStateTable.delete(unconsciousState)
             }
         } else {
-            if (unconscious) {
+            if (event.isUnconscious) {
                 unconsciousState = RPKUnconsciousState(
-                        character = character,
+                        character = event.character,
                         deathTime = System.currentTimeMillis()
                 )
                 unconsciousStateTable.insert(unconsciousState)
