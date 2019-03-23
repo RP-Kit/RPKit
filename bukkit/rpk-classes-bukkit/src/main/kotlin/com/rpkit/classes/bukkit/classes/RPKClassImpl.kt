@@ -47,8 +47,8 @@ class RPKClassImpl(
 
     override fun hasPrerequisites(character: RPKCharacter): Boolean {
         val classProvider = plugin.core.serviceManager.getServiceProvider(RPKClassProvider::class)
-        for ((clazz, level) in prerequisites) {
-            if (classProvider.getLevel(character, clazz) < level) {
+        for ((`class`, level) in prerequisites) {
+            if (classProvider.getLevel(character, `class`) < level) {
                 return false
             }
         }

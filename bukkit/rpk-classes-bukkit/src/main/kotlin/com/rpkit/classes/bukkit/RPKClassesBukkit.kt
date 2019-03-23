@@ -75,8 +75,8 @@ class RPKClassesBukkit: RPKBukkitPlugin() {
 
                 override fun get(character: RPKCharacter): Map<RPKClass, Int>? {
                     return classProvider.classes
-                            .map { clazz ->
-                                Pair(clazz, classProvider.getLevel(character, clazz))
+                            .map { `class` ->
+                                Pair(`class`, classProvider.getLevel(character, `class`))
                             }
                             .toMap()
                 }
@@ -84,7 +84,7 @@ class RPKClassesBukkit: RPKBukkitPlugin() {
             })
             statVariableProvider.addStatVariable(object: RPKStatVariable {
 
-                override val name = "clazz"
+                override val name = "class"
 
                 override fun get(character: RPKCharacter): Any? {
                     return classProvider.getClass(character)

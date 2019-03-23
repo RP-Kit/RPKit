@@ -54,4 +54,11 @@ interface RPKWarningProvider: ServiceProvider {
      */
     fun removeWarning(warning: RPKWarning)
 
+    /**
+     * Updates a warning
+     *
+     * @param warning the warning to update
+     */
+    fun updateWarning(warning: RPKWarning)
+
 }

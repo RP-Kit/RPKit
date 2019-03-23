@@ -38,18 +38,18 @@ class ClassSetCommand(private val plugin: RPKClassesBukkit): CommandExecutor {
             return true
         }
         val className = args[0]
-        val clazz = classProvider.getClass(className)
-        if (clazz == null) {
+        val `class` = classProvider.getClass(className)
+        if (`class` == null) {
             sender.sendMessage(plugin.messages["class-set-invalid-class"])
             return true
         }
-        if (!clazz.hasPrerequisites(character)) {
+        if (!`class`.hasPrerequisites(character)) {
             sender.sendMessage(plugin.messages["class-set-invalid-prerequisites"])
             return true
         }
-        classProvider.setClass(character, clazz)
+        classProvider.setClass(character, `class`)
         sender.sendMessage(plugin.messages["class-set-valid", mapOf(
-                Pair("class", clazz.name)
+                Pair("class", `class`.name)
         )])
         return true
     }

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.rpkit.store.bukkit.payment
+package com.rpkit.chat.bukkit.event.chatchannel
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
+import com.rpkit.core.event.RPKEvent
 
-/**
- * Represents a provider of payments, facilitates access to a payment gateway.
- */
-interface RPKPaymentProvider: ServiceProvider {
+
+interface RPKChatChannelEvent: RPKEvent {
+
+    val chatChannel: RPKChatChannel?
+
 }

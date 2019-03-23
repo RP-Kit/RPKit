@@ -7,5 +7,5 @@ import com.rpkit.core.database.Entity
 class RPKCharacterClass(
         override var id: Int = 0,
         val character: RPKCharacter,
-        var clazz: RPKClass
+        var `class`: RPKClass
 ) : Entity

@@ -19,6 +19,8 @@ package com.rpkit.auctions.bukkit.auction
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidProvider
+import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionBiddingCloseEvent
+import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionBiddingOpenEvent
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrency
@@ -48,21 +50,29 @@ class RPKAuctionImpl(
     override val bids: List<RPKBid>
         get() = plugin.core.serviceManager.getServiceProvider(RPKBidProvider::class).getBids(this)
 
-    override fun addBid(bid: RPKBid) {
-        if (!isBiddingOpen) return
+    override fun addBid(bid: RPKBid): Boolean {
+        if (!isBiddingOpen) return false
         val highestCurrentBid = bids.sortedByDescending { bid -> bid.amount }.firstOrNull()
         if ((highestCurrentBid == null && bid.amount >= startPrice + minimumBidIncrement) || (highestCurrentBid != null && bid.amount >= highestCurrentBid.amount + minimumBidIncrement)) {
-            plugin.core.serviceManager.getServiceProvider(RPKBidProvider::class).addBid(bid)
+            if (!plugin.core.serviceManager.getServiceProvider(RPKBidProvider::class).addBid(bid)) {
+                return false
+            }
             if (buyOutPrice != null) {
                 if (bid.amount >= buyOutPrice) {
                     closeBidding()
                 }
             }
+            return true
+        } else {
+            return false
         }
     }
 
     override fun openBidding() {
         if (!isBiddingOpen) {
+            val event = RPKBukkitAuctionBiddingOpenEvent(this)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
             isBiddingOpen = true
         } else {
             throw IllegalStateException("Bidding is already open.")
@@ -71,6 +81,9 @@ class RPKAuctionImpl(
 
     override fun closeBidding() {
         if (isBiddingOpen) {
+            val event = RPKBukkitAuctionBiddingCloseEvent(this)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
             val highestBid = bids.sortedByDescending { bid -> bid.amount }.firstOrNull()
             if (highestBid != null) {
                 if (highestBid.amount > noSellPrice?:0) {

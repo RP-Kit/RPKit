@@ -23,6 +23,7 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineCom
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
 import com.rpkit.chat.bukkit.context.DirectedChatChannelMessageContext
 import com.rpkit.chat.bukkit.context.UndirectedChatChannelMessageContext
+import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelMessageEvent
 import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteProvider
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
@@ -122,16 +123,7 @@ class RPKChatChannelImpl(
     }
 
     override fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String) {
-        listenerMinecraftProfiles.forEach { listener ->
-            var context: DirectedChatChannelMessageContext = DirectedChatChannelMessageContextImpl(this, sender, senderMinecraftProfile, listener, message)
-            directedPipeline.forEach { component ->
-                context = component.process(context)
-            }
-        }
-        var context: UndirectedChatChannelMessageContext = UndirectedChatChannelMessageContextImpl(this, sender, senderMinecraftProfile, message)
-        undirectedPipeline.forEach { component ->
-            context = component.process(context)
-        }
+        sendMessage(sender, senderMinecraftProfile, message, directedPipeline, undirectedPipeline)
     }
 
     override fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>) {
@@ -149,13 +141,27 @@ class RPKChatChannelImpl(
     }
 
     override fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>) {
+        val event = RPKBukkitChatChannelMessageEvent(sender, senderMinecraftProfile, this, message)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         listenerMinecraftProfiles.forEach { listener ->
-            var context: DirectedChatChannelMessageContext = DirectedChatChannelMessageContextImpl(this, sender, senderMinecraftProfile, listener, message)
+            var context: DirectedChatChannelMessageContext = DirectedChatChannelMessageContextImpl(
+                    event.chatChannel,
+                    event.profile,
+                    event.minecraftProfile,
+                    listener,
+                    event.message
+            )
             directedPipeline.forEach { component ->
                 context = component.process(context)
             }
         }
-        var context: UndirectedChatChannelMessageContext = UndirectedChatChannelMessageContextImpl(this, sender, senderMinecraftProfile, message)
+        var context: UndirectedChatChannelMessageContext = UndirectedChatChannelMessageContextImpl(
+                event.chatChannel,
+                event.profile,
+                event.minecraftProfile,
+                event.message
+        )
         undirectedPipeline.forEach { component ->
             context = component.process(context)
         }

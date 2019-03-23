@@ -28,22 +28,25 @@ interface RPKBidProvider: ServiceProvider {
      * Adds a bid.
      *
      * @param bid The bid to add
+     * @return Whether adding the bid was successful
      */
-    fun addBid(bid: RPKBid)
+    fun addBid(bid: RPKBid): Boolean
 
     /**
      * Updates a bid in data storage.
      *
      * @param bid The bid to update
+     * @return Whether updating the bid was successful
      */
-    fun updateBid(bid: RPKBid)
+    fun updateBid(bid: RPKBid): Boolean
 
     /**
      * Removes a bid.
      *
      * @param bid The bid to remove
+     * @return Whether removing the bid was successful
      */
-    fun removeBid(bid: RPKBid)
+    fun removeBid(bid: RPKBid): Boolean
 
     /**
      * Gets a list of all bids made for a particular auction.

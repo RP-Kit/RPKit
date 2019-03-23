@@ -2,6 +2,8 @@ package com.rpkit.travel.bukkit.warp
 
 import com.rpkit.travel.bukkit.RPKTravelBukkit
 import com.rpkit.travel.bukkit.database.table.RPKWarpTable
+import com.rpkit.warp.bukkit.event.warp.RPKBukkitWarpCreateEvent
+import com.rpkit.warp.bukkit.event.warp.RPKBukkitWarpUpdateEvent
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import com.rpkit.warp.bukkit.warp.RPKWarpProvider
 
@@ -19,14 +21,23 @@ class RPKWarpProviderImpl(private val plugin: RPKTravelBukkit): RPKWarpProvider 
     }
 
     override fun addWarp(warp: RPKWarp) {
-        plugin.core.database.getTable(RPKWarpTable::class).insert(warp)
+        val event = RPKBukkitWarpCreateEvent(warp)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKWarpTable::class).insert(event.warp)
     }
 
     override fun updateWarp(warp: RPKWarp) {
-        plugin.core.database.getTable(RPKWarpTable::class).update(warp)
+        val event = RPKBukkitWarpUpdateEvent(warp)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKWarpTable::class).update(event.warp)
     }
 
     override fun removeWarp(warp: RPKWarp) {
-        plugin.core.database.getTable(RPKWarpTable::class).delete(warp)
+        val event = RPKBukkitWarpUpdateEvent(warp)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKWarpTable::class).delete(event.warp)
     }
 }

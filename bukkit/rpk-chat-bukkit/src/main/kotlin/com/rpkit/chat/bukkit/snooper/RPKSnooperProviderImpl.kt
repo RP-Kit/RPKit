@@ -18,6 +18,8 @@ package com.rpkit.chat.bukkit.snooper
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.database.table.RPKSnooperTable
+import com.rpkit.chat.bukkit.event.snooper.RPKBukkitSnoopingBeginEvent
+import com.rpkit.chat.bukkit.event.snooper.RPKBukkitSnoopingEndEvent
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
@@ -51,6 +53,9 @@ class RPKSnooperProviderImpl(private val plugin: RPKChatBukkit): RPKSnooperProvi
 
     override fun addSnooper(minecraftProfile: RPKMinecraftProfile) {
         if (!snooperMinecraftProfiles.contains(minecraftProfile)) {
+            val event = RPKBukkitSnoopingBeginEvent(minecraftProfile)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
             plugin.core.database.getTable(RPKSnooperTable::class).insert(RPKSnooper(minecraftProfile = minecraftProfile))
         }
     }
@@ -70,6 +75,9 @@ class RPKSnooperProviderImpl(private val plugin: RPKChatBukkit): RPKSnooperProvi
         val snooperTable = plugin.core.database.getTable(RPKSnooperTable::class)
         val snooper = snooperTable.get(minecraftProfile)
         if (snooper != null) {
+            val event = RPKBukkitSnoopingEndEvent(minecraftProfile)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
             snooperTable.delete(snooper)
         }
     }

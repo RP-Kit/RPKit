@@ -2,6 +2,9 @@ package com.rpkit.players.bukkit.profile
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.table.RPKGitHubProfileTable
+import com.rpkit.players.bukkit.event.githubprofile.RPKBukkitGitHubProfileCreateEvent
+import com.rpkit.players.bukkit.event.githubprofile.RPKBukkitGitHubProfileDeleteEvent
+import com.rpkit.players.bukkit.event.githubprofile.RPKBukkitGitHubProfileUpdateEvent
 import org.kohsuke.github.GHUser
 
 
@@ -20,15 +23,24 @@ class RPKGitHubProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPKGit
     }
 
     override fun addGitHubProfile(profile: RPKGitHubProfile) {
-        plugin.core.database.getTable(RPKGitHubProfileTable::class).insert(profile)
+        val event = RPKBukkitGitHubProfileCreateEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKGitHubProfileTable::class).insert(event.githubProfile)
     }
 
     override fun updateGitHubProfile(profile: RPKGitHubProfile) {
-        plugin.core.database.getTable(RPKGitHubProfileTable::class).update(profile)
+        val event = RPKBukkitGitHubProfileUpdateEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKGitHubProfileTable::class).update(event.githubProfile)
     }
 
     override fun removeGitHubProfile(profile: RPKGitHubProfile) {
-        plugin.core.database.getTable(RPKGitHubProfileTable::class).delete(profile)
+        val event = RPKBukkitGitHubProfileDeleteEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKGitHubProfileTable::class).delete(event.githubProfile)
     }
 
 }

@@ -3,6 +3,7 @@ package com.rpkit.experience.bukkit.experience
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.experience.bukkit.RPKExperienceBukkit
 import com.rpkit.experience.bukkit.database.table.RPKExperienceTable
+import com.rpkit.experience.bukkit.event.experience.RPKBukkitExperienceChangeEvent
 import javax.script.ScriptContext.ENGINE_SCOPE
 import javax.script.ScriptEngineManager
 
@@ -29,17 +30,20 @@ class RPKExperienceProviderImpl(private val plugin: RPKExperienceBukkit): RPKExp
     }
 
     override fun setExperience(character: RPKCharacter, experience: Int) {
+        val event = RPKBukkitExperienceChangeEvent(character, getExperience(character), experience)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         val experienceTable = plugin.core.database.getTable(RPKExperienceTable::class)
         var experienceValue = experienceTable.get(character)
         if (experienceValue == null) {
-            experienceValue = RPKExperienceValue(character = character, value = experience)
+            experienceValue = RPKExperienceValue(character = character, value = event.experience)
             experienceTable.insert(experienceValue)
         } else {
-            experienceValue.value = experience
+            experienceValue.value = event.experience
             experienceTable.update(experienceValue)
         }
         var level = 1
-        while (level + 1 <= plugin.config.getInt("levels.max-level") && getExperienceNeededForLevel(level + 1) <= experience) {
+        while (level + 1 <= plugin.config.getInt("levels.max-level") && getExperienceNeededForLevel(level + 1) <= event.experience) {
             level++
         }
         val isMaxLevel = level == plugin.config.getInt("levels.max-level")
@@ -51,7 +55,7 @@ class RPKExperienceProviderImpl(private val plugin: RPKExperienceBukkit): RPKExp
                 if (isMaxLevel) {
                     bukkitPlayer.exp = 0F
                 } else {
-                    bukkitPlayer.exp = (experience - getExperienceNeededForLevel(level)).toFloat() / (getExperienceNeededForLevel(level + 1) - getExperienceNeededForLevel(level)).toFloat()
+                    bukkitPlayer.exp = (event.experience - getExperienceNeededForLevel(level)).toFloat() / (getExperienceNeededForLevel(level + 1) - getExperienceNeededForLevel(level)).toFloat()
                 }
             }
         }

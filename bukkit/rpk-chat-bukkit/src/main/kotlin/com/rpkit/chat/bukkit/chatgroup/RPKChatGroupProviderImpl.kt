@@ -17,8 +17,11 @@
 package com.rpkit.chat.bukkit.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.database.table.RPKChatGroupTable
 import com.rpkit.chat.bukkit.database.table.LastUsedChatGroupTable
+import com.rpkit.chat.bukkit.database.table.RPKChatGroupTable
+import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupCreateEvent
+import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupDeleteEvent
+import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupUpdateEvent
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
@@ -37,15 +40,24 @@ class RPKChatGroupProviderImpl(private val plugin: RPKChatBukkit): RPKChatGroupP
     }
 
     override fun addChatGroup(chatGroup: RPKChatGroup) {
-        plugin.core.database.getTable(RPKChatGroupTable::class).insert(chatGroup)
+        val event = RPKBukkitChatGroupCreateEvent(chatGroup)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKChatGroupTable::class).insert(event.chatGroup)
     }
 
     override fun removeChatGroup(chatGroup: RPKChatGroup) {
-        plugin.core.database.getTable(RPKChatGroupTable::class).delete(chatGroup)
+        val event = RPKBukkitChatGroupDeleteEvent(chatGroup)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKChatGroupTable::class).delete(event.chatGroup)
     }
 
     override fun updateChatGroup(chatGroup: RPKChatGroup) {
-        plugin.core.database.getTable(RPKChatGroupTable::class).update(chatGroup)
+        val event = RPKBukkitChatGroupUpdateEvent(chatGroup)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKChatGroupTable::class).update(event.chatGroup)
     }
 
     override fun getLastUsedChatGroup(player: RPKPlayer): RPKChatGroup? {

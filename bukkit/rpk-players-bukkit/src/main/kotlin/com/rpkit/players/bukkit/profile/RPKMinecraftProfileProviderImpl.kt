@@ -4,6 +4,9 @@ import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileLinkRequestTable
 import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileTable
 import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileTokenTable
+import com.rpkit.players.bukkit.event.minecraftprofile.RPKBukkitMinecraftProfileCreateEvent
+import com.rpkit.players.bukkit.event.minecraftprofile.RPKBukkitMinecraftProfileDeleteEvent
+import com.rpkit.players.bukkit.event.minecraftprofile.RPKBukkitMinecraftProfileUpdateEvent
 import org.bukkit.OfflinePlayer
 
 
@@ -22,15 +25,24 @@ class RPKMinecraftProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPK
     }
 
     override fun addMinecraftProfile(profile: RPKMinecraftProfile) {
-        plugin.core.database.getTable(RPKMinecraftProfileTable::class).insert(profile)
+        val event = RPKBukkitMinecraftProfileCreateEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKMinecraftProfileTable::class).insert(event.minecraftProfile)
     }
 
     override fun updateMinecraftProfile(profile: RPKMinecraftProfile) {
-        plugin.core.database.getTable(RPKMinecraftProfileTable::class).update(profile)
+        val event = RPKBukkitMinecraftProfileUpdateEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKMinecraftProfileTable::class).update(event.minecraftProfile)
     }
 
     override fun removeMinecraftProfile(profile: RPKMinecraftProfile) {
-        plugin.core.database.getTable(RPKMinecraftProfileTable::class).delete(profile)
+        val event = RPKBukkitMinecraftProfileDeleteEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKMinecraftProfileTable::class).delete(event.minecraftProfile)
     }
 
     override fun getMinecraftProfileToken(id: Int): RPKMinecraftProfileToken? {
