@@ -11,7 +11,7 @@ class RPKBukkitAuctionCreateEvent(override val auction: RPKAuction) : RPKBukkitE
         @JvmStatic val handlerList = HandlerList()
     }
 
-    var cancel: Boolean = false
+    private var cancel: Boolean = false
 
     override fun isCancelled(): Boolean {
         return cancel

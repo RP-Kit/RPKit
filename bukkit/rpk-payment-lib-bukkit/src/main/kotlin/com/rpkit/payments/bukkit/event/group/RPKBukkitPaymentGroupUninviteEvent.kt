@@ -29,7 +29,7 @@ class RPKBukkitPaymentGroupUninviteEvent(override val paymentGroup: RPKPaymentGr
         @JvmStatic val handlerList = HandlerList()
     }
 
-    var cancel: Boolean = false
+    private var cancel: Boolean = false
 
     override fun isCancelled(): Boolean {
         return cancel

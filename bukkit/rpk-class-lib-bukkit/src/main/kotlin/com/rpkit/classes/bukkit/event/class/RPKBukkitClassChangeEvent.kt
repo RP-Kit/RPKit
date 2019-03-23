@@ -33,7 +33,7 @@ class RPKBukkitClassChangeEvent(
         @JvmStatic val handlerList = HandlerList()
     }
 
-    var cancel: Boolean = false
+    private var cancel: Boolean = false
 
     override fun isCancelled(): Boolean {
         return cancel
