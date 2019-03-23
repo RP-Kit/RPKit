@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-package com.rpkit.store.bukkit.payment
+package com.rpkit.store.bukkit.event.storeitem
 
-import com.rpkit.core.service.ServiceProvider
 
-/**
- * Represents a provider of payments, facilitates access to a payment gateway.
- */
-interface RPKPaymentProvider: ServiceProvider {
-}
+interface RPKStoreItemDeleteEvent: RPKStoreItemEvent
