@@ -38,14 +38,14 @@ class PlayerMoveListener(private val plugin: RPKUnconsciousnessBukkit): Listener
             val character = characterProvider.getActiveCharacter(minecraftProfile)
             if (character != null) {
                 if (unconsciousnessProvider.isUnconscious(character)) {
-                    if (event.from.blockX != event.to.blockX || event.from.blockZ != event.to.blockZ) {
+                    if (event.from.blockX != event.to?.blockX || event.from.blockZ != event.to?.blockZ) {
                         event.player.teleport(Location(
                                 event.from.world,
                                 event.from.blockX + 0.5,
                                 event.from.blockY + 0.5,
                                 event.from.blockZ + 0.5,
-                                event.to.yaw,
-                                event.to.pitch
+                                event.to?.yaw ?: event.from.yaw,
+                                event.to?.pitch ?: event.from.pitch
                         ))
                     }
                 }

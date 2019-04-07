@@ -48,7 +48,7 @@ class RPKShopsBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("restock").executor = RestockCommand(this)
+        getCommand("restock")?.setExecutor(RestockCommand(this))
     }
 
     override fun createTables(database: Database) {
@@ -83,6 +83,8 @@ class RPKShopsBukkit: RPKBukkitPlugin() {
         messages.setDefault("shop-sell-not-enough-items", "&cYou do not have enough items to sell to that shop.")
         messages.setDefault("shop-character-invalid", "&cThere is no character with that ID. Perhaps they have been deleted?")
         messages.setDefault("shop-currency-invalid", "&cThere is no currency by that name.")
+        messages.setDefault("shop-material-invalid", "&cThere is no material by that name.")
+        messages.setDefault("trader-material-invalid", "&cThere is no material by that name.")
         messages.setDefault("not-from-console", "&cYou must be a player to perform that command.")
         messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
     }

@@ -52,19 +52,21 @@ class SignChangeListener(private val plugin: RPKShopsBukkit): Listener {
                     if (character != null) {
                         val shopCount = shopCountProvider.getShopCount(character)
                         if (shopCount < plugin.config.getInt("shops.limit") || event.player.hasPermission("rpkit.shops.sign.shop.nolimit")) {
-                            if (!(event.getLine(1).matches(Regex("buy\\s+\\d+"))
-                                    || (event.getLine(1).matches(Regex("sell\\s+\\d+\\s+.+"))
-                                    && Material.matchMaterial(event.getLine(1).replace(Regex("sell\\s+\\d+\\s+"), "")) != null))) {
+                            if ((event.getLine(1)?.matches(Regex("buy\\s+\\d+")) != true
+                                    || (event.getLine(1)?.matches(Regex("sell\\s+\\d+\\s+.+")) == true
+                                    && Material.matchMaterial(event.getLine(1)?.replace(Regex("sell\\s+\\d+\\s+"), "") ?: "") != null))) {
                                 event.block.breakNaturally()
                                 event.player.sendMessage(plugin.messages["shop-line-1-invalid"])
                                 return
                             }
-                            if (!(event.getLine(2).matches(Regex("for\\s+\\d+\\s+.+")) && currencyProvider.getCurrency(event.getLine(2).replace(Regex("for\\s+\\d+\\s+"), "")) != null)) {
+                            if (!(event.getLine(2)?.matches(Regex("for\\s+\\d+\\s+.+")) == true
+                                            && currencyProvider.getCurrency(event.getLine(2)
+                                                    ?.replace(Regex("for\\s+\\d+\\s+"), "") ?: "") != null)) {
                                 event.block.breakNaturally()
                                 event.player.sendMessage(plugin.messages["shop-line-2-invalid"])
                                 return
                             }
-                            event.setLine(0, GREEN.toString() + "[shop]")
+                            event.setLine(0, "$GREEN[shop]")
                             if (!event.getLine(3).equals("admin", ignoreCase = true)) {
                                 event.setLine(3, character.id.toString())
                             } else {
@@ -118,11 +120,12 @@ class SignChangeListener(private val plugin: RPKShopsBukkit): Listener {
                     val character = characterProvider.getActiveCharacter(minecraftProfile)
                     if (character != null) {
                         event.setLine(1, character.id.toString())
-                        if (event.getLine(2).matches(Regex("\\d+\\s+.+"))) {
+                        if (event.getLine(2)?.matches(Regex("\\d+\\s+.+")) == true) {
                             val currencyName = event.getLine(2)
-                                    .split(Regex("\\s+"))
-                                    .drop(1)
-                                    .joinToString(" ")
+                                    ?.split(Regex("\\s+"))
+                                    ?.drop(1)
+                                    ?.joinToString(" ")
+                                    ?: ""
                             if (currencyProvider.getCurrency(currencyName) == null) {
                                 event.block.breakNaturally()
                                 event.player.sendMessage(plugin.messages["rent-line-2-invalid"])
@@ -132,7 +135,7 @@ class SignChangeListener(private val plugin: RPKShopsBukkit): Listener {
                             event.player.sendMessage(plugin.messages["rent-line-2-invalid"])
                         }
                         event.setLine(3, LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                        event.setLine(0, GREEN.toString() + "[rent]")
+                        event.setLine(0, "$GREEN[rent]")
                     } else {
                         event.block.breakNaturally()
                         event.player.sendMessage(plugin.messages["no-character"])

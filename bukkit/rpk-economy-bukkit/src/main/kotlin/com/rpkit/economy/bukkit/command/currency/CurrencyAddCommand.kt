@@ -94,7 +94,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
             return plugin.messages["currency-set-name-singular-prompt"]
         }
 
-        override fun acceptInput(context: ConversationContext, input: String): Prompt {
+        override fun acceptInput(context: ConversationContext, input: String?): Prompt {
             context.setSessionData("name_singular", input)
             return NameSingularSetPrompt()
         }
@@ -117,7 +117,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
             return plugin.messages["currency-set-name-plural-prompt"]
         }
 
-        override fun acceptInput(context: ConversationContext, input: String): Prompt {
+        override fun acceptInput(context: ConversationContext, input: String?): Prompt {
             context.setSessionData("name_plural", input)
             return NamePluralSetPrompt()
         }
@@ -153,7 +153,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
             return plugin.messages["currency-set-rate-invalid-rate-negative"]
         }
 
-        override fun getInputNotNumericText(context: ConversationContext?, invalidInput: String?): String? {
+        override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String? {
             return plugin.messages["currency-set-rate-invalid-rate-number"]
         }
     }
@@ -187,13 +187,13 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
             return plugin.messages["currency-set-default-amount-invalid-negative"]
         }
 
-        override fun getInputNotNumericText(context: ConversationContext?, invalidInput: String?): String? {
+        override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String? {
             return plugin.messages["currency-set-default-amount-invalid-number"]
         }
     }
 
     private inner class DefaultAmountSetPrompt: MessagePrompt() {
-        override fun getNextPrompt(context: ConversationContext?): Prompt? {
+        override fun getNextPrompt(context: ConversationContext): Prompt? {
             return MaterialPrompt()
         }
 

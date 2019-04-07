@@ -60,11 +60,11 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                     while (i < line.length) {
                                         if (line[i] == ChatColor.COLOR_CHAR) {
                                             val colourOrFormat = ChatColor.getByChar(line[i + 1])
-                                            if (colourOrFormat.isColor) {
+                                            if (colourOrFormat?.isColor == true) {
                                                 chatColor = colourOrFormat
                                                 chatFormat = null
                                             }
-                                            if (colourOrFormat.isFormat) chatFormat = colourOrFormat
+                                            if (colourOrFormat?.isFormat == true) chatFormat = colourOrFormat
                                             i += 1
                                         } else {
                                             var fieldFound = false
@@ -402,11 +402,11 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                                     while (i < line.length) {
                                         if (line[i] == ChatColor.COLOR_CHAR) {
                                             val colourOrFormat = ChatColor.getByChar(line[i + 1])
-                                            if (colourOrFormat.isColor) {
+                                            if (colourOrFormat?.isColor == true) {
                                                 chatColor = colourOrFormat
                                                 chatFormat = null
                                             }
-                                            if (colourOrFormat.isFormat) chatFormat = colourOrFormat
+                                            if (colourOrFormat?.isFormat == true) chatFormat = colourOrFormat
                                             i += 1
                                         } else {
                                             var fieldFound = false

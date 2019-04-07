@@ -196,7 +196,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                         entity.race?.id,
                         entity.description,
                         entity.isDead,
-                        entity.location.world.name,
+                        entity.location.world?.name,
                         entity.location.x,
                         entity.location.y,
                         entity.location.z,
@@ -240,7 +240,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .set(RPKIT_CHARACTER.RACE_ID, entity.race?.id)
                 .set(RPKIT_CHARACTER.DESCRIPTION, entity.description)
                 .set(RPKIT_CHARACTER.DEAD, if (entity.isDead) 1.toByte() else 0.toByte())
-                .set(RPKIT_CHARACTER.WORLD, entity.location.world.name)
+                .set(RPKIT_CHARACTER.WORLD, entity.location.world?.name)
                 .set(RPKIT_CHARACTER.X, entity.location.x)
                 .set(RPKIT_CHARACTER.Y, entity.location.y)
                 .set(RPKIT_CHARACTER.Z, entity.location.z)
@@ -415,9 +415,8 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .from(RPKIT_CHARACTER)
                 .where(RPKIT_CHARACTER.PROFILE_ID.eq(profile.id))
                 .fetch()
-        val characters = results.map { result -> get(result.get(RPKIT_CHARACTER.ID)) }
+        return results.map { result -> get(result.get(RPKIT_CHARACTER.ID)) }
                 .filterNotNull()
-        return characters
     }
 
     fun get(name: String): List<RPKCharacter> {
@@ -426,9 +425,8 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .from(RPKIT_CHARACTER)
                 .where(RPKIT_CHARACTER.NAME.likeIgnoreCase("%$name%"))
                 .fetch()
-        val characters = results.map { result -> get(result.get(RPKIT_CHARACTER.ID)) }
+        return results.map { result -> get(result.get(RPKIT_CHARACTER.ID)) }
                 .filterNotNull()
-        return characters
     }
 
     override fun delete(entity: RPKCharacter) {

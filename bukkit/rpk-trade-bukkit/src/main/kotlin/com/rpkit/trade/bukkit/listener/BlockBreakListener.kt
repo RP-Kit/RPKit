@@ -34,7 +34,7 @@ class BlockBreakListener(private val plugin: RPKTradeBukkit): Listener {
             if (event.block.state != null) {
                 if (event.block.state is Sign) {
                     val sign = event.block.state as Sign
-                    if (sign.getLine(0) == GREEN.toString() + "[trader]") {
+                    if (sign.getLine(0) == "$GREEN[trader]") {
                         if (!event.player.hasPermission("rpkit.trade.sign.trader.destroy")) {
                             event.isCancelled = true
                             event.player.sendMessage(plugin.messages["no-permission-trader-destroy"])

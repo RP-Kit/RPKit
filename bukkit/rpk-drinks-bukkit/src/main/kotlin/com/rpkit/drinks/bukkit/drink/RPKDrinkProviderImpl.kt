@@ -13,18 +13,28 @@ import org.bukkit.inventory.ShapelessRecipe
 
 class RPKDrinkProviderImpl(private val plugin: RPKDrinksBukkit): RPKDrinkProvider {
 
-    override val drinks: List<RPKDrink> = plugin.config.getConfigurationSection("drinks").getKeys(false).map { name ->
-            val recipe = ShapelessRecipe(NamespacedKey(plugin, name), plugin.config.getItemStack("drinks.$name.item"))
-            plugin.config.getConfigurationSection("drinks.$name.recipe").getKeys(false).forEach { item ->
-                recipe.addIngredient(plugin.config.getInt("drinks.$name.recipe.$item"), Material.matchMaterial(item))
+    override val drinks: List<RPKDrink> = plugin.config.getConfigurationSection("drinks")
+            ?.getKeys(false)
+            ?.mapNotNull { name ->
+                val drinkItem = plugin.config.getItemStack("drinks.$name.item") ?: return@mapNotNull null
+                val recipe = ShapelessRecipe(NamespacedKey(plugin, name), drinkItem)
+                plugin.config.getConfigurationSection("drinks.$name.recipe")
+                        ?.getKeys(false)
+                        ?.forEach { item ->
+                            recipe.addIngredient(plugin.config.getInt("drinks.$name.recipe.$item"),
+                                    Material.matchMaterial(item)
+                                            ?: Material.matchMaterial(item, true)
+                                            ?: throw IllegalArgumentException("Invalid material $item in recipe for $name")
+                            )
+                        }
+                RPKDrinkImpl(
+                        name,
+                        drinkItem,
+                        recipe,
+                        plugin.config.getInt("drinks.$name.drunkenness")
+                )
             }
-            RPKDrinkImpl(
-                    name,
-                    plugin.config.getItemStack("drinks.$name.item"),
-                    recipe,
-                    plugin.config.getInt("drinks.$name.drunkenness")
-            )
-        }
+            ?: listOf()
 
     override fun getDrunkenness(character: RPKCharacter): Int {
         return plugin.core.database.getTable(RPKDrunkennessTable::class).get(character)?.drunkenness?:0
@@ -43,11 +53,11 @@ class RPKDrinkProviderImpl(private val plugin: RPKDrinksBukkit): RPKDrinkProvide
     }
 
     override fun getDrink(name: String): RPKDrink? {
-        return drinks.filter { it.name == name }.firstOrNull()
+        return drinks.firstOrNull { it.name == name }
     }
 
     override fun getDrink(item: ItemStack): RPKDrink? {
-        return drinks.filter { it.item.isSimilar(item) }.firstOrNull()
+        return drinks.firstOrNull { it.item.isSimilar(item) }
     }
 
 }

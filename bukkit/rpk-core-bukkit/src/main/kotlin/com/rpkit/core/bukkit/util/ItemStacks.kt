@@ -98,3 +98,58 @@ fun ByteArray.toItemStackArray(): Array<ItemStack> {
         }
     }
 }
+
+/**
+ * Creates a clone of the [ItemStack] with the given display name
+ *
+ * @return A clone of the [ItemStack] with the given display name
+ */
+fun ItemStack.withDisplayName(displayName: String): ItemStack {
+    val newItemStack = clone()
+    val meta = newItemStack.itemMeta ?: return newItemStack
+    meta.setDisplayName(displayName)
+    newItemStack.itemMeta = meta
+    return newItemStack
+}
+
+/**
+ * Creates a clone of the [ItemStack] with the given lore.
+ * If the [ItemStack] already has lore the lore is appended to the existing lore.
+ *
+ * @return A clone of the [ItemStack] with the given lore
+ */
+fun ItemStack.withLore(lore: List<String>): ItemStack {
+    val newItemStack = clone()
+    val meta = newItemStack.itemMeta ?: return newItemStack
+    val metaLore = meta.lore ?: mutableListOf()
+    metaLore.addAll(lore)
+    meta.lore = metaLore
+    newItemStack.itemMeta = meta
+    return newItemStack
+}
+
+/**
+ * Creates a clone of the [ItemStack] with the given lore removed.
+ *
+ * @return A clone of the [ItemStack] with the given lore removed.
+ */
+fun ItemStack.withoutLore(lore: List<String>): ItemStack {
+    val newItemStack = clone()
+    val meta = newItemStack.itemMeta ?: return newItemStack
+    val metaLore = meta.lore ?: mutableListOf()
+    metaLore.removeAll(lore)
+    return newItemStack
+}
+
+/**
+ * Creates a clone of the [ItemStack] with any lore matching the given [Regex] removed.
+ *
+ * @return A clone of the [ItemStack] with any lore matching the given [Regex] removed.
+ */
+fun ItemStack.withoutLoreMatching(regex: Regex): ItemStack {
+    val newItemStack = clone()
+    val meta = newItemStack.itemMeta ?: return newItemStack
+    val metaLore = meta.lore?.filter { loreItem -> !loreItem.matches(regex) } ?: mutableListOf()
+    meta.lore = metaLore
+    return newItemStack
+}

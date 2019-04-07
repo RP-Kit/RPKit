@@ -54,8 +54,7 @@ class RPKChatChannelImpl(
                 .filter { player -> plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).getPlayerChannel(player) == this }
     override val speakerMinecraftProfiles: List<RPKMinecraftProfile>
         get() = plugin.server.onlinePlayers
-                .map { player -> plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class).getMinecraftProfile(player) }
-                .filterNotNull()
+                .mapNotNull { player -> plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class).getMinecraftProfile(player) }
                 .filter { minecraftProfile -> plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).getMinecraftProfileChannel(minecraftProfile) == this }
     override val listeners: List<RPKPlayer>
         get() = plugin.server.onlinePlayers
@@ -65,8 +64,7 @@ class RPKChatChannelImpl(
     override val listenerMinecraftProfiles: List<RPKMinecraftProfile>
         get() = plugin.server.onlinePlayers
                 .filter { player -> player.hasPermission("rpkit.chat.listen.$name") }
-                .map { player -> plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class).getMinecraftProfile(player) }
-                .filterNotNull()
+                .mapNotNull { player -> plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class).getMinecraftProfile(player) }
                 .filter { minecraftProfile -> !plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).hasMinecraftProfileMutedChatChannel(minecraftProfile, this) }
 
     override fun addSpeaker(speaker: RPKPlayer) {

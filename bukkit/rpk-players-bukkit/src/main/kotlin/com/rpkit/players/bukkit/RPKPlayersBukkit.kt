@@ -72,8 +72,8 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("account").executor = AccountCommand(this)
-        getCommand("profile").executor = ProfileCommand(this)
+        getCommand("account")?.setExecutor(AccountCommand(this))
+        getCommand("profile")?.setExecutor(ProfileCommand(this))
     }
 
     override fun registerListeners() {

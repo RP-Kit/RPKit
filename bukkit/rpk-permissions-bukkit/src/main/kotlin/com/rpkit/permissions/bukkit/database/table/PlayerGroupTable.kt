@@ -106,20 +106,20 @@ class PlayerGroupTable(database: Database, private val plugin: RPKPermissionsBuk
             val groupProvider = plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class)
             val groupName = result.get(PLAYER_GROUP.GROUP_NAME)
             val group = groupProvider.getGroup(groupName)
-            if (player != null && group != null) {
+            return if (player != null && group != null) {
                 val playerGroup = PlayerGroup(
                         id,
                         player,
                         group
                 )
                 cache?.put(id, playerGroup)
-                return playerGroup
+                playerGroup
             } else {
                 database.create
                         .deleteFrom(PLAYER_GROUP)
                         .where(PLAYER_GROUP.ID.eq(id))
                         .execute()
-                return null
+                null
             }
         }
     }

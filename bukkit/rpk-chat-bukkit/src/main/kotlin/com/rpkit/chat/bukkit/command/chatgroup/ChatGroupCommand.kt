@@ -37,24 +37,17 @@ class ChatGroupCommand(private val plugin: RPKChatBukkit): CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.chat.command.chatgroup")) {
-            if (args.size >= 1) {
+            if (args.isNotEmpty()) {
                 val newArgs = args.drop(1).toTypedArray()
-                if (args[0].equals("create", ignoreCase = true)) {
-                    chatGroupCreateCommand.onCommand(sender, command, label, newArgs)
-                } else if (args[0].equals("disband", ignoreCase = true)) {
-                    chatGroupDisbandCommand.onCommand(sender, command, label, newArgs)
-                } else if (args[0].equals("invite", ignoreCase = true)) {
-                    chatGroupInviteCommand.onCommand(sender, command, label, newArgs)
-                } else if (args[0].equals("join", ignoreCase = true)) {
-                    chatGroupJoinCommand.onCommand(sender, command, label, newArgs)
-                } else if (args[0].equals("leave", ignoreCase = true)) {
-                    chatGroupLeaveCommand.onCommand(sender, command, label, newArgs)
-                } else if (args[0].equals("message", ignoreCase = true)) {
-                    chatGroupMessageCommand.onCommand(sender, command, label, newArgs)
-                } else if (args[0].equals("members", ignoreCase = true)) {
-                    chatGroupMembersCommand.onCommand(sender, command, label, newArgs)
-                } else {
-                    sender.sendMessage(plugin.messages["chat-group-usage"])
+                when {
+                    args[0].equals("create", ignoreCase = true) -> chatGroupCreateCommand.onCommand(sender, command, label, newArgs)
+                    args[0].equals("disband", ignoreCase = true) -> chatGroupDisbandCommand.onCommand(sender, command, label, newArgs)
+                    args[0].equals("invite", ignoreCase = true) -> chatGroupInviteCommand.onCommand(sender, command, label, newArgs)
+                    args[0].equals("join", ignoreCase = true) -> chatGroupJoinCommand.onCommand(sender, command, label, newArgs)
+                    args[0].equals("leave", ignoreCase = true) -> chatGroupLeaveCommand.onCommand(sender, command, label, newArgs)
+                    args[0].equals("message", ignoreCase = true) -> chatGroupMessageCommand.onCommand(sender, command, label, newArgs)
+                    args[0].equals("members", ignoreCase = true) -> chatGroupMembersCommand.onCommand(sender, command, label, newArgs)
+                    else -> sender.sendMessage(plugin.messages["chat-group-usage"])
                 }
             } else {
                 sender.sendMessage(plugin.messages["chat-group-usage"])

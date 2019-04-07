@@ -10,7 +10,7 @@ class RPKDailyQuoteProviderImpl(private val plugin: RPKEssentialsBukkit): RPKDai
 
     override fun getDailyQuote(): String {
         var i = 0
-        for (j in 0..Calendar.getInstance().get(Calendar.DAY_OF_YEAR) - 1) {
+        for (j in 0 until Calendar.getInstance().get(Calendar.DAY_OF_YEAR)) {
             i++
             if (i > plugin.config.getStringList("daily-messages").size - 1) {
                 i = 0

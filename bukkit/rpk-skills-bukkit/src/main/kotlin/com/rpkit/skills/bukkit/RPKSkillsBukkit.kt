@@ -23,7 +23,7 @@ class RPKSkillsBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("skill").executor = SkillCommand(this)
+        getCommand("skill")?.setExecutor(SkillCommand(this))
     }
 
     override fun createTables(database: Database) {

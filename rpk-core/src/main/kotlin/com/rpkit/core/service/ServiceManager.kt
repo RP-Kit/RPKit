@@ -28,7 +28,7 @@ class ServiceManager {
     private val providers: MutableMap<KClass<out ServiceProvider>, ServiceProvider>
 
     init {
-        providers = ConcurrentHashMap<KClass<out ServiceProvider>, ServiceProvider>()
+        providers = ConcurrentHashMap()
     }
 
     /**
@@ -38,9 +38,9 @@ class ServiceManager {
     fun registerServiceProvider(provider: ServiceProvider) {
         for (providerInterface in provider.javaClass.interfaces) {
             if (ServiceProvider::class.java.isAssignableFrom(providerInterface)) {
-                providers.put(providerInterface.asSubclass(ServiceProvider::class.java).kotlin, provider)
+                providers[providerInterface.asSubclass(ServiceProvider::class.java).kotlin] = provider
             }
-            providers.put(provider.javaClass.kotlin, provider)
+            providers[provider.javaClass.kotlin] = provider
         }
     }
 

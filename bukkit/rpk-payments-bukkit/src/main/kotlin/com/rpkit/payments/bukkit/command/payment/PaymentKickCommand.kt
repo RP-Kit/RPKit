@@ -43,6 +43,10 @@ class PaymentKickCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor
                     val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     val bukkitPlayer = plugin.server.getPlayer(args.last())
+                    if (bukkitPlayer == null) {
+                        sender.sendMessage(plugin.messages[""])
+                        return true
+                    }
                     val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
                     if (minecraftProfile != null) {
                         val character = characterProvider.getActiveCharacter(minecraftProfile)

@@ -42,7 +42,7 @@ class MessageCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                         if (sender.hasPermission("rpkit.chat.command.chatgroup.message")) {
                             if (chatGroup.memberMinecraftProfiles.contains(senderMinecraftProfile)) {
                                 val message = StringBuilder()
-                                for (i in 1..args.size - 1) {
+                                for (i in 1 until args.size) {
                                     message.append(args[i]).append(" ")
                                 }
                                 chatGroup.sendMessage(senderMinecraftProfile, message.toString())
@@ -55,23 +55,27 @@ class MessageCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                     } else if (plugin.server.getPlayer(args[0]) != null) {
                         if (sender.hasPermission("rpkit.chat.command.message")) {
                             val receiver = plugin.server.getPlayer(args[0])
+                            if (receiver == null) {
+                                sender.sendMessage(plugin.messages["message-invalid-target"])
+                                return true
+                            }
                             val receiverMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(receiver)
                             if (receiverMinecraftProfile != null) {
                                 if (receiverMinecraftProfile != senderMinecraftProfile) {
                                     val chatGroup1 = chatGroupProvider.getChatGroup("_pm_" + sender.name + "_" + receiver.name)
                                     val chatGroup2 = chatGroupProvider.getChatGroup("_pm_" + receiver.name + "_" + sender.name)
-                                    if (chatGroup1 != null) {
-                                        chatGroup = chatGroup1
-                                    } else if (chatGroup2 != null) {
-                                        chatGroup = chatGroup2
-                                    } else {
-                                        chatGroup = RPKChatGroupImpl(plugin, name = "_pm_" + sender.getName() + "_" + receiver.name)
-                                        chatGroupProvider.addChatGroup(chatGroup)
-                                        chatGroup.addMember(senderMinecraftProfile)
-                                        chatGroup.addMember(receiverMinecraftProfile)
+                                    when {
+                                        chatGroup1 != null -> chatGroup = chatGroup1
+                                        chatGroup2 != null -> chatGroup = chatGroup2
+                                        else -> {
+                                            chatGroup = RPKChatGroupImpl(plugin, name = "_pm_" + sender.getName() + "_" + receiver.name)
+                                            chatGroupProvider.addChatGroup(chatGroup)
+                                            chatGroup.addMember(senderMinecraftProfile)
+                                            chatGroup.addMember(receiverMinecraftProfile)
+                                        }
                                     }
                                     val message = StringBuilder()
-                                    for (i in 1..args.size - 1) {
+                                    for (i in 1 until args.size) {
                                         message.append(args[i]).append(" ")
                                     }
                                     chatGroup.sendMessage(senderMinecraftProfile, message.toString())

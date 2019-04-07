@@ -59,7 +59,7 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit): C
                     if (character != null) {
                         if (args.isNotEmpty()) {
                             val descriptionBuilder = StringBuilder()
-                            for (i in 0..args.size - 1 - 1) {
+                            for (i in 0 until args.size - 1) {
                                 descriptionBuilder.append(args[i]).append(" ")
                             }
                             descriptionBuilder.append(args[args.size - 1])
@@ -91,7 +91,7 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit): C
             return plugin.messages["character-set-description-prompt"]
         }
 
-        override fun acceptInput(context: ConversationContext, input: String): Prompt {
+        override fun acceptInput(context: ConversationContext, input: String?): Prompt {
             if (context.getSessionData("description") == null) {
                 context.setSessionData("description", "")
             }
@@ -112,7 +112,7 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit): C
                 return DescriptionSetPrompt()
             } else {
                 val previousDescription = context.getSessionData("description") as String
-                context.setSessionData("description", previousDescription + " " + input)
+                context.setSessionData("description", "$previousDescription $input")
                 return DescriptionPrompt()
             }
         }

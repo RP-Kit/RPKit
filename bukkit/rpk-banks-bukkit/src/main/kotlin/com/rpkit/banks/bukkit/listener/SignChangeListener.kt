@@ -30,7 +30,7 @@ class SignChangeListener(private val plugin: RPKBanksBukkit): Listener {
     @EventHandler
     fun onSignChange(event: SignChangeEvent) {
         if (event.getLine(0).equals("[bank]", ignoreCase = true)) {
-            event.setLine(0, GREEN.toString() + "[bank]")
+            event.setLine(0, "$GREEN[bank]")
             if (!event.player.hasPermission("rpkit.banks.sign.bank")) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-permission-bank-create"])
@@ -47,7 +47,8 @@ class SignChangeListener(private val plugin: RPKBanksBukkit): Listener {
                 event.setLine(2, "1")
             }
             val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            if (currencyProvider.getCurrency(event.getLine(3)) == null) {
+            val currencyName = event.getLine(3)
+            if (currencyName == null || currencyProvider.getCurrency(currencyName) == null) {
                 val defaultCurrency = currencyProvider.defaultCurrency
                 if (defaultCurrency == null) {
                     event.block.breakNaturally()

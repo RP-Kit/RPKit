@@ -76,7 +76,7 @@ class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssent
                 )
                 .values(
                         entity.minecraftProfile.id,
-                        entity.location.world.name,
+                        entity.location.world?.name,
                         entity.location.x,
                         entity.location.y,
                         entity.location.z,
@@ -94,7 +94,7 @@ class RPKPreviousLocationTable(database: Database, private val plugin: RPKEssent
         database.create
                 .update(RPKIT_PREVIOUS_LOCATION)
                 .set(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
-                .set(RPKIT_PREVIOUS_LOCATION.WORLD, entity.location.world.name)
+                .set(RPKIT_PREVIOUS_LOCATION.WORLD, entity.location.world?.name)
                 .set(RPKIT_PREVIOUS_LOCATION.X, entity.location.x)
                 .set(RPKIT_PREVIOUS_LOCATION.Y, entity.location.y)
                 .set(RPKIT_PREVIOUS_LOCATION.Z, entity.location.z)

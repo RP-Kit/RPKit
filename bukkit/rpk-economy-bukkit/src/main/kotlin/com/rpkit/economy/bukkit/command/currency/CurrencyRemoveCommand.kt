@@ -52,7 +52,7 @@ class CurrencyRemoveCommand(private val plugin: RPKEconomyBukkit): CommandExecut
                 if (args.isNotEmpty()) {
                     val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
                     val currencyBuilder = StringBuilder()
-                    for (i in 0..args.size - 1 - 1) {
+                    for (i in 0 until args.size - 1) {
                         currencyBuilder.append(args[i]).append(' ')
                     }
                     currencyBuilder.append(args[args.size - 1])

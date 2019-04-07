@@ -17,7 +17,6 @@
 package com.rpkit.players.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.core.service.ServiceProvider
 
 /**
  * Class to allow player lib to load as a plugin.
@@ -26,7 +25,7 @@ import com.rpkit.core.service.ServiceProvider
 class RPKPlayerLibBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
-        serviceProviders = arrayOf<ServiceProvider>()
+        serviceProviders = arrayOf()
     }
 
 }

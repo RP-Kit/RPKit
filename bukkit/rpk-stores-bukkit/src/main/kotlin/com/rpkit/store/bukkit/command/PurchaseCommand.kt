@@ -54,7 +54,7 @@ class PurchaseCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-other", mapOf(
-                    Pair("name", bukkitOfflinePlayer.name),
+                    Pair("name", bukkitOfflinePlayer.name ?: ""),
                     Pair("uuid", bukkitOfflinePlayer.uniqueId.toString())
             )])
             return true
@@ -105,7 +105,7 @@ class PurchaseCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
         }
         purchaseProvider.addPurchase(purchase)
         sender.sendMessage(plugin.messages["purchase-successful", mapOf(
-                Pair("player-name", bukkitOfflinePlayer.name),
+                Pair("player-name", bukkitOfflinePlayer.name ?: ""),
                 Pair("player-uuid", bukkitOfflinePlayer.uniqueId.toString()),
                 Pair("profile-id", profile.id.toString()),
                 Pair("profile-name", profile.name),

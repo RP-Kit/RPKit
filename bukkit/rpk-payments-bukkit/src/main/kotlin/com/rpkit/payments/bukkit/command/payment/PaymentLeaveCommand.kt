@@ -59,7 +59,7 @@ class PaymentLeaveCommand(private val plugin: RPKPaymentsBukkit): CommandExecuto
                                             Pair("date", dateFormat.format(Date(now)))
                                     )]
                                     paymentGroup.owners.forEach { owner ->
-                                        if (!(owner.minecraftProfile?.isOnline ?: false)) {
+                                        if (owner.minecraftProfile?.isOnline != true) {
                                             paymentNotificationProvider.addPaymentNotification(
                                                     RPKPaymentNotificationImpl(
                                                             group = paymentGroup,

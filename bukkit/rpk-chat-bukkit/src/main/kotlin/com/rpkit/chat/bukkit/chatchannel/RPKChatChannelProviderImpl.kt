@@ -31,8 +31,8 @@ import java.awt.Color
 class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChannelProvider {
 
     override val chatChannels: MutableList<RPKChatChannel> = plugin.config.getConfigurationSection("chat-channels")
-                .getKeys(false)
-                .mapIndexed { id, channelName -> RPKChatChannelImpl(
+                ?.getKeys(false)
+                ?.mapIndexed { id, channelName -> RPKChatChannelImpl(
                         plugin = plugin,
                         id = id,
                         name = channelName,
@@ -47,14 +47,15 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
                         matchPattern = plugin.config.getString("chat-channels.$channelName.match-pattern"),
                         isJoinedByDefault = plugin.config.getBoolean("chat-channels.$channelName.joined-by-default")
                 ) }
-                .toMutableList()
+                ?.toMutableList<RPKChatChannel>()
+                ?: mutableListOf()
 
     override fun getChatChannel(id: Int): RPKChatChannel? {
         return chatChannels[id]
     }
 
     override fun getChatChannel(name: String): RPKChatChannel? {
-        return chatChannels.filter { it.name == name }.firstOrNull()
+        return chatChannels.firstOrNull { it.name == name }
     }
 
     override fun addChatChannel(chatChannel: RPKChatChannel) {
@@ -100,13 +101,10 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
     }
 
     override fun getChatChannelFromIRCChannel(ircChannel: String): RPKChatChannel? {
-        return chatChannels.filter { chatChannel ->
-            chatChannel.undirectedPipeline
-                .map { component -> component as? IRCComponent }
-                .filterNotNull()
-                .firstOrNull() != null
+        return chatChannels.firstOrNull { chatChannel ->
+            chatChannel.undirectedPipeline.mapNotNull { component -> component as? IRCComponent }
+                    .firstOrNull() != null
         }
-        .firstOrNull()
     }
 
 }

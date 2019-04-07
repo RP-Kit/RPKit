@@ -40,7 +40,13 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit): Listener {
             }
             try {
                 val auctionProvider = plugin.core.serviceManager.getServiceProvider(RPKAuctionProvider::class)
-                val auction = auctionProvider.getAuction(event.getLine(1).toInt())
+                val auctionId = event.getLine(1)?.toInt()
+                if (auctionId == null) {
+                    event.block.breakNaturally()
+                    event.player.sendMessage(plugin.messages["auction-sign-invalid-id-not-a-number"])
+                    return
+                }
+                val auction = auctionProvider.getAuction(auctionId)
                 if (auction == null) {
                     event.block.breakNaturally()
                     event.player.sendMessage(plugin.messages["auction-sign-invalid-auction-does-not-exist"])

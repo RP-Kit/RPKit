@@ -59,8 +59,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
                 val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                val fromBukkitPlayer = sender
-                val fromMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(fromBukkitPlayer)
+                val fromMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                 if (fromMinecraftProfile != null) {
                     val fromCharacter = characterProvider.getActiveCharacter(fromMinecraftProfile)
                     if (fromCharacter != null) {
@@ -73,8 +72,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                                     if (toProfile != null) {
                                         if (args.size > 1) {
                                             val character = characterProvider.getCharacters(toProfile)
-                                                    .filter { character -> character.name.startsWith(args[1]) }
-                                                    .firstOrNull()
+                                                    .firstOrNull { character -> character.name.startsWith(args[1]) }
                                             if (character != null) {
                                                 if (args.size > 2) {
                                                     val currency = currencyProvider.getCurrency(args[2])
@@ -177,15 +175,13 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             return plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     .getCharacters(context.getSessionData("profile") as RPKProfile)
-                    .filter { character -> character.name == input }
-                    .isNotEmpty()
+                    .any { character -> character.name == input }
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             context.setSessionData("character", plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     .getCharacters(context.getSessionData("profile") as RPKProfile)
-                    .filter { character -> character.name == input }
-                    .first()
+                    .first { character -> character.name == input }
             )
             return CharacterSetPrompt()
         }
@@ -195,10 +191,11 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                     "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                             .getCharacters(context.getSessionData("profile") as RPKProfile)
-                            .map { character -> plugin.messages["money-set-character-prompt-list-item", mapOf(
-                                    Pair("character", character.name)
-                            )] }
-                            .joinToString("\n")
+                            .joinToString("\n") { character ->
+                                plugin.messages["money-set-character-prompt-list-item", mapOf(
+                                        Pair("character", character.name)
+                                )]
+                            }
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
@@ -230,10 +227,11 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["money-set-currency-prompt"] + "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
-                            .map { currency -> plugin.messages["money-set-currency-prompt-list-item", mapOf(
-                                    Pair("currency", currency.name)
-                            )] }
-                            .joinToString("\n")
+                            .joinToString("\n") { currency ->
+                                plugin.messages["money-set-currency-prompt-list-item", mapOf(
+                                        Pair("currency", currency.name)
+                                )]
+                            }
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
@@ -268,10 +266,10 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
-            if (invalidInput.toInt() < 0) {
-                return plugin.messages["money-set-amount-invalid-amount-negative"]
+            return if (invalidInput.toInt() < 0) {
+                plugin.messages["money-set-amount-invalid-amount-negative"]
             } else {
-                return plugin.messages["money-set-amount-invalid-amount-limit"]
+                plugin.messages["money-set-amount-invalid-amount-limit"]
             }
         }
 

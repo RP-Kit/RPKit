@@ -88,20 +88,20 @@ class RPKCharacterClassTable(database: Database, private val plugin: RPKClassesB
             val classProvider = plugin.core.serviceManager.getServiceProvider(RPKClassProvider::class)
             val className = result.get(RPKIT_CHARACTER_CLASS.CLASS_NAME)
             val clazz = classProvider.getClass(className)
-            if (character != null && clazz != null) {
+            return if (character != null && clazz != null) {
                 val characterClass = RPKCharacterClass(
                         id,
                         character,
                         clazz
                 )
                 cache?.put(id, characterClass)
-                return characterClass
+                characterClass
             } else {
                 database.create
                         .deleteFrom(RPKIT_CHARACTER_CLASS)
                         .where(RPKIT_CHARACTER_CLASS.ID.eq(id))
                         .execute()
-                return null
+                null
             }
         }
     }

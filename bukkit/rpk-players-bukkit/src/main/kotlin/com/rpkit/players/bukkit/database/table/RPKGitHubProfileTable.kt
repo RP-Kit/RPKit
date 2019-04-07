@@ -116,10 +116,9 @@ class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBu
                 .from(RPKIT_GITHUB_PROFILE)
                 .where(RPKIT_GITHUB_PROFILE.PROFILE_ID.eq(profile.id))
                 .fetch()
-        val githubProfiles = results.map { result ->
+        return results.map { result ->
             get(result.get(RPKIT_GITHUB_PROFILE.ID))
         }.filterNotNull()
-        return githubProfiles
     }
 
     fun get(user: GHUser): RPKGitHubProfile? {

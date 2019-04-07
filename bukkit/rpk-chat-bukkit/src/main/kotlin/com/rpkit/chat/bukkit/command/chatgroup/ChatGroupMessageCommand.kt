@@ -42,7 +42,7 @@ class ChatGroupMessageCommand(private val plugin: RPKChatBukkit): CommandExecuto
                         if (minecraftProfile != null) {
                             if (chatGroup.memberMinecraftProfiles.contains(minecraftProfile)) {
                                 val message = StringBuilder()
-                                for (i in 1..args.size - 1) {
+                                for (i in 1 until args.size) {
                                     message.append(args[i]).append(" ")
                                 }
                                 chatGroup.sendMessage(minecraftProfile, message.toString())

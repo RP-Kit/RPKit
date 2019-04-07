@@ -26,5 +26,4 @@ class RPKPermanentPurchaseImpl(
         override val storeItem: RPKPermanentStoreItem,
         override val profile: RPKProfile,
         override val purchaseDate: LocalDateTime
-): RPKPermanentPurchase {
-}
+): RPKPermanentPurchase

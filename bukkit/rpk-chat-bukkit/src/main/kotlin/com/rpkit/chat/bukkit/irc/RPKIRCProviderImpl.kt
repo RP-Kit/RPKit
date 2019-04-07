@@ -73,15 +73,20 @@ class RPKIRCProviderImpl(private val plugin: RPKChatBukkit): RPKIRCProvider {
             val autoSplitMessage = plugin.config.getBoolean("irc.auto-split-message-enabled")
             configuration.isAutoSplitMessage = autoSplitMessage
         }
-        if (plugin.config.getString("irc.server").contains(":")) {
-            try {
+        if (plugin.config.getString("irc.server")?.contains(":") == true) {
+            val serverAddress = plugin.config.getString("irc.server")?.split(":")?.get(0)
+            val serverPort = plugin.config.getString("irc.server")?.split(":")?.get(1)?.toIntOrNull()
+            if (serverAddress != null && serverPort != null) {
                 configuration.addServer(
-                        plugin.config.getString("irc.server").split(":")[0], plugin.config.getString("irc.server").split(":")[1].toInt()
+                        serverAddress,
+                        serverPort
                 )
-            } catch (ignore: NumberFormatException) {
             }
         } else {
-            configuration.addServer(plugin.config.getString("irc.server"))
+            val serverAddress = plugin.config.getString("irc.server")
+            if (serverAddress != null) {
+                configuration.addServer(serverAddress)
+            }
         }
         if (plugin.config.get("irc.max-line-length") != null) {
             val maxLineLength = plugin.config.getInt("irc.max-line-length")

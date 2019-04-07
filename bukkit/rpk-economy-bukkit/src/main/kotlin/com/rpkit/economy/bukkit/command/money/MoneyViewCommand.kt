@@ -51,27 +51,25 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                 val profile = minecraftProfile.profile
                 if (profile != null) {
                     val character: RPKCharacter?
-                    if (args.size > 1) {
+                    character = if (args.size > 1) {
                         val nameBuilder = StringBuilder()
                         for (i in 1..args.size - 2) {
                             nameBuilder.append(args[i]).append(' ')
                         }
                         nameBuilder.append(args[args.size - 1])
                         val name = nameBuilder.toString()
-                        character = characterProvider.getCharacters(profile)
-                                .filter { character -> character.name == name }
-                                .firstOrNull()
+                        characterProvider.getCharacters(profile)
+                                .firstOrNull { character -> character.name == name }
                     } else {
-                        character = characterProvider.getActiveCharacter(minecraftProfile)
+                        characterProvider.getActiveCharacter(minecraftProfile)
                     }
-                    val finalCharacter = character
-                    if (finalCharacter != null) {
+                    if (character != null) {
                         sender.sendMessage(plugin.messages["money-view-valid"])
                         sender.sendMessage(currencyProvider.currencies
                                 .map { currency ->
                                     plugin.messages["money-view-valid-list-item", mapOf(
                                             Pair("currency", currency.name),
-                                            Pair("balance", economyProvider.getBalance(finalCharacter, currency).toString())
+                                            Pair("balance", economyProvider.getBalance(character, currency).toString())
                                     )]
                                 }
                                 .toTypedArray()

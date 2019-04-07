@@ -67,8 +67,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
                             if (profile != null) {
                                 if (args.size > 1) {
                                     val character = characterProvider.getCharacters(profile)
-                                            .filter { character -> character.name.startsWith(args[1]) }
-                                            .firstOrNull()
+                                            .firstOrNull { character -> character.name.startsWith(args[1]) }
                                     if (character != null) {
                                         if (args.size > 2) {
                                             val currency = currencyProvider.getCurrency(args[2])
@@ -161,15 +160,13 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             return plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     .getCharacters(context.getSessionData("profile") as RPKProfile)
-                    .filter { character -> character.name == input }
-                    .isNotEmpty()
+                    .any { character -> character.name == input }
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             context.setSessionData("character", plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     .getCharacters(context.getSessionData("profile") as RPKProfile)
-                    .filter { character -> character.name == input }
-                    .first()
+                    .first { character -> character.name == input }
             )
             return CharacterSetPrompt()
         }
@@ -179,10 +176,11 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
                     "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                             .getCharacters(context.getSessionData("profile") as RPKProfile)
-                            .map { character -> plugin.messages["money-subtract-character-prompt-list-item", mapOf(
-                                    Pair("character", character.name)
-                            )] }
-                            .joinToString("\n")
+                            .joinToString("\n") { character ->
+                                plugin.messages["money-subtract-character-prompt-list-item", mapOf(
+                                        Pair("character", character.name)
+                                )]
+                            }
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
@@ -214,10 +212,11 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["money-subtract-currency-prompt"] + "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
-                            .map { currency -> plugin.messages["money-subtract-currency-prompt-list-item", mapOf(
-                                    Pair("currency", currency.name)
-                            )] }
-                            .joinToString("\n")
+                            .joinToString("\n") { currency ->
+                                plugin.messages["money-subtract-currency-prompt-list-item", mapOf(
+                                        Pair("currency", currency.name)
+                                )]
+                            }
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
@@ -241,7 +240,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
             val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
             val balance = economyProvider.getBalance(context.getSessionData("character") as RPKCharacter, context.getSessionData("currency") as RPKCurrency)
-            return input.toInt() > 0 && input.toInt() <= balance
+            return input.toInt() in 1..balance
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
@@ -254,10 +253,10 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
-            if (invalidInput.toInt() <= 0) {
-                return plugin.messages["money-subtract-amount-invalid-amount-negative"]
+            return if (invalidInput.toInt() <= 0) {
+                plugin.messages["money-subtract-amount-invalid-amount-negative"]
             } else {
-                return plugin.messages["money-subtract-amount-invalid-amount-balance"]
+                plugin.messages["money-subtract-amount-invalid-amount-balance"]
             }
         }
 

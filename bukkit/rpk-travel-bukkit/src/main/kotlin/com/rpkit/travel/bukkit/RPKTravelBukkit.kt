@@ -28,9 +28,9 @@ class RPKTravelBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("deletewarp").executor = DeleteWarpCommand(this)
-        getCommand("setwarp").executor = SetWarpCommand(this)
-        getCommand("warp").executor = WarpCommand(this)
+        getCommand("deletewarp")?.setExecutor(DeleteWarpCommand(this))
+        getCommand("setwarp")?.setExecutor(SetWarpCommand(this))
+        getCommand("warp")?.setExecutor(WarpCommand(this))
     }
 
     override fun createTables(database: Database) {

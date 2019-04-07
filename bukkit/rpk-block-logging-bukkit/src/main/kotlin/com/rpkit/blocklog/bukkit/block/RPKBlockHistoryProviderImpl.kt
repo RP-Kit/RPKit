@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack
 class RPKBlockHistoryProviderImpl(private val plugin: RPKBlockLoggingBukkit): RPKBlockHistoryProvider {
 
     override fun getBlockHistory(id: Int): RPKBlockHistory? {
-        return plugin.core.database.getTable(RPKBlockHistoryTable::class).get(id)
+        return plugin.core.database.getTable(RPKBlockHistoryTable::class)[id]
     }
 
     override fun addBlockHistory(blockHistory: RPKBlockHistory) {
@@ -29,7 +29,7 @@ class RPKBlockHistoryProviderImpl(private val plugin: RPKBlockLoggingBukkit): RP
     }
 
     override fun getBlockChange(id: Int): RPKBlockChange? {
-        return plugin.core.database.getTable(RPKBlockChangeTable::class).get(id)
+        return plugin.core.database.getTable(RPKBlockChangeTable::class)[id]
     }
 
     override fun addBlockChange(blockChange: RPKBlockChange) {
@@ -45,7 +45,7 @@ class RPKBlockHistoryProviderImpl(private val plugin: RPKBlockLoggingBukkit): RP
     }
 
     override fun getBlockInventoryChange(id: Int): RPKBlockInventoryChange? {
-        return plugin.core.database.getTable(RPKBlockInventoryChangeTable::class).get(id)
+        return plugin.core.database.getTable(RPKBlockInventoryChangeTable::class)[id]
     }
 
     override fun addBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange) {

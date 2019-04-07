@@ -111,7 +111,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
             return GenderSetPrompt()
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
             return plugin.messages["character-set-gender-invalid-gender"]
         }
 

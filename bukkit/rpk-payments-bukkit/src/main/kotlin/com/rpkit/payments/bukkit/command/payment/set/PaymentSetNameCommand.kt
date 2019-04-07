@@ -111,11 +111,11 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit): CommandExecu
 
     private inner class NameSetPrompt: MessagePrompt() {
 
-        override fun getNextPrompt(context: ConversationContext?): Prompt? {
+        override fun getNextPrompt(context: ConversationContext): Prompt? {
             return END_OF_CONVERSATION
         }
 
-        override fun getPromptText(context: ConversationContext?): String {
+        override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["payment-set-name-valid"]
         }
 

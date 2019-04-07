@@ -86,20 +86,20 @@ class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukki
             val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
             val profileId = result.get(RPKIT_IRC_PROFILE.PROFILE_ID)
             val profile = profileProvider.getProfile(profileId)
-            if (profile != null) {
+            return if (profile != null) {
                 val ircProfile = RPKIRCProfileImpl(
                         id,
                         profile,
                         result.get(RPKIT_IRC_PROFILE.NICK)
                 )
                 cache?.put(id, ircProfile)
-                return ircProfile
+                ircProfile
             } else {
                 database.create
                         .deleteFrom(RPKIT_IRC_PROFILE)
                         .where(RPKIT_IRC_PROFILE.ID.eq(id))
                         .execute()
-                return null
+                null
             }
         }
     }
@@ -110,10 +110,9 @@ class RPKIRCProfileTable(database: Database, private val plugin: RPKPlayersBukki
                 .from(RPKIT_IRC_PROFILE)
                 .where(RPKIT_IRC_PROFILE.PROFILE_ID.eq(profile.id))
                 .fetch()
-        val ircProfiles = results.map { result ->
+        return results.map { result ->
             get(result.get(RPKIT_IRC_PROFILE.ID))
         }.filterNotNull()
-        return ircProfiles
     }
 
     fun get(user: User): RPKIRCProfile? {
