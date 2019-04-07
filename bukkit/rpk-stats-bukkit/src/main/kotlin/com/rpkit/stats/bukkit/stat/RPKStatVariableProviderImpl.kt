@@ -38,7 +38,7 @@ class RPKStatVariableProviderImpl(private val plugin: RPKStatsBukkit): RPKStatVa
     }
 
     override fun getStatVariable(name: String): RPKStatVariable? {
-        return statVariables.filter { variable -> variable.name == name }.firstOrNull()
+        return statVariables.firstOrNull { variable -> variable.name == name }
     }
 
 }

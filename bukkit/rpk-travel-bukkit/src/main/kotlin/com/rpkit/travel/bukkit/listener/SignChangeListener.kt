@@ -15,7 +15,7 @@ class SignChangeListener(private val plugin: RPKTravelBukkit): Listener {
         if (event.getLine(0).equals("[warp]", ignoreCase = true)) {
             if (event.player.hasPermission("rpkit.travel.sign.warp.create")) {
                 val warpProvider = plugin.core.serviceManager.getServiceProvider(RPKWarpProvider::class)
-                val warp = warpProvider.getWarp(event.getLine(1))
+                val warp = warpProvider.getWarp(event.getLine(1) ?: "")
                 if (warp == null) {
                     event.block.breakNaturally()
                     event.player.sendMessage(plugin.messages["warp-sign-invalid-warp"])

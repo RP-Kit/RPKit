@@ -34,7 +34,7 @@ class RPKExperienceBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("experience").executor = ExperienceCommand(this)
+        getCommand("experience")?.setExecutor(ExperienceCommand(this))
     }
 
     override fun createTables(database: Database) {

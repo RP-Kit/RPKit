@@ -1,5 +1,8 @@
 package com.rpkit.locks.bukkit.lock
 
+import com.rpkit.core.bukkit.util.withDisplayName
+import com.rpkit.core.bukkit.util.withLore
+import com.rpkit.core.bukkit.util.withoutLoreMatching
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.database.table.RPKLockedBlockTable
 import com.rpkit.locks.bukkit.database.table.RPKPlayerGettingKeyTable
@@ -7,6 +10,7 @@ import com.rpkit.locks.bukkit.database.table.RPKPlayerUnclaimingTable
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
 
@@ -14,7 +18,9 @@ import org.bukkit.inventory.ItemStack
 class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
 
     override val lockItem: ItemStack = plugin.config.getItemStack("lock-item")
+            ?: ItemStack(Material.IRON_INGOT).withDisplayName("Lock")
     val keyItem: ItemStack = plugin.config.getItemStack("key-item")
+            ?: ItemStack(Material.IRON_INGOT).withDisplayName("Key")
 
     override fun isLocked(block: Block): Boolean {
         return plugin.core.database.getTable(RPKLockedBlockTable::class).get(block) != null
@@ -49,16 +55,12 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
 
     override fun isClaiming(minecraftProfile: RPKMinecraftProfile): Boolean {
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
-        if (bukkitOfflinePlayer != null) {
-            if (bukkitOfflinePlayer.isOnline) {
-                val bukkitPlayer = bukkitOfflinePlayer.player
-                val item = bukkitPlayer.inventory.itemInMainHand
-                if (item != null) {
-                    val lockProvider = plugin.core.serviceManager.getServiceProvider(RPKLockProvider::class)
-                    if (item.isSimilar(lockProvider.lockItem)) {
-                        return true
-                    }
-                }
+        val bukkitPlayer = bukkitOfflinePlayer.player
+        if (bukkitPlayer != null) {
+            val item = bukkitPlayer.inventory.itemInMainHand
+            val lockProvider = plugin.core.serviceManager.getServiceProvider(RPKLockProvider::class)
+            if (item.isSimilar(lockProvider.lockItem)) {
+                return true
             }
         }
         return false
@@ -149,25 +151,13 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
     }
 
     override fun getKeyFor(block: Block): ItemStack {
-        val key = ItemStack(keyItem)
-        val meta = key.itemMeta
-        val lore = if (key.hasItemMeta()) if (meta.hasLore()) meta.lore else mutableListOf<String>() else mutableListOf<String>()
-        lore.add("${block.world.name},${block.x},${block.y},${block.z}")
-        meta.lore = lore
-        key.itemMeta = meta
-        return key
+        return ItemStack(keyItem)
+                .withLore(listOf("${block.world.name},${block.x},${block.y},${block.z}"))
     }
 
     override fun isKey(item: ItemStack): Boolean {
         val key = ItemStack(item)
-        val meta = key.itemMeta ?: return false
-        val lore = if (key.hasItemMeta()) if (meta.hasLore()) meta.lore else mutableListOf<String>() else mutableListOf<String>()
-        val locationLoreItem = lore.filter { it.matches(Regex("\\w+,-?\\d+,-?\\d+,-?\\d+")) }.lastOrNull()
-        if (locationLoreItem != null) {
-            lore.remove(locationLoreItem)
-        }
-        meta.lore = lore
-        key.itemMeta = meta
+                .withoutLoreMatching(Regex("\\w+,-?\\d+,-?\\d+,-?\\d+"))
         return key.isSimilar(keyItem)
     }
 

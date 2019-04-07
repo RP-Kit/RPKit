@@ -121,20 +121,20 @@ class RPKChatChannelSpeakerTable(database: Database, private val plugin: RPKChat
             val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
             val chatChannelId = result.get(RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_ID)
             val chatChannel = chatChannelProvider.getChatChannel(chatChannelId)
-            if (minecraftProfile != null && chatChannel != null) {
+            return if (minecraftProfile != null && chatChannel != null) {
                 val chatChannelSpeaker = RPKChatChannelSpeaker(
                         id,
                         minecraftProfile,
                         chatChannel
                 )
                 cache?.put(id, chatChannelSpeaker)
-                return chatChannelSpeaker
+                chatChannelSpeaker
             } else {
                 database.create
                         .deleteFrom(RPKIT_CHAT_CHANNEL_SPEAKER)
                         .where(RPKIT_CHAT_CHANNEL_SPEAKER.ID.eq(id))
                         .execute()
-                return null
+                null
             }
         }
     }

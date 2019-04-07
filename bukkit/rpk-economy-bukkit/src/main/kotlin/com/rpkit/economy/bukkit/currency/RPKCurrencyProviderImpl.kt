@@ -46,10 +46,10 @@ class RPKCurrencyProviderImpl(private val plugin: RPKEconomyBukkit): RPKCurrency
     override val defaultCurrency: RPKCurrency?
         get() {
             val currencyName = plugin.config.getString("currency.default")
-            if (currencyName != null)
-                return getCurrency(currencyName)
+            return if (currencyName != null)
+                getCurrency(currencyName)
             else
-                return null
+                null
         }
 
 

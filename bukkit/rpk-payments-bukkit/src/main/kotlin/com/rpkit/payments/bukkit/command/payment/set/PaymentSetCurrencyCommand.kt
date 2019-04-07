@@ -87,19 +87,19 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit): CommandE
 
     private inner class CurrencyPrompt: ValidatingPrompt() {
 
-        override fun getPromptText(context: ConversationContext?): String {
+        override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["payment-set-currency-prompt"] + "\n" +
                     plugin.messages["currency-list-title"] + "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                        .currencies.map { currency -> plugin.messages["currency-list-item", mapOf(Pair("currency", currency.name))] }
-                            .joinToString("\n")
+                            .currencies
+                            .joinToString("\n") { currency -> plugin.messages["currency-list-item", mapOf(Pair("currency", currency.name))] }
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             return plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(input) != null
         }
 
-        override fun getFailedValidationText(context: ConversationContext, invalidInput: String?): String {
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
             return plugin.messages["payment-set-currency-invalid-currency"]
         }
 
@@ -116,7 +116,7 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit): CommandE
 
     private inner class CurrencySetPrompt: MessagePrompt() {
 
-        override fun getNextPrompt(context: ConversationContext?): Prompt? {
+        override fun getNextPrompt(context: ConversationContext): Prompt? {
             return END_OF_CONVERSATION
         }
 

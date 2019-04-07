@@ -46,14 +46,14 @@ class RPKModerationBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("amivanished").executor = AmIVanishedCommand(this)
-        getCommand("onlinestaff").executor = OnlineStaffCommand(this)
-        getCommand("ticket").executor = TicketCommand(this)
-        getCommand("warning").executor = WarningCommand(this)
-        getCommand("warn").executor = WarningCreateCommand(this)
-        getCommand("unwarn").executor = WarningRemoveCommand(this)
-        getCommand("vanish").executor = VanishCommand(this)
-        getCommand("unvanish").executor = UnvanishCommand(this)
+        getCommand("amivanished")?.setExecutor(AmIVanishedCommand(this))
+        getCommand("onlinestaff")?.setExecutor(OnlineStaffCommand(this))
+        getCommand("ticket")?.setExecutor(TicketCommand(this))
+        getCommand("warning")?.setExecutor(WarningCommand(this))
+        getCommand("warn")?.setExecutor(WarningCreateCommand(this))
+        getCommand("unwarn")?.setExecutor(WarningRemoveCommand(this))
+        getCommand("vanish")?.setExecutor(VanishCommand(this))
+        getCommand("unvanish")?.setExecutor(UnvanishCommand(this))
     }
 
     override fun registerListeners() {
@@ -82,6 +82,7 @@ class RPKModerationBukkit: RPKBukkitPlugin() {
         messages.setDefault("ticket-list-item", "&7#\$id - &f\$reason (\$issuer, \$open-date)")
         messages.setDefault("ticket-teleport-usage", "&cUsage: /ticket teleport [id]")
         messages.setDefault("ticket-teleport-invalid-ticket", "&cThere is no ticket with that ID.")
+        messages.setDefault("ticket-teleport-invalid-location", "&cThat ticket has no location.")
         messages.setDefault("ticket-teleport-valid", "&aTeleported to ticket.")
         messages.setDefault("vanish-invisible", "&aYou are currently invisible.")
         messages.setDefault("unvanish-valid", "&aUnvanished.")

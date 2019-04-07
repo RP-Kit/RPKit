@@ -44,7 +44,7 @@ class BlockBreakListener(val plugin: RPKShopsBukkit): Listener {
             sign = event.block.getRelative(UP).state as? Sign
         }
         if (sign != null) {
-            if (sign.getLine(0) == GREEN.toString() + "[shop]") {
+            if (sign.getLine(0) == "$GREEN[shop]") {
                 val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val shopCountProvider = plugin.core.serviceManager.getServiceProvider(RPKShopCountProvider::class)
@@ -54,7 +54,7 @@ class BlockBreakListener(val plugin: RPKShopsBukkit): Listener {
                     return
                 }
                 val character = characterProvider.getActiveCharacter(minecraftProfile)
-                val shopCharacter = if (sign.getLine(3)?.equals("admin", ignoreCase = true) == true) null else characterProvider.getCharacter(sign.getLine(3).toInt())
+                val shopCharacter = if (sign.getLine(3).equals("admin", ignoreCase = true)) null else characterProvider.getCharacter(sign.getLine(3).toInt())
                 if (character == null) {
                     event.isCancelled = true
                     return
@@ -69,7 +69,7 @@ class BlockBreakListener(val plugin: RPKShopsBukkit): Listener {
                 }
                 val shopCount = shopCountProvider.getShopCount(character)
                 shopCountProvider.setShopCount(character, shopCount - 1)
-            } else if (sign.getLine(0) == GREEN.toString() + "[rent]") {
+            } else if (sign.getLine(0) == "$GREEN[rent]") {
                 val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)

@@ -96,15 +96,15 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit): CommandEx
             return plugin.messages["character-set-age-prompt"]
         }
 
-        override fun isNumberValid(context: ConversationContext?, input: Number?): Boolean {
-            return input!!.toInt() >= plugin.config.getInt("characters.min-age") && input.toInt() <= plugin.config.getInt("characters.max-age")
+        override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
+            return input.toInt() >= plugin.config.getInt("characters.min-age") && input.toInt() <= plugin.config.getInt("characters.max-age")
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: Number?): String {
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
             return plugin.messages["character-set-age-invalid-validation"]
         }
 
-        override fun getInputNotNumericText(context: ConversationContext?, invalidInput: String?): String {
+        override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
             return plugin.messages["character-set-age-invalid-number"]
         }
 

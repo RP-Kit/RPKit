@@ -9,8 +9,9 @@ import com.rpkit.experience.bukkit.experience.RPKExperienceProvider
 
 class RPKClassProviderImpl(private val plugin: RPKClassesBukkit): RPKClassProvider {
 
-    override val classes: List<RPKClass> = plugin.config.getConfigurationSection("classes").getKeys(false)
-            .map { className ->
+    override val classes: List<RPKClass> = plugin.config.getConfigurationSection("classes")
+            ?.getKeys(false)
+            ?.map { className ->
                     RPKClassImpl(
                             plugin,
                             className,
@@ -24,30 +25,33 @@ class RPKClassProviderImpl(private val plugin: RPKClassesBukkit): RPKClassProvid
                                         )
                                     }
                                     ?.toMap()
-                                    ?:mapOf(),
+                                    ?: mapOf(),
                             plugin.config.getConfigurationSection("classes.$className.skill-points.base")
-                                    .getKeys(false)
-                                    .map { skillTypeName ->
+                                    ?.getKeys(false)
+                                    ?.map { skillTypeName ->
                                         Pair(
                                                 skillTypeName,
                                                 plugin.config.getInt("classes.$className.skill-points.base.$skillTypeName")
                                         )
                                     }
-                                    .toMap(),
+                                    ?.toMap()
+                                    ?: mapOf(),
                             plugin.config.getConfigurationSection("classes.$className.skill-points.level")
-                                    .getKeys(false)
-                                    .map { skillTypeName ->
+                                    ?.getKeys(false)
+                                    ?.map { skillTypeName ->
                                         Pair(
                                                 skillTypeName,
                                                 plugin.config.getInt("classes.$className.skill-points.level.$skillTypeName")
                                         )
                                     }
-                                    .toMap()
+                                    ?.toMap()
+                                    ?: mapOf()
                     )
             }
+            ?: mutableListOf()
 
     override fun getClass(name: String): RPKClass? {
-        return classes.filter { it.name.equals(name, ignoreCase = true) }.firstOrNull()
+        return classes.firstOrNull { it.name.equals(name, ignoreCase = true) }
     }
 
     override fun getClass(character: RPKCharacter): RPKClass? {
@@ -95,15 +99,15 @@ class RPKClassProviderImpl(private val plugin: RPKClassesBukkit): RPKClassProvid
 
     override fun getLevel(character: RPKCharacter, clazz: RPKClass): Int {
         val experienceProvider = plugin.core.serviceManager.getServiceProvider(RPKExperienceProvider::class)
-        if (clazz == getClass(character)) {
-            return experienceProvider.getLevel(character)
+        return if (clazz == getClass(character)) {
+            experienceProvider.getLevel(character)
         } else {
             val experience = getExperience(character, clazz)
             var level = 1
             while (level + 1 <= clazz.maxLevel && experienceProvider.getExperienceNeededForLevel(level + 1) <= experience) {
                 level++
             }
-            return level
+            level
         }
     }
 
@@ -118,12 +122,12 @@ class RPKClassProviderImpl(private val plugin: RPKClassesBukkit): RPKClassProvid
 
     override fun getExperience(character: RPKCharacter, clazz: RPKClass): Int {
         val experienceProvider = plugin.core.serviceManager.getServiceProvider(RPKExperienceProvider::class)
-        if (clazz == getClass(character)) {
-            return experienceProvider.getExperience(character)
+        return if (clazz == getClass(character)) {
+            experienceProvider.getExperience(character)
         } else {
             val classExperienceTable = plugin.core.database.getTable(RPKClassExperienceTable::class)
             val classExperience = classExperienceTable.get(character, clazz)
-            return classExperience?.experience?:0
+            classExperience?.experience?:0
         }
     }
 

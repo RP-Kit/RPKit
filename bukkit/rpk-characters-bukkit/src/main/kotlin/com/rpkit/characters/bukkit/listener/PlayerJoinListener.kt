@@ -38,7 +38,7 @@ class PlayerJoinListener(val plugin: RPKCharactersBukkit): Listener {
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
             if (minecraftProfile != null) {
                 val character = characterProvider.getActiveCharacter(minecraftProfile)
-                event.player.displayName = character?.name ?: event.player.name
+                event.player.setDisplayName(character?.name ?: event.player.name)
             }
         }
     }

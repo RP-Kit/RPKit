@@ -137,7 +137,7 @@ class RPKChatGroupImpl(
         val senderCharacter = characterProvider.getActiveCharacter(sender)
         memberMinecraftProfiles.forEach { receiver ->
             val receiverCharacter = characterProvider.getActiveCharacter(receiver)
-            val formatString = plugin.config.getString("chat-group.format")
+            val formatString = plugin.config.getString("chat-group.format") ?: return
             var formattedMessage = ChatColor.translateAlternateColorCodes('&', formatString)
             if (formattedMessage.contains("\$message")) {
                 formattedMessage = formattedMessage.replace("\$message", message)
@@ -165,10 +165,10 @@ class RPKChatGroupImpl(
                 }
             }
             if (formattedMessage.contains("\$group")) {
-                if (name.startsWith("_pm_")) {
-                    formattedMessage = formattedMessage.replace("\$group", sender.minecraftUsername + " -> " + memberMinecraftProfiles.filter { member -> member != sender }.first().minecraftUsername)
+                formattedMessage = if (name.startsWith("_pm_")) {
+                    formattedMessage.replace("\$group", sender.minecraftUsername + " -> " + memberMinecraftProfiles.first { member -> member != sender }.minecraftUsername)
                 } else {
-                    formattedMessage = formattedMessage.replace("\$group", name)
+                    formattedMessage.replace("\$group", name)
                 }
             }
             receiver.sendMessage(formattedMessage)

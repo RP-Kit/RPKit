@@ -92,20 +92,20 @@ class RPKPlayerUnclaimingTable(database: Database, private val plugin: RPKLocksB
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
             val minecraftProfileId = result.get(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID)
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
-            if (minecraftProfile != null) {
+            return if (minecraftProfile != null) {
                 val playerUnclaiming = RPKPlayerUnclaiming(
                         id,
                         minecraftProfile
                 )
                 cache?.put(id, playerUnclaiming)
-                return playerUnclaiming
+                playerUnclaiming
             } else {
                 database.create
                         .deleteFrom(RPKIT_PLAYER_UNCLAIMING)
                         .where(RPKIT_PLAYER_UNCLAIMING.ID.eq(id))
                         .execute()
                 cache?.remove(id)
-                return null
+                null
             }
         }
     }

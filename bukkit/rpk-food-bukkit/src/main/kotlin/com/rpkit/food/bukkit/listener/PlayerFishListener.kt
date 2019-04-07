@@ -36,7 +36,7 @@ class PlayerFishListener(private val plugin: RPKFoodBukkit): Listener {
                 val item = caught.itemStack
                 val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProviderImpl::class)
                 expiryProvider.setExpiry(item)
-                caught.itemStack = item
+                caught.setItemStack(item)
             }
         }
     }

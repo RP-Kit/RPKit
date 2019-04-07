@@ -16,7 +16,8 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit): Listener {
 
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (event.hasBlock()) {
+        val clickedBlock = event.clickedBlock
+        if (clickedBlock != null) {
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
@@ -25,11 +26,11 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit): Listener {
                 if (character != null) {
                     val lockProvider = plugin.core.serviceManager.getServiceProvider(RPKLockProvider::class)
                     var block: Block? = null
-                    xLoop@ for (x in event.clickedBlock.x - 1..event.clickedBlock.x + 1) {
-                        for (y in event.clickedBlock.y - 1..event.clickedBlock.y + 1) {
-                            for (z in event.clickedBlock.z - 1..event.clickedBlock.z + 1) {
-                                if (lockProvider.isLocked(event.clickedBlock.world.getBlockAt(x, y, z))) {
-                                    block = event.clickedBlock.world.getBlockAt(x, y, z)
+                    xLoop@ for (x in clickedBlock.x - 1..clickedBlock.x + 1) {
+                        for (y in clickedBlock.y - 1..clickedBlock.y + 1) {
+                            for (z in clickedBlock.z - 1..clickedBlock.z + 1) {
+                                if (lockProvider.isLocked(clickedBlock.world.getBlockAt(x, y, z))) {
+                                    block = clickedBlock.world.getBlockAt(x, y, z)
                                     break@xLoop
                                 }
                             }
@@ -38,12 +39,12 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit): Listener {
                     if (lockProvider.isClaiming(minecraftProfile)) {
                         if (block == null) {
                             if (event.player.inventory.itemInMainHand.amount == 1) {
-                                event.player.inventory.itemInMainHand = null
+                                event.player.inventory.setItemInMainHand(null)
                             } else {
                                 event.player.inventory.itemInMainHand.amount = event.player.inventory.itemInMainHand.amount - 1
                             }
-                            lockProvider.setLocked(event.clickedBlock, true)
-                            for (item in event.player.inventory.addItem(lockProvider.getKeyFor(event.clickedBlock)).values) {
+                            lockProvider.setLocked(clickedBlock, true)
+                            for (item in event.player.inventory.addItem(lockProvider.getKeyFor(clickedBlock)).values) {
                                 event.player.world.dropItem(event.player.location, item)
                             }
                             event.player.updateInventory()
@@ -106,18 +107,14 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit): Listener {
         val minecraftProfile = character.minecraftProfile
         if (minecraftProfile != null) {
             val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
-            if (offlineBukkitPlayer.isOnline) {
-                val bukkitPlayer = offlineBukkitPlayer.player
+            val bukkitPlayer = offlineBukkitPlayer.player
+            if (bukkitPlayer != null) {
                 val inventory = bukkitPlayer.inventory
-                if (inventory != null) {
-                    keyringProvider.getKeyring(character)
-                            .filter { it.isSimilar(lockProvider.getKeyFor(block)) }
-                            .forEach { return true }
-                    inventory.contents
-                            .filter { it != null }
-                            .filter { it.isSimilar(lockProvider.getKeyFor(block)) }
-                            .forEach { return true }
-                }
+                repeat(keyringProvider.getKeyring(character)
+                        .filter { it.isSimilar(lockProvider.getKeyFor(block)) }.size) { return true }
+                repeat(inventory.contents
+                        .filter { it != null }
+                        .filter { it.isSimilar(lockProvider.getKeyFor(block)) }.size) { return true }
             }
         }
         return false
@@ -143,18 +140,16 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit): Listener {
         val minecraftProfile = character.minecraftProfile
         if (minecraftProfile != null) {
             val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
-            if (offlineBukkitPlayer.isOnline) {
-                val bukkitPlayer = offlineBukkitPlayer.player
+            val bukkitPlayer = offlineBukkitPlayer.player
+            if (bukkitPlayer != null) {
                 val inventory = bukkitPlayer.inventory
-                val inventoryContents = inventory?.contents
-                if (inventory != null && inventoryContents != null) {
-                    for (key in inventoryContents) {
-                        if (key.isSimilar(lockProvider.getKeyFor(block))) {
-                            val oneKey = ItemStack(key)
-                            oneKey.amount = 1
-                            inventory.removeItem(oneKey)
-                            return
-                        }
+                val inventoryContents = inventory.contents
+                for (key in inventoryContents) {
+                    if (key.isSimilar(lockProvider.getKeyFor(block))) {
+                        val oneKey = ItemStack(key)
+                        oneKey.amount = 1
+                        inventory.removeItem(oneKey)
+                        return
                     }
                 }
             }

@@ -23,7 +23,6 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.bukkit.servlet.IndexServlet
 import com.rpkit.core.bukkit.servlet.StaticServlet
 import com.rpkit.core.database.Database
-import com.rpkit.core.service.ServiceProvider
 import com.rpkit.core.web.NavigationLink
 import com.rpkit.core.web.Web
 import org.eclipse.jetty.server.Server
@@ -47,13 +46,27 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
         servletContext = ServletContextHandler()
         servletContext.sessionHandler = SessionHandler()
         webServer.handler = servletContext
+        val databaseUrl = config.getString("database.url")
+        val databaseUsername = config.getString("database.username")
+        val databasePassword = config.getString("database.password")
+        val databaseDialect = config.getString("database.dialect")
+        if (databaseUrl == null) {
+            logger.severe("No database URL is set. Disabling.")
+            isEnabled = false
+            return
+        }
+        if (databaseDialect == null) {
+            logger.severe("No database dialect is set. Disabling.")
+            isEnabled = false
+            return
+        }
         core = RPKCore(
                 logger,
                 Database(
-                        config.getString("database.url"),
-                        config.getString("database.username"),
-                        config.getString("database.password"),
-                        SQLDialect.valueOf(config.getString("database.dialect"))
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        SQLDialect.valueOf(databaseDialect)
                 ),
                 Web(webServer, mutableListOf(NavigationLink("Home", "/")))
         )
@@ -62,7 +75,7 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
         } catch (exception: SQLException) {
             exception.printStackTrace()
         }
-        serviceProviders = arrayOf<ServiceProvider>()
+        serviceProviders = arrayOf()
         servlets = arrayOf(IndexServlet(this), StaticServlet(this))
         registerServiceProviders(this)
         registerCommands()

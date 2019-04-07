@@ -17,8 +17,8 @@ class SpawnMobCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                         val entityType = EntityType.valueOf(args[0].toUpperCase())
                         try {
                             val amount = Integer.parseInt(args[1])
-                            for (i in 0..amount - 1) {
-                                sender.location.world.spawnEntity(sender.location, entityType)
+                            for (i in 0 until amount) {
+                                sender.location.world?.spawnEntity(sender.location, entityType)
                             }
                             sender.sendMessage(plugin.messages["spawn-mob-valid"])
                         } catch (exception: NumberFormatException) {

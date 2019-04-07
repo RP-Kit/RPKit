@@ -25,7 +25,7 @@ import net.milkbowl.vault.permission.Permission
 /**
  * A Vault [Chat] implementation for chat plugins.
  */
-class RPKChatVaultChat(private val plugin: RPKChatLibBukkit): Chat(plugin.server.servicesManager.getRegistration(Permission::class.java).provider) {
+class RPKChatVaultChat(private val plugin: RPKChatLibBukkit): Chat(plugin.server.servicesManager.getRegistration(Permission::class.java)?.provider) {
 
     override fun getGroupPrefix(world: String, group: String): String {
         val prefixProvider = plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class)

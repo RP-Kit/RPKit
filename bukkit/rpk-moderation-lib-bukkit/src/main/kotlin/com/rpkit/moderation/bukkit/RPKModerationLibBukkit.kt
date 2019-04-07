@@ -19,5 +19,4 @@ package com.rpkit.moderation.bukkit
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 
 
-class RPKModerationLibBukkit: RPKBukkitPlugin() {
-}
+class RPKModerationLibBukkit: RPKBukkitPlugin()

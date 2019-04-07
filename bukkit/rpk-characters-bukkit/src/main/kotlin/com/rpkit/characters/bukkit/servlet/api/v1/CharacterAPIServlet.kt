@@ -90,7 +90,7 @@ class CharacterAPIServlet(private val plugin: RPKCharactersBukkit): RPKServlet()
                                         Pair("location", character.location.serialize()),
                                         Pair("inventory_contents", character.inventoryContents
                                                 .map { item ->
-                                                    item?.serialize()
+                                                    item.serialize()
                                                 }
                                         ),
                                         Pair("helmet", character.helmet?.serialize()),

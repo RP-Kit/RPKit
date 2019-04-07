@@ -37,9 +37,9 @@ class RPKStoresBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("purchase").executor = PurchaseCommand(this)
-        getCommand("purchases").executor = PurchasesCommand(this)
-        getCommand("claim").executor = ClaimCommand(this)
+        getCommand("purchase")?.setExecutor(PurchaseCommand(this))
+        getCommand("purchases")?.setExecutor(PurchasesCommand(this))
+        getCommand("claim")?.setExecutor(ClaimCommand(this))
     }
 
     override fun createTables(database: Database) {

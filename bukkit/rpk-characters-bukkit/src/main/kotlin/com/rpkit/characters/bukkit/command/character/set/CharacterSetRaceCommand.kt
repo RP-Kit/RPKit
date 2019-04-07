@@ -60,7 +60,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
                     if (character != null) {
                         if (args.isNotEmpty()) {
                             val raceBuilder = StringBuilder()
-                            for (i in 0..args.size - 1 - 1) {
+                            for (i in 0 until args.size - 1) {
                                 raceBuilder.append(args[i]).append(" ")
                             }
                             raceBuilder.append(args[args.size - 1])
@@ -116,7 +116,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
             return RaceSetPrompt()
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
             return plugin.messages["character-set-race-invalid-race"]
         }
 

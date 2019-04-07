@@ -60,7 +60,7 @@ class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Tab
                 )
                 .values(
                         entity.name,
-                        entity.location.world.name,
+                        entity.location.world?.name,
                         entity.location.x,
                         entity.location.y,
                         entity.location.z,
@@ -78,7 +78,7 @@ class RPKWarpTable(database: Database, private val plugin: RPKTravelBukkit): Tab
         database.create
                 .update(RPKIT_WARP)
                 .set(RPKIT_WARP.NAME, entity.name)
-                .set(RPKIT_WARP.WORLD, entity.location.world.name)
+                .set(RPKIT_WARP.WORLD, entity.location.world?.name)
                 .set(RPKIT_WARP.X, entity.location.x)
                 .set(RPKIT_WARP.Y, entity.location.y)
                 .set(RPKIT_WARP.Z, entity.location.z)

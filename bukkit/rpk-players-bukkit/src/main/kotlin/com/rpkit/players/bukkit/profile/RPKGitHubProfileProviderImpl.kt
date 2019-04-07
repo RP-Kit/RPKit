@@ -8,7 +8,7 @@ import org.kohsuke.github.GHUser
 class RPKGitHubProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPKGitHubProfileProvider {
 
     override fun getGitHubProfile(id: Int): RPKGitHubProfile? {
-        return plugin.core.database.getTable(RPKGitHubProfileTable::class).get(id)
+        return plugin.core.database.getTable(RPKGitHubProfileTable::class)[id]
     }
 
     override fun getGitHubProfile(user: GHUser): RPKGitHubProfile? {

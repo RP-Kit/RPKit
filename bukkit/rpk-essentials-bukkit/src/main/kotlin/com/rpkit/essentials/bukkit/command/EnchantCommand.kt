@@ -2,6 +2,7 @@ package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -34,11 +35,11 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                                 sender.sendMessage(plugin.messages["enchant-invalid-enchantment"])
                             }
                         } else {
-                            val enchantment = Enchantment.getByName(args[0].toUpperCase())
+                            val enchantment = Enchantment.getByKey(NamespacedKey.minecraft(args[0]))
                             if (enchantment != null) {
                                 try {
                                     val level = args[1].toInt()
-                                    sender.inventory.itemInMainHand.addEnchantment(Enchantment.getByName(args[0].toUpperCase()), Integer.parseInt(args[1]))
+                                    sender.inventory.itemInMainHand.addEnchantment(enchantment, Integer.parseInt(args[1]))
                                     sender.sendMessage(plugin.messages["enchant-valid", mapOf(
                                             Pair("amount", sender.inventory.itemInMainHand.amount.toString()),
                                             Pair("type", sender.inventory.itemInMainHand.type.toString().toLowerCase().replace('_', ' ')),

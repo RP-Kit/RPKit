@@ -53,7 +53,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
                 if (args.isNotEmpty()) {
                     val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
                     val raceBuilder = StringBuilder()
-                    for (i in 0..args.size - 1 - 1) {
+                    for (i in 0 until args.size - 1) {
                         raceBuilder.append(args[i]).append(' ')
                     }
                     raceBuilder.append(args[args.size - 1])
@@ -90,7 +90,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
             return RaceAddedPrompt()
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
             return plugin.messages["race-add-invalid-race"]
         }
 

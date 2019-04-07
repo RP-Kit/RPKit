@@ -47,8 +47,8 @@ class InventoryCloseListener(private val plugin: RPKEconomyBukkit): Listener {
                                 item != null
                                         && item.type === currency.material
                                         && item.hasItemMeta()
-                                        && item.itemMeta.hasDisplayName()
-                                        && item.itemMeta.displayName == currency.nameSingular
+                                        && item.itemMeta?.hasDisplayName() == true
+                                        && item.itemMeta?.displayName == currency.nameSingular
                             }
                             .map { item -> item.amount }
                             .sum()
@@ -58,8 +58,8 @@ class InventoryCloseListener(private val plugin: RPKEconomyBukkit): Listener {
                                         && (
                                             item.type !== currency.material
                                                 || !item.hasItemMeta()
-                                                || !item.itemMeta.hasDisplayName()
-                                                || item.itemMeta.displayName != currency.nameSingular
+                                                || item.itemMeta?.hasDisplayName() == false
+                                                || item.itemMeta?.displayName != currency.nameSingular
                                         )
                             }
                             .forEach { item ->

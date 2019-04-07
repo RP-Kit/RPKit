@@ -46,7 +46,7 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
         if (chest is Chest) {
             val sign = chest.block.getRelative(UP).state
             if (sign is Sign) {
-                if (sign.getLine(0) == GREEN.toString() + "[shop]") {
+                if (sign.getLine(0) == "$GREEN[shop]") {
                     val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
@@ -104,7 +104,7 @@ class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
 
     private fun validateRentSign(block: Block): Boolean {
         val sign = block.state as? Sign ?: return true
-        if (sign.getLine(0) != GREEN.toString() + "[rent]") return true
+        if (sign.getLine(0) != "$GREEN[rent]") return true
         return LocalDate.now().isBefore(LocalDate.parse(sign.getLine(3), DateTimeFormatter.ofPattern("yyyy-MM-dd")))
     }
 

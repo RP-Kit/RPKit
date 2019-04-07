@@ -39,8 +39,9 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
 
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (event.hasBlock()) {
-            val sign = event.clickedBlock.state
+        val clickedBlock = event.clickedBlock
+        if (clickedBlock != null) {
+            val sign = clickedBlock.state
             if (sign is Sign) {
                 if (sign.getLine(0) == "$GREEN[auction]") {
                     if (event.player.hasPermission("rpkit.auctions.sign.auction.bid")) {
@@ -61,7 +62,8 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
                                     if (character != null) {
                                         if (bidAmount < economyProvider.getBalance(character, auction.currency)) {
                                             val radius = plugin.config.getInt("auctions.radius")
-                                            if (radius < 0 || event.player.location.distanceSquared(auction.location) <= radius * radius) {
+                                            val auctionLocation = auction.location
+                                            if (radius < 0 || auctionLocation == null || event.player.location.distanceSquared(auctionLocation) <= radius * radius) {
                                                 val bid = RPKBidImpl(
                                                         auction = auction,
                                                         character = character,
@@ -75,12 +77,14 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
                                                         Pair("item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else "")
                                                 )])
                                                 auction.bids
+                                                        .asSequence()
                                                         .map(RPKBid::character)
                                                         .toSet()
+                                                        .asSequence()
                                                         .filter { character -> character != bid.character }
-                                                        .map(RPKCharacter::minecraftProfile)
-                                                        .filterNotNull()
+                                                        .mapNotNull(RPKCharacter::minecraftProfile)
                                                         .filter(RPKMinecraftProfile::isOnline)
+                                                        .toList()
                                                         .forEach { minecraftProfile ->
                                                             minecraftProfile.sendMessage(plugin.messages["bid-created", mapOf(
                                                                     Pair("auction_id", bid.auction.id.toString()),
@@ -93,7 +97,7 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit): Listener {
                                                 sign.setLine(3, (bid.amount + auction.minimumBidIncrement).toString())
                                                 sign.update()
                                                 if (!auction.isBiddingOpen) {
-                                                    event.clickedBlock.type = AIR
+                                                    clickedBlock.type = AIR
                                                 }
                                             } else {
                                                 event.player.sendMessage(plugin.messages["bid-invalid-too-far-away"])

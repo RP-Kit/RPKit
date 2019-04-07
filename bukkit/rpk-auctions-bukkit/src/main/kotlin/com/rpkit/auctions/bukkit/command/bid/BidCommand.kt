@@ -61,7 +61,8 @@ class BidCommand(private val plugin: RPKAuctionsBukkit): CommandExecutor {
                                             if (bidAmount < economyProvider.getBalance(character, auction.currency)) {
                                                 if (bidAmount >= (auction.bids.sortedByDescending { bid -> bid.amount }.firstOrNull()?.amount ?: auction.startPrice) + auction.minimumBidIncrement) {
                                                     val radius = plugin.config.getInt("auctions.radius")
-                                                    if (radius < 0 || sender.location.distanceSquared(auction.location) <= radius * radius) {
+                                                    val auctionLocation = auction.location
+                                                    if (radius < 0 || auctionLocation == null || sender.location.distanceSquared(auctionLocation) <= radius * radius) {
                                                         val bid = RPKBidImpl(
                                                                 auction = auction,
                                                                 character = character,
@@ -75,13 +76,15 @@ class BidCommand(private val plugin: RPKAuctionsBukkit): CommandExecutor {
                                                                 Pair("item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else "")
                                                         )])
                                                         auction.bids
+                                                                .asSequence()
                                                                 .map(RPKBid::character)
                                                                 .toSet()
+                                                                .asSequence()
                                                                 .filter { character -> character != bid.character }
-                                                                .map(RPKCharacter::minecraftProfile)
-                                                                .filterNotNull()
+                                                                .mapNotNull(RPKCharacter::minecraftProfile)
                                                                 .map { minecraftProfile -> Bukkit.getPlayer(minecraftProfile.minecraftUUID) }
                                                                 .filterNotNull()
+                                                                .toList()
                                                                 .forEach { player ->
                                                                     player.sendMessage(plugin.messages["bid-created", mapOf(
                                                                             Pair("auction_id", bid.auction.id.toString()),

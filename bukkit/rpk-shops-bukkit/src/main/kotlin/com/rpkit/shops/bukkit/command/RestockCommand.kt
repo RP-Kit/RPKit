@@ -21,7 +21,7 @@ class RestockCommand(private val plugin: RPKShopsBukkit): CommandExecutor {
                     if (args.isNotEmpty()) {
                         val material = Material.matchMaterial(args.joinToString(" "))
                         if (material != null) {
-                            for (i in 0..chest.inventory.size - 1) {
+                            for (i in 0 until chest.inventory.size) {
                                 chest.inventory.setItem(i, ItemStack(material, material.maxStackSize))
                             }
                             sender.sendMessage(plugin.messages["restock-valid"])

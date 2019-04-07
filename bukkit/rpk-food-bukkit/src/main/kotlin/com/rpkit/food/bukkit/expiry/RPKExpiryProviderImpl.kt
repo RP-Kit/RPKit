@@ -28,8 +28,8 @@ class RPKExpiryProviderImpl(private val plugin: RPKFoodBukkit): RPKExpiryProvide
 
     override fun setExpiry(item: ItemStack, expiryDate: Date) {
         if (!item.type.isEdible) return
-        val itemMeta = item.itemMeta
-        val lore = if (itemMeta.hasLore()) itemMeta.lore else mutableListOf<String>()
+        val itemMeta = item.itemMeta ?: plugin.server.itemFactory.getItemMeta(item.type) ?: return
+        val lore = itemMeta.lore ?: mutableListOf<String>()
         lore.removeAll(lore.filter { it.startsWith("Expires: ") })
         lore.add("Expires: ${dateFormat.format(expiryDate)}")
         itemMeta.lore = lore
@@ -43,14 +43,13 @@ class RPKExpiryProviderImpl(private val plugin: RPKFoodBukkit): RPKExpiryProvide
 
     override fun getExpiry(item: ItemStack): Date? {
         if (!item.type.isEdible) return null
-        val itemMeta = item.itemMeta
-        if (itemMeta.hasLore()) {
-            val lore = itemMeta.lore
-            val expiryLore = lore.filter { it.startsWith("Expires: ") }.firstOrNull()
+        val itemMeta = item.itemMeta ?: plugin.server.itemFactory.getItemMeta(item.type) ?: return null
+        val lore = itemMeta.lore
+        if (lore != null) {
+            val expiryLore = lore.firstOrNull { it.startsWith("Expires: ") }
             if (expiryLore != null) {
                 val expiryDateString = expiryLore.drop("Expires: ".length)
-                val expiryDate = dateFormat.parse(expiryDateString)
-                return expiryDate
+                return dateFormat.parse(expiryDateString)
             }
         }
         return null

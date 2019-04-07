@@ -134,12 +134,10 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
                 if (minecraftProfile != null) {
                     val profile = minecraftProfile.profile
                     if (profile != null) {
-                        characterProvider.getCharacters(profile)
-                                .filter { it.name.equals(input, ignoreCase = true) }
-                                .forEach { return true }
-                        characterProvider.getCharacters(profile)
-                                .filter { it.name.toLowerCase().contains(input.toLowerCase()) }
-                                .forEach { return true }
+                        repeat(characterProvider.getCharacters(profile)
+                                .filter { it.name.equals(input, ignoreCase = true) }.size) { return true }
+                        repeat(characterProvider.getCharacters(profile)
+                                .filter { it.name.toLowerCase().contains(input.toLowerCase()) }.size) { return true }
                     }
                 }
             }
@@ -185,7 +183,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
             }
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
             return plugin.messages["character-delete-invalid-character"]
         }
 
@@ -194,7 +192,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
-                if (profile != null) {
+                return if (profile != null) {
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     val characterListBuilder = StringBuilder()
                     for (character in characterProvider.getCharacters(profile)) {
@@ -203,9 +201,9 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
                                         Pair("character", character.name))]
                         )
                     }
-                    return plugin.messages["character-delete-prompt"] + characterListBuilder.toString()
+                    plugin.messages["character-delete-prompt"] + characterListBuilder.toString()
                 } else {
-                    return plugin.messages["no-profile"]
+                    plugin.messages["no-profile"]
                 }
             } else {
                 return plugin.messages["no-minecraft-profile"]
@@ -217,19 +215,19 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
     private inner class ConfirmationPrompt: BooleanPrompt() {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Boolean): Prompt? {
-            if (input) {
+            return if (input) {
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val character = characterProvider.getCharacter(context.getSessionData("character_id") as Int)
                 if (character != null) {
                     characterProvider.removeCharacter(character)
                 }
-                return CharacterDeletedPrompt()
+                CharacterDeletedPrompt()
             } else {
-                return END_OF_CONVERSATION
+                END_OF_CONVERSATION
             }
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
             return plugin.messages["character-delete-confirmation-invalid-boolean"]
         }
 

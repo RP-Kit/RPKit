@@ -142,10 +142,9 @@ class RPKBidTable(database: Database, private val plugin: RPKAuctionsBukkit): Ta
                 .from(RPKIT_BID)
                 .where(RPKIT_BID.AUCTION_ID.eq(auction.id))
                 .fetch()
-        val bids = results.map { result ->
+        return results.map { result ->
             get(result.get(RPKIT_BID.ID))
         }.filterNotNull()
-        return bids
     }
 
     override fun delete(entity: RPKBid) {

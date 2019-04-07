@@ -53,7 +53,7 @@ class MoneyCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
                 sender.sendMessage(plugin.messages["money-usage"])
             }
         } else {
-            return moneyViewCommand.onCommand(sender, command, label, arrayOf<String>())
+            return moneyViewCommand.onCommand(sender, command, label, arrayOf())
         }
         return true
     }

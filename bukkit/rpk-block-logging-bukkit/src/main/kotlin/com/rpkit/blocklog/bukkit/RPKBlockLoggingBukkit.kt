@@ -22,9 +22,9 @@ class RPKBlockLoggingBukkit : RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("history").executor = HistoryCommand(this)
-        getCommand("inventoryhistory").executor = InventoryHistoryCommand(this)
-        getCommand("rollback").executor = RollbackCommand(this)
+        getCommand("history")?.setExecutor(HistoryCommand(this))
+        getCommand("inventoryhistory")?.setExecutor(InventoryHistoryCommand(this))
+        getCommand("rollback")?.setExecutor(RollbackCommand(this))
     }
 
     override fun registerListeners() {

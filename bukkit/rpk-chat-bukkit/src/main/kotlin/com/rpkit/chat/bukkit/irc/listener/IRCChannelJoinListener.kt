@@ -40,10 +40,9 @@ class IRCChannelJoinListener(private val plugin: RPKChatBukkit): ListenerAdapter
             val chatChannel = chatChannelProvider.getChatChannelFromIRCChannel(event.channel.name)
             if (chatChannel != null) {
                 if (chatChannel.undirectedPipeline
-                        .map { component -> component as? IRCComponent }
-                        .filterNotNull()
-                        .firstOrNull()
-                        ?.isIRCWhitelisted?:false) {
+                                .mapNotNull { component -> component as? IRCComponent }
+                                .firstOrNull()
+                                ?.isIRCWhitelisted == true) {
                     if (!verified) {
                         event.getBot<PircBotX>().sendIRC().message(event.channel.name, "/kick " + event.channel.name + " " + user.nick + " Only registered/identified users may join this channel.")
                         event.channel.send().message(user.nick + " attempted to join, but was not registered.")

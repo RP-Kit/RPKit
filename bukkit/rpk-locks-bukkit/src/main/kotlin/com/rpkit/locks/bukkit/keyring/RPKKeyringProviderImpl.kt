@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack
 
 class RPKKeyringProviderImpl(private val plugin: RPKLocksBukkit): RPKKeyringProvider {
     override fun getKeyring(character: RPKCharacter): MutableList<ItemStack> {
-        return plugin.core.database.getTable(RPKKeyringTable::class).get(character)?.items?.toMutableList()?:mutableListOf<ItemStack>()
+        return plugin.core.database.getTable(RPKKeyringTable::class).get(character)?.items?.toMutableList()?:mutableListOf()
     }
 
     override fun setKeyring(character: RPKCharacter, items: MutableList<ItemStack>) {

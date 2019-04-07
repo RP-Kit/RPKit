@@ -24,10 +24,12 @@ import com.rpkit.stats.bukkit.RPKStatsBukkit
 class RPKStatProviderImpl(private val plugin: RPKStatsBukkit): RPKStatProvider {
 
     override val stats: List<RPKStat>
-            get() = plugin.config.getConfigurationSection("stats").getKeys(false)
-                            .mapIndexed { id, name ->
-                                RPKStatImpl(id, name, plugin.config.getString("stats.$name"))
+            get() = plugin.config.getConfigurationSection("stats")
+                            ?.getKeys(false)
+                            ?.mapIndexed { id, name ->
+                                RPKStatImpl(id, name, plugin.config.getString("stats.$name") ?: "0")
                             }
+                    ?: emptyList()
 
     override fun addStat(stat: RPKStat) {
         plugin.config.set("stats.${stat.name}", stat.script)
@@ -40,7 +42,7 @@ class RPKStatProviderImpl(private val plugin: RPKStatsBukkit): RPKStatProvider {
     }
 
     override fun getStat(name: String): RPKStat? {
-        return stats.filter { stat -> stat.name == name }.firstOrNull()
+        return stats.firstOrNull { stat -> stat.name == name }
     }
 
 }

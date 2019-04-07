@@ -31,17 +31,16 @@ class MoneyField(val plugin: RPKEconomyBukkit): HideableCharacterCardField {
 
     override val name = "money"
     override fun get(character: RPKCharacter): String {
-        if (isHidden(character)) {
-            return "[HIDDEN]"
+        return if (isHidden(character)) {
+            "[HIDDEN]"
         } else {
             val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
             val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            return currencyProvider.currencies
-                    .map { currency ->
+            currencyProvider.currencies
+                    .joinToString(", ") { currency ->
                         val balance = economyProvider.getBalance(character, currency)
                         "$balance ${if (balance == 1) currency.nameSingular else currency.namePlural}"
                     }
-                    .joinToString(", ")
         }
     }
     override fun isHidden(character: RPKCharacter): Boolean {
