@@ -19,7 +19,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit): Listener {
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         if (event.action == RIGHT_CLICK_BLOCK) {
-            val sign = event.clickedBlock.state
+            val sign = event.clickedBlock?.state
             if (sign is Sign) {
                 if (sign.getLine(0).equals(ChatColor.GREEN.toString() + "[exchange]", ignoreCase = true)) { // Exchange signs
                     val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
@@ -98,7 +98,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit): Listener {
                 }
             }
         } else if (event.action == LEFT_CLICK_BLOCK) {
-            val sign = event.clickedBlock.state
+            val sign = event.clickedBlock?.state
             if (sign is Sign) {
                 if (sign.getLine(0).equals(ChatColor.GREEN.toString() + "[dynexchange]", ignoreCase = true)) { // Dynamic exchange signs
                     val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)

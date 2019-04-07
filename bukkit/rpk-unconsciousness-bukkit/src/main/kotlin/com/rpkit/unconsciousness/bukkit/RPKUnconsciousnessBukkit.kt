@@ -63,7 +63,7 @@ class RPKUnconsciousnessBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("wake").executor = WakeCommand(this)
+        getCommand("wake")?.setExecutor(WakeCommand(this))
     }
 
     override fun registerListeners() {

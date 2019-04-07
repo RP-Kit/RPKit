@@ -29,11 +29,7 @@ class RPKGenderProviderImpl(private val plugin: RPKCharactersBukkit): RPKGenderP
     }
 
     override fun getGender(name: String): RPKGender? {
-        val table = plugin.core.database.getTable(RPKGenderTable::class)
-        if (table is RPKGenderTable) {
-            return table[name]
-        }
-        return null
+        return plugin.core.database.getTable(RPKGenderTable::class)[name]
     }
 
     override val genders: Collection<RPKGender>

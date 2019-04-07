@@ -12,7 +12,7 @@ class RPKSkillTypeProviderImpl(private val plugin: RPKSkillsBukkit): RPKSkillTyp
     }
 
     override fun getSkillType(name: String): RPKSkillType? {
-        return skillTypes.filter { it.name == name }.firstOrNull()
+        return skillTypes.firstOrNull { it.name == name }
     }
 
     override fun addSkillType(skillType: RPKSkillType) {

@@ -39,7 +39,7 @@ class RPKSelectionBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("wand").executor = WandCommand(this)
+        getCommand("wand")?.setExecutor(WandCommand(this))
     }
 
     override fun createTables(database: Database) {

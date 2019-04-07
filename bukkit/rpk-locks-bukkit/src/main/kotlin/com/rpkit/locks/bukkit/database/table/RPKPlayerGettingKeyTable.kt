@@ -90,20 +90,20 @@ class RPKPlayerGettingKeyTable(database: Database, private val plugin: RPKLocksB
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
             val minecraftProfileId = result.get(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID)
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
-            if (minecraftProfile != null) {
+            return if (minecraftProfile != null) {
                 val playerGettingKey = RPKPlayerGettingKey(
                         id,
                         minecraftProfile
                 )
                 cache?.put(id, playerGettingKey)
-                return playerGettingKey
+                playerGettingKey
             } else {
                 database.create
                         .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
                         .where(RPKIT_PLAYER_GETTING_KEY.ID.eq(id))
                         .execute()
                 cache?.remove(id)
-                return null
+                null
             }
         }
     }

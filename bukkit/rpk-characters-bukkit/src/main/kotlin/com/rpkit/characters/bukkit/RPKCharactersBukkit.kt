@@ -96,9 +96,9 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("character").executor = CharacterCommand(this)
-        getCommand("gender").executor = GenderCommand(this)
-        getCommand("race").executor = RaceCommand(this)
+        getCommand("character")?.setExecutor(CharacterCommand(this))
+        getCommand("gender")?.setExecutor(GenderCommand(this))
+        getCommand("race")?.setExecutor(RaceCommand(this))
     }
 
     override fun registerListeners() {

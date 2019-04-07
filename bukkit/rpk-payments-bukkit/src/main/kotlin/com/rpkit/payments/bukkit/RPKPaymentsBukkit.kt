@@ -67,7 +67,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                     Pair("group", group.name),
                                                     Pair("date", dateFormat.format(Date(now)))
                                             )]
-                                            if (!(member.minecraftProfile?.isOnline?:false)) { // If offline
+                                            if (member.minecraftProfile?.isOnline != true) { // If offline
                                                 paymentNotificationProvider.addPaymentNotification(
                                                         RPKPaymentNotificationImpl(
                                                                 group = group,
@@ -86,7 +86,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                     Pair("date", dateFormat.format(Date(now)))
                                             )]
                                             group.owners.forEach { owner ->
-                                                if (!(owner.minecraftProfile?.isOnline?:false)) {
+                                                if (owner.minecraftProfile?.isOnline != true) {
                                                     paymentNotificationProvider.addPaymentNotification(
                                                             RPKPaymentNotificationImpl(
                                                                     group = group,
@@ -113,7 +113,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                     Pair("group", group.name),
                                                     Pair("date", dateFormat.format(Date(now)))
                                             )]
-                                            if (!(member.minecraftProfile?.isOnline?:false)) { // If offline
+                                            if (member.minecraftProfile?.isOnline != true) { // If offline
                                                 paymentNotificationProvider.addPaymentNotification(
                                                         RPKPaymentNotificationImpl(
                                                                 group = group,
@@ -133,7 +133,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
                                                     Pair("date", dateFormat.format(Date(now)))
                                             )]
                                             group.owners.forEach { owner ->
-                                                if (!(owner.minecraftProfile?.isOnline?:false)) { // If offline
+                                                if (owner.minecraftProfile?.isOnline != true) { // If offline
                                                     paymentNotificationProvider.addPaymentNotification(
                                                             RPKPaymentNotificationImpl(
                                                                     group = group,
@@ -160,7 +160,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("payment").executor = PaymentCommand(this)
+        getCommand("payment")?.setExecutor(PaymentCommand(this))
     }
 
     override fun registerListeners() {

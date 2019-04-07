@@ -42,17 +42,13 @@ class GarbleComponent(private val plugin: RPKChatBukkit, var clearRadius: Double
         if (snooperProvider.isSnooping(receiverMinecraftProfile)) return context // Prevent garble if the receiver is snooping
         val senderOfflineBukkitPlayer = Bukkit.getOfflinePlayer(senderMinecraftProfile.minecraftUUID)
         val receiverOfflineBukkitPlayer = Bukkit.getOfflinePlayer(receiverMinecraftProfile.minecraftUUID)
-        if (senderOfflineBukkitPlayer != null) {
-            if (receiverOfflineBukkitPlayer != null) {
-                if (senderOfflineBukkitPlayer.isOnline && receiverOfflineBukkitPlayer.isOnline) {
-                    val senderBukkitPlayer = senderOfflineBukkitPlayer.player
-                    val receiverBukkitPlayer = receiverOfflineBukkitPlayer.player
-                    val distance = MathUtils.fastSqrt(senderBukkitPlayer.location.distanceSquared(receiverBukkitPlayer.location))
-                    val hearingRange = context.chatChannel.radius
-                    val clarity = 1.0 - (distance - clearRadius) / hearingRange
-                    context.message = garbleMessage(context.message, clarity)
-                }
-            }
+        val senderBukkitPlayer = senderOfflineBukkitPlayer.player
+        val receiverBukkitPlayer = receiverOfflineBukkitPlayer.player
+        if (senderBukkitPlayer != null && receiverBukkitPlayer != null) {
+            val distance = MathUtils.fastSqrt(senderBukkitPlayer.location.distanceSquared(receiverBukkitPlayer.location))
+            val hearingRange = context.chatChannel.radius
+            val clarity = 1.0 - (distance - clearRadius) / hearingRange
+            context.message = garbleMessage(context.message, clarity)
         }
         return context
     }
@@ -65,15 +61,17 @@ class GarbleComponent(private val plugin: RPKChatBukkit, var clearRadius: Double
         while (i < message.length) {
             val c = message.codePointAt(i)
             i += Character.charCount(c)
-            if (random.nextDouble() < clarity) {
-                newMessage.appendCodePoint(c)
-            } else if (random.nextDouble() < 0.1) {
-                newMessage.append(ChatColor.DARK_GRAY)
-                newMessage.appendCodePoint(c)
-                newMessage.append(ChatColor.WHITE)
-            } else {
-                newMessage.append(' ')
-                drops++
+            when {
+                random.nextDouble() < clarity -> newMessage.appendCodePoint(c)
+                random.nextDouble() < 0.1 -> {
+                    newMessage.append(ChatColor.DARK_GRAY)
+                    newMessage.appendCodePoint(c)
+                    newMessage.append(ChatColor.WHITE)
+                }
+                else -> {
+                    newMessage.append(' ')
+                    drops++
+                }
             }
         }
         if (drops == message.length) {

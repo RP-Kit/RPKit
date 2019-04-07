@@ -112,7 +112,7 @@ class CharacterSetPlayerCommand(private val plugin: RPKCharactersBukkit): Comman
             return PlayerSetPrompt()
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
             return plugin.messages["character-set-player-invalid-player"]
         }
 

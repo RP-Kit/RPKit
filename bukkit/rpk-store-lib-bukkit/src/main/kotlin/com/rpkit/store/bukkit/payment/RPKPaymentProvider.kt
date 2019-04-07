@@ -21,5 +21,4 @@ import com.rpkit.core.service.ServiceProvider
 /**
  * Represents a provider of payments, facilitates access to a payment gateway.
  */
-interface RPKPaymentProvider: ServiceProvider {
-}
+interface RPKPaymentProvider: ServiceProvider

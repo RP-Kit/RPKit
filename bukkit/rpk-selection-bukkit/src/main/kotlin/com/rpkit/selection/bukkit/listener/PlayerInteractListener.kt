@@ -37,28 +37,29 @@ class PlayerInteractListener(private val plugin: RPKSelectionBukkit): Listener {
             val selectionProvider = plugin.core.serviceManager.getServiceProvider(RPKSelectionProvider::class)
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer) ?: return
             val selection = selectionProvider.getSelection(minecraftProfile)
+            val clickedBlock = event.clickedBlock ?: return
             when (event.action) {
                 Action.LEFT_CLICK_BLOCK -> {
-                    selection.world = event.clickedBlock.world
-                    selection.point1 = event.clickedBlock
+                    selection.world = clickedBlock.world
+                    selection.point1 = clickedBlock
                     selectionProvider.updateSelection(selection)
                     event.player.sendMessage(plugin.messages["wand-primary", mapOf(
-                            Pair("world", event.clickedBlock.world.name),
-                            Pair("x", event.clickedBlock.x.toString()),
-                            Pair("y", event.clickedBlock.y.toString()),
-                            Pair("z", event.clickedBlock.z.toString())
+                            Pair("world", clickedBlock.world.name),
+                            Pair("x", clickedBlock.x.toString()),
+                            Pair("y", clickedBlock.y.toString()),
+                            Pair("z", clickedBlock.z.toString())
                     )])
                 }
                 Action.RIGHT_CLICK_BLOCK -> {
                     if (event.hand == EquipmentSlot.HAND) {
-                        selection.world = event.clickedBlock.world
-                        selection.point2 = event.clickedBlock
+                        selection.world = clickedBlock.world
+                        selection.point2 = clickedBlock
                         selectionProvider.updateSelection(selection)
                         event.player.sendMessage(plugin.messages["wand-secondary", mapOf(
-                                Pair("world", event.clickedBlock.world.name),
-                                Pair("x", event.clickedBlock.x.toString()),
-                                Pair("y", event.clickedBlock.y.toString()),
-                                Pair("z", event.clickedBlock.z.toString())
+                                Pair("world", clickedBlock.world.name),
+                                Pair("x", clickedBlock.x.toString()),
+                                Pair("y", clickedBlock.y.toString()),
+                                Pair("z", clickedBlock.z.toString())
                         )])
                     }
                 }

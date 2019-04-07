@@ -120,20 +120,20 @@ class RPKChatChannelMuteTable(database: Database, private val plugin: RPKChatBuk
             val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
             val chatChannelId = result.get(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_ID)
             val chatChannel = chatChannelProvider.getChatChannel(chatChannelId)
-            if (minecraftProfile != null && chatChannel != null) {
+            return if (minecraftProfile != null && chatChannel != null) {
                 val chatChannelMute = RPKChatChannelMute(
                         id,
                         minecraftProfile,
                         chatChannel
                 )
                 cache?.put(id, chatChannelMute)
-                return chatChannelMute
+                chatChannelMute
             } else {
                 database.create
                         .deleteFrom(RPKIT_CHAT_CHANNEL_MUTE)
                         .where(RPKIT_CHAT_CHANNEL_MUTE.ID.eq(id))
                         .execute()
-                return null
+                null
             }
         }
     }

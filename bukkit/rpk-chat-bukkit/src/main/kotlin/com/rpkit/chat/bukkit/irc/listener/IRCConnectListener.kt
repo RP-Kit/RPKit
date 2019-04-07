@@ -34,8 +34,7 @@ class IRCConnectListener(private val plugin: RPKChatBukkit): ListenerAdapter() {
         val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
         for (channel in chatChannelProvider.chatChannels) {
             val ircChannel = channel.undirectedPipeline
-                    .map { component -> component as? IRCComponent }
-                    .filterNotNull()
+                    .mapNotNull { component -> component as? IRCComponent }
                     .firstOrNull()?.ircChannel
             if (ircChannel != null) {
                 ircProvider.ircBot.sendIRC().joinChannel(ircChannel)

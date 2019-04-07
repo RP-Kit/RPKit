@@ -88,12 +88,11 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["auction-set-currency-prompt"] + "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
-                            .map { currency ->
+                            .joinToString("\n") { currency ->
                                 plugin.messages["auction-set-currency-prompt-list-item", mapOf(
                                         Pair("currency", currency.name)
                                 )]
                             }
-                            .joinToString("\n")
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
@@ -325,7 +324,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
                     auctionProvider.addAuction(auction)
                     auction.openBidding()
                     auctionProvider.updateAuction(auction)
-                    bukkitPlayer.inventory.itemInMainHand = null
+                    bukkitPlayer.inventory.setItemInMainHand(null)
                     context.setSessionData("id", auction.id)
                 } else {
                     context.setSessionData("id", -1)
@@ -349,16 +348,16 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            if (context.getSessionData("id") != -1) {
+            return if (context.getSessionData("id") != -1) {
                 if (context.getSessionData("id") != -2) {
-                    return plugin.messages["auction-create-id", mapOf(
+                    plugin.messages["auction-create-id", mapOf(
                             Pair("id", context.getSessionData("id").toString())
                     )]
                 } else {
-                    return plugin.messages["no-minecraft-profile"]
+                    plugin.messages["no-minecraft-profile"]
                 }
             } else {
-                return plugin.messages["no-character"]
+                plugin.messages["no-character"]
             }
         }
 

@@ -48,128 +48,135 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit): Listener {
     fun onPlayerInteract(event: PlayerInteractEvent) {
         if (event.action == RIGHT_CLICK_BLOCK) {
             val block = event.clickedBlock
-            val state = block.state
-            if (state is Sign) {
-                if (state.getLine(0) == GREEN.toString() + "[shop]") {
-                    if (validateRentSign(block.getRelative(UP))) {
-                        if (state.getLine(1).startsWith("buy")) {
-                            val chestBlock = block.getRelative(DOWN)
-                            val chestState = chestBlock.state as? Chest
-                            if (chestState != null) {
-                                event.player.openInventory(chestState.blockInventory)
-                            }
-                        } else if (state.getLine(1).startsWith("sell")) {
-                            val amount = state.getLine(1).split(Regex("\\s+"))[1].toInt()
-                            val material = Material.matchMaterial(state.getLine(1).split(Regex("\\s+"))[2])
-                            val price = state.getLine(2).split(Regex("\\s+"))[1].toInt()
-                            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                            val currencyBuilder = StringBuilder()
-                            for (i in 2 until state.getLine(2).split(Regex("\\s+")).size) {
-                                currencyBuilder.append(state.getLine(2).split(Regex("\\s+"))[i]).append(' ')
-                            }
-                            currencyBuilder.deleteCharAt(currencyBuilder.lastIndex)
-                            val currency = currencyProvider.getCurrency(currencyBuilder.toString())
-                            if (currency != null) {
-                                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                                val isAdminShop = state.getLine(3).equals("admin", ignoreCase = true)
-                                val ownerCharacter = if (isAdminShop) null else characterProvider.getCharacter(state.getLine(3).toInt())
-                                if (ownerCharacter != null || isAdminShop) {
-                                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                                    val customerMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
-                                    if (customerMinecraftProfile != null) {
-                                        val customerCharacter = characterProvider.getActiveCharacter(customerMinecraftProfile)
-                                        if (customerCharacter != null) {
-                                            val item = ItemStack(material)
-                                            val items = ItemStack(material, amount)
-                                            if (event.player.inventory.containsAtLeast(item, amount)) {
-                                                val chestBlock = block.getRelative(DOWN)
-                                                val chestState = chestBlock.state as? Chest
-                                                if (chestState != null) {
-                                                    val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-                                                    val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
-                                                    if (isAdminShop) {
-                                                        event.player.inventory.removeItem(items)
-                                                        chestState.blockInventory.addItem(items)
-                                                        economyProvider.setBalance(customerCharacter, currency, economyProvider.getBalance(customerCharacter, currency) + price)
-                                                    } else if (ownerCharacter != null) {
-                                                        if (bankProvider.getBalance(ownerCharacter, currency) >= price) {
+            if (block != null) {
+                val state = block.state
+                if (state is Sign) {
+                    if (state.getLine(0) == "$GREEN[shop]") {
+                        if (validateRentSign(block.getRelative(UP))) {
+                            if (state.getLine(1).startsWith("buy")) {
+                                val chestBlock = block.getRelative(DOWN)
+                                val chestState = chestBlock.state as? Chest
+                                if (chestState != null) {
+                                    event.player.openInventory(chestState.blockInventory)
+                                }
+                            } else if (state.getLine(1).startsWith("sell")) {
+                                val amount = state.getLine(1).split(Regex("\\s+"))[1].toInt()
+                                val materialName = state.getLine(1).split(Regex("\\s+"))[2]
+                                val material = Material.matchMaterial(materialName) ?: Material.matchMaterial(materialName, true)
+                                if (material == null) {
+                                    event.player.sendMessage(plugin.messages["shop-material-invalid"])
+                                    return
+                                }
+                                val price = state.getLine(2).split(Regex("\\s+"))[1].toInt()
+                                val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
+                                val currencyBuilder = StringBuilder()
+                                for (i in 2 until state.getLine(2).split(Regex("\\s+")).size) {
+                                    currencyBuilder.append(state.getLine(2).split(Regex("\\s+"))[i]).append(' ')
+                                }
+                                currencyBuilder.deleteCharAt(currencyBuilder.lastIndex)
+                                val currency = currencyProvider.getCurrency(currencyBuilder.toString())
+                                if (currency != null) {
+                                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                                    val isAdminShop = state.getLine(3).equals("admin", ignoreCase = true)
+                                    val ownerCharacter = if (isAdminShop) null else characterProvider.getCharacter(state.getLine(3).toInt())
+                                    if (ownerCharacter != null || isAdminShop) {
+                                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                                        val customerMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+                                        if (customerMinecraftProfile != null) {
+                                            val customerCharacter = characterProvider.getActiveCharacter(customerMinecraftProfile)
+                                            if (customerCharacter != null) {
+                                                val item = ItemStack(material)
+                                                val items = ItemStack(material, amount)
+                                                if (event.player.inventory.containsAtLeast(item, amount)) {
+                                                    val chestBlock = block.getRelative(DOWN)
+                                                    val chestState = chestBlock.state as? Chest
+                                                    if (chestState != null) {
+                                                        val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
+                                                        val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
+                                                        if (isAdminShop) {
                                                             event.player.inventory.removeItem(items)
                                                             chestState.blockInventory.addItem(items)
-                                                            bankProvider.setBalance(ownerCharacter, currency, bankProvider.getBalance(ownerCharacter, currency) - price)
                                                             economyProvider.setBalance(customerCharacter, currency, economyProvider.getBalance(customerCharacter, currency) + price)
+                                                        } else if (ownerCharacter != null) {
+                                                            if (bankProvider.getBalance(ownerCharacter, currency) >= price) {
+                                                                event.player.inventory.removeItem(items)
+                                                                chestState.blockInventory.addItem(items)
+                                                                bankProvider.setBalance(ownerCharacter, currency, bankProvider.getBalance(ownerCharacter, currency) - price)
+                                                                economyProvider.setBalance(customerCharacter, currency, economyProvider.getBalance(customerCharacter, currency) + price)
+                                                            } else {
+                                                                event.player.sendMessage(plugin.messages["shop-sell-not-enough-money"])
+                                                            }
                                                         } else {
-                                                            event.player.sendMessage(plugin.messages["shop-sell-not-enough-money"])
+                                                            event.player.sendMessage(plugin.messages["shop-character-invalid"])
                                                         }
                                                     } else {
-                                                        event.player.sendMessage(plugin.messages["shop-character-invalid"])
+                                                        event.player.sendMessage(plugin.messages["shop-sell-chest-not-found"])
                                                     }
                                                 } else {
-                                                    event.player.sendMessage(plugin.messages["shop-sell-chest-not-found"])
+                                                    event.player.sendMessage(plugin.messages["shop-sell-not-enough-items"])
                                                 }
                                             } else {
-                                                event.player.sendMessage(plugin.messages["shop-sell-not-enough-items"])
+                                                event.player.sendMessage(plugin.messages["no-character"])
                                             }
                                         } else {
-                                            event.player.sendMessage(plugin.messages["no-character"])
+                                            event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                                         }
                                     } else {
-                                        event.player.sendMessage(plugin.messages["no-minecraft-profile"])
+                                        event.player.sendMessage(plugin.messages["shop-character-invalid"])
                                     }
                                 } else {
-                                    event.player.sendMessage(plugin.messages["shop-character-invalid"])
+                                    event.player.sendMessage(plugin.messages["shop-currency-invalid"])
                                 }
-                            } else {
-                                event.player.sendMessage(plugin.messages["shop-currency-invalid"])
-                            }
-                        }
-                    } else {
-                        event.player.sendMessage(plugin.messages["rent-ended"])
-                    }
-                } else if (state.getLine(0) == GREEN.toString() + "[rent]") {
-                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-                    val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
-                    if (minecraftProfile != null) {
-                        val character = characterProvider.getActiveCharacter(minecraftProfile)
-                        val rentCharacter = characterProvider.getCharacter(state.getLine(1).toInt())
-                        val cost = state.getLine(2).split(Regex("\\s+"))[0].toInt()
-                        val currency = currencyProvider.getCurrency(state.getLine(2)
-                                .split(Regex("\\s+"))
-                                .drop(1)
-                                .joinToString(" "))
-                        if (character != null) {
-                            val shopSign = block.getRelative(BlockFace.DOWN).state as? Sign
-                            if (shopSign != null) {
-                                val isAdminShop = shopSign.getLine(3).equals("admin", ignoreCase = true)
-                                val shopCharacter = if (isAdminShop) null else characterProvider.getCharacter(shopSign.getLine(3).toInt())
-                                if (shopCharacter == null || shopCharacter.id == character.id) {
-                                    if (rentCharacter != null) {
-                                        if (currency != null) {
-                                            economyProvider.transfer(character, rentCharacter, currency, cost)
-                                            state.setLine(3, LocalDate.parse(state.getLine(3), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                                                    .plusDays(1L).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                                            state.update()
-                                            event.player.sendMessage(plugin.messages["rent-paid"])
-                                        } else {
-                                            event.player.sendMessage(plugin.messages["rent-invalid-currency"])
-                                        }
-                                    } else {
-                                        event.player.sendMessage(plugin.messages["rent-invalid-character"])
-                                        event.clickedBlock.type = AIR
-                                    }
-                                } else {
-                                    event.player.sendMessage(plugin.messages["rent-not-owner"])
-                                }
-                            } else {
-                                event.player.sendMessage(plugin.messages["rent-no-shop"])
                             }
                         } else {
-                            event.player.sendMessage(plugin.messages["no-character"])
+                            event.player.sendMessage(plugin.messages["rent-ended"])
                         }
-                    } else {
-                        event.player.sendMessage(plugin.messages["no-minecraft-profile"])
+                    } else if (state.getLine(0) == "$GREEN[rent]") {
+                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                        val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
+                        val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
+                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+                        if (minecraftProfile != null) {
+                            val character = characterProvider.getActiveCharacter(minecraftProfile)
+                            val rentCharacter = characterProvider.getCharacter(state.getLine(1).toInt())
+                            val cost = state.getLine(2).split(Regex("\\s+"))[0].toInt()
+                            val currency = currencyProvider.getCurrency(state.getLine(2)
+                                    .split(Regex("\\s+"))
+                                    .drop(1)
+                                    .joinToString(" "))
+                            if (character != null) {
+                                val shopSign = block.getRelative(BlockFace.DOWN).state as? Sign
+                                if (shopSign != null) {
+                                    val isAdminShop = shopSign.getLine(3).equals("admin", ignoreCase = true)
+                                    val shopCharacter = if (isAdminShop) null else characterProvider.getCharacter(shopSign.getLine(3).toInt())
+                                    if (shopCharacter == null || shopCharacter.id == character.id) {
+                                        if (rentCharacter != null) {
+                                            if (currency != null) {
+                                                economyProvider.transfer(character, rentCharacter, currency, cost)
+                                                state.setLine(3, LocalDate.parse(state.getLine(3), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                                        .plusDays(1L).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                                                state.update()
+                                                event.player.sendMessage(plugin.messages["rent-paid"])
+                                            } else {
+                                                event.player.sendMessage(plugin.messages["rent-invalid-currency"])
+                                            }
+                                        } else {
+                                            event.player.sendMessage(plugin.messages["rent-invalid-character"])
+                                            block.type = AIR
+                                        }
+                                    } else {
+                                        event.player.sendMessage(plugin.messages["rent-not-owner"])
+                                    }
+                                } else {
+                                    event.player.sendMessage(plugin.messages["rent-no-shop"])
+                                }
+                            } else {
+                                event.player.sendMessage(plugin.messages["no-character"])
+                            }
+                        } else {
+                            event.player.sendMessage(plugin.messages["no-minecraft-profile"])
+                        }
                     }
                 }
             }
@@ -178,7 +185,7 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit): Listener {
 
     private fun validateRentSign(block: Block): Boolean {
         val sign = block.state as? Sign ?: return true
-        if (sign.getLine(0) != GREEN.toString() + "[rent]") return true
+        if (sign.getLine(0) != "$GREEN[rent]") return true
         return LocalDate.now().isBefore(LocalDate.parse(sign.getLine(3), DateTimeFormatter.ofPattern("yyyy-MM-dd")))
     }
 

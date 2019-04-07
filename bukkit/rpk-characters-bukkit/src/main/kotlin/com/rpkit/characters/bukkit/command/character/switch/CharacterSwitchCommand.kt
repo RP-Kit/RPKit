@@ -127,14 +127,12 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
                 if (minecraftProfile != null) {
                     val profile = minecraftProfile.profile
                     if (profile != null) {
-                        characterProvider.getCharacters(profile)
+                        repeat(characterProvider.getCharacters(profile)
                                 .filter { it.name.equals(input, ignoreCase = true) }
-                                .filter { it.minecraftProfile == null }
-                                .forEach { return true }
-                        characterProvider.getCharacters(profile)
+                                .filter { it.minecraftProfile == null }.size) { return true }
+                        repeat(characterProvider.getCharacters(profile)
                                 .filter { it.name.toLowerCase().contains(input.toLowerCase()) }
-                                .filter { it.minecraftProfile == null }
-                                .forEach { return true }
+                                .filter { it.minecraftProfile == null }.size) { return true }
                     }
                 }
             }
@@ -223,7 +221,7 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
-                if (profile != null) {
+                return if (profile != null) {
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     val characterListBuilder = StringBuilder()
                     for (character in characterProvider.getCharacters(profile)) {
@@ -232,9 +230,9 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit): CommandEx
                                         Pair("character", character.name)
                                 )])
                     }
-                    return plugin.messages["character-switch-prompt"] + characterListBuilder.toString()
+                    plugin.messages["character-switch-prompt"] + characterListBuilder.toString()
                 } else {
-                    return plugin.messages["no-profile"]
+                    plugin.messages["no-profile"]
                 }
             } else {
                 return plugin.messages["no-minecraft-profile"]

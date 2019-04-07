@@ -19,5 +19,4 @@ package com.rpkit.selection.bukkit
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 
 
-class RPKSelectionLibBukkit: RPKBukkitPlugin() {
-}
+class RPKSelectionLibBukkit: RPKBukkitPlugin()

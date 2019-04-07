@@ -28,10 +28,11 @@ import org.bukkit.ChatColor
 class RPKPrefixProviderImpl(private val plugin: RPKChatBukkit): RPKPrefixProvider {
 
     override val prefixes: List<RPKPrefix> = plugin.config.getConfigurationSection("prefixes")
-            .getKeys(false)
-            .mapIndexed { id, name ->
-                    RPKPrefixImpl(id, name, ChatColor.translateAlternateColorCodes('&', plugin.config.getString("prefixes.$name")))
+            ?.getKeys(false)
+            ?.mapIndexed { id, name ->
+                    RPKPrefixImpl(id, name, ChatColor.translateAlternateColorCodes('&', plugin.config.getString("prefixes.$name") ?: ""))
             }
+            ?: emptyList()
 
     override fun addPrefix(prefix: RPKPrefix) {
         plugin.config.set("prefixes.${prefix.name}", prefix.prefix)
@@ -49,14 +50,14 @@ class RPKPrefixProviderImpl(private val plugin: RPKChatBukkit): RPKPrefixProvide
     }
 
     override fun getPrefix(name: String): RPKPrefix? {
-        return prefixes.filter { prefix -> prefix.name == name }.firstOrNull()
+        return prefixes.firstOrNull { prefix -> prefix.name == name }
     }
 
     override fun getPrefix(player: RPKPlayer): String {
         val prefixBuilder = StringBuilder()
         for (prefix in prefixes) {
-            if (player.bukkitPlayer?.isOnline?:false) {
-                if (player.bukkitPlayer?.player?.hasPermission("rpkit.chat.prefix.${prefix.name}")?:false) {
+            if (player.bukkitPlayer?.isOnline == true) {
+                if (player.bukkitPlayer?.player?.hasPermission("rpkit.chat.prefix.${prefix.name}") == true) {
                     prefixBuilder.append(prefix.prefix).append(' ')
                 }
             }

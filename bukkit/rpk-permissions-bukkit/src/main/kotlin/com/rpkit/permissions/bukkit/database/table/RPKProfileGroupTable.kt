@@ -88,20 +88,20 @@ class RPKProfileGroupTable(database: Database, private val plugin: RPKPermission
             val groupProvider = plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class)
             val groupName = result.get(RPKIT_PROFILE_GROUP.GROUP_NAME)
             val group = groupProvider.getGroup(groupName)
-            if (profile != null && group != null) {
+            return if (profile != null && group != null) {
                 val profileGroup = RPKProfileGroup(
                         id,
                         profile,
                         group
                 )
                 cache?.put(id, profileGroup)
-                return profileGroup
+                profileGroup
             } else {
                 database.create
                         .deleteFrom(RPKIT_PROFILE_GROUP)
                         .where(RPKIT_PROFILE_GROUP.ID.eq(id))
                         .execute()
-                return null
+                null
             }
         }
     }

@@ -26,15 +26,10 @@ import org.bukkit.command.CommandSender
  * Parent command for all currency management commands.
  */
 class CurrencyCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
-    private val currencyAddCommand: CurrencyAddCommand
-    private val currencyRemoveCommand: CurrencyRemoveCommand
-    private val currencyListCommand: CurrencyListCommand
 
-    init {
-        this.currencyAddCommand = CurrencyAddCommand(plugin)
-        this.currencyRemoveCommand = CurrencyRemoveCommand(plugin)
-        this.currencyListCommand = CurrencyListCommand(plugin)
-    }
+    private val currencyAddCommand = CurrencyAddCommand(plugin)
+    private val currencyRemoveCommand = CurrencyRemoveCommand(plugin)
+    private val currencyListCommand = CurrencyListCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (args.isNotEmpty()) {

@@ -147,6 +147,16 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
             val characterId = result.get(RPKIT_BLOCK_CHANGE.CHARACTER_ID)
             val character = if (characterId == null) null else characterProvider.getCharacter(characterId)
+            val fromMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM)) ?: Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM), true)
+            val toMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO)) ?: Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO), true)
+            if (fromMaterial == null || toMaterial == null) {
+                database.create
+                        .deleteFrom(RPKIT_BLOCK_CHANGE)
+                        .where(RPKIT_BLOCK_CHANGE.ID.eq(id))
+                        .execute()
+                cache?.remove(id)
+                return null
+            }
             val blockChange =  RPKBlockChangeImpl(
                     id,
                     blockHistory,
@@ -154,8 +164,8 @@ class RPKBlockChangeTable(database: Database, private val plugin: RPKBlockLoggin
                     profile,
                     minecraftProfile,
                     character,
-                    Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM)),
-                    Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO)),
+                    fromMaterial,
+                    toMaterial,
                     result.get(RPKIT_BLOCK_CHANGE.REASON)
             )
             cache?.put(id, blockChange)

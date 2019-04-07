@@ -18,10 +18,9 @@ package com.rpkit.chat.bukkit
 
 import com.rpkit.chat.bukkit.vault.RPKChatVaultChat
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.core.service.ServiceProvider
 import net.milkbowl.vault.chat.Chat
-import org.bukkit.plugin.ServicePriority.Normal
 import org.bukkit.plugin.ServicePriority
+import org.bukkit.plugin.ServicePriority.Normal
 
 /**
  * Class to allow chat lib to load as a plugin.
@@ -33,7 +32,7 @@ import org.bukkit.plugin.ServicePriority
 class RPKChatLibBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
-        serviceProviders = arrayOf<ServiceProvider>()
+        serviceProviders = arrayOf()
         if (server.pluginManager.getPlugin("Vault") != null) {
             server.servicesManager.register(Chat::class.java, RPKChatVaultChat(this), this, Normal)
         }

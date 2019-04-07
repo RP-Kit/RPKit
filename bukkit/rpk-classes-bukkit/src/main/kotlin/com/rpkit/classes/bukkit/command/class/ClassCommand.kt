@@ -14,12 +14,10 @@ class ClassCommand(private val plugin: RPKClassesBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
-            if (args[0].equals("set", ignoreCase = true)) {
-                return classSetCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("list", ignoreCase = true)) {
-                return classListCommand.onCommand(sender, command, label, newArgs)
-            } else {
-                sender.sendMessage(plugin.messages["class-usage"])
+            when {
+                args[0].equals("set", ignoreCase = true) -> return classSetCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("list", ignoreCase = true) -> return classListCommand.onCommand(sender, command, label, newArgs)
+                else -> sender.sendMessage(plugin.messages["class-usage"])
             }
         } else {
             sender.sendMessage(plugin.messages["class-usage"])

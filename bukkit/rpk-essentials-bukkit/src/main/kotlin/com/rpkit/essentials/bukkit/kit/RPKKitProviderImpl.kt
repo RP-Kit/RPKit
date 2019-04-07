@@ -10,12 +10,11 @@ class RPKKitProviderImpl(private val plugin: RPKEssentialsBukkit): RPKKitProvide
     override val kits: MutableList<RPKKit> = plugin.config.getList("kits") as MutableList<RPKKit>
 
     override fun getKit(id: Int): RPKKit? {
-        return kits.filter { it.id == id }.firstOrNull()
+        return kits.firstOrNull { it.id == id }
     }
 
     override fun getKit(name: String): RPKKit? {
-        return kits.filter { it.name == name }
-                .firstOrNull()
+        return kits.firstOrNull { it.name == name }
     }
 
     override fun addKit(kit: RPKKit) {

@@ -12,8 +12,8 @@ class InventoryCommand(private val plugin: RPKEssentialsBukkit) : CommandExecuto
         if (sender.hasPermission("rpkit.essentials.command.inventory")) {
             if (args.isNotEmpty()) {
                 if (sender is Player) {
-                    if (plugin.server.getPlayer(args[0]) != null) {
-                        val target = plugin.server.getPlayer(args[0])
+                    val target = plugin.server.getPlayer(args[0])
+                    if (target != null) {
                         sender.openInventory(target.inventory)
                         sender.sendMessage(plugin.messages["inventory-valid", mapOf(
                                 Pair("player", target.name)

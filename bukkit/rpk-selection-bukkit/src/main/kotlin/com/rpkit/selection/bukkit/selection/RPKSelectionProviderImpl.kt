@@ -26,7 +26,7 @@ class RPKSelectionProviderImpl(private val plugin: RPKSelectionBukkit): RPKSelec
     override fun getSelection(minecraftProfile: RPKMinecraftProfile): RPKSelection {
         var selection = plugin.core.database.getTable(RPKSelectionTable::class).get(minecraftProfile)
         if (selection != null) return selection
-        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
+        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID) ?: throw IllegalArgumentException("Invalid Minecraft profile")
         val world = bukkitPlayer.world
         selection = RPKSelectionImpl(0, minecraftProfile, world, world.getBlockAt(world.spawnLocation), world.getBlockAt(world.spawnLocation))
         plugin.core.database.getTable(RPKSelectionTable::class).insert(selection)

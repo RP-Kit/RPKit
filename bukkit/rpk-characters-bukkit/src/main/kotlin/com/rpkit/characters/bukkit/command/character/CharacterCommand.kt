@@ -35,28 +35,17 @@ import org.bukkit.command.CommandSender
  */
 class CharacterCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
 
-    private val characterSetCommand: CharacterSetCommand
-    private val characterHideCommand: CharacterHideCommand
-    private val characterUnhideCommand: CharacterUnhideCommand
-    private val characterCardCommand: CharacterCardCommand
-    private val characterSwitchCommand: CharacterSwitchCommand
-    private val characterListCommand: CharacterListCommand
-    private val characterNewCommand: CharacterNewCommand
-    private val characterDeleteCommand: CharacterDeleteCommand
-
-    init {
-        characterSetCommand = CharacterSetCommand(plugin)
-        characterHideCommand = CharacterHideCommand(plugin)
-        characterUnhideCommand = CharacterUnhideCommand(plugin)
-        characterCardCommand = CharacterCardCommand(plugin)
-        characterSwitchCommand = CharacterSwitchCommand(plugin)
-        characterListCommand = CharacterListCommand(plugin)
-        characterNewCommand = CharacterNewCommand(plugin)
-        characterDeleteCommand = CharacterDeleteCommand(plugin)
-    }
+    private val characterSetCommand = CharacterSetCommand(plugin)
+    private val characterHideCommand = CharacterHideCommand(plugin)
+    private val characterUnhideCommand = CharacterUnhideCommand(plugin)
+    private val characterCardCommand = CharacterCardCommand(plugin)
+    private val characterSwitchCommand = CharacterSwitchCommand(plugin)
+    private val characterListCommand = CharacterListCommand(plugin)
+    private val characterNewCommand = CharacterNewCommand(plugin)
+    private val characterDeleteCommand = CharacterDeleteCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (args.size > 0) {
+        if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("set", ignoreCase = true)) {
                 return characterSetCommand.onCommand(sender, command, label, newArgs)

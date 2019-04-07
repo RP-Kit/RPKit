@@ -214,8 +214,7 @@ class RPKAuctionTable(database: Database, private val plugin: RPKAuctionsBukkit)
                         .where(RPKIT_BID.AUCTION_ID.eq(id))
                         .fetch()
                         .map { it[RPKIT_BID.ID] }
-                        .map { bidId -> bidTable[bidId] }
-                        .filterNotNull()
+                        .mapNotNull { bidId -> bidTable[bidId] }
                         .forEach { bid -> bidTable.delete(bid) }
                 database.create
                         .deleteFrom(RPKIT_AUCTION)
@@ -236,10 +235,9 @@ class RPKAuctionTable(database: Database, private val plugin: RPKAuctionsBukkit)
                 .select(RPKIT_AUCTION.ID)
                 .from(RPKIT_AUCTION)
                 .fetch()
-        val auctions = results.map { result ->
+        return results.map { result ->
             get(result.get(RPKIT_AUCTION.ID))
         }.filterNotNull()
-        return auctions
     }
 
     override fun delete(entity: RPKAuction) {

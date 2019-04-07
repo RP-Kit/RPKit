@@ -132,14 +132,14 @@ class RPKChatBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("chatchannel").executor = ChatChannelCommand(this)
-        getCommand("mute").executor = MuteCommand(this)
-        getCommand("unmute").executor = UnmuteCommand(this)
-        getCommand("listchatchannels").executor = ListChatChannelsCommand(this)
-        getCommand("chatgroup").executor = ChatGroupCommand(this)
-        getCommand("message").executor = MessageCommand(this)
-        getCommand("reply").executor = ReplyCommand(this)
-        getCommand("snoop").executor = SnoopCommand(this)
+        getCommand("chatchannel")?.setExecutor(ChatChannelCommand(this))
+        getCommand("mute")?.setExecutor(MuteCommand(this))
+        getCommand("unmute")?.setExecutor(UnmuteCommand(this))
+        getCommand("listchatchannels")?.setExecutor(ListChatChannelsCommand(this))
+        getCommand("chatgroup")?.setExecutor(ChatGroupCommand(this))
+        getCommand("message")?.setExecutor(MessageCommand(this))
+        getCommand("reply")?.setExecutor(ReplyCommand(this))
+        getCommand("snoop")?.setExecutor(SnoopCommand(this))
     }
 
     override fun registerListeners() {

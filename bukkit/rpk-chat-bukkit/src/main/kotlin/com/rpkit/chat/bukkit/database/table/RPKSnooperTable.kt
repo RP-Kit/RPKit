@@ -108,19 +108,19 @@ class RPKSnooperTable(database: Database, private val plugin: RPKChatBukkit): Ta
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
             val minecraftProfileId = result.get(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
-            if (minecraftProfile != null) {
+            return if (minecraftProfile != null) {
                 val snooper = RPKSnooper(
                         id,
                         minecraftProfile
                 )
                 cache?.put(id, snooper)
-                return snooper
+                snooper
             } else {
                 database.create
                         .deleteFrom(RPKIT_SNOOPER)
                         .where(RPKIT_SNOOPER.ID.eq(id))
                         .execute()
-                return null
+                null
             }
         }
     }
@@ -151,10 +151,9 @@ class RPKSnooperTable(database: Database, private val plugin: RPKChatBukkit): Ta
                 .select(RPKIT_SNOOPER.ID)
                 .from(RPKIT_SNOOPER)
                 .fetch()
-        val snoopers = results.map { result ->
+        return results.map { result ->
             get(result.get(RPKIT_SNOOPER.ID))
         }.filterNotNull()
-        return snoopers
     }
 
     override fun delete(entity: RPKSnooper) {

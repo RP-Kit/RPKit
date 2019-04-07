@@ -103,10 +103,9 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
                 .from(RPKIT_MINECRAFT_PROFILE)
                 .where(RPKIT_MINECRAFT_PROFILE.PROFILE_ID.eq(profile.id))
                 .fetch()
-        val minecraftProfiles = results.map { result ->
+        return results.map { result ->
             get(result.get(RPKIT_MINECRAFT_PROFILE.ID))
         }.filterNotNull()
-        return minecraftProfiles
     }
 
     fun get(player: OfflinePlayer): RPKMinecraftProfile? {

@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest
 class RPKProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPKProfileProvider {
 
     override fun getProfile(id: Int): RPKProfile? {
-        return plugin.core.database.getTable(RPKProfileTable::class).get(id)
+        return plugin.core.database.getTable(RPKProfileTable::class)[id]
     }
 
     override fun getProfile(name: String): RPKProfile? {

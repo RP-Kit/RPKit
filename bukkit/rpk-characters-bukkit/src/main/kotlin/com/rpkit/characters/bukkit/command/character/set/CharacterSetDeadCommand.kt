@@ -98,12 +98,12 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit): CommandE
                 if (minecraftProfile != null) {
                     val character = characterProvider.getActiveCharacter(minecraftProfile)
                     if (character != null) {
-                        if (input && conversable.hasPermission("rpkit.characters.command.character.set.dead.yes") || !input && conversable.hasPermission("rpkit.characters.command.character.set.dead.no")) {
+                        return if (input && conversable.hasPermission("rpkit.characters.command.character.set.dead.yes") || !input && conversable.hasPermission("rpkit.characters.command.character.set.dead.no")) {
                             character.isDead = input
                             characterProvider.updateCharacter(character)
-                            return DeadSetPrompt()
+                            DeadSetPrompt()
                         } else {
-                            return DeadNotSetNoPermissionPrompt(input)
+                            DeadNotSetNoPermissionPrompt(input)
                         }
                     }
                 }
@@ -111,7 +111,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit): CommandE
             return DeadSetPrompt()
         }
 
-        override fun getFailedValidationText(context: ConversationContext?, invalidInput: String?): String {
+        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
             return plugin.messages["character-set-dead-invalid-boolean"]
         }
 

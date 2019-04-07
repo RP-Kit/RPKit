@@ -22,7 +22,6 @@ import com.rpkit.core.database.TableVersion
 import com.rpkit.core.database.jooq.rpkit.Tables.TABLE_VERSION
 import org.jooq.impl.DSL.constraint
 import org.jooq.impl.SQLDataType
-import org.jooq.util.sqlite.SQLiteDataType
 
 /**
  * Represents the database table used to record versions of tables.
@@ -40,7 +39,6 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
                         constraint("pk_table_version").primaryKey(TABLE_VERSION.ID)
                 )
                 .execute()
-        SQLiteDataType.INTEGER
     }
 
     override fun applyMigrations() {
@@ -82,12 +80,11 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
                 .from(TABLE_VERSION)
                 .where(TABLE_VERSION.ID.eq(id))
                 .fetchOne() ?: return null
-        val tableVersion = TableVersion(
+        return TableVersion(
                 id,
                 result.get(TABLE_VERSION.TABLE_NAME),
                 result.get(TABLE_VERSION.VERSION)
         )
-        return tableVersion
     }
 
     /**
@@ -102,12 +99,11 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
                 .from(TABLE_VERSION)
                 .where(TABLE_VERSION.TABLE_NAME.eq(table))
                 .fetchOne() ?: return null
-        val tableVersion = TableVersion(
+        return TableVersion(
                 result.get(TABLE_VERSION.ID),
                 table,
                 result.get(TABLE_VERSION.VERSION)
         )
-        return tableVersion
     }
 
     override fun delete(entity: TableVersion) {

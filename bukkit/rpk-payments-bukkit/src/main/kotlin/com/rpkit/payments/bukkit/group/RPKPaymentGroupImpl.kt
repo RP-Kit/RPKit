@@ -54,9 +54,11 @@ class RPKPaymentGroupImpl(
     }
 
     override fun removeOwner(character: RPKCharacter) {
-        val owner = plugin.core.database.getTable(RPKPaymentGroupOwnerTable::class).get(this).filter { it.character == character }.firstOrNull()
+        val owner = plugin.core.database.getTable(RPKPaymentGroupOwnerTable::class).get(this)
+                .firstOrNull { it.character == character }
         if (owner != null) {
-            plugin.core.database.getTable(RPKPaymentGroupOwnerTable::class).get(this).filter { it.character == character }.firstOrNull()
+            plugin.core.database.getTable(RPKPaymentGroupOwnerTable::class).get(this)
+                    .firstOrNull { it.character == character }
         }
     }
 
@@ -65,7 +67,8 @@ class RPKPaymentGroupImpl(
     }
 
     override fun removeMember(character: RPKCharacter) {
-        val member = plugin.core.database.getTable(RPKPaymentGroupMemberTable::class).get(this).filter { it.character == character }.firstOrNull()
+        val member = plugin.core.database.getTable(RPKPaymentGroupMemberTable::class).get(this)
+                .firstOrNull { it.character == character }
         if (member != null) {
             plugin.core.database.getTable(RPKPaymentGroupMemberTable::class).delete(member)
         }
@@ -76,7 +79,8 @@ class RPKPaymentGroupImpl(
     }
 
     override fun removeInvite(character: RPKCharacter) {
-        val invite = plugin.core.database.getTable(RPKPaymentGroupInviteTable::class).get(this).filter { it.character == character }.firstOrNull()
+        val invite = plugin.core.database.getTable(RPKPaymentGroupInviteTable::class).get(this)
+                .firstOrNull { it.character == character }
         if (invite != null) {
             plugin.core.database.getTable(RPKPaymentGroupInviteTable::class).delete(invite)
         }

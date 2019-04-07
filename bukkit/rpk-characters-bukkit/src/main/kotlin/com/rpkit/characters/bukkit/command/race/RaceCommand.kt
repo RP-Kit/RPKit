@@ -26,18 +26,13 @@ import org.bukkit.command.CommandSender
  * Parent for all race management commands.
  */
 class RaceCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
-    private val raceAddCommand: RaceAddCommand
-    private val raceRemoveCommand: RaceRemoveCommand
-    private val raceListCommand: RaceListCommand
 
-    init {
-        this.raceAddCommand = RaceAddCommand(plugin)
-        this.raceRemoveCommand = RaceRemoveCommand(plugin)
-        this.raceListCommand = RaceListCommand(plugin)
-    }
+    private val raceAddCommand = RaceAddCommand(plugin)
+    private val raceRemoveCommand = RaceRemoveCommand(plugin)
+    private val raceListCommand = RaceListCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (args.size > 0) {
+        if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
             if (args[0].equals("add", ignoreCase = true) || args[0].equals("create", ignoreCase = true) || args[0].equals("new", ignoreCase = true)) {
                 return raceAddCommand.onCommand(sender, command, label, newArgs)
