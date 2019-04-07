@@ -30,7 +30,7 @@ class RPKMinecraftProfileImpl(
         get() = Bukkit.getOfflinePlayer(minecraftUUID).isOnline
 
     override val minecraftUsername: String
-        get() = Bukkit.getOfflinePlayer(minecraftUUID).name
+        get() = Bukkit.getOfflinePlayer(minecraftUUID).name ?: ""
 
     override fun sendMessage(message: String) {
         Bukkit.getPlayer(minecraftUUID)?.sendMessage(message)

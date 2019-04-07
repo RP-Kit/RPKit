@@ -52,7 +52,7 @@ class GenderAddCommand(private val plugin: RPKCharactersBukkit): CommandExecutor
                 if (args.isNotEmpty()) {
                     val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
                     val genderBuilder = StringBuilder()
-                    for (i in 0..args.size - 1 - 1) {
+                    for (i in 0 until args.size - 1) {
                         genderBuilder.append(args[i]).append(' ')
                     }
                     genderBuilder.append(args[args.size - 1])

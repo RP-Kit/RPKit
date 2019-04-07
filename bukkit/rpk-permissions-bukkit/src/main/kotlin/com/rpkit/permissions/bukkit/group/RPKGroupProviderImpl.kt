@@ -117,8 +117,7 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
     override fun removeGroup(player: RPKPlayer, group: RPKGroup) {
         val playerGroupTable = plugin.core.database.getTable(PlayerGroupTable::class)
         val playerGroup = playerGroupTable.get(player)
-                .filter { playerGroup -> playerGroup.group == group }
-                .firstOrNull()
+                .firstOrNull { playerGroup -> playerGroup.group == group }
         if (playerGroup != null) {
             playerGroupTable.delete(playerGroup)
             assignPermissions(player)
@@ -174,32 +173,31 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
 
     override fun assignPermissions(minecraftProfile: RPKMinecraftProfile) {
         val bukkitPlayer = Bukkit.getOfflinePlayer(minecraftProfile.minecraftUUID)
-        if (bukkitPlayer != null) {
-            val onlineBukkitPlayer = bukkitPlayer.player
-            if (onlineBukkitPlayer != null) {
-                if (!permissionsAttachments.containsKey(minecraftProfile.id)) {
-                    permissionsAttachments[minecraftProfile.id] = onlineBukkitPlayer.addAttachment(plugin)
-                } else {
-                    onlineBukkitPlayer.removeAttachment(permissionsAttachments[minecraftProfile.id])
-                    permissionsAttachments[minecraftProfile.id] = onlineBukkitPlayer.addAttachment(plugin)
-                }
-                val groups = mutableListOf<RPKGroup>()
-                val profile = minecraftProfile.profile
-                if (profile != null) {
-                    groups.addAll(getGroups(profile))
-                }
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val character = characterProvider.getActiveCharacter(minecraftProfile)
-                if (character != null) {
-                    groups.addAll(getGroups(character))
-                }
-                if (groups.isEmpty()) {
-                    assignGroupPermissions(minecraftProfile, defaultGroup, mutableListOf())
-                } else {
-                    val assignedGroups = mutableListOf<RPKGroup>()
-                    for (group in groups) {
-                        assignGroupPermissions(minecraftProfile, group, assignedGroups)
-                    }
+        val onlineBukkitPlayer = bukkitPlayer.player
+        if (onlineBukkitPlayer != null) {
+            val permissionsAttachment = permissionsAttachments[minecraftProfile.id]
+            if (permissionsAttachment == null) {
+                permissionsAttachments[minecraftProfile.id] = onlineBukkitPlayer.addAttachment(plugin)
+            } else {
+                onlineBukkitPlayer.removeAttachment(permissionsAttachment)
+                permissionsAttachments[minecraftProfile.id] = onlineBukkitPlayer.addAttachment(plugin)
+            }
+            val groups = mutableListOf<RPKGroup>()
+            val profile = minecraftProfile.profile
+            if (profile != null) {
+                groups.addAll(getGroups(profile))
+            }
+            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            if (character != null) {
+                groups.addAll(getGroups(character))
+            }
+            if (groups.isEmpty()) {
+                assignGroupPermissions(minecraftProfile, defaultGroup, mutableListOf())
+            } else {
+                val assignedGroups = mutableListOf<RPKGroup>()
+                for (group in groups) {
+                    assignGroupPermissions(minecraftProfile, group, assignedGroups)
                 }
             }
         }
@@ -218,10 +216,11 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
 
     override fun unassignPermissions(minecraftProfile: RPKMinecraftProfile) {
         val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
-        if (bukkitPlayer != null) {
-            val onlineBukkitPlayer = bukkitPlayer.player
-            if (onlineBukkitPlayer != null) {
-                onlineBukkitPlayer.removeAttachment(permissionsAttachments[minecraftProfile.id])
+        val onlineBukkitPlayer = bukkitPlayer.player
+        if (onlineBukkitPlayer != null) {
+            val permissionsAttachment = permissionsAttachments[minecraftProfile.id]
+            if (permissionsAttachment != null) {
+                onlineBukkitPlayer.removeAttachment(permissionsAttachment)
                 permissionsAttachments.remove(minecraftProfile.id)
             }
         }

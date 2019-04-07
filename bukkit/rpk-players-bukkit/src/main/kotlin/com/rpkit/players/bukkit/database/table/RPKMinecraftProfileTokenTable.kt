@@ -85,20 +85,20 @@ class RPKMinecraftProfileTokenTable(database: Database, private val plugin: RPKP
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
             val minecraftProfileId = result.get(RPKIT_MINECRAFT_PROFILE_TOKEN.MINECRAFT_PROFILE_ID)
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
-            if (minecraftProfile != null) {
+            return if (minecraftProfile != null) {
                 val minecraftProfileToken = RPKMinecraftProfileTokenImpl(
                         id,
                         minecraftProfile,
                         result.get(RPKIT_MINECRAFT_PROFILE_TOKEN.TOKEN)
                 )
                 cache?.put(id, minecraftProfileToken)
-                return minecraftProfileToken
+                minecraftProfileToken
             } else {
                 database.create
                         .deleteFrom(RPKIT_MINECRAFT_PROFILE_TOKEN)
                         .where(RPKIT_MINECRAFT_PROFILE_TOKEN.ID.eq(id))
                         .execute()
-                return null
+                null
             }
         }
     }

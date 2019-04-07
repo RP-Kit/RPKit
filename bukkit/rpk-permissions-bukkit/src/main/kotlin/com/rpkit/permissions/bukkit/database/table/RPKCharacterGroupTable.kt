@@ -88,20 +88,20 @@ class RPKCharacterGroupTable(database: Database, private val plugin: RPKPermissi
             val groupProvider = plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class)
             val groupName = result.get(RPKIT_CHARACTER_GROUP.GROUP_NAME)
             val group = groupProvider.getGroup(groupName)
-            if (character != null && group != null) {
+            return if (character != null && group != null) {
                 val characterGroup = RPKCharacterGroup(
                         id,
                         character,
                         group
                 )
                 cache?.put(id, characterGroup)
-                return characterGroup
+                characterGroup
             } else {
                 database.create
                         .deleteFrom(RPKIT_CHARACTER_GROUP)
                         .where(RPKIT_CHARACTER_GROUP.ID.eq(id))
                         .execute()
-                return null
+                null
             }
         }
     }

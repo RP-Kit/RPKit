@@ -17,6 +17,7 @@ import com.rpkit.locks.bukkit.listener.PlayerInteractListener
 import com.rpkit.locks.bukkit.lock.RPKLockProviderImpl
 import org.bukkit.Material.IRON_BLOCK
 import org.bukkit.Material.IRON_INGOT
+import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ShapedRecipe
 
 class RPKLocksBukkit: RPKBukkitPlugin() {
@@ -28,15 +29,15 @@ class RPKLocksBukkit: RPKBukkitPlugin() {
                 RPKKeyringProviderImpl(this),
                 lockProvider
         )
-        val lockRecipe = ShapedRecipe(lockProvider.lockItem)
+        val lockRecipe = ShapedRecipe(NamespacedKey(this, "lock"), lockProvider.lockItem)
         lockRecipe.shape("I", "B").setIngredient('I', IRON_INGOT).setIngredient('B', IRON_BLOCK)
         server.addRecipe(lockRecipe)
     }
 
     override fun registerCommands() {
-        getCommand("getkey").executor = GetKeyCommand(this)
-        getCommand("keyring").executor = KeyringCommand(this)
-        getCommand("unlock").executor = UnlockCommand(this)
+        getCommand("getkey")?.setExecutor(GetKeyCommand(this))
+        getCommand("keyring")?.setExecutor(KeyringCommand(this))
+        getCommand("unlock")?.setExecutor(UnlockCommand(this))
     }
 
     override fun registerListeners() {

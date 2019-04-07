@@ -19,8 +19,4 @@ package com.rpkit.unconsciousness.bukkit
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 
 
-class RPKUnconsciousnessLibBukkit: RPKBukkitPlugin() {
-
-
-
-}
+class RPKUnconsciousnessLibBukkit: RPKBukkitPlugin()

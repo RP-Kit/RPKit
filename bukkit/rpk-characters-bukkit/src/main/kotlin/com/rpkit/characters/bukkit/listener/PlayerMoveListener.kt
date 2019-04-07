@@ -39,7 +39,7 @@ class PlayerMoveListener(private val plugin: RPKCharactersBukkit): Listener {
         if (minecraftProfile != null) {
             val character = characterProvider.getActiveCharacter(minecraftProfile)
             if (character != null && character.isDead) {
-                if (event.from.blockX != event.to.blockX || event.from.blockZ != event.to.blockZ) {
+                if (event.from.blockX != event.to?.blockX || event.from.blockZ != event.to?.blockZ) {
                     event.player.teleport(Location(event.from.world, event.from.blockX + 0.5, event.from.blockY + 0.5, event.from.blockZ.toDouble(), event.from.yaw, event.from.pitch))
                     event.player.sendMessage(plugin.messages["dead-character"])
                     event.player.addPotionEffect(PotionEffect(BLINDNESS, 60, 1))

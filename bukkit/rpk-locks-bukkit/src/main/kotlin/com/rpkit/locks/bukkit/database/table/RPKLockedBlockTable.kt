@@ -90,13 +90,22 @@ class RPKLockedBlockTable(database: Database, private val plugin: RPKLocksBukkit
                     .from(RPKIT_LOCKED_BLOCK)
                     .where(RPKIT_LOCKED_BLOCK.ID.eq(id))
                     .fetchOne() ?: return null
+            val block = plugin.server.getWorld(result.get(RPKIT_LOCKED_BLOCK.WORLD))?.getBlockAt(
+                    result.get(RPKIT_LOCKED_BLOCK.X),
+                    result.get(RPKIT_LOCKED_BLOCK.Y),
+                    result.get(RPKIT_LOCKED_BLOCK.Z)
+            )
+            if (block == null) {
+                database.create
+                        .deleteFrom(RPKIT_LOCKED_BLOCK)
+                        .where(RPKIT_LOCKED_BLOCK.ID.eq(id))
+                        .execute()
+                cache?.remove(id)
+                return null
+            }
             val lockedBlock = RPKLockedBlock(
                     id,
-                    plugin.server.getWorld(result.get(RPKIT_LOCKED_BLOCK.WORLD)).getBlockAt(
-                            result.get(RPKIT_LOCKED_BLOCK.X),
-                            result.get(RPKIT_LOCKED_BLOCK.Y),
-                            result.get(RPKIT_LOCKED_BLOCK.Z)
-                    )
+                    block
             )
             cache?.put(id, lockedBlock)
             return lockedBlock

@@ -16,6 +16,10 @@ class SmiteCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                     sender.sendMessage(plugin.messages["smite-invalid-player"])
                 } else {
                     val player = plugin.server.getPlayer(args[0])
+                    if (player == null) {
+                        sender.sendMessage(plugin.messages["smite-invalid-player"])
+                        return true
+                    }
                     val world = player.world
                     val location = player.location
                     world.strikeLightning(location)

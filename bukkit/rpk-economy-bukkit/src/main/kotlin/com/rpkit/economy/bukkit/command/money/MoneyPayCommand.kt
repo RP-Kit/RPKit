@@ -23,7 +23,6 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -57,8 +56,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
                 val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                val fromBukkitPlayer = sender
-                val fromMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(fromBukkitPlayer)
+                val fromMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                 if (fromMinecraftProfile != null) {
                     val fromCharacter = characterProvider.getActiveCharacter(fromMinecraftProfile)
                     if (fromCharacter != null) {
@@ -79,7 +77,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                                                             currency = currencyProvider.defaultCurrency
                                                         }
                                                         if (currency != null) {
-                                                            if (fromBukkitPlayer.location.distanceSquared(toBukkitPlayer.location) <= plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
+                                                            if (sender.location.distanceSquared(toBukkitPlayer.location) <= plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
                                                                 if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
                                                                     if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
                                                                         economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
@@ -190,10 +188,11 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["money-pay-currency-prompt"] + "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
-                            .map { currency -> plugin.messages["money-pay-currency-prompt-list-item", mapOf(
-                                    Pair("currency", currency.name)
-                            )] }
-                            .joinToString("\n")
+                            .joinToString("\n") { currency ->
+                                plugin.messages["money-pay-currency-prompt-list-item", mapOf(
+                                        Pair("currency", currency.name)
+                                )]
+                            }
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
@@ -267,32 +266,29 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                 val amount = context.getSessionData("amount") as Int
                 if (fromCharacter != null) {
                     if (toCharacter != null) {
-                        val toBukkitPlayer = Bukkit.getOfflinePlayer(toMinecraftProfile.minecraftUUID)
-                        if (toBukkitPlayer != null) {
-                            if (fromBukkitPlayer.location.distanceSquared(toBukkitPlayer.player.location) <= plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
-                                if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
-                                    if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
-                                        economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
-                                        toMinecraftProfile.sendMessage(plugin.messages["money-pay-received", mapOf(
-                                                Pair("amount", amount.toString()),
-                                                Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
-                                                Pair("character", fromCharacter.name),
-                                                Pair("player", fromMinecraftProfile.minecraftUsername)
-                                        )])
-                                        return plugin.messages["money-pay-valid", mapOf(
-                                                Pair("amount", amount.toString()),
-                                                Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
-                                                Pair("character", toCharacter.name),
-                                                Pair("player", toMinecraftProfile.minecraftUsername)
-                                        )]
-                                    } else {
-                                        return plugin.messages["money-pay-amount-invalid-amount-limit"]
-                                    }
+                        val toBukkitOfflinePlayer = plugin.server.getOfflinePlayer(toMinecraftProfile.minecraftUUID)
+                        val toBukkitPlayer = toBukkitOfflinePlayer.player ?: return plugin.messages["money-pay-player-invalid-player-distance"]
+                        if (fromBukkitPlayer.location.distanceSquared(toBukkitPlayer.location) <= plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
+                            if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
+                                if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
+                                    economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
+                                    toMinecraftProfile.sendMessage(plugin.messages["money-pay-received", mapOf(
+                                            Pair("amount", amount.toString()),
+                                            Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
+                                            Pair("character", fromCharacter.name),
+                                            Pair("player", fromMinecraftProfile.minecraftUsername)
+                                    )])
+                                    return plugin.messages["money-pay-valid", mapOf(
+                                            Pair("amount", amount.toString()),
+                                            Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
+                                            Pair("character", toCharacter.name),
+                                            Pair("player", toMinecraftProfile.minecraftUsername)
+                                    )]
                                 } else {
-                                    return plugin.messages["money-pay-amount-invalid-amount-balance"]
+                                    return plugin.messages["money-pay-amount-invalid-amount-limit"]
                                 }
                             } else {
-                                return plugin.messages["money-pay-player-invalid-player-distance"]
+                                return plugin.messages["money-pay-amount-invalid-amount-balance"]
                             }
                         } else {
                             return plugin.messages["money-pay-player-invalid-player-distance"]

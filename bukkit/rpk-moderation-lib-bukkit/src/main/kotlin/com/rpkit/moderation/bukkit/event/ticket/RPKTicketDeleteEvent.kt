@@ -17,5 +17,4 @@
 package com.rpkit.moderation.bukkit.event.ticket
 
 
-interface RPKTicketDeleteEvent: RPKTicketEvent {
-}
+interface RPKTicketDeleteEvent: RPKTicketEvent

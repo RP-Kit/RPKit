@@ -14,9 +14,7 @@ class PlayerJoinListener(private val plugin: RPKEssentialsBukkit): Listener {
     fun onPlayerJoin(event: PlayerJoinEvent) {
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val logMessageProvider = plugin.core.serviceManager.getServiceProvider(RPKLogMessageProvider::class)
-        plugin.server.onlinePlayers
-                .map { player -> minecraftProfileProvider.getMinecraftProfile(player) }
-                .filterNotNull()
+        plugin.server.onlinePlayers.mapNotNull { player -> minecraftProfileProvider.getMinecraftProfile(player) }
                 .filter { minecraftProfile -> logMessageProvider.isLogMessagesEnabled(minecraftProfile) }
                 .forEach { minecraftProfile ->
             minecraftProfile.sendMessage(event.joinMessage)

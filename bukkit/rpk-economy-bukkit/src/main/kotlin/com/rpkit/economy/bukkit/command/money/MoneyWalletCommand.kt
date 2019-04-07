@@ -87,12 +87,12 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
             if (character != null) {
                 val wallet = plugin.server.createInventory(null, 27, "Wallet [" + currency.name + "]")
                 val coin = ItemStack(currency.material)
-                val meta = coin.itemMeta
-                meta.displayName = currency.nameSingular
+                val meta = coin.itemMeta ?: plugin.server.itemFactory.getItemMeta(coin.type) ?: return
+                meta.setDisplayName(currency.nameSingular)
                 coin.itemMeta = meta
                 val coinStack = ItemStack(currency.material, 64)
-                val stackMeta = coinStack.itemMeta
-                stackMeta.displayName = currency.nameSingular
+                val stackMeta = coinStack.itemMeta ?: plugin.server.itemFactory.getItemMeta(coinStack.type) ?: return
+                stackMeta.setDisplayName(currency.nameSingular)
                 coinStack.itemMeta = stackMeta
                 val remainder = (economyProvider.getBalance(character, currency) % 64)
                 var i = 0
@@ -130,10 +130,11 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["money-subtract-currency-prompt"] + "\n" +
                     plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
-                            .map { currency -> plugin.messages["money-subtract-currency-prompt-list-item", mapOf(
-                                    Pair("currency", currency.name)
-                            )] }
-                            .joinToString("\n")
+                            .joinToString("\n") { currency ->
+                                plugin.messages["money-subtract-currency-prompt-list-item", mapOf(
+                                        Pair("currency", currency.name)
+                                )]
+                            }
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {

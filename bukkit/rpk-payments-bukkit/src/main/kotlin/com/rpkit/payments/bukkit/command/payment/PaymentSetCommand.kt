@@ -39,16 +39,12 @@ class PaymentSetCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
-            if (args[0].equals("name", ignoreCase = true)) {
-                return paymentSetNameCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("amount", ignoreCase = true)) {
-                return paymentSetAmountCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("currency", ignoreCase = true)) {
-                return paymentSetCurrencyCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("interval", ignoreCase = true)) {
-                return paymentSetIntervalCommand.onCommand(sender, command, label, newArgs)
-            } else {
-                sender.sendMessage(plugin.messages["payment-set-usage"])
+            when {
+                args[0].equals("name", ignoreCase = true) -> return paymentSetNameCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("amount", ignoreCase = true) -> return paymentSetAmountCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("currency", ignoreCase = true) -> return paymentSetCurrencyCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("interval", ignoreCase = true) -> return paymentSetIntervalCommand.onCommand(sender, command, label, newArgs)
+                else -> sender.sendMessage(plugin.messages["payment-set-usage"])
             }
         } else {
             sender.sendMessage(plugin.messages["payment-set-usage"])

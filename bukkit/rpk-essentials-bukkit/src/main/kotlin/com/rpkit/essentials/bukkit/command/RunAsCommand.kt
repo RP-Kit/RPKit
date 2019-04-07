@@ -10,10 +10,10 @@ class RunAsCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.essentials.command.runas")) {
             if (args.size >= 2) {
-                if (plugin.server.getPlayer(args[0]) != null) {
-                    val player = plugin.server.getPlayer(args[0])
+                val player = plugin.server.getPlayer(args[0])
+                if (player != null) {
                     val commandToRun = StringBuilder()
-                    for (i in 1..args.size - 1) {
+                    for (i in 1 until args.size) {
                         commandToRun.append(args[i]).append(" ")
                     }
                     plugin.server.dispatchCommand(player, commandToRun.toString())

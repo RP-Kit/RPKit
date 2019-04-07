@@ -26,15 +26,10 @@ import org.bukkit.command.CommandSender
  * Parent command for all gender management commands.
  */
 class GenderCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
-    private val genderAddCommand: GenderAddCommand
-    private val genderRemoveCommand: GenderRemoveCommand
-    private val genderListCommand: GenderListCommand
 
-    init {
-        this.genderAddCommand = GenderAddCommand(plugin)
-        this.genderRemoveCommand = GenderRemoveCommand(plugin)
-        this.genderListCommand = GenderListCommand(plugin)
-    }
+    private val genderAddCommand = GenderAddCommand(plugin)
+    private val genderRemoveCommand = GenderRemoveCommand(plugin)
+    private val genderListCommand = GenderListCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (args.isNotEmpty()) {

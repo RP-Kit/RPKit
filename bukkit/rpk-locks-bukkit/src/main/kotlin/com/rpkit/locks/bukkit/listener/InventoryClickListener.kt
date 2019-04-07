@@ -2,7 +2,6 @@ package com.rpkit.locks.bukkit.listener
 
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.lock.RPKLockProvider
-import org.bukkit.ChatColor
 import org.bukkit.Material.AIR
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -13,14 +12,15 @@ class InventoryClickListener(private val plugin: RPKLocksBukkit): Listener {
 
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
-        if (event.inventory.title.equals("Keyring", ignoreCase = true)) {
-            if (event.currentItem != null) {
+        if (event.view.title.equals("Keyring", ignoreCase = true)) {
+            val currentItem = event.currentItem
+            if (currentItem != null) {
                 event.isCancelled = true
                 val lockProvider = plugin.core.serviceManager.getServiceProvider(RPKLockProvider::class)
-                if (lockProvider.isKey(event.currentItem)) {
+                if (lockProvider.isKey(currentItem)) {
                     event.isCancelled = false
                 }
-                if (event.currentItem.type == AIR) {
+                if (currentItem.type == AIR) {
                     event.isCancelled = false
                 }
                 if (event.isCancelled) {

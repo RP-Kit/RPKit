@@ -57,8 +57,8 @@ class RPKPermissionsBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("group").executor = GroupCommand(this)
-        getCommand("charactergroup").executor = CharacterGroupCommand(this)
+        getCommand("group")?.setExecutor(GroupCommand(this))
+        getCommand("charactergroup")?.setExecutor(CharacterGroupCommand(this))
     }
 
     override fun registerListeners() {

@@ -53,7 +53,7 @@ class RPKVanishProviderImpl(private val plugin: RPKModerationBukkit): RPKVanishP
             vanishStateTable.update(vanishState)
         }
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val target = plugin.server.getPlayer(event.minecraftProfile!!.minecraftUUID)
+        val target = plugin.server.getPlayer(event.minecraftProfile!!.minecraftUUID) ?: return
         if (vanished) {
             for (observer in plugin.server.onlinePlayers) {
                 val observerMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(observer)
@@ -72,8 +72,8 @@ class RPKVanishProviderImpl(private val plugin: RPKModerationBukkit): RPKVanishP
 
     override fun canSee(observer: RPKMinecraftProfile, target: RPKMinecraftProfile): Boolean {
         if (!isVanished(target)) return true
-        val observerPlayer = plugin.server.getPlayer(observer.minecraftUUID)
-        val targetPlayer = plugin.server.getPlayer(target.minecraftUUID)
+        val observerPlayer = plugin.server.getPlayer(observer.minecraftUUID) ?: return false
+        val targetPlayer = plugin.server.getPlayer(target.minecraftUUID) ?: return false
         var observerTier = 10
         var targetTier = 10
         for (tier in 9 downTo 1) {

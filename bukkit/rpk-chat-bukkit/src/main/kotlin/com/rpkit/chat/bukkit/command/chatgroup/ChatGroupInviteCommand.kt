@@ -41,23 +41,23 @@ class ChatGroupInviteCommand(private val plugin: RPKChatBukkit): CommandExecutor
                         val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                         if (senderMinecraftProfile != null) {
                             if (chatGroup.memberMinecraftProfiles.contains(senderMinecraftProfile)) {
-                                if (plugin.server.getPlayer(args[1]) != null) {
-                                    val bukkitPlayer = plugin.server.getPlayer(args[1])
-                                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-                                    if (minecraftProfile != null) {
-                                        chatGroup.invite(minecraftProfile)
-                                        minecraftProfile.sendMessage(plugin.messages["chat-group-invite-received", mapOf(
-                                                Pair("group", chatGroup.name)
-                                        )])
-                                        sender.sendMessage(plugin.messages["chat-group-invite-valid", mapOf(
-                                                Pair("player", minecraftProfile.minecraftUsername),
-                                                Pair("group", chatGroup.name)
-                                        )])
-                                    } else {
-                                        sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                                    }
-                                } else {
+                                val bukkitPlayer = plugin.server.getPlayer(args[1])
+                                if (bukkitPlayer == null) {
                                     sender.sendMessage(plugin.messages["chat-group-invite-invalid-player"])
+                                    return true
+                                }
+                                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+                                if (minecraftProfile != null) {
+                                    chatGroup.invite(minecraftProfile)
+                                    minecraftProfile.sendMessage(plugin.messages["chat-group-invite-received", mapOf(
+                                            Pair("group", chatGroup.name)
+                                    )])
+                                    sender.sendMessage(plugin.messages["chat-group-invite-valid", mapOf(
+                                            Pair("player", minecraftProfile.minecraftUsername),
+                                            Pair("group", chatGroup.name)
+                                    )])
+                                } else {
+                                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
                                 }
                             } else {
                                 sender.sendMessage(plugin.messages["chat-group-invite-invalid-not-a-member"])

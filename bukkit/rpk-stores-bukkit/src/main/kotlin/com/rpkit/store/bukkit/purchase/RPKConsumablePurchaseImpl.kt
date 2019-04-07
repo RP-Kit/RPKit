@@ -27,5 +27,4 @@ class RPKConsumablePurchaseImpl(
         override var remainingUses: Int,
         override val profile: RPKProfile,
         override val purchaseDate: LocalDateTime
-): RPKConsumablePurchase {
-}
+): RPKConsumablePurchase

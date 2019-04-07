@@ -81,10 +81,10 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("money").executor = MoneyCommand(this)
-        getCommand("pay").executor = MoneyPayCommand(this)
-        getCommand("wallet").executor = MoneyWalletCommand(this)
-        getCommand("currency").executor = CurrencyCommand(this)
+        getCommand("money")?.setExecutor(MoneyCommand(this))
+        getCommand("pay")?.setExecutor(MoneyPayCommand(this))
+        getCommand("wallet")?.setExecutor(MoneyWalletCommand(this))
+        getCommand("currency")?.setExecutor(CurrencyCommand(this))
     }
 
     override fun registerListeners() {

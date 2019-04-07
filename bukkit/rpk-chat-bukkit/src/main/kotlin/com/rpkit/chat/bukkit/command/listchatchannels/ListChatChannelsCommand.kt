@@ -117,11 +117,11 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit): CommandExecuto
                                 }
                             } else {
                                 val colorOrFormat = ChatColor.getByChar(matcher.group().drop(1))
-                                if (colorOrFormat.isColor) {
+                                if (colorOrFormat?.isColor == true) {
                                     chatColor = colorOrFormat
                                     chatFormat = null
                                 }
-                                if (colorOrFormat.isFormat) {
+                                if (colorOrFormat?.isFormat == true) {
                                     chatFormat = colorOrFormat
                                 }
                                 if (colorOrFormat == ChatColor.RESET) {

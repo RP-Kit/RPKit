@@ -41,7 +41,7 @@ class RPKSkillProviderImpl(private val plugin: RPKSkillsBukkit): RPKSkillProvide
     }
 
     override fun getSkill(name: String): RPKSkill? {
-        return skills.filter { it.name.equals(name, ignoreCase = true) }.firstOrNull()
+        return skills.firstOrNull { it.name.equals(name, ignoreCase = true) }
     }
 
     override fun addSkill(skill: RPKSkill) {

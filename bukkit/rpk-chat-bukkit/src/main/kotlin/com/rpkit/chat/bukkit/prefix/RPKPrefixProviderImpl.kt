@@ -31,10 +31,11 @@ import org.bukkit.ChatColor
 class RPKPrefixProviderImpl(private val plugin: RPKChatBukkit): RPKPrefixProvider {
 
     override val prefixes: List<RPKPrefix> = plugin.config.getConfigurationSection("prefixes")
-            .getKeys(false)
-            .mapIndexed { id, name ->
-                    RPKPrefixImpl(id, name, ChatColor.translateAlternateColorCodes('&', plugin.config.getString("prefixes.$name")))
+            ?.getKeys(false)
+            ?.mapIndexed { id, name ->
+                    RPKPrefixImpl(id, name, ChatColor.translateAlternateColorCodes('&', plugin.config.getString("prefixes.$name") ?: ""))
             }
+            ?: emptyList()
 
     override fun addPrefix(prefix: RPKPrefix) {
         val event = RPKBukkitPrefixCreateEvent(prefix)

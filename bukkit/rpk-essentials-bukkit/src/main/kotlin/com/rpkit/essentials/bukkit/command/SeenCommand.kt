@@ -15,13 +15,13 @@ class SeenCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 val player = plugin.server.getOfflinePlayer(args[0])
                 if (player.isOnline) {
                     sender.sendMessage(plugin.messages["seen-online", mapOf(
-                            Pair("player", player.name)
+                            Pair("player", player.name ?: "")
                     )])
                 } else {
                     if (player.lastPlayed != 0L) {
                         val lastPlayed = Date(player.lastPlayed)
                         sender.sendMessage(plugin.messages["seen-date", mapOf(
-                                Pair("player", player.name),
+                                Pair("player", player.name ?: ""),
                                 Pair("date", SimpleDateFormat("yyyy-MM-dd").format(lastPlayed)),
                                 Pair("time", SimpleDateFormat("HH:mm:ss").format(lastPlayed))
                         )])

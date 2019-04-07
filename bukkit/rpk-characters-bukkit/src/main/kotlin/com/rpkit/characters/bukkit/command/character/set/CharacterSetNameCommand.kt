@@ -59,7 +59,7 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit): CommandE
                     if (character != null) {
                         if (args.isNotEmpty()) {
                             val nameBuilder = StringBuilder()
-                            for (i in 0..args.size - 1 - 1) {
+                            for (i in 0 until args.size - 1) {
                                 nameBuilder.append(args[i]).append(" ")
                             }
                             nameBuilder.append(args[args.size - 1])
@@ -91,7 +91,7 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit): CommandE
             return plugin.messages["character-set-name-prompt"]
         }
 
-        override fun acceptInput(context: ConversationContext, input: String): Prompt {
+        override fun acceptInput(context: ConversationContext, input: String?): Prompt {
             val conversable = context.forWhom
             if (conversable is Player) {
                 val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
@@ -100,8 +100,10 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit): CommandE
                 if (minecraftProfile != null) {
                     val character = characterProvider.getActiveCharacter(minecraftProfile)
                     if (character != null) {
-                        character.name = input
-                        characterProvider.updateCharacter(character)
+                        if (input != null) {
+                            character.name = input
+                            characterProvider.updateCharacter(character)
+                        }
                     }
                 }
             }

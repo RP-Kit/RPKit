@@ -80,12 +80,11 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
                 .from(TABLE_VERSION)
                 .where(TABLE_VERSION.ID.eq(id))
                 .fetchOne() ?: return null
-        val tableVersion = TableVersion(
+        return TableVersion(
                 id,
                 result.get(TABLE_VERSION.TABLE_NAME),
                 result.get(TABLE_VERSION.VERSION)
         )
-        return tableVersion
     }
 
     /**
@@ -100,12 +99,11 @@ class TableVersionTable(database: Database): Table<TableVersion>(database, Table
                 .from(TABLE_VERSION)
                 .where(TABLE_VERSION.TABLE_NAME.eq(table))
                 .fetchOne() ?: return null
-        val tableVersion = TableVersion(
+        return TableVersion(
                 result.get(TABLE_VERSION.ID),
                 table,
                 result.get(TABLE_VERSION.VERSION)
         )
-        return tableVersion
     }
 
     override fun delete(entity: TableVersion) {

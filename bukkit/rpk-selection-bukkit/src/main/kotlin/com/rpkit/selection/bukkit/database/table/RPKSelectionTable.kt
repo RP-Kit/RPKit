@@ -138,6 +138,14 @@ class RPKSelectionTable(database: Database, private val plugin: RPKSelectionBukk
                 return null
             }
             val world = plugin.server.getWorld(result[RPKIT_SELECTION.WORLD])
+            if (world == null) {
+                database.create
+                        .deleteFrom(RPKIT_SELECTION)
+                        .where(RPKIT_SELECTION.ID.eq(id))
+                        .execute()
+                cache?.remove(id)
+                return null
+            }
             val block1 = world.getBlockAt(
                     result[RPKIT_SELECTION.X_1],
                     result[RPKIT_SELECTION.Y_1],

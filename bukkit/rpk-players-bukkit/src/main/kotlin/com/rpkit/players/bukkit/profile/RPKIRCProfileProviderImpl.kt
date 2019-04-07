@@ -11,7 +11,7 @@ import org.pircbotx.User
 class RPKIRCProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPKIRCProfileProvider {
 
     override fun getIRCProfile(id: Int): RPKIRCProfile? {
-        return plugin.core.database.getTable(RPKIRCProfileTable::class).get(id)
+        return plugin.core.database.getTable(RPKIRCProfileTable::class)[id]
     }
 
     override fun getIRCProfile(user: User): RPKIRCProfile? {

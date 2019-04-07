@@ -15,14 +15,11 @@ class ExperienceCommand(private val plugin: RPKExperienceBukkit): CommandExecuto
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
-            if (args[0].equals("add", ignoreCase = true)) {
-                return experienceAddCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("set", ignoreCase = true)) {
-                return experienceSetCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("setlevel", ignoreCase = true)) {
-                return experienceSetLevelCommand.onCommand(sender, command, label, newArgs)
-            } else {
-                sender.sendMessage(plugin.messages["experience-usage"])
+            when {
+                args[0].equals("add", ignoreCase = true) -> return experienceAddCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("set", ignoreCase = true) -> return experienceSetCommand.onCommand(sender, command, label, newArgs)
+                args[0].equals("setlevel", ignoreCase = true) -> return experienceSetLevelCommand.onCommand(sender, command, label, newArgs)
+                else -> sender.sendMessage(plugin.messages["experience-usage"])
             }
         } else {
             sender.sendMessage(plugin.messages["experience-usage"])

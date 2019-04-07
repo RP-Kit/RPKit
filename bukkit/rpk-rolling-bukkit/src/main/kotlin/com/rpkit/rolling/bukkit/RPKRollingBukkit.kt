@@ -10,7 +10,7 @@ class RPKRollingBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("roll").executor = RollCommand(this)
+        getCommand("roll")?.setExecutor(RollCommand(this))
     }
 
     override fun setDefaultMessages() {

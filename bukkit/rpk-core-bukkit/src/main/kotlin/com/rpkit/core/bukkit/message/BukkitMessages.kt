@@ -39,7 +39,8 @@ class BukkitMessages(private val plugin: RPKBukkitPlugin): Messages {
     }
 
     override fun get(key: String, vars: Map<String, String>): String {
-        var message = ChatColor.translateAlternateColorCodes('&', messagesConfig.getString(key))
+        var message = messagesConfig.getString(key) ?: return key
+        message = ChatColor.translateAlternateColorCodes('&', message)
         vars.forEach { pair ->
             message = message.replace("\$${pair.key}", pair.value)
         }
@@ -47,7 +48,8 @@ class BukkitMessages(private val plugin: RPKBukkitPlugin): Messages {
     }
 
     override fun get(key: String): String {
-        return ChatColor.translateAlternateColorCodes('&', messagesConfig.getString(key))
+        val message = messagesConfig.getString(key) ?: return key
+        return ChatColor.translateAlternateColorCodes('&', message)
     }
 
     override fun getList(key: String, vars: Map<String, String>): List<String> {

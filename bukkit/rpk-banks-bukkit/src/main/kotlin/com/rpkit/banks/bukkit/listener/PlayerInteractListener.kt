@@ -37,10 +37,11 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit): Listener {
 
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (event.hasBlock()) {
-            if (event.clickedBlock.state is Sign) {
-                val sign = event.clickedBlock.state as Sign
-                if (sign.getLine(0).equals(GREEN.toString() + "[bank]", ignoreCase = true)) {
+        val clickedBlock = event.clickedBlock
+        if (clickedBlock != null) {
+            if (clickedBlock.state is Sign) {
+                val sign = clickedBlock.state as Sign
+                if (sign.getLine(0).equals("$GREEN[bank]", ignoreCase = true)) {
                     event.isCancelled = true
                     val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
@@ -76,21 +77,21 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit): Listener {
                                     }
                                 } else if (event.action == Action.LEFT_CLICK_BLOCK) {
                                     if (sign.getLine(1).equals("withdraw", ignoreCase = true)) {
-                                        if (economyProvider.getBalance(character, currency) + sign.getLine(2).toInt() > 1728) {
-                                            event.player.sendMessage(plugin.messages["bank-withdraw-invalid-wallet-full"])
-                                        } else if (sign.getLine(2).toInt() > bankProvider.getBalance(character, currency)) {
-                                            event.player.sendMessage(plugin.messages["bank-withdraw-invalid-not-enough-money"])
-                                        } else {
-                                            bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - sign.getLine(2).toInt())
-                                            economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + sign.getLine(2).toInt())
-                                            event.player.sendMessage(
-                                                    plugin.messages["bank-withdraw-valid", mapOf(
-                                                            Pair("amount", sign.getLine(2)),
-                                                            Pair("currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural),
-                                                            Pair("wallet-balance", economyProvider.getBalance(character, currency).toString()),
-                                                            Pair("bank-balance", bankProvider.getBalance(character, currency).toString())
-                                                    )]
-                                            )
+                                        when {
+                                            economyProvider.getBalance(character, currency) + sign.getLine(2).toInt() > 1728 -> event.player.sendMessage(plugin.messages["bank-withdraw-invalid-wallet-full"])
+                                            sign.getLine(2).toInt() > bankProvider.getBalance(character, currency) -> event.player.sendMessage(plugin.messages["bank-withdraw-invalid-not-enough-money"])
+                                            else -> {
+                                                bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - sign.getLine(2).toInt())
+                                                economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + sign.getLine(2).toInt())
+                                                event.player.sendMessage(
+                                                        plugin.messages["bank-withdraw-valid", mapOf(
+                                                                Pair("amount", sign.getLine(2)),
+                                                                Pair("currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural),
+                                                                Pair("wallet-balance", economyProvider.getBalance(character, currency).toString()),
+                                                                Pair("bank-balance", bankProvider.getBalance(character, currency).toString())
+                                                        )]
+                                                )
+                                            }
                                         }
                                     } else if (sign.getLine(1).equals("deposit", ignoreCase = true)) {
                                         if (sign.getLine(2).toInt() > economyProvider.getBalance(character, currency)) {

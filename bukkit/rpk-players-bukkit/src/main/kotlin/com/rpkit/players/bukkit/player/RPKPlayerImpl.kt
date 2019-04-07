@@ -34,7 +34,8 @@ class RPKPlayerImpl(
 ): RPKPlayer {
     override var bukkitPlayer: OfflinePlayer?
         get() {
-            return if (minecraftUUID == null) null else Bukkit.getOfflinePlayer(minecraftUUID)
+            val finalMinecraftUUID = minecraftUUID
+            return if (finalMinecraftUUID == null) null else Bukkit.getOfflinePlayer(finalMinecraftUUID)
         }
         set(value) {
             minecraftUUID = value?.uniqueId

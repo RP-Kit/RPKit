@@ -91,10 +91,19 @@ class RPKBlockHistoryTable(database: Database, private val plugin: RPKBlockLoggi
                     .from(RPKIT_BLOCK_HISTORY)
                     .where(RPKIT_BLOCK_HISTORY.ID.eq(id))
                     .fetchOne()
+            val world = plugin.server.getWorld(result.get(RPKIT_BLOCK_HISTORY.WORLD))
+            if (world == null) {
+                database.create
+                        .deleteFrom(RPKIT_BLOCK_HISTORY)
+                        .where(RPKIT_BLOCK_HISTORY.ID.eq(id))
+                        .execute()
+                cache?.remove(id)
+                return null
+            }
             val blockHistory = RPKBlockHistoryImpl(
                     plugin,
                     id,
-                    plugin.server.getWorld(result.get(RPKIT_BLOCK_HISTORY.WORLD)),
+                    world,
                     result.get(RPKIT_BLOCK_HISTORY.X),
                     result.get(RPKIT_BLOCK_HISTORY.Y),
                     result.get(RPKIT_BLOCK_HISTORY.Z)
@@ -114,10 +123,10 @@ class RPKBlockHistoryTable(database: Database, private val plugin: RPKBlockLoggi
                 .and(RPKIT_BLOCK_HISTORY.Z.eq(block.z))
                 .fetchOne() ?: return null
         val id = result.get(RPKIT_BLOCK_HISTORY.ID)
-        if (id == null) {
-            return null
+        return if (id == null) {
+            null
         } else {
-            return get(id)
+            get(id)
         }
     }
 

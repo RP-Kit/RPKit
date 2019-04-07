@@ -17,8 +17,7 @@ class PlayerQuitListener(private val plugin: RPKEssentialsBukkit): Listener {
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val logMessageProvider = plugin.core.serviceManager.getServiceProvider(RPKLogMessageProvider::class)
         plugin.server.onlinePlayers
-                .map { player -> minecraftProfileProvider.getMinecraftProfile(player) }
-                .filterNotNull()
+                .mapNotNull { player -> minecraftProfileProvider.getMinecraftProfile(player) }
                 .filter { minecraftProfile -> logMessageProvider.isLogMessagesEnabled(minecraftProfile) }
                 .forEach { minecraftProfile ->
                     minecraftProfile.sendMessage(event.quitMessage)

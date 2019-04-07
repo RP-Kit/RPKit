@@ -13,7 +13,7 @@ class RPKWarpProviderImpl(private val plugin: RPKTravelBukkit): RPKWarpProvider 
         get() = plugin.core.database.getTable(RPKWarpTable::class).getAll()
 
     override fun getWarp(id: Int): RPKWarp? {
-        return plugin.core.database.getTable(RPKWarpTable::class).get(id)
+        return plugin.core.database.getTable(RPKWarpTable::class)[id]
     }
 
     override fun getWarp(name: String): RPKWarp? {

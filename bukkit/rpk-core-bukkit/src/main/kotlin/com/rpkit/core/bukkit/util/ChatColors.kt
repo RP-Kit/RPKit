@@ -19,7 +19,6 @@ package com.rpkit.core.bukkit.util
 import org.bukkit.ChatColor
 
 import java.awt.Color
-import java.lang.Double
 
 private val BLACK = Color(0, 0, 0)
 private val DARK_BLUE = Color(0, 0, 170)

@@ -14,7 +14,7 @@ class PlayerInteractListener(private val plugin: RPKTravelBukkit): Listener {
     @EventHandler
     fun onPlayerInteractListener(event: PlayerInteractEvent) {
         val clickedBlock = event.clickedBlock ?: return
-        val sign = (clickedBlock.state ?: return) as? Sign ?: return
+        val sign = clickedBlock.state as? Sign ?: return
         if (!sign.getLine(0).equals("$GREEN[warp]", ignoreCase = true)) return
         val warpProvider = plugin.core.serviceManager.getServiceProvider(RPKWarpProvider::class)
         val warp = warpProvider.getWarp(sign.getLine(1))

@@ -137,6 +137,8 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
                     result.get(RPKIT_CURRENCY.RATE),
                     result.get(RPKIT_CURRENCY.DEFAULT_AMOUNT),
                     Material.getMaterial(result.get(RPKIT_CURRENCY.MATERIAL))
+                            ?: Material.getMaterial(result.get(RPKIT_CURRENCY.MATERIAL), true)
+                            ?: Material.AIR
             )
             cache?.put(id, currency)
             nameCache?.put(currency.name, id)

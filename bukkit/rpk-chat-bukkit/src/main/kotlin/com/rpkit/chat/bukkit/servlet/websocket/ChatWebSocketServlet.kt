@@ -8,7 +8,7 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory
 class ChatWebSocketServlet(private val plugin: RPKChatBukkit): WebSocketServlet() {
     override fun configure(factory: WebSocketServletFactory) {
         factory.policy.idleTimeout = 1800000
-        factory.setCreator({ req, resp ->
+        factory.setCreator { req, resp ->
             val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
             val profile = profileProvider.getActiveProfile(req.httpServletRequest)
             if (profile != null) {
@@ -18,6 +18,6 @@ class ChatWebSocketServlet(private val plugin: RPKChatBukkit): WebSocketServlet(
                 return@setCreator socket
             }
             return@setCreator null
-        })
+        }
     }
 }

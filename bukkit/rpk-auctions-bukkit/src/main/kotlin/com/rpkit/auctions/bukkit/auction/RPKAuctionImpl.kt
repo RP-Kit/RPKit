@@ -94,17 +94,15 @@ class RPKAuctionImpl(
                     val minecraftProfile = character.minecraftProfile
                     if (minecraftProfile != null) {
                         val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
-                        if (bukkitPlayer != null) {
-                            if (bukkitPlayer.isOnline) {
-                                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                                if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
-                                    bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
-                                            Pair("amount", item.amount.toString()),
-                                            Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
-                                            Pair("character", this.character.name),
-                                            Pair("auction_id", id.toString())
-                                    )])
-                                }
+                        if (bukkitPlayer.isOnline) {
+                            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                            if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
+                                bukkitPlayer.player?.sendMessage(plugin.messages["auction-item-received", mapOf(
+                                        Pair("amount", item.amount.toString()),
+                                        Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
+                                        Pair("character", this.character.name),
+                                        Pair("auction_id", id.toString())
+                                )])
                             }
                         }
                     }
@@ -113,17 +111,16 @@ class RPKAuctionImpl(
                     val minecraftProfile = character.minecraftProfile
                     if (minecraftProfile != null) {
                         val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
-                        if (bukkitPlayer != null) {
-                            if (bukkitPlayer.isOnline) {
-                                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                                if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
-                                    bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
-                                            Pair("amount", item.amount.toString()),
-                                            Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
-                                            Pair("character", this.character.name),
-                                            Pair("auction_id", id.toString())
-                                    )])
-                                }
+                        val bukkitOnlinePlayer = bukkitPlayer.player
+                        if (bukkitOnlinePlayer != null) {
+                            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                            if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
+                                bukkitOnlinePlayer.sendMessage(plugin.messages["auction-item-received", mapOf(
+                                        Pair("amount", item.amount.toString()),
+                                        Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
+                                        Pair("character", this.character.name),
+                                        Pair("auction_id", id.toString())
+                                )])
                             }
                         }
                     }
@@ -133,17 +130,16 @@ class RPKAuctionImpl(
                 val minecraftProfile = character.minecraftProfile
                 if (minecraftProfile != null) {
                     val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
-                    if (bukkitPlayer != null) {
-                        if (bukkitPlayer.isOnline) {
-                            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                            if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
-                                bukkitPlayer.player.sendMessage(plugin.messages["auction-item-received", mapOf(
-                                        Pair("amount", item.amount.toString()),
-                                        Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
-                                        Pair("character", this.character.name),
-                                        Pair("auction_id", id.toString())
-                                )])
-                            }
+                    val bukkitOnlinePlayer = bukkitPlayer.player
+                    if (bukkitOnlinePlayer != null) {
+                        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                        if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
+                            bukkitOnlinePlayer.sendMessage(plugin.messages["auction-item-received", mapOf(
+                                    Pair("amount", item.amount.toString()),
+                                    Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
+                                    Pair("character", this.character.name),
+                                    Pair("auction_id", id.toString())
+                            )])
                         }
                     }
                 }
@@ -156,24 +152,17 @@ class RPKAuctionImpl(
         val minecraftProfile = character.minecraftProfile
         if (minecraftProfile != null) {
             val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
-            if (bukkitPlayer != null) {
-                if (bukkitPlayer.isOnline) {
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
-                        bukkitPlayer.player.inventory.addItem(item).values.forEach { item ->
-                            bukkitPlayer.player.world.dropItem(bukkitPlayer.player.location, item)
-                        }
-                    } else {
-                        val inventoryContentsMutable = character.inventoryContents.toMutableList()
-                        inventoryContentsMutable.add(item)
-                        character.inventoryContents = inventoryContentsMutable.toTypedArray()
-                        characterProvider.updateCharacter(character)
+            val bukkitOnlinePlayer = bukkitPlayer.player
+            if (bukkitOnlinePlayer != null) {
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                if (characterProvider.getActiveCharacter(minecraftProfile) == character) {
+                    bukkitOnlinePlayer.inventory.addItem(item).values.forEach { item ->
+                        bukkitOnlinePlayer.world.dropItem(bukkitOnlinePlayer.location, item)
                     }
                 } else {
                     val inventoryContentsMutable = character.inventoryContents.toMutableList()
                     inventoryContentsMutable.add(item)
                     character.inventoryContents = inventoryContentsMutable.toTypedArray()
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     characterProvider.updateCharacter(character)
                 }
             } else {

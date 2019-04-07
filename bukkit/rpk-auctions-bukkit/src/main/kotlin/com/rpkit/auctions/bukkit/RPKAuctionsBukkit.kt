@@ -42,8 +42,8 @@ class RPKAuctionsBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("auction").executor = AuctionCommand(this)
-        getCommand("bid").executor = BidCommand(this)
+        getCommand("auction")?.setExecutor(AuctionCommand(this))
+        getCommand("bid")?.setExecutor(BidCommand(this))
     }
 
     override fun registerListeners() {

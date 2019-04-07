@@ -45,7 +45,12 @@ class TicketTeleportCommand(private val plugin: RPKModerationBukkit): CommandExe
                 sender.sendMessage(plugin.messages["ticket-teleport-invalid-ticket"])
                 return true
             }
-            sender.teleport(ticket.location)
+            val location = ticket.location
+            if (location == null) {
+                sender.sendMessage(plugin.messages["ticket-teleport-invalid-location"])
+                return true
+            }
+            sender.teleport(location)
             sender.sendMessage(plugin.messages["ticket-teleport-valid"])
         } catch (exception: NumberFormatException) {
             sender.sendMessage(plugin.messages["ticket-teleport-usage"])

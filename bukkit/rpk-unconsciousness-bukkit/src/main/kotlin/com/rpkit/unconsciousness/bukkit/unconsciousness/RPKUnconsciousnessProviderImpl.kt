@@ -29,10 +29,10 @@ class RPKUnconsciousnessProviderImpl(private val plugin: RPKUnconsciousnessBukki
     override fun isUnconscious(character: RPKCharacter): Boolean {
         val unconsciousStateTable = plugin.core.database.getTable(RPKUnconsciousStateTable::class)
         val unconsciousState = unconsciousStateTable.get(character)
-        if (unconsciousState == null) {
-            return false
+        return if (unconsciousState == null) {
+            false
         } else {
-            return unconsciousState.deathTime + plugin.config.getLong("unconscious-time") > System.currentTimeMillis()
+            unconsciousState.deathTime + plugin.config.getLong("unconscious-time") > System.currentTimeMillis()
         }
     }
 
@@ -46,7 +46,8 @@ class RPKUnconsciousnessProviderImpl(private val plugin: RPKUnconsciousnessBukki
             if (event.isUnconscious) {
                 unconsciousState.deathTime = System.currentTimeMillis()
                 unconsciousStateTable.update(unconsciousState)
-                plugin.server.getPlayer(event.character.minecraftProfile?.minecraftUUID).addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0), true)
+                val minecraftUUID = event.character.minecraftProfile?.minecraftUUID ?: return
+                plugin.server.getPlayer(minecraftUUID)?.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0), true)
             } else {
                 unconsciousStateTable.delete(unconsciousState)
             }

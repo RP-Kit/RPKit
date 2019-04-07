@@ -13,7 +13,7 @@ import org.bukkit.OfflinePlayer
 class RPKMinecraftProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPKMinecraftProfileProvider {
 
     override fun getMinecraftProfile(id: Int): RPKMinecraftProfile? {
-        return plugin.core.database.getTable(RPKMinecraftProfileTable::class).get(id)
+        return plugin.core.database.getTable(RPKMinecraftProfileTable::class)[id]
     }
 
     override fun getMinecraftProfile(player: OfflinePlayer): RPKMinecraftProfile? {
@@ -46,7 +46,7 @@ class RPKMinecraftProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPK
     }
 
     override fun getMinecraftProfileToken(id: Int): RPKMinecraftProfileToken? {
-        return plugin.core.database.getTable(RPKMinecraftProfileTokenTable::class).get(id)
+        return plugin.core.database.getTable(RPKMinecraftProfileTokenTable::class)[id]
     }
 
     override fun getMinecraftProfileToken(profile: RPKMinecraftProfile): RPKMinecraftProfileToken? {

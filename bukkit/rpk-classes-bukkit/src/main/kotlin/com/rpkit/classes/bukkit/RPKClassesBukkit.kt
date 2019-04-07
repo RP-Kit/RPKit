@@ -35,7 +35,7 @@ class RPKClassesBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerCommands() {
-        getCommand("class").executor = ClassCommand(this)
+        getCommand("class")?.setExecutor(ClassCommand(this))
     }
 
     override fun registerListeners() {

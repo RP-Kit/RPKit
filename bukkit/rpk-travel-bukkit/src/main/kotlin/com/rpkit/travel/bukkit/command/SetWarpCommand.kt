@@ -32,7 +32,7 @@ class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
         warpProvider.addWarp(warp)
         sender.sendMessage(plugin.messages["set-warp-valid", mapOf(
                 Pair("warp", warp.name),
-                Pair("world", warp.location.world.name),
+                Pair("world", warp.location.world?.name ?: ""),
                 Pair("x", warp.location.blockX.toString()),
                 Pair("y", warp.location.blockY.toString()),
                 Pair("z", warp.location.blockZ.toString())
