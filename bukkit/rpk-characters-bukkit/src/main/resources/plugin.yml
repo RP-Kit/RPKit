@@ -10,9 +10,6 @@ commands:
         description: Character management command
         aliases: [char, c]
         usage: /<command> [set|card|switch|list|new|delete]
-    gender:
-        description: Gender management command
-        usage: /<command> [add|remove|list]
     race:
         description: Race management command
         usage: /<command> [add|remove|list]
@@ -110,15 +107,6 @@ permissions:
     rpkit.characters.command.character.delete:
         description: Allows deleting characters
         default: op
-    rpkit.characters.command.gender.add:
-        description: Allows creation of genders
-        default: op
-    rpkit.characters.command.gender.remove:
-        description: Allows removal of genders
-        default: op
-    rpkit.characters.command.gender.list:
-        description: Allows listing of genders
-        default: true
     rpkit.characters.command.race.add:
         description: Allows creation of races
         default: op
