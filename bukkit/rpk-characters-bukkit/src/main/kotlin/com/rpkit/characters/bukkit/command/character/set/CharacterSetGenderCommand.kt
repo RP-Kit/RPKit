@@ -18,6 +18,7 @@ package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.gender.RPKGenderImpl
 import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
@@ -60,15 +61,16 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
                     if (character != null) {
                         if (args.isNotEmpty()) {
                             val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
-                            val gender = genderProvider.getGender(args[0])
-                            if (gender != null) {
-                                character.gender = gender
-                                characterProvider.updateCharacter(character)
-                                sender.sendMessage(plugin.messages["character-set-gender-valid"])
-                                character.showCharacterCard(minecraftProfile)
-                            } else {
-                                sender.sendMessage(plugin.messages["character-set-gender-invalid-gender"])
+                            val genderName = args.joinToString(" ")
+                            var gender = genderProvider.getGender(genderName)
+                            if (gender == null) {
+                                gender = RPKGenderImpl(name = genderName)
+                                genderProvider.addGender(gender)
                             }
+                            character.gender = gender
+                            characterProvider.updateCharacter(character)
+                            sender.sendMessage(plugin.messages["character-set-gender-valid"])
+                            character.showCharacterCard(minecraftProfile)
                         } else {
                             conversationFactory.buildConversation(sender).begin()
                         }
@@ -87,13 +89,12 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
         return true
     }
 
-    private inner class GenderPrompt: ValidatingPrompt() {
+    private inner class GenderPrompt: StringPrompt() {
 
-        override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class).getGender(input) != null
-        }
-
-        override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
+        override fun acceptInput(context: ConversationContext, input: String?): Prompt? {
+            if (input == null) {
+                return GenderNotSetPrompt()
+            }
             val conversable = context.forWhom
             if (conversable is Player) {
                 val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
@@ -103,7 +104,12 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
                 if (minecraftProfile != null) {
                     val character = characterProvider.getActiveCharacter(minecraftProfile)
                     if (character != null) {
-                        character.gender = genderProvider.getGender(input)!!
+                        var gender = genderProvider.getGender(input)
+                        if (gender == null) {
+                            gender = RPKGenderImpl(name = input)
+                            genderProvider.addGender(gender)
+                        }
+                        character.gender = gender
                         characterProvider.updateCharacter(character)
                     }
                 }
@@ -111,19 +117,29 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
             return GenderSetPrompt()
         }
 
-        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return plugin.messages["character-set-gender-invalid-gender"]
+        override fun getPromptText(context: ConversationContext): String {
+            return plugin.messages["character-set-gender-prompt"]
+        }
+
+    }
+
+    private inner class GenderNotSetPrompt: MessagePrompt() {
+
+        override fun getNextPrompt(context: ConversationContext): Prompt? {
+            val conversable = context.forWhom
+            if (conversable is Player) {
+                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
+                if (minecraftProfile != null) {
+                    characterProvider.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                }
+            }
+            return Prompt.END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
-            val genderListBuilder = StringBuilder()
-            for (gender in genderProvider.genders) {
-                genderListBuilder.append(plugin.messages["gender-list-item", mapOf(
-                        Pair("gender", gender.name)
-                )]).append("\n")
-            }
-            return plugin.messages["character-set-gender-prompt"] + "\n" + genderListBuilder.toString()
+            return plugin.messages["character-set-gender-not-set"]
         }
 
     }
