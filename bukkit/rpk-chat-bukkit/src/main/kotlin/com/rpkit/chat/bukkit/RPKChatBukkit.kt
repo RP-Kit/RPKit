@@ -48,6 +48,7 @@ import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.web.NavigationLink
+import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
@@ -60,6 +61,7 @@ import org.eclipse.jetty.servlet.ServletHolder
 class RPKChatBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         ConfigurationSerialization.registerClass(DirectedFormatComponent::class.java, "DirectedFormatComponent")
         ConfigurationSerialization.registerClass(DrunkenSlurComponent::class.java, "DrunkenSlurComponent")
         ConfigurationSerialization.registerClass(GarbleComponent::class.java, "GarbleComponent")

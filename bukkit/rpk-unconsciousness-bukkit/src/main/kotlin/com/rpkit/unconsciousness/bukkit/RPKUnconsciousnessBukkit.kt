@@ -25,6 +25,7 @@ import com.rpkit.unconsciousness.bukkit.database.table.RPKUnconsciousStateTable
 import com.rpkit.unconsciousness.bukkit.listener.*
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProvider
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProviderImpl
+import org.bstats.bukkit.Metrics
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
@@ -32,6 +33,7 @@ import org.bukkit.scheduler.BukkitRunnable
 class RPKUnconsciousnessBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
             RPKUnconsciousnessProviderImpl(this)

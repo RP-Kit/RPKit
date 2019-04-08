@@ -17,6 +17,13 @@
 package com.rpkit.store.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import org.bstats.bukkit.Metrics
 
 
-class RPKStoreLibBukkit: RPKBukkitPlugin()
+class RPKStoreLibBukkit: RPKBukkitPlugin() {
+
+    override fun onEnable() {
+        Metrics(this)
+    }
+
+}

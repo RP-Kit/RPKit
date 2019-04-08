@@ -17,9 +17,14 @@
 package com.rpkit.permissions.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import org.bstats.bukkit.Metrics
 
 /**
  * Class to allow permissions lib to load as a plugin.
  * This allows plugins requiring permissions or implementing permissions to depend on the plugin.
  */
-class RPKPermissionsLibBukkit: RPKBukkitPlugin()
+class RPKPermissionsLibBukkit: RPKBukkitPlugin() {
+    override fun onEnable() {
+        Metrics(this)
+    }
+}

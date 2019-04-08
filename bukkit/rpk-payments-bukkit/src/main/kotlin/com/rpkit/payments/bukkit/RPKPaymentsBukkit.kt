@@ -27,6 +27,7 @@ import com.rpkit.payments.bukkit.listener.PlayerJoinListener
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProvider
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProviderImpl
+import org.bstats.bukkit.Metrics
 import org.bukkit.scheduler.BukkitRunnable
 import java.text.SimpleDateFormat
 import java.util.*
@@ -37,6 +38,7 @@ import java.util.*
 class RPKPaymentsBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKPaymentGroupProviderImpl(this),

@@ -28,6 +28,7 @@ import com.rpkit.banks.bukkit.servlet.StaticServlet
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.web.NavigationLink
+import org.bstats.bukkit.Metrics
 
 /**
  * RPK banks plugin default implementation.
@@ -37,6 +38,7 @@ class RPKBanksBukkit: RPKBukkitPlugin() {
     private lateinit var bankProvider: RPKBankProvider
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         bankProvider = RPKBankProviderImpl(this)
         serviceProviders = arrayOf(

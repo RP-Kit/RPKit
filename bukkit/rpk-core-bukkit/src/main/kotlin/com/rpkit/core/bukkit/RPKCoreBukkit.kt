@@ -25,6 +25,7 @@ import com.rpkit.core.bukkit.servlet.StaticServlet
 import com.rpkit.core.database.Database
 import com.rpkit.core.web.NavigationLink
 import com.rpkit.core.web.Web
+import org.bstats.bukkit.Metrics
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
@@ -41,6 +42,7 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
     lateinit var servletContext: ServletContextHandler
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         val webServer = Server(config.getInt("web-server.port"))
         servletContext = ServletContextHandler()

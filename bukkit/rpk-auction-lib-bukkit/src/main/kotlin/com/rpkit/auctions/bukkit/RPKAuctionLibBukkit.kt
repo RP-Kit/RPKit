@@ -17,6 +17,7 @@
 package com.rpkit.auctions.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import org.bstats.bukkit.Metrics
 
 /**
  * Class to allow auction lib to load as a plugin.
@@ -25,6 +26,7 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 class RPKAuctionLibBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         serviceProviders = arrayOf()
     }
 

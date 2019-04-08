@@ -12,6 +12,7 @@ import com.rpkit.experience.bukkit.experience.RPKExperienceProviderImpl
 import com.rpkit.experience.bukkit.listener.PlayerExpChangeListener
 import com.rpkit.experience.bukkit.listener.PlayerJoinListener
 import com.rpkit.experience.bukkit.listener.PluginEnableListener
+import org.bstats.bukkit.Metrics
 
 
 class RPKExperienceBukkit: RPKBukkitPlugin() {
@@ -19,6 +20,7 @@ class RPKExperienceBukkit: RPKBukkitPlugin() {
     private var experienceFieldsInitialised = false
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKExperienceProviderImpl(this)

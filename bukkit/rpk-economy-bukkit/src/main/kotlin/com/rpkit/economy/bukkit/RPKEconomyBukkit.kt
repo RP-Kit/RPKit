@@ -40,6 +40,7 @@ import com.rpkit.economy.bukkit.listener.SignChangeListener
 import com.rpkit.economy.bukkit.servlet.CurrencyServlet
 import com.rpkit.economy.bukkit.servlet.MoneyServlet
 import com.rpkit.economy.bukkit.servlet.api.MoneyAPIServlet
+import org.bstats.bukkit.Metrics
 
 /**
  * RPK economy plugin default implementation.
@@ -51,6 +52,7 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
     private var moneyFieldInitialised: Boolean = false
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         currencyProvider = RPKCurrencyProviderImpl(this)
         economyProvider = RPKEconomyProviderImpl(this)

@@ -20,6 +20,7 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.trade.bukkit.listener.BlockBreakListener
 import com.rpkit.trade.bukkit.listener.PlayerInteractListener
 import com.rpkit.trade.bukkit.listener.SignChangeListener
+import org.bstats.bukkit.Metrics
 
 /**
  * RPK trade plugin default implementation.
@@ -27,6 +28,7 @@ import com.rpkit.trade.bukkit.listener.SignChangeListener
 class RPKTradeBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         // Migrate config 1.1 -> 1.2
         if (!config.isConfigurationSection("traders.minimum-price")) {

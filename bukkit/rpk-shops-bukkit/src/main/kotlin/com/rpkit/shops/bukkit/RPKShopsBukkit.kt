@@ -25,6 +25,7 @@ import com.rpkit.shops.bukkit.listener.InventoryClickListener
 import com.rpkit.shops.bukkit.listener.PlayerInteractListener
 import com.rpkit.shops.bukkit.listener.SignChangeListener
 import com.rpkit.shops.bukkit.shopcount.RPKShopCountProviderImpl
+import org.bstats.bukkit.Metrics
 
 /**
  * RPK shops plugin default implementation.
@@ -32,6 +33,7 @@ import com.rpkit.shops.bukkit.shopcount.RPKShopCountProviderImpl
 class RPKShopsBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKShopCountProviderImpl(this)

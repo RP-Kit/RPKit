@@ -15,6 +15,7 @@ import com.rpkit.locks.bukkit.listener.InventoryClickListener
 import com.rpkit.locks.bukkit.listener.InventoryCloseListener
 import com.rpkit.locks.bukkit.listener.PlayerInteractListener
 import com.rpkit.locks.bukkit.lock.RPKLockProviderImpl
+import org.bstats.bukkit.Metrics
 import org.bukkit.Material.IRON_BLOCK
 import org.bukkit.Material.IRON_INGOT
 import org.bukkit.NamespacedKey
@@ -23,6 +24,7 @@ import org.bukkit.inventory.ShapedRecipe
 class RPKLocksBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         val lockProvider = RPKLockProviderImpl(this)
         serviceProviders = arrayOf(

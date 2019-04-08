@@ -27,6 +27,7 @@ import com.rpkit.permissions.bukkit.group.RPKGroupImpl
 import com.rpkit.permissions.bukkit.group.RPKGroupProviderImpl
 import com.rpkit.permissions.bukkit.listener.PlayerJoinListener
 import com.rpkit.permissions.bukkit.listener.PlayerQuitListener
+import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
@@ -37,6 +38,7 @@ import org.bukkit.permissions.PermissionDefault
 class RPKPermissionsBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         ConfigurationSerialization.registerClass(RPKGroupImpl::class.java, "RPKGroupImpl")
         saveDefaultConfig()
         config.options().pathSeparator('/')
