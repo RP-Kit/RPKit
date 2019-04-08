@@ -7,6 +7,7 @@ import com.rpkit.drinks.bukkit.database.table.RPKDrunkennessTable
 import com.rpkit.drinks.bukkit.drink.RPKDrinkProviderImpl
 import com.rpkit.drinks.bukkit.listener.PlayerItemConsumeListener
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import org.bstats.bukkit.Metrics
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
@@ -15,6 +16,7 @@ import org.bukkit.scheduler.BukkitRunnable
 class RPKDrinksBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         val drinkProvider = RPKDrinkProviderImpl(this)
         drinkProvider.drinks.forEach { server.addRecipe(it.recipe) }

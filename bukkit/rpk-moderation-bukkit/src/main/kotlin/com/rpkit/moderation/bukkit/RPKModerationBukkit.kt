@@ -33,11 +33,13 @@ import com.rpkit.moderation.bukkit.listener.PlayerJoinListener
 import com.rpkit.moderation.bukkit.ticket.RPKTicketProviderImpl
 import com.rpkit.moderation.bukkit.vanish.RPKVanishProviderImpl
 import com.rpkit.moderation.bukkit.warning.RPKWarningProviderImpl
+import org.bstats.bukkit.Metrics
 
 
 class RPKModerationBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         serviceProviders = arrayOf(
                 RPKTicketProviderImpl(this),
                 RPKVanishProviderImpl(this),

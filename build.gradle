@@ -13,7 +13,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.1"
+        classpath "com.github.jengelman.gradle.plugins:shadow:5.0.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.21"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.9"
     }
@@ -32,9 +32,9 @@ subprojects {
         mavenCentral()
         maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
         maven { url "https://ci.ender.zone/plugin/repository/everything/" }
-        maven { url "https://jitpack.io" }
         maven { url "http://repo.jenkins-ci.org/public/" }
         maven { url "https://maven.sk89q.com/repo/"}
+        maven { url "https://repo.codemc.org/repository/maven-public" }
     }
 
     dependencies {
@@ -100,8 +100,7 @@ project(":rpk-core") {
     apply plugin: "com.github.johnrengelman.shadow"
 
     shadowJar {
-        classifier = ""
-        from sourceSets.main.output
+        classifier = null
     }
 
     artifacts {
@@ -131,6 +130,7 @@ project(":bukkit:rpk-core-bukkit") {
     dependencies {
         compile group: "org.spigotmc", name: "spigot-api", version: "1.13.2-R0.1-SNAPSHOT"
         compile group: "net.milkbowl.vault", name: "VaultAPI", version: "1.6"
+        compile group: "org.bstats", name: "bstats-bukkit", version: "1.4"
         compile project(":rpk-core")
     }
 
@@ -146,10 +146,12 @@ project(":bukkit:rpk-core-bukkit") {
 
         dependencies {
             include(project(":rpk-core"))
+            include(dependency("org.bstats:bstats-bukkit"))
         }
 
+        relocate "org.bstats", "com.rpkit.core.bukkit.shadow.org.bstats"
+
         classifier = ""
-        from sourceSets.main.output
     }
 
     artifacts {
@@ -184,8 +186,21 @@ project(":bukkit:rpk-player-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.players.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -218,8 +233,21 @@ project(":bukkit:rpk-permissions-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.permissions.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -251,8 +279,21 @@ project(":bukkit:rpk-character-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.characters.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -285,8 +326,21 @@ project(":bukkit:rpk-chat-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.chat.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -318,8 +372,21 @@ project(":bukkit:rpk-economy-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.economy.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -352,8 +419,21 @@ project(":bukkit:rpk-bank-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.banks.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -387,8 +467,21 @@ project(":bukkit:rpk-shop-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.shops.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -421,8 +514,21 @@ project(":bukkit:rpk-auction-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.auctions.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -454,8 +560,21 @@ project(":bukkit:rpk-stat-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.stats.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -486,8 +605,21 @@ project(":bukkit:rpk-food-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.food.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -521,8 +653,21 @@ project(":bukkit:rpk-payment-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.payments.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -554,8 +699,21 @@ project(":bukkit:rpk-warp-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.warp.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -587,8 +745,21 @@ project(":bukkit:rpk-kit-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.kit.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -620,8 +791,21 @@ project(":bukkit:rpk-drink-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.drink.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -653,8 +837,21 @@ project(":bukkit:rpk-location-history-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.locationhistory.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -686,8 +883,21 @@ project(":bukkit:rpk-tracking-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.tracking.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -719,8 +929,21 @@ project(":bukkit:rpk-daily-quote-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.dailyquote.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -752,8 +975,21 @@ project(":bukkit:rpk-lock-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.locks.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -786,8 +1022,21 @@ project(":bukkit:rpk-feature-flag-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.featureflags.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -818,9 +1067,22 @@ project(":bukkit:rpk-experience-lib-bukkit") {
                 "version": version
         ]
     }
-    
+
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.experience.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -852,8 +1114,21 @@ project(":bukkit:rpk-skill-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.skills.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -888,8 +1163,21 @@ project(":bukkit:rpk-class-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.classes.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -922,8 +1210,21 @@ project(":bukkit:rpk-block-log-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.blocklog.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -956,8 +1257,21 @@ project(":bukkit:rpk-unconsciousness-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.unconsciousness.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -989,8 +1303,21 @@ project(":bukkit:rpk-moderation-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.moderation.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1022,8 +1349,21 @@ project(":bukkit:rpk-selection-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.selection.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1055,8 +1395,21 @@ project(":bukkit:rpk-store-lib-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.store.bukkit.shadow.lib.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1091,8 +1444,21 @@ project(":bukkit:rpk-players-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.players.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1126,8 +1492,21 @@ project(":bukkit:rpk-permissions-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.permissions.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1160,8 +1539,21 @@ project(":bukkit:rpk-characters-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.characters.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1197,8 +1589,21 @@ project(":bukkit:rpk-chat-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.chat.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1231,8 +1636,21 @@ project(":bukkit:rpk-economy-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.economy.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1266,8 +1684,21 @@ project(":bukkit:rpk-banks-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.banks.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1301,8 +1732,21 @@ project(":bukkit:rpk-trade-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.trade.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1337,8 +1781,21 @@ project(":bukkit:rpk-shops-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.shops.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1372,8 +1829,21 @@ project(":bukkit:rpk-auctions-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.auctions.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1407,8 +1877,21 @@ project(":bukkit:rpk-stats-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.stats.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1440,8 +1923,21 @@ project(":bukkit:rpk-food-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.food.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1476,8 +1972,21 @@ project(":bukkit:rpk-payments-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.payments.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1516,8 +2025,21 @@ project(":bukkit:rpk-essentials-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.essentials.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1550,8 +2072,21 @@ project(":bukkit:rpk-locks-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.locks.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1583,8 +2118,21 @@ project(":bukkit:rpk-travel-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.travel.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1617,8 +2165,21 @@ project(":bukkit:rpk-feature-flags-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.featureflags.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1651,8 +2212,21 @@ project(":bukkit:rpk-rolling-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.rolling.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1685,8 +2259,21 @@ project(":bukkit:rpk-experience-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.experience.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1719,8 +2306,21 @@ project(":bukkit:rpk-skills-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.skills.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1756,8 +2356,21 @@ project(":bukkit:rpk-classes-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.classes.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1790,8 +2403,21 @@ project(":bukkit:rpk-drinks-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.drinks.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1826,8 +2452,21 @@ project(":bukkit:rpk-block-logging-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.blocklog.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1861,8 +2500,21 @@ project(":bukkit:rpk-unconsciousness-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.unconsciousness.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1895,8 +2547,21 @@ project(":bukkit:rpk-moderation-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.moderation.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1929,8 +2594,21 @@ project(":bukkit:rpk-selection-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.selection.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1964,8 +2642,21 @@ project(":bukkit:rpk-selection-worldedit-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.selection.bukkit.worldedit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {
@@ -1997,8 +2688,21 @@ project(":bukkit:rpk-stores-bukkit") {
         ]
     }
 
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    shadowJar {
+
+        dependencies {
+            include(dependency("org.bstats:bstats-bukkit"))
+        }
+
+        relocate "org.bstats", "com.rpkit.stores.bukkit.shadow.impl.org.bstats"
+
+        classifier = ""
+    }
+
     artifacts {
-        archives jar
+        archives shadowJar
     }
 
     uploadArchives {

@@ -19,6 +19,7 @@ package com.rpkit.chat.bukkit
 import com.rpkit.chat.bukkit.vault.RPKChatVaultChat
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import net.milkbowl.vault.chat.Chat
+import org.bstats.bukkit.Metrics
 import org.bukkit.plugin.ServicePriority
 import org.bukkit.plugin.ServicePriority.Normal
 
@@ -32,6 +33,7 @@ import org.bukkit.plugin.ServicePriority.Normal
 class RPKChatLibBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         serviceProviders = arrayOf()
         if (server.pluginManager.getPlugin("Vault") != null) {
             server.servicesManager.register(Chat::class.java, RPKChatVaultChat(this), this, Normal)

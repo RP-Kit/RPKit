@@ -16,12 +16,14 @@ import com.rpkit.essentials.bukkit.locationhistory.RPKLocationHistoryProviderImp
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageProvider
 import com.rpkit.essentials.bukkit.time.TimeSlowRunnable
 import com.rpkit.essentials.bukkit.tracking.RPKTrackingProviderImpl
+import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 
 
 class RPKEssentialsBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         ConfigurationSerialization.registerClass(RPKKitImpl::class.java)
         saveDefaultConfig()
         serviceProviders = arrayOf(

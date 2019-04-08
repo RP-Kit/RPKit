@@ -5,11 +5,13 @@ import com.rpkit.core.database.Database
 import com.rpkit.featureflags.bukkit.database.table.RPKFeatureFlagTable
 import com.rpkit.featureflags.bukkit.database.table.RPKProfileFeatureFlagTable
 import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlagProviderImpl
+import org.bstats.bukkit.Metrics
 
 
 class RPKFeatureFlagsBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKFeatureFlagProviderImpl(this)

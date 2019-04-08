@@ -40,6 +40,7 @@ import com.rpkit.characters.bukkit.servlet.api.v1.CharacterAPIServlet
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.web.NavigationLink
+import org.bstats.bukkit.Metrics
 import java.sql.SQLException
 
 /**
@@ -54,6 +55,7 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
     private lateinit var newCharacterCooldownProvider: RPKNewCharacterCooldownProvider
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         characterProvider = RPKCharacterProviderImpl(this)
         genderProvider = RPKGenderProviderImpl(this)

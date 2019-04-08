@@ -30,6 +30,7 @@ import com.rpkit.players.bukkit.profile.RPKIRCProfileProviderImpl
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProviderImpl
 import com.rpkit.players.bukkit.profile.RPKProfileProviderImpl
 import com.rpkit.players.bukkit.servlet.*
+import org.bstats.bukkit.Metrics
 import java.sql.SQLException
 
 /**
@@ -38,6 +39,7 @@ import java.sql.SQLException
 class RPKPlayersBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKPlayerProviderImpl(this),

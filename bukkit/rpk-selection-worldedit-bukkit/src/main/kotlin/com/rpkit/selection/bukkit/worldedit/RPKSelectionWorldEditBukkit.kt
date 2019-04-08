@@ -18,11 +18,13 @@ package com.rpkit.selection.bukkit.worldedit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.selection.bukkit.worldedit.selection.RPKWorldEditSelectionProvider
+import org.bstats.bukkit.Metrics
 
 
 class RPKSelectionWorldEditBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         serviceProviders = arrayOf(
                 RPKWorldEditSelectionProvider(this)
         )

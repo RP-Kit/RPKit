@@ -17,9 +17,14 @@
 package com.rpkit.characters.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import org.bstats.bukkit.Metrics
 
 /**
  * Class to allow character lib to load as a plugin.
  * This allows plugins requiring characters or implementing characters to depend on the plugin.
  */
-class RPKCharacterLibBukkit: RPKBukkitPlugin()
+class RPKCharacterLibBukkit: RPKBukkitPlugin() {
+    override fun onEnable() {
+        Metrics(this)
+    }
+}

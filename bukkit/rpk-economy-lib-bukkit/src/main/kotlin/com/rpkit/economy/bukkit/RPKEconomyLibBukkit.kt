@@ -19,6 +19,7 @@ package com.rpkit.economy.bukkit
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.economy.bukkit.vault.RPKEconomyVaultEconomy
 import net.milkbowl.vault.economy.Economy
+import org.bstats.bukkit.Metrics
 import org.bukkit.plugin.ServicePriority
 
 /**
@@ -31,6 +32,7 @@ import org.bukkit.plugin.ServicePriority
 class RPKEconomyLibBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         serviceProviders = arrayOf()
         if (server.pluginManager.getPlugin("Vault") != null) {
             server.servicesManager.register(Economy::class.java, RPKEconomyVaultEconomy(this), this, ServicePriority.Normal)

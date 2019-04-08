@@ -9,11 +9,13 @@ import com.rpkit.travel.bukkit.database.table.RPKWarpTable
 import com.rpkit.travel.bukkit.listener.PlayerInteractListener
 import com.rpkit.travel.bukkit.listener.SignChangeListener
 import com.rpkit.travel.bukkit.warp.RPKWarpProviderImpl
+import org.bstats.bukkit.Metrics
 
 
 class RPKTravelBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKWarpProviderImpl(this)

@@ -22,11 +22,13 @@ import com.rpkit.selection.bukkit.command.WandCommand
 import com.rpkit.selection.bukkit.database.table.RPKSelectionTable
 import com.rpkit.selection.bukkit.listener.PlayerInteractListener
 import com.rpkit.selection.bukkit.selection.RPKSelectionProviderImpl
+import org.bstats.bukkit.Metrics
 
 
 class RPKSelectionBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         serviceProviders = arrayOf(
                 RPKSelectionProviderImpl(this)
         )

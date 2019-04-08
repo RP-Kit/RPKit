@@ -6,11 +6,13 @@ import com.rpkit.skills.bukkit.command.SkillCommand
 import com.rpkit.skills.bukkit.database.table.RPKSkillCooldownTable
 import com.rpkit.skills.bukkit.skills.RPKSkillProviderImpl
 import com.rpkit.skills.bukkit.skills.RPKSkillTypeProviderImpl
+import org.bstats.bukkit.Metrics
 
 
 class RPKSkillsBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKSkillTypeProviderImpl(this),
