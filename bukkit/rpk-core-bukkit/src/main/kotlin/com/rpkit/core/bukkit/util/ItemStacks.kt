@@ -78,6 +78,7 @@ fun Array<ItemStack>.toByteArray(): ByteArray {
 /**
  * Converts the [ByteArray] to an [ItemStack] [Array]
  *
+ * @param bytes The [ByteArray]
  * @return The [ItemStack] [Array]
  * @deprecated Replaced by extension method
  * @see toItemStackArray
@@ -102,6 +103,7 @@ fun ByteArray.toItemStackArray(): Array<ItemStack> {
 /**
  * Creates a clone of the [ItemStack] with the given display name
  *
+ * @param displayName The display name to set
  * @return A clone of the [ItemStack] with the given display name
  */
 fun ItemStack.withDisplayName(displayName: String): ItemStack {
@@ -116,6 +118,7 @@ fun ItemStack.withDisplayName(displayName: String): ItemStack {
  * Creates a clone of the [ItemStack] with the given lore.
  * If the [ItemStack] already has lore the lore is appended to the existing lore.
  *
+ * 
  * @return A clone of the [ItemStack] with the given lore
  */
 fun ItemStack.withLore(lore: List<String>): ItemStack {
@@ -152,4 +155,41 @@ fun ItemStack.withoutLoreMatching(regex: Regex): ItemStack {
     val metaLore = meta.lore?.filter { loreItem -> !loreItem.matches(regex) } ?: mutableListOf()
     meta.lore = metaLore
     return newItemStack
+}
+
+/**
+ * Sets the display name of the [ItemStack]
+ *
+ * @param name The display name to set
+ */
+fun ItemStack.setDisplayName(name: String) {
+    val meta = itemMeta ?: return
+    meta.setDisplayName(name)
+    itemMeta = meta
+}
+
+/**
+ * Adds lore to the item stack
+ *
+ * @param lore The lore to add
+ */
+fun ItemStack.addLore(lore: List<String>) {
+    val meta = itemMeta ?: return
+    val metaLore = meta.lore ?: mutableListOf()
+    metaLore.addAll(lore)
+    meta.lore = metaLore
+    itemMeta = meta
+}
+
+/**
+ * Removes lore from the [ItemStack]
+ *
+ * @param lore The lore to remove
+ */
+fun ItemStack.removeLore(lore: List<String>) {
+    val meta = itemMeta ?: return
+    val metaLore = meta.lore ?: mutableListOf()
+    metaLore.removeAll(lore)
+    meta.lore = metaLore
+    itemMeta = meta
 }
