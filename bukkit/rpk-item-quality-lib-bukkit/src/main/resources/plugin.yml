@@ -1,0 +1,5 @@
+name: rpk-item-quality-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.itemquality.bukkit.RPKItemQualityLibBukkit
+api-version: 1.13
