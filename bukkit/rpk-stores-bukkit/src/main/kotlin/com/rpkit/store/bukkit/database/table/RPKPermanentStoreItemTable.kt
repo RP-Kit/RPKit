@@ -42,7 +42,7 @@ class RPKPermanentStoreItemTable(database: Database, private val plugin: RPKStor
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_PERMANENT_STORE_ITEM)
-                .column(RPKIT_PERMANENT_STORE_ITEM.ID, SQLDataType.INTEGER)
+                .column(RPKIT_PERMANENT_STORE_ITEM.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_PERMANENT_STORE_ITEM.STORE_ITEM_ID, SQLDataType.INTEGER)
                 .constraints(
                         constraint("pk_rpkit_permanent_store_item").primaryKey(RPKIT_PERMANENT_STORE_ITEM.ID)
