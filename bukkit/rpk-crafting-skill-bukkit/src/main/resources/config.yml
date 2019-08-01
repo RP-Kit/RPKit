@@ -1,0 +1,114 @@
+crafting:
+    BREAD:
+        '0':
+            amount: 0.25
+        '100':
+            amount: 1
+        '200':
+            amount: 3
+    WOODEN_SWORD:
+        '0':
+            amount: 1
+            quality: poor
+        '100':
+            amount: 1
+            quality: adequate
+        '200':
+            amount: 1
+            quality: good
+smelting:
+    IRON_INGOT:
+        '0':
+            amount: 1
+        '100':
+            amount: 2
+        '200':
+            amount: 4
+    COOKED_CHICKEN:
+        '0':
+            amount: 1
+            quality: poor
+        '100':
+            amount: 1
+            quality: adequate
+        '200':
+            amount: 1
+            quality: good
+mining:
+    COAL:
+        '0':
+            amount: 0.25
+        '50':
+            amount: 0.5
+        '100':
+            amount: 1
+        '150':
+            amount: 2
+        '200':
+            amount: 4
+    IRON_ORE:
+        '0':
+            amount: 0.25
+        '100':
+            amount: 0.5
+        '200':
+            amount: 1
+        '300':
+            amount: 2
+        '400':
+            amount: 3
+        '500':
+            amount: 4
+    LAPIS_LAZULI:
+        '0':
+            amount: 0.5
+        '100':
+            amount: 1
+        '200':
+            amount: 2
+    GOLD_ORE:
+        '0':
+            amount: 0.1
+        '100':
+            amount: 0.25
+        '200':
+            amount: 0.5
+        '300':
+            amount: 1
+        '400':
+            amount: 2
+    DIAMOND:
+        '0':
+            amount: 0.01
+        '200':
+            amount: 0.1
+        '400':
+            amount: 0.25
+        '600':
+            amount: 0.5
+        '800':
+            amount: 1
+    REDSTONE:
+        '0':
+            amount: 1
+        '100':
+            amount: 2
+    EMERALD:
+        '0':
+            amount: 0.01
+        '200':
+            amount: 0.1
+        '400':
+            amount: 0.25
+        '600':
+            amount: 0.5
+        '800':
+            amount: 1
+    NETHER_QUARTZ:
+        '0':
+            amount: 0.25
+        '100':
+            amount: 0.5
+        '200':
+            amount: 1
+

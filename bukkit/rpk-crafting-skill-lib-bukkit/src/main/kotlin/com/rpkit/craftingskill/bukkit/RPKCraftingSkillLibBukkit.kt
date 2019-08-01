@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package com.rpkit.characters.bukkit.event.character
+package com.rpkit.craftingskill.bukkit
 
-import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import org.bstats.bukkit.Metrics
 
 
-interface RPKCharacterDeleteEvent: RPKCharacterEvent {
-    override val character: RPKCharacter
+class RPKCraftingSkillLibBukkit: RPKBukkitPlugin() {
+
+    override fun onEnable() {
+        Metrics(this)
+    }
+
 }
