@@ -1,0 +1,10 @@
+name: rpk-crafting-skill-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.craftingskill.bukkit.RPKCraftingSkillLibBukkit
+api-version: 1.13
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+- rpk-item-quality-lib-bukkit

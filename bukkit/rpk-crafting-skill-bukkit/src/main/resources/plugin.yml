@@ -1,0 +1,19 @@
+name: rpk-crafting-skill-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
+api-version: 1.13
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+- rpk-item-quality-lib-bukkit
+- rpk-crafting-skill-lib-bukkit
+commands:
+    craftingskill:
+        description: Displays crafting skill for a given action and material
+        usage: /<command> [action] [material]
+permissions:
+    rpkit.craftingskill.command.craftingskill:
+        description: Allows viewing crafting skill
+        default: true

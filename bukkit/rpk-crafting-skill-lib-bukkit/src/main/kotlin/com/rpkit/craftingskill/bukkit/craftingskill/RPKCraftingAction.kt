@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.rpkit.characters.bukkit.event.character
-
-import com.rpkit.characters.bukkit.character.RPKCharacter
+package com.rpkit.craftingskill.bukkit.craftingskill
 
 
-interface RPKCharacterDeleteEvent: RPKCharacterEvent {
-    override val character: RPKCharacter
+enum class RPKCraftingAction {
+
+    CRAFT,
+    SMELT,
+    MINE
+
 }

@@ -35,7 +35,7 @@ def jettyVersion = "9.4.15.v20190215"
 def velocityVersion = "1.7"
 def hikariCPVersion = "3.3.1"
 def githubAPIVersion = "1.95"
-def jooqVersion = "3.11.10"
+def jooqVersion = "3.11.11"
 
 dependencies {
     compile group: "mysql", name: "mysql-connector-java", version: mysqlConnectorVersion
