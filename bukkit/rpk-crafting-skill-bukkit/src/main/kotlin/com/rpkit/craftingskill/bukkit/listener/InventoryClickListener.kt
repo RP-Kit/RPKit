@@ -80,7 +80,6 @@ class InventoryClickListener(private val plugin: RPKCraftingSkillBukkit): Listen
                     Pair("received-experience", item.amount.toString())
             )])
         }
-        event.currentItem = item
     }
 
 }

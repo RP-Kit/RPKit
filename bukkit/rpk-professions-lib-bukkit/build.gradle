@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ shadowJar {
         include(dependency("org.bstats:bstats-bukkit"))
     }
 
-    relocate "org.bstats", "com.rpkit.craftingskill.bukkit.shadow.lib.org.bstats"
+    relocate "org.bstats", "com.rpkit.professions.bukkit.shadow.lib.org.bstats"
 
     classifier = ""
 }
@@ -59,9 +59,9 @@ uploadArchives {
             authentication(userName: repoUserName, password: repoPassword)
         }
 
-        pom.version = project(":bukkit:rpk-crafting-skill-lib-bukkit").version
-        pom.artifactId = project(":bukkit:rpk-crafting-skill-lib-bukkit").name
-        pom.groupId = project(":bukkit:rpk-crafting-skill-lib-bukkit").group
+        pom.version = project(":bukkit:rpk-professions-lib-bukkit").version
+        pom.artifactId = project(":bukkit:rpk-professions-lib-bukkit").name
+        pom.groupId = project(":bukkit:rpk-professions-lib-bukkit").group
 
     }
 }

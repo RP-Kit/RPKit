@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,15 @@ package com.rpkit.craftingskill.bukkit.database.jooq;
 
 
 import com.rpkit.craftingskill.bukkit.database.jooq.rpkit.Rpkit;
-import org.jooq.Schema;
-import org.jooq.impl.CatalogImpl;
 
-import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.annotation.Generated;
+
+import org.jooq.Schema;
+import org.jooq.impl.CatalogImpl;
 
 
 /**
