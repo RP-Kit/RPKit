@@ -58,3 +58,6 @@ include "bukkit:rpk-item-quality-lib-bukkit"
 include "bukkit:rpk-item-quality-bukkit"
 include "bukkit:rpk-crafting-skill-lib-bukkit"
 include "bukkit:rpk-crafting-skill-bukkit"
+include "bukkit:rpk-professions-lib-bukkit"
+include "bukkit:rpk-professions-bukkit"
+

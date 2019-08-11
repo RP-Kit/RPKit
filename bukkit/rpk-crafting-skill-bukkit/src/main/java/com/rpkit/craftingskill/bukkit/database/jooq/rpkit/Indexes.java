@@ -5,11 +5,12 @@ package com.rpkit.craftingskill.bukkit.database.jooq.rpkit;
 
 
 import com.rpkit.craftingskill.bukkit.database.jooq.rpkit.tables.RpkitCraftingExperience;
+
+import javax.annotation.Generated;
+
 import org.jooq.Index;
 import org.jooq.OrderField;
 import org.jooq.impl.Internal;
-
-import javax.annotation.Generated;
 
 
 /**

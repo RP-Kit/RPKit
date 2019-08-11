@@ -6,11 +6,12 @@ package com.rpkit.craftingskill.bukkit.database.jooq.rpkit;
 
 import com.rpkit.craftingskill.bukkit.database.jooq.rpkit.tables.RpkitCraftingExperience;
 import com.rpkit.craftingskill.bukkit.database.jooq.rpkit.tables.records.RpkitCraftingExperienceRecord;
+
+import javax.annotation.Generated;
+
 import org.jooq.Identity;
 import org.jooq.UniqueKey;
 import org.jooq.impl.Internal;
-
-import javax.annotation.Generated;
 
 
 /**
