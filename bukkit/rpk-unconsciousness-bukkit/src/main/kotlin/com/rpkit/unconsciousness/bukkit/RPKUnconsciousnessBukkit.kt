@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ class RPKUnconsciousnessBukkit: RPKBukkitPlugin() {
         Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
-            RPKUnconsciousnessProviderImpl(this)
+                RPKUnconsciousnessProviderImpl(this)
         )
         object: BukkitRunnable() {
             override fun run() {
@@ -92,7 +92,7 @@ class RPKUnconsciousnessBukkit: RPKBukkitPlugin() {
         messages.setDefault("wake-success", "&aWoke \$character.")
         messages.setDefault("wake-already-awake", "&c\$character is already awake.")
         messages.setDefault("no-character-other", "&c\$player does not have an active character.")
-        messages.setDefault("no-minecraft-profile-other", "&c\$player does not ")
+        messages.setDefault("no-minecraft-profile-other", "&c\$player does not have a Minecraft profile.")
     }
 
 }
