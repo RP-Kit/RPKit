@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,9 @@ class RPKChatBukkit: RPKBukkitPlugin() {
 
     override fun onDisable() {
         if (config.getBoolean("irc.enabled")) {
-            core.serviceManager.getServiceProvider(RPKIRCProvider::class).ircBot.sendIRC().quitServer(messages["irc-quit"])
+            val ircBot = core.serviceManager.getServiceProvider(RPKIRCProvider::class).ircBot
+            ircBot.stopBotReconnect()
+            ircBot.sendIRC().quitServer(messages["irc-quit"])
         }
     }
 
