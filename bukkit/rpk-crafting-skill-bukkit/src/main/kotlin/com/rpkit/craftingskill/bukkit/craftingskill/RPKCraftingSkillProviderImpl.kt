@@ -47,15 +47,16 @@ class RPKCraftingSkillProviderImpl(private val plugin: RPKCraftingSkillBukkit): 
                 ?.max()
                 ?: 0
         if (maxExperience == 0) return
+        val craftingExperienceTable = plugin.core.database.getTable(RPKCraftingExperienceTable::class)
         val event = RPKBukkitCraftingSkillExperienceChangeEvent(
                 character,
                 action,
                 material,
+                craftingExperienceTable.get(character, action, material)?.experience ?: 0,
                 experience
         )
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        val craftingExperienceTable = plugin.core.database.getTable(RPKCraftingExperienceTable::class)
         var craftingExperience = craftingExperienceTable
                 .get(event.character, event.action, event.material)
         if (craftingExperience == null) {

@@ -21,6 +21,9 @@ import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.database.table.RPKCharacterProfessionChangeCooldownTable
 import com.rpkit.professions.bukkit.database.table.RPKCharacterProfessionExperienceTable
 import com.rpkit.professions.bukkit.database.table.RPKCharacterProfessionTable
+import com.rpkit.professions.bukkit.event.profession.RPKBukkitProfessionAddEvent
+import com.rpkit.professions.bukkit.event.profession.RPKBukkitProfessionExperienceChangeEvent
+import com.rpkit.professions.bukkit.event.profession.RPKBukkitProfessionRemoveEvent
 import java.time.Duration
 import java.time.LocalDateTime
 
@@ -52,19 +55,27 @@ class RPKProfessionProviderImpl(val plugin: RPKProfessionsBukkit): RPKProfession
 
     override fun addProfession(character: RPKCharacter, profession: RPKProfession) {
         if (!getProfessions(character).contains(profession)) {
+            val event = RPKBukkitProfessionAddEvent(character, profession)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
             plugin.core.database.getTable(RPKCharacterProfessionTable::class)
                     .insert(RPKCharacterProfession(
-                            character = character,
-                            profession = profession
+                            character = event.character,
+                            profession = event.profession
                     ))
         }
     }
 
     override fun removeProfession(character: RPKCharacter, profession: RPKProfession) {
-        val characterProfessionTable = plugin.core.database.getTable(RPKCharacterProfessionTable::class)
-        val characterProfession = characterProfessionTable.get(character, profession)
-        if (characterProfession != null) {
-            characterProfessionTable.delete(characterProfession)
+        if (getProfessions(character).contains(profession)) {
+            val event = RPKBukkitProfessionRemoveEvent(character, profession)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
+            val characterProfessionTable = plugin.core.database.getTable(RPKCharacterProfessionTable::class)
+            val characterProfession = characterProfessionTable.get(event.character, event.profession)
+            if (characterProfession != null) {
+                characterProfessionTable.delete(characterProfession)
+            }
         }
     }
 
@@ -87,21 +98,29 @@ class RPKProfessionProviderImpl(val plugin: RPKProfessionsBukkit): RPKProfession
     }
 
     override fun setProfessionExperience(character: RPKCharacter, profession: RPKProfession, experience: Int) {
-        if (experience > profession.getExperienceNeededForLevel(profession.maxLevel)) {
-            setProfessionLevel(character, profession, profession.maxLevel)
+        val event = RPKBukkitProfessionExperienceChangeEvent(
+                character,
+                profession,
+                getProfessionExperience(character, profession),
+                experience
+        )
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        if (event.experience > profession.getExperienceNeededForLevel(event.profession.maxLevel)) {
+            setProfessionLevel(event.character, event.profession, event.profession.maxLevel)
             return
         }
         val characterProfessionExperienceTable = plugin.core.database.getTable(RPKCharacterProfessionExperienceTable::class)
-        var characterProfessionExperience = characterProfessionExperienceTable.get(character, profession)
+        var characterProfessionExperience = characterProfessionExperienceTable.get(event.character, event.profession)
         if (characterProfessionExperience == null) {
             characterProfessionExperience = RPKCharacterProfessionExperience(
-                    character = character,
-                    profession = profession,
-                    experience = experience
+                    character = event.character,
+                    profession = event.profession,
+                    experience = event.experience
             )
             characterProfessionExperienceTable.insert(characterProfessionExperience)
         } else {
-            characterProfessionExperience.experience = experience
+            characterProfessionExperience.experience = event.experience
             characterProfessionExperienceTable.update(characterProfessionExperience)
         }
     }
