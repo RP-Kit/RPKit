@@ -21,6 +21,7 @@ import com.rpkit.core.exception.UnregisteredServiceException
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.*
 import com.rpkit.craftingskill.bukkit.database.table.RPKCraftingExperienceTable
+import com.rpkit.craftingskill.bukkit.event.craftingskill.RPKBukkitCraftingSkillExperienceChangeEvent
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityProvider
 import org.bukkit.Material
@@ -46,20 +47,27 @@ class RPKCraftingSkillProviderImpl(private val plugin: RPKCraftingSkillBukkit): 
                 ?.max()
                 ?: 0
         if (maxExperience == 0) return
-
+        val event = RPKBukkitCraftingSkillExperienceChangeEvent(
+                character,
+                action,
+                material,
+                experience
+        )
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         val craftingExperienceTable = plugin.core.database.getTable(RPKCraftingExperienceTable::class)
         var craftingExperience = craftingExperienceTable
-                .get(character, action, material)
+                .get(event.character, event.action, event.material)
         if (craftingExperience == null) {
             craftingExperience = RPKCraftingExperienceValue(
-                    character = character,
-                    action = action,
-                    material = material,
-                    experience = min(experience, maxExperience)
+                    character = event.character,
+                    action = event.action,
+                    material = event.material,
+                    experience = min(event.experience, maxExperience)
             )
             craftingExperienceTable.insert(craftingExperience)
         } else {
-            craftingExperience.experience = min(experience, maxExperience)
+            craftingExperience.experience = min(event.experience, maxExperience)
             craftingExperienceTable.update(craftingExperience)
         }
     }
