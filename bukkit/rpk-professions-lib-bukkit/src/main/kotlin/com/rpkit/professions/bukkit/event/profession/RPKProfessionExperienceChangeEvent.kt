@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package com.rpkit.craftingskill.bukkit.event.craftingskill
+package com.rpkit.professions.bukkit.event.profession
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.event.character.RPKCharacterEvent
-import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction
-import org.bukkit.Material
 
 
-interface RPKCraftingSkillExperienceChangeEvent: RPKCharacterEvent {
+interface RPKProfessionExperienceChangeEvent: RPKCharacterEvent, RPKProfessionEvent {
 
-    override val character: RPKCharacter
-    val action: RPKCraftingAction
-    val material: Material
+    override val character: RPKCharacter?
     val oldExperience: Int
     var experience: Int
 

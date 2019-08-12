@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package com.rpkit.craftingskill.bukkit.event.craftingskill
+package com.rpkit.professions.bukkit.event.profession
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
-import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction
-import org.bukkit.Material
+import com.rpkit.professions.bukkit.profession.RPKProfession
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 
 
-class RPKBukkitCraftingSkillExperienceChangeEvent(
+class RPKBukkitProfessionExperienceChangeEvent(
         override val character: RPKCharacter,
-        override val action: RPKCraftingAction,
-        override val material: Material,
+        override val profession: RPKProfession,
         override val oldExperience: Int,
         override var experience: Int
-): RPKBukkitEvent(), RPKCraftingSkillExperienceChangeEvent, Cancellable {
+): RPKBukkitEvent(), RPKProfessionExperienceChangeEvent, Cancellable {
 
     companion object {
         @JvmStatic val handlerList = HandlerList()
