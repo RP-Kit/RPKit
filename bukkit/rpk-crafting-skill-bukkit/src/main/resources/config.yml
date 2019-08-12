@@ -111,4 +111,9 @@ mining:
             amount: 0.5
         '200':
             amount: 1
+caching:
+    rpkit_crafting_experience_value:
+        id:
+            enabled: true
+            size: 20
 

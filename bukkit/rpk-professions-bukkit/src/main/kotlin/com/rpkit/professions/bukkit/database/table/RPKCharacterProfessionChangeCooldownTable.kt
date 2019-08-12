@@ -37,18 +37,18 @@ class RPKCharacterProfessionChangeCooldownTable(
         RPKCharacterProfessionChangeCooldown::class
 ) {
 
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_character_profession_change.id.enabled")) {
-        database.cacheManager.createCache("rpk-professions-bukkit.rpkit_character_profession_change.id", CacheConfigurationBuilder
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_character_profession_change_cooldown.id.enabled")) {
+        database.cacheManager.createCache("rpk-professions-bukkit.rpkit_character_profession_change_cooldown.id", CacheConfigurationBuilder
                 .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacterProfessionChangeCooldown::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character_profession_change.id.size"))).build())
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character_profession_change_cooldown.id.size"))).build())
     } else {
         null
     }
 
-    private val characterCache = if (plugin.config.getBoolean("caching.rpkit_character_profession_change.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-professions-bukkit.rpkit_character_profession_change.character_id", CacheConfigurationBuilder
+    private val characterCache = if (plugin.config.getBoolean("caching.rpkit_character_profession_change_cooldown.character_id.enabled")) {
+        database.cacheManager.createCache("rpk-professions-bukkit.rpkit_character_profession_change_cooldown.character_id", CacheConfigurationBuilder
                 .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacterProfessionChangeCooldown::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character_profession_change.character_id.size"))).build())
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character_profession_change_cooldown.character_id.size"))).build())
     } else {
         null
     }

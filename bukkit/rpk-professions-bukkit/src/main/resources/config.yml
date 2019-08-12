@@ -67,3 +67,26 @@ professions:
 # 432000 seconds = 5 days
 profession-change-cooldown: 432000
 max-professions: 2
+caching:
+    rpkit_character_profession_change_cooldown:
+        id:
+            enabled: true
+            size: 20
+        character_id:
+            enabled: true
+            size: 20
+    rpkit_character_profession_experience:
+        id:
+            enabled: true
+            size: 20
+    rpkit_character_profession:
+        id:
+            enabled: true
+            size: 20
+    rpkit_profession_hidden:
+        id:
+            enabled: true
+            size: 20
+        character_id:
+            enabled:  true
+            size: 20

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.jooq.impl.SQLDataType.VARCHAR
 class RPKCraftingExperienceTable(database: Database, private val plugin: RPKCraftingSkillBukkit): Table<RPKCraftingExperienceValue>(database, RPKCraftingExperienceValue::class) {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_crafting_experience_value.id.enabled")) {
-        database.cacheManager.createCache("rpk-shops-bukkit.rpkit_crafting_experience_value.id", CacheConfigurationBuilder
+        database.cacheManager.createCache("rpk-crafting-skill-bukkit.rpkit_crafting_experience_value.id", CacheConfigurationBuilder
                 .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCraftingExperienceValue::class.java,
                         ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_crafting_experience_value.id.size"))).build())
     } else {
