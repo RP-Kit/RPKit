@@ -21,7 +21,7 @@ properties.load(new FileInputStream(propertiesFile))
 def repoUserName = properties.getProperty("repo-username")
 def repoPassword = properties.getProperty("repo-password")
 
-def mysqlConnectorVersion = "8.0.15"
+def mysqlConnectorVersion = "8.0.17"
 def sqliteConnectorVersion = "3.25.2"
 def commonsCodecVersion = "1.12"
 def commonsLangVersion = "2.6"
