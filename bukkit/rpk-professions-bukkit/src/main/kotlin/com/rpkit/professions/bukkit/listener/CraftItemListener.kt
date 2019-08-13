@@ -17,8 +17,6 @@
 package com.rpkit.professions.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.core.bukkit.util.addLore
-import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.profession.RPKCraftingAction
@@ -62,9 +60,6 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit): Listener {
             val amount = professionLevels.entries
                     .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.CRAFT, itemType, level) }
                     .firstOrNull() ?: plugin.config.getDouble("default.crafting.$itemType.amount", 1.0)
-            val potentialQualities = professionLevels.entries
-                    .mapNotNull { (profession, level) -> profession.getQualityFor(RPKCraftingAction.CRAFT, itemType, level) }
-            val quality = potentialQualities.maxBy(RPKItemQuality::durabilityModifier)
             if (amount > 1) {
                 amountCrafted *= amount.roundToInt()
             } else if (amount < 1) {
@@ -75,11 +70,13 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit): Listener {
                     }
                 }
             }
-            val item = ItemStack(event.recipe.result)
-            item.amount = amountCrafted
-            if (quality != null) {
-                item.addLore(quality.lore)
+            val currentItem = event.currentItem
+            val item = if (currentItem == null) {
+                ItemStack(event.recipe.result)
+            } else {
+                ItemStack(currentItem)
             }
+            item.amount = amountCrafted
             event.isCancelled = true
             if (event.isShiftClick) {
                 if (amountCrafted > 0) {
