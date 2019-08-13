@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ def repoUserName = properties.getProperty("repo-username")
 def repoPassword = properties.getProperty("repo-password")
 
 dependencies {
-    compile group: "org.spigotmc", name: "spigot-api", version: "1.13.2-R0.1-SNAPSHOT"
+    compile group: "org.spigotmc", name: "spigot-api", version: "1.14.4-R0.1-SNAPSHOT"
     compile group: "net.milkbowl.vault", name: "VaultAPI", version: "1.6"
     compile group: "org.bstats", name: "bstats-bukkit", version: "1.4"
     compile project(":rpk-core")
