@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,12 @@ class CraftItemListener(private val plugin: RPKCraftingSkillBukkit): Listener {
                     }
                 }
             }
-            val item = ItemStack(event.recipe.result)
+            val currentItem = event.currentItem
+            val item = if (currentItem == null) {
+                ItemStack(event.recipe.result)
+            } else {
+                ItemStack(currentItem)
+            }
             item.amount = amountCrafted
             event.isCancelled = true
             if (event.isShiftClick) {
