@@ -23,7 +23,7 @@ def repoPassword = properties.getProperty("repo-password")
 
 def mysqlConnectorVersion = "8.0.17"
 def sqliteConnectorVersion = "3.28.0"
-def commonsCodecVersion = "1.12"
+def commonsCodecVersion = "1.13"
 def commonsLangVersion = "2.6"
 def guavaVersion = "27.0.1-jre"
 def gsonVersion = "2.8.5"
