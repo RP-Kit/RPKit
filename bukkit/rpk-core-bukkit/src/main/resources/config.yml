@@ -5,3 +5,4 @@ database:
     dialect: MYSQL
 web-server:
     port: 8089
+    title: RPKit

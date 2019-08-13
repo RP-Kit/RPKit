@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,11 @@ import org.eclipse.jetty.server.Server
  * Represents the web component of RPK.
  *
  * @property server The [Server] instance
+ * @property title The title to be displayed on each page
  * @property navigationBar A list of navigation links which will be displayed on the navigation bar on all pages.
  */
 class Web(
         val server: Server,
+        val title: String,
         val navigationBar: MutableList<NavigationLink>
 )

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ class PlayersServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
         scanner.close()
         val velocityContext = VelocityContext()
         val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-        velocityContext.put("server", plugin.server.serverName)
+        velocityContext.put("server", plugin.core.web.title)
         velocityContext.put("navigationBar", plugin.core.web.navigationBar)
         velocityContext.put("player", playerProvider.getPlayer(InetAddress.getByName(req.remoteAddr)))
         velocityContext.put("onlinePlayers", plugin.server.onlinePlayers.map { player -> playerProvider.getPlayer(player) }.toTypedArray())

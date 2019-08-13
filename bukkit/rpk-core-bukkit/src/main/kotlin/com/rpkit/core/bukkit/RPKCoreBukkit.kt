@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
                         databasePassword,
                         SQLDialect.valueOf(databaseDialect)
                 ),
-                Web(webServer, mutableListOf(NavigationLink("Home", "/")))
+                Web(webServer, config.getString("web-server.title") ?: "RPKit", mutableListOf(NavigationLink("Home", "/")))
         )
         try {
             createTables(core.database)
