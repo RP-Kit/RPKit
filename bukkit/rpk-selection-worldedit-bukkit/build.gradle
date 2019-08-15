@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ dependencies {
     compile project(":bukkit:rpk-core-bukkit")
     compile project(":bukkit:rpk-player-lib-bukkit")
     compile project(":bukkit:rpk-selection-lib-bukkit")
-    compile group: "com.sk89q.worldedit", name: "worldedit-bukkit", version: "6.1.5"
-    compile group: "com.sk89q.worldedit", name: "worldedit-core", version: "6.1.4-SNAPSHOT"
+    compile group: "com.sk89q.worldedit", name: "worldedit-bukkit", version: "7.0.1"
+    compile group: "com.sk89q.worldedit", name: "worldedit-core", version: "7.0.1"
 }
 
 processResources {
