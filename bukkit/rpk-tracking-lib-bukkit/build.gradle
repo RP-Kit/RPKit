@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ artifacts {
 uploadArchives {
     repositories.mavenDeployer {
 
-        repository(url: "https://repo.seventh-root.com/artifactory/libs-release-local/") {
+        repository(url: "https://repo.rpkit.com/repository/maven-releases/") {
             authentication(userName: repoUserName, password: repoPassword)
         }
 
