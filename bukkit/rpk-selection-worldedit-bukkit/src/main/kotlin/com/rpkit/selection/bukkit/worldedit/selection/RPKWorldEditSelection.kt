@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,68 +18,94 @@ package com.rpkit.selection.bukkit.worldedit.selection
 
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.selection.bukkit.selection.RPKSelection
-import com.sk89q.worldedit.bukkit.BukkitUtil
-import com.sk89q.worldedit.bukkit.selections.Selection
+import com.sk89q.worldedit.IncompleteRegionException
+import com.sk89q.worldedit.LocalSession
+import com.sk89q.worldedit.bukkit.BukkitAdapter
+import com.sk89q.worldedit.math.BlockVector3
+import com.sk89q.worldedit.regions.selector.CuboidRegionSelector
 import com.sk89q.worldedit.regions.selector.limit.PermissiveSelectorLimits
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.block.Block
+import kotlin.math.floor
 
 
 class RPKWorldEditSelection(
         override var id: Int = 0,
         override val minecraftProfile: RPKMinecraftProfile,
-        val selection: Selection?
+        val session: LocalSession?
 ): RPKSelection {
 
     override var point1: Block
         get() {
-            if (selection == null) {
+            return if (session == null) {
                 val world = Bukkit.getWorlds()[0]
-                return world.getBlockAt(world.spawnLocation)
+                world.getBlockAt(world.spawnLocation)
             } else {
-                val block = selection.world?.getBlockAt(
-                        selection.nativeMinimumPoint.blockX,
-                        selection.nativeMinimumPoint.blockY,
-                        selection.nativeMinimumPoint.blockZ
+                val world = BukkitAdapter.adapt(session.selectionWorld)
+                val primaryPosition = try {
+                    session.getRegionSelector(session.selectionWorld).primaryPosition.toVector3()
+                } catch (exception: IncompleteRegionException) {
+                    BukkitAdapter.adapt(world.spawnLocation).toVector()
+                }
+                world.getBlockAt(
+                        floor(primaryPosition.x).toInt(),
+                        floor(primaryPosition.y).toInt(),
+                        floor(primaryPosition.z).toInt()
                 )
-                if (block != null) return block
-                val world = Bukkit.getWorlds()[0]
-                return world.getBlockAt(world.spawnLocation)
             }
         }
         set(value) {
-            selection?.regionSelector?.selectPrimary(BukkitUtil.toVector(value), PermissiveSelectorLimits.getInstance())
+            val selector = session?.getRegionSelector(BukkitAdapter.adapt(value.world))
+            selector?.selectPrimary(
+                    BlockVector3.at(
+                            value.x,
+                            value.y,
+                            value.z
+                    ),
+                    PermissiveSelectorLimits.getInstance()
+            )
         }
 
     override var point2: Block
         get() {
-            if (selection == null) {
+            return if (session == null) {
                 val world = Bukkit.getWorlds()[0]
-                return world.getBlockAt(world.spawnLocation)
+                world.getBlockAt(world.spawnLocation)
             } else {
-                val block = selection.world?.getBlockAt(
-                        selection.nativeMaximumPoint.blockX,
-                        selection.nativeMaximumPoint.blockY,
-                        selection.nativeMaximumPoint.blockZ
+                val world = BukkitAdapter.adapt(session.selectionWorld)
+                val secondaryPosition = try {
+                    (session.getRegionSelector(session.selectionWorld) as? CuboidRegionSelector)?.region?.pos2?.toVector3()
+                } catch (exception: IncompleteRegionException) {
+                    null
+                } ?: BukkitAdapter.adapt(world.spawnLocation).toVector()
+                world.getBlockAt(
+                        floor(secondaryPosition.x).toInt(),
+                        floor(secondaryPosition.y).toInt(),
+                        floor(secondaryPosition.z).toInt()
                 )
-                if (block != null) return block
-                val world = Bukkit.getServer().worlds[0]
-                return world.getBlockAt(world.spawnLocation)
             }
         }
         set(value) {
-            selection?.regionSelector?.selectSecondary(BukkitUtil.toVector(value), PermissiveSelectorLimits.getInstance())
+            val selector = session?.getRegionSelector(BukkitAdapter.adapt(value.world))
+            selector?.selectPrimary(
+                    BlockVector3.at(
+                            value.x,
+                            value.y,
+                            value.z
+                    ),
+                    PermissiveSelectorLimits.getInstance()
+            )
         }
 
     override var world: World
-        get() = selection?.world ?: Bukkit.getWorlds()[0]
+        get() = BukkitAdapter.adapt(session?.selectionWorld) ?: Bukkit.getWorlds()[0]
         set(value) {
-            selection?.regionSelector?.world = BukkitUtil.getLocalWorld(value)
+
         }
 
     override fun contains(block: Block): Boolean {
-        return selection?.contains(block.location) ?: false
+        return session?.getSelection(session.selectionWorld)?.contains(BukkitAdapter.asBlockVector(block.location)) ?: false
     }
 
 }

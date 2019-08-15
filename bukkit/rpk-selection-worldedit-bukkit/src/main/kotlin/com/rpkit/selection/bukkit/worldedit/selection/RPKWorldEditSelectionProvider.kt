@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ class RPKWorldEditSelectionProvider(private val plugin: RPKSelectionWorldEditBuk
     override fun getSelection(minecraftProfile: RPKMinecraftProfile): RPKSelection {
         val worldEdit = plugin.server.pluginManager.getPlugin("WorldEdit") as WorldEditPlugin
         val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID) ?: return RPKWorldEditSelection(0, minecraftProfile, null)
-        val selection = worldEdit.getSelection(bukkitPlayer)
-        return RPKWorldEditSelection(0, minecraftProfile, selection)
+        val session = worldEdit.getSession(bukkitPlayer)
+        return RPKWorldEditSelection(0, minecraftProfile, session)
     }
 
     override fun updateSelection(selection: RPKSelection) {
