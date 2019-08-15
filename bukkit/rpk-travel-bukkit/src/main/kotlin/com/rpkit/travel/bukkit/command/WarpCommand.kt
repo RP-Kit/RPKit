@@ -1,6 +1,8 @@
 package com.rpkit.travel.bukkit.command
 
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.travel.bukkit.RPKTravelBukkit
+import com.rpkit.warp.bukkit.event.warp.RPKBukkitWarpUseEvent
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import com.rpkit.warp.bukkit.warp.RPKWarpProvider
 import org.bukkit.command.Command
@@ -18,7 +20,16 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
                 if (args.isNotEmpty()) {
                     val warp = warpProvider.getWarp(args[0].toLowerCase())
                     if (warp != null) {
-                        sender.teleport(warp.location)
+                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
+                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+                        if (minecraftProfile == null) {
+                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                            return true
+                        }
+                        val event = RPKBukkitWarpUseEvent(warp, minecraftProfile)
+                        plugin.server.pluginManager.callEvent(event)
+                        if (event.isCancelled) return true
+                        sender.teleport(event.warp.location)
                         sender.sendMessage(plugin.messages["warp-valid", mapOf(
                                 Pair("warp", warp.name)
                         )])

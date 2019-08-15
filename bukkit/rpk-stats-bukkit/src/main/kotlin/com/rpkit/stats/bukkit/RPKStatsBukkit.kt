@@ -28,6 +28,7 @@ import com.rpkit.stats.bukkit.command.stats.StatsCommand
 import com.rpkit.stats.bukkit.stat.RPKStatProviderImpl
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
 import com.rpkit.stats.bukkit.stat.RPKStatVariableProviderImpl
+import org.bstats.bukkit.Metrics
 import org.bukkit.attribute.Attribute
 import org.bukkit.inventory.ItemStack
 
@@ -37,6 +38,7 @@ import org.bukkit.inventory.ItemStack
 class RPKStatsBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         val statVariableProvider = RPKStatVariableProviderImpl(this)
         val statProvider = RPKStatProviderImpl(this)

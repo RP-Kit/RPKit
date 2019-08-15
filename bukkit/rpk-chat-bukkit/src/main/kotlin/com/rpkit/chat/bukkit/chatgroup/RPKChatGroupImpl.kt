@@ -20,6 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.database.table.ChatGroupInviteTable
 import com.rpkit.chat.bukkit.database.table.ChatGroupMemberTable
+import com.rpkit.chat.bukkit.event.chatgroup.*
 import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
@@ -66,7 +67,15 @@ class RPKChatGroupImpl(
 
     override fun addMember(minecraftProfile: RPKMinecraftProfile) {
         if (!memberMinecraftProfiles.contains(minecraftProfile)) {
-            plugin.core.database.getTable(ChatGroupMemberTable::class).insert(ChatGroupMember(chatGroup = this, minecraftProfile = minecraftProfile))
+            val event = RPKBukkitChatGroupJoinEvent(minecraftProfile, this)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
+            plugin.core.database.getTable(ChatGroupMemberTable::class).insert(
+                    ChatGroupMember(
+                            chatGroup = event.chatGroup,
+                            minecraftProfile = event.minecraftProfile
+                    )
+            )
         }
     }
 
@@ -82,8 +91,16 @@ class RPKChatGroupImpl(
     }
 
     override fun removeMember(minecraftProfile: RPKMinecraftProfile) {
+        val event = RPKBukkitChatGroupLeaveEvent(
+                minecraftProfile,
+                this
+        )
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         val chatGroupMemberTable = plugin.core.database.getTable(ChatGroupMemberTable::class)
-        chatGroupMemberTable.get(minecraftProfile).filter { member -> member.chatGroup == this }.forEach { member -> chatGroupMemberTable.delete(member) }
+        chatGroupMemberTable.get(event.minecraftProfile)
+                .filter { member -> member.chatGroup == event.chatGroup }
+                .forEach { member -> chatGroupMemberTable.delete(member) }
     }
 
     override fun invite(player: RPKPlayer) {
@@ -99,7 +116,15 @@ class RPKChatGroupImpl(
 
     override fun invite(minecraftProfile: RPKMinecraftProfile) {
         if (!invitedMinecraftProfiles.contains(minecraftProfile)) {
-            plugin.core.database.getTable(ChatGroupInviteTable::class).insert(ChatGroupInvite(chatGroup = this, minecraftProfile = minecraftProfile))
+            val event = RPKBukkitChatGroupInviteEvent(minecraftProfile, this)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
+            plugin.core.database.getTable(ChatGroupInviteTable::class).insert(
+                    ChatGroupInvite(
+                            chatGroup = event.chatGroup,
+                            minecraftProfile = event.minecraftProfile
+                    )
+            )
         }
     }
 
@@ -115,8 +140,13 @@ class RPKChatGroupImpl(
     }
 
     override fun uninvite(minecraftProfile: RPKMinecraftProfile) {
+        val event = RPKBukkitChatGroupUninviteEvent(minecraftProfile, this)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         val chatGroupInviteTable = plugin.core.database.getTable(ChatGroupInviteTable::class)
-        chatGroupInviteTable.get(minecraftProfile).filter { invite -> invite.chatGroup == this }.forEach { invite -> chatGroupInviteTable.delete(invite) }
+        chatGroupInviteTable.get(event.minecraftProfile)
+                .filter { invite -> invite.chatGroup == event.chatGroup }
+                .forEach { invite -> chatGroupInviteTable.delete(invite) }
     }
 
     override fun sendMessage(sender: RPKPlayer, message: String) {
@@ -131,6 +161,9 @@ class RPKChatGroupImpl(
     }
 
     override fun sendMessage(sender: RPKMinecraftProfile, message: String) {
+        val event = RPKBukkitChatGroupMessageEvent(sender, this, message)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         val prefixProvider = plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)

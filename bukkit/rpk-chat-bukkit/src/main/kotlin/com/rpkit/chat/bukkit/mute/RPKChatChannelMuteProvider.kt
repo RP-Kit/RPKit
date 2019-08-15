@@ -19,6 +19,8 @@ package com.rpkit.chat.bukkit.mute
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.chat.bukkit.database.table.RPKChatChannelMuteTable
+import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelMuteEvent
+import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelUnmuteEvent
 import com.rpkit.core.service.ServiceProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
@@ -54,10 +56,13 @@ class RPKChatChannelMuteProvider(private val plugin: RPKChatBukkit): ServiceProv
      */
     fun addChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel) {
         if (!hasMinecraftProfileMutedChatChannel(minecraftProfile, chatChannel)) {
+            val event = RPKBukkitChatChannelMuteEvent(minecraftProfile, chatChannel)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
             plugin.core.database.getTable(RPKChatChannelMuteTable::class).insert(
                     RPKChatChannelMute(
-                            minecraftProfile = minecraftProfile,
-                            chatChannel = chatChannel
+                            minecraftProfile = event.minecraftProfile,
+                            chatChannel = event.chatChannel
                     )
             )
         }
@@ -87,8 +92,11 @@ class RPKChatChannelMuteProvider(private val plugin: RPKChatBukkit): ServiceProv
      * @param chatChannel The chat channel
      */
     fun removeChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel) {
+        val event = RPKBukkitChatChannelUnmuteEvent(minecraftProfile, chatChannel)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         val chatChannelMuteTable = plugin.core.database.getTable(RPKChatChannelMuteTable::class)
-        val chatChannelMute = chatChannelMuteTable.get(minecraftProfile, chatChannel)
+        val chatChannelMute = chatChannelMuteTable.get(event.minecraftProfile, event.chatChannel)
         if (chatChannelMute != null) {
             chatChannelMuteTable.delete(chatChannelMute)
         }

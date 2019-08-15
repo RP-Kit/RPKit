@@ -20,6 +20,10 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineComponent
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
+import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelCreateEvent
+import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelDeleteEvent
+import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelSwitchEvent
+import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelUpdateEvent
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
@@ -59,15 +63,22 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
     }
 
     override fun addChatChannel(chatChannel: RPKChatChannel) {
-        chatChannels.add(chatChannel)
+        val event = RPKBukkitChatChannelCreateEvent(chatChannel)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        chatChannels.add(event.chatChannel)
     }
 
     override fun removeChatChannel(chatChannel: RPKChatChannel) {
-        chatChannels.remove(chatChannel)
+        val event = RPKBukkitChatChannelDeleteEvent(chatChannel)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        chatChannels.remove(event.chatChannel)
     }
 
     override fun updateChatChannel(chatChannel: RPKChatChannel) {
-
+        val event = RPKBukkitChatChannelUpdateEvent(chatChannel)
+        plugin.server.pluginManager.callEvent(event)
     }
 
     override fun getPlayerChannel(player: RPKPlayer): RPKChatChannel? {
@@ -89,14 +100,19 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
     }
 
     override fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?) {
-        val oldChannel = getMinecraftProfileChannel(minecraftProfile)
+        var oldChannel = getMinecraftProfileChannel(minecraftProfile)
+        val event = RPKBukkitChatChannelSwitchEvent(minecraftProfile, oldChannel, channel)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        oldChannel = event.oldChannel
         if (oldChannel != null) {
             oldChannel.removeSpeaker(minecraftProfile)
             updateChatChannel(oldChannel)
         }
-        if (channel != null) {
-            channel.addSpeaker(minecraftProfile)
-            updateChatChannel(channel)
+        val chatChannel = event.chatChannel
+        if (chatChannel != null) {
+            chatChannel.addSpeaker(minecraftProfile)
+            updateChatChannel(chatChannel)
         }
     }
 

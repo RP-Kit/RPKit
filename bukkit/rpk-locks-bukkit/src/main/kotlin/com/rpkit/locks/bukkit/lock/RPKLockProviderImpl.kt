@@ -7,6 +7,8 @@ import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.database.table.RPKLockedBlockTable
 import com.rpkit.locks.bukkit.database.table.RPKPlayerGettingKeyTable
 import com.rpkit.locks.bukkit.database.table.RPKPlayerUnclaimingTable
+import com.rpkit.locks.bukkit.event.lock.RPKBukkitBlockLockEvent
+import com.rpkit.locks.bukkit.event.lock.RPKBukkitBlockUnlockEvent
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
@@ -29,12 +31,18 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
     override fun setLocked(block: Block, locked: Boolean) {
         val lockedBlockTable = plugin.core.database.getTable(RPKLockedBlockTable::class)
         if (locked) {
-            val lockedBlock = lockedBlockTable.get(block)
+            val event = RPKBukkitBlockLockEvent(block)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
+            val lockedBlock = lockedBlockTable.get(event.block)
             if (lockedBlock == null) {
-                lockedBlockTable.insert(RPKLockedBlock(block = block))
+                lockedBlockTable.insert(RPKLockedBlock(block = event.block))
             }
         } else {
-            val lockedBlock = lockedBlockTable.get(block)
+            val event = RPKBukkitBlockUnlockEvent(block)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
+            val lockedBlock = lockedBlockTable.get(event.block)
             if (lockedBlock != null) {
                 lockedBlockTable.delete(lockedBlock)
             }

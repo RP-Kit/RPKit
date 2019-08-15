@@ -18,6 +18,9 @@ package com.rpkit.economy.bukkit.currency
 
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.database.table.RPKCurrencyTable
+import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyCreateEvent
+import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyDeleteEvent
+import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyUpdateEvent
 
 /**
  * Currency provider implementation.
@@ -36,11 +39,24 @@ class RPKCurrencyProviderImpl(private val plugin: RPKEconomyBukkit): RPKCurrency
         get() = plugin.core.database.getTable(RPKCurrencyTable::class).getAll()
 
     override fun addCurrency(currency: RPKCurrency) {
-        plugin.core.database.getTable(RPKCurrencyTable::class).insert(currency)
+        val event = RPKBukkitCurrencyCreateEvent(currency)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKCurrencyTable::class).insert(event.currency)
     }
 
     override fun removeCurrency(currency: RPKCurrency) {
-        plugin.core.database.getTable(RPKCurrencyTable::class).delete(currency)
+        val event = RPKBukkitCurrencyDeleteEvent(currency)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKCurrencyTable::class).delete(event.currency)
+    }
+
+    override fun updateCurrency(currency: RPKCurrency) {
+        val event = RPKBukkitCurrencyUpdateEvent(currency)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKCurrencyTable::class).update(event.currency)
     }
 
     override val defaultCurrency: RPKCurrency?

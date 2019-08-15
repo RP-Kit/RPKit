@@ -27,22 +27,25 @@ interface RPKAuctionProvider: ServiceProvider {
      * Adds an auction to be tracked by this auction provider.
      *
      * @param auction The auction to add
+     * @return Whether adding the auction was successful
      */
-    fun addAuction(auction: RPKAuction)
+    fun addAuction(auction: RPKAuction): Boolean
 
     /**
      * Updates an auction's state in data storage.
      *
      * @param auction The auction to update
+     * @return Whether updating the auction was successful
      */
-    fun updateAuction(auction: RPKAuction)
+    fun updateAuction(auction: RPKAuction): Boolean
 
     /**
      * Removes an auction from being tracked by this auction provider.
      *
      * @param auction The auction to update
+     * @return Whether removing the auction was successful
      */
-    fun removeAuction(auction: RPKAuction)
+    fun removeAuction(auction: RPKAuction): Boolean
 
     /**
      * Gets an auction by ID.

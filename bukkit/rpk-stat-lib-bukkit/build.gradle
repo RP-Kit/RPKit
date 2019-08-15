@@ -1,0 +1,65 @@
+/*
+ * Copyright 2019 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import org.apache.tools.ant.filters.ReplaceTokens
+
+File propertiesFile = new File("repo.properties")
+Properties properties = new Properties()
+properties.load(new FileInputStream(propertiesFile))
+def repoUserName = properties.getProperty("repo-username")
+def repoPassword = properties.getProperty("repo-password")
+
+dependencies {
+    compile project(":bukkit:rpk-core-bukkit")
+    compile project(":bukkit:rpk-character-lib-bukkit")
+}
+
+processResources {
+    filter ReplaceTokens, tokens: [
+            "version": version
+    ]
+}
+
+apply plugin: "com.github.johnrengelman.shadow"
+
+shadowJar {
+
+    dependencies {
+        include(dependency("org.bstats:bstats-bukkit"))
+    }
+
+    relocate "org.bstats", "com.rpkit.stats.bukkit.shadow.lib.org.bstats"
+
+    classifier = ""
+}
+
+artifacts {
+    archives shadowJar
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+
+        repository(url: "https://repo.rpkit.com/repository/maven-releases/") {
+            authentication(userName: repoUserName, password: repoPassword)
+        }
+
+        pom.version = project(":bukkit:rpk-stat-lib-bukkit").version
+        pom.artifactId = project(":bukkit:rpk-stat-lib-bukkit").name
+        pom.groupId = project(":bukkit:rpk-stat-lib-bukkit").group
+
+    }
+}

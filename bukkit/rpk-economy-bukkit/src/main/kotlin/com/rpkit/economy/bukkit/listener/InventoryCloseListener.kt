@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,14 @@ class InventoryCloseListener(private val plugin: RPKEconomyBukkit): Listener {
 
     @EventHandler
     fun onInventoryClose(event: InventoryCloseEvent) {
-        if (event.inventory.title.toLowerCase().contains("wallet")) {
+        if (event.view.title.toLowerCase().contains("wallet")) {
             val bukkitPlayer = event.player
             if (bukkitPlayer is Player) {
                 val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                 val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
                 val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-                val currency = currencyProvider.getCurrency(event.inventory.title.substringAfterLast("[").substringBeforeLast("]"))
+                val currency = currencyProvider.getCurrency(event.view.title.substringAfterLast("[").substringBeforeLast("]"))
                 if (currency != null) {
                     val amount = event.inventory.contents
                             .filter { item ->

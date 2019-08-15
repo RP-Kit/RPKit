@@ -1,11 +1,13 @@
 package com.rpkit.rolling.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import org.bstats.bukkit.Metrics
 
 
 class RPKRollingBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
     }
 

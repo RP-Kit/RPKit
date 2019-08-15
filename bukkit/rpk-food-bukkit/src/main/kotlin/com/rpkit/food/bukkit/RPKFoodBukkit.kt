@@ -19,6 +19,7 @@ package com.rpkit.food.bukkit
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.food.bukkit.expiry.RPKExpiryProviderImpl
 import com.rpkit.food.bukkit.listener.*
+import org.bstats.bukkit.Metrics
 
 /**
  * RPK food plugin default implementation.
@@ -26,6 +27,7 @@ import com.rpkit.food.bukkit.listener.*
 class RPKFoodBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKExpiryProviderImpl(this)

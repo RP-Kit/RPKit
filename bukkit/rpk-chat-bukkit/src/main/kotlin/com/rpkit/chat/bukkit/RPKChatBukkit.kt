@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.web.NavigationLink
+import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
@@ -60,6 +61,7 @@ import org.eclipse.jetty.servlet.ServletHolder
 class RPKChatBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         ConfigurationSerialization.registerClass(DirectedFormatComponent::class.java, "DirectedFormatComponent")
         ConfigurationSerialization.registerClass(DrunkenSlurComponent::class.java, "DrunkenSlurComponent")
         ConfigurationSerialization.registerClass(GarbleComponent::class.java, "GarbleComponent")
@@ -127,7 +129,9 @@ class RPKChatBukkit: RPKBukkitPlugin() {
 
     override fun onDisable() {
         if (config.getBoolean("irc.enabled")) {
-            core.serviceManager.getServiceProvider(RPKIRCProvider::class).ircBot.sendIRC().quitServer(messages["irc-quit"])
+            val ircBot = core.serviceManager.getServiceProvider(RPKIRCProvider::class).ircBot
+            ircBot.stopBotReconnect()
+            ircBot.sendIRC().quitServer(messages["irc-quit"])
         }
     }
 

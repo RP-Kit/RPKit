@@ -101,8 +101,9 @@ interface RPKAuction: Entity {
      * Adds a bid to the auction.
      *
      * @param bid The bid to add
+     * @return Whether adding the bid was successful
      */
-    fun addBid(bid: RPKBid)
+    fun addBid(bid: RPKBid): Boolean
 
     /**
      * Opens bidding on the auction, performing any required setup.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import com.rpkit.unconsciousness.bukkit.database.table.RPKUnconsciousStateTable
 import com.rpkit.unconsciousness.bukkit.listener.*
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProvider
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProviderImpl
+import org.bstats.bukkit.Metrics
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
@@ -32,9 +33,10 @@ import org.bukkit.scheduler.BukkitRunnable
 class RPKUnconsciousnessBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
-            RPKUnconsciousnessProviderImpl(this)
+                RPKUnconsciousnessProviderImpl(this)
         )
         object: BukkitRunnable() {
             override fun run() {
@@ -90,7 +92,7 @@ class RPKUnconsciousnessBukkit: RPKBukkitPlugin() {
         messages.setDefault("wake-success", "&aWoke \$character.")
         messages.setDefault("wake-already-awake", "&c\$character is already awake.")
         messages.setDefault("no-character-other", "&c\$player does not have an active character.")
-        messages.setDefault("no-minecraft-profile-other", "&c\$player does not ")
+        messages.setDefault("no-minecraft-profile-other", "&c\$player does not have a Minecraft profile.")
     }
 
 }

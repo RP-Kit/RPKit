@@ -20,6 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.database.table.RPKWalletTable
+import com.rpkit.economy.bukkit.event.economy.RPKBukkitBalanceChangeEvent
 import com.rpkit.economy.bukkit.exception.NegativeBalanceException
 
 /**
@@ -32,9 +33,12 @@ class RPKEconomyProviderImpl(val plugin: RPKEconomyBukkit): RPKEconomyProvider {
     }
 
     override fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int) {
-        if (amount < 0) throw NegativeBalanceException()
-        val wallet = plugin.core.database.getTable(RPKWalletTable::class).get(character, currency)
-        wallet.balance = amount
+        val event = RPKBukkitBalanceChangeEvent(character, currency, getBalance(character, currency), amount)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        if (event.newBalance < 0) throw NegativeBalanceException()
+        val wallet = plugin.core.database.getTable(RPKWalletTable::class).get(event.character, event.currency)
+        wallet.balance = event.newBalance
         plugin.core.database.getTable(RPKWalletTable::class).update(wallet)
     }
 

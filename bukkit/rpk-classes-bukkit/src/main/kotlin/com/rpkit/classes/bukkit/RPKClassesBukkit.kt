@@ -15,6 +15,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.exception.UnregisteredServiceException
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
 import com.rpkit.stats.bukkit.stat.RPKStatVariableProvider
+import org.bstats.bukkit.Metrics
 
 
 class RPKClassesBukkit: RPKBukkitPlugin() {
@@ -23,6 +24,7 @@ class RPKClassesBukkit: RPKBukkitPlugin() {
     private var characterCardFieldsInitialized = false
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKClassProviderImpl(this)
@@ -75,8 +77,8 @@ class RPKClassesBukkit: RPKBukkitPlugin() {
 
                 override fun get(character: RPKCharacter): Map<RPKClass, Int>? {
                     return classProvider.classes
-                            .map { clazz ->
-                                Pair(clazz, classProvider.getLevel(character, clazz))
+                            .map { `class` ->
+                                Pair(`class`, classProvider.getLevel(character, `class`))
                             }
                             .toMap()
                 }
@@ -84,7 +86,7 @@ class RPKClassesBukkit: RPKBukkitPlugin() {
             })
             statVariableProvider.addStatVariable(object: RPKStatVariable {
 
-                override val name = "clazz"
+                override val name = "class"
 
                 override fun get(character: RPKCharacter): Any? {
                     return classProvider.getClass(character)

@@ -4,6 +4,8 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.classes.bukkit.RPKClassesBukkit
 import com.rpkit.classes.bukkit.database.table.RPKCharacterClassTable
 import com.rpkit.classes.bukkit.database.table.RPKClassExperienceTable
+import com.rpkit.classes.bukkit.event.`class`.RPKBukkitClassChangeEvent
+import com.rpkit.classes.bukkit.event.`class`.RPKBukkitClassExperienceChangeEvent
 import com.rpkit.experience.bukkit.experience.RPKExperienceProvider
 
 
@@ -55,21 +57,25 @@ class RPKClassProviderImpl(private val plugin: RPKClassesBukkit): RPKClassProvid
     }
 
     override fun getClass(character: RPKCharacter): RPKClass? {
-        return plugin.core.database.getTable(RPKCharacterClassTable::class).get(character)?.clazz
+        return plugin.core.database.getTable(RPKCharacterClassTable::class).get(character)?.`class`
     }
 
-    override fun setClass(character: RPKCharacter, clazz: RPKClass) {
+    override fun setClass(character: RPKCharacter, `class`: RPKClass) {
         // Update experience in the class the character is being switched from
         val experienceProvider = plugin.core.serviceManager.getServiceProvider(RPKExperienceProvider::class)
         val oldClass = getClass(character)
-        if (oldClass != null) {
-            val experience = experienceProvider.getExperience(character)
+        val event = RPKBukkitClassChangeEvent(character, oldClass, `class`)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        val eventOldClass = event.oldClass
+        if (eventOldClass != null) {
+            val experience = experienceProvider.getExperience(event.character)
             val classExperienceTable = plugin.core.database.getTable(RPKClassExperienceTable::class)
-            var classExperience = classExperienceTable.get(character, oldClass)
+            var classExperience = classExperienceTable.get(event.character, eventOldClass)
             if (classExperience == null) {
                 classExperience = RPKClassExperience(
-                        character = character,
-                        clazz = oldClass,
+                        character = event.character,
+                        `class` = eventOldClass,
                         experience = experience
                 )
                 classExperienceTable.insert(classExperience)
@@ -80,68 +86,72 @@ class RPKClassProviderImpl(private val plugin: RPKClassesBukkit): RPKClassProvid
         }
 
         // Update experience in the experience provider to that of the new class
-        experienceProvider.setExperience(character, getExperience(character, clazz))
+        experienceProvider.setExperience(event.character, getExperience(event.character, event.`class`))
 
         // Update database with new class
         val characterClassTable = plugin.core.database.getTable(RPKCharacterClassTable::class)
-        var characterClass = characterClassTable.get(character)
+        var characterClass = characterClassTable.get(event.character)
         if (characterClass == null) {
             characterClass = RPKCharacterClass(
-                    character = character,
-                    clazz = clazz
+                    character = event.character,
+                    `class` = event.`class`
             )
             characterClassTable.insert(characterClass)
         } else {
-            characterClass.clazz = clazz
+            characterClass.`class` = `class`
             characterClassTable.update(characterClass)
         }
     }
 
-    override fun getLevel(character: RPKCharacter, clazz: RPKClass): Int {
+    override fun getLevel(character: RPKCharacter, `class`: RPKClass): Int {
         val experienceProvider = plugin.core.serviceManager.getServiceProvider(RPKExperienceProvider::class)
-        return if (clazz == getClass(character)) {
+        return if (`class` == getClass(character)) {
             experienceProvider.getLevel(character)
         } else {
-            val experience = getExperience(character, clazz)
+            val experience = getExperience(character, `class`)
             var level = 1
-            while (level + 1 <= clazz.maxLevel && experienceProvider.getExperienceNeededForLevel(level + 1) <= experience) {
+            while (level + 1 <= `class`.maxLevel && experienceProvider.getExperienceNeededForLevel(level + 1) <= experience) {
                 level++
             }
             level
         }
     }
 
-    override fun setLevel(character: RPKCharacter, clazz: RPKClass, level: Int) {
+    override fun setLevel(character: RPKCharacter, `class`: RPKClass, level: Int) {
         val experienceProvider = plugin.core.serviceManager.getServiceProvider(RPKExperienceProvider::class)
-        if (clazz == getClass(character)) {
+        if (`class` == getClass(character)) {
             experienceProvider.setLevel(character, level)
         } else {
-            setExperience(character, clazz, experienceProvider.getExperienceNeededForLevel(level))
+            setExperience(character, `class`, experienceProvider.getExperienceNeededForLevel(level))
         }
     }
 
-    override fun getExperience(character: RPKCharacter, clazz: RPKClass): Int {
+    override fun getExperience(character: RPKCharacter, `class`: RPKClass): Int {
         val experienceProvider = plugin.core.serviceManager.getServiceProvider(RPKExperienceProvider::class)
-        return if (clazz == getClass(character)) {
+        return if (`class` == getClass(character)) {
             experienceProvider.getExperience(character)
         } else {
             val classExperienceTable = plugin.core.database.getTable(RPKClassExperienceTable::class)
-            val classExperience = classExperienceTable.get(character, clazz)
+            val classExperience = classExperienceTable.get(character, `class`)
             classExperience?.experience?:0
         }
     }
 
-    override fun setExperience(character: RPKCharacter, clazz: RPKClass, experience: Int) {
+    override fun setExperience(character: RPKCharacter, `class`: RPKClass, experience: Int) {
+        val oldExperience = getExperience(character, `class`)
+        val event = RPKBukkitClassExperienceChangeEvent(character, `class`, oldExperience, experience)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         val experienceProvider = plugin.core.serviceManager.getServiceProvider(RPKExperienceProvider::class)
-        if (clazz == getClass(character)) {
+        if (`class` == getClass(character)) {
             experienceProvider.setExperience(character, experience)
         } else {
             val classExperienceTable = plugin.core.database.getTable(RPKClassExperienceTable::class)
-            var classExperience = classExperienceTable.get(character, clazz)
+            var classExperience = classExperienceTable.get(character, `class`)
             if (classExperience == null) {
                 classExperience = RPKClassExperience(
                         character = character,
-                        clazz = clazz,
+                        `class` = `class`,
                         experience = experience
                 )
                 classExperienceTable.insert(classExperience)

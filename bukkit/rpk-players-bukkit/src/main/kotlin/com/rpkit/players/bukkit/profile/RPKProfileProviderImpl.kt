@@ -2,6 +2,9 @@ package com.rpkit.players.bukkit.profile
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.table.RPKProfileTable
+import com.rpkit.players.bukkit.event.profile.RPKBukkitProfileCreateEvent
+import com.rpkit.players.bukkit.event.profile.RPKBukkitProfileDeleteEvent
+import com.rpkit.players.bukkit.event.profile.RPKBukkitProfileUpdateEvent
 import javax.servlet.http.HttpServletRequest
 
 
@@ -16,15 +19,24 @@ class RPKProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPKProfilePr
     }
 
     override fun addProfile(profile: RPKProfile) {
-        plugin.core.database.getTable(RPKProfileTable::class).insert(profile)
+        val event = RPKBukkitProfileCreateEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKProfileTable::class).insert(event.profile)
     }
 
     override fun updateProfile(profile: RPKProfile) {
-        plugin.core.database.getTable(RPKProfileTable::class).update(profile)
+        val event = RPKBukkitProfileUpdateEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKProfileTable::class).update(event.profile)
     }
 
     override fun removeProfile(profile: RPKProfile) {
-        plugin.core.database.getTable(RPKProfileTable::class).delete(profile)
+        val event = RPKBukkitProfileDeleteEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKProfileTable::class).delete(event.profile)
     }
 
     override fun getActiveProfile(req: HttpServletRequest): RPKProfile? {

@@ -1,0 +1,92 @@
+default:
+    crafting:
+        BREAD:
+            amount: 0
+        PUMPKIN_SEEDS:
+            amount: 0
+        CAKE:
+            amount: 0
+    smelting:
+        COOKED_CHICKEN:
+            amount: 0
+    mining:
+        COAL:
+            amount: 0
+        IRON_ORE:
+            amount: 1
+professions:
+    cook:
+        levels:
+            max-level: 100
+        experience:
+            formula: '(level - 1) * 100'
+            items:
+                crafting:
+                    BREAD: 2
+                    CAKE: 5
+                smelting:
+                    COOKED_CHICKEN: 1
+        crafting:
+            '1':
+                BREAD:
+                    amount: 1
+                    quality: poor
+                PUMPKIN_SEEDS:
+                    amount: 1
+            '5':
+                CAKE:
+                    amount: 1
+        smelting:
+            '1':
+                COOKED_CHICKEN:
+                    amount: 1
+                    quality: poor
+            '5':
+                COOKED_CHICKEN:
+                    amount: 2
+                    quality: adequate
+    miner:
+        levels:
+            max-level: 100
+        experience:
+            formula: '(level - 1) * 100'
+            items:
+                mining:
+                    COAL: 5
+        mining:
+            '1':
+                COAL:
+                    amount: 1
+                IRON_ORE:
+                    amount: 2
+            '2':
+                COAL:
+                    amount: 2
+                IRON_ORE:
+                    amount: 5
+# 432000 seconds = 5 days
+profession-change-cooldown: 432000
+max-professions: 2
+caching:
+    rpkit_character_profession_change_cooldown:
+        id:
+            enabled: true
+            size: 20
+        character_id:
+            enabled: true
+            size: 20
+    rpkit_character_profession_experience:
+        id:
+            enabled: true
+            size: 20
+    rpkit_character_profession:
+        id:
+            enabled: true
+            size: 20
+    rpkit_profession_hidden:
+        id:
+            enabled: true
+            size: 20
+        character_id:
+            enabled:  true
+            size: 20

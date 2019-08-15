@@ -2,6 +2,9 @@ package com.rpkit.players.bukkit.profile
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.table.RPKIRCProfileTable
+import com.rpkit.players.bukkit.event.ircprofile.RPKBukkitIRCProfileCreateEvent
+import com.rpkit.players.bukkit.event.ircprofile.RPKBukkitIRCProfileDeleteEvent
+import com.rpkit.players.bukkit.event.ircprofile.RPKBukkitIRCProfileUpdateEvent
 import org.pircbotx.User
 
 
@@ -20,15 +23,24 @@ class RPKIRCProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPKIRCPro
     }
 
     override fun addIRCProfile(profile: RPKIRCProfile) {
-        plugin.core.database.getTable(RPKIRCProfileTable::class).insert(profile)
+        val event = RPKBukkitIRCProfileCreateEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKIRCProfileTable::class).insert(event.ircProfile)
     }
 
     override fun updateIRCProfile(profile: RPKIRCProfile) {
-        plugin.core.database.getTable(RPKIRCProfileTable::class).update(profile)
+        val event = RPKBukkitIRCProfileUpdateEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKIRCProfileTable::class).update(event.ircProfile)
     }
 
     override fun removeIRCProfile(profile: RPKIRCProfile) {
-        plugin.core.database.getTable(RPKIRCProfileTable::class).delete(profile)
+        val event = RPKBukkitIRCProfileDeleteEvent(profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKIRCProfileTable::class).delete(event.ircProfile)
     }
     
 }

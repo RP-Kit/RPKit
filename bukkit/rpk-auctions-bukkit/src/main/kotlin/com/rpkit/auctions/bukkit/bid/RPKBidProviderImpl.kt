@@ -19,22 +19,37 @@ package com.rpkit.auctions.bukkit.bid
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
 import com.rpkit.auctions.bukkit.auction.RPKAuction
 import com.rpkit.auctions.bukkit.database.table.RPKBidTable
+import com.rpkit.auctions.bukkit.event.bid.RPKBukkitBidCreateEvent
+import com.rpkit.auctions.bukkit.event.bid.RPKBukkitBidDeleteEvent
+import com.rpkit.auctions.bukkit.event.bid.RPKBukkitBidUpdateEvent
 
 /**
  * Bid provider implementation.
  */
 class RPKBidProviderImpl(private val plugin: RPKAuctionsBukkit): RPKBidProvider {
 
-    override fun addBid(bid: RPKBid) {
-        plugin.core.database.getTable(RPKBidTable::class).insert(bid)
+    override fun addBid(bid: RPKBid): Boolean {
+        val event = RPKBukkitBidCreateEvent(bid)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return false
+        plugin.core.database.getTable(RPKBidTable::class).insert(event.bid)
+        return true
     }
 
-    override fun updateBid(bid: RPKBid) {
-        plugin.core.database.getTable(RPKBidTable::class).update(bid)
+    override fun updateBid(bid: RPKBid): Boolean {
+        val event = RPKBukkitBidUpdateEvent(bid)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return false
+        plugin.core.database.getTable(RPKBidTable::class).update(event.bid)
+        return true
     }
 
-    override fun removeBid(bid: RPKBid) {
-        plugin.core.database.getTable(RPKBidTable::class).delete(bid)
+    override fun removeBid(bid: RPKBid): Boolean {
+        val event = RPKBukkitBidDeleteEvent(bid)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return false
+        plugin.core.database.getTable(RPKBidTable::class).delete(event.bid)
+        return true
     }
 
     override fun getBids(auction: RPKAuction): List<RPKBid> {

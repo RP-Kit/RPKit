@@ -51,7 +51,7 @@ class RPKCharacterClassTable(database: Database, private val plugin: RPKClassesB
                 )
                 .values(
                         entity.character.id,
-                        entity.clazz.name
+                        entity.`class`.name
                 )
                 .execute()
         val id = database.create.lastID().toInt()
@@ -64,7 +64,7 @@ class RPKCharacterClassTable(database: Database, private val plugin: RPKClassesB
         database.create
                 .update(RPKIT_CHARACTER_CLASS)
                 .set(RPKIT_CHARACTER_CLASS.CHARACTER_ID, entity.character.id)
-                .set(RPKIT_CHARACTER_CLASS.CLASS_NAME, entity.clazz.name)
+                .set(RPKIT_CHARACTER_CLASS.CLASS_NAME, entity.`class`.name)
                 .where(RPKIT_CHARACTER_CLASS.ID.eq(entity.id))
                 .execute()
         cache?.put(entity.id, entity)
@@ -87,12 +87,12 @@ class RPKCharacterClassTable(database: Database, private val plugin: RPKClassesB
             val character = characterProvider.getCharacter(characterId)
             val classProvider = plugin.core.serviceManager.getServiceProvider(RPKClassProvider::class)
             val className = result.get(RPKIT_CHARACTER_CLASS.CLASS_NAME)
-            val clazz = classProvider.getClass(className)
-            return if (character != null && clazz != null) {
+            val `class` = classProvider.getClass(className)
+            return if (character != null && `class` != null) {
                 val characterClass = RPKCharacterClass(
                         id,
                         character,
-                        clazz
+                        `class`
                 )
                 cache?.put(id, characterClass)
                 characterClass

@@ -26,6 +26,7 @@ import com.rpkit.auctions.bukkit.listener.PlayerInteractListener
 import com.rpkit.auctions.bukkit.listener.SignChangeListener
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import org.bstats.bukkit.Metrics
 
 /**
  * RPK auctions plugin default implementation.
@@ -34,6 +35,7 @@ class RPKAuctionsBukkit: RPKBukkitPlugin() {
 
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKAuctionProviderImpl(this),
@@ -106,6 +108,12 @@ class RPKAuctionsBukkit: RPKBukkitPlugin() {
         messages.setDefault("operation-cancelled", "&cOperation cancelled.")
         messages.setDefault("no-permission-bid", "&cYou do not have permission to bid.")
         messages.setDefault("no-permission-auction-create", "&cYou do not have permission to create auctions.")
+        messages.setDefault("auction-create-failed", "&cFailed to create auction.")
+        messages.setDefault("auction-update-failed", "&cFailed to update auction.")
+        messages.setDefault("auction-delete-failed", "&cFailed to delete auction.")
+        messages.setDefault("bid-create-failed", "&cFailed to create bid.")
+        messages.setDefault("bid-update-failed", "&cFailed to update bid.")
+        messages.setDefault("bid-delete-failed", "&cFailed to delete bid.")
     }
 
 }

@@ -1,0 +1,18 @@
+name: rpk-item-quality-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.itemquality.bukkit.RPKItemQualityBukkit
+api-version: 1.13
+depend:
+- rpk-core-bukkit
+commands:
+    itemquality:
+        description: Item quality management command
+        usage: /<command> [list|set]
+permissions:
+    rpkit.itemquality.command.itemquality.list:
+        description: Allows listing item qualities
+        default: op
+    rpkit.itemquality.command.itemquality.set:
+        description: Allows setting the quality of the currently held item
+        default: op

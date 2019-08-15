@@ -18,6 +18,9 @@ package com.rpkit.moderation.bukkit.vanish
 
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.database.table.RPKVanishStateTable
+import com.rpkit.moderation.bukkit.event.vanish.RPKBukkitUnvanishEvent
+import com.rpkit.moderation.bukkit.event.vanish.RPKBukkitVanishEvent
+import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 
@@ -29,22 +32,33 @@ class RPKVanishProviderImpl(private val plugin: RPKModerationBukkit): RPKVanishP
     }
 
     override fun setVanished(minecraftProfile: RPKMinecraftProfile, vanished: Boolean) {
+        val event: RPKMinecraftProfileEvent = if (vanished) {
+            val event = RPKBukkitVanishEvent(minecraftProfile)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
+            event
+        } else {
+            val event = RPKBukkitUnvanishEvent(minecraftProfile)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
+            event
+        }
         val vanishStateTable = plugin.core.database.getTable(RPKVanishStateTable::class)
-        var vanishState = vanishStateTable.get(minecraftProfile)
+        var vanishState = vanishStateTable.get(event.minecraftProfile!!)
         if (vanishState == null) {
-            vanishState = RPKVanishState(0, minecraftProfile, vanished)
+            vanishState = RPKVanishState(0, event.minecraftProfile!!, vanished)
             vanishStateTable.insert(vanishState)
         } else {
             vanishState.isVanished = vanished
             vanishStateTable.update(vanishState)
         }
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val target = plugin.server.getPlayer(minecraftProfile.minecraftUUID) ?: return
+        val target = plugin.server.getPlayer(event.minecraftProfile!!.minecraftUUID) ?: return
         if (vanished) {
             for (observer in plugin.server.onlinePlayers) {
                 val observerMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(observer)
                 if (observerMinecraftProfile != null) {
-                    if (!canSee(observerMinecraftProfile, minecraftProfile)) {
+                    if (!canSee(observerMinecraftProfile, event.minecraftProfile!!)) {
                         observer.hidePlayer(plugin, target)
                     }
                 }

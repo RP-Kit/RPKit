@@ -17,6 +17,9 @@
 package com.rpkit.chat.bukkit.prefix
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixCreateEvent
+import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixDeleteEvent
+import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixUpdateEvent
 import com.rpkit.permissions.bukkit.group.RPKGroupProvider
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -35,17 +38,26 @@ class RPKPrefixProviderImpl(private val plugin: RPKChatBukkit): RPKPrefixProvide
             ?: emptyList()
 
     override fun addPrefix(prefix: RPKPrefix) {
-        plugin.config.set("prefixes.${prefix.name}", prefix.prefix)
+        val event = RPKBukkitPrefixCreateEvent(prefix)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.config.set("prefixes.${event.prefix.name}", event.prefix.prefix)
         plugin.saveConfig()
     }
 
     override fun updatePrefix(prefix: RPKPrefix) {
-        plugin.config.set("prefixes.${prefix.name}", prefix.prefix)
+        val event = RPKBukkitPrefixUpdateEvent(prefix)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.config.set("prefixes.${event.prefix.name}", event.prefix.prefix)
         plugin.saveConfig()
     }
 
     override fun removePrefix(prefix: RPKPrefix) {
-        plugin.config.set("prefixes.${prefix.name}", null)
+        val event = RPKBukkitPrefixDeleteEvent(prefix)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.config.set("prefixes.${event.prefix.name}", null)
         plugin.saveConfig()
     }
 

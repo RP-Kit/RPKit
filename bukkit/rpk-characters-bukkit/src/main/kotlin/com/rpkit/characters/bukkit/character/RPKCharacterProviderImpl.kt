@@ -18,6 +18,10 @@ package com.rpkit.characters.bukkit.character
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.table.RPKCharacterTable
+import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterCreateEvent
+import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterDeleteEvent
+import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterSwitchEvent
+import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterUpdateEvent
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
@@ -77,7 +81,12 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
     }
 
     override fun setActiveCharacter(minecraftProfile: RPKMinecraftProfile, character: RPKCharacter?) {
-        val oldCharacter = getActiveCharacter(minecraftProfile)
+        var oldCharacter = getActiveCharacter(minecraftProfile)
+        val event = RPKBukkitCharacterSwitchEvent(minecraftProfile, oldCharacter, character)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        oldCharacter = event.fromCharacter
+        val newCharacter = event.character
         if (oldCharacter != null) {
             oldCharacter.minecraftProfile = null
             val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
@@ -94,28 +103,25 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
             }
             updateCharacter(oldCharacter)
         }
-        if (character != null) {
+        if (newCharacter != null) {
             val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
             val bukkitPlayer = offlineBukkitPlayer.player
             if (bukkitPlayer != null) {
-                bukkitPlayer.inventory.contents = character.inventoryContents
-                bukkitPlayer.inventory.helmet = character.helmet
-                bukkitPlayer.inventory.chestplate = character.chestplate
-                bukkitPlayer.inventory.leggings = character.leggings
-                bukkitPlayer.inventory.boots = character.boots
-                bukkitPlayer.teleport(character.location)
-                bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.baseValue = character.maxHealth
-                bukkitPlayer.health = character.health
-                bukkitPlayer.foodLevel = character.foodLevel
+                bukkitPlayer.inventory.contents = newCharacter.inventoryContents
+                bukkitPlayer.inventory.helmet = newCharacter.helmet
+                bukkitPlayer.inventory.chestplate = newCharacter.chestplate
+                bukkitPlayer.inventory.leggings = newCharacter.leggings
+                bukkitPlayer.inventory.boots = newCharacter.boots
+                bukkitPlayer.teleport(newCharacter.location)
+                bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.baseValue = newCharacter.maxHealth
+                bukkitPlayer.health = newCharacter.health
+                bukkitPlayer.foodLevel = newCharacter.foodLevel
                 if (plugin.config.getBoolean("characters.set-player-display-name")) {
-                    bukkitPlayer.setDisplayName(character.name)
+                    bukkitPlayer.setDisplayName(newCharacter.name)
                 }
             }
-            character.minecraftProfile = minecraftProfile
-            updateCharacter(character)
-        } else if (oldCharacter != null) {
-            oldCharacter.minecraftProfile = null
-            updateCharacter(oldCharacter)
+            newCharacter.minecraftProfile = minecraftProfile
+            updateCharacter(newCharacter)
         }
     }
 
@@ -154,24 +160,33 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
     }
 
     override fun addCharacter(character: RPKCharacter) {
-        plugin.core.database.getTable(RPKCharacterTable::class).insert(character)
+        val event = RPKBukkitCharacterCreateEvent(character)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKCharacterTable::class).insert(event.character)
     }
 
     override fun removeCharacter(character: RPKCharacter) {
-        val minecraftProfile = character.minecraftProfile
+        val event = RPKBukkitCharacterDeleteEvent(character)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        val minecraftProfile = event.character.minecraftProfile
         if (minecraftProfile != null) {
-            if (getActiveCharacter(minecraftProfile) == character) {
+            if (getActiveCharacter(minecraftProfile) == event.character) {
                 setActiveCharacter(minecraftProfile, null)
             }
         }
-        plugin.core.database.getTable(RPKCharacterTable::class).delete(character)
+        plugin.core.database.getTable(RPKCharacterTable::class).delete(event.character)
     }
 
     override fun updateCharacter(character: RPKCharacter) {
         if (plugin.config.getBoolean("characters.delete-character-on-death") && character.isDead) {
             removeCharacter(character)
         } else {
-            plugin.core.database.getTable(RPKCharacterTable::class).update(character)
+            val event = RPKBukkitCharacterUpdateEvent(character)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
+            plugin.core.database.getTable(RPKCharacterTable::class).update(event.character)
         }
     }
 

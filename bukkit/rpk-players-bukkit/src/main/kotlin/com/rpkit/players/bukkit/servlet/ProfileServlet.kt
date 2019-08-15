@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.players.bukkit.servlet
 
 import com.rpkit.chat.bukkit.irc.RPKIRCProvider
@@ -32,7 +48,7 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
             }
             scanner.close()
             val velocityContext = VelocityContext()
-            velocityContext.put("server", plugin.server.serverName)
+            velocityContext.put("server", plugin.core.web.title)
             velocityContext.put("navigationBar", plugin.core.web.navigationBar)
             Velocity.evaluate(velocityContext, resp.writer, "/web/404.html", templateBuilder.toString())
             return
@@ -49,7 +65,7 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
             }
             scanner.close()
             val velocityContext = VelocityContext()
-            velocityContext.put("server", plugin.server.serverName)
+            velocityContext.put("server", plugin.core.web.title)
             velocityContext.put("navigationBar", plugin.core.web.navigationBar)
             Velocity.evaluate(velocityContext, resp.writer, "/web/404.html", templateBuilder.toString())
             return
@@ -65,7 +81,7 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
             }
             scanner.close()
             val velocityContext = VelocityContext()
-            velocityContext.put("server", plugin.server.serverName)
+            velocityContext.put("server", plugin.core.web.title)
             velocityContext.put("navigationBar", plugin.core.web.navigationBar)
             Velocity.evaluate(velocityContext, resp.writer, "/web/404.html", templateBuilder.toString())
             return
@@ -83,7 +99,7 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
             val githubProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKGitHubProfileProvider::class)
             val ircProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProfileProvider::class)
             val velocityContext = VelocityContext()
-            velocityContext.put("server", plugin.server.serverName)
+            velocityContext.put("server", plugin.core.web.title)
             velocityContext.put("navigationBar", plugin.core.web.navigationBar)
             velocityContext.put("profile", profile)
             velocityContext.put("minecraftProfiles", minecraftProfileProvider.getMinecraftProfiles(profile))
@@ -104,7 +120,7 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
             val githubProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKGitHubProfileProvider::class)
             val ircProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProfileProvider::class)
             val velocityContext = VelocityContext()
-            velocityContext.put("server", plugin.server.serverName)
+            velocityContext.put("server", plugin.core.web.title)
             velocityContext.put("navigationBar", plugin.core.web.navigationBar)
             velocityContext.put("profile", profile)
             velocityContext.put("minecraftProfiles", minecraftProfileProvider.getMinecraftProfiles(profile))
@@ -126,7 +142,7 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
             }
             scanner.close()
             val velocityContext = VelocityContext()
-            velocityContext.put("server", plugin.server.serverName)
+            velocityContext.put("server", plugin.core.web.title)
             velocityContext.put("navigationBar", plugin.core.web.navigationBar)
             Velocity.evaluate(velocityContext, resp.writer, "/web/404.html", templateBuilder.toString())
             return
@@ -143,7 +159,7 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
             }
             scanner.close()
             val velocityContext = VelocityContext()
-            velocityContext.put("server", plugin.server.serverName)
+            velocityContext.put("server", plugin.core.web.title)
             velocityContext.put("navigationBar", plugin.core.web.navigationBar)
             Velocity.evaluate(velocityContext, resp.writer, "/web/404.html", templateBuilder.toString())
             return
@@ -159,7 +175,7 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
             }
             scanner.close()
             val velocityContext = VelocityContext()
-            velocityContext.put("server", plugin.server.serverName)
+            velocityContext.put("server", plugin.core.web.title)
             velocityContext.put("navigationBar", plugin.core.web.navigationBar)
             Velocity.evaluate(velocityContext, resp.writer, "/web/404.html", templateBuilder.toString())
             return
@@ -174,7 +190,7 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
             }
             scanner.close()
             val velocityContext = VelocityContext()
-            velocityContext.put("server", plugin.server.serverName)
+            velocityContext.put("server", plugin.core.web.title)
             velocityContext.put("navigationBar", plugin.core.web.navigationBar)
             velocityContext.put("profile", profile)
             velocityContext.put("alerts", listOf(Alert(Alert.Type.DANGER, "You may only modify your own profile.")))
@@ -345,7 +361,7 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
         val githubProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKGitHubProfileProvider::class)
         val ircProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProfileProvider::class)
         val velocityContext = VelocityContext()
-        velocityContext.put("server", plugin.server.serverName)
+        velocityContext.put("server", plugin.core.web.title)
         velocityContext.put("navigationBar", plugin.core.web.navigationBar)
         velocityContext.put("profile", profile)
         velocityContext.put("minecraftProfiles", minecraftProfileProvider.getMinecraftProfiles(profile))

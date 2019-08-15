@@ -17,9 +17,16 @@
 package com.rpkit.payments.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import org.bstats.bukkit.Metrics
 
 /**
  * Class to allow payment lib to load as a plugin.
  * This allows plugins requiring payment or implementing payment to depend on the plugin.
  */
-class RPKPaymentLibBukkit: RPKBukkitPlugin()
+class RPKPaymentLibBukkit: RPKBukkitPlugin() {
+
+    override fun onEnable() {
+        Metrics(this)
+    }
+
+}

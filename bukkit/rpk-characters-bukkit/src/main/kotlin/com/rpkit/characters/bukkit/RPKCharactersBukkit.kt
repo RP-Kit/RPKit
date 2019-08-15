@@ -20,7 +20,6 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.characters.bukkit.character.RPKCharacterProviderImpl
 import com.rpkit.characters.bukkit.character.field.*
 import com.rpkit.characters.bukkit.command.character.CharacterCommand
-import com.rpkit.characters.bukkit.command.gender.GenderCommand
 import com.rpkit.characters.bukkit.command.race.RaceCommand
 import com.rpkit.characters.bukkit.database.table.RPKCharacterTable
 import com.rpkit.characters.bukkit.database.table.RPKGenderTable
@@ -41,6 +40,7 @@ import com.rpkit.characters.bukkit.servlet.api.v1.CharacterAPIServlet
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.web.NavigationLink
+import org.bstats.bukkit.Metrics
 import java.sql.SQLException
 
 /**
@@ -55,6 +55,7 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
     private lateinit var newCharacterCooldownProvider: RPKNewCharacterCooldownProvider
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         characterProvider = RPKCharacterProviderImpl(this)
         genderProvider = RPKGenderProviderImpl(this)
@@ -97,7 +98,6 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
 
     override fun registerCommands() {
         getCommand("character")?.setExecutor(CharacterCommand(this))
-        getCommand("gender")?.setExecutor(GenderCommand(this))
         getCommand("race")?.setExecutor(RaceCommand(this))
     }
 
@@ -137,7 +137,7 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         messages.setDefault("character-set-name-prompt", "&fWhat is your character's name? &7(Type cancel to cancel)")
         messages.setDefault("character-set-name-valid", "&aName set.")
         messages.setDefault("character-set-gender-prompt", "&fWhat is your character's gender? &7(Type cancel to cancel)")
-        messages.setDefault("character-set-gender-invalid-gender", "&cThat's not a valid gender.")
+        messages.setDefault("character-set-gender-not-set", "&cGender not set.")
         messages.setDefault("character-set-gender-valid", "&aGender set.")
         messages.setDefault("character-set-race-prompt", "&fWhat is your character's race? &7(Type cancel to cancel)")
         messages.setDefault("character-set-race-invalid-race", "&cThat's not a valid race.")
@@ -195,15 +195,6 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         messages.setDefault("character-delete-confirmation", "&fThis operation will be permanent, and you will not be able to recover your character. Are you sure you wish to continue?")
         messages.setDefault("character-delete-confirmation-invalid-boolean", "&cThat's not a valid answer.")
         messages.setDefault("character-delete-valid", "&aCharacter deleted.")
-        messages.setDefault("gender-usage", "&cUsage: /gender [add|remove|list]")
-        messages.setDefault("gender-add-prompt", "&fWhat is the name of the gender you would like to add? &7(Type cancel to cancel)")
-        messages.setDefault("gender-add-invalid-gender", "&cThat gender already exists.")
-        messages.setDefault("gender-add-valid", "&aGender added.")
-        messages.setDefault("gender-remove-prompt", "&fWhat is the name of the gender you would like to remove? &7(Type cancel to cancel)")
-        messages.setDefault("gender-remove-invalid-gender", "&cThat's not a valid gender.")
-        messages.setDefault("gender-remove-valid", "&aGender removed.")
-        messages.setDefault("gender-list-title", "&fGenders")
-        messages.setDefault("gender-list-item", "&f- &7\$gender")
         messages.setDefault("race-usage", "&cUsage: /race [add|remove|list]")
         messages.setDefault("race-add-prompt", "&fWhat is the name of the race you would like to add? &7(Type cancel to cancel)")
         messages.setDefault("race-add-invalid-race", "&cThat race already exists.")

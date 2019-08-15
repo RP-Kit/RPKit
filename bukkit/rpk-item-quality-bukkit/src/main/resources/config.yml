@@ -1,0 +1,125 @@
+item-qualities:
+    poor:
+        lore:
+        - '&9Poor'
+        - '&fPoorly crafted, barely holding together, or falling apart at the seams'
+        durability-modifier: 0.5
+        applicable-items:
+        - WOODEN_AXE
+        - WOODEN_HOE
+        - WOODEN_PICKAXE
+        - WOODEN_SHOVEL
+        - WOODEN_SWORD
+        - STONE_AXE
+        - STONE_HOE
+        - STONE_PICKAXE
+        - STONE_SHOVEL
+        - STONE_SWORD
+        - IRON_AXE
+        - IRON_HOE
+        - IRON_PICKAXE
+        - IRON_SHOVEL
+        - IRON_SWORD
+        - GOLD_AXE
+        - GOLD_HOE
+        - GOLD_PICKAXE
+        - GOLD_SHOVEL
+        - GOLD_SWORD
+        - DIAMOND_AXE
+        - DIAMOND_HOE
+        - DIAMOND_PICKAXE
+        - DIAMOND_SHOVEL
+        - DIAMOND_SWORD
+    adequate:
+        lore:
+        - '&eAdequate'
+        - '&fDecently well made, but by no means masterwork'
+        durability-modifier: 1
+        applicable-items:
+        - WOODEN_AXE
+        - WOODEN_HOE
+        - WOODEN_PICKAXE
+        - WOODEN_SHOVEL
+        - WOODEN_SWORD
+        - STONE_AXE
+        - STONE_HOE
+        - STONE_PICKAXE
+        - STONE_SHOVEL
+        - STONE_SWORD
+        - IRON_AXE
+        - IRON_HOE
+        - IRON_PICKAXE
+        - IRON_SHOVEL
+        - IRON_SWORD
+        - GOLD_AXE
+        - GOLD_HOE
+        - GOLD_PICKAXE
+        - GOLD_SHOVEL
+        - GOLD_SWORD
+        - DIAMOND_AXE
+        - DIAMOND_HOE
+        - DIAMOND_PICKAXE
+        - DIAMOND_SHOVEL
+        - DIAMOND_SWORD
+    good:
+        lore:
+        - '&6Good'
+        - '&fWell put-together, obviously the work of somewhat of an expert'
+        durability-modifier: 2
+        applicable-items:
+        - WOODEN_AXE
+        - WOODEN_HOE
+        - WOODEN_PICKAXE
+        - WOODEN_SHOVEL
+        - WOODEN_SWORD
+        - STONE_AXE
+        - STONE_HOE
+        - STONE_PICKAXE
+        - STONE_SHOVEL
+        - STONE_SWORD
+        - IRON_AXE
+        - IRON_HOE
+        - IRON_PICKAXE
+        - IRON_SHOVEL
+        - IRON_SWORD
+        - GOLD_AXE
+        - GOLD_HOE
+        - GOLD_PICKAXE
+        - GOLD_SHOVEL
+        - GOLD_SWORD
+        - DIAMOND_AXE
+        - DIAMOND_HOE
+        - DIAMOND_PICKAXE
+        - DIAMOND_SHOVEL
+        - DIAMOND_SWORD
+    legendary:
+        lore:
+        - '&cLegendary'
+        - '&fBeyond the work of modern craft, possibly forged by ancient magicks'
+        durability-modifier: 10
+        applicable-items:
+        - WOODEN_AXE
+        - WOODEN_HOE
+        - WOODEN_PICKAXE
+        - WOODEN_SHOVEL
+        - WOODEN_SWORD
+        - STONE_AXE
+        - STONE_HOE
+        - STONE_PICKAXE
+        - STONE_SHOVEL
+        - STONE_SWORD
+        - IRON_AXE
+        - IRON_HOE
+        - IRON_PICKAXE
+        - IRON_SHOVEL
+        - IRON_SWORD
+        - GOLD_AXE
+        - GOLD_HOE
+        - GOLD_PICKAXE
+        - GOLD_SHOVEL
+        - GOLD_SWORD
+        - DIAMOND_AXE
+        - DIAMOND_HOE
+        - DIAMOND_PICKAXE
+        - DIAMOND_SHOVEL
+        - DIAMOND_SWORD

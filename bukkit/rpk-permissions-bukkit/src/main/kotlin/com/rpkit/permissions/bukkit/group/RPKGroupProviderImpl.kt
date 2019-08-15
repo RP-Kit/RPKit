@@ -22,6 +22,10 @@ import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.database.table.PlayerGroupTable
 import com.rpkit.permissions.bukkit.database.table.RPKCharacterGroupTable
 import com.rpkit.permissions.bukkit.database.table.RPKProfileGroupTable
+import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupAssignCharacterEvent
+import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupAssignProfileEvent
+import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupUnassignCharacterEvent
+import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupUnassignProfileEvent
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
@@ -53,11 +57,14 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
 
     override fun addGroup(profile: RPKProfile, group: RPKGroup) {
         if (!getGroups(profile).contains(group)) {
+            val event = RPKBukkitGroupAssignProfileEvent(group, profile)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
             plugin.core.database.getTable(RPKProfileGroupTable::class).insert(
-                    RPKProfileGroup(profile = profile, group = group)
+                    RPKProfileGroup(profile = event.profile, group = event.group)
             )
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            minecraftProfileProvider.getMinecraftProfiles(profile).forEach { minecraftProfile ->
+            minecraftProfileProvider.getMinecraftProfiles(event.profile).forEach { minecraftProfile ->
                 assignPermissions(minecraftProfile)
             }
         }
@@ -65,11 +72,14 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
 
     override fun addGroup(character: RPKCharacter, group: RPKGroup) {
         if (!getGroups(character).contains(group)) {
+            val event = RPKBukkitGroupAssignCharacterEvent(group, character)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return
             plugin.core.database.getTable(RPKCharacterGroupTable::class).insert(
-                    RPKCharacterGroup(character = character, group = group)
+                    RPKCharacterGroup(character = event.character, group = event.group)
             )
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = character.minecraftProfile
+            val minecraftProfile = event.character.minecraftProfile
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
                 if (profile != null) {
@@ -115,26 +125,30 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
     }
 
     override fun removeGroup(profile: RPKProfile, group: RPKGroup) {
+        val event = RPKBukkitGroupUnassignProfileEvent(group, profile)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         val profileGroupTable = plugin.core.database.getTable(RPKProfileGroupTable::class)
-        val profileGroup = profileGroupTable.get(profile)
-                .firstOrNull { profileGroup -> profileGroup.group == group }
+        val profileGroup = profileGroupTable.get(event.profile).firstOrNull { profileGroup -> profileGroup.group == event.group }
         if (profileGroup != null) {
             profileGroupTable.delete(profileGroup)
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            minecraftProfileProvider.getMinecraftProfiles(profile).forEach { minecraftProfile ->
+            minecraftProfileProvider.getMinecraftProfiles(event.profile).forEach { minecraftProfile ->
                 assignPermissions(minecraftProfile)
             }
         }
     }
 
     override fun removeGroup(character: RPKCharacter, group: RPKGroup) {
+        val event = RPKBukkitGroupUnassignCharacterEvent(group, character)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
         val characterGroupTable = plugin.core.database.getTable(RPKCharacterGroupTable::class)
-        val characterGroup = characterGroupTable.get(character)
-                .firstOrNull { characterGroup -> characterGroup.group == group }
+        val characterGroup = characterGroupTable.get(event.character).firstOrNull { characterGroup -> characterGroup.group == event.group }
         if (characterGroup != null) {
             characterGroupTable.delete(characterGroup)
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = character.minecraftProfile
+            val minecraftProfile = event.character.minecraftProfile
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
                 if (profile != null) {

@@ -19,6 +19,9 @@ package com.rpkit.payments.bukkit.notification
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.database.table.RPKPaymentNotificationTable
+import com.rpkit.payments.bukkit.event.notification.RPKBukkitPaymentNotificationCreateEvent
+import com.rpkit.payments.bukkit.event.notification.RPKBukkitPaymentNotificationDeleteEvent
+import com.rpkit.payments.bukkit.event.notification.RPKBukkitPaymentNotificationUpdateEvent
 
 
 class RPKPaymentNotificationProviderImpl(private val plugin: RPKPaymentsBukkit): RPKPaymentNotificationProvider {
@@ -35,15 +38,24 @@ class RPKPaymentNotificationProviderImpl(private val plugin: RPKPaymentsBukkit):
     }
 
     override fun addPaymentNotification(paymentNotification: RPKPaymentNotification) {
-        plugin.core.database.getTable(RPKPaymentNotificationTable::class).insert(paymentNotification)
+        val event = RPKBukkitPaymentNotificationCreateEvent(paymentNotification)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKPaymentNotificationTable::class).insert(event.paymentNotification)
     }
 
     override fun removePaymentNotification(paymentNotification: RPKPaymentNotification) {
-        plugin.core.database.getTable(RPKPaymentNotificationTable::class).delete(paymentNotification)
+        val event = RPKBukkitPaymentNotificationDeleteEvent(paymentNotification)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKPaymentNotificationTable::class).delete(event.paymentNotification)
     }
 
     override fun updatePaymentNotification(paymentNotification: RPKPaymentNotification) {
-        plugin.core.database.getTable(RPKPaymentNotificationTable::class).update(paymentNotification)
+        val event = RPKBukkitPaymentNotificationUpdateEvent(paymentNotification)
+        plugin.server.pluginManager.callEvent(event)
+        if (event.isCancelled) return
+        plugin.core.database.getTable(RPKPaymentNotificationTable::class).update(event.paymentNotification)
     }
 
 }

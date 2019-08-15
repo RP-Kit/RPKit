@@ -9,11 +9,13 @@ import com.rpkit.travel.bukkit.database.table.RPKWarpTable
 import com.rpkit.travel.bukkit.listener.PlayerInteractListener
 import com.rpkit.travel.bukkit.listener.SignChangeListener
 import com.rpkit.travel.bukkit.warp.RPKWarpProviderImpl
+import org.bstats.bukkit.Metrics
 
 
 class RPKTravelBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKWarpProviderImpl(this)
@@ -38,6 +40,7 @@ class RPKTravelBukkit: RPKBukkitPlugin() {
     }
 
     override fun setDefaultMessages() {
+        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
         messages.setDefault("delete-warp-valid", "&aDeleted warp \$warp.")
         messages.setDefault("delete-warp-usage", "&cUsage: /deletewarp [warp]")
         messages.setDefault("set-warp-invalid-name-already-in-use", "&cA warp by that name already exists.")

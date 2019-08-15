@@ -24,11 +24,13 @@ import com.rpkit.store.bukkit.command.PurchasesCommand
 import com.rpkit.store.bukkit.database.table.*
 import com.rpkit.store.bukkit.purchase.RPKPurchaseProviderImpl
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemProviderImpl
+import org.bstats.bukkit.Metrics
 
 
 class RPKStoresBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKPurchaseProviderImpl(this),

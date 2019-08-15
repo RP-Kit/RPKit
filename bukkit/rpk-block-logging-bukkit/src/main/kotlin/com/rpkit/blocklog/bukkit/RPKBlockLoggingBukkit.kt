@@ -10,11 +10,13 @@ import com.rpkit.blocklog.bukkit.database.table.RPKBlockInventoryChangeTable
 import com.rpkit.blocklog.bukkit.listener.*
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import org.bstats.bukkit.Metrics
 
 
 class RPKBlockLoggingBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKBlockHistoryProviderImpl(this)

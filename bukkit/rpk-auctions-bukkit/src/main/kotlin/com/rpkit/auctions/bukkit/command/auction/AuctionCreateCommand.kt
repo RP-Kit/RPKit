@@ -321,11 +321,17 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
                             noSellPrice = context.getSessionData("no_sell_price") as Int,
                             minimumBidIncrement = context.getSessionData("minimum_bid_increment") as Int
                     )
-                    auctionProvider.addAuction(auction)
-                    auction.openBidding()
-                    auctionProvider.updateAuction(auction)
-                    bukkitPlayer.inventory.setItemInMainHand(null)
-                    context.setSessionData("id", auction.id)
+                    if (auctionProvider.addAuction(auction)) {
+                        auction.openBidding()
+                        if (auctionProvider.updateAuction(auction)) {
+                            bukkitPlayer.inventory.setItemInMainHand(null)
+                            context.setSessionData("id", auction.id)
+                        } else {
+                            context.setSessionData("id", -3)
+                        }
+                    } else {
+                        context.setSessionData("id", -4)
+                    }
                 } else {
                     context.setSessionData("id", -1)
                 }
@@ -348,16 +354,14 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit): CommandExecut
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return if (context.getSessionData("id") != -1) {
-                if (context.getSessionData("id") != -2) {
-                    plugin.messages["auction-create-id", mapOf(
-                            Pair("id", context.getSessionData("id").toString())
-                    )]
-                } else {
-                    plugin.messages["no-minecraft-profile"]
-                }
-            } else {
-                plugin.messages["no-character"]
+            return when (context.getSessionData("id")) {
+                -1 -> plugin.messages["no-character"]
+                -2 -> plugin.messages["no-minecraft-profile"]
+                -3 -> plugin.messages["auction-update-failed"]
+                -4 -> plugin.messages["auction-create-failed"]
+                else -> plugin.messages["auction-create-id", mapOf(
+                        Pair("id", context.getSessionData("id").toString())
+                )]
             }
         }
 

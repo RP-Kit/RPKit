@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import com.rpkit.core.bukkit.servlet.StaticServlet
 import com.rpkit.core.database.Database
 import com.rpkit.core.web.NavigationLink
 import com.rpkit.core.web.Web
+import org.bstats.bukkit.Metrics
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
@@ -41,6 +42,7 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
     lateinit var servletContext: ServletContextHandler
 
     override fun onEnable() {
+        Metrics(this)
         saveDefaultConfig()
         val webServer = Server(config.getInt("web-server.port"))
         servletContext = ServletContextHandler()
@@ -68,7 +70,7 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
                         databasePassword,
                         SQLDialect.valueOf(databaseDialect)
                 ),
-                Web(webServer, mutableListOf(NavigationLink("Home", "/")))
+                Web(webServer, config.getString("web-server.title") ?: "RPKit", mutableListOf(NavigationLink("Home", "/")))
         )
         try {
             createTables(core.database)

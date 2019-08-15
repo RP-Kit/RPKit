@@ -68,4 +68,11 @@ interface RPKCurrencyProvider: ServiceProvider {
      */
     fun removeCurrency(currency: RPKCurrency)
 
+    /**
+     * Updates a currency.
+     *
+     * @param currency The currency to update
+     */
+    fun updateCurrency(currency: RPKCurrency)
+
 }

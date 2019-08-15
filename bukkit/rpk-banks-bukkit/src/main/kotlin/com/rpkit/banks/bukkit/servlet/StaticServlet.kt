@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class StaticServlet(private val plugin: RPKBanksBukkit): RPKServlet() {
             }
             scanner.close()
             val velocityContext = VelocityContext()
-            velocityContext.put("server", plugin.server.serverName)
+            velocityContext.put("server", plugin.core.web.title)
             velocityContext.put("navigationBar", plugin.core.web.navigationBar)
             Velocity.evaluate(velocityContext, resp.writer, "/web/404.html", templateBuilder.toString())
         }
