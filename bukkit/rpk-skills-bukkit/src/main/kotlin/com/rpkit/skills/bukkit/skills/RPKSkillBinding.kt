@@ -17,19 +17,13 @@
 package com.rpkit.skills.bukkit.skills
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.database.Entity
 import org.bukkit.inventory.ItemStack
 
 
-interface RPKSkillProvider: ServiceProvider {
-
-    val skills: List<RPKSkill>
-    fun getSkill(name: String): RPKSkill?
-    fun addSkill(skill: RPKSkill)
-    fun removeSkill(skill: RPKSkill)
-    fun getSkillCooldown(character: RPKCharacter, skill: RPKSkill): Int
-    fun setSkillCooldown(character: RPKCharacter, skill: RPKSkill, seconds: Int)
-    fun getSkillBinding(character: RPKCharacter, item: ItemStack): RPKSkill?
-    fun setSkillBinding(character: RPKCharacter, item: ItemStack, skill: RPKSkill?)
-
-}
+class RPKSkillBinding(
+        override var id: Int = 0,
+        val character: RPKCharacter,
+        val item: ItemStack,
+        val skill: RPKSkill
+): Entity
