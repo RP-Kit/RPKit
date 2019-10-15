@@ -11,6 +11,9 @@ commands:
     wand:
         description: Gives you a wand item
         usage: /<command>
+    setwand:
+        description: Sets the wand item
+        usage: /<command>
 permissions:
     rpkit.selection.command.wand:
         description: Allows creating a wand

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2019 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ class RPKSelectionTable(database: Database, private val plugin: RPKSelectionBukk
     override fun create() {
         database.create
                 .createTableIfNotExists(RPKIT_SELECTION)
-                .column(RPKIT_SELECTION.ID, SQLDataType.INTEGER)
+                .column(RPKIT_SELECTION.ID, SQLDataType.INTEGER.identity(true))
                 .column(RPKIT_SELECTION.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
                 .column(RPKIT_SELECTION.WORLD, SQLDataType.VARCHAR(256))
                 .column(RPKIT_SELECTION.X_1, SQLDataType.INTEGER)
@@ -60,7 +60,15 @@ class RPKSelectionTable(database: Database, private val plugin: RPKSelectionBukk
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.6.0")
+            database.setTableVersion(this, "1.8.0")
+        }
+        if (database.getTableVersion(this) == "1.6.0") {
+            database.create
+                    .alterTable(RPKIT_SELECTION)
+                    .alterColumn(RPKIT_SELECTION.ID)
+                    .set(SQLDataType.INTEGER.identity(true))
+                    .execute()
+            database.setTableVersion(this, "1.8.0")
         }
     }
 
