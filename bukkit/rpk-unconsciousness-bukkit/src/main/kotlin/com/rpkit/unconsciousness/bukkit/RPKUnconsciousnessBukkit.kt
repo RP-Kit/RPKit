@@ -26,6 +26,8 @@ import com.rpkit.unconsciousness.bukkit.listener.*
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProvider
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProviderImpl
 import org.bstats.bukkit.Metrics
+import org.bukkit.GameRule
+import org.bukkit.GameRule.KEEP_INVENTORY
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
@@ -60,7 +62,7 @@ class RPKUnconsciousnessBukkit: RPKBukkitPlugin() {
             }
         }.runTaskTimer(this, 200L, 200L)
         server.worlds.forEach { world ->
-            world.setGameRuleValue("keepInventory", "true")
+            world.setGameRule(KEEP_INVENTORY, true)
         }
     }
 
