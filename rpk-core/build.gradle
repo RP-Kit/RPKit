@@ -42,9 +42,6 @@ dependencies {
     implementation group: "org.jooq", name: "jooq", version: "3.11.11"
 }
 
-apply plugin: "com.github.johnrengelman.shadow"
-
-
 artifacts {
     archives jar
 }
