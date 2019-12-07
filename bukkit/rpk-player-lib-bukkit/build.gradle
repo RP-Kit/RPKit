@@ -23,7 +23,18 @@ def repoUserName = properties.getProperty("repo-username")
 def repoPassword = properties.getProperty("repo-password")
 
 dependencies {
-    compile project(":bukkit:rpk-core-bukkit")
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.3.60"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.3.60"
+    implementation group: "org.spigotmc", name: "spigot-api", version: "1.14.4-R0.1-SNAPSHOT"
+    implementation group: "org.bstats", name: "bstats-bukkit", version: "1.5"
+    implementation group: "org.pircbotx", name: "pircbotx", version: "2.1"
+    implementation group: "org.kohsuke", name: "github-api", version: "1.95"
+    implementation group: "org.eclipse.jetty", name: "jetty-server", version: "9.4.19.v20190610"
+    implementation group: "org.eclipse.jetty", name: "jetty-servlet", version: "9.4.19.v20190610"
+    implementation group: "org.eclipse.jetty", name: "jetty-webapp", version: "9.4.19.v20190610"
+    implementation group: "org.eclipse.jetty.websocket", name: "websocket-server", version: "9.4.19.v20190610"
+    implementation project(":rpk-core")
+    implementation project(":bukkit:rpk-core-bukkit")
 }
 
 processResources {
@@ -40,10 +51,7 @@ shadowJar {
         include(dependency("org.bstats:bstats-bukkit"))
     }
 
-    relocate "org.bstats", "com.rpkit.players.bukkit.shadow.lib.org.bstats"
-
-    classifier = ""
-}
+    relocate "org.bstats", "com.rpkit.players.bukkit.shadow.lib.org.bstats"}
 
 artifacts {
     archives shadowJar
