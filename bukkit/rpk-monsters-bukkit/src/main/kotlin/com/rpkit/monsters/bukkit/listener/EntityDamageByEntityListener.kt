@@ -22,6 +22,8 @@ import com.rpkit.monsters.bukkit.RPKMonstersBukkit
 import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelProvider
 import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatProviderImpl
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.stats.bukkit.stat.RPKStatProvider
+import com.rpkit.stats.bukkit.stat.RPKStatVariableProvider
 import org.bukkit.entity.Arrow
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
@@ -95,14 +97,20 @@ class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit): Liste
         val expression = plugin.config.getString("stats.$type.$stat")
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+        val statProvider = plugin.core.serviceManager.getServiceProvider(RPKStatProvider::class)
+        val statVariableProvider = plugin.core.serviceManager.getServiceProvider(RPKStatVariableProvider::class)
         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(player) ?: return 0.0
         val character = characterProvider.getActiveCharacter(minecraftProfile) ?: return 0.0
+        val statVariables = statVariableProvider.statVariables
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
         parser.addRPKitFunctions()
         parser.addVariableAsObject("core", plugin.core)
         parser.addVariableAsObject("character", character)
+        statProvider.stats.forEach {
+            parser.addVariable(it.name, it.get(character, statVariables).toDouble())
+        }
         parser.parseExpression(expression)
         return parser.value
     }
