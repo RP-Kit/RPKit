@@ -121,6 +121,7 @@ class RPKMonsterStatProviderImpl(private val plugin: RPKMonstersBukkit): RPKMons
 
     fun calculateMonsterMaxHealth(entityType: EntityType, level: Int): Double {
         val expression = plugin.config.getString("monsters.$entityType.max-health")
+                ?: plugin.config.getString("monsters.default.max-health")
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
@@ -132,6 +133,7 @@ class RPKMonsterStatProviderImpl(private val plugin: RPKMonstersBukkit): RPKMons
 
     fun calculateMonsterMinDamageMultiplier(entityType: EntityType, level: Int): Double {
         val expression = plugin.config.getString("monsters.$entityType.min-damage-multiplier")
+                ?: plugin.config.getString("monsters.default.min-damage-multiplier")
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
@@ -143,6 +145,7 @@ class RPKMonsterStatProviderImpl(private val plugin: RPKMonstersBukkit): RPKMons
 
     fun calculateMonsterMaxDamageMultiplier(entityType: EntityType, level: Int): Double {
         val expression = plugin.config.getString("monsters.$entityType.max-damage-multiplier")
+                ?: plugin.config.getString("monsters.default.max-damage-multiplier")
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
