@@ -17,6 +17,7 @@
 package com.rpkit.monsters.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.core.expression.function.addRPKitFunctions
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
 import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelProvider
 import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatProviderImpl
@@ -28,8 +29,7 @@ import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import javax.script.ScriptContext
-import javax.script.ScriptEngineManager
+import org.nfunk.jep.JEP
 
 
 class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit): Listener {
@@ -92,52 +92,47 @@ class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit): Liste
     }
 
     private fun getPlayerStat(player: Player, type: String, stat: String): Double {
-        val originalClassLoader = Thread.currentThread().contextClassLoader
-        Thread.currentThread().contextClassLoader = plugin.javaClass.classLoader
-        val script = plugin.config.getString("stats.$type.$stat")
-        val engineManager = ScriptEngineManager()
-        val engine = engineManager.getEngineByName("nashorn")
-        val bindings = engine.createBindings()
+        val expression = plugin.config.getString("stats.$type.$stat")
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(player) ?: return 0.0
         val character = characterProvider.getActiveCharacter(minecraftProfile) ?: return 0.0
-        bindings["core"] = plugin.core
-        bindings["character"] = character
-        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-        val statValue = (engine.eval(script) as Number).toDouble()
-        Thread.currentThread().contextClassLoader = originalClassLoader
-        return statValue
+        val parser = JEP()
+        parser.addStandardConstants()
+        parser.addStandardFunctions()
+        parser.addRPKitFunctions()
+        parser.addVariableAsObject("core", plugin.core)
+        parser.addVariableAsObject("character", character)
+        parser.parseExpression(expression)
+        return parser.value
     }
 
     private fun getEntityStat(entity: LivingEntity, type: String, stat: String): Double {
-        val originalClassLoader = Thread.currentThread().contextClassLoader
-        Thread.currentThread().contextClassLoader = plugin.javaClass.classLoader
-        val script = plugin.config.getString("monsters.${entity.type}.stats.$type.$stat")
+        val expression = plugin.config.getString("monsters.${entity.type}.stats.$type.$stat")
                 ?: plugin.config.getString("monsters.default.stats.$type.$stat")
-        val engineManager = ScriptEngineManager()
-        val engine = engineManager.getEngineByName("nashorn")
-        val bindings = engine.createBindings()
         val monsterLevelProvider = plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class)
-        bindings["core"] = plugin.core
-        bindings["level"] = monsterLevelProvider.getMonsterLevel(entity)
-        bindings["monster"] = entity
-        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-        val statValue = (engine.eval(script) as Number).toDouble()
-        Thread.currentThread().contextClassLoader = originalClassLoader
-        return statValue
+        val parser = JEP()
+        parser.addStandardConstants()
+        parser.addStandardFunctions()
+        parser.addRPKitFunctions()
+        parser.addVariableAsObject("core", plugin.core)
+        parser.addVariable("level", monsterLevelProvider.getMonsterLevel(entity).toDouble())
+        parser.addVariableAsObject("monster", entity)
+        parser.parseExpression(expression)
+        return parser.value
     }
 
     private fun getDamage(originalDamage: Double, attack: Double, defence: Double): Double {
-        val script = plugin.config.getString("damage")
-        val engineManager = ScriptEngineManager()
-        val engine = engineManager.getEngineByName("nashorn")
-        val bindings = engine.createBindings()
-        bindings["damage"] = originalDamage
-        bindings["attack"] = attack
-        bindings["defence"] = defence
-        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-        return (engine.eval(script) as Number).toDouble()
+        val expression = plugin.config.getString("damage")
+        val parser = JEP()
+        parser.addStandardConstants()
+        parser.addStandardFunctions()
+        parser.addRPKitFunctions()
+        parser.addVariable("damage", originalDamage)
+        parser.addVariable("attack", attack)
+        parser.addVariable("defence", defence)
+        parser.parseExpression(expression)
+        return parser.value
     }
 
 }

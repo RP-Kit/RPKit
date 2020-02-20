@@ -1,0 +1,10 @@
+name: rpk-stat-build-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.statbuilds.bukkit.RPKStatBuildLibBukkit
+depend:
+- rpk-core-bukkit
+- rpk-character-lib-bukkit
+- rpk-stat-lib-bukkit
+- rpk-experience-lib-bukkit
+- rpk-skill-lib-bukkit

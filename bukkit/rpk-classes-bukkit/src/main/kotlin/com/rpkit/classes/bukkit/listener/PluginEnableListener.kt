@@ -11,7 +11,7 @@ class PluginEnableListener(private val plugin: RPKClassesBukkit): Listener {
 
     @EventHandler
     fun onPluginEnable(event: PluginEnableEvent) {
-        if (plugin is RPKBukkitPlugin) {
+        if (event.plugin is RPKBukkitPlugin) {
             plugin.attemptStatRegistration()
             plugin.attemptCharacterCardFieldRegistration()
         }

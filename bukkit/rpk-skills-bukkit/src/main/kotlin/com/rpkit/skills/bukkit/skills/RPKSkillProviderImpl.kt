@@ -23,8 +23,10 @@ import com.rpkit.skills.bukkit.database.table.RPKSkillCooldownTable
 import org.bukkit.inventory.ItemStack
 import java.io.File
 import java.nio.charset.Charset
+import java.util.logging.Level.WARNING
 import javax.script.ScriptContext
 import javax.script.ScriptEngineManager
+import javax.script.ScriptException
 
 
 class RPKSkillProviderImpl(private val plugin: RPKSkillsBukkit): RPKSkillProvider {
@@ -35,18 +37,22 @@ class RPKSkillProviderImpl(private val plugin: RPKSkillsBukkit): RPKSkillProvide
         val skillsDirectory = File(plugin.dataFolder, "skills")
         if (!skillsDirectory.exists()) {
             skillsDirectory.mkdirs()
-            plugin.saveResource("skills/fireball.js", false)
+            plugin.saveResource("skills/fireball.kts", false)
         }
         val originalClassLoader = Thread.currentThread().contextClassLoader
         Thread.currentThread().contextClassLoader = plugin.javaClass.classLoader
         val engineManager = ScriptEngineManager()
         for (file in skillsDirectory.listFiles()) {
-            val engine = engineManager.getEngineByName("nashorn")
+            val engine = engineManager.getEngineByName("kotlin")
             val bindings = engine.createBindings()
             bindings["core"] = plugin.core
             engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
             file.reader(Charset.forName("UTF-8")).use { reader ->
-                engine.eval(reader)
+                try {
+                    engine.eval(reader)
+                } catch (exception: ScriptException) {
+                    plugin.logger.log(WARNING, "Failed to load skill from $file", exception)
+                }
             }
             val skill = engine.get("skill") as? RPKSkill
             if (skill != null) {
@@ -55,7 +61,6 @@ class RPKSkillProviderImpl(private val plugin: RPKSkillsBukkit): RPKSkillProvide
                 plugin.logger.warning("Failed to load skill from $file")
             }
         }
-        Thread.currentThread().contextClassLoader = originalClassLoader
     }
 
     override fun getSkill(name: String): RPKSkill? {

@@ -17,6 +17,7 @@
 package com.rpkit.permissions.bukkit.group.test
 
 import com.rpkit.permissions.bukkit.group.RPKGroupImpl
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.WordSpec
 
 class RPKGroupImplTests : WordSpec() {
@@ -44,7 +45,7 @@ class RPKGroupImplTests : WordSpec() {
         )
         "RPKGroupImpl.deserialize" should {
             "return an equivalent instance to what was serialized" {
-                RPKGroupImpl.deserialize(group.serialize()) shouldEqual group
+                RPKGroupImpl.deserialize(group.serialize()) shouldBe group
             }
         }
     }

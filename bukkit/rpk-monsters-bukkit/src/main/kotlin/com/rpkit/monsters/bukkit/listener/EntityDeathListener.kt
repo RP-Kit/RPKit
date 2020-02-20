@@ -18,6 +18,7 @@ package com.rpkit.monsters.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.exception.UnregisteredServiceException
+import com.rpkit.core.expression.function.addRPKitFunctions
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.experience.bukkit.experience.RPKExperienceProvider
@@ -31,8 +32,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.inventory.ItemStack
-import javax.script.ScriptContext
-import javax.script.ScriptEngineManager
+import org.nfunk.jep.JEP
+import kotlin.math.roundToInt
 
 
 class EntityDeathListener(private val plugin: RPKMonstersBukkit): Listener {
@@ -81,23 +82,25 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit): Listener {
     }
 
     private fun getExperience(entity: LivingEntity): Int {
-        val script = plugin.config.getString("monsters.${entity.type}.experience", plugin.config.getString("monsters.default.experience"))
-        val engineManager = ScriptEngineManager()
-        val engine = engineManager.getEngineByName("nashorn")
-        val bindings = engine.createBindings()
-        bindings["level"] = plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class).getMonsterLevel(entity)
-        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-        return (engine.eval(script) as Number).toDouble().toInt()
+        val expression = plugin.config.getString("monsters.${entity.type}.experience", plugin.config.getString("monsters.default.experience"))
+        val parser = JEP()
+        parser.addStandardConstants()
+        parser.addStandardFunctions()
+        parser.addRPKitFunctions()
+        parser.addVariable("level", plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class).getMonsterLevel(entity).toDouble())
+        parser.parseExpression(expression)
+        return parser.value.roundToInt()
     }
 
     private fun getMoney(entity: LivingEntity, currency: RPKCurrency): Int {
-        val script = plugin.config.getString("monsters.${entity.type}.money.${currency.name}", plugin.config.getString("monsters.default.money.${currency.name}"))
-        val engineManager = ScriptEngineManager()
-        val engine = engineManager.getEngineByName("nashorn")
-        val bindings = engine.createBindings()
-        bindings["level"] = plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class).getMonsterLevel(entity)
-        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-        return (engine.eval(script) as Number).toDouble().toInt()
+        val expression = plugin.config.getString("monsters.${entity.type}.money.${currency.name}", plugin.config.getString("monsters.default.money.${currency.name}"))
+        val parser = JEP()
+        parser.addStandardConstants()
+        parser.addStandardFunctions()
+        parser.addRPKitFunctions()
+        parser.addVariable("level", plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class).getMonsterLevel(entity).toDouble())
+        parser.parseExpression(expression)
+        return parser.value.roundToInt()
     }
 
 }

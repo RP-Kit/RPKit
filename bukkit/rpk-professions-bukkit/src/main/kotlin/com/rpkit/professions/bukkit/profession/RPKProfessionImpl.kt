@@ -20,8 +20,7 @@ import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityProvider
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import org.bukkit.Material
-import javax.script.ScriptContext
-import javax.script.ScriptEngineManager
+import org.nfunk.jep.JEP
 import kotlin.math.roundToInt
 
 
@@ -62,13 +61,13 @@ class RPKProfessionImpl(
     }
 
     override fun getExperienceNeededForLevel(level: Int): Int {
-        val experienceFormula = plugin.config.getString("professions.$name.experience.formula")
-        val engineManager = ScriptEngineManager()
-        val engine = engineManager.getEngineByName("nashorn")
-        val bindings = engine.createBindings()
-        bindings["level"] = level
-        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-        return (engine.eval(experienceFormula) as Number).toDouble().roundToInt()
+        val expression = plugin.config.getString("professions.$name.experience.formula")
+        val parser = JEP()
+        parser.addStandardConstants()
+        parser.addStandardFunctions()
+        parser.addVariable("level", level.toDouble())
+        parser.parseExpression(expression)
+        return parser.value.roundToInt()
     }
 
     override fun getExperienceFor(action: RPKCraftingAction, material: Material): Int {
