@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,8 +167,9 @@ interface RPKChatChannel: Entity {
      *
      * @param sender The player sending the message
      * @param message The message
+     * @param isAsync Whether the message is being sent asynchronously
      */
-    fun sendMessage(sender: RPKPlayer, message: String)
+    fun sendMessage(sender: RPKPlayer, message: String, isAsync: Boolean = false)
 
     /**
      * Sends the message to the channel, passing it through the specified directed pipeline once for each listener, and
@@ -178,8 +179,9 @@ interface RPKChatChannel: Entity {
      * @param message The message
      * @param directedPipeline The directed pipeline
      * @param undirectedPipeline The undirected pipeline
+     * @param isAsync Whether the message is being sent asynchronously
      */
-    fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>)
+    fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>, isAsync: Boolean = false)
 
     /**
      * Sends a message to the channel, passing it through the directed pipeline once for each listener, and the
@@ -188,8 +190,9 @@ interface RPKChatChannel: Entity {
      * @param sender The profile sending the message
      * @param senderMinecraftProfile The Minecraft profile used to send the message, or null if not sent from Minecraft
      * @param message The message
+     * @param isAsync Whether the message is being sent asynchronously
      */
-    fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String)
+    fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, isAsync: Boolean = false)
 
     /**
      * Sends a message to the channel, passing it through the specified directed pipeline once for each listener, and
@@ -200,7 +203,8 @@ interface RPKChatChannel: Entity {
      * @param message The message
      * @param directedPipeline The directed pipeline
      * @param undirectedPipeline The undirected pipeline
+     * @param isAsync Whether the message is being sent asynchronously
      */
-    fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>)
+    fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>, isAsync: Boolean = false)
 
 }

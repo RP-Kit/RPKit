@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@ class RPKBukkitChatChannelMessageEvent(
         override val profile: RPKProfile,
         override val minecraftProfile: RPKMinecraftProfile?,
         override var chatChannel: RPKChatChannel,
-        override val message: String
-): RPKBukkitEvent(), RPKChatChannelMessageEvent, Cancellable {
+        override val message: String,
+        isAsync: Boolean = false
+): RPKBukkitEvent(isAsync), RPKChatChannelMessageEvent, Cancellable {
 
     companion object {
         @JvmStatic val handlerList = HandlerList()
