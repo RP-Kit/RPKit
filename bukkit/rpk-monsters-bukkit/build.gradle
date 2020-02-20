@@ -37,6 +37,7 @@ dependencies {
     implementation project(":bukkit:rpk-economy-lib-bukkit")
     implementation project(":bukkit:rpk-experience-lib-bukkit")
     implementation project(":bukkit:rpk-selection-lib-bukkit")
+    implementation project(":bukkit:rpk-stat-lib-bukkit")
     implementation project(":bukkit:rpk-monster-lib-bukkit")
 }
 

@@ -1185,56 +1185,14 @@ monsters:
         ignored: false
 stats:
     melee:
-        attack: |
-            var RPKStatProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatProvider");
-            var RPKStatVariableProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatVariableProvider");
-            var statProvider = core.getServiceManager().getServiceProvider(RPKStatProvider.class);
-            var statVariableProvider = core.getServiceManager().getServiceProvider(RPKStatVariableProvider.class);
-            var stat = statProvider.getStat("strength");
-            var statValue = stat.get(character, statVariableProvider.getStatVariables());
-            statValue
-        defence: |
-            var RPKStatProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatProvider");
-            var RPKStatVariableProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatVariableProvider");
-            var statProvider = core.getServiceManager().getServiceProvider(RPKStatProvider.class);
-            var statVariableProvider = core.getServiceManager().getServiceProvider(RPKStatVariableProvider.class);
-            var stat = statProvider.getStat("strength");
-            var statValue = stat.get(character, statVariableProvider.getStatVariables());
-            statValue
+        attack: strength
+        defence: strength
     bow:
-        attack: |
-            var RPKStatProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatProvider");
-            var RPKStatVariableProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatVariableProvider");
-            var statProvider = core.getServiceManager().getServiceProvider(RPKStatProvider.class);
-            var statVariableProvider = core.getServiceManager().getServiceProvider(RPKStatVariableProvider.class);
-            var stat = statProvider.getStat("agility");
-            var statValue = stat.get(character, statVariableProvider.getStatVariables());
-            statValue
-        defence: |
-            var RPKStatProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatProvider");
-            var RPKStatVariableProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatVariableProvider");
-            var statProvider = core.getServiceManager().getServiceProvider(RPKStatProvider.class);
-            var statVariableProvider = core.getServiceManager().getServiceProvider(RPKStatVariableProvider.class);
-            var stat = statProvider.getStat("agility");
-            var statValue = stat.get(character, statVariableProvider.getStatVariables());
-            statValue
+        attack: agility
+        defence: agility
     projectile:
-        attack: |
-            var RPKStatProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatProvider");
-            var RPKStatVariableProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatVariableProvider");
-            var statProvider = core.getServiceManager().getServiceProvider(RPKStatProvider.class);
-            var statVariableProvider = core.getServiceManager().getServiceProvider(RPKStatVariableProvider.class);
-            var stat = statProvider.getStat("intelligence");
-            var statValue = stat.get(character, statVariableProvider.getStatVariables());
-            statValue
-        defence: |
-            var RPKStatProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatProvider");
-            var RPKStatVariableProvider = Java.type("com.rpkit.stats.bukkit.stat.RPKStatVariableProvider");
-            var statProvider = core.getServiceManager().getServiceProvider(RPKStatProvider.class);
-            var statVariableProvider = core.getServiceManager().getServiceProvider(RPKStatVariableProvider.class);
-            var stat = statProvider.getStat("intelligence");
-            var statValue = stat.get(character, statVariableProvider.getStatVariables());
-            statValue
+        attack: intelligence
+        defence: intelligence
 damage: ceil((((attack + 1.0) / 2.0) + 5.0) * damage) / (defence + 1.0) / 2.0
 caching:
     rpkit_monster_spawn_area_monster:

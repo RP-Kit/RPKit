@@ -9,6 +9,7 @@ depend:
 - rpk-economy-lib-bukkit
 - rpk-experience-lib-bukkit
 - rpk-selection-lib-bukkit
+- rpk-stat-lib-bukkit
 - rpk-monster-lib-bukkit
 commands:
     monsterspawnarea:
