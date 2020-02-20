@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
                 for (otherChannel in chatChannelProvider.chatChannels) {
                     val matchPattern = otherChannel.matchPattern
                     if (matchPattern != null) {
-                        if (!matchPattern.isEmpty()) {
+                        if (matchPattern.isNotEmpty()) {
                             if (message.matches(matchPattern.toRegex())) {
                                 chatChannel = otherChannel
                                 val pattern = Pattern.compile(matchPattern)
@@ -63,7 +63,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
                     }
                 }
                 if (chatChannel != null) {
-                    chatChannel.sendMessage(profile, minecraftProfile, message)
+                    chatChannel.sendMessage(profile, minecraftProfile, message, event.isAsynchronous)
                 } else {
                     event.player.sendMessage(plugin.messages["no-chat-channel"])
                 }
