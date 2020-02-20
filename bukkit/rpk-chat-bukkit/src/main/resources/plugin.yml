@@ -7,9 +7,10 @@ depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
+- rpk-permissions-lib-bukkit
 - rpk-chat-lib-bukkit
 - rpk-drink-lib-bukkit
-api-version: 1.13
+api-version: '1.15'
 commands:
     chatchannel:
         description: Switches which chat channel you are speaking in

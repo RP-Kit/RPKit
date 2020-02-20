@@ -2,5 +2,7 @@ name: rpk-experience-lib-bukkit
 version: @version@
 author: alyphen
 main: com.rpkit.experience.bukkit.RPKExperienceLibBukkit
-depend: [rpk-core-bukkit, rpk-character-lib-bukkit]
-api-version: 1.13
+depend:
+- rpk-core-bukkit
+- rpk-character-lib-bukkit
+api-version: '1.15'

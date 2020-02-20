@@ -3,8 +3,12 @@ version: @version@
 main: com.rpkit.characters.bukkit.RPKCharactersBukkit
 author: alyphen
 description: RPK Characters implementation for Bukkit
-depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-character-lib-bukkit]
-api-version: 1.13
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+- rpk-permissions-lib-bukkit
+api-version: '1.15'
 commands:
     character:
         description: Character management command

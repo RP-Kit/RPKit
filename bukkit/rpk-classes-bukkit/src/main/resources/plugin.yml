@@ -4,12 +4,13 @@ author: alyphen
 main: com.rpkit.classes.bukkit.RPKClassesBukkit
 depend:
 - rpk-core-bukkit
+- rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-stat-lib-bukkit
 - rpk-skill-lib-bukkit
 - rpk-experience-lib-bukkit
 - rpk-class-lib-bukkit
-api-version: 1.13
+api-version: '1.15'
 commands:
     class:
         description: Class management command

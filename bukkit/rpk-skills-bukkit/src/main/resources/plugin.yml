@@ -2,8 +2,12 @@ name: rpk-skills-bukkit
 version: @version@
 author: alyphen
 main: com.rpkit.skills.bukkit.RPKSkillsBukkit
-depend: [rpk-core-bukkit, rpk-character-lib-bukkit, rpk-skill-lib-bukkit]
-api-version: 1.13
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+- rpk-skill-lib-bukkit
+api-version: '1.15'
 commands:
     skill:
         description: Uses a skill

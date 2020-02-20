@@ -3,7 +3,7 @@ author: alyphen
 version: @version@
 main: com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
 description: RPKit Stat Builds implementation for Bukkit
-api-version: 1.15
+api-version: '1.15'
 depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit

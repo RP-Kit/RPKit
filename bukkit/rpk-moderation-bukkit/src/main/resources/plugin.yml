@@ -6,7 +6,7 @@ depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
 - rpk-moderation-lib-bukkit
-api-version: 1.13
+api-version: '1.15'
 commands:
     amivanished:
         description: Checks if you''re vanished

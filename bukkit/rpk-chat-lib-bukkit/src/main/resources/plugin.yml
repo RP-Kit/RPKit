@@ -2,6 +2,9 @@ name: rpk-chat-lib-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.chat.bukkit.RPKChatLibBukkit
-depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-character-lib-bukkit]
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
 softdepend: [Vault]
-api-version: 1.13
+api-version: '1.15'
