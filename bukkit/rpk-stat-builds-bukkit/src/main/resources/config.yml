@@ -1,0 +1,24 @@
+stat-attributes:
+  strength:
+    max-points: level
+  agility:
+    max-points: level
+  intelligence:
+    max-points: level
+  vitality:
+    max-points: level
+stat-attribute-points-formula: level * 3
+skill-points:
+  melee_offence: strength * 2
+  melee_defence: strength + vitality
+  ranged_offence: strength + agility
+  ranged_defence: agility + vitality
+  magic_offence: intelligence * 2
+  magic_defence: intelligence + vitality
+  magic_healing: intelligence + vitality
+  magic_nature: agility + intelligence
+  magic_illusion: intelligence * 2
+  magic_summoning: intelligence * 2
+  magic_sword: strength + intelligence
+  speed_nimble: agility * 2
+  support_perform: intelligence + agility

@@ -16,14 +16,14 @@
 
 package com.rpkit.monsters.bukkit.monsterstat
 
+import com.rpkit.core.expression.function.addRPKitFunctions
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
 import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelProvider
 import org.bukkit.ChatColor
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
-import javax.script.ScriptContext
-import javax.script.ScriptEngineManager
+import org.nfunk.jep.JEP
 
 
 class RPKMonsterStatProviderImpl(private val plugin: RPKMonstersBukkit): RPKMonsterStatProvider {
@@ -120,33 +120,36 @@ class RPKMonsterStatProviderImpl(private val plugin: RPKMonstersBukkit): RPKMons
     }
 
     fun calculateMonsterMaxHealth(entityType: EntityType, level: Int): Double {
-        val script = plugin.config.getString("monsters.$entityType.max-health")
-        val engineManager = ScriptEngineManager()
-        val engine = engineManager.getEngineByName("nashorn")
-        val bindings = engine.createBindings()
-        bindings["level"] = level
-        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-        return (engine.eval(script) as Number).toDouble()
+        val expression = plugin.config.getString("monsters.$entityType.max-health")
+        val parser = JEP()
+        parser.addStandardConstants()
+        parser.addStandardFunctions()
+        parser.addRPKitFunctions()
+        parser.addVariable("level", level.toDouble())
+        parser.parseExpression(expression)
+        return parser.value
     }
 
     fun calculateMonsterMinDamageMultiplier(entityType: EntityType, level: Int): Double {
-        val script = plugin.config.getString("monsters.$entityType.min-damage-multiplier")
-        val engineManager = ScriptEngineManager()
-        val engine = engineManager.getEngineByName("nashorn")
-        val bindings = engine.createBindings()
-        bindings["level"] = level
-        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-        return (engine.eval(script) as Number).toDouble()
+        val expression = plugin.config.getString("monsters.$entityType.min-damage-multiplier")
+        val parser = JEP()
+        parser.addStandardConstants()
+        parser.addStandardFunctions()
+        parser.addRPKitFunctions()
+        parser.addVariable("level", level.toDouble())
+        parser.parseExpression(expression)
+        return parser.value
     }
 
     fun calculateMonsterMaxDamageMultiplier(entityType: EntityType, level: Int): Double {
-        val script = plugin.config.getString("monsters.$entityType.max-damage-multiplier")
-        val engineManager = ScriptEngineManager()
-        val engine = engineManager.getEngineByName("nashorn")
-        val bindings = engine.createBindings()
-        bindings["level"] = level
-        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-        return (engine.eval(script) as Number).toDouble()
+        val expression = plugin.config.getString("monsters.$entityType.max-damage-multiplier")
+        val parser = JEP()
+        parser.addStandardConstants()
+        parser.addStandardFunctions()
+        parser.addRPKitFunctions()
+        parser.addVariable("level", level.toDouble())
+        parser.parseExpression(expression)
+        return parser.value
     }
 
     fun setMonsterNameplate(

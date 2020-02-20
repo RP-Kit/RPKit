@@ -19,7 +19,7 @@
 stats:
     strength: >
       (minecraftLevel * 5)
-      + (characterHelmet == null ? 0 : characterHelmet.getType().toString() == "DIAMOND_HELMET" ? 10 : 0)
-      + (characterHelmet == null ? 0 : characterHelmet.getType().toString() == "IRON_HELMET" ? 8 : 0)
+      + (if(characterHelmet,if(characterHelmet.getType().toString() = "DIAMOND_HELMET",10,0),0))
+      + (if(characterHelmet,if(characterHelmet.getType().toString() = "IRON_HELMET",8,0),0))
     agility: '(minecraftLevel * 20) - characterAge + characterFoodLevel'
     intelligence: '(minecraftLevel * 5) + characterMana'

@@ -33,6 +33,8 @@ dependencies {
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
     implementation project(":bukkit:rpk-selection-lib-bukkit")
+    testImplementation group: "io.kotlintest", name: "kotlintest-runner-junit5", version: "3.4.2"
+    testImplementation group: "io.mockk", name: "mockk", version: "1.9"
 }
 
 processResources {

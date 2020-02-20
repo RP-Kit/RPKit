@@ -17,31 +17,32 @@
 package com.rpkit.selection.bukkit.selection.test
 
 import com.rpkit.selection.bukkit.selection.RPKSelectionImpl
-import io.kotlintest.mock.`when`
-import io.kotlintest.mock.mock
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.WordSpec
+import io.mockk.every
+import io.mockk.mockk
 import org.bukkit.World
 import org.bukkit.block.Block
 
 class RPKSelectionImplTests: WordSpec() {
 
     init {
-        val world = mock<World>()
-        val minPosition = mock<Block>()
-        `when`(minPosition.world).thenReturn(world)
-        `when`(minPosition.x).thenReturn(1)
-        `when`(minPosition.y).thenReturn(1)
-        `when`(minPosition.z).thenReturn(1)
-        `when`(world.getBlockAt(1, 1, 1)).thenReturn(minPosition)
-        val maxPosition = mock<Block>()
-        `when`(maxPosition.world).thenReturn(world)
-        `when`(maxPosition.x).thenReturn(3)
-        `when`(maxPosition.y).thenReturn(3)
-        `when`(maxPosition.z).thenReturn(3)
-        `when`(world.getBlockAt(3, 3, 3)).thenReturn(maxPosition)
+        val world = mockk<World>()
+        val minPosition = mockk<Block>()
+        every { minPosition.world } returns world
+        every { minPosition.x } returns 1
+        every { minPosition.y } returns 1
+        every { minPosition.z } returns 1
+        every { world.getBlockAt(1, 1, 1) } returns minPosition
+        val maxPosition = mockk<Block>()
+        every { maxPosition.world } returns world
+        every { maxPosition.x } returns 3
+        every { maxPosition.y } returns 3
+        every { maxPosition.z } returns 3
+        every { world.getBlockAt(3, 3, 3) } returns maxPosition
         val selection = RPKSelectionImpl(
                 0,
-                mock(),
+                mockk(),
                 world,
                 minPosition,
                 maxPosition
@@ -49,11 +50,11 @@ class RPKSelectionImplTests: WordSpec() {
 
         "RPKSelectionImpl.contains" should {
             "return true when it contains the given point" {
-                val block = mock<Block>()
-                `when`(block.world).thenReturn(world)
-                `when`(block.x).thenReturn(2)
-                `when`(block.y).thenReturn(2)
-                `when`(block.z).thenReturn(2)
+                val block = mockk<Block>()
+                every { block.world } returns world
+                every { block.x } returns 2
+                every { block.y } returns 2
+                every { block.z } returns 2
 
                 selection.contains(block) shouldBe true
             }
@@ -61,11 +62,11 @@ class RPKSelectionImplTests: WordSpec() {
 
         "RPKSelectionImpl.contains" should {
             "return false when it does not contain the given point" {
-                val block = mock<Block>()
-                `when`(block.world).thenReturn(world)
-                `when`(block.x).thenReturn(4)
-                `when`(block.y).thenReturn(4)
-                `when`(block.z).thenReturn(4)
+                val block = mockk<Block>()
+                every { block.world } returns world
+                every { block.x } returns 4
+                every { block.y } returns 4
+                every { block.z } returns 4
 
                 selection.contains(block) shouldBe false
             }
@@ -73,12 +74,12 @@ class RPKSelectionImplTests: WordSpec() {
 
         "RPKSelectionImpl.contains" should {
             "return false when the given point is in another world" {
-                val otherWorld = mock<World>()
-                val block = mock<Block>()
-                `when`(block.world).thenReturn(otherWorld)
-                `when`(block.x).thenReturn(2)
-                `when`(block.y).thenReturn(2)
-                `when`(block.z).thenReturn(2)
+                val otherWorld = mockk<World>()
+                val block = mockk<Block>()
+                every { block.world } returns otherWorld
+                every { block.x } returns 2
+                every { block.y } returns 2
+                every { block.z } returns 2
 
                 selection.contains(block) shouldBe false
             }

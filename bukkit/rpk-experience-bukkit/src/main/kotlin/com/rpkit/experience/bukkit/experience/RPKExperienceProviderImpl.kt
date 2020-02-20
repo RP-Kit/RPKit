@@ -4,8 +4,8 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.experience.bukkit.RPKExperienceBukkit
 import com.rpkit.experience.bukkit.database.table.RPKExperienceTable
 import com.rpkit.experience.bukkit.event.experience.RPKBukkitExperienceChangeEvent
-import javax.script.ScriptContext.ENGINE_SCOPE
-import javax.script.ScriptEngineManager
+import org.nfunk.jep.JEP
+import kotlin.math.roundToInt
 
 
 class RPKExperienceProviderImpl(private val plugin: RPKExperienceBukkit): RPKExperienceProvider {
@@ -62,12 +62,13 @@ class RPKExperienceProviderImpl(private val plugin: RPKExperienceBukkit): RPKExp
     }
 
     override fun getExperienceNeededForLevel(level: Int): Int {
-        val engineManager = ScriptEngineManager()
-        val engine = engineManager.getEngineByName("nashorn")
-        val bindings = engine.createBindings()
-        bindings["level"] = level
-        engine.setBindings(bindings, ENGINE_SCOPE)
-        return Math.round((engine.eval(plugin.config.getString("experience.equation")) as Number).toDouble()).toInt()
+        val expression = plugin.config.getString("experience.equation")
+        val parser = JEP()
+        parser.addStandardConstants()
+        parser.addStandardFunctions()
+        parser.addVariable("level", level.toDouble())
+        parser.parseExpression(expression)
+        return parser.value.roundToInt()
     }
 
 }
