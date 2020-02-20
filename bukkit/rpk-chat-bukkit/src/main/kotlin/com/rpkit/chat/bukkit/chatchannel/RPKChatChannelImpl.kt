@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ class RPKChatChannelImpl(
         plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).addChatChannelMute(listener, this)
     }
 
-    override fun sendMessage(sender: RPKPlayer, message: String) {
+    override fun sendMessage(sender: RPKPlayer, message: String, isAsync: Boolean) {
         val bukkitPlayer = sender.bukkitPlayer
         if (bukkitPlayer != null) {
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
@@ -120,11 +120,11 @@ class RPKChatChannelImpl(
         }
     }
 
-    override fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String) {
+    override fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, isAsync: Boolean) {
         sendMessage(sender, senderMinecraftProfile, message, directedPipeline, undirectedPipeline)
     }
 
-    override fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>) {
+    override fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>, isAsync: Boolean) {
         val bukkitPlayer = sender.bukkitPlayer
         if (bukkitPlayer != null) {
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
@@ -138,8 +138,8 @@ class RPKChatChannelImpl(
         }
     }
 
-    override fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>) {
-        val event = RPKBukkitChatChannelMessageEvent(sender, senderMinecraftProfile, this, message)
+    override fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>, isAsync: Boolean) {
+        val event = RPKBukkitChatChannelMessageEvent(sender, senderMinecraftProfile, this, message, isAsync)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         listenerMinecraftProfiles.forEach { listener ->
