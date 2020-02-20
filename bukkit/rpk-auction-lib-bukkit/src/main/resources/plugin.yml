@@ -2,5 +2,8 @@ name: rpk-auction-lib-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.auctions.bukkit.RPKAuctionLibBukkit
-depend: [rpk-core-bukkit, rpk-character-lib-bukkit, rpk-economy-lib-bukkit]
-api-version: 1.13
+depend:
+- rpk-core-bukkit
+- rpk-character-lib-bukkit
+- rpk-economy-lib-bukkit
+api-version: '1.15'

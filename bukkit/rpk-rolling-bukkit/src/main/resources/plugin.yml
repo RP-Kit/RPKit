@@ -2,8 +2,11 @@ name: rpk-rolling-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.rolling.bukkit.RPKRollingBukkit
-depend: [rpk-core-bukkit, rpk-player-lib-bukkit, rpk-character-lib-bukkit]
-api-version: 1.13
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+api-version: '1.15'
 commands:
     roll:
         description: Rolls

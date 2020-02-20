@@ -6,4 +6,5 @@ depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
 - rpk-selection-lib-bukkit
-api-version: 1.13
+- WorldEdit
+api-version: '1.15'

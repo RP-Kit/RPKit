@@ -2,9 +2,10 @@ name: rpk-item-quality-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.itemquality.bukkit.RPKItemQualityBukkit
-api-version: 1.13
+api-version: '1.15'
 depend:
 - rpk-core-bukkit
+- rpk-item-quality-lib-bukkit
 commands:
     itemquality:
         description: Item quality management command
