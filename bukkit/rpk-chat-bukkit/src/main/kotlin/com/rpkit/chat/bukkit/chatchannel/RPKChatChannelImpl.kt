@@ -114,14 +114,14 @@ class RPKChatChannelImpl(
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
                 if (profile != null) {
-                    sendMessage(profile, minecraftProfile, message)
+                    sendMessage(profile, minecraftProfile, message, isAsync)
                 }
             }
         }
     }
 
     override fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, isAsync: Boolean) {
-        sendMessage(sender, senderMinecraftProfile, message, directedPipeline, undirectedPipeline)
+        sendMessage(sender, senderMinecraftProfile, message, directedPipeline, undirectedPipeline, isAsync)
     }
 
     override fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>, isAsync: Boolean) {
@@ -132,7 +132,7 @@ class RPKChatChannelImpl(
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
                 if (profile != null) {
-                    sendMessage(profile, minecraftProfile, message, directedPipeline, undirectedPipeline)
+                    sendMessage(profile, minecraftProfile, message, directedPipeline, undirectedPipeline, isAsync)
                 }
             }
         }
