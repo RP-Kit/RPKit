@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,13 @@ import com.rpkit.monsters.bukkit.monsterexperience.RPKMonsterExperienceProviderI
 import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelProviderImpl
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaProviderImpl
 import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatProviderImpl
+import org.bstats.bukkit.Metrics
 
 
 class RPKMonstersBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
+        Metrics(this, 6661)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKMonsterExperienceProviderImpl(this),

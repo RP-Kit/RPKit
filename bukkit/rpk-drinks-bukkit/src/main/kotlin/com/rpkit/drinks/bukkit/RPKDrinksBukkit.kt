@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.bukkit.scheduler.BukkitRunnable
 class RPKDrinksBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
-        Metrics(this)
+        Metrics(this, 4389)
         saveDefaultConfig()
         val drinkProvider = RPKDrinkProviderImpl(this)
         drinkProvider.drinks.forEach { server.addRecipe(it.recipe) }

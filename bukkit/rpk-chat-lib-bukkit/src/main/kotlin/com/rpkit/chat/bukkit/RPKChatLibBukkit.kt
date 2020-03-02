@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.bukkit.plugin.ServicePriority.Normal
 class RPKChatLibBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
-        Metrics(this)
+        Metrics(this, 4384)
         serviceProviders = arrayOf()
         if (server.pluginManager.getPlugin("Vault") != null) {
             server.servicesManager.register(Chat::class.java, RPKChatVaultChat(this), this, Normal)

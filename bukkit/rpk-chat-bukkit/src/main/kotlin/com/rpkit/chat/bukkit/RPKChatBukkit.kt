@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ import org.eclipse.jetty.servlet.ServletHolder
 class RPKChatBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
-        Metrics(this)
+        Metrics(this, 4383)
         ConfigurationSerialization.registerClass(DirectedFormatComponent::class.java, "DirectedFormatComponent")
         ConfigurationSerialization.registerClass(DrunkenSlurComponent::class.java, "DrunkenSlurComponent")
         ConfigurationSerialization.registerClass(GarbleComponent::class.java, "GarbleComponent")

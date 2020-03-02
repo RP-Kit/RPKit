@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ class RPKProfessionsBukkit: RPKBukkitPlugin() {
     private var professionFieldInitialised = false
 
     override fun onEnable() {
-        Metrics(this)
+        Metrics(this, 5352)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKProfessionProviderImpl(this)
