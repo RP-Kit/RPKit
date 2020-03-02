@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,47 +21,11 @@ import com.rpkit.skills.bukkit.RPKSkillsBukkit
 import com.rpkit.skills.bukkit.database.table.RPKSkillBindingTable
 import com.rpkit.skills.bukkit.database.table.RPKSkillCooldownTable
 import org.bukkit.inventory.ItemStack
-import java.io.File
-import java.nio.charset.Charset
-import java.util.logging.Level.WARNING
-import javax.script.ScriptContext
-import javax.script.ScriptEngineManager
-import javax.script.ScriptException
 
 
 class RPKSkillProviderImpl(private val plugin: RPKSkillsBukkit): RPKSkillProvider {
 
     override val skills: MutableList<RPKSkill> = mutableListOf()
-
-    fun init() {
-        val skillsDirectory = File(plugin.dataFolder, "skills")
-        if (!skillsDirectory.exists()) {
-            skillsDirectory.mkdirs()
-            plugin.saveResource("skills/fireball.kts", false)
-        }
-        val originalClassLoader = Thread.currentThread().contextClassLoader
-        Thread.currentThread().contextClassLoader = plugin.javaClass.classLoader
-        val engineManager = ScriptEngineManager()
-        for (file in skillsDirectory.listFiles()) {
-            val engine = engineManager.getEngineByName("kotlin")
-            val bindings = engine.createBindings()
-            bindings["core"] = plugin.core
-            engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-            file.reader(Charset.forName("UTF-8")).use { reader ->
-                try {
-                    engine.eval(reader)
-                } catch (exception: ScriptException) {
-                    plugin.logger.log(WARNING, "Failed to load skill from $file", exception)
-                }
-            }
-            val skill = engine.get("skill") as? RPKSkill
-            if (skill != null) {
-                addSkill(skill)
-            } else {
-                plugin.logger.warning("Failed to load skill from $file")
-            }
-        }
-    }
 
     override fun getSkill(name: String): RPKSkill? {
         return skills.firstOrNull { it.name.equals(name, ignoreCase = true) }

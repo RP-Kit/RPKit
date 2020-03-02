@@ -40,10 +40,6 @@ class RPKSkillsBukkit: RPKBukkitPlugin() {
         )
     }
 
-    override fun onPostEnable() {
-        core.serviceManager.getServiceProvider(RPKSkillProviderImpl::class).init()
-    }
-
     override fun registerCommands() {
         getCommand("skill")?.setExecutor(SkillCommand(this))
         getCommand("bindskill")?.setExecutor(BindSkillCommand(this))
