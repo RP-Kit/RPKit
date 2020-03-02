@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.profession.RPKCraftingAction
 import com.rpkit.professions.bukkit.profession.RPKProfessionProvider
-import org.bukkit.Material
+import org.bukkit.Material.AIR
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -140,20 +140,24 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit): Listener {
     }
 
     private fun getAmountCrafted(event: CraftItemEvent): Int {
+        val currentItem = event.currentItem
+        if (currentItem == null || currentItem.type == AIR) {
+            return 0
+        }
         val cursor = event.cursor
         var amount = event.recipe.result.amount
         if (event.isShiftClick) {
             var max = event.inventory.maxStackSize
             val matrix = event.inventory.matrix
             matrix.asSequence()
-                    .filter { it != null && it.type != Material.AIR }
+                    .filter { it != null && it.type != AIR }
                     .map { it.amount }
                     .filter { it in 1 until max }
                     .forEach { max = it }
             amount *= max
         } else {
             if (cursor != null) {
-                if (cursor.type != Material.AIR) {
+                if (cursor.type != AIR) {
                     return 0
                 }
             }

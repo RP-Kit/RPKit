@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,6 +133,10 @@ class CraftItemListener(private val plugin: RPKCraftingSkillBukkit): Listener {
     }
 
     private fun getAmountCrafted(event: CraftItemEvent): Int {
+        val currentItem = event.currentItem
+        if (currentItem == null || currentItem.type == Material.AIR) {
+            return 0
+        }
         val cursor = event.cursor
         var amount = event.recipe.result.amount
         if (event.isShiftClick) {
