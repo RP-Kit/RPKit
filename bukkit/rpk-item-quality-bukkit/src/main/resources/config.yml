@@ -5,6 +5,8 @@ item-qualities:
         - '&fPoorly crafted, barely holding together, or falling apart at the seams'
         durability-modifier: 0.5
         applicable-items:
+        - BREAD
+        - COOKED_CHICKEN
         - WOODEN_AXE
         - WOODEN_HOE
         - WOODEN_PICKAXE
@@ -36,6 +38,8 @@ item-qualities:
         - '&fDecently well made, but by no means masterwork'
         durability-modifier: 1
         applicable-items:
+        - BREAD
+        - COOKED_CHICKEN
         - WOODEN_AXE
         - WOODEN_HOE
         - WOODEN_PICKAXE
@@ -67,6 +71,8 @@ item-qualities:
         - '&fWell put-together, obviously the work of somewhat of an expert'
         durability-modifier: 2
         applicable-items:
+        - BREAD
+        - COOKED_CHICKEN
         - WOODEN_AXE
         - WOODEN_HOE
         - WOODEN_PICKAXE
@@ -98,6 +104,8 @@ item-qualities:
         - '&fBeyond the work of modern craft, possibly forged by ancient magicks'
         durability-modifier: 10
         applicable-items:
+        - BREAD
+        - COOKED_CHICKEN
         - WOODEN_AXE
         - WOODEN_HOE
         - WOODEN_PICKAXE
