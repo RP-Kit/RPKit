@@ -2,6 +2,10 @@ name: rpk-bank-lib-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.banks.bukkit.RPKBankLibBukkit
-depend: [rpk-core-bukkit, rpk-character-lib-bukkit, rpk-economy-lib-bukkit]
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+- rpk-economy-lib-bukkit
 softdepend: [Vault]
-api-version: 1.13
+api-version: '1.15'

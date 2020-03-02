@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.bukkit.permissions.PermissionDefault
 class RPKPermissionsBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
-        Metrics(this)
+        Metrics(this, 4407)
         ConfigurationSerialization.registerClass(RPKGroupImpl::class.java, "RPKGroupImpl")
         saveDefaultConfig()
         config.options().pathSeparator('/')

@@ -19,14 +19,15 @@ package com.rpkit.stats.bukkit.stat.test
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.stats.bukkit.stat.RPKStatImpl
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
-import io.kotlintest.mock.mock
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.WordSpec
+import io.mockk.mockk
 
 
 class RPKStatImplTests: WordSpec() {
 
     init {
-        val character = mock<RPKCharacter>()
+        val character = mockk<RPKCharacter>()
         val statVariables = listOf(object: RPKStatVariable {
             override val name: String = "level"
 
@@ -42,7 +43,7 @@ class RPKStatImplTests: WordSpec() {
         )
         "RPKStatImpl.get" should {
             "successfully parse its script and return the correct value" {
-                stat.get(character, statVariables) shouldEqual 15
+                stat.get(character, statVariables) shouldBe 15
             }
         }
     }

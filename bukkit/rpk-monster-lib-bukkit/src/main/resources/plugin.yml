@@ -1,0 +1,9 @@
+name: rpk-monster-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.monsters.bukkit.RPKMonsterLibBukkit
+api-version: '1.15'
+depend:
+- rpk-core-bukkit
+- rpk-character-lib-bukkit
+- rpk-experience-lib-bukkit

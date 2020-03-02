@@ -2,5 +2,7 @@ name: rpk-character-lib-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.characters.bukkit.RPKCharacterLibBukkit
-depend: [rpk-core-bukkit, rpk-player-lib-bukkit]
-api-version: 1.13
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+api-version: '1.15'

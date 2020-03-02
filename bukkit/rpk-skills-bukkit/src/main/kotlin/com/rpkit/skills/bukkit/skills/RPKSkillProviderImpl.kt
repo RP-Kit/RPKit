@@ -1,44 +1,31 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.skills.bukkit.skills
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.skills.bukkit.RPKSkillsBukkit
+import com.rpkit.skills.bukkit.database.table.RPKSkillBindingTable
 import com.rpkit.skills.bukkit.database.table.RPKSkillCooldownTable
-import java.io.File
-import java.nio.charset.Charset
-import javax.script.ScriptContext
-import javax.script.ScriptEngineManager
+import org.bukkit.inventory.ItemStack
 
 
 class RPKSkillProviderImpl(private val plugin: RPKSkillsBukkit): RPKSkillProvider {
 
     override val skills: MutableList<RPKSkill> = mutableListOf()
-
-    fun init() {
-        val skillsDirectory = File(plugin.dataFolder, "skills")
-        if (!skillsDirectory.exists()) {
-            skillsDirectory.mkdirs()
-            plugin.saveResource("skills/fireball.js", false)
-        }
-        val originalClassLoader = Thread.currentThread().contextClassLoader
-        Thread.currentThread().contextClassLoader = plugin.javaClass.classLoader
-        val engineManager = ScriptEngineManager()
-        for (file in skillsDirectory.listFiles()) {
-            val engine = engineManager.getEngineByName("nashorn")
-            val bindings = engine.createBindings()
-            bindings["core"] = plugin.core
-            engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-            file.reader(Charset.forName("UTF-8")).use { reader ->
-                engine.eval(reader)
-            }
-            val skill = engine.get("skill") as? RPKSkill
-            if (skill != null) {
-                addSkill(skill)
-            } else {
-                plugin.logger.warning("Failed to load skill from $file")
-            }
-        }
-        Thread.currentThread().contextClassLoader = originalClassLoader
-    }
 
     override fun getSkill(name: String): RPKSkill? {
         return skills.firstOrNull { it.name.equals(name, ignoreCase = true) }
@@ -71,6 +58,31 @@ class RPKSkillProviderImpl(private val plugin: RPKSkillsBukkit): RPKSkillProvide
         } else {
             skillCooldown.cooldownTimestamp = System.currentTimeMillis() + (seconds * 1000)
             skillCooldownTable.update(skillCooldown)
+        }
+    }
+
+    override fun getSkillBinding(character: RPKCharacter, item: ItemStack): RPKSkill? {
+        val skillBindingTable = plugin.core.database.getTable(RPKSkillBindingTable::class)
+        val skillBindings = skillBindingTable.get(character)
+        return skillBindings.firstOrNull { skillBinding -> skillBinding.item.isSimilar(item) }?.skill
+    }
+
+    override fun setSkillBinding(character: RPKCharacter, item: ItemStack, skill: RPKSkill?) {
+        val skillBindingTable = plugin.core.database.getTable(RPKSkillBindingTable::class)
+        val skillBindings = skillBindingTable.get(character)
+        if (skill != null) {
+            if (skillBindings.none { skillBinding -> skillBinding.item.isSimilar(item) }) {
+                skillBindingTable.insert(RPKSkillBinding(
+                        character = character,
+                        item = item,
+                        skill = skill
+                ))
+            }
+        } else {
+            val skillBinding = skillBindings.firstOrNull { skillBinding -> skillBinding.item.isSimilar(item) }
+            if (skillBinding != null) {
+                skillBindingTable.delete(skillBinding)
+            }
         }
     }
 

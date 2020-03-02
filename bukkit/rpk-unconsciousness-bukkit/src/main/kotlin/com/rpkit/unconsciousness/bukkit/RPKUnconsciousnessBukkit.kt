@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import com.rpkit.unconsciousness.bukkit.listener.*
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProvider
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProviderImpl
 import org.bstats.bukkit.Metrics
+import org.bukkit.GameRule.KEEP_INVENTORY
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
@@ -33,7 +34,7 @@ import org.bukkit.scheduler.BukkitRunnable
 class RPKUnconsciousnessBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
-        Metrics(this)
+        Metrics(this, 4425)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKUnconsciousnessProviderImpl(this)
@@ -60,7 +61,7 @@ class RPKUnconsciousnessBukkit: RPKBukkitPlugin() {
             }
         }.runTaskTimer(this, 200L, 200L)
         server.worlds.forEach { world ->
-            world.setGameRuleValue("keepInventory", "true")
+            world.setGameRule(KEEP_INVENTORY, true)
         }
     }
 

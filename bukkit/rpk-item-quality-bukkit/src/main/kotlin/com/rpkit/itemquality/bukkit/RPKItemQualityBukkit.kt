@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.bstats.bukkit.Metrics
 class RPKItemQualityBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
-        Metrics(this)
+        Metrics(this, 6658)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKItemQualityProviderImpl(this)

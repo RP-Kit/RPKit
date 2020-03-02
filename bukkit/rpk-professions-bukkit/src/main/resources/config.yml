@@ -27,21 +27,24 @@ professions:
                 smelting:
                     COOKED_CHICKEN: 1
         crafting:
-            '1':
+            1:
                 BREAD:
                     amount: 1
                     quality: poor
                 PUMPKIN_SEEDS:
                     amount: 1
-            '5':
+            3:
+                BREAD:
+                    quality: adequate
+            5:
                 CAKE:
                     amount: 1
         smelting:
-            '1':
+            1:
                 COOKED_CHICKEN:
                     amount: 1
                     quality: poor
-            '5':
+            5:
                 COOKED_CHICKEN:
                     amount: 2
                     quality: adequate
@@ -54,12 +57,12 @@ professions:
                 mining:
                     COAL: 5
         mining:
-            '1':
+            1:
                 COAL:
                     amount: 1
                 IRON_ORE:
                     amount: 2
-            '2':
+            2:
                 COAL:
                     amount: 2
                 IRON_ORE:

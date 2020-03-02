@@ -4,8 +4,7 @@ version: @version@
 main: com.rpkit.payments.bukkit.RPKPaymentLibBukkit
 depend:
 - rpk-core-bukkit
-- rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-economy-lib-bukkit
 - rpk-bank-lib-bukkit
-api-version: 1.13
+api-version: '1.15'

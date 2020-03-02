@@ -1,0 +1,35 @@
+name: rpk-stat-builds-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
+description: RPKit Stat Builds implementation for Bukkit
+api-version: '1.15'
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+- rpk-stat-lib-bukkit
+- rpk-experience-lib-bukkit
+- rpk-skill-lib-bukkit
+- rpk-stat-build-lib-bukkit
+commands:
+  statbuild:
+    description: |
+      Stat build management commands
+      /statbuild assignpoint [stat variable] (points) - Assigns points to a stat variable
+      /statbuild view
+    usage: /statbuild [assignpoint|view]
+  statattribute:
+    description: |
+      Stat attribute commands
+    usage: /statattribute [list]
+permissions:
+  rpkit.statbuilds.command.statbuild.assignpoint:
+    description: Allows assigning stat points
+    default: true
+  rpkit.statbuilds.command.statbuild.view:
+    description: Allows viewing your stat build
+    default: true
+  rpkit.statbuilds.command.statattribute.list:
+    description: Allows listing stat attributes
+    default: true

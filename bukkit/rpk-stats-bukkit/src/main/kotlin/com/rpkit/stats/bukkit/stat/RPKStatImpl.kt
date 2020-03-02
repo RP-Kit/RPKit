@@ -17,8 +17,8 @@
 package com.rpkit.stats.bukkit.stat
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import javax.script.ScriptContext.ENGINE_SCOPE
-import javax.script.ScriptEngineManager
+import org.nfunk.jep.JEP
+import kotlin.math.roundToInt
 
 /**
  * Stat implementation.
@@ -29,13 +29,16 @@ class RPKStatImpl(
         override val script: String
 ) : RPKStat {
     override fun get(character: RPKCharacter, variables: List<RPKStatVariable>): Int {
-        val engineManager = ScriptEngineManager()
-        val engine = engineManager.getEngineByName("nashorn")
-        val bindings = engine.createBindings()
+        val parser = JEP()
+        parser.addStandardConstants()
+        parser.addStandardFunctions()
         for (variable in variables) {
-            bindings[variable.name] = variable.get(character)
+            val value = variable.get(character)
+            if (value != null) {
+                parser.addVariableAsObject(variable.name, value)
+            }
         }
-        engine.setBindings(bindings, ENGINE_SCOPE)
-        return Math.round((engine.eval(script) as Number).toDouble()).toInt()
+        parser.parseExpression(script)
+        return parser.value.roundToInt()
     }
 }

@@ -1,5 +1,6 @@
 wand-item:
     ==: org.bukkit.inventory.ItemStack
+    v: 1976
     type: STICK
     meta:
         ==: ItemMeta

@@ -6,10 +6,13 @@ depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
 - rpk-selection-lib-bukkit
-api-version: 1.13
+api-version: '1.15'
 commands:
     wand:
         description: Gives you a wand item
+        usage: /<command>
+    setwand:
+        description: Sets the wand item
         usage: /<command>
 permissions:
     rpkit.selection.command.wand:
