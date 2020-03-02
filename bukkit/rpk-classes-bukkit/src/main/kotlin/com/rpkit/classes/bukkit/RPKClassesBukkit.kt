@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class RPKClassesBukkit: RPKBukkitPlugin() {
     private var characterCardFieldsInitialized = false
 
     override fun onEnable() {
-        Metrics(this)
+        Metrics(this, 4386)
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKClassProviderImpl(this),

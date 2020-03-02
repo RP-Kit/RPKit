@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
     private lateinit var newCharacterCooldownProvider: RPKNewCharacterCooldownProvider
 
     override fun onEnable() {
-        Metrics(this)
+        Metrics(this, 4382)
         saveDefaultConfig()
         characterProvider = RPKCharacterProviderImpl(this)
         genderProvider = RPKGenderProviderImpl(this)

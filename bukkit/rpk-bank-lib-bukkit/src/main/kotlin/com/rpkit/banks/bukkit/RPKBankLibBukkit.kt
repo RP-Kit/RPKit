@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class RPKBankLibBukkit: RPKBukkitPlugin() {
 
 
     override fun onEnable() {
-        Metrics(this)
+        Metrics(this, 4377)
         serviceProviders = arrayOf()
         if (server.pluginManager.getPlugin("Vault") != null) {
             server.servicesManager.register(Economy::class.java, RPKBanksVaultEconomy(this), this, ServicePriority.High)
