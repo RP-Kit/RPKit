@@ -38,7 +38,7 @@ dependencies {
     implementation group: "org.eclipse.jetty", name: "jetty-webapp", version: "9.4.27.v20200227"
     implementation group: "org.eclipse.jetty.websocket", name: "websocket-server", version: "9.4.27.v20200227"
     implementation group: "com.zaxxer", name: "HikariCP", version: "3.4.2"
-    implementation group: "org.kohsuke", name: "github-api", version: "1.95"
+    implementation group: "org.kohsuke", name: "github-api", version: "1.107"
     implementation group: "org.jooq", name: "jooq", version: "3.11.11"
     implementation group: "jep", name: "jep", version: "2.24"
 }

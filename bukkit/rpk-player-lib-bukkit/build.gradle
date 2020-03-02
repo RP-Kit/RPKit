@@ -28,7 +28,7 @@ dependencies {
     implementation group: "org.spigotmc", name: "spigot-api", version: "1.15.2-R0.1-SNAPSHOT"
     implementation group: "org.bstats", name: "bstats-bukkit", version: "1.5"
     implementation group: "org.pircbotx", name: "pircbotx", version: "2.1"
-    implementation group: "org.kohsuke", name: "github-api", version: "1.95"
+    implementation group: "org.kohsuke", name: "github-api", version: "1.107"
     implementation group: "org.eclipse.jetty", name: "jetty-server", version: "9.4.27.v20200227"
     implementation group: "org.eclipse.jetty", name: "jetty-servlet", version: "9.4.27.v20200227"
     implementation group: "org.eclipse.jetty", name: "jetty-webapp", version: "9.4.27.v20200227"
