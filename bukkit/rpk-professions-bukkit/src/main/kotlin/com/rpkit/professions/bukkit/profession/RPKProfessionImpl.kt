@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,12 +51,12 @@ class RPKProfessionImpl(
             RPKCraftingAction.MINE -> "mining"
         }
         val itemQualityProvider = plugin.core.serviceManager.getServiceProvider(RPKItemQualityProvider::class)
-        val itemQualityName = plugin.config.getString("professions.$name.$actionConfigSectionName.$level.$material.quality",
-                if (level > 1)
-                    return getQualityFor(action, material, level - 1)
-                else
-                    plugin.config.getString("default.$actionConfigSectionName.$material.quality")
-        ) ?: return null
+        val itemQualityName = plugin.config.getString("professions.$name.$actionConfigSectionName.$level.$material.quality")
+                ?: when {
+                    level > 1 -> return getQualityFor(action, material, level - 1)
+                    else -> plugin.config.getString("default.$actionConfigSectionName.$material.quality")
+                }
+                ?: return null
         return itemQualityProvider.getItemQuality(itemQualityName)
     }
 
