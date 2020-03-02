@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ def repoUserName = properties.getProperty("repo-username")
 def repoPassword = properties.getProperty("repo-password")
 
 dependencies {
-    implementation group: "mysql", name: "mysql-connector-java", version: "8.0.17"
+    implementation group: "mysql", name: "mysql-connector-java", version: "8.0.19"
     implementation group: "org.xerial", name: "sqlite-jdbc", version: "3.28.0"
     implementation group: "commons-codec", name: "commons-codec", version: "1.13"
     implementation group: "commons-lang", name: "commons-lang", version: "2.6"
