@@ -78,6 +78,7 @@ shadowJar {
         include(dependency("org.eclipse.jetty.websocket:websocket-servlet"))
         include(dependency("org.eclipse.jetty.websocket:websocket-api"))
         include(dependency("org.eclipse.jetty.websocket:websocket-common"))
+        include(dependency("org.reactivestreams:reactive-streams"))
 
         // stuff that might be related to some obscure feature and used to be included
         include(dependency("com.fasterxml.jackson.core:jackson-core"))
