@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package com.rpkit.statbuilds.bukkit.listener
+package com.rpkit.core.bukkit.event.provider
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.event.server.PluginEnableEvent
+import com.rpkit.core.bukkit.event.RPKBukkitEvent
+import com.rpkit.core.service.ServiceProvider
+import org.bukkit.event.HandlerList
 
-class PluginEnableListener(private val plugin: RPKStatBuildsBukkit): Listener {
+class RPKBukkitServiceProviderReadyEvent(override val serviceProvider: ServiceProvider) : RPKBukkitEvent(), RPKServiceProviderReadyEvent {
 
-    @EventHandler
-    fun onPluginEnable(event: PluginEnableEvent) {
-        if (event.plugin is RPKBukkitPlugin) {
-            plugin.attemptStatRegistration()
-        }
+    companion object {
+        @JvmStatic val handlerList = HandlerList()
+    }
+
+    override fun getHandlers(): HandlerList {
+        return handlerList
     }
 
 }

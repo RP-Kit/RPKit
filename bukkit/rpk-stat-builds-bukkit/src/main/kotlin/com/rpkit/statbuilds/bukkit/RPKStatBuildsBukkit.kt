@@ -23,7 +23,7 @@ import com.rpkit.core.exception.UnregisteredServiceException
 import com.rpkit.statbuilds.bukkit.command.statattribute.StatAttributeCommand
 import com.rpkit.statbuilds.bukkit.command.statbuild.StatBuildCommand
 import com.rpkit.statbuilds.bukkit.database.table.RPKCharacterStatPointsTable
-import com.rpkit.statbuilds.bukkit.listener.PluginEnableListener
+import com.rpkit.statbuilds.bukkit.listener.RPKServiceProviderReadyListener
 import com.rpkit.statbuilds.bukkit.skillpoint.RPKSkillPointProviderImpl
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeProvider
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeProviderImpl
@@ -58,7 +58,7 @@ class RPKStatBuildsBukkit: RPKBukkitPlugin() {
 
     override fun registerListeners() {
         registerListeners(
-                PluginEnableListener(this)
+                RPKServiceProviderReadyListener(this)
         )
     }
 

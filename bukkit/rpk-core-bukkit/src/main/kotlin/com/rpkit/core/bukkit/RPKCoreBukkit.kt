@@ -17,6 +17,7 @@
 package com.rpkit.core.bukkit
 
 import com.rpkit.core.RPKCore
+import com.rpkit.core.bukkit.event.provider.RPKBukkitServiceProviderReadyEvent
 import com.rpkit.core.bukkit.listener.PluginEnableListener
 import com.rpkit.core.bukkit.message.BukkitMessages
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
@@ -97,6 +98,7 @@ class RPKCoreBukkit: RPKBukkitPlugin() {
     fun registerServiceProviders(plugin: RPKBukkitPlugin) {
         for (provider in plugin.serviceProviders) {
             core.serviceManager.registerServiceProvider(provider)
+            server.pluginManager.callEvent(RPKBukkitServiceProviderReadyEvent(provider))
         }
     }
 
