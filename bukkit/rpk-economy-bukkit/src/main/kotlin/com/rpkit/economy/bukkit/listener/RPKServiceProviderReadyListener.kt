@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@
 
 package com.rpkit.economy.bukkit.listener
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
+import com.rpkit.core.bukkit.event.provider.RPKBukkitServiceProviderReadyEvent
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.server.PluginEnableEvent
 
 
-class PluginEnableListener(private val plugin: RPKEconomyBukkit): Listener {
+class RPKServiceProviderReadyListener(private val plugin: RPKEconomyBukkit): Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
-    fun onPluginEnable(event: PluginEnableEvent) {
-        if (event.plugin is RPKBukkitPlugin) {
+    fun onServiceProviderReady(event: RPKBukkitServiceProviderReadyEvent) {
+        if (event.serviceProvider is RPKCharacterCardFieldProvider) {
             plugin.attemptCharacterCardFieldInitialisation()
         }
     }

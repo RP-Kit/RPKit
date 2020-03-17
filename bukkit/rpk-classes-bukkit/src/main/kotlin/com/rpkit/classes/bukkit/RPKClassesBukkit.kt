@@ -25,7 +25,7 @@ import com.rpkit.classes.bukkit.classes.RPKClassProviderImpl
 import com.rpkit.classes.bukkit.command.`class`.ClassCommand
 import com.rpkit.classes.bukkit.database.table.RPKCharacterClassTable
 import com.rpkit.classes.bukkit.database.table.RPKClassExperienceTable
-import com.rpkit.classes.bukkit.listener.PluginEnableListener
+import com.rpkit.classes.bukkit.listener.RPKServiceProviderReadyListener
 import com.rpkit.classes.bukkit.skillpoint.RPKSkillPointProviderImpl
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
@@ -60,7 +60,7 @@ class RPKClassesBukkit: RPKBukkitPlugin() {
 
     override fun registerListeners() {
         registerListeners(
-                PluginEnableListener(this)
+                RPKServiceProviderReadyListener(this)
         )
     }
 

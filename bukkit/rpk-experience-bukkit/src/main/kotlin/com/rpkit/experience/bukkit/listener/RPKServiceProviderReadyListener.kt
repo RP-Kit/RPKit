@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package com.rpkit.professions.bukkit.listener
+package com.rpkit.experience.bukkit.listener
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.professions.bukkit.RPKProfessionsBukkit
+import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
+import com.rpkit.core.bukkit.event.provider.RPKBukkitServiceProviderReadyEvent
+import com.rpkit.experience.bukkit.RPKExperienceBukkit
 import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.server.PluginEnableEvent
 
 
-class PluginEnableListener(private val plugin: RPKProfessionsBukkit): Listener {
+class RPKServiceProviderReadyListener(private val plugin: RPKExperienceBukkit): Listener {
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    fun onPluginEnable(event: PluginEnableEvent) {
-        if (event.plugin is RPKBukkitPlugin) {
+    @EventHandler
+    fun onServiceProviderReady(event: RPKBukkitServiceProviderReadyEvent) {
+        if (event.serviceProvider is RPKCharacterCardFieldProvider) {
             plugin.attemptCharacterCardFieldInitialisation()
         }
     }
