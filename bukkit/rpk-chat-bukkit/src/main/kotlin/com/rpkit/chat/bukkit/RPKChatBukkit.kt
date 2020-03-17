@@ -62,16 +62,21 @@ class RPKChatBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4383)
+        // Directed chat channel pipeline components
         ConfigurationSerialization.registerClass(DirectedFormatComponent::class.java, "DirectedFormatComponent")
         ConfigurationSerialization.registerClass(DrunkenSlurComponent::class.java, "DrunkenSlurComponent")
         ConfigurationSerialization.registerClass(GarbleComponent::class.java, "GarbleComponent")
+        ConfigurationSerialization.registerClass(LanguageComponent::class.java, "LanguageComponent")
         ConfigurationSerialization.registerClass(RadiusFilterComponent::class.java, "RadiusFilterComponent")
         ConfigurationSerialization.registerClass(SendMessageComponent::class.java, "SendMessageComponent")
         ConfigurationSerialization.registerClass(SnoopComponent::class.java, "SnoopComponent")
+
+        // Undirected chat channel pipline components
         ConfigurationSerialization.registerClass(IRCComponent::class.java, "IRCComponent")
         ConfigurationSerialization.registerClass(LogComponent::class.java, "LogComponent")
         ConfigurationSerialization.registerClass(UndirectedFormatComponent::class.java, "UndirectedFormatComponent")
         ConfigurationSerialization.registerClass(WebComponent::class.java, "WebComponent")
+
         saveDefaultConfig()
         if (config.getBoolean("irc.enabled")) {
             val ircProvider = RPKIRCProviderImpl(this)
