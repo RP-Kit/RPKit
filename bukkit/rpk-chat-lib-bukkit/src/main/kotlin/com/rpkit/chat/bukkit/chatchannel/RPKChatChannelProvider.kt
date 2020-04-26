@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,5 +115,14 @@ interface RPKChatChannelProvider: ServiceProvider {
      * @return The chat channel, or null if no chat channel uses the given IRC channel.
      */
     fun getChatChannelFromIRCChannel(ircChannel: String): RPKChatChannel?
+
+    /**
+     * Gets a chat channel from the Discord channel it is linked to.
+     * If no chat channel uses the given Discord channel, null is returned.
+     *
+     * @param discordChannel The Discord channel
+     * @return The chat channel, or null if no chat channel uses the given Discord channel.
+     */
+    fun getChatChannelFromDiscordChannel(discordChannel: String): RPKChatChannel?
 
 }

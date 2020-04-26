@@ -150,6 +150,10 @@ irc:
     auto-split-message-enabled: false
     server: 'chat.freenode.net:6667'
     password: 'change_me'
+discord:
+    enabled: false
+    token: 'change_me'
+    server-name: RPKit
 prefixes:
     admin: '&e[Admin]'
     mod: '&9[Moderator]'
