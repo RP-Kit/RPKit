@@ -35,6 +35,9 @@ dependencies {
     implementation group: "org.eclipse.jetty.websocket", name: "websocket-server", version: "9.4.27.v20200227"
     implementation group: "org.ehcache", name: "ehcache", version: "3.8.1"
     implementation group: "org.jooq", name: "jooq", version: "3.13.1"
+    implementation (group: 'net.dv8tion', name: 'JDA', version: '4.1.1_116') {
+        exclude module: 'opus-java'
+    }
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
@@ -59,7 +62,9 @@ shadowJar {
         include(dependency("org.bstats:bstats-bukkit"))
     }
 
-    relocate "org.bstats", "com.rpkit.chat.bukkit.shadow.impl.org.bstats"}
+    relocate "org.bstats", "com.rpkit.chat.bukkit.shadow.impl.org.bstats"
+
+}
 
 artifacts {
     archives shadowJar

@@ -36,6 +36,9 @@ dependencies {
     implementation group: "org.ehcache", name: "ehcache", version: "3.8.1"
     implementation group: "org.jooq", name: "jooq", version: "3.13.1"
     implementation group: "org.kohsuke", name: "github-api", version: "1.107"
+    implementation (group: 'net.dv8tion', name: 'JDA', version: '4.1.1_116') {
+        exclude module: 'opus-java'
+    }
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
@@ -56,7 +59,8 @@ shadowJar {
         include(dependency("org.bstats:bstats-bukkit"))
     }
 
-    relocate "org.bstats", "com.rpkit.players.bukkit.shadow.impl.org.bstats"}
+    relocate "org.bstats", "com.rpkit.players.bukkit.shadow.impl.org.bstats"
+}
 
 artifacts {
     archives shadowJar

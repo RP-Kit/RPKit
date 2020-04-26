@@ -29,6 +29,9 @@ dependencies {
     implementation group: "org.bstats", name: "bstats-bukkit", version: "1.7"
     implementation group: "net.milkbowl.vault", name: "VaultAPI", version: "1.7"
     implementation group: "org.pircbotx", name: "pircbotx", version: "2.1"
+    implementation (group: 'net.dv8tion', name: 'JDA', version: '4.1.1_116') {
+        exclude module: 'opus-java'
+    }
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")

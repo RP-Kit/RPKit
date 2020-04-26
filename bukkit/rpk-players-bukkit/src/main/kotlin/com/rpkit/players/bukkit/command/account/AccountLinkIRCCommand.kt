@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ class AccountLinkIRCCommand(private val plugin: RPKPlayersBukkit): CommandExecut
                                     sender.sendMessage(plugin.messages["account-link-irc-invalid-profile"])
                                 }
                             } else {
-                                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                                sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
                             }
                         } else {
                             sender.sendMessage(plugin.messages["account-link-irc-invalid-nick"])

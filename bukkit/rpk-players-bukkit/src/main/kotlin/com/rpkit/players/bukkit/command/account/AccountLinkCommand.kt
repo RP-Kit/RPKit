@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ class AccountLinkCommand(private val plugin: RPKPlayersBukkit): CommandExecutor 
 
     private val accountLinkIRCCommand = AccountLinkIRCCommand(plugin)
     private val accountLinkMinecraftCommand = AccountLinkMinecraftCommand(plugin)
+    private val accountLinkDiscordCommand = AccountLinkDiscordCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.players.command.account.link")) {
@@ -41,6 +42,8 @@ class AccountLinkCommand(private val plugin: RPKPlayersBukkit): CommandExecutor 
                 return accountLinkIRCCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("minecraft", ignoreCase = true) || args[0].equals("mc", ignoreCase = true)) {
                 return accountLinkMinecraftCommand.onCommand(sender, command, label, newArgs)
+            } else if (args[0].equals("discord", ignoreCase = true)) {
+                return accountLinkDiscordCommand.onCommand(sender, command, label, newArgs)
             } else {
                 sender.sendMessage(plugin.messages["account-link-usage"])
             }

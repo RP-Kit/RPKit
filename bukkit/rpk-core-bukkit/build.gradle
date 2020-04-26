@@ -35,6 +35,9 @@ dependencies {
     implementation group: "org.eclipse.jetty.websocket", name: "websocket-server", version: "9.4.27.v20200227"
     implementation group: "org.jetbrains.kotlin", name: "kotlin-scripting-jsr223-embeddable", version: "1.3.61"
     implementation group: "jep", name: "jep", version: "2.24"
+    implementation (group: 'net.dv8tion', name: 'JDA', version: '4.1.1_116') {
+        exclude module: 'opus-java'
+    }
     implementation project(":rpk-core")
 }
 
@@ -49,7 +52,6 @@ apply plugin: "com.github.johnrengelman.shadow"
 shadowJar {
 
     dependencies {
-        // direct dependencies
         include(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8"))
         include(dependency("org.jetbrains.kotlin:kotlin-reflect"))
         include(dependency("org.bstats:bstats-bukkit"))
@@ -60,10 +62,8 @@ shadowJar {
         include(dependency("org.eclipse.jetty:jetty-webapp"))
         include(dependency("org.eclipse.jetty.websocket:websocket-server"))
         include(dependency("jep:jep"))
-
+        include(dependency("net.dv8tion:JDA"))
         include(project(":rpk-core"))
-
-        // stuff that's needed to at least get running
         include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
         include(dependency("org.jetbrains.kotlin:kotlin-runtime"))
         include(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7"))
@@ -73,18 +73,23 @@ shadowJar {
         include(dependency("org.eclipse.jetty:jetty-io"))
         include(dependency("org.eclipse.jetty:jetty-security"))
         include(dependency("org.ehcache:ehcache"))
-        include(dependency("org.slf4j:slf4j-api"))
         include(dependency("com.zaxxer:HikariCP"))
         include(dependency("org.eclipse.jetty.websocket:websocket-servlet"))
         include(dependency("org.eclipse.jetty.websocket:websocket-api"))
         include(dependency("org.eclipse.jetty.websocket:websocket-common"))
         include(dependency("org.reactivestreams:reactive-streams"))
-
-        // stuff that might be related to some obscure feature and used to be included
+        include(dependency("com.google.code.findbugs:jsr305"))
+        include(dependency("org.jetbrains:annotations"))
+        include(dependency("org.slf4j:slf4j-api"))
+        include(dependency("com.neovisionaries:nv-websocket-client"))
+        include(dependency("com.squareup.okhttp3:okhttp"))
+        include(dependency("com.squareup.okio:okio"))
+        include(dependency("org.apache.commons:commons-collections4"))
+        include(dependency("org.json:json"))
+        include(dependency("net.sf.trove4j:trove4j"))
         include(dependency("com.fasterxml.jackson.core:jackson-core"))
         include(dependency("com.fasterxml.jackson.core:jackson-annotations"))
         include(dependency("com.fasterxml.jackson.core:jackson-databind"))
-        include(dependency("com.google.code.findbugs:jsr305"))
         include(dependency("com.google.code.gson:gson"))
         include(dependency("com.google.errorprone:error_prone_annotations"))
         include(dependency("com.google.guava:guava"))
@@ -98,7 +103,6 @@ shadowJar {
         include(dependency("com.sun.xml.fastinfoset:FastInfoset"))
         include(dependency("javax.activation:javax-activation-api"))
         include(dependency("javax.xml.bind:jaxb-api"))
-        include(dependency("org.jetbrains:annotations"))
         include(dependency("org.jvnet.staxex:stax-ex"))
         include(dependency("org.kohsuke:github-api"))
         include(dependency("org.pircbotx:pircbotx"))
