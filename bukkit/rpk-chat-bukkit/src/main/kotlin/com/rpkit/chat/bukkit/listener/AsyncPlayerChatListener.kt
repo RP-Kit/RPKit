@@ -54,7 +54,8 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
                                         message = matcher.group(1)
                                     }
                                 }
-                                if (!chatChannel.listenerMinecraftProfiles.contains(minecraftProfile)) {
+                                if (!chatChannel.listenerMinecraftProfiles.any { listenerMinecraftProfile ->
+                                            listenerMinecraftProfile.id == minecraftProfile.id }) {
                                     chatChannel.addListener(minecraftProfile, event.isAsynchronous)
                                     chatChannelProvider.updateChatChannel(chatChannel, event.isAsynchronous)
                                 }
