@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,8 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit): CommandExecuto
                                 }
                                 messageComponents.add(chatChannelComponent)
                             } else if (matcher.group() == "\$mute") {
-                                if (chatChannel.listenerMinecraftProfiles.contains(minecraftProfile)) {
+                                if (chatChannel.listenerMinecraftProfiles.any { listenerMinecraftProfile ->
+                                            listenerMinecraftProfile.id == minecraftProfile.id }) {
                                     val muteComponent = TextComponent("Mute")
                                     muteComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mute ${chatChannel.name}")
                                     muteComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, arrayOf(TextComponent("Click to mute ${chatChannel.name}")))
