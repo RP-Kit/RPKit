@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ class ChatGroupLeaveCommand(private val plugin: RPKChatBukkit): CommandExecutor 
                     if (sender is Player) {
                         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                         if (minecraftProfile != null) {
-                            if (chatGroup.memberMinecraftProfiles.contains(minecraftProfile)) {
+                            if (chatGroup.memberMinecraftProfiles.any { memberMinecraftProfile ->
+                                        memberMinecraftProfile.id == minecraftProfile.id }) {
                                 chatGroup.removeMember(minecraftProfile)
                                 if (chatGroup.memberMinecraftProfiles.isEmpty()) {
                                     chatGroupProvider.removeChatGroup(chatGroup)

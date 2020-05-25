@@ -38,7 +38,7 @@ allprojects {
     apply plugin: "maven"
     apply plugin: "org.jetbrains.dokka"
     group = "com.rpkit"
-    version = "1.8.4"
+    version = "1.8.5"
 }
 
 subprojects {
