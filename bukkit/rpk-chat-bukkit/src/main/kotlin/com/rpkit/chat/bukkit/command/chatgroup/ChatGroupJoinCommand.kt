@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ class ChatGroupJoinCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                     if (sender is Player) {
                         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                         if (minecraftProfile != null) {
-                            if (chatGroup.invitedMinecraftProfiles.contains(minecraftProfile)) {
+                            if (chatGroup.invitedMinecraftProfiles.any { invitedMinecraftProfile ->
+                                        invitedMinecraftProfile.id == minecraftProfile.id }) {
                                 chatGroup.memberMinecraftProfiles.forEach { member ->
                                     member.sendMessage(plugin.messages["chat-group-join-received", mapOf(
                                             Pair("group", chatGroup.name),
