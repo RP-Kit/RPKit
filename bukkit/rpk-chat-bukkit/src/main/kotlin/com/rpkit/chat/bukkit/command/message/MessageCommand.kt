@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ class MessageCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                     var chatGroup = chatGroupProvider.getChatGroup(args[0])
                     if (chatGroup != null) {
                         if (sender.hasPermission("rpkit.chat.command.chatgroup.message")) {
-                            if (chatGroup.memberMinecraftProfiles.contains(senderMinecraftProfile)) {
+                            if (chatGroup.memberMinecraftProfiles.any { memberMinecraftProfile ->
+                                        memberMinecraftProfile.id == senderMinecraftProfile.id }) {
                                 val message = StringBuilder()
                                 for (i in 1 until args.size) {
                                     message.append(args[i]).append(" ")
