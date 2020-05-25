@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,13 +75,13 @@ class RPKChatChannelMuteProvider(private val plugin: RPKChatBukkit): ServiceProv
      * @param chatChannel The chat channel
      */
     @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("removeChatChannelMute(minecraftProfile, chatChannel)"))
-    fun removeChatChannelMute(player: RPKPlayer, chatChannel: RPKChatChannel) {
+    fun removeChatChannelMute(player: RPKPlayer, chatChannel: RPKChatChannel, isAsync: Boolean = false) {
         val bukkitPlayer = player.bukkitPlayer
         if (bukkitPlayer != null) {
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
             if (minecraftProfile != null) {
-                removeChatChannelMute(minecraftProfile, chatChannel)
+                removeChatChannelMute(minecraftProfile, chatChannel, isAsync)
             }
         }
     }
@@ -91,8 +91,8 @@ class RPKChatChannelMuteProvider(private val plugin: RPKChatBukkit): ServiceProv
      * @param minecraftProfile The Minecraft profile
      * @param chatChannel The chat channel
      */
-    fun removeChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel) {
-        val event = RPKBukkitChatChannelUnmuteEvent(minecraftProfile, chatChannel)
+    fun removeChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel, isAsync: Boolean = false) {
+        val event = RPKBukkitChatChannelUnmuteEvent(minecraftProfile, chatChannel, isAsync)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         val chatChannelMuteTable = plugin.core.database.getTable(RPKChatChannelMuteTable::class)
