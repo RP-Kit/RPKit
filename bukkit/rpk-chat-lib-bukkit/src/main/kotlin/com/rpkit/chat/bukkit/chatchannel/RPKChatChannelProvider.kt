@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ interface RPKChatChannelProvider: ServiceProvider {
      *
      * @param chatChannel The chat channel to update
      */
-    fun updateChatChannel(chatChannel: RPKChatChannel)
+    fun updateChatChannel(chatChannel: RPKChatChannel, isAsync: Boolean = false)
 
     /**
      * Gets the chat channel a player is currently speaking in.
@@ -89,7 +89,7 @@ interface RPKChatChannelProvider: ServiceProvider {
      * @param channel The channel to set
      */
     @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("setMinecraftProfileChannel"))
-    fun setPlayerChannel(player: RPKPlayer, channel: RPKChatChannel)
+    fun setPlayerChannel(player: RPKPlayer, channel: RPKChatChannel, isAsync: Boolean = false)
 
     /**
      * Gets the chat channel a Minecraft profile is currently speaking in.
@@ -105,7 +105,7 @@ interface RPKChatChannelProvider: ServiceProvider {
      * @param minecraftProfile The Minecraft profile
      * @param channel The channel to set
      */
-    fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?)
+    fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?, isAsync: Boolean = false)
 
     /**
      * Gets a chat channel from the IRC channel it is linked to.
