@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,12 @@ class ChatGroupDisbandCommand(private val plugin: RPKChatBukkit): CommandExecuto
                     val chatGroup = chatGroupProvider.getChatGroup(args[0])
                     if (chatGroup != null) {
                         val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                        if (chatGroup.memberMinecraftProfiles.contains(senderMinecraftProfile)) {
+                        if (senderMinecraftProfile == null) {
+                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                            return true
+                        }
+                        if (chatGroup.memberMinecraftProfiles.any { memberMinecraftProfile ->
+                                            memberMinecraftProfile.id == senderMinecraftProfile.id }) {
                             for (minecraftProfile in chatGroup.memberMinecraftProfiles) {
                                 minecraftProfile.sendMessage(plugin.messages["chat-group-disband-valid", mapOf(
                                         Pair("group", chatGroup.name)

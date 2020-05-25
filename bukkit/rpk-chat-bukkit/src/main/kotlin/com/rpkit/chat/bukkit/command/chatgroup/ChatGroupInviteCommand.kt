@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ class ChatGroupInviteCommand(private val plugin: RPKChatBukkit): CommandExecutor
                     if (sender is Player) {
                         val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                         if (senderMinecraftProfile != null) {
-                            if (chatGroup.memberMinecraftProfiles.contains(senderMinecraftProfile)) {
+                            if (chatGroup.memberMinecraftProfiles.any { memberMinecraftProfile ->
+                                                memberMinecraftProfile.id == senderMinecraftProfile.id }) {
                                 val bukkitPlayer = plugin.server.getPlayer(args[1])
                                 if (bukkitPlayer == null) {
                                     sender.sendMessage(plugin.messages["chat-group-invite-invalid-player"])

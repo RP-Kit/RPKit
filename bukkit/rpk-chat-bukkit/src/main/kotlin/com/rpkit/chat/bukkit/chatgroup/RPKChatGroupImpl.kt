@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ class RPKChatGroupImpl(
     }
 
     override fun addMember(minecraftProfile: RPKMinecraftProfile) {
-        if (!memberMinecraftProfiles.contains(minecraftProfile)) {
+        if (!memberMinecraftProfiles.any { memberMinecraftProfile -> memberMinecraftProfile.id == minecraftProfile.id }) {
             val event = RPKBukkitChatGroupJoinEvent(minecraftProfile, this)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
@@ -115,7 +115,8 @@ class RPKChatGroupImpl(
     }
 
     override fun invite(minecraftProfile: RPKMinecraftProfile) {
-        if (!invitedMinecraftProfiles.contains(minecraftProfile)) {
+        if (!invitedMinecraftProfiles
+                        .any { invitedMinecraftProfile -> invitedMinecraftProfile.id == minecraftProfile.id }) {
             val event = RPKBukkitChatGroupInviteEvent(minecraftProfile, this)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
@@ -199,7 +200,7 @@ class RPKChatGroupImpl(
             }
             if (formattedMessage.contains("\$group")) {
                 formattedMessage = if (name.startsWith("_pm_")) {
-                    formattedMessage.replace("\$group", sender.minecraftUsername + " -> " + memberMinecraftProfiles.first { member -> member != sender }.minecraftUsername)
+                    formattedMessage.replace("\$group", sender.minecraftUsername + " -> " + memberMinecraftProfiles.first { member -> member.id != sender.id }.minecraftUsername)
                 } else {
                     formattedMessage.replace("\$group", name)
                 }
