@@ -56,7 +56,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
                                 }
                                 if (!chatChannel.listenerMinecraftProfiles.contains(minecraftProfile)) {
                                     chatChannel.addListener(minecraftProfile, event.isAsynchronous)
-                                    chatChannelProvider.updateChatChannel(chatChannel)
+                                    chatChannelProvider.updateChatChannel(chatChannel, event.isAsynchronous)
                                 }
                             }
                         }
