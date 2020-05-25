@@ -77,8 +77,8 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
         chatChannels.remove(event.chatChannel)
     }
 
-    override fun updateChatChannel(chatChannel: RPKChatChannel) {
-        val event = RPKBukkitChatChannelUpdateEvent(chatChannel)
+    override fun updateChatChannel(chatChannel: RPKChatChannel, isAsync: Boolean) {
+        val event = RPKBukkitChatChannelUpdateEvent(chatChannel, isAsync)
         plugin.server.pluginManager.callEvent(event)
     }
 
@@ -86,21 +86,21 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
         return plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).getPlayerChannel(player)
     }
 
-    override fun setPlayerChannel(player: RPKPlayer, channel: RPKChatChannel) {
+    override fun setPlayerChannel(player: RPKPlayer, channel: RPKChatChannel, isAsync: Boolean) {
         val oldChannel = getPlayerChannel(player)
         if (oldChannel != null) {
             oldChannel.removeSpeaker(player)
-            updateChatChannel(oldChannel)
+            updateChatChannel(oldChannel, isAsync)
         }
         channel.addSpeaker(player)
-        updateChatChannel(channel)
+        updateChatChannel(channel, isAsync)
     }
 
     override fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel? {
         return plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).getMinecraftProfileChannel(minecraftProfile)
     }
 
-    override fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?) {
+    override fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?, isAsync: Boolean) {
         var oldChannel = getMinecraftProfileChannel(minecraftProfile)
         val event = RPKBukkitChatChannelSwitchEvent(minecraftProfile, oldChannel, channel)
         plugin.server.pluginManager.callEvent(event)
@@ -108,12 +108,12 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
         oldChannel = event.oldChannel
         if (oldChannel != null) {
             oldChannel.removeSpeaker(minecraftProfile)
-            updateChatChannel(oldChannel)
+            updateChatChannel(oldChannel, isAsync)
         }
         val chatChannel = event.chatChannel
         if (chatChannel != null) {
             chatChannel.addSpeaker(minecraftProfile)
-            updateChatChannel(chatChannel)
+            updateChatChannel(chatChannel, isAsync)
         }
     }
 
