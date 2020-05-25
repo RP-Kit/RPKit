@@ -151,8 +151,9 @@ interface RPKChatChannel: Entity {
      * Adds a listener to the channel.
      *
      * @param listener The Minecraft profile to add
+     * @param isAsync Whether adding the listener is being done asynchronously
      */
-    fun addListener(listener: RPKMinecraftProfile)
+    fun addListener(listener: RPKMinecraftProfile, isAsync: Boolean = false)
 
     /**
      * Removes a listener from the channel.

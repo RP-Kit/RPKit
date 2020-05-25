@@ -94,8 +94,8 @@ class RPKChatChannelImpl(
         plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).removeChatChannelMute(listener, this)
     }
 
-    override fun addListener(listener: RPKMinecraftProfile) {
-        plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).removeChatChannelMute(listener, this)
+    override fun addListener(listener: RPKMinecraftProfile, isAsync: Boolean) {
+        plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).removeChatChannelMute(listener, this, isAsync)
     }
 
     override fun removeListener(listener: RPKPlayer) {

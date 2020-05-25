@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,9 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitChatChannelUnmuteEvent(
         override val minecraftProfile: RPKMinecraftProfile,
-        override val chatChannel: RPKChatChannel
-): RPKBukkitEvent(), RPKChatChannelUnmuteEvent, Cancellable {
+        override val chatChannel: RPKChatChannel,
+        isAsync: Boolean = false
+): RPKBukkitEvent(isAsync), RPKChatChannelUnmuteEvent, Cancellable {
 
     companion object {
         @JvmStatic val handlerList = HandlerList()
