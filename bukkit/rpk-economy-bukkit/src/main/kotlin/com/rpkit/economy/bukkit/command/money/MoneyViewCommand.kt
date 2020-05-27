@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -49,7 +50,7 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
-                if (profile != null) {
+                if (profile is RPKProfile) {
                     val character: RPKCharacter?
                     character = if (args.size > 1) {
                         val nameBuilder = StringBuilder()

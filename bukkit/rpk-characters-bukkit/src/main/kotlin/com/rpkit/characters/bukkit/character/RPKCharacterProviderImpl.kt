@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(offlineBukkitPlayer)
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
-                if (profile != null) {
+                if (profile is RPKProfile) {
                     val characters = getCharacters(profile).toMutableList()
                     val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
                     val oldCharacters = characterTable.get(player)

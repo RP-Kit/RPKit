@@ -32,6 +32,10 @@ class RPKDiscordProviderImpl(private val plugin: RPKChatBukkit): RPKDiscordProvi
         discordServer?.sendMessage(channel, message)
     }
 
+    override fun getUser(discordId: Long): User? {
+        return discordServer?.getUser(discordId)
+    }
+
     override fun getUser(discordUserName: String): User? {
         return discordServer?.getUser(discordUserName)
     }

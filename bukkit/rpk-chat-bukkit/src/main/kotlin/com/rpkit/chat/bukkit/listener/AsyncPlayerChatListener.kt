@@ -38,38 +38,34 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
-            if (profile != null) {
-                var chatChannel = chatChannelProvider.getMinecraftProfileChannel(minecraftProfile)
-                var message = event.message
-                for (otherChannel in chatChannelProvider.chatChannels) {
-                    val matchPattern = otherChannel.matchPattern
-                    if (matchPattern != null) {
-                        if (matchPattern.isNotEmpty()) {
-                            if (message.matches(matchPattern.toRegex())) {
-                                chatChannel = otherChannel
-                                val pattern = Pattern.compile(matchPattern)
-                                val matcher = pattern.matcher(message)
-                                if (matcher.matches()) {
-                                    if (matcher.groupCount() > 0) {
-                                        message = matcher.group(1)
-                                    }
+            var chatChannel = chatChannelProvider.getMinecraftProfileChannel(minecraftProfile)
+            var message = event.message
+            for (otherChannel in chatChannelProvider.chatChannels) {
+                val matchPattern = otherChannel.matchPattern
+                if (matchPattern != null) {
+                    if (matchPattern.isNotEmpty()) {
+                        if (message.matches(matchPattern.toRegex())) {
+                            chatChannel = otherChannel
+                            val pattern = Pattern.compile(matchPattern)
+                            val matcher = pattern.matcher(message)
+                            if (matcher.matches()) {
+                                if (matcher.groupCount() > 0) {
+                                    message = matcher.group(1)
                                 }
-                                if (!chatChannel.listenerMinecraftProfiles.any { listenerMinecraftProfile ->
-                                            listenerMinecraftProfile.id == minecraftProfile.id }) {
-                                    chatChannel.addListener(minecraftProfile, event.isAsynchronous)
-                                    chatChannelProvider.updateChatChannel(chatChannel, event.isAsynchronous)
-                                }
+                            }
+                            if (!chatChannel.listenerMinecraftProfiles.any { listenerMinecraftProfile ->
+                                        listenerMinecraftProfile.id == minecraftProfile.id }) {
+                                chatChannel.addListener(minecraftProfile, event.isAsynchronous)
+                                chatChannelProvider.updateChatChannel(chatChannel, event.isAsynchronous)
                             }
                         }
                     }
                 }
-                if (chatChannel != null) {
-                    chatChannel.sendMessage(profile, minecraftProfile, message, event.isAsynchronous)
-                } else {
-                    event.player.sendMessage(plugin.messages["no-chat-channel"])
-                }
+            }
+            if (chatChannel != null) {
+                chatChannel.sendMessage(profile, minecraftProfile, message, event.isAsynchronous)
             } else {
-                event.player.sendMessage(plugin.messages["no-profile"])
+                event.player.sendMessage(plugin.messages["no-chat-channel"])
             }
         } else {
             event.player.sendMessage(plugin.messages["no-minecraft-profile"])

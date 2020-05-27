@@ -18,6 +18,7 @@ package com.rpkit.players.bukkit.command.profile
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -42,7 +43,7 @@ class ProfileNameCommand(private val plugin: RPKPlayersBukkit): CommandExecutor 
             return true
         }
         val profile = minecraftProfile.profile
-        if (profile == null) {
+        if (profile !is RPKProfile) {
             sender.sendMessage(plugin.messages["no-profile-self"])
             return true
         }

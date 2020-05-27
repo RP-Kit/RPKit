@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ class MoneyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
                         if (minecraftProfile != null) {
                             val profile = minecraftProfile.profile
-                            if (profile != null) {
+                            if (profile is RPKProfile) {
                                 if (args.size > 1) {
                                     val character = characterProvider.getCharacters(profile)
                                             .firstOrNull { character -> character.name.startsWith(args[1]) }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.rpkit.chat.bukkit.vault
 import com.rpkit.chat.bukkit.RPKChatLibBukkit
 import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.permission.Permission
 
@@ -63,7 +64,7 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit): Chat(plugin.server
         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
-            if (profile != null) {
+            if (profile is RPKProfile) {
                 return prefixProvider.getPrefix(profile)
             }
         }

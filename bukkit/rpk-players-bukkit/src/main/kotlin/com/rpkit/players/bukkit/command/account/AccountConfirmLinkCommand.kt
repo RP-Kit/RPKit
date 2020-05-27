@@ -18,6 +18,7 @@ package com.rpkit.players.bukkit.command.account
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -49,7 +50,7 @@ class AccountConfirmLinkCommand(private val plugin: RPKPlayersBukkit): CommandEx
                     sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
                     return true
                 }
-                if (minecraftProfile.profile != null) {
+                if (minecraftProfile.profile is RPKProfile) {
                     sender.sendMessage(plugin.messages["account-confirm-link-invalid-already-linked"])
                     return true
                 }

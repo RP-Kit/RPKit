@@ -22,6 +22,7 @@ import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKIRCProfileImpl
 import com.rpkit.players.bukkit.profile.RPKIRCProfileProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -46,7 +47,7 @@ class AccountLinkIRCCommand(private val plugin: RPKPlayersBukkit): CommandExecut
                             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                             if (minecraftProfile != null) {
                                 val profile = minecraftProfile.profile
-                                if (profile != null) {
+                                if (profile is RPKProfile) {
                                     val ircProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProfileProvider::class)
                                     var ircProfile = ircProfileProvider.getIRCProfile(ircUser)
                                     if (ircProfile == null) {

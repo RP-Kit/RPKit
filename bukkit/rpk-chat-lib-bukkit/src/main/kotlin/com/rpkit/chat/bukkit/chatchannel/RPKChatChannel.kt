@@ -21,7 +21,7 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineC
 import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 import java.awt.Color
 
 /**
@@ -193,7 +193,7 @@ interface RPKChatChannel: Entity {
      * @param message The message
      * @param isAsync Whether the message is being sent asynchronously
      */
-    fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, isAsync: Boolean = false)
+    fun sendMessage(sender: RPKThinProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, isAsync: Boolean = false)
 
     /**
      * Sends a message to the channel, passing it through the specified directed pipeline once for each listener, and
@@ -206,6 +206,6 @@ interface RPKChatChannel: Entity {
      * @param undirectedPipeline The undirected pipeline
      * @param isAsync Whether the message is being sent asynchronously
      */
-    fun sendMessage(sender: RPKProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>, isAsync: Boolean = false)
+    fun sendMessage(sender: RPKThinProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>, isAsync: Boolean = false)
 
 }

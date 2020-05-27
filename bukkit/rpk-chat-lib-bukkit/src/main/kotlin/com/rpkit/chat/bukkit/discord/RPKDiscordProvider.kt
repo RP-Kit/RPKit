@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.entities.User
 interface RPKDiscordProvider: ServiceProvider {
 
     fun sendMessage(channel: String, message: String)
+    fun getUser(discordId: Long): User?
     fun getUser(discordUserName: String): User?
     fun setMessageAsProfileLinkRequest(message: Message, profile: RPKProfile)
     fun setMessageAsProfileLinkRequest(messageId: String, profile: RPKProfile)

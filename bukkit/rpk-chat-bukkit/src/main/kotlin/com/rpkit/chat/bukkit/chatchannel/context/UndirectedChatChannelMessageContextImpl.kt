@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ package com.rpkit.chat.bukkit.chatchannel.context
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.chat.bukkit.context.UndirectedChatChannelMessageContext
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 
 /**
  * Undirected chat channel message context implementation.
  */
 class UndirectedChatChannelMessageContextImpl(
         override val chatChannel: RPKChatChannel,
-        override val senderProfile: RPKProfile,
+        override val senderProfile: RPKThinProfile,
         override val senderMinecraftProfile: RPKMinecraftProfile?,
         override var message: String,
         override var isCancelled: Boolean = false

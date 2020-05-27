@@ -16,15 +16,4 @@
 
 package com.rpkit.players.bukkit.profile
 
-import com.rpkit.core.database.Entity
-import net.dv8tion.jda.api.JDA
-import net.dv8tion.jda.api.entities.User
-
-interface RPKDiscordProfile: Entity {
-
-    var profile: RPKThinProfile
-    val discordId: Long
-
-    fun getDiscordUser(jda: JDA): User?
-
-}
+class RPKThinProfileImpl(override val name: String): RPKThinProfile

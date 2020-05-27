@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
             val minecraftProfile = event.character.minecraftProfile
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
-                if (profile != null) {
+                if (profile is RPKProfile) {
                     minecraftProfileProvider.getMinecraftProfiles(profile).forEach { profileMinecraftProfile ->
                         assignPermissions(profileMinecraftProfile)
                     }
@@ -151,7 +151,7 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
             val minecraftProfile = event.character.minecraftProfile
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
-                if (profile != null) {
+                if (profile is RPKProfile) {
                     minecraftProfileProvider.getMinecraftProfiles(profile).forEach { profileMinecraftProfile ->
                         assignPermissions(profileMinecraftProfile)
                     }
@@ -184,7 +184,7 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
             }
             val groups = mutableListOf<RPKGroup>()
             val profile = minecraftProfile.profile
-            if (profile != null) {
+            if (profile is RPKProfile) {
                 groups.addAll(getGroups(profile))
             }
             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
@@ -233,7 +233,7 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
-                if (profile != null) {
+                if (profile is RPKProfile) {
                     return getGroups(profile)
                 }
             }
@@ -275,7 +275,7 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
-                if (profile != null) {
+                if (profile is RPKProfile) {
                     hasPermission = hasPermission(profile, node)
                 }
             }
@@ -301,7 +301,7 @@ class RPKGroupProviderImpl(private val plugin: RPKPermissionsBukkit): RPKGroupPr
         val minecraftProfile = character.minecraftProfile
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
-            if (profile != null) {
+            if (profile is RPKProfile) {
                 hasPermission = hasPermission(profile, node)
             }
         }
