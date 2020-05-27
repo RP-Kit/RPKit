@@ -50,6 +50,7 @@ class RPKBlockLoggingBukkit : RPKBukkitPlugin() {
                 BlockBreakListener(this),
                 BlockBurnListener(this),
                 BlockFormListener(this),
+                BlockFromToListener(this),
                 BlockIgniteListener(this),
                 BlockPistonExtendListener(this),
                 BlockPistonRetractListener(this),
