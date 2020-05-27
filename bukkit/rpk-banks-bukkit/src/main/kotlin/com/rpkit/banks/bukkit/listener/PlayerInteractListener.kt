@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package com.rpkit.banks.bukkit.listener
 
 import com.rpkit.banks.bukkit.RPKBanksBukkit
 import com.rpkit.banks.bukkit.bank.RPKBankProvider
+import com.rpkit.banks.bukkit.event.bank.RPKBukkitBankDepositEvent
+import com.rpkit.banks.bukkit.event.bank.RPKBukkitBankWithdrawEvent
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
@@ -81,30 +83,62 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit): Listener {
                                             economyProvider.getBalance(character, currency) + sign.getLine(2).toInt() > 1728 -> event.player.sendMessage(plugin.messages["bank-withdraw-invalid-wallet-full"])
                                             sign.getLine(2).toInt() > bankProvider.getBalance(character, currency) -> event.player.sendMessage(plugin.messages["bank-withdraw-invalid-not-enough-money"])
                                             else -> {
-                                                bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - sign.getLine(2).toInt())
-                                                economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + sign.getLine(2).toInt())
-                                                event.player.sendMessage(
-                                                        plugin.messages["bank-withdraw-valid", mapOf(
-                                                                Pair("amount", sign.getLine(2)),
-                                                                Pair("currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural),
-                                                                Pair("wallet-balance", economyProvider.getBalance(character, currency).toString()),
-                                                                Pair("bank-balance", bankProvider.getBalance(character, currency).toString())
-                                                        )]
-                                                )
+                                                val bankWithdrawEvent = RPKBukkitBankWithdrawEvent(character, currency, sign.getLine(2).toInt())
+                                                plugin.server.pluginManager.callEvent(bankWithdrawEvent)
+                                                if (!bankWithdrawEvent.isCancelled) {
+                                                    bankProvider.setBalance(
+                                                            bankWithdrawEvent.character,
+                                                            bankWithdrawEvent.currency,
+                                                            bankProvider.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency) - bankWithdrawEvent.amount
+                                                    )
+                                                    economyProvider.setBalance(
+                                                            bankWithdrawEvent.character,
+                                                            bankWithdrawEvent.currency,
+                                                            economyProvider.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency) + bankWithdrawEvent.amount
+                                                    )
+                                                    event.player.sendMessage(
+                                                            plugin.messages["bank-withdraw-valid", mapOf(
+                                                                    Pair("amount", bankWithdrawEvent.amount.toString()),
+                                                                    Pair(
+                                                                            "currency",
+                                                                            if (bankWithdrawEvent.amount == 1)
+                                                                                bankWithdrawEvent.currency.nameSingular
+                                                                            else
+                                                                                bankWithdrawEvent.currency.namePlural),
+                                                                    Pair("wallet-balance", economyProvider.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).toString()),
+                                                                    Pair("bank-balance", bankProvider.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).toString())
+                                                            )]
+                                                    )
+                                                }
                                             }
                                         }
                                     } else if (sign.getLine(1).equals("deposit", ignoreCase = true)) {
                                         if (sign.getLine(2).toInt() > economyProvider.getBalance(character, currency)) {
                                             event.player.sendMessage(plugin.messages["bank-deposit-invalid-not-enough-money"])
                                         } else {
-                                            bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) + sign.getLine(2).toInt())
-                                            economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - sign.getLine(2).toInt())
-                                            event.player.sendMessage(plugin.messages["bank-deposit-valid", mapOf(
-                                                    Pair("amount", sign.getLine(2)),
-                                                    Pair("currency", if (sign.getLine(2).toInt() == 1) currency.nameSingular else currency.namePlural),
-                                                    Pair("wallet-balance", economyProvider.getBalance(character, currency).toString()),
-                                                    Pair("bank-balance", bankProvider.getBalance(character, currency).toString())
-                                            )])
+                                            val bankDepositEvent = RPKBukkitBankDepositEvent(character, currency, sign.getLine(2).toInt())
+                                            plugin.server.pluginManager.callEvent(bankDepositEvent)
+                                            if (!bankDepositEvent.isCancelled) {
+                                                bankProvider.setBalance(
+                                                        bankDepositEvent.character,
+                                                        bankDepositEvent.currency,
+                                                        bankProvider.getBalance(character, currency) + bankDepositEvent.amount
+                                                )
+                                                economyProvider.setBalance(
+                                                        bankDepositEvent.character,
+                                                        bankDepositEvent.currency,
+                                                        economyProvider.getBalance(character, currency) - bankDepositEvent.amount
+                                                )
+                                                event.player.sendMessage(plugin.messages["bank-deposit-valid", mapOf(
+                                                        Pair("amount", bankDepositEvent.amount.toString()),
+                                                        Pair("currency", if (bankDepositEvent.amount == 1)
+                                                            bankDepositEvent.currency.nameSingular
+                                                        else
+                                                            bankDepositEvent.currency.namePlural),
+                                                        Pair("wallet-balance", economyProvider.getBalance(bankDepositEvent.character, bankDepositEvent.currency).toString()),
+                                                        Pair("bank-balance", bankProvider.getBalance(bankDepositEvent.character, bankDepositEvent.currency).toString())
+                                                )])
+                                            }
                                         }
                                     } else if (sign.getLine(1).equals("balance", ignoreCase = true)) {
                                         val balance = bankProvider.getBalance(character, currency)
