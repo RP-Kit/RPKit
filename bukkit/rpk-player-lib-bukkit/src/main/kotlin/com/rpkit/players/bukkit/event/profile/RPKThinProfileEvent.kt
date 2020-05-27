@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package com.rpkit.players.bukkit.profile
+package com.rpkit.players.bukkit.event.profile
 
-import com.rpkit.core.database.Entity
-import net.dv8tion.jda.api.JDA
-import net.dv8tion.jda.api.entities.User
+import com.rpkit.core.event.RPKEvent
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 
-interface RPKDiscordProfile: Entity {
+interface RPKThinProfileEvent: RPKEvent {
 
-    var profile: RPKThinProfile
-    val discordId: Long
-
-    fun getDiscordUser(jda: JDA): User?
+    val profile: RPKThinProfile
 
 }

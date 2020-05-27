@@ -16,14 +16,12 @@
 
 package com.rpkit.players.bukkit.database.table
 
+import com.rpkit.chat.bukkit.discord.RPKDiscordProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.jooq.rpkit.Tables.RPKIT_DISCORD_PROFILE
-import com.rpkit.players.bukkit.profile.RPKDiscordProfile
-import com.rpkit.players.bukkit.profile.RPKDiscordProfileImpl
-import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileProvider
+import com.rpkit.players.bukkit.profile.*
 import net.dv8tion.jda.api.entities.User
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
@@ -63,6 +61,7 @@ class RPKDiscordProfileTable(
     }
 
     override fun insert(entity: RPKDiscordProfile): Int {
+        val profile = entity.profile
         database.create
                 .insertInto(
                         RPKIT_DISCORD_PROFILE,
@@ -70,7 +69,11 @@ class RPKDiscordProfileTable(
                         RPKIT_DISCORD_PROFILE.DISCORD_ID
                 )
                 .values(
-                        entity.profile?.id,
+                        if (profile is RPKProfile) {
+                            profile.id
+                        } else {
+                            null
+                        },
                         entity.discordId
                 )
                 .execute()
@@ -81,9 +84,17 @@ class RPKDiscordProfileTable(
     }
 
     override fun update(entity: RPKDiscordProfile) {
+        val profile = entity.profile
         database.create
                 .update(RPKIT_DISCORD_PROFILE)
-                .set(RPKIT_DISCORD_PROFILE.PROFILE_ID, entity.profile?.id)
+                .set(
+                        RPKIT_DISCORD_PROFILE.PROFILE_ID,
+                        if (profile is RPKProfile) {
+                            profile.id
+                        } else {
+                            null
+                        }
+                )
                 .set(RPKIT_DISCORD_PROFILE.DISCORD_ID, entity.discordId)
                 .where(RPKIT_DISCORD_PROFILE.ID.eq(entity.id))
                 .execute()
@@ -104,9 +115,12 @@ class RPKDiscordProfileTable(
                 .fetchOne() ?: return null
         val profileId = result[RPKIT_DISCORD_PROFILE.PROFILE_ID]
         val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
+        val discordProvider = plugin.core.serviceManager.getServiceProvider(RPKDiscordProvider::class)
         val profile = if (profileId != null) {
             profileProvider.getProfile(profileId)
-        } else null
+        } else {
+            null
+        } ?: RPKThinProfileImpl(discordProvider.getUser(result[RPKIT_DISCORD_PROFILE.DISCORD_ID])?.name ?: "Unknown Discord user")
         val discordProfile = RPKDiscordProfileImpl(
                 id,
                 profile,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.rpkit.store.bukkit.command
 
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.purchase.RPKPurchaseProvider
 import org.bukkit.command.Command
@@ -42,7 +43,7 @@ class PurchasesCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
             return true
         }
         val profile = minecraftProfile.profile
-        if (profile == null) {
+        if (profile !is RPKProfile) {
             sender.sendMessage(plugin.messages["no-profile-self"])
             return true
         }

@@ -84,23 +84,14 @@ class DiscordServer(
             val profile = discordProfile.profile
             val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
             val chatChannel = chatChannelProvider.getChatChannelFromDiscordChannel(event.channel.name)
-            if (profile != null) {
-                chatChannel?.sendMessage(
-                        profile,
-                        null,
-                        message,
-                        chatChannel.directedPipeline,
-                        chatChannel.undirectedPipeline.filter { it !is DiscordComponent },
-                        true
-                )
-            } else {
-                if (chatChannel != null) {
-                    event.message.delete().queue()
-                    author.openPrivateChannel().queue { privateChannel ->
-                        privateChannel.sendMessage("In order to send messages in this channel, you must first link your Discord profile to your RPKit profile.").queue()
-                    }
-                }
-            }
+            chatChannel?.sendMessage(
+                    profile,
+                    null,
+                    message,
+                    chatChannel.directedPipeline,
+                    chatChannel.undirectedPipeline.filter { it !is DiscordComponent },
+                    true
+            )
         }
     }
 
@@ -137,6 +128,10 @@ class DiscordServer(
                 ).queue()
             }
         }
+    }
+
+    fun getUser(discordId: Long): User? {
+        return jda.getUserById(discordId)
     }
 
     fun getUser(userName: String): User? {

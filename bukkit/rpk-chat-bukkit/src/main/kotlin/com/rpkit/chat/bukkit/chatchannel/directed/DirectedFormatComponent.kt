@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineCom
 import com.rpkit.chat.bukkit.context.DirectedChatChannelMessageContext
 import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
 import com.rpkit.core.bukkit.util.closestChatColor
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
@@ -52,7 +53,11 @@ class DirectedFormatComponent(private val plugin: RPKChatBukkit, val formatStrin
             formattedMessage = formattedMessage.replace("\$message", context.message)
         }
         if (formattedMessage.contains("\$sender-prefix")) {
-            formattedMessage = formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(senderProfile))
+            formattedMessage = if (senderProfile is RPKProfile) {
+                formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(senderProfile))
+            } else {
+                formattedMessage.replace("\$sender-prefix", "")
+            }
         }
         if (formattedMessage.contains("\$sender-player")) {
             formattedMessage = formattedMessage.replace("\$sender-player", senderProfile.name)
@@ -65,18 +70,14 @@ class DirectedFormatComponent(private val plugin: RPKChatBukkit, val formatStrin
             }
         }
         if (formattedMessage.contains("\$receiver-prefix")) {
-            if (receiverProfile != null) {
-                formattedMessage = formattedMessage.replace("\$receiver-prefix", prefixProvider.getPrefix(receiverProfile))
+            formattedMessage = if (receiverProfile is RPKProfile) {
+                formattedMessage.replace("\$receiver-prefix", prefixProvider.getPrefix(receiverProfile))
             } else {
-                context.isCancelled = true
+                formattedMessage.replace("\$receiver-prefix", "")
             }
         }
         if (formattedMessage.contains("\$receiver-player")) {
-            if (receiverProfile != null) {
-                formattedMessage = formattedMessage.replace("\$receiver-player", receiverProfile.name)
-            } else {
-                context.isCancelled = true
-            }
+            formattedMessage = formattedMessage.replace("\$receiver-player", receiverProfile.name)
         }
         if (formattedMessage.contains("\$receiver-character")) {
             if (receiverCharacter != null) {

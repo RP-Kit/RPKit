@@ -19,6 +19,7 @@ package com.rpkit.players.bukkit.command.account
 import com.rpkit.chat.bukkit.discord.RPKDiscordProvider
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -53,7 +54,7 @@ class AccountLinkDiscordCommand(private val plugin: RPKPlayersBukkit): CommandEx
             return true
         }
         val profile = minecraftProfile.profile
-        if (profile == null) {
+        if (profile !is RPKProfile) {
             sender.sendMessage(plugin.messages["no-profile-self"])
             return true
         }

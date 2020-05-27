@@ -21,7 +21,7 @@ import net.dv8tion.jda.api.entities.User
 
 class RPKDiscordProfileImpl(
         override var id: Int = 0,
-        override var profile: RPKProfile? = null,
+        override var profile: RPKThinProfile,
         override val discordId: Long
 ) : RPKDiscordProfile {
 

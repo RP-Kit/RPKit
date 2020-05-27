@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,17 +46,13 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit): Listen
                 val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
                 if (minecraftProfile != null) {
                     val profile = minecraftProfile.profile
-                    if (profile != null) {
-                        if (event.message.startsWith("/$chatChannelName ")) {
-                            chatChannel.sendMessage(profile, minecraftProfile, event.message.split(Regex("\\s+")).drop(1).joinToString(" "))
-                        } else if (event.message.startsWith("/$chatChannelName")) {
-                            chatChannel.addSpeaker(minecraftProfile)
-                            event.player.sendMessage(plugin.messages["chatchannel-valid", mapOf(
-                                    Pair("channel", chatChannel.name)
-                            )])
-                        }
-                    } else {
-                        event.player.sendMessage(plugin.messages["no-profile"])
+                    if (event.message.startsWith("/$chatChannelName ")) {
+                        chatChannel.sendMessage(profile, minecraftProfile, event.message.split(Regex("\\s+")).drop(1).joinToString(" "))
+                    } else if (event.message.startsWith("/$chatChannelName")) {
+                        chatChannel.addSpeaker(minecraftProfile)
+                        event.player.sendMessage(plugin.messages["chatchannel-valid", mapOf(
+                                Pair("channel", chatChannel.name)
+                        )])
                     }
                 } else {
                     event.player.sendMessage(plugin.messages["no-minecraft-profile"])

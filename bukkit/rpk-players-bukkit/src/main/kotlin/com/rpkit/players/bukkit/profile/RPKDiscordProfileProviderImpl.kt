@@ -29,7 +29,7 @@ class RPKDiscordProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPKDi
         val discordProfileTable = plugin.core.database.getTable(RPKDiscordProfileTable::class)
         var discordProfile = discordProfileTable.get(user)
         if (discordProfile == null) {
-            discordProfile = RPKDiscordProfileImpl(discordId = user.idLong)
+            discordProfile = RPKDiscordProfileImpl(discordId = user.idLong, profile = RPKThinProfileImpl(user.name))
             discordProfileTable.insert(discordProfile)
         }
         return discordProfile

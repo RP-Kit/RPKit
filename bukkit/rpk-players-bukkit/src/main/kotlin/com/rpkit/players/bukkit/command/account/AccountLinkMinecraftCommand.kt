@@ -17,9 +17,7 @@
 package com.rpkit.players.bukkit.command.account
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileImpl
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileLinkRequestImpl
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.*
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -54,11 +52,11 @@ class AccountLinkMinecraftCommand(private val plugin: RPKPlayersBukkit): Command
             return true
         }
         val profile = senderMinecraftProfile.profile
-        if (profile == null) {
+        if (profile !is RPKProfile) {
             sender.sendMessage(plugin.messages["no-profile-self"])
             return true
         }
-        minecraftProfile = RPKMinecraftProfileImpl(profile = null, minecraftUUID = bukkitPlayer.uniqueId)
+        minecraftProfile = RPKMinecraftProfileImpl(profile = RPKThinProfileImpl(bukkitPlayer.name ?: "Unknown Minecraft user"), minecraftUUID = bukkitPlayer.uniqueId)
         minecraftProfileProvider.addMinecraftProfile(minecraftProfile)
         val minecraftProfileLinkRequest = RPKMinecraftProfileLinkRequestImpl(profile = profile, minecraftProfile = minecraftProfile)
         minecraftProfileProvider.addMinecraftProfileLinkRequest(minecraftProfileLinkRequest)

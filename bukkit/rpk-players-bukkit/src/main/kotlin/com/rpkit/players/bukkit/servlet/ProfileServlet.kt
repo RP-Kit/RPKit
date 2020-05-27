@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,13 +236,13 @@ class ProfileServlet(private val plugin: RPKPlayersBukkit): RPKServlet() {
                     val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                     val existingMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
                     if (existingMinecraftProfile == null) {
-                        val minecraftProfile = RPKMinecraftProfileImpl(profile = null, minecraftUUID = bukkitPlayer.uniqueId)
+                        val minecraftProfile = RPKMinecraftProfileImpl(profile = RPKThinProfileImpl(minecraftUsername), minecraftUUID = bukkitPlayer.uniqueId)
                         minecraftProfileProvider.addMinecraftProfile(minecraftProfile)
                         val minecraftProfileLinkRequest = RPKMinecraftProfileLinkRequestImpl(profile = profile, minecraftProfile = minecraftProfile)
                         minecraftProfileProvider.addMinecraftProfileLinkRequest(minecraftProfileLinkRequest)
                         alerts.add(Alert(SUCCESS, "Link request sent. Log in to the account and approve it to link the account."))
                     } else {
-                        if (existingMinecraftProfile.profile == null) {
+                        if (existingMinecraftProfile.profile !is RPKProfile) {
                             val minecraftProfileLinkRequest = RPKMinecraftProfileLinkRequestImpl(profile = profile, minecraftProfile = existingMinecraftProfile)
                             minecraftProfileProvider.addMinecraftProfileLinkRequest(minecraftProfileLinkRequest = minecraftProfileLinkRequest)
                             alerts.add(Alert(SUCCESS, "Link request sent. Log in to the account and approve it to link the account."))

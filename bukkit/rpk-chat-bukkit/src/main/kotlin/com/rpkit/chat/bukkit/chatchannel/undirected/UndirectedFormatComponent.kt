@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineC
 import com.rpkit.chat.bukkit.context.UndirectedChatChannelMessageContext
 import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
 import com.rpkit.core.bukkit.util.closestChatColor
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
@@ -45,7 +46,11 @@ class UndirectedFormatComponent(private val plugin: RPKChatBukkit, var formatStr
             formattedMessage = formattedMessage.replace("\$message", context.message)
         }
         if (formattedMessage.contains("\$sender-prefix")) {
-            formattedMessage = formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(senderProfile))
+            formattedMessage = if (senderProfile is RPKProfile) {
+                formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(senderProfile))
+            } else {
+                formattedMessage.replace("\$sender-prefix", "")
+            }
         }
         if (formattedMessage.contains("\$sender-player")) {
             formattedMessage = formattedMessage.replace("\$sender-player", senderProfile.name)

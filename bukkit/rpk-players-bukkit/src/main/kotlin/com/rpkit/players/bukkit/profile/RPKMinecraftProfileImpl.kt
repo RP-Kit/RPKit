@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.*
 
 class RPKMinecraftProfileImpl(
         override var id: Int = 0,
-        override var profile: RPKProfile?,
+        override var profile: RPKThinProfile,
         override val minecraftUUID: UUID
 ) : RPKMinecraftProfile {
 
