@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.profession.RPKCraftingAction
 import com.rpkit.professions.bukkit.profession.RPKProfessionProvider
+import org.bukkit.GameMode
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
@@ -35,10 +36,11 @@ class BlockBreakListener(private val plugin: RPKProfessionsBukkit): Listener {
 
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
+        val bukkitPlayer = event.player
+        if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val professionProvider = plugin.core.serviceManager.getServiceProvider(RPKProfessionProvider::class)
-        val bukkitPlayer = event.player
         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             event.isDropItems = false
@@ -57,7 +59,7 @@ class BlockBreakListener(private val plugin: RPKProfessionsBukkit): Listener {
             val material = item.type
             val amount = professionLevels.entries
                     .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.MINE, material, level) }
-                    .firstOrNull() ?: plugin.config.getDouble("default.mining.$material.amount", 1.0)
+                    .max() ?: plugin.config.getDouble("default.mining.$material.amount", 1.0)
             val potentialQualities = professionLevels.entries
                     .mapNotNull { (profession, level) -> profession.getQualityFor(RPKCraftingAction.MINE, material, level) }
             val quality = potentialQualities.maxBy(RPKItemQuality::durabilityModifier)
@@ -95,6 +97,7 @@ class BlockBreakListener(private val plugin: RPKProfessionsBukkit): Listener {
                 }
             }
         }
+        event.isDropItems = false
         for (item in itemsToDrop) {
             event.block.world.dropItemNaturally(event.block.location, item)
         }

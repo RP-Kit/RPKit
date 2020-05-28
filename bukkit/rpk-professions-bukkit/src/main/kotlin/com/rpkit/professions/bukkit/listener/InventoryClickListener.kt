@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.profession.RPKCraftingAction
 import com.rpkit.professions.bukkit.profession.RPKProfessionProvider
+import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -43,7 +44,8 @@ class InventoryClickListener(private val plugin: RPKProfessionsBukkit): Listener
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val professionProvider = plugin.core.serviceManager.getServiceProvider(RPKProfessionProvider::class)
-        val bukkitPlayer = event.viewers.firstOrNull() as? Player ?: return
+        val bukkitPlayer = event.whoClicked as? Player ?: return
+        if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer) ?: return
         val character = characterProvider.getActiveCharacter(minecraftProfile) ?: return
         val item = event.currentItem ?: return
@@ -57,7 +59,7 @@ class InventoryClickListener(private val plugin: RPKProfessionsBukkit): Listener
         val quality = potentialQualities.maxBy(RPKItemQuality::durabilityModifier)
         val amount = professionLevels.entries
                 .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.SMELT, material, level) }
-                .firstOrNull() ?: plugin.config.getDouble("default.smelting.$material.amount", 1.0) * item.amount
+                .max() ?: plugin.config.getDouble("default.smelting.$material.amount", 1.0) * item.amount
         if (quality != null) {
             item.addLore(quality.lore)
         }
