@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import org.bukkit.GameMode
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
@@ -35,10 +36,11 @@ class BlockBreakListener(private val plugin: RPKCraftingSkillBukkit): Listener {
 
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
+        val bukkitPlayer = event.player
+        if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val craftingSkillProvider = plugin.core.serviceManager.getServiceProvider(RPKCraftingSkillProvider::class)
-        val bukkitPlayer = event.player
         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             event.isDropItems = false
@@ -84,6 +86,7 @@ class BlockBreakListener(private val plugin: RPKCraftingSkillBukkit): Listener {
                 )])
             }
         }
+        event.isDropItems = false
         for (item in itemsToDrop) {
             event.block.world.dropItemNaturally(event.block.location, item)
         }

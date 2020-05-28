@@ -21,6 +21,7 @@ import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.CRAFT
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -38,6 +39,7 @@ class CraftItemListener(private val plugin: RPKCraftingSkillBukkit): Listener {
     fun onCraftItem(event: CraftItemEvent) {
         val bukkitPlayer = event.whoClicked
         if (bukkitPlayer is Player) {
+            if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
             val craftingSkillProvider = plugin.core.serviceManager.getServiceProvider(RPKCraftingSkillProvider::class)
