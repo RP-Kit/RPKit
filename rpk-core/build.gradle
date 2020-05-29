@@ -27,7 +27,7 @@ if (propertiesFile.exists()) {
 
 dependencies {
     implementation group: "mysql", name: "mysql-connector-java", version: "8.0.20"
-    implementation group: "org.xerial", name: "sqlite-jdbc", version: "3.30.1"
+    implementation group: "org.xerial", name: "sqlite-jdbc", version: "3.31.1"
     implementation group: "commons-codec", name: "commons-codec", version: "1.14"
     implementation group: "commons-lang", name: "commons-lang", version: "2.6"
     implementation group: "com.google.guava", name: "guava", version: "28.2-jre"
