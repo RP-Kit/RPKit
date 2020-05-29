@@ -1,0 +1,10 @@
+name: rpk-skill-fireball-bukkit
+version: @version@
+author: alyphen
+main: com.rpkit.skills.bukkit.fireball.RPKFireballSkillBukkit
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+- rpk-skill-lib-bukkit
+api-version: '1.15'
