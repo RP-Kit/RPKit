@@ -30,6 +30,10 @@ classes:
                 magic_sword: 1
                 speed_nimble: 3
                 support_perform: 3
+        stat-variables:
+            strength: 8 + (level * 5)
+            agility: 6 + (level * 2)
+            intelligence: 3 + level
     bowman:
         max-level: 20
         skill-points:
@@ -61,6 +65,10 @@ classes:
                 magic_sword: 0
                 speed_nimble: 10
                 support_perform: 5
+        stat-variables:
+            strength: 5 + (level * 2)
+            agility: 7 + (level * 4)
+            intelligence: 5 + (level * 2)
     wizard:
         max-level: 20
         skill-points:
@@ -92,6 +100,10 @@ classes:
                 magic_sword: 5
                 speed_nimble: 1
                 support_perform: 5
+        stat-variables:
+            strength: 3 + level
+            agility: 6 + (level * 2)
+            intelligence: 8 + (level * 5)
     freelancer:
         max-level: 50
         prerequisites:
@@ -127,6 +139,10 @@ classes:
                 magic_sword: 5
                 speed_nimble: 5
                 support_perform: 5
+        stat-variables:
+            strength: 5 + (level * 2)
+            agility: 5 + (level * 2)
+            intelligence: 5 + (level * 2)
 caching:
     rpkit_character_class:
         id:
