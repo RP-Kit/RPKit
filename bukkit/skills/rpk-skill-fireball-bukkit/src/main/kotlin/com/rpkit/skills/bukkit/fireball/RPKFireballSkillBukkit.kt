@@ -25,7 +25,11 @@ import org.bukkit.event.Listener
 
 class RPKFireballSkillBukkit : RPKBukkitPlugin(), Listener {
 
-    private var registered = false;
+    private var registered = false
+
+    override fun onEnable() {
+        saveDefaultConfig()
+    }
 
     override fun onPostEnable() {
         attemptSkillRegistration()
