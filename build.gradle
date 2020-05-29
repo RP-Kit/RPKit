@@ -24,24 +24,26 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
     }
 
     dependencies {
         classpath "com.github.jengelman.gradle.plugins:shadow:5.2.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.61"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.9"
+        classpath "com.github.breadmoirai:github-release:2.2.12"
     }
 }
 
-allprojects {
+apply plugin: "com.github.breadmoirai.github-release"
+
+subprojects {
     apply plugin: "kotlin"
     apply plugin: "maven"
     apply plugin: "org.jetbrains.dokka"
     group = "com.rpkit"
     version = "1.9.0-SNAPSHOT"
-}
 
-subprojects {
     repositories {
         mavenCentral()
         maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
@@ -60,5 +62,47 @@ subprojects {
         kotlinOptions {
             jvmTarget = '1.8'
         }
+    }
+}
+
+def githubToken = ""
+def githubPropertiesFile = new File("github.properties")
+if (githubPropertiesFile.exists()) {
+    def githubProperties = new Properties()
+    githubProperties.load(new FileInputStream(githubPropertiesFile))
+    githubToken = githubProperties.get("token")
+}
+
+githubRelease {
+    authorization githubToken
+    owner "RP-Kit"
+    repo "RPKit"
+    releaseName "Version " + version
+    releaseAssets subprojects.stream()
+            .flatMap { subproject ->
+                subproject.evaluate()
+                def noSource = true
+                def sourceSets = subproject.sourceSets
+                for (sourceSet in sourceSets) {
+                    noSource = !sourceSet.allSource.isEmpty() || !noSource
+                }
+                if (!noSource) {
+                    def files = subproject.tasks.jar.outputs.getFiles().getFiles().stream()
+                    if (subproject.tasks.findByName("shadowJar")) {
+                        files = subproject.tasks.shadowJar.outputs.getFiles().getFiles().stream()
+                    }
+                    files
+                } else {
+                    Arrays.stream(new File[0])
+                }
+            }.toArray { size -> new File[size] }
+}
+
+subprojects.forEach { subproject ->
+    subproject.evaluate()
+    if (subproject.tasks.findByName("shadowJar")) {
+        project.tasks.githubRelease.dependsOn subproject.tasks.shadowJar
+    } else {
+        project.tasks.githubRelease.dependsOn subproject.tasks.jar
     }
 }
