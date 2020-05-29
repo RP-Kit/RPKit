@@ -19,7 +19,6 @@ package com.rpkit.classes.bukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
 import com.rpkit.classes.bukkit.character.ClassField
-import com.rpkit.classes.bukkit.classes.RPKClass
 import com.rpkit.classes.bukkit.classes.RPKClassProvider
 import com.rpkit.classes.bukkit.classes.RPKClassProviderImpl
 import com.rpkit.classes.bukkit.command.`class`.ClassCommand
@@ -89,28 +88,21 @@ class RPKClassesBukkit: RPKBukkitPlugin() {
         try {
             val statVariableProvider = core.serviceManager.getServiceProvider(RPKStatVariableProvider::class)
             val classProvider = core.serviceManager.getServiceProvider(RPKClassProvider::class)
-            statVariableProvider.addStatVariable(object: RPKStatVariable {
+            config.getConfigurationSection("classes")
+                    ?.getKeys(false)
+                    ?.flatMap { className ->
+                        config.getConfigurationSection("classes.$className.stat-variables")?.getKeys(false) ?: setOf() }
+                    ?.toSet()
+                    ?.forEach { statVariableName ->
+                        statVariableProvider.addStatVariable(object: RPKStatVariable {
+                            override val name = statVariableName
 
-                override val name = "classLevels"
-
-                override fun get(character: RPKCharacter): Map<RPKClass, Int>? {
-                    return classProvider.classes
-                            .map { `class` ->
-                                Pair(`class`, classProvider.getLevel(character, `class`))
+                            override fun get(character: RPKCharacter): Int {
+                                val `class` = classProvider.getClass(character)
+                                return `class`?.getStatVariableValue(this, classProvider.getLevel(character, `class`)) ?: 0
                             }
-                            .toMap()
-                }
-
-            })
-            statVariableProvider.addStatVariable(object: RPKStatVariable {
-
-                override val name = "class"
-
-                override fun get(character: RPKCharacter): Any? {
-                    return classProvider.getClass(character)
-                }
-
-            })
+                        })
+                    }
             statsInitialized = true
         } catch (ignore: UnregisteredServiceException) {}
     }

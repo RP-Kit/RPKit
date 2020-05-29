@@ -17,9 +17,6 @@
 # characterFoodLevel: The character's food level from the character implementation (Integer)
 # characterThirstLevel: The character's thirst level from the character implementation (Integer)
 stats:
-    strength: >
-      (minecraftLevel * 5)
-      + (if(characterHelmet,if(characterHelmet.getType().toString() = "DIAMOND_HELMET",10,0),0))
-      + (if(characterHelmet,if(characterHelmet.getType().toString() = "IRON_HELMET",8,0),0))
-    agility: '(minecraftLevel * 20) - characterAge + characterFoodLevel'
-    intelligence: '(minecraftLevel * 5) + characterMana'
+    strength: strength
+    agility: agility
+    intelligence: intelligence
