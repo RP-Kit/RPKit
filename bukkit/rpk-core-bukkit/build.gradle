@@ -37,7 +37,6 @@ dependencies {
     implementation group: "org.eclipse.jetty", name: "jetty-servlet", version: "9.4.29.v20200521"
     implementation group: "org.eclipse.jetty", name: "jetty-webapp", version: "9.4.29.v20200521"
     implementation group: "org.eclipse.jetty.websocket", name: "websocket-server", version: "9.4.29.v20200521"
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-scripting-jsr223-embeddable", version: "1.3.72"
     implementation group: "jep", name: "jep", version: "2.24"
     implementation (group: "net.dv8tion", name: "JDA", version: "4.1.1_155") {
         exclude module: "opus-java"
@@ -89,7 +88,6 @@ shadowJar {
         include(dependency("com.squareup.okhttp3:okhttp"))
         include(dependency("com.squareup.okio:okio"))
         include(dependency("org.apache.commons:commons-collections4"))
-        include(dependency("org.json:json"))
         include(dependency("net.sf.trove4j:trove4j"))
         include(dependency("com.fasterxml.jackson.core:jackson-core"))
         include(dependency("com.fasterxml.jackson.core:jackson-annotations"))
@@ -97,7 +95,6 @@ shadowJar {
         include(dependency("com.google.code.gson:gson"))
         include(dependency("com.google.errorprone:error_prone_annotations"))
         include(dependency("com.google.guava:guava"))
-        include(dependency("com.google.j2objc:j2objc-annotations"))
         include(dependency("com.google.protobuf:protobuf-java"))
         include(dependency("commons-codec:commons-codec"))
         include(dependency("commons-collections:commons-collections"))
@@ -105,7 +102,6 @@ shadowJar {
         include(dependency("commons-lang:commons-lang"))
         include(dependency("com.sun.istack:istack-commons-runtime"))
         include(dependency("com.sun.xml.fastinfoset:FastInfoset"))
-        include(dependency("javax.activation:javax-activation-api"))
         include(dependency("javax.xml.bind:jaxb-api"))
         include(dependency("org.jvnet.staxex:stax-ex"))
         include(dependency("org.kohsuke:github-api"))
@@ -114,7 +110,6 @@ shadowJar {
         include(dependency("org.xerial:sqlite-jdbc"))
         include(dependency("org.apache.commons:commons-lang3"))
         include(dependency("org.checkerframework:checker-qual"))
-        include(dependency("org.codehaus.mojo:animal-sniffer-annotations"))
         include(dependency("org.eclipse.jetty:jetty-client"))
         include(dependency("org.eclipse.jetty.websocket:websocket-client"))
         include(dependency("org.eclipse.jetty:jetty-xml"))
