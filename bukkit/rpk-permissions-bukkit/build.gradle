@@ -39,7 +39,7 @@ dependencies {
     implementation project(":bukkit:rpk-character-lib-bukkit")
     implementation project(":bukkit:rpk-permissions-lib-bukkit")
     testImplementation group: "io.kotlintest", name: "kotlintest-runner-junit5", version: "3.4.2"
-    testImplementation group: "io.mockk", name: "mockk", version: "1.9"
+    testImplementation group: "io.mockk", name: "mockk", version: "1.10.0"
 }
 
 processResources {
