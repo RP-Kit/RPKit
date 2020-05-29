@@ -19,10 +19,7 @@ package com.rpkit.chat.bukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProviderImpl
 import com.rpkit.chat.bukkit.chatchannel.directed.*
-import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
-import com.rpkit.chat.bukkit.chatchannel.undirected.LogComponent
-import com.rpkit.chat.bukkit.chatchannel.undirected.UndirectedFormatComponent
-import com.rpkit.chat.bukkit.chatchannel.undirected.WebComponent
+import com.rpkit.chat.bukkit.chatchannel.undirected.*
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProviderImpl
 import com.rpkit.chat.bukkit.command.chatchannel.ChatChannelCommand
 import com.rpkit.chat.bukkit.command.chatgroup.ChatGroupCommand
@@ -33,6 +30,7 @@ import com.rpkit.chat.bukkit.command.reply.ReplyCommand
 import com.rpkit.chat.bukkit.command.snoop.SnoopCommand
 import com.rpkit.chat.bukkit.command.unmute.UnmuteCommand
 import com.rpkit.chat.bukkit.database.table.*
+import com.rpkit.chat.bukkit.discord.RPKDiscordProviderImpl
 import com.rpkit.chat.bukkit.irc.RPKIRCProvider
 import com.rpkit.chat.bukkit.irc.RPKIRCProviderImpl
 import com.rpkit.chat.bukkit.listener.AsyncPlayerChatListener
@@ -62,58 +60,54 @@ class RPKChatBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4383)
+        // Directed chat channel pipeline components
         ConfigurationSerialization.registerClass(DirectedFormatComponent::class.java, "DirectedFormatComponent")
         ConfigurationSerialization.registerClass(DrunkenSlurComponent::class.java, "DrunkenSlurComponent")
         ConfigurationSerialization.registerClass(GarbleComponent::class.java, "GarbleComponent")
+        ConfigurationSerialization.registerClass(LanguageComponent::class.java, "LanguageComponent")
         ConfigurationSerialization.registerClass(RadiusFilterComponent::class.java, "RadiusFilterComponent")
         ConfigurationSerialization.registerClass(SendMessageComponent::class.java, "SendMessageComponent")
         ConfigurationSerialization.registerClass(SnoopComponent::class.java, "SnoopComponent")
+
+        // Undirected chat channel pipline components
+        ConfigurationSerialization.registerClass(DiscordComponent::class.java, "DiscordComponent")
         ConfigurationSerialization.registerClass(IRCComponent::class.java, "IRCComponent")
         ConfigurationSerialization.registerClass(LogComponent::class.java, "LogComponent")
         ConfigurationSerialization.registerClass(UndirectedFormatComponent::class.java, "UndirectedFormatComponent")
         ConfigurationSerialization.registerClass(WebComponent::class.java, "WebComponent")
+
         saveDefaultConfig()
-        if (config.getBoolean("irc.enabled")) {
-            val ircProvider = RPKIRCProviderImpl(this)
-            val prefixProvider = RPKPrefixProviderImpl(this)
-            val chatChannelProvider = RPKChatChannelProviderImpl(this)
-            val chatChannelMuteProvider = RPKChatChannelMuteProvider(this)
-            val chatChannelSpeakerProvider = RPKChatChannelSpeakerProvider(this)
-            val chatGroupProvider = RPKChatGroupProviderImpl(this)
-            val snooperProvider =  RPKSnooperProviderImpl(this)
-            val chatWebSocketProvider = RPKChatWebSocketProvider()
-            serviceProviders = arrayOf(
-                    ircProvider,
-                    prefixProvider,
-                    chatChannelProvider,
-                    chatChannelMuteProvider,
-                    chatChannelSpeakerProvider,
-                    chatGroupProvider,
-                    snooperProvider,
-                    chatWebSocketProvider
-            )
-            registerChatChannelPermissions(chatChannelProvider)
-            registerPrefixPermissions(prefixProvider)
-        } else {
-            val prefixProvider = RPKPrefixProviderImpl(this)
-            val chatChannelProvider = RPKChatChannelProviderImpl(this)
-            val chatChannelMuteProvider = RPKChatChannelMuteProvider(this)
-            val chatChannelSpeakerProvider = RPKChatChannelSpeakerProvider(this)
-            val chatGroupProvider = RPKChatGroupProviderImpl(this)
-            val snooperProvider =  RPKSnooperProviderImpl(this)
-            val chatWebSocketProvider = RPKChatWebSocketProvider()
-            serviceProviders = arrayOf(
-                    prefixProvider,
-                    chatChannelProvider,
-                    chatChannelMuteProvider,
-                    chatChannelSpeakerProvider,
-                    chatGroupProvider,
-                    snooperProvider,
-                    chatWebSocketProvider
-            )
-            registerChatChannelPermissions(chatChannelProvider)
-            registerPrefixPermissions(prefixProvider)
-        }
+
+        val ircProvider = if (config.getBoolean("irc.enabled")) {
+            RPKIRCProviderImpl(this)
+        } else null
+
+        val discordProvider = if (config.getBoolean("discord.enabled")) {
+            RPKDiscordProviderImpl(this)
+        } else null
+
+        val prefixProvider = RPKPrefixProviderImpl(this)
+        val chatChannelProvider = RPKChatChannelProviderImpl(this)
+        val chatChannelMuteProvider = RPKChatChannelMuteProvider(this)
+        val chatChannelSpeakerProvider = RPKChatChannelSpeakerProvider(this)
+        val chatGroupProvider = RPKChatGroupProviderImpl(this)
+        val snooperProvider =  RPKSnooperProviderImpl(this)
+        val chatWebSocketProvider = RPKChatWebSocketProvider()
+
+        serviceProviders = listOfNotNull(
+                ircProvider,
+                discordProvider,
+                prefixProvider,
+                chatChannelProvider,
+                chatChannelMuteProvider,
+                chatChannelSpeakerProvider,
+                chatGroupProvider,
+                snooperProvider,
+                chatWebSocketProvider
+        ).toTypedArray()
+
+        registerChatChannelPermissions(chatChannelProvider)
+        registerPrefixPermissions(prefixProvider)
         servlets = arrayOf(
                 ChatServlet(this)
         )
@@ -285,6 +279,7 @@ class RPKChatBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-message", "&cYou do not have permission to send private messages.")
         messages.setDefault("no-permission-reply", "&cYou do not have permission to reply to messages.")
         messages.setDefault("command-snoop", "&2[command] \$sender-player: \$command")
+        messages.setDefault("account-link-discord-successful", "&aDiscord profile \$discord-tag successfully linked.")
     }
 
 }

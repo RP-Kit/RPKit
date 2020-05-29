@@ -1,0 +1,10 @@
+name: rpk-languages-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.languages.bukkit.RPKLanguagesBukkit
+api-version: 1.15
+depend:
+- rpk-core-bukkit
+- rpk-player-lib-bukkit
+- rpk-character-lib-bukkit
+- rpk-language-lib-bukkit

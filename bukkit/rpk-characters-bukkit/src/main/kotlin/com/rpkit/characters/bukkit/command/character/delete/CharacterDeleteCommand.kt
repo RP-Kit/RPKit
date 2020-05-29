@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.rpkit.characters.bukkit.command.character.delete
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -76,7 +77,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
                     val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                     if (minecraftProfile != null) {
                         val profile = minecraftProfile.profile
-                        if (profile != null) {
+                        if (profile is RPKProfile) {
                             var charFound = false
                             // Prioritise exact matches...
                             for (character in characterProvider.getCharacters(profile)) {
@@ -133,7 +134,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
                 val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(conversable)
                 if (minecraftProfile != null) {
                     val profile = minecraftProfile.profile
-                    if (profile != null) {
+                    if (profile is RPKProfile) {
                         repeat(characterProvider.getCharacters(profile)
                                 .filter { it.name.equals(input, ignoreCase = true) }.size) { return true }
                         repeat(characterProvider.getCharacters(profile)
@@ -152,7 +153,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
                 val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(conversable)
                 if (minecraftProfile != null) {
                     val profile = minecraftProfile.profile
-                    if (profile != null) {
+                    if (profile is RPKProfile) {
                         var charFound = false
                         // Prioritise exact matches...
                         for (character in characterProvider.getCharacters(profile)) {
@@ -192,7 +193,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit): CommandEx
             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
             if (minecraftProfile != null) {
                 val profile = minecraftProfile.profile
-                return if (profile != null) {
+                return if (profile is RPKProfile) {
                     val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
                     val characterListBuilder = StringBuilder()
                     for (character in characterProvider.getCharacters(profile)) {

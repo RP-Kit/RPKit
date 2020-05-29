@@ -26,6 +26,7 @@ import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.ChatColor
 
 /**
@@ -178,8 +179,10 @@ class RPKChatGroupImpl(
             }
             if (formattedMessage.contains("\$sender-prefix")) {
                 val profile = sender.profile
-                if (profile != null) {
-                    formattedMessage = formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(profile))
+                formattedMessage = if (profile is RPKProfile) {
+                    formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(profile))
+                } else {
+                    formattedMessage.replace("\$sender-prefix", "")
                 }
             }
             if (formattedMessage.contains("\$sender-player")) {

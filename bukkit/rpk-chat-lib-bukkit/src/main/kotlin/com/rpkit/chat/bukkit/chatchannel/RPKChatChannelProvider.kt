@@ -116,4 +116,13 @@ interface RPKChatChannelProvider: ServiceProvider {
      */
     fun getChatChannelFromIRCChannel(ircChannel: String): RPKChatChannel?
 
+    /**
+     * Gets a chat channel from the Discord channel it is linked to.
+     * If no chat channel uses the given Discord channel, null is returned.
+     *
+     * @param discordChannel The Discord channel
+     * @return The chat channel, or null if no chat channel uses the given Discord channel.
+     */
+    fun getChatChannelFromDiscordChannel(discordChannel: String): RPKChatChannel?
+
 }

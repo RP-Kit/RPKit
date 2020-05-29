@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ class InventoryClickListener(private val plugin: RPKCraftingSkillBukkit): Listen
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val craftingSkillProvider = plugin.core.serviceManager.getServiceProvider(RPKCraftingSkillProvider::class)
-        val bukkitPlayer = event.viewers.firstOrNull() as? Player ?: return
+        val bukkitPlayer = event.whoClicked as? Player ?: return
         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer) ?: return
         val character = characterProvider.getActiveCharacter(minecraftProfile) ?: return
         val item = event.currentItem ?: return

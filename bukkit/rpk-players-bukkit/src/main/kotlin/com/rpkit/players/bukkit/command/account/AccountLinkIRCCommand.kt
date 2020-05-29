@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKIRCProfileImpl
 import com.rpkit.players.bukkit.profile.RPKIRCProfileProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -46,7 +47,7 @@ class AccountLinkIRCCommand(private val plugin: RPKPlayersBukkit): CommandExecut
                             val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                             if (minecraftProfile != null) {
                                 val profile = minecraftProfile.profile
-                                if (profile != null) {
+                                if (profile is RPKProfile) {
                                     val ircProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProfileProvider::class)
                                     var ircProfile = ircProfileProvider.getIRCProfile(ircUser)
                                     if (ircProfile == null) {
@@ -63,7 +64,7 @@ class AccountLinkIRCCommand(private val plugin: RPKPlayersBukkit): CommandExecut
                                     sender.sendMessage(plugin.messages["account-link-irc-invalid-profile"])
                                 }
                             } else {
-                                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                                sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
                             }
                         } else {
                             sender.sendMessage(plugin.messages["account-link-irc-invalid-nick"])

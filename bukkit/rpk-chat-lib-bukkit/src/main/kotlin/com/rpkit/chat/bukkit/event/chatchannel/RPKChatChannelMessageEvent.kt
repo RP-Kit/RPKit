@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ package com.rpkit.chat.bukkit.event.chatchannel
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
-import com.rpkit.players.bukkit.event.profile.RPKProfileEvent
-import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.event.profile.RPKThinProfileEvent
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 
 
-interface RPKChatChannelMessageEvent: RPKChatChannelEvent, RPKMinecraftProfileEvent, RPKProfileEvent {
+interface RPKChatChannelMessageEvent: RPKChatChannelEvent, RPKMinecraftProfileEvent, RPKThinProfileEvent {
 
-    override val profile: RPKProfile
+    override val profile: RPKThinProfile
     override var chatChannel: RPKChatChannel
     val message: String
 

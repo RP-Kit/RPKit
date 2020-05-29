@@ -19,13 +19,13 @@ package com.rpkit.chat.bukkit.event.chatchannel
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 
 
 class RPKBukkitChatChannelMessageEvent(
-        override val profile: RPKProfile,
+        override val profile: RPKThinProfile,
         override val minecraftProfile: RPKMinecraftProfile?,
         override var chatChannel: RPKChatChannel,
         override val message: String,

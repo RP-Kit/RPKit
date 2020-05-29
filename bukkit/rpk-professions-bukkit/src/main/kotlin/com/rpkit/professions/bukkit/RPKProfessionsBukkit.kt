@@ -53,7 +53,7 @@ class RPKProfessionsBukkit: RPKBukkitPlugin() {
 
     override fun registerListeners() {
         registerListeners(
-                PluginEnableListener(this),
+                RPKServiceProviderReadyListener(this),
                 BlockBreakListener(this),
                 CraftItemListener(this),
                 InventoryClickListener(this),

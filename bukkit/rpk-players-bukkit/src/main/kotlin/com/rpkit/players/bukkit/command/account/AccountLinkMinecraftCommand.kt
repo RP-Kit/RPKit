@@ -1,9 +1,23 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.players.bukkit.command.account
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileImpl
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileLinkRequestImpl
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.*
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -34,15 +48,15 @@ class AccountLinkMinecraftCommand(private val plugin: RPKPlayersBukkit): Command
         }
         val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
         if (senderMinecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
         }
         val profile = senderMinecraftProfile.profile
-        if (profile == null) {
-            sender.sendMessage(plugin.messages["no-profile"])
+        if (profile !is RPKProfile) {
+            sender.sendMessage(plugin.messages["no-profile-self"])
             return true
         }
-        minecraftProfile = RPKMinecraftProfileImpl(profile = null, minecraftUUID = bukkitPlayer.uniqueId)
+        minecraftProfile = RPKMinecraftProfileImpl(profile = RPKThinProfileImpl(bukkitPlayer.name ?: "Unknown Minecraft user"), minecraftUUID = bukkitPlayer.uniqueId)
         minecraftProfileProvider.addMinecraftProfile(minecraftProfile)
         val minecraftProfileLinkRequest = RPKMinecraftProfileLinkRequestImpl(profile = profile, minecraftProfile = minecraftProfile)
         minecraftProfileProvider.addMinecraftProfileLinkRequest(minecraftProfileLinkRequest)

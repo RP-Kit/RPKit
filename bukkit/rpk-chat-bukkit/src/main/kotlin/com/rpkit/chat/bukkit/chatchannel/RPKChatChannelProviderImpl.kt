@@ -19,6 +19,7 @@ package com.rpkit.chat.bukkit.chatchannel
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineComponent
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
+import com.rpkit.chat.bukkit.chatchannel.undirected.DiscordComponent
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelCreateEvent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelDeleteEvent
@@ -118,8 +119,13 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
 
     override fun getChatChannelFromIRCChannel(ircChannel: String): RPKChatChannel? {
         return chatChannels.firstOrNull { chatChannel ->
-            chatChannel.undirectedPipeline.mapNotNull { component -> component as? IRCComponent }
-                    .firstOrNull() != null
+            chatChannel.undirectedPipeline.any { component -> component is IRCComponent && component.ircChannel == ircChannel }
+        }
+    }
+
+    override fun getChatChannelFromDiscordChannel(discordChannel: String): RPKChatChannel? {
+        return chatChannels.firstOrNull { chatChannel ->
+            chatChannel.undirectedPipeline.any { component -> component is DiscordComponent && component.discordChannel == discordChannel }
         }
     }
 

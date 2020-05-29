@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.context
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 
 /**
  * A directed chat channel message context.
@@ -34,10 +34,10 @@ interface DirectedChatChannelMessageContext {
     /**
      * The sender of the message.
      */
-    val senderProfile: RPKProfile
+    val senderProfile: RPKThinProfile
 
     /**
-     * Which Minecraft the sender used to send the message, if any.
+     * Which Minecraft profile the sender used to send the message, if any.
      */
     val senderMinecraftProfile: RPKMinecraftProfile?
 

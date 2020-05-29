@@ -25,10 +25,7 @@ import com.rpkit.players.bukkit.database.table.*
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
 import com.rpkit.players.bukkit.listener.PlayerLoginListener
 import com.rpkit.players.bukkit.player.RPKPlayerProviderImpl
-import com.rpkit.players.bukkit.profile.RPKGitHubProfileProviderImpl
-import com.rpkit.players.bukkit.profile.RPKIRCProfileProviderImpl
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProviderImpl
-import com.rpkit.players.bukkit.profile.RPKProfileProviderImpl
+import com.rpkit.players.bukkit.profile.*
 import com.rpkit.players.bukkit.servlet.*
 import org.bstats.bukkit.Metrics
 import java.sql.SQLException
@@ -43,6 +40,7 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
         saveDefaultConfig()
         serviceProviders = arrayOf(
                 RPKPlayerProviderImpl(this),
+                RPKDiscordProfileProviderImpl(this),
                 RPKGitHubProfileProviderImpl(this),
                 RPKIRCProfileProviderImpl(this),
                 RPKMinecraftProfileProviderImpl(this),
@@ -85,6 +83,7 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
     @Throws(SQLException::class)
     override fun createTables(database: Database) {
         database.addTable(RPKPlayerTable(this, database))
+        database.addTable(RPKDiscordProfileTable(database, this))
         database.addTable(RPKGitHubProfileTable(database, this))
         database.addTable(RPKIRCProfileTable(database, this))
         database.addTable(RPKMinecraftProfileTable(database, this))
@@ -95,7 +94,9 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
 
     override fun setDefaultMessages() {
         messages.setDefault("account-usage", "&cUsage: /account [link|confirmlink|denylink]")
-        messages.setDefault("account-link-usage", "&cUsage: /account link [irc|minecraft]")
+        messages.setDefault("account-link-usage", "&cUsage: /account link [irc|minecraft|discord]")
+        messages.setDefault("account-link-discord-invalid-user-tag", "&cThat is not a valid discord tag.")
+        messages.setDefault("account-link-discord-invalid-user", "&cThat is not a valid discord user.")
         messages.setDefault("account-link-irc-usage", "&cUsage: /account link irc [nick]")
         messages.setDefault("account-link-irc-invalid-already-linked", "&cThat IRC user is already linked to a Minecraft user.")
         messages.setDefault("account-link-irc-invalid-nick", "&cThere is no IRC user by that name online.")
@@ -125,12 +126,13 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
         messages.setDefault("profile-password-usage", "&cUsage: /profile password [password]")
         messages.setDefault("profile-password-valid", "&aProfile password set.")
         messages.setDefault("profile-usage", "&cUsage: /profile [name|password]")
-        messages.setDefault("no-profile", "&cA profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
+        messages.setDefault("no-profile-self", "&cA profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
+        messages.setDefault("no-minecraft-profile-self", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
         messages.setDefault("profile-link-request", "&fWould you like to link this Minecraft account to \$profile?")
         messages.setDefault("yes", "Yes")
         messages.setDefault("no", "No")
         messages.setDefault("no-permission-account-link", "&cYou do not have permission to link accounts.")
+        messages.setDefault("no-permission-account-link-discord", "&cYou do not have permission to link Discord accounts.")
         messages.setDefault("no-permission-account-link-irc", "&cYou do not have permission to link IRC accounts.")
         messages.setDefault("no-permission-account-link-minecraft", "&cYou do not have permission to link Minecraft accounts.")
         messages.setDefault("no-permission-profile-create", "&cYou do not have permission to create profiles.")

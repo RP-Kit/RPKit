@@ -21,6 +21,7 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.profession.RPKCraftingAction
 import com.rpkit.professions.bukkit.profession.RPKProfessionProvider
+import org.bukkit.GameMode
 import org.bukkit.Material.AIR
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -37,6 +38,7 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit): Listener {
     fun onCraftItem(event: CraftItemEvent) {
         val bukkitPlayer = event.whoClicked
         if (bukkitPlayer is Player) {
+            if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
             val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
             val professionProvider = plugin.core.serviceManager.getServiceProvider(RPKProfessionProvider::class)
@@ -59,7 +61,7 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit): Listener {
             var amountCrafted = getAmountCrafted(event)
             val amount = professionLevels.entries
                     .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.CRAFT, itemType, level) }
-                    .firstOrNull() ?: plugin.config.getDouble("default.crafting.$itemType.amount", 1.0)
+                    .max() ?: plugin.config.getDouble("default.crafting.$itemType.amount", 1.0)
             if (amount > 1) {
                 amountCrafted *= amount.roundToInt()
             } else if (amount < 1) {

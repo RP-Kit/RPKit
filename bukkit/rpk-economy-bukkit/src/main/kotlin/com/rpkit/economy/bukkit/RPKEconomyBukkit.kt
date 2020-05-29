@@ -33,10 +33,7 @@ import com.rpkit.economy.bukkit.database.table.RPKCurrencyTable
 import com.rpkit.economy.bukkit.database.table.RPKWalletTable
 import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
 import com.rpkit.economy.bukkit.economy.RPKEconomyProviderImpl
-import com.rpkit.economy.bukkit.listener.InventoryCloseListener
-import com.rpkit.economy.bukkit.listener.PlayerInteractListener
-import com.rpkit.economy.bukkit.listener.PluginEnableListener
-import com.rpkit.economy.bukkit.listener.SignChangeListener
+import com.rpkit.economy.bukkit.listener.*
 import com.rpkit.economy.bukkit.servlet.CurrencyServlet
 import com.rpkit.economy.bukkit.servlet.MoneyServlet
 import com.rpkit.economy.bukkit.servlet.api.MoneyAPIServlet
@@ -91,9 +88,10 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
 
     override fun registerListeners() {
         registerListeners(
+                InventoryClickListener(this),
                 InventoryCloseListener(this),
                 PlayerInteractListener(this),
-                PluginEnableListener(this),
+                RPKServiceProviderReadyListener(this),
                 SignChangeListener(this)
         )
     }

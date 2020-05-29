@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.warning.RPKWarningImpl
 import com.rpkit.moderation.bukkit.warning.RPKWarningProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -59,12 +60,12 @@ class WarningCreateCommand(private val plugin: RPKModerationBukkit): CommandExec
             return true
         }
         val targetProfile = targetMinecraftProfile.profile
-        if (targetProfile == null) {
+        if (targetProfile !is RPKProfile) {
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
         val issuerProfile = issuerMinecraftProfile.profile
-        if (issuerProfile == null) {
+        if (issuerProfile !is RPKProfile) {
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }

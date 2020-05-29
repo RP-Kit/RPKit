@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,3 +81,6 @@ fun ChatColor.toColor(): Color? {
         else -> return null
     }
 }
+
+operator fun ChatColor.plus(string: String) = toString() + string
+operator fun ChatColor.plus(color: ChatColor) = toString() + color.toString()

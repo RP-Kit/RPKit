@@ -1,0 +1,25 @@
+languages:
+  Elven:
+    cypher:
+      a: i
+      b: c
+      c: ll
+    default-race-understanding:
+      Elf: 100
+      Human: 0
+      Half-Elf: 75
+    understanding-increment:
+      Elf:
+        minimum: 100
+        maximum: 100
+      Human:
+        minimum: 0.01
+        maximum: 0.02
+      Half-Elf:
+        minimum: 0.01
+        maximum: 0.05
+caching:
+  rpkit_character_language:
+    id:
+      enabled: true
+      size: 50

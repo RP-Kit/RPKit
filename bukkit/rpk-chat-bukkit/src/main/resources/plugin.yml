@@ -10,6 +10,7 @@ depend:
 - rpk-permissions-lib-bukkit
 - rpk-chat-lib-bukkit
 - rpk-drink-lib-bukkit
+- rpk-language-lib-bukkit
 api-version: '1.15'
 commands:
     chatchannel:

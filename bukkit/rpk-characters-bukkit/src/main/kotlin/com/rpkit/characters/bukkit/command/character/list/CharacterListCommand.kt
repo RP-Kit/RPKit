@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.rpkit.characters.bukkit.command.character.list
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -38,7 +39,7 @@ class CharacterListCommand(private val plugin: RPKCharactersBukkit): CommandExec
                 val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                 if (minecraftProfile != null) {
                     val profile = minecraftProfile.profile
-                    if (profile != null) {
+                    if (profile is RPKProfile) {
                         sender.sendMessage(plugin.messages["character-list-title"])
                         for (character in characterProvider.getCharacters(profile)) {
                             sender.sendMessage(plugin.messages["character-list-item", mapOf(

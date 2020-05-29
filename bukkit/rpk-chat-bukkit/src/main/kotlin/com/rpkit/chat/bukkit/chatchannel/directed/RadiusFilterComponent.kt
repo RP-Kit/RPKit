@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,24 +35,20 @@ class RadiusFilterComponent: DirectedChatChannelPipelineComponent, Configuration
         if (senderMinecraftProfile != null) {
             val senderBukkitPlayer = Bukkit.getOfflinePlayer(senderMinecraftProfile.minecraftUUID)
             val receiverBukkitPlayer = Bukkit.getOfflinePlayer(context.receiverMinecraftProfile.minecraftUUID)
-            if (senderBukkitPlayer != null && receiverBukkitPlayer != null) {
-                val senderBukkitOnlinePlayer = senderBukkitPlayer.player
-                val receiverBukkitOnlinePlayer = receiverBukkitPlayer.player
-                if (senderBukkitOnlinePlayer != null && receiverBukkitOnlinePlayer != null) {
-                    val senderLocation = senderBukkitOnlinePlayer.location
-                    val receiverLocation = receiverBukkitOnlinePlayer.location
-                    if (senderLocation.world == receiverLocation.world) {
-                        if (senderLocation.distanceSquared(receiverLocation) > context.chatChannel.radius * context.chatChannel.radius) {
-                            context.isCancelled = true
-                        }
-                        // If there is a radius filter in place, the only situation where the message is not cancelled
-                        // is both players having a Minecraft player online AND the players being in the same world,
-                        // within the chat channel's radius.
-                        // If any of these conditions fail, the message is cancelled, otherwise it maintains the same
-                        // cancelled state as before reaching the component.
-                    } else {
+            val senderBukkitOnlinePlayer = senderBukkitPlayer.player
+            val receiverBukkitOnlinePlayer = receiverBukkitPlayer.player
+            if (senderBukkitOnlinePlayer != null && receiverBukkitOnlinePlayer != null) {
+                val senderLocation = senderBukkitOnlinePlayer.location
+                val receiverLocation = receiverBukkitOnlinePlayer.location
+                if (senderLocation.world == receiverLocation.world) {
+                    if (senderLocation.distanceSquared(receiverLocation) > context.chatChannel.radius * context.chatChannel.radius) {
                         context.isCancelled = true
                     }
+                    // If there is a radius filter in place, the only situation where the message is not cancelled
+                    // is both players having a Minecraft player online AND the players being in the same world,
+                    // within the chat channel's radius.
+                    // If any of these conditions fail, the message is cancelled, otherwise it maintains the same
+                    // cancelled state as before reaching the component.
                 } else {
                     context.isCancelled = true
                 }
