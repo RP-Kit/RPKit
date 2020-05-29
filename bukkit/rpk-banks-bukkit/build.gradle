@@ -38,7 +38,7 @@ dependencies {
     implementation group: "org.eclipse.jetty", name: "jetty-webapp", version: "9.4.27.v20200227"
     implementation group: "org.eclipse.jetty.websocket", name: "websocket-server", version: "9.4.27.v20200227"
     implementation group: "org.ehcache", name: "ehcache", version: "3.8.1"
-    implementation group: "org.jooq", name: "jooq", version: "3.13.1"
+    implementation group: "org.jooq", name: "jooq", version: "3.13.2"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
