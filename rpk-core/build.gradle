@@ -15,11 +15,15 @@
  * limitations under the License.
  */
 
-File propertiesFile = new File("repo.properties")
-Properties properties = new Properties()
-properties.load(new FileInputStream(propertiesFile))
-def repoUserName = properties.getProperty("repo-username")
-def repoPassword = properties.getProperty("repo-password")
+def repoUserName = ""
+def repoPassword = ""
+def propertiesFile = new File("repo.properties")
+if (propertiesFile.exists()) {
+    def properties = new Properties()
+    properties.load(new FileInputStream(propertiesFile))
+    repoUserName = properties.getProperty("repo-username")
+    repoPassword = properties.getProperty("repo-password")
+}
 
 dependencies {
     implementation group: "mysql", name: "mysql-connector-java", version: "8.0.19"
