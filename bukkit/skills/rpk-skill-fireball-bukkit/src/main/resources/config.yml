@@ -1,0 +1,5 @@
+name: fireball
+requirements:
+  magic_offence: 5
+mana-cost: 2
+cooldown: 10
