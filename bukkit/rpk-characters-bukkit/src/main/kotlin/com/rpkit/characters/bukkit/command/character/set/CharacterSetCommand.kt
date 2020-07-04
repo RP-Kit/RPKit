@@ -27,7 +27,6 @@ import org.bukkit.command.CommandSender
  */
 class CharacterSetCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
 
-    private val characterSetPlayerCommand = CharacterSetPlayerCommand(plugin)
     private val characterSetProfileCommand = CharacterSetProfileCommand(plugin)
     private val characterSetNameCommand = CharacterSetNameCommand(plugin)
     private val characterSetGenderCommand = CharacterSetGenderCommand(plugin)
@@ -39,9 +38,7 @@ class CharacterSetCommand(private val plugin: RPKCharactersBukkit): CommandExecu
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
-            if (args[0].equals("player", ignoreCase = true)) {
-                return characterSetPlayerCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("profile", ignoreCase = true)) {
+            if (args[0].equals("profile", ignoreCase = true)) {
                 return characterSetProfileCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("name", ignoreCase = true)) {
                 return characterSetNameCommand.onCommand(sender, command, label, newArgs)

@@ -40,7 +40,7 @@ class ChatGroupMessageCommand(private val plugin: RPKChatBukkit): CommandExecuto
                     if (sender is Player) {
                         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                         if (minecraftProfile != null) {
-                            if (chatGroup.memberMinecraftProfiles.any { memberMinecraftProfile ->
+                            if (chatGroup.members.any { memberMinecraftProfile ->
                                         memberMinecraftProfile.id == minecraftProfile.id }) {
                                 val message = StringBuilder()
                                 for (i in 1 until args.size) {

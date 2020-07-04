@@ -1,7 +1,6 @@
 # These are parsed as mathematical expressions. You may use variables added by other plugins.
 # Built in variables are:
 # character: The character (RPKCharacter)
-# player: The player (RPKPlayer) (If you wish to get Bukkit's OfflinePlayer in order to access Bukkit methods, use getBukkitPlayer())
 # minecraftLevel: The player's level in Minecraft (Integer)
 # characterGender: The character's gender from the character implementation (RPKGender)
 # characterAge: The character's age from the character implementation (Integer)

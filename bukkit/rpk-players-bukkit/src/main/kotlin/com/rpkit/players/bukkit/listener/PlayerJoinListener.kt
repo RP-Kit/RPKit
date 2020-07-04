@@ -17,7 +17,6 @@
 package com.rpkit.players.bukkit.listener
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import net.md_5.bungee.api.ChatColor.GREEN
 import net.md_5.bungee.api.ChatColor.RED
@@ -35,13 +34,6 @@ class PlayerJoinListener(private val plugin: RPKPlayersBukkit): Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        // If RPK doesn't have a player for Bukkit's player, create it here so that the player can log on through
-        // web UI. If RPK DOES have a player, update the last known IP.
-        val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-        val player = playerProvider.getPlayer(event.player)
-        player.lastKnownIP = event.player.address?.address?.hostAddress
-        playerProvider.updatePlayer(player)
-
         // If the player's Minecraft profile is not linked to a profile, run the player through linking their profile.
         val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)

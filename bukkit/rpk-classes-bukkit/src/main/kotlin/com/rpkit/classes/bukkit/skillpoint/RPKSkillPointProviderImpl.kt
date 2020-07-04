@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,6 @@ class RPKSkillPointProviderImpl(private val plugin: RPKClassesBukkit): RPKSkillP
             return `class`.getSkillPoints(skillType, classProvider.getLevel(character, `class`))
         }
         return 0
-    }
-
-    override fun setSkillPoints(character: RPKCharacter, skillType: RPKSkillType, points: Int) {
-        throw UnsupportedOperationException("Classes does not support setting skill points")
     }
 
 }

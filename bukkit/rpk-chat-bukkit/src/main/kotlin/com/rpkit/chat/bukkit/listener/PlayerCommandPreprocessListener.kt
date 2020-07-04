@@ -67,7 +67,7 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit): Listen
 
         // Snooping
         val snooperProvider = plugin.core.serviceManager.getServiceProvider(RPKSnooperProvider::class)
-        snooperProvider.snooperMinecraftProfiles
+        snooperProvider.snoopers
                 .filter(RPKMinecraftProfile::isOnline)
                 .forEach { minecraftProfile -> minecraftProfile.sendMessage(plugin.messages["command-snoop", mapOf(
                         Pair("sender-player", event.player.name),

@@ -20,54 +20,22 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.database.table.RPKSnooperTable
 import com.rpkit.chat.bukkit.event.snooper.RPKBukkitSnoopingBeginEvent
 import com.rpkit.chat.bukkit.event.snooper.RPKBukkitSnoopingEndEvent
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import org.bukkit.Bukkit
 
 /**
  * Snooper provider implementation.
  */
 class RPKSnooperProviderImpl(private val plugin: RPKChatBukkit): RPKSnooperProvider {
 
-    override val snoopers: List<RPKPlayer>
-        get() = snooperMinecraftProfiles.map { minecraftProfile ->
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-            playerProvider.getPlayer(Bukkit.getOfflinePlayer(minecraftProfile.minecraftUUID))
-        }
-
-    override val snooperMinecraftProfiles: List<RPKMinecraftProfile>
+    override val snoopers: List<RPKMinecraftProfile>
         get() = plugin.core.database.getTable(RPKSnooperTable::class).getAll().map(RPKSnooper::minecraftProfile)
 
-    override fun addSnooper(player: RPKPlayer) {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                addSnooper(minecraftProfile)
-            }
-        }
-    }
-
     override fun addSnooper(minecraftProfile: RPKMinecraftProfile) {
-        if (!snooperMinecraftProfiles.contains(minecraftProfile)) {
+        if (!this.snoopers.contains(minecraftProfile)) {
             val event = RPKBukkitSnoopingBeginEvent(minecraftProfile)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
             plugin.core.database.getTable(RPKSnooperTable::class).insert(RPKSnooper(minecraftProfile = minecraftProfile))
-        }
-    }
-
-    override fun removeSnooper(player: RPKPlayer) {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                removeSnooper(minecraftProfile)
-            }
         }
     }
 
@@ -80,18 +48,6 @@ class RPKSnooperProviderImpl(private val plugin: RPKChatBukkit): RPKSnooperProvi
             if (event.isCancelled) return
             snooperTable.delete(snooper)
         }
-    }
-
-    override fun isSnooping(player: RPKPlayer): Boolean {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                return isSnooping(minecraftProfile)
-            }
-        }
-        return false
     }
 
     override fun isSnooping(minecraftProfile: RPKMinecraftProfile): Boolean {

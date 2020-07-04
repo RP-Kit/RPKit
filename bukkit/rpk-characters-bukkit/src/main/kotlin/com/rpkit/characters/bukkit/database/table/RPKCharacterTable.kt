@@ -23,13 +23,11 @@ import com.rpkit.characters.bukkit.database.jooq.rpkit.Tables.PLAYER_CHARACTER
 import com.rpkit.characters.bukkit.database.jooq.rpkit.Tables.RPKIT_CHARACTER
 import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
-import com.rpkit.core.bukkit.util.itemStackArrayFromByteArray
-import com.rpkit.core.bukkit.util.itemStackFromByteArray
 import com.rpkit.core.bukkit.util.toByteArray
+import com.rpkit.core.bukkit.util.toItemStack
+import com.rpkit.core.bukkit.util.toItemStackArray
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -187,7 +185,6 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                         RPKIT_CHARACTER.DESCRIPTION_HIDDEN
                 )
                 .values(
-                        entity.player?.id,
                         entity.profile?.id,
                         entity.minecraftProfile?.id,
                         entity.name,
@@ -231,7 +228,6 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
     override fun update(entity: RPKCharacter) {
         database.create
                 .update(RPKIT_CHARACTER)
-                .set(RPKIT_CHARACTER.PLAYER_ID, entity.player?.id)
                 .set(RPKIT_CHARACTER.PROFILE_ID, entity.profile?.id)
                 .set(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id)
                 .set(RPKIT_CHARACTER.NAME, entity.name)
@@ -314,13 +310,10 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .where(RPKIT_CHARACTER.ID.eq(id))
                 .fetchOne() ?: return null
 
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
             val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
             val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
             val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
-            val playerId = result.get(RPKIT_CHARACTER.PLAYER_ID)
-            val player = if (playerId == null) null else playerProvider.getPlayer(playerId)
             val profileId = result.get(RPKIT_CHARACTER.PROFILE_ID)
             val profile = if (profileId == null) null else profileProvider.getProfile(profileId)
             val minecraftProfileId = result.get(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID)
@@ -329,18 +322,9 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
             val gender = if (genderId == null) null else genderProvider.getGender(genderId)
             val raceId = result.get(RPKIT_CHARACTER.RACE_ID)
             val race = if (raceId == null) null else raceProvider.getRace(raceId)
-            val helmetBytes = result.get(RPKIT_CHARACTER.HELMET)
-            val helmet = if (helmetBytes == null) null else itemStackFromByteArray(helmetBytes)
-            val chestplateBytes = result.get(RPKIT_CHARACTER.CHESTPLATE)
-            val chestplate = if (chestplateBytes == null) null else itemStackFromByteArray(chestplateBytes)
-            val leggingsBytes = result.get(RPKIT_CHARACTER.LEGGINGS)
-            val leggings = if (leggingsBytes == null) null else itemStackFromByteArray(leggingsBytes)
-            val bootsBytes = result.get(RPKIT_CHARACTER.BOOTS)
-            val boots = if (bootsBytes == null) null else itemStackFromByteArray(bootsBytes)
             val character = RPKCharacterImpl(
                     plugin = plugin,
                     id = result.get(RPKIT_CHARACTER.ID),
-                    player = player,
                     profile = profile,
                     minecraftProfile = minecraftProfile,
                     name = result.get(RPKIT_CHARACTER.NAME),
@@ -357,11 +341,11 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                             result.get(RPKIT_CHARACTER.YAW).toFloat(),
                             result.get(RPKIT_CHARACTER.PITCH).toFloat()
                     ),
-                    inventoryContents = itemStackArrayFromByteArray(result.get(RPKIT_CHARACTER.INVENTORY_CONTENTS)),
-                    helmet = helmet,
-                    chestplate = chestplate,
-                    leggings = leggings,
-                    boots = boots,
+                    inventoryContents = result.get(RPKIT_CHARACTER.INVENTORY_CONTENTS)?.toItemStackArray() ?: emptyArray(),
+                    helmet = result.get(RPKIT_CHARACTER.HELMET)?.toItemStack(),
+                    chestplate = result.get(RPKIT_CHARACTER.CHESTPLATE)?.toItemStack(),
+                    leggings = result.get(RPKIT_CHARACTER.LEGGINGS)?.toItemStack(),
+                    boots = result.get(RPKIT_CHARACTER.BOOTS)?.toItemStack(),
                     health = result.get(RPKIT_CHARACTER.HEALTH),
                     maxHealth = result.get(RPKIT_CHARACTER.MAX_HEALTH),
                     mana = result.get(RPKIT_CHARACTER.MANA),
@@ -379,25 +363,6 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
             cache?.put(id, character)
             return character
         }
-    }
-
-    fun getActive(player: RPKPlayer): RPKCharacter? {
-        val result = database.create
-                .select(PLAYER_CHARACTER.CHARACTER_ID)
-                .from(PLAYER_CHARACTER)
-                .where(PLAYER_CHARACTER.PLAYER_ID.eq(player.id))
-                .fetchOne() ?: return null
-        return get(result.get(PLAYER_CHARACTER.CHARACTER_ID))
-    }
-
-    fun get(player: RPKPlayer): List<RPKCharacter> {
-        val results = database.create
-                .select(RPKIT_CHARACTER.ID)
-                .from(RPKIT_CHARACTER)
-                .where(RPKIT_CHARACTER.PLAYER_ID.eq(player.id))
-                .fetch()
-        return results.map { result -> get(result.get(RPKIT_CHARACTER.ID)) }
-                .filterNotNull()
     }
 
     fun get(minecraftProfile: RPKMinecraftProfile): RPKCharacter? {

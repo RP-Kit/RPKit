@@ -35,13 +35,13 @@ class ChatGroupMembersCommand(private val plugin: RPKChatBukkit): CommandExecuto
                 val chatGroup = chatGroupProvider.getChatGroup(args[0])
                 if (chatGroup != null) {
                     sender.sendMessage(plugin.messages["chat-group-members-list-title"])
-                    for (player in chatGroup.memberMinecraftProfiles) {
+                    for (player in chatGroup.members) {
                         sender.sendMessage(plugin.messages["chat-group-members-list-item", mapOf(
                                 Pair("player", player.minecraftUsername)
                         )])
                     }
                     sender.sendMessage(plugin.messages["chat-group-invitations-list-title"])
-                    for (player in chatGroup.invitedMinecraftProfiles) {
+                    for (player in chatGroup.invited) {
                         sender.sendMessage(plugin.messages["chat-group-invitations-list-item", mapOf(
                                 Pair("player", player.minecraftUsername)
                         )])

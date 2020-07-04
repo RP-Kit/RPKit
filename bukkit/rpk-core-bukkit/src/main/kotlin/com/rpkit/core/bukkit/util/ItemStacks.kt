@@ -37,18 +37,6 @@ fun ItemStack.toByteArray(): ByteArray {
 }
 
 /**
- * Converts the given byte array to an [ItemStack].
- *
- * @param bytes The [ByteArray]
- * @return The [ItemStack]
- * @deprecated Replaced by extension method
- * @see toItemStack
- */
-fun itemStackFromByteArray(bytes: ByteArray): ItemStack {
-    return bytes.toItemStack()
-}
-
-/**
  * Converts the byte array to an [ItemStack].
  *
  * @return The [ItemStack]
@@ -73,18 +61,6 @@ fun Array<ItemStack>.toByteArray(): ByteArray {
             return byteArrayOutputStream.toByteArray()
         }
     }
-}
-
-/**
- * Converts the [ByteArray] to an [ItemStack] [Array]
- *
- * @param bytes The [ByteArray]
- * @return The [ItemStack] [Array]
- * @deprecated Replaced by extension method
- * @see toItemStackArray
- */
-fun itemStackArrayFromByteArray(bytes: ByteArray): Array<ItemStack> {
-    return bytes.toItemStackArray()
 }
 
 /**

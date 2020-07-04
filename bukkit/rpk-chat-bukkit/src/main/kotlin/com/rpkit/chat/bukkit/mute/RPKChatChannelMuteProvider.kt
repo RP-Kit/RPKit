@@ -22,32 +22,12 @@ import com.rpkit.chat.bukkit.database.table.RPKChatChannelMuteTable
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelMuteEvent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelUnmuteEvent
 import com.rpkit.core.service.ServiceProvider
-import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 
 /**
  * Provides chat channel mute related services.
  */
 class RPKChatChannelMuteProvider(private val plugin: RPKChatBukkit): ServiceProvider {
-
-    /**
-     * Adds a chat channel mute.
-     *
-     * @param player The player
-     * @param chatChannel The chat channel
-     */
-    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("addChatChannelMute(minecraftProfile, chatChannel)"))
-    fun addChatChannelMute(player: RPKPlayer, chatChannel: RPKChatChannel) {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                addChatChannelMute(minecraftProfile, chatChannel)
-            }
-        }
-    }
 
     /**
      * Adds a chat channel mute.
@@ -70,24 +50,6 @@ class RPKChatChannelMuteProvider(private val plugin: RPKChatBukkit): ServiceProv
 
     /**
      * Removes a chat channel mute.
-     *
-     * @param player The player
-     * @param chatChannel The chat channel
-     */
-    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("removeChatChannelMute(minecraftProfile, chatChannel)"))
-    fun removeChatChannelMute(player: RPKPlayer, chatChannel: RPKChatChannel, isAsync: Boolean = false) {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                removeChatChannelMute(minecraftProfile, chatChannel, isAsync)
-            }
-        }
-    }
-
-    /**
-     * Removes a chat channel mute.
      * @param minecraftProfile The Minecraft profile
      * @param chatChannel The chat channel
      */
@@ -100,26 +62,6 @@ class RPKChatChannelMuteProvider(private val plugin: RPKChatBukkit): ServiceProv
         if (chatChannelMute != null) {
             chatChannelMuteTable.delete(chatChannelMute)
         }
-    }
-
-    /**
-     * Checks whether a player has muted a chat channel.
-     *
-     * @param player The player
-     * @param chatChannel The chat channel
-     * @return Whether the player has muted the chat channel
-     */
-    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("hasMinecraftProfileMutedChatChannel(minecraftProfile, chatChannel)"))
-    fun hasPlayerMutedChatChannel(player: RPKPlayer, chatChannel: RPKChatChannel): Boolean {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                return hasMinecraftProfileMutedChatChannel(minecraftProfile, chatChannel)
-            }
-        }
-        return false
     }
 
     /**

@@ -24,7 +24,6 @@ import com.rpkit.players.bukkit.command.profile.ProfileCommand
 import com.rpkit.players.bukkit.database.table.*
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
 import com.rpkit.players.bukkit.listener.PlayerLoginListener
-import com.rpkit.players.bukkit.player.RPKPlayerProviderImpl
 import com.rpkit.players.bukkit.profile.*
 import com.rpkit.players.bukkit.servlet.*
 import org.bstats.bukkit.Metrics
@@ -39,7 +38,6 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
         Metrics(this, 4409)
         saveDefaultConfig()
         serviceProviders = arrayOf(
-                RPKPlayerProviderImpl(this),
                 RPKDiscordProfileProviderImpl(this),
                 RPKGitHubProfileProviderImpl(this),
                 RPKIRCProfileProviderImpl(this),
@@ -47,17 +45,12 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
                 RPKProfileProviderImpl(this)
         )
         servlets = arrayOf(
-                PlayersServlet(this),
-                PlayerServlet(this),
                 ProfilesServlet(this),
                 ProfileServlet(this),
                 ProfileSignInServlet(this),
                 ProfileSignOutServlet(this),
                 ProfileSignUpServlet(this),
-                // API v0.4
-                com.rpkit.players.bukkit.servlet.api.v0_4.PlayerAPIServlet(this),
                 // API v1
-                com.rpkit.players.bukkit.servlet.api.v1.PlayerAPIServlet(this),
                 com.rpkit.players.bukkit.servlet.api.v1.ProfileAPIServlet(this),
                 com.rpkit.players.bukkit.servlet.api.v1.GitHubProfileAPIServlet(this),
                 com.rpkit.players.bukkit.servlet.api.v1.IRCProfileAPIServlet(this),
@@ -67,7 +60,6 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
     }
 
     override fun onPostEnable() {
-        core.web.navigationBar.add(NavigationLink("Players", "/players/"))
         core.web.navigationBar.add(NavigationLink("Profiles", "/profiles/"))
     }
 
@@ -82,7 +74,6 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
 
     @Throws(SQLException::class)
     override fun createTables(database: Database) {
-        database.addTable(RPKPlayerTable(this, database))
         database.addTable(RPKDiscordProfileTable(database, this))
         database.addTable(RPKGitHubProfileTable(database, this))
         database.addTable(RPKIRCProfileTable(database, this))

@@ -40,9 +40,9 @@ class ChatGroupJoinCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                     if (sender is Player) {
                         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                         if (minecraftProfile != null) {
-                            if (chatGroup.invitedMinecraftProfiles.any { invitedMinecraftProfile ->
+                            if (chatGroup.invited.any { invitedMinecraftProfile ->
                                         invitedMinecraftProfile.id == minecraftProfile.id }) {
-                                chatGroup.memberMinecraftProfiles.forEach { member ->
+                                chatGroup.members.forEach { member ->
                                     member.sendMessage(plugin.messages["chat-group-join-received", mapOf(
                                             Pair("group", chatGroup.name),
                                             Pair("player", minecraftProfile.minecraftUsername)

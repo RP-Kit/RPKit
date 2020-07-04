@@ -38,7 +38,7 @@ class SnoopCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                 if (args.isNotEmpty()) {
                     if (args[0].equals("on", ignoreCase = true)) {
                         if (sender.hasPermission("rpkit.chat.command.snoop.on")) {
-                            if (!snooperProvider.snooperMinecraftProfiles.contains(minecraftProfile)) {
+                            if (!snooperProvider.snoopers.contains(minecraftProfile)) {
                                 snooperProvider.addSnooper(minecraftProfile)
                                 sender.sendMessage(plugin.messages["snoop-enabled"])
                             } else {
@@ -49,7 +49,7 @@ class SnoopCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                         }
                     } else if (args[0].equals("off", ignoreCase = true)) {
                         if (sender.hasPermission("rpkit.chat.command.snoop.off")) {
-                            if (snooperProvider.snooperMinecraftProfiles.contains(minecraftProfile)) {
+                            if (snooperProvider.snoopers.contains(minecraftProfile)) {
                                 snooperProvider.removeSnooper(minecraftProfile)
                                 sender.sendMessage(plugin.messages["snoop-disabled"])
                             } else {
@@ -60,7 +60,7 @@ class SnoopCommand(private val plugin: RPKChatBukkit): CommandExecutor {
                         }
                     } else if (args[0].equals("check", ignoreCase = true)) {
                         if (sender.hasPermission("rpkit.chat.command.snoop.check")) {
-                            if (snooperProvider.snooperMinecraftProfiles.contains(minecraftProfile)) {
+                            if (snooperProvider.snoopers.contains(minecraftProfile)) {
                                 sender.sendMessage(plugin.messages["snoop-check-on"])
                             } else {
                                 sender.sendMessage(plugin.messages["snoop-check-off"])

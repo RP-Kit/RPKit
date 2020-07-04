@@ -20,7 +20,6 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.permissions.bukkit.command.charactergroup.CharacterGroupCommand
 import com.rpkit.permissions.bukkit.command.group.GroupCommand
-import com.rpkit.permissions.bukkit.database.table.PlayerGroupTable
 import com.rpkit.permissions.bukkit.database.table.RPKCharacterGroupTable
 import com.rpkit.permissions.bukkit.database.table.RPKProfileGroupTable
 import com.rpkit.permissions.bukkit.group.RPKGroupImpl
@@ -68,7 +67,6 @@ class RPKPermissionsBukkit: RPKBukkitPlugin() {
     }
 
     override fun createTables(database: Database) {
-        database.addTable(PlayerGroupTable(database, this))
         database.addTable(RPKProfileGroupTable(database, this))
         database.addTable(RPKCharacterGroupTable(database, this))
     }

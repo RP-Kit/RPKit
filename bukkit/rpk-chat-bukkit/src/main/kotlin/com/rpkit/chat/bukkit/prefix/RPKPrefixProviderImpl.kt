@@ -21,7 +21,6 @@ import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixCreateEvent
 import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixDeleteEvent
 import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixUpdateEvent
 import com.rpkit.permissions.bukkit.group.RPKGroupProvider
-import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.ChatColor
 
@@ -63,18 +62,6 @@ class RPKPrefixProviderImpl(private val plugin: RPKChatBukkit): RPKPrefixProvide
 
     override fun getPrefix(name: String): RPKPrefix? {
         return prefixes.firstOrNull { prefix -> prefix.name == name }
-    }
-
-    override fun getPrefix(player: RPKPlayer): String {
-        val prefixBuilder = StringBuilder()
-        for (prefix in prefixes) {
-            if (player.bukkitPlayer?.isOnline == true) {
-                if (player.bukkitPlayer?.player?.hasPermission("rpkit.chat.prefix.${prefix.name}") == true) {
-                    prefixBuilder.append(prefix.prefix).append(' ')
-                }
-            }
-        }
-        return prefixBuilder.toString()
     }
 
     override fun getPrefix(profile: RPKProfile): String {

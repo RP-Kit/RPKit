@@ -21,7 +21,6 @@ import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
 import com.rpkit.core.database.Entity
-import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Location
@@ -33,16 +32,6 @@ import org.bukkit.inventory.ItemStack
  * Each player has a currently-active character retrievable from the [RPKCharacterProvider].
  */
 interface RPKCharacter: Entity {
-
-    /**
-     * The player.
-     * Only this player may use the character.
-     * Some characters may not have a player assigned, in which case this will be null.
-     * It is important to remember the player may not always be playing the character, so operations like inventory
-     * modification should be checked before directly modifying the player's inventory on platforms such as Bukkit.
-     */
-    @Deprecated("Old players API. Please move to new profiles APIs.", replaceWith = ReplaceWith("profile"))
-    var player: RPKPlayer?
 
     /**
      * The profile.
@@ -259,13 +248,6 @@ interface RPKCharacter: Entity {
      * description.
      */
     var isDescriptionHidden: Boolean
-
-    /**
-     * Shows the character card to the given player.
-     * How this is done may be implementation-dependant, but the most common usage will be to show this in Minecraft.
-     */
-    @Deprecated("Old players API. Please move to new profiles API.", ReplaceWith("showCharacterCard(minecraftProfile)"))
-    fun showCharacterCard(player: RPKPlayer)
 
     /**
      * Shows the character card to the given Minecraft profile.

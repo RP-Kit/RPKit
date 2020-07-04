@@ -42,8 +42,4 @@ class RPKSkillPointProviderImpl(private val plugin: RPKStatBuildsBukkit): RPKSki
         parser.parseExpression(expression)
         return parser.value.roundToInt()
     }
-
-    override fun setSkillPoints(character: RPKCharacter, skillType: RPKSkillType, points: Int) {
-        TODO("not implemented")
-    }
 }

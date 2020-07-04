@@ -22,9 +22,7 @@ import com.rpkit.chat.bukkit.database.table.RPKChatGroupTable
 import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupCreateEvent
 import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupDeleteEvent
 import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupUpdateEvent
-import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 
 /**
  * Chat group provider implementation.
@@ -60,18 +58,6 @@ class RPKChatGroupProviderImpl(private val plugin: RPKChatBukkit): RPKChatGroupP
         plugin.core.database.getTable(RPKChatGroupTable::class).update(event.chatGroup)
     }
 
-    override fun getLastUsedChatGroup(player: RPKPlayer): RPKChatGroup? {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                return getLastUsedChatGroup(minecraftProfile)
-            }
-        }
-        return null
-    }
-
     override fun getLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile): RPKChatGroup? {
         return plugin.core.database.getTable(LastUsedChatGroupTable::class).get(minecraftProfile)?.chatGroup
     }
@@ -84,17 +70,6 @@ class RPKChatGroupProviderImpl(private val plugin: RPKChatBukkit): RPKChatGroupP
             lastUsedChatGroupTable.update(lastUsedChatGroup)
         } else {
             lastUsedChatGroupTable.insert(LastUsedChatGroup(minecraftProfile = minecraftProfile, chatGroup = chatGroup))
-        }
-    }
-
-    override fun setLastUsedChatGroup(player: RPKPlayer, chatGroup: RPKChatGroup) {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                setLastUsedChatGroup(minecraftProfile, chatGroup)
-            }
         }
     }
 
