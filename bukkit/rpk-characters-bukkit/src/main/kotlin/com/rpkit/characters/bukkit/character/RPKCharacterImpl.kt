@@ -23,9 +23,7 @@ import com.rpkit.characters.bukkit.gender.RPKGender
 import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
-import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.players.bukkit.profile.RPKProfile
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.ClickEvent
@@ -42,7 +40,6 @@ import org.bukkit.inventory.ItemStack
 class RPKCharacterImpl constructor(
         val plugin: RPKCharactersBukkit,
         override var id: Int = 0,
-        override var player: RPKPlayer? = null,
         override var profile: RPKProfile? = null,
         override var minecraftProfile: RPKMinecraftProfile? = null,
         name: String = plugin.config.getString("characters.defaults.name") ?: "",
@@ -90,17 +87,6 @@ class RPKCharacterImpl constructor(
             }
         }
     override var isDead = dead
-
-    override fun showCharacterCard(player: RPKPlayer) {
-        val offlineBukkitPlayer = player.bukkitPlayer
-        if (offlineBukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(offlineBukkitPlayer)
-            if (minecraftProfile != null) {
-                showCharacterCard(minecraftProfile)
-            }
-        }
-    }
 
     override fun showCharacterCard(minecraftProfile: RPKMinecraftProfile) {
         val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)

@@ -17,7 +17,6 @@
 package com.rpkit.characters.bukkit.character
 
 import com.rpkit.core.service.ServiceProvider
-import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 
@@ -36,16 +35,6 @@ interface RPKCharacterProvider: ServiceProvider {
     fun getCharacter(id: Int): RPKCharacter?
 
     /**
-     * Gets a player's active character.
-     * If the player does not currently have an active character, null is returned.
-     *
-     * @param player The player
-     * @return The player's active character, or null if the player does not currently have an active character.
-     */
-    @Deprecated("Old players API. Please move to new profiles API.", ReplaceWith("getActiveCharacter(minecraftProfile)"))
-    fun getActiveCharacter(player: RPKPlayer): RPKCharacter?
-
-    /**
      * Gets a Minecraft profile's active character.
      * If the profile does not currently have an active character, null is returned.
      *
@@ -55,16 +44,6 @@ interface RPKCharacterProvider: ServiceProvider {
     fun getActiveCharacter(minecraftProfile: RPKMinecraftProfile): RPKCharacter?
 
     /**
-     * Sets a player's active character.
-     *
-     * @param player The player
-     * @param character The character to set. May be null if the player should be set to have no active character,
-     *                  for example if they are moderating without a character.
-     */
-    @Deprecated("Old players API. Please move to new profiles API.", ReplaceWith("setActiveCharacter(minecraftProfile, character)"))
-    fun setActiveCharacter(player: RPKPlayer, character: RPKCharacter?)
-
-    /**
      * Sets a Minecraft profile's active character.
      *
      * @param minecraftProfile The Minecraft profile
@@ -72,15 +51,6 @@ interface RPKCharacterProvider: ServiceProvider {
      *                  for example if they are moderating without a character
      */
     fun setActiveCharacter(minecraftProfile: RPKMinecraftProfile, character: RPKCharacter?)
-
-    /**
-     * Gets all characters currently playable by the given player.
-     *
-     * @param player The player
-     * @return All characters currently playable by the player.
-     */
-    @Deprecated("Old players API. Please move to new profiles API.", ReplaceWith("getCharacters(profile)"))
-    fun getCharacters(player: RPKPlayer): Collection<RPKCharacter>
 
     /**
      * Gets all characters currently playable by the owner of the given profile.

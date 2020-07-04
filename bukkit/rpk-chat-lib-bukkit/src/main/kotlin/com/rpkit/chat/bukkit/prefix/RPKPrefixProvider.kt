@@ -17,7 +17,6 @@
 package com.rpkit.chat.bukkit.prefix
 
 import com.rpkit.core.service.ServiceProvider
-import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 /**
@@ -30,15 +29,6 @@ interface RPKPrefixProvider: ServiceProvider {
      * The list is immutable, so to add or remove prefixes, [addPrefix] or [removePrefix] should be used.
      */
     val prefixes: List<RPKPrefix>
-
-    /**
-     * Constructs a player's prefix from all of the prefixes they have.
-     *
-     * @param player The player
-     * @return The player's full prefix
-     */
-    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("getPrefix(profile)"))
-    fun getPrefix(player: RPKPlayer): String
 
     /**
      * Constructs a profile's prefix from all of the prefixes they have.

@@ -22,10 +22,7 @@ import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterCreateEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterDeleteEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterSwitchEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterUpdateEvent
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.player.RPKPlayerProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.attribute.Attribute
 
@@ -38,46 +35,8 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
         return plugin.core.database.getTable(RPKCharacterTable::class)[id]
     }
 
-    override fun getActiveCharacter(player: RPKPlayer): RPKCharacter? {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val offlineBukkitPlayer = player.bukkitPlayer
-        if (offlineBukkitPlayer != null) {
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(offlineBukkitPlayer)
-            if (minecraftProfile != null) {
-                return getActiveCharacter(minecraftProfile)
-            }
-        }
-
-        val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
-        return characterTable.getActive(player)
-    }
-
     override fun getActiveCharacter(minecraftProfile: RPKMinecraftProfile): RPKCharacter? {
-        var character = plugin.core.database.getTable(RPKCharacterTable::class).get(minecraftProfile)
-        if (character != null) {
-            return character
-        } else {
-            val playerProvider = plugin.core.serviceManager.getServiceProvider(RPKPlayerProvider::class)
-            val player = playerProvider.getPlayer(plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID))
-            val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
-            character = characterTable.getActive(player)
-            if (character != null) {
-                setActiveCharacter(minecraftProfile, character)
-                return character
-            }
-        }
-        return null
-    }
-
-    override fun setActiveCharacter(player: RPKPlayer, character: RPKCharacter?) {
-        val offlineBukkitPlayer = player.bukkitPlayer
-        if (offlineBukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(offlineBukkitPlayer)
-            if (minecraftProfile != null) {
-                setActiveCharacter(minecraftProfile, character)
-            }
-        }
+        return plugin.core.database.getTable(RPKCharacterTable::class).get(minecraftProfile)
     }
 
     override fun setActiveCharacter(minecraftProfile: RPKMinecraftProfile, character: RPKCharacter?) {
@@ -123,32 +82,6 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
             newCharacter.minecraftProfile = minecraftProfile
             updateCharacter(newCharacter)
         }
-    }
-
-    override fun getCharacters(player: RPKPlayer): Collection<RPKCharacter> {
-        val offlineBukkitPlayer = player.bukkitPlayer
-        if (offlineBukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(offlineBukkitPlayer)
-            if (minecraftProfile != null) {
-                val profile = minecraftProfile.profile
-                if (profile is RPKProfile) {
-                    val characters = getCharacters(profile).toMutableList()
-                    val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
-                    val oldCharacters = characterTable.get(player)
-                    oldCharacters.forEach { oldCharacter ->
-                        oldCharacter.profile = profile
-                        updateCharacter(oldCharacter)
-                    }
-                    characters.addAll(oldCharacters)
-                    if (characters.isNotEmpty()) {
-                        return characters.distinct()
-                    }
-                }
-            }
-        }
-        val characterTable = plugin.core.database.getTable(RPKCharacterTable::class)
-        return characterTable.get(player)
     }
 
     override fun getCharacters(profile: RPKProfile): List<RPKCharacter> {

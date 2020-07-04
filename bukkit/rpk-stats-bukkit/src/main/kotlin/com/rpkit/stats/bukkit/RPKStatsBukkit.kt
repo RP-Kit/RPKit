@@ -21,7 +21,6 @@ import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.characters.bukkit.gender.RPKGender
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.stats.bukkit.command.stats.StatsCommand
@@ -50,12 +49,6 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
             override val name = "character"
             override fun get(character: RPKCharacter): RPKCharacter {
                 return character
-            }
-        })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
-            override val name = "player"
-            override fun get(character: RPKCharacter): RPKPlayer? {
-                return character.player
             }
         })
         statVariableProvider.addStatVariable(object: RPKStatVariable {

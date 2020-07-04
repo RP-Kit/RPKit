@@ -34,7 +34,7 @@ class SnoopComponent(private val plugin: RPKChatBukkit): DirectedPostFormatPipel
     override fun process(context: DirectedPostFormatMessageContext): DirectedPostFormatMessageContext {
         if (!context.isCancelled) return context
         val snooperProvider = plugin.core.serviceManager.getServiceProvider(RPKSnooperProvider::class)
-        if (snooperProvider.snooperMinecraftProfiles.contains(context.receiverMinecraftProfile)) {
+        if (snooperProvider.snoopers.contains(context.receiverMinecraftProfile)) {
             context.receiverMinecraftProfile.sendMessage(*context.message)
         }
         return context

@@ -28,7 +28,6 @@ import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelDeleteEvent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelSwitchEvent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelUpdateEvent
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
-import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import java.awt.Color
 

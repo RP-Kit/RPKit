@@ -23,22 +23,6 @@ caching:
         id:
             enabled: true
             size: 20
-    rpkit_player:
-        id:
-            enabled: true
-            size: 20
-        name:
-            enabled: true
-            size: 20
-        minecraft_uuid:
-            enabled: true
-            size: 20
-        irc_nick:
-            enabled: true
-            size: 20
-        last_known_ip:
-            enabled: true
-            size: 20
     rpkit_profile:
         id:
             enabled: true

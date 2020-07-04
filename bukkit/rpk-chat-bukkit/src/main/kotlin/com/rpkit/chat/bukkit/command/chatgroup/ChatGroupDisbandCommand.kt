@@ -43,9 +43,9 @@ class ChatGroupDisbandCommand(private val plugin: RPKChatBukkit): CommandExecuto
                             sender.sendMessage(plugin.messages["no-minecraft-profile"])
                             return true
                         }
-                        if (chatGroup.memberMinecraftProfiles.any { memberMinecraftProfile ->
+                        if (chatGroup.members.any { memberMinecraftProfile ->
                                             memberMinecraftProfile.id == senderMinecraftProfile.id }) {
-                            for (minecraftProfile in chatGroup.memberMinecraftProfiles) {
+                            for (minecraftProfile in chatGroup.members) {
                                 minecraftProfile.sendMessage(plugin.messages["chat-group-disband-valid", mapOf(
                                         Pair("group", chatGroup.name)
                                 )])

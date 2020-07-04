@@ -40,10 +40,10 @@ class ChatGroupLeaveCommand(private val plugin: RPKChatBukkit): CommandExecutor 
                     if (sender is Player) {
                         val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                         if (minecraftProfile != null) {
-                            if (chatGroup.memberMinecraftProfiles.any { memberMinecraftProfile ->
+                            if (chatGroup.members.any { memberMinecraftProfile ->
                                         memberMinecraftProfile.id == minecraftProfile.id }) {
                                 chatGroup.removeMember(minecraftProfile)
-                                if (chatGroup.memberMinecraftProfiles.isEmpty()) {
+                                if (chatGroup.members.isEmpty()) {
                                     chatGroupProvider.removeChatGroup(chatGroup)
                                 }
                                 sender.sendMessage(plugin.messages["chat-group-leave-valid", mapOf(

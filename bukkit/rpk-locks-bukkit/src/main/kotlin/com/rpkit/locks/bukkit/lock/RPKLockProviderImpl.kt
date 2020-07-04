@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.locks.bukkit.lock
 
 import com.rpkit.core.bukkit.util.withDisplayName
@@ -9,9 +25,7 @@ import com.rpkit.locks.bukkit.database.table.RPKPlayerGettingKeyTable
 import com.rpkit.locks.bukkit.database.table.RPKPlayerUnclaimingTable
 import com.rpkit.locks.bukkit.event.lock.RPKBukkitBlockLockEvent
 import com.rpkit.locks.bukkit.event.lock.RPKBukkitBlockUnlockEvent
-import com.rpkit.players.bukkit.player.RPKPlayer
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
@@ -49,18 +63,6 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
         }
     }
 
-    override fun isClaiming(player: RPKPlayer): Boolean {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                return isClaiming(minecraftProfile)
-            }
-        }
-        return false
-    }
-
     override fun isClaiming(minecraftProfile: RPKMinecraftProfile): Boolean {
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
         val bukkitPlayer = bukkitOfflinePlayer.player
@@ -74,31 +76,8 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
         return false
     }
 
-    override fun isUnclaiming(player: RPKPlayer): Boolean {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                return isUnclaiming(minecraftProfile)
-            }
-        }
-        return false
-    }
-
     override fun isUnclaiming(minecraftProfile: RPKMinecraftProfile): Boolean {
         return plugin.core.database.getTable(RPKPlayerUnclaimingTable::class).get(minecraftProfile) != null
-    }
-
-    override fun setUnclaiming(player: RPKPlayer, unclaiming: Boolean) {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                setUnclaiming(minecraftProfile, unclaiming)
-            }
-        }
     }
 
     override fun setUnclaiming(minecraftProfile: RPKMinecraftProfile, unclaiming: Boolean) {
@@ -116,31 +95,8 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
         }
     }
 
-    override fun isGettingKey(player: RPKPlayer): Boolean {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                return isGettingKey(minecraftProfile)
-            }
-        }
-        return false
-    }
-
     override fun isGettingKey(minecraftProfile: RPKMinecraftProfile): Boolean {
         return plugin.core.database.getTable(RPKPlayerGettingKeyTable::class).get(minecraftProfile) != null
-    }
-
-    override fun setGettingKey(player: RPKPlayer, gettingKey: Boolean) {
-        val bukkitPlayer = player.bukkitPlayer
-        if (bukkitPlayer != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                setGettingKey(minecraftProfile, gettingKey)
-            }
-        }
     }
 
     override fun setGettingKey(minecraftProfile: RPKMinecraftProfile, gettingKey: Boolean) {

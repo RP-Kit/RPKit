@@ -40,7 +40,7 @@ class ChatGroupInviteCommand(private val plugin: RPKChatBukkit): CommandExecutor
                     if (sender is Player) {
                         val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
                         if (senderMinecraftProfile != null) {
-                            if (chatGroup.memberMinecraftProfiles.any { memberMinecraftProfile ->
+                            if (chatGroup.members.any { memberMinecraftProfile ->
                                                 memberMinecraftProfile.id == senderMinecraftProfile.id }) {
                                 val bukkitPlayer = plugin.server.getPlayer(args[1])
                                 if (bukkitPlayer == null) {
