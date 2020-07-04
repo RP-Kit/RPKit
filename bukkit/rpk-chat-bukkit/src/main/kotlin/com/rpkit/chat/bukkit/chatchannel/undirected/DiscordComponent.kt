@@ -17,8 +17,8 @@
 package com.rpkit.chat.bukkit.chatchannel.undirected
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.context.UndirectedChatChannelMessageContext
+import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
+import com.rpkit.chat.bukkit.context.UndirectedMessageContext
 import com.rpkit.chat.bukkit.discord.RPKDiscordProvider
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -27,8 +27,8 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable
 class DiscordComponent(
         private val plugin: RPKChatBukkit,
         val discordChannel: String
-): UndirectedChatChannelPipelineComponent, ConfigurationSerializable {
-    override fun process(context: UndirectedChatChannelMessageContext): UndirectedChatChannelMessageContext {
+): UndirectedPipelineComponent, ConfigurationSerializable {
+    override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         if (!context.isCancelled) {
             val discordProvider = plugin.core.serviceManager.getServiceProvider(RPKDiscordProvider::class)
             discordProvider.sendMessage(discordChannel, ChatColor.stripColor(context.message)!!)

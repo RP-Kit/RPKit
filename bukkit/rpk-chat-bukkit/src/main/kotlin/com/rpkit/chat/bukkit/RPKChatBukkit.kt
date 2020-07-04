@@ -18,7 +18,15 @@ package com.rpkit.chat.bukkit
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProviderImpl
-import com.rpkit.chat.bukkit.chatchannel.directed.*
+import com.rpkit.chat.bukkit.chatchannel.directed.postformat.SendMessageComponent
+import com.rpkit.chat.bukkit.chatchannel.directed.postformat.SnoopComponent
+import com.rpkit.chat.bukkit.chatchannel.directed.preformat.DrunkenSlurComponent
+import com.rpkit.chat.bukkit.chatchannel.directed.preformat.GarbleComponent
+import com.rpkit.chat.bukkit.chatchannel.directed.preformat.LanguageComponent
+import com.rpkit.chat.bukkit.chatchannel.directed.preformat.RadiusFilterComponent
+import com.rpkit.chat.bukkit.chatchannel.format.click.*
+import com.rpkit.chat.bukkit.chatchannel.format.hover.ShowTextHoverAction
+import com.rpkit.chat.bukkit.chatchannel.format.part.*
 import com.rpkit.chat.bukkit.chatchannel.undirected.*
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProviderImpl
 import com.rpkit.chat.bukkit.command.chatchannel.ChatChannelCommand
@@ -60,16 +68,38 @@ class RPKChatBukkit: RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4383)
-        // Directed chat channel pipeline components
-        ConfigurationSerialization.registerClass(DirectedFormatComponent::class.java, "DirectedFormatComponent")
+        // Directed pre-format pipeline components
         ConfigurationSerialization.registerClass(DrunkenSlurComponent::class.java, "DrunkenSlurComponent")
         ConfigurationSerialization.registerClass(GarbleComponent::class.java, "GarbleComponent")
         ConfigurationSerialization.registerClass(LanguageComponent::class.java, "LanguageComponent")
         ConfigurationSerialization.registerClass(RadiusFilterComponent::class.java, "RadiusFilterComponent")
+
+        // Format parts
+        ConfigurationSerialization.registerClass(ChannelPart::class.java, "ChannelPart")
+        ConfigurationSerialization.registerClass(MessagePart::class.java, "MessagePart")
+        ConfigurationSerialization.registerClass(ReceiverCharacterNamePart::class.java, "ReceiverCharacterNamePart")
+        ConfigurationSerialization.registerClass(ReceiverPrefixPart::class.java, "ReceiverPrefixPart")
+        ConfigurationSerialization.registerClass(ReceiverProfileNamePart::class.java, "ReceiverProfileNamePart")
+        ConfigurationSerialization.registerClass(SenderCharacterNamePart::class.java, "SenderCharacterNamePart")
+        ConfigurationSerialization.registerClass(SenderPrefixPart::class.java, "SenderPrefixPart")
+        ConfigurationSerialization.registerClass(SenderProfileNamePart::class.java, "SenderProfileNamePart")
+        ConfigurationSerialization.registerClass(TextPart::class.java)
+
+        // Hover actions
+        ConfigurationSerialization.registerClass(ShowTextHoverAction::class.java, "ShowTextHoverAction")
+
+        // Click actions
+        ConfigurationSerialization.registerClass(CopyToClipboardClickAction::class.java, "CopyToClipboardClickAction")
+        ConfigurationSerialization.registerClass(OpenFileClickAction::class.java, "OpenFileClickAction")
+        ConfigurationSerialization.registerClass(OpenURLClickAction::class.java, "OpenURLClickAction")
+        ConfigurationSerialization.registerClass(RunCommandClickAction::class.java, "RunCommandClickAction")
+        ConfigurationSerialization.registerClass(SuggestCommandClickAction::class.java, "SuggestCommandClickAction")
+
+        //Directed post-format pipeline components
         ConfigurationSerialization.registerClass(SendMessageComponent::class.java, "SendMessageComponent")
         ConfigurationSerialization.registerClass(SnoopComponent::class.java, "SnoopComponent")
 
-        // Undirected chat channel pipline components
+        // Undirected pipeline components
         ConfigurationSerialization.registerClass(DiscordComponent::class.java, "DiscordComponent")
         ConfigurationSerialization.registerClass(IRCComponent::class.java, "IRCComponent")
         ConfigurationSerialization.registerClass(LogComponent::class.java, "LogComponent")

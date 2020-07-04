@@ -10,7 +10,7 @@ depend:
 - rpk-skill-lib-bukkit
 - rpk-experience-lib-bukkit
 - rpk-class-lib-bukkit
-api-version: '1.15'
+api-version: '1.16'
 commands:
     class:
         description: Class management command

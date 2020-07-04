@@ -17,8 +17,8 @@
 package com.rpkit.chat.bukkit.chatchannel.undirected
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.context.UndirectedChatChannelMessageContext
+import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
+import com.rpkit.chat.bukkit.context.UndirectedMessageContext
 import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
@@ -34,9 +34,9 @@ import java.util.*
  * Logs messages to a dated log file.
  */
 @SerializableAs("LogComponent")
-class LogComponent(private val plugin: RPKChatBukkit): UndirectedChatChannelPipelineComponent, ConfigurationSerializable {
+class LogComponent(private val plugin: RPKChatBukkit): UndirectedPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: UndirectedChatChannelMessageContext): UndirectedChatChannelMessageContext {
+    override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         val logDirectory = File(plugin.dataFolder, "logs")
         val logDateFormat = SimpleDateFormat("yyyy-MM-dd")
         val datedLogDirectory = File(logDirectory, logDateFormat.format(Date()))

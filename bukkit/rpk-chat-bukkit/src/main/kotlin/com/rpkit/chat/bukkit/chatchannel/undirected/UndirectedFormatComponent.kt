@@ -18,8 +18,8 @@ package com.rpkit.chat.bukkit.chatchannel.undirected
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.context.UndirectedChatChannelMessageContext
+import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
+import com.rpkit.chat.bukkit.context.UndirectedMessageContext
 import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
 import com.rpkit.core.bukkit.util.closestChatColor
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -29,9 +29,9 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
 @SerializableAs("UndirectedFormatComponent")
-class UndirectedFormatComponent(private val plugin: RPKChatBukkit, var formatString: String): UndirectedChatChannelPipelineComponent, ConfigurationSerializable {
+class UndirectedFormatComponent(private val plugin: RPKChatBukkit, var formatString: String): UndirectedPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: UndirectedChatChannelMessageContext): UndirectedChatChannelMessageContext {
+    override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val prefixProvider = plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class)
         val senderMinecraftProfile = context.senderMinecraftProfile

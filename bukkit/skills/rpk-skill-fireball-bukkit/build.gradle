@@ -29,7 +29,7 @@ if (propertiesFile.exists()) {
 dependencies {
     implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.3.72"
     implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.3.72"
-    implementation group: "org.spigotmc", name: "spigot-api", version: "1.15.2-R0.1-SNAPSHOT"
+    implementation group: "org.spigotmc", name: "spigot-api", version: "1.16.1-R0.1-SNAPSHOT"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")

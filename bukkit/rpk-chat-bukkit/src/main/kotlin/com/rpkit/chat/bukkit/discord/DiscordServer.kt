@@ -88,7 +88,9 @@ class DiscordServer(
                     profile,
                     null,
                     message,
-                    chatChannel.directedPipeline,
+                    chatChannel.directedPreFormatPipeline,
+                    chatChannel.format,
+                    chatChannel.directedPostFormatPipeline,
                     chatChannel.undirectedPipeline.filter { it !is DiscordComponent },
                     true
             )

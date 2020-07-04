@@ -2,7 +2,7 @@ name: rpk-item-quality-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.itemquality.bukkit.RPKItemQualityBukkit
-api-version: '1.15'
+api-version: '1.16'
 depend:
 - rpk-core-bukkit
 - rpk-item-quality-lib-bukkit

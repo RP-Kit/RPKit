@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.rpkit.chat.bukkit.chatchannel.directed
+package com.rpkit.chat.bukkit.chatchannel.directed.preformat
 
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.context.DirectedChatChannelMessageContext
+import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineComponent
+import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageProvider
 import com.rpkit.languages.bukkit.language.RPKLanguageProvider
 import org.bukkit.Bukkit
@@ -27,9 +27,9 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
 @SerializableAs("LanguageComponent")
-class LanguageComponent(private val plugin: RPKChatBukkit): DirectedChatChannelPipelineComponent, ConfigurationSerializable {
+class LanguageComponent(private val plugin: RPKChatBukkit): DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: DirectedChatChannelMessageContext): DirectedChatChannelMessageContext {
+    override fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
         val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
         val senderMinecraftProfile = context.senderMinecraftProfile ?: return context
         val receiverMinecraftProfile = context.receiverMinecraftProfile

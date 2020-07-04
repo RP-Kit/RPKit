@@ -16,24 +16,25 @@
 
 package com.rpkit.chat.bukkit.chatchannel.pipeline
 
-import com.rpkit.chat.bukkit.context.UndirectedChatChannelMessageContext
+import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 
 /**
- * An undirected chat channel pipeline component.
- * This is used in the undirected pipeline for a channel, for messages that are not directed towards a particular
- * individual.
- * This means [process] is called once for the message, and the contents of the message are the same for each recipient.
- * Use cases include sending messages to an IRC channel, and for writing messages to a log file.
+ * A directed chat channel pipeline component.
+ * This is used in the directed pipeline for a channel, for messages that are directed towards a particular individual.
+ * This means [process] is called for each recipient of the message, and the contents of the final message may be
+ * different for each recipient.
+ * Use cases include for message formatting for individuals, and for garbling text based on the distance of the
+ * recipient from the sender.
  */
-interface UndirectedChatChannelPipelineComponent {
+interface DirectedPreFormatPipelineComponent {
 
     /**
      * Processes a message with the given context.
-     * This will be called once per message.
+     * This will be called once per recipient of a message.
      *
      * @param context The message context
      * @return The message context, after modifications performed by the component
      */
-    fun process(context: UndirectedChatChannelMessageContext): UndirectedChatChannelMessageContext
+    fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext
 
 }

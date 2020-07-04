@@ -21,10 +21,10 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 
 /**
- * A directed chat channel message context.
- * Stores data for messages passed through a chat channel's directed pipeline.
+ * An undirected chat channel message context.
+ * Stores data for messages passed through a chat channel's undirected pipeline.
  */
-interface DirectedChatChannelMessageContext {
+interface UndirectedMessageContext {
 
     /**
      * The chat channel the message is being sent to.
@@ -42,11 +42,6 @@ interface DirectedChatChannelMessageContext {
     val senderMinecraftProfile: RPKMinecraftProfile?
 
     /**
-     * The receiver of the message.
-     */
-    val receiverMinecraftProfile: RPKMinecraftProfile
-
-    /**
      * The message. Changing the message results in the updated message being propagated to all further pipeline
      * components.
      */
@@ -54,7 +49,7 @@ interface DirectedChatChannelMessageContext {
 
     /**
      * Whether the message has been cancelled.
-     * If the message is cancelled, further pipeline components may choose whether they still wish to operate on the
+     * If the message is cancelled, further pipeline components may choose whether they still  wish to operate on the
      * message or not.
      */
     var isCancelled: Boolean
