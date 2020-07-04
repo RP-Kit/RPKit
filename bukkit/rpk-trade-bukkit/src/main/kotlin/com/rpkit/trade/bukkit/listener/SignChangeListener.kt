@@ -31,31 +31,30 @@ class SignChangeListener(private val plugin: RPKTradeBukkit): Listener {
 
     @EventHandler
     fun onSignChange(event: SignChangeEvent) {
-        if (event.getLine(0) == "[trader]") {
-            if (event.player.hasPermission("rpkit.trade.sign.trader.create")) {
-                if ((Material.matchMaterial(event.getLine(1) ?: "") == null
-                                && (event.getLine(1)?.matches(Regex("\\d+\\s+.*")) != true))
-                        || Material.matchMaterial(event.getLine(1)?.replace(Regex("\\d+\\s+"), "") ?: "") == null) {
-                    event.block.breakNaturally()
-                    event.player.sendMessage(plugin.messages["trader-sign-invalid-material"])
-                    return
-                }
-                if (event.getLine(2)?.matches(Regex("\\d+ \\| \\d+")) != true) {
-                    event.block.breakNaturally()
-                    event.player.sendMessage(plugin.messages["trader-sign-invalid-price"])
-                    return
-                }
-                if (plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(event.getLine(3) ?: "") == null) {
-                    event.block.breakNaturally()
-                    event.player.sendMessage(plugin.messages["trader-sign-invalid-currency"])
-                    return
-                }
-                event.setLine(0, "$GREEN[trader]")
-                event.player.sendMessage(plugin.messages["trader-sign-valid"])
-            } else {
-                event.player.sendMessage(plugin.messages["no-permission-trader-create"])
-            }
+        if (event.getLine(0) != "[trader]") return
+        if (!event.player.hasPermission("rpkit.trade.sign.trader.create")) {
+            event.player.sendMessage(plugin.messages["no-permission-trader-create"])
+            return
         }
+        if ((Material.matchMaterial(event.getLine(1) ?: "") == null
+                        && (event.getLine(1)?.matches(Regex("\\d+\\s+.*")) != true))
+                || Material.matchMaterial(event.getLine(1)?.replace(Regex("\\d+\\s+"), "") ?: "") == null) {
+            event.block.breakNaturally()
+            event.player.sendMessage(plugin.messages["trader-sign-invalid-material"])
+            return
+        }
+        if (event.getLine(2)?.matches(Regex("\\d+ \\| \\d+")) != true) {
+            event.block.breakNaturally()
+            event.player.sendMessage(plugin.messages["trader-sign-invalid-price"])
+            return
+        }
+        if (plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(event.getLine(3) ?: "") == null) {
+            event.block.breakNaturally()
+            event.player.sendMessage(plugin.messages["trader-sign-invalid-currency"])
+            return
+        }
+        event.setLine(0, "$GREEN[trader]")
+        event.player.sendMessage(plugin.messages["trader-sign-valid"])
     }
 
 }
