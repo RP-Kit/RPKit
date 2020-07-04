@@ -19,13 +19,9 @@ package com.rpkit.chat.bukkit.context
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfile
+import net.md_5.bungee.api.chat.BaseComponent
 
-/**
- * An undirected chat channel message context.
- * Stores data for messages passed through a chat channel's undirected pipeline.
- */
-interface UndirectedChatChannelMessageContext {
-
+interface DirectedPostFormatMessageContext {
     /**
      * The chat channel the message is being sent to.
      */
@@ -42,16 +38,20 @@ interface UndirectedChatChannelMessageContext {
     val senderMinecraftProfile: RPKMinecraftProfile?
 
     /**
+     * The receiver of the message.
+     */
+    val receiverMinecraftProfile: RPKMinecraftProfile
+
+    /**
      * The message. Changing the message results in the updated message being propagated to all further pipeline
      * components.
      */
-    var message: String
+    var message: Array<BaseComponent>
 
     /**
      * Whether the message has been cancelled.
-     * If the message is cancelled, further pipeline components may choose whether they still  wish to operate on the
+     * If the message is cancelled, further pipeline components may choose whether they still wish to operate on the
      * message or not.
      */
     var isCancelled: Boolean
-
 }

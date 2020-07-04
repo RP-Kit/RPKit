@@ -43,7 +43,15 @@ class IRCMessageListener(private val plugin: RPKChatBukkit): ListenerAdapter() {
                 val senderProfile = senderIRCProfile.profile
                 val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
                 val chatChannel = chatChannelProvider.getChatChannelFromIRCChannel(event.channel.name)
-                chatChannel?.sendMessage(senderProfile, null, event.message, chatChannel.directedPipeline, chatChannel.undirectedPipeline.filter { it !is IRCComponent })
+                chatChannel?.sendMessage(
+                        senderProfile,
+                        null,
+                        event.message,
+                        chatChannel.directedPreFormatPipeline,
+                        chatChannel.format,
+                        chatChannel.directedPostFormatPipeline,
+                        chatChannel.undirectedPipeline.filter { it !is IRCComponent }
+                )
             }
         }
     }

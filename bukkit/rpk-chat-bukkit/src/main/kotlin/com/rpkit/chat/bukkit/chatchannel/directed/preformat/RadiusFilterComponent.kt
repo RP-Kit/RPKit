@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.rpkit.chat.bukkit.chatchannel.directed
+package com.rpkit.chat.bukkit.chatchannel.directed.preformat
 
-import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.context.DirectedChatChannelMessageContext
+import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineComponent
+import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
@@ -27,9 +27,9 @@ import org.bukkit.configuration.serialization.SerializableAs
  * Filters out messages if they are beyond the radius of the channel.
  */
 @SerializableAs("RadiusFilterComponent")
-class RadiusFilterComponent: DirectedChatChannelPipelineComponent, ConfigurationSerializable {
+class RadiusFilterComponent: DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: DirectedChatChannelMessageContext): DirectedChatChannelMessageContext {
+    override fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
         if (context.isCancelled) return context
         val senderMinecraftProfile = context.senderMinecraftProfile
         if (senderMinecraftProfile != null) {

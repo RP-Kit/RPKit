@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.rpkit.chat.bukkit.chatchannel.directed
+package com.rpkit.chat.bukkit.chatchannel.directed.postformat
 
-import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.context.DirectedChatChannelMessageContext
+import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPostFormatPipelineComponent
+import com.rpkit.chat.bukkit.context.DirectedPostFormatMessageContext
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
@@ -26,11 +26,11 @@ import org.bukkit.configuration.serialization.SerializableAs
  * Sends message to the receiver.
  */
 @SerializableAs("SendMessageComponent")
-class SendMessageComponent: DirectedChatChannelPipelineComponent, ConfigurationSerializable {
+class SendMessageComponent: DirectedPostFormatPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: DirectedChatChannelMessageContext): DirectedChatChannelMessageContext {
+    override fun process(context: DirectedPostFormatMessageContext): DirectedPostFormatMessageContext {
         if (!context.isCancelled)
-            context.receiverMinecraftProfile.sendMessage(context.message)
+            context.receiverMinecraftProfile.sendMessage(*context.message)
         return context
     }
 

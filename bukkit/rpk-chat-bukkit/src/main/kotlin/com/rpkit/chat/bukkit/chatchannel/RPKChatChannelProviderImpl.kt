@@ -17,8 +17,10 @@
 package com.rpkit.chat.bukkit.chatchannel
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
+import com.rpkit.chat.bukkit.chatchannel.format.FormatPart
+import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPostFormatPipelineComponent
+import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineComponent
+import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.chatchannel.undirected.DiscordComponent
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelCreateEvent
@@ -47,8 +49,10 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
                                 plugin.config.getInt("chat-channels.$channelName.color.blue")
                         ),
                         radius = plugin.config.getDouble("chat-channels.$channelName.radius"),
-                        directedPipeline = plugin.config.getList("chat-channels.$channelName.directed-pipeline") as List<DirectedChatChannelPipelineComponent>,
-                        undirectedPipeline = plugin.config.getList("chat-channels.$channelName.undirected-pipeline") as List<UndirectedChatChannelPipelineComponent>,
+                        directedPreFormatPipeline = plugin.config.getList("chat-channels.$channelName.directed-pre-format-pipeline") as List<DirectedPreFormatPipelineComponent>,
+                        format = plugin.config.getList("chat-channels.$channelName.format") as List<FormatPart>,
+                        directedPostFormatPipeline = plugin.config.getList("chat-channels.$channelName.directed-post-format-pipeline") as List<DirectedPostFormatPipelineComponent>,
+                        undirectedPipeline = plugin.config.getList("chat-channels.$channelName.undirected-pipeline") as List<UndirectedPipelineComponent>,
                         matchPattern = plugin.config.getString("chat-channels.$channelName.match-pattern"),
                         isJoinedByDefault = plugin.config.getBoolean("chat-channels.$channelName.joined-by-default")
                 ) }
@@ -80,20 +84,6 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
     override fun updateChatChannel(chatChannel: RPKChatChannel, isAsync: Boolean) {
         val event = RPKBukkitChatChannelUpdateEvent(chatChannel, isAsync)
         plugin.server.pluginManager.callEvent(event)
-    }
-
-    override fun getPlayerChannel(player: RPKPlayer): RPKChatChannel? {
-        return plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).getPlayerChannel(player)
-    }
-
-    override fun setPlayerChannel(player: RPKPlayer, channel: RPKChatChannel, isAsync: Boolean) {
-        val oldChannel = getPlayerChannel(player)
-        if (oldChannel != null) {
-            oldChannel.removeSpeaker(player)
-            updateChatChannel(oldChannel, isAsync)
-        }
-        channel.addSpeaker(player)
-        updateChatChannel(channel, isAsync)
     }
 
     override fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel? {

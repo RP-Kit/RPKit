@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.rpkit.chat.bukkit.chatchannel.directed
+package com.rpkit.chat.bukkit.chatchannel.directed.preformat
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.context.DirectedChatChannelMessageContext
+import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineComponent
+import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import com.rpkit.chat.bukkit.snooper.RPKSnooperProvider
 import com.rpkit.core.util.MathUtils
 import org.bukkit.Bukkit
@@ -32,9 +32,9 @@ import java.util.*
  * Garbles messages based on the distance between the sender and receiver of the message.
  */
 @SerializableAs("GarbleComponent")
-class GarbleComponent(private val plugin: RPKChatBukkit, var clearRadius: Double): DirectedChatChannelPipelineComponent, ConfigurationSerializable {
+class GarbleComponent(private val plugin: RPKChatBukkit, var clearRadius: Double): DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: DirectedChatChannelMessageContext): DirectedChatChannelMessageContext {
+    override fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
         if (context.isCancelled) return context // Don't bother garbling if the receiver won't receive anyway
         val senderMinecraftProfile = context.senderMinecraftProfile ?: return context // Prevent garble if the message wasn't sent from Minecraft
         val receiverMinecraftProfile = context.receiverMinecraftProfile

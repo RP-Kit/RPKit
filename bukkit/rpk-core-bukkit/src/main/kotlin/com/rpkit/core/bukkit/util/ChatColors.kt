@@ -16,7 +16,7 @@
 
 package com.rpkit.core.bukkit.util
 
-import org.bukkit.ChatColor
+import net.md_5.bungee.api.ChatColor
 
 import java.awt.Color
 
@@ -40,26 +40,13 @@ private val WHITE = Color(255, 255, 255)
 /**
  * Gets the closest Bukkit chat color to the color.
  */
-fun Color.closestChatColor(): ChatColor {
-    var minDistSquared = java.lang.Double.MAX_VALUE
-    var closest: ChatColor? = null
-    for (chatColor in ChatColor.values()) {
-        val chatColorColor = chatColor.toColor()
-        if (chatColorColor != null) {
-            val distSquared = Math.pow((red - chatColorColor.red).toDouble(), 2.0) + Math.pow((blue - chatColorColor.blue).toDouble(), 2.0) + Math.pow((green - chatColorColor.green).toDouble(), 2.0)
-            if (distSquared < minDistSquared) {
-                minDistSquared = distSquared
-                closest = chatColor
-            }
-        }
-    }
-    return closest!!
-}
+fun Color.closestChatColor() = ChatColor.of(this)
 
 /**
  * Gets the color of this chat color.
  */
 fun ChatColor.toColor(): Color? {
+
     when (this) {
         ChatColor.BLACK -> return BLACK
         ChatColor.DARK_BLUE -> return DARK_BLUE
@@ -78,6 +65,7 @@ fun ChatColor.toColor(): Color? {
         ChatColor.YELLOW -> return YELLOW
         ChatColor.WHITE -> return WHITE
         ChatColor.MAGIC, ChatColor.BOLD, ChatColor.STRIKETHROUGH, ChatColor.UNDERLINE, ChatColor.ITALIC, ChatColor.RESET -> return null
+
         else -> return null
     }
 }

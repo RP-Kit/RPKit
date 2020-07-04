@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.rpkit.chat.bukkit.chatchannel.directed
+package com.rpkit.chat.bukkit.chatchannel.directed.postformat
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.context.DirectedChatChannelMessageContext
+import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPostFormatPipelineComponent
+import com.rpkit.chat.bukkit.context.DirectedPostFormatMessageContext
 import com.rpkit.chat.bukkit.snooper.RPKSnooperProvider
 import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
@@ -29,13 +29,13 @@ import org.bukkit.configuration.serialization.SerializableAs
  * Sends message to snoopers if the message would not be sent to them otherwise.
  */
 @SerializableAs("SnoopComponent")
-class SnoopComponent(private val plugin: RPKChatBukkit): DirectedChatChannelPipelineComponent, ConfigurationSerializable {
+class SnoopComponent(private val plugin: RPKChatBukkit): DirectedPostFormatPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: DirectedChatChannelMessageContext): DirectedChatChannelMessageContext {
+    override fun process(context: DirectedPostFormatMessageContext): DirectedPostFormatMessageContext {
         if (!context.isCancelled) return context
         val snooperProvider = plugin.core.serviceManager.getServiceProvider(RPKSnooperProvider::class)
         if (snooperProvider.snooperMinecraftProfiles.contains(context.receiverMinecraftProfile)) {
-            context.receiverMinecraftProfile.sendMessage(context.message)
+            context.receiverMinecraftProfile.sendMessage(*context.message)
         }
         return context
     }
