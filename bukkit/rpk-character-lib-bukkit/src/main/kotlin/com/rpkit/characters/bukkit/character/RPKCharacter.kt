@@ -202,14 +202,6 @@ interface RPKCharacter: Entity {
     var thirstLevel: Int
 
     /**
-     * Whether the player playing the character is hidden on the character's character card. If the player is hidden,
-     * it is a good idea to maintain this behaviour in other plugins as well (at least to other players).
-     * As of Minecraft 1.10, it is impossible to hide the nameplate while keeping the skin of the player. (This was
-     * possible in Minecraft 1.7 for a short time)
-     */
-    var isPlayerHidden: Boolean
-
-    /**
      * Whether the profile playing the character is hidden on the character's character card. If the profile is hidden,
      * it is a good idea to maintain this behaviour in
      */
