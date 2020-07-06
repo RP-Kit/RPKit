@@ -16,11 +16,8 @@
 
 package com.rpkit.characters.bukkit.character
 
-import com.rpkit.characters.bukkit.gender.RPKGender
-import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
-import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Location
@@ -31,7 +28,13 @@ import org.bukkit.inventory.ItemStack
  * Players may have multiple characters, so data that is dependant on the character is stored in the character.
  * Each player has a currently-active character retrievable from the [RPKCharacterProvider].
  */
-interface RPKCharacter: Entity {
+interface RPKCharacter {
+
+    /**
+     * The ID of the character. Guaranteed to be unique.
+     * If set to null it is a new character that has not yet been inserted into the database.
+     */
+    var id: Int?
 
     /**
      * The profile.
@@ -57,11 +60,8 @@ interface RPKCharacter: Entity {
 
     /**
      * The gender of the character.
-     * May be set to any gender implementation, as long as it has been registered with the [RPKGenderProvider].
-     * This may be set to null, which is the current default in the config, as genders must be set up by the admins of
-     * the server.
      */
-    var gender: RPKGender?
+    var gender: String?
 
     /**
      * The age of the character.

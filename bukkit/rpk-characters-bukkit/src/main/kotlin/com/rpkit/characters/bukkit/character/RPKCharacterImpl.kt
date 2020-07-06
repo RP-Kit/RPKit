@@ -19,8 +19,6 @@ package com.rpkit.characters.bukkit.character
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
 import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
-import com.rpkit.characters.bukkit.gender.RPKGender
-import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
@@ -43,7 +41,7 @@ class RPKCharacterImpl constructor(
         override var profile: RPKProfile? = null,
         override var minecraftProfile: RPKMinecraftProfile? = null,
         name: String = plugin.config.getString("characters.defaults.name") ?: "",
-        override var gender: RPKGender? = if (plugin.config.getString("characters.defaults.gender") != null) plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class).getGender(plugin.config.getString("characters.defaults.gender") ?: "") else null,
+        override var gender: String? = plugin.config.getString("characters.defaults.gender"),
         override var age: Int = plugin.config.getInt("characters.defaults.age"),
         override var race: RPKRace? = if (plugin.config.getString("characters.defaults.race") != null) plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class).getRace(plugin.config.getString("characters.defaults.race") ?: "") else null,
         description: String = plugin.config.getString("characters.defaults.description") ?: "",

@@ -25,7 +25,7 @@ class GenderField: HideableCharacterCardField {
 
     override val name = "gender"
     override fun get(character: RPKCharacter): String {
-        return if (isHidden(character)) "[HIDDEN]" else character.gender?.name?:"unset"
+        return if (isHidden(character)) "[HIDDEN]" else character.gender ?: "unset"
     }
     override fun isHidden(character: RPKCharacter): Boolean {
         return character.isGenderHidden

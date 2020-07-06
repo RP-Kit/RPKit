@@ -18,8 +18,6 @@ package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.characters.bukkit.gender.RPKGenderImpl
-import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -32,23 +30,19 @@ import org.bukkit.entity.Player
  * Sets character's gender.
  */
 class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
-    private val conversationFactory: ConversationFactory
-
-    init {
-        conversationFactory = ConversationFactory(plugin)
-                .withModality(true)
-                .withFirstPrompt(GenderPrompt())
-                .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
-                .addConversationAbandonedListener { event ->
-            if (!event.gracefulExit()) {
-                val conversable = event.context.forWhom
-                if (conversable is Player) {
-                    conversable.sendMessage(plugin.messages["operation-cancelled"])
+    private val conversationFactory = ConversationFactory(plugin)
+            .withModality(true)
+            .withFirstPrompt(GenderPrompt())
+            .withEscapeSequence("cancel")
+            .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
+            .addConversationAbandonedListener { event ->
+                if (!event.gracefulExit()) {
+                    val conversable = event.context.forWhom
+                    if (conversable is Player) {
+                        conversable.sendMessage(plugin.messages["operation-cancelled"])
+                    }
                 }
             }
-        }
-    }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Player) {
@@ -60,14 +54,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
                     val character = characterProvider.getActiveCharacter(minecraftProfile)
                     if (character != null) {
                         if (args.isNotEmpty()) {
-                            val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
-                            val genderName = args.joinToString(" ")
-                            var gender = genderProvider.getGender(genderName)
-                            if (gender == null) {
-                                gender = RPKGenderImpl(name = genderName)
-                                genderProvider.addGender(gender)
-                            }
-                            character.gender = gender
+                            character.gender = args.joinToString(" ")
                             characterProvider.updateCharacter(character)
                             sender.sendMessage(plugin.messages["character-set-gender-valid"])
                             character.showCharacterCard(minecraftProfile)
@@ -99,17 +86,11 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit): Comman
             if (conversable is Player) {
                 val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
                 val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
                 val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(conversable)
                 if (minecraftProfile != null) {
                     val character = characterProvider.getActiveCharacter(minecraftProfile)
                     if (character != null) {
-                        var gender = genderProvider.getGender(input)
-                        if (gender == null) {
-                            gender = RPKGenderImpl(name = input)
-                            genderProvider.addGender(gender)
-                        }
-                        character.gender = gender
+                        character.gender = input
                         characterProvider.updateCharacter(character)
                     }
                 }

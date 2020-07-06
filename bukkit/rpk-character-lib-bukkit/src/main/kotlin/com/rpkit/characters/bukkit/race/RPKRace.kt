@@ -16,12 +16,15 @@
 
 package com.rpkit.characters.bukkit.race
 
-import com.rpkit.core.database.Entity
-
 /**
  * Represents a race.
  */
-interface RPKRace: Entity {
+interface RPKRace {
+
+    /**
+     * The ID of the race. Guaranteed to be unique. If set to null, the race has not yet been inserted into the database.
+     */
+    var id: Int?
 
     /**
      * The name of the race.

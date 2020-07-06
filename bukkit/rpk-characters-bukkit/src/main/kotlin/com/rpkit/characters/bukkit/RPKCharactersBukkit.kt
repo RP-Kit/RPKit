@@ -49,7 +49,6 @@ import java.sql.SQLException
 class RPKCharactersBukkit: RPKBukkitPlugin() {
 
     private lateinit var characterProvider: RPKCharacterProvider
-    private lateinit var genderProvider: RPKGenderProvider
     private lateinit var raceProvider: RPKRaceProvider
     private lateinit var characterCardFieldProvider: RPKCharacterCardFieldProvider
     private lateinit var newCharacterCooldownProvider: RPKNewCharacterCooldownProvider
@@ -58,13 +57,11 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
         Metrics(this, 4382)
         saveDefaultConfig()
         characterProvider = RPKCharacterProviderImpl(this)
-        genderProvider = RPKGenderProviderImpl(this)
         raceProvider = RPKRaceProviderImpl(this)
         characterCardFieldProvider = RPKCharacterCardFieldProviderImpl()
         newCharacterCooldownProvider = RPKNewCharacterCooldownProvider(this)
         serviceProviders = arrayOf(
                 characterProvider,
-                genderProvider,
                 raceProvider,
                 characterCardFieldProvider,
                 newCharacterCooldownProvider
@@ -109,7 +106,6 @@ class RPKCharactersBukkit: RPKBukkitPlugin() {
 
     @Throws(SQLException::class)
     override fun createTables(database: Database) {
-        database.addTable(RPKGenderTable(database, this))
         database.addTable(RPKRaceTable(database, this))
         database.addTable(RPKCharacterTable(database, this))
         database.addTable(RPKNewCharacterCooldownTable(database, this))
