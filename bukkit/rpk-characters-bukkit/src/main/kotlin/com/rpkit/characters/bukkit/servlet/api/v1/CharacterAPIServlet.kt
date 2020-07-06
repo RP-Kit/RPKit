@@ -19,7 +19,6 @@ package com.rpkit.characters.bukkit.servlet.api.v1
 import com.google.gson.Gson
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
 import com.rpkit.core.web.RPKServlet
 import com.rpkit.permissions.bukkit.group.RPKGroupProvider
@@ -49,7 +48,7 @@ class CharacterAPIServlet(private val plugin: RPKCharactersBukkit): RPKServlet()
                                         Pair("profile_id", character.profile?.id),
                                         Pair("minecraft_profile_id", character.minecraftProfile?.id),
                                         Pair("name", character.name),
-                                        Pair("gender_id", character.gender?.id),
+                                        Pair("gender", character.gender),
                                         Pair("age", character.age),
                                         Pair("race", character.race?.id),
                                         Pair("description", character.description),
@@ -70,7 +69,6 @@ class CharacterAPIServlet(private val plugin: RPKCharactersBukkit): RPKServlet()
                                         Pair("max_mana", character.maxMana),
                                         Pair("food_level", character.foodLevel),
                                         Pair("thirst_level", character.thirstLevel),
-                                        Pair("player_hidden", character.isPlayerHidden),
                                         Pair("profile_hidden", character.isProfileHidden),
                                         Pair("name_hidden", character.isNameHidden),
                                         Pair("gender_hidden", character.isGenderHidden),
@@ -96,7 +94,7 @@ class CharacterAPIServlet(private val plugin: RPKCharactersBukkit): RPKServlet()
                                         Pair("profile_id", character.profile?.id),
                                         Pair("minecraft_profile_id", character.minecraftProfile?.id),
                                         Pair("name", character.name),
-                                        Pair("gender_id", character.gender?.id),
+                                        Pair("gender", character.gender),
                                         Pair("age", character.age),
                                         Pair("race", character.race?.id),
                                         Pair("description", character.description),
@@ -117,7 +115,6 @@ class CharacterAPIServlet(private val plugin: RPKCharactersBukkit): RPKServlet()
                                         Pair("max_mana", character.maxMana),
                                         Pair("food_level", character.foodLevel),
                                         Pair("thirst_level", character.thirstLevel),
-                                        Pair("player_hidden", character.isPlayerHidden),
                                         Pair("profile_hidden", character.isProfileHidden),
                                         Pair("name_hidden", character.isNameHidden),
                                         Pair("gender_hidden", character.isGenderHidden),
@@ -203,11 +200,9 @@ class CharacterAPIServlet(private val plugin: RPKCharactersBukkit): RPKServlet()
                 character.name = name
             }
         }
-        val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
-        val genderId = req.getParameter("gender")?.toInt()
-        if (genderId != null) {
+        val gender = req.getParameter("gender")
+        if (gender != null) {
             if (permissionsProvider.hasPermission(profile, "rpkit.characters.command.character.set.gender")) {
-                val gender = genderProvider.getGender(genderId)
                 character.gender = gender
             }
         }

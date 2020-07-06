@@ -22,11 +22,8 @@ import com.rpkit.characters.bukkit.character.field.*
 import com.rpkit.characters.bukkit.command.character.CharacterCommand
 import com.rpkit.characters.bukkit.command.race.RaceCommand
 import com.rpkit.characters.bukkit.database.table.RPKCharacterTable
-import com.rpkit.characters.bukkit.database.table.RPKGenderTable
 import com.rpkit.characters.bukkit.database.table.RPKNewCharacterCooldownTable
 import com.rpkit.characters.bukkit.database.table.RPKRaceTable
-import com.rpkit.characters.bukkit.gender.RPKGenderProvider
-import com.rpkit.characters.bukkit.gender.RPKGenderProviderImpl
 import com.rpkit.characters.bukkit.listener.PlayerDeathListener
 import com.rpkit.characters.bukkit.listener.PlayerInteractEntityListener
 import com.rpkit.characters.bukkit.listener.PlayerJoinListener

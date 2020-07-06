@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package com.rpkit.characters.bukkit.servlet
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
 import com.rpkit.core.web.Alert
 import com.rpkit.core.web.RPKServlet
@@ -106,8 +105,6 @@ class CharacterServlet(private val plugin: RPKCharactersBukkit): RPKServlet() {
         while (scanner.hasNextLine()) {
             templateBuilder.append(scanner.nextLine()).append('\n')
         }
-        val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
-        val genders = genderProvider.genders
         val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
         val races = raceProvider.races
         val minAge = plugin.config.getInt("characters.min-age")
@@ -116,7 +113,6 @@ class CharacterServlet(private val plugin: RPKCharactersBukkit): RPKServlet() {
         velocityContext.put("server", plugin.core.web.title)
         velocityContext.put("navigationBar", plugin.core.web.navigationBar)
         velocityContext.put("character", character)
-        velocityContext.put("genders", genders)
         velocityContext.put("minAge", minAge)
         velocityContext.put("maxAge", maxAge)
         velocityContext.put("races", races)
@@ -199,11 +195,9 @@ class CharacterServlet(private val plugin: RPKCharactersBukkit): RPKServlet() {
                 alerts.add(Alert(Alert.Type.DANGER, "You do not have permission to set your character's name."))
             }
         }
-        val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
-        val genderId = req.getParameter("gender")?.toInt()
-        if (genderId != null) {
+        val gender = req.getParameter("gender")
+        if (gender != null) {
             if (permissionsProvider.hasPermission(profile, "rpkit.characters.command.character.set.gender")) {
-                val gender = genderProvider.getGender(genderId)
                 character.gender = gender
             } else {
                 alerts.add(Alert(Alert.Type.DANGER, "You do not have permission to set your character's gender."))
@@ -255,7 +249,6 @@ class CharacterServlet(private val plugin: RPKCharactersBukkit): RPKServlet() {
             templateBuilder.append(scanner.nextLine()).append('\n')
         }
         alerts.add(Alert(Alert.Type.SUCCESS, "Character successfully updated."))
-        val genders = genderProvider.genders
         val races = raceProvider.races
         val minAge = plugin.config.getInt("characters.min-age")
         val maxAge = plugin.config.getInt("characters.max-age")
@@ -264,7 +257,6 @@ class CharacterServlet(private val plugin: RPKCharactersBukkit): RPKServlet() {
         velocityContext.put("navigationBar", plugin.core.web.navigationBar)
         velocityContext.put("alerts", alerts)
         velocityContext.put("character", character)
-        velocityContext.put("genders", genders)
         velocityContext.put("minAge", minAge)
         velocityContext.put("maxAge", maxAge)
         velocityContext.put("races", races)

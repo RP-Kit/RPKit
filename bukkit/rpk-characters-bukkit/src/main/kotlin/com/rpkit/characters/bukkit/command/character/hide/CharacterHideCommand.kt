@@ -27,7 +27,6 @@ import org.bukkit.command.CommandSender
  */
 class CharacterHideCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
 
-    private val characterHidePlayerCommand = CharacterHidePlayerCommand(plugin)
     private val characterHideProfileCommand = CharacterHideProfileCommand(plugin)
     private val characterHideNameCommand = CharacterHideNameCommand(plugin)
     private val characterHideGenderCommand = CharacterHideGenderCommand(plugin)
@@ -38,9 +37,7 @@ class CharacterHideCommand(private val plugin: RPKCharactersBukkit): CommandExec
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
-            if (args[0].equals("player", ignoreCase = true)) {
-                return characterHidePlayerCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("profile", ignoreCase = true)) {
+            if (args[0].equals("profile", ignoreCase = true)) {
                 return characterHideProfileCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("name", ignoreCase = true)) {
                 return characterHideNameCommand.onCommand(sender, command, label, newArgs)

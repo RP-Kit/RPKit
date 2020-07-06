@@ -37,7 +37,7 @@ import org.bukkit.inventory.ItemStack
 /**
  * Character implementation.
  */
-class RPKCharacterImpl constructor(
+class RPKCharacterImpl(
         val plugin: RPKCharactersBukkit,
         override var id: Int = 0,
         override var profile: RPKProfile? = null,
@@ -60,7 +60,6 @@ class RPKCharacterImpl constructor(
         override var maxMana: Int = plugin.config.getInt("characters.defaults.max-mana"),
         override var foodLevel: Int = plugin.config.getInt("characters.defaults.food-level"),
         override var thirstLevel: Int = plugin.config.getInt("characters.defaults.thirst-level"),
-        override var isPlayerHidden: Boolean = plugin.config.getBoolean("characters.defaults.player-hidden"),
         override var isProfileHidden: Boolean = plugin.config.getBoolean("characters.defaults.profile-hidden"),
         override var isNameHidden: Boolean = plugin.config.getBoolean("characters.defaults.name-hidden"),
         override var isGenderHidden: Boolean = plugin.config.getBoolean("characters.defaults.gender-hidden"),
@@ -94,7 +93,7 @@ class RPKCharacterImpl constructor(
         if (bukkitPlayer != null) {
             val characterCardFieldProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterCardFieldProvider::class)
             val profile = minecraftProfile.profile
-            for (line in if (profile != null && profile == this.profile) plugin.messages.getList("character-card-owner") else
+            for (line in if (profile == this.profile) plugin.messages.getList("character-card-owner") else
                 plugin.messages.getList("character-card-not-owner")) {
                 val messageComponents = mutableListOf<BaseComponent>()
                 var chatColor: ChatColor? = null

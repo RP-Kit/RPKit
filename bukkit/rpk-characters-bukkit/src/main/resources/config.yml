@@ -19,7 +19,6 @@ characters:
         max-mana: 20
         food-level: 20
         thirst-level: 20
-        player-hidden: false
         profile-hidden: false
         name-hidden: false
         gender-hidden: false

@@ -19,9 +19,7 @@ package com.rpkit.characters.bukkit.database.table
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterImpl
-import com.rpkit.characters.bukkit.database.jooq.rpkit.Tables.PLAYER_CHARACTER
 import com.rpkit.characters.bukkit.database.jooq.rpkit.Tables.RPKIT_CHARACTER
-import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.race.RPKRaceProvider
 import com.rpkit.core.bukkit.util.toByteArray
 import com.rpkit.core.bukkit.util.toItemStack
@@ -36,12 +34,11 @@ import org.bukkit.Location
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 /**
  * Represents the character table.
  */
-class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBukkit): Table<RPKCharacter>(database, RPKCharacter::class) {
+class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBukkit): Table(database, "rpkit_character") {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_character.id.enabled")) {
         database.cacheManager.createCache("rpk-characters-bukkit.rpkit_character.id",
@@ -53,108 +50,58 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
 
     override fun create() {
         database.create.createTableIfNotExists(RPKIT_CHARACTER)
-                    .column(RPKIT_CHARACTER.ID, SQLDataType.INTEGER.identity(true))
-                    .column(RPKIT_CHARACTER.PLAYER_ID, SQLDataType.INTEGER)
-                    .column(RPKIT_CHARACTER.PROFILE_ID, SQLDataType.INTEGER)
-                    .column(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
-                    .column(RPKIT_CHARACTER.NAME, SQLDataType.VARCHAR(256))
-                    .column(RPKIT_CHARACTER.GENDER_ID, SQLDataType.INTEGER)
-                    .column(RPKIT_CHARACTER.AGE, SQLDataType.INTEGER)
-                    .column(RPKIT_CHARACTER.RACE_ID, SQLDataType.INTEGER)
-                    .column(RPKIT_CHARACTER.DESCRIPTION, SQLDataType.VARCHAR(1024))
-                    .column(RPKIT_CHARACTER.DEAD, SQLDataType.TINYINT.length(1))
-                    .column(RPKIT_CHARACTER.WORLD, SQLDataType.VARCHAR(256))
-                    .column(RPKIT_CHARACTER.X, SQLDataType.DOUBLE)
-                    .column(RPKIT_CHARACTER.Y, SQLDataType.DOUBLE)
-                    .column(RPKIT_CHARACTER.Z, SQLDataType.DOUBLE)
-                    .column(RPKIT_CHARACTER.YAW, SQLDataType.DOUBLE)
-                    .column(RPKIT_CHARACTER.PITCH, SQLDataType.DOUBLE)
-                    .column(RPKIT_CHARACTER.INVENTORY_CONTENTS, SQLDataType.BLOB)
-                    .column(RPKIT_CHARACTER.HELMET, SQLDataType.BLOB)
-                    .column(RPKIT_CHARACTER.CHESTPLATE, SQLDataType.BLOB)
-                    .column(RPKIT_CHARACTER.LEGGINGS, SQLDataType.BLOB)
-                    .column(RPKIT_CHARACTER.BOOTS, SQLDataType.BLOB)
-                    .column(RPKIT_CHARACTER.HEALTH, SQLDataType.DOUBLE)
-                    .column(RPKIT_CHARACTER.MAX_HEALTH, SQLDataType.DOUBLE)
-                    .column(RPKIT_CHARACTER.MANA, SQLDataType.INTEGER)
-                    .column(RPKIT_CHARACTER.MAX_MANA, SQLDataType.INTEGER)
-                    .column(RPKIT_CHARACTER.FOOD_LEVEL, SQLDataType.INTEGER)
-                    .column(RPKIT_CHARACTER.THIRST_LEVEL, SQLDataType.INTEGER)
-                    .column(RPKIT_CHARACTER.PLAYER_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .column(RPKIT_CHARACTER.PROFILE_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .column(RPKIT_CHARACTER.NAME_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .column(RPKIT_CHARACTER.GENDER_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .column(RPKIT_CHARACTER.AGE_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .column(RPKIT_CHARACTER.RACE_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .column(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, SQLDataType.TINYINT.length(1))
+                    .column(RPKIT_CHARACTER.ID)
+                    .column(RPKIT_CHARACTER.PROFILE_ID)
+                    .column(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID)
+                    .column(RPKIT_CHARACTER.NAME)
+                    .column(RPKIT_CHARACTER.GENDER)
+                    .column(RPKIT_CHARACTER.AGE)
+                    .column(RPKIT_CHARACTER.RACE_ID)
+                    .column(RPKIT_CHARACTER.DESCRIPTION)
+                    .column(RPKIT_CHARACTER.DEAD)
+                    .column(RPKIT_CHARACTER.WORLD)
+                    .column(RPKIT_CHARACTER.X)
+                    .column(RPKIT_CHARACTER.Y)
+                    .column(RPKIT_CHARACTER.Z)
+                    .column(RPKIT_CHARACTER.YAW)
+                    .column(RPKIT_CHARACTER.PITCH)
+                    .column(RPKIT_CHARACTER.INVENTORY_CONTENTS)
+                    .column(RPKIT_CHARACTER.HELMET)
+                    .column(RPKIT_CHARACTER.CHESTPLATE)
+                    .column(RPKIT_CHARACTER.LEGGINGS)
+                    .column(RPKIT_CHARACTER.BOOTS)
+                    .column(RPKIT_CHARACTER.HEALTH)
+                    .column(RPKIT_CHARACTER.MAX_HEALTH)
+                    .column(RPKIT_CHARACTER.MANA)
+                    .column(RPKIT_CHARACTER.MAX_MANA)
+                    .column(RPKIT_CHARACTER.FOOD_LEVEL)
+                    .column(RPKIT_CHARACTER.THIRST_LEVEL)
+                    .column(RPKIT_CHARACTER.PROFILE_HIDDEN)
+                    .column(RPKIT_CHARACTER.NAME_HIDDEN)
+                    .column(RPKIT_CHARACTER.GENDER_HIDDEN)
+                    .column(RPKIT_CHARACTER.AGE_HIDDEN)
+                    .column(RPKIT_CHARACTER.RACE_HIDDEN)
+                    .column(RPKIT_CHARACTER.DESCRIPTION_HIDDEN)
                     .constraints(
                             constraint("pk_rpkit_character").primaryKey(RPKIT_CHARACTER.ID)
                     )
                     .execute()
-        database.create
-                .createTableIfNotExists(PLAYER_CHARACTER)
-                .column(PLAYER_CHARACTER.PLAYER_ID, SQLDataType.INTEGER)
-                .column(PLAYER_CHARACTER.CHARACTER_ID, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("uk_player_character").unique(PLAYER_CHARACTER.PLAYER_ID)
-                )
-                .execute()
     }
 
     override fun applyMigrations() {
         if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.3.0")
-        }
-        if (database.getTableVersion(this) == "0.1.0") {
-            database.setTableVersion(this, "0.1.1")
-        }
-        if (database.getTableVersion(this) == "0.1.1") {
-            database.setTableVersion(this, "0.1.2")
-        }
-        if (database.getTableVersion(this) == "0.1.2") {
-            database.create.alterTable(RPKIT_CHARACTER)
-                    .addColumn(RPKIT_CHARACTER.PLAYER_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .execute()
-            database.create.alterTable(RPKIT_CHARACTER)
-                    .addColumn(RPKIT_CHARACTER.NAME_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .execute()
-            database.create.alterTable(RPKIT_CHARACTER)
-                    .addColumn(RPKIT_CHARACTER.GENDER_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .execute()
-            database.create.alterTable(RPKIT_CHARACTER)
-                    .addColumn(RPKIT_CHARACTER.AGE_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .execute()
-            database.create.alterTable(RPKIT_CHARACTER)
-                    .addColumn(RPKIT_CHARACTER.RACE_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .execute()
-            database.create.alterTable(RPKIT_CHARACTER)
-                    .addColumn(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .execute()
-            database.setTableVersion(this, "0.4.0")
-        }
-        if (database.getTableVersion(this) == "0.4.0") {
-            database.create.alterTable(RPKIT_CHARACTER)
-                    .addColumn(RPKIT_CHARACTER.PROFILE_ID, SQLDataType.INTEGER)
-                    .execute()
-            database.create.alterTable(RPKIT_CHARACTER)
-                    .addColumn(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
-                    .execute()
-            database.create.alterTable(RPKIT_CHARACTER)
-                    .addColumn(RPKIT_CHARACTER.PROFILE_HIDDEN, SQLDataType.TINYINT.length(1))
-                    .execute()
-            database.setTableVersion(this, "1.3.0")
+            database.setTableVersion(this, "2.0.0")
         }
     }
 
-    override fun insert(entity: RPKCharacter): Int {
+    fun insert(entity: RPKCharacter): Int {
         database.create
                 .insertInto(
                         RPKIT_CHARACTER,
-                        RPKIT_CHARACTER.PLAYER_ID,
                         RPKIT_CHARACTER.PROFILE_ID,
                         RPKIT_CHARACTER.MINECRAFT_PROFILE_ID,
                         RPKIT_CHARACTER.NAME,
-                        RPKIT_CHARACTER.GENDER_ID,
+                        RPKIT_CHARACTER.GENDER,
                         RPKIT_CHARACTER.AGE,
                         RPKIT_CHARACTER.RACE_ID,
                         RPKIT_CHARACTER.DESCRIPTION,
@@ -176,7 +123,6 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                         RPKIT_CHARACTER.MAX_MANA,
                         RPKIT_CHARACTER.FOOD_LEVEL,
                         RPKIT_CHARACTER.THIRST_LEVEL,
-                        RPKIT_CHARACTER.PLAYER_HIDDEN,
                         RPKIT_CHARACTER.PROFILE_HIDDEN,
                         RPKIT_CHARACTER.NAME_HIDDEN,
                         RPKIT_CHARACTER.GENDER_HIDDEN,
@@ -188,7 +134,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                         entity.profile?.id,
                         entity.minecraftProfile?.id,
                         entity.name,
-                        entity.gender?.id,
+                        entity.gender,
                         entity.age,
                         entity.race?.id,
                         entity.description,
@@ -210,7 +156,6 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                         entity.maxMana,
                         entity.foodLevel,
                         entity.thirstLevel,
-                        entity.isPlayerHidden,
                         entity.isProfileHidden,
                         entity.isNameHidden,
                         entity.isGenderHidden,
@@ -225,23 +170,23 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
         return id
     }
 
-    override fun update(entity: RPKCharacter) {
+    fun update(entity: RPKCharacter) {
         database.create
                 .update(RPKIT_CHARACTER)
                 .set(RPKIT_CHARACTER.PROFILE_ID, entity.profile?.id)
                 .set(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id)
                 .set(RPKIT_CHARACTER.NAME, entity.name)
-                .set(RPKIT_CHARACTER.GENDER_ID, entity.gender?.id)
+                .set(RPKIT_CHARACTER.GENDER, entity.gender)
                 .set(RPKIT_CHARACTER.AGE, entity.age)
                 .set(RPKIT_CHARACTER.RACE_ID, entity.race?.id)
                 .set(RPKIT_CHARACTER.DESCRIPTION, entity.description)
-                .set(RPKIT_CHARACTER.DEAD, if (entity.isDead) 1.toByte() else 0.toByte())
+                .set(RPKIT_CHARACTER.DEAD, entity.isDead)
                 .set(RPKIT_CHARACTER.WORLD, entity.location.world?.name)
                 .set(RPKIT_CHARACTER.X, entity.location.x)
                 .set(RPKIT_CHARACTER.Y, entity.location.y)
                 .set(RPKIT_CHARACTER.Z, entity.location.z)
-                .set(RPKIT_CHARACTER.YAW, entity.location.yaw.toDouble())
-                .set(RPKIT_CHARACTER.PITCH, entity.location.pitch.toDouble())
+                .set(RPKIT_CHARACTER.YAW, entity.location.yaw)
+                .set(RPKIT_CHARACTER.PITCH, entity.location.pitch)
                 .set(RPKIT_CHARACTER.INVENTORY_CONTENTS, entity.inventoryContents.toByteArray())
                 .set(RPKIT_CHARACTER.HELMET, entity.helmet?.toByteArray())
                 .set(RPKIT_CHARACTER.CHESTPLATE, entity.chestplate?.toByteArray())
@@ -253,30 +198,28 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .set(RPKIT_CHARACTER.MAX_MANA, entity.maxMana)
                 .set(RPKIT_CHARACTER.FOOD_LEVEL, entity.foodLevel)
                 .set(RPKIT_CHARACTER.THIRST_LEVEL, entity.thirstLevel)
-                .set(RPKIT_CHARACTER.PLAYER_HIDDEN, if (entity.isPlayerHidden) 1.toByte() else 0.toByte())
-                .set(RPKIT_CHARACTER.PROFILE_HIDDEN, if (entity.isProfileHidden) 1.toByte() else 0.toByte())
-                .set(RPKIT_CHARACTER.NAME_HIDDEN, if (entity.isNameHidden) 1.toByte() else 0.toByte())
-                .set(RPKIT_CHARACTER.GENDER_HIDDEN, if (entity.isGenderHidden) 1.toByte() else 0.toByte())
-                .set(RPKIT_CHARACTER.AGE_HIDDEN, if (entity.isAgeHidden) 1.toByte() else 0.toByte())
-                .set(RPKIT_CHARACTER.RACE_HIDDEN, if (entity.isRaceHidden) 1.toByte() else 0.toByte())
-                .set(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, if (entity.isDescriptionHidden) 1.toByte() else 0.toByte())
+                .set(RPKIT_CHARACTER.PROFILE_HIDDEN, entity.isProfileHidden)
+                .set(RPKIT_CHARACTER.NAME_HIDDEN, entity.isNameHidden)
+                .set(RPKIT_CHARACTER.GENDER_HIDDEN, entity.isGenderHidden)
+                .set(RPKIT_CHARACTER.AGE_HIDDEN, entity.isAgeHidden)
+                .set(RPKIT_CHARACTER.RACE_HIDDEN, entity.isRaceHidden)
+                .set(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, entity.isDescriptionHidden)
                 .where(RPKIT_CHARACTER.ID.eq(entity.id))
                 .execute()
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKCharacter? {
+    operator fun get(id: Int): RPKCharacter? {
         if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
             val result = database.create
                     .select(
                         RPKIT_CHARACTER.ID,
-                        RPKIT_CHARACTER.PLAYER_ID,
                         RPKIT_CHARACTER.PROFILE_ID,
                         RPKIT_CHARACTER.MINECRAFT_PROFILE_ID,
                         RPKIT_CHARACTER.NAME,
-                        RPKIT_CHARACTER.GENDER_ID,
+                        RPKIT_CHARACTER.GENDER,
                         RPKIT_CHARACTER.AGE,
                         RPKIT_CHARACTER.RACE_ID,
                         RPKIT_CHARACTER.DESCRIPTION,
@@ -298,7 +241,6 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                         RPKIT_CHARACTER.MAX_MANA,
                         RPKIT_CHARACTER.FOOD_LEVEL,
                         RPKIT_CHARACTER.THIRST_LEVEL,
-                        RPKIT_CHARACTER.PLAYER_HIDDEN,
                         RPKIT_CHARACTER.PROFILE_HIDDEN,
                         RPKIT_CHARACTER.NAME_HIDDEN,
                         RPKIT_CHARACTER.GENDER_HIDDEN,
@@ -312,53 +254,49 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
 
             val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val genderProvider = plugin.core.serviceManager.getServiceProvider(RPKGenderProvider::class)
             val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
-            val profileId = result.get(RPKIT_CHARACTER.PROFILE_ID)
+            val profileId = result[RPKIT_CHARACTER.PROFILE_ID]
             val profile = if (profileId == null) null else profileProvider.getProfile(profileId)
-            val minecraftProfileId = result.get(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID)
+            val minecraftProfileId = result[RPKIT_CHARACTER.MINECRAFT_PROFILE_ID]
             val minecraftProfile = if (minecraftProfileId == null) null else minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
-            val genderId = result.get(RPKIT_CHARACTER.GENDER_ID)
-            val gender = if (genderId == null) null else genderProvider.getGender(genderId)
-            val raceId = result.get(RPKIT_CHARACTER.RACE_ID)
+            val raceId = result[RPKIT_CHARACTER.RACE_ID]
             val race = if (raceId == null) null else raceProvider.getRace(raceId)
             val character = RPKCharacterImpl(
                     plugin = plugin,
-                    id = result.get(RPKIT_CHARACTER.ID),
+                    id = result[RPKIT_CHARACTER.ID],
                     profile = profile,
                     minecraftProfile = minecraftProfile,
-                    name = result.get(RPKIT_CHARACTER.NAME),
-                    gender = gender,
-                    age = result.get(RPKIT_CHARACTER.AGE),
+                    name = result[RPKIT_CHARACTER.NAME],
+                    gender = result[RPKIT_CHARACTER.GENDER],
+                    age = result[RPKIT_CHARACTER.AGE],
                     race = race,
-                    description = result.get(RPKIT_CHARACTER.DESCRIPTION),
-                    dead = result.get(RPKIT_CHARACTER.DEAD) == 1.toByte(),
+                    description = result[RPKIT_CHARACTER.DESCRIPTION],
+                    dead = result[RPKIT_CHARACTER.DEAD],
                     location = Location(
-                            plugin.server.getWorld(result.get(RPKIT_CHARACTER.WORLD)),
-                            result.get(RPKIT_CHARACTER.X),
-                            result.get(RPKIT_CHARACTER.Y),
-                            result.get(RPKIT_CHARACTER.Z),
-                            result.get(RPKIT_CHARACTER.YAW).toFloat(),
-                            result.get(RPKIT_CHARACTER.PITCH).toFloat()
+                            plugin.server.getWorld(result[RPKIT_CHARACTER.WORLD]),
+                            result[RPKIT_CHARACTER.X],
+                            result[RPKIT_CHARACTER.Y],
+                            result[RPKIT_CHARACTER.Z],
+                            result[RPKIT_CHARACTER.YAW].toFloat(),
+                            result[RPKIT_CHARACTER.PITCH].toFloat()
                     ),
-                    inventoryContents = result.get(RPKIT_CHARACTER.INVENTORY_CONTENTS)?.toItemStackArray() ?: emptyArray(),
-                    helmet = result.get(RPKIT_CHARACTER.HELMET)?.toItemStack(),
-                    chestplate = result.get(RPKIT_CHARACTER.CHESTPLATE)?.toItemStack(),
-                    leggings = result.get(RPKIT_CHARACTER.LEGGINGS)?.toItemStack(),
-                    boots = result.get(RPKIT_CHARACTER.BOOTS)?.toItemStack(),
-                    health = result.get(RPKIT_CHARACTER.HEALTH),
-                    maxHealth = result.get(RPKIT_CHARACTER.MAX_HEALTH),
-                    mana = result.get(RPKIT_CHARACTER.MANA),
-                    maxMana = result.get(RPKIT_CHARACTER.MAX_MANA),
-                    foodLevel = result.get(RPKIT_CHARACTER.FOOD_LEVEL),
-                    thirstLevel = result.get(RPKIT_CHARACTER.THIRST_LEVEL),
-                    isPlayerHidden = result.get(RPKIT_CHARACTER.PLAYER_HIDDEN) == 1.toByte(),
-                    isProfileHidden = result.get(RPKIT_CHARACTER.PROFILE_HIDDEN) == 1.toByte(),
-                    isNameHidden = result.get(RPKIT_CHARACTER.NAME_HIDDEN) == 1.toByte(),
-                    isGenderHidden = result.get(RPKIT_CHARACTER.GENDER_HIDDEN) == 1.toByte(),
-                    isAgeHidden = result.get(RPKIT_CHARACTER.AGE_HIDDEN) == 1.toByte(),
-                    isRaceHidden = result.get(RPKIT_CHARACTER.RACE_HIDDEN) == 1.toByte(),
-                    isDescriptionHidden = result.get(RPKIT_CHARACTER.DESCRIPTION_HIDDEN) == 1.toByte()
+                    inventoryContents = result[RPKIT_CHARACTER.INVENTORY_CONTENTS]?.toItemStackArray() ?: emptyArray(),
+                    helmet = result[RPKIT_CHARACTER.HELMET]?.toItemStack(),
+                    chestplate = result[RPKIT_CHARACTER.CHESTPLATE]?.toItemStack(),
+                    leggings = result[RPKIT_CHARACTER.LEGGINGS]?.toItemStack(),
+                    boots = result[RPKIT_CHARACTER.BOOTS]?.toItemStack(),
+                    health = result[RPKIT_CHARACTER.HEALTH],
+                    maxHealth = result[RPKIT_CHARACTER.MAX_HEALTH],
+                    mana = result[RPKIT_CHARACTER.MANA],
+                    maxMana = result[RPKIT_CHARACTER.MAX_MANA],
+                    foodLevel = result[RPKIT_CHARACTER.FOOD_LEVEL],
+                    thirstLevel = result[RPKIT_CHARACTER.THIRST_LEVEL],
+                    isProfileHidden = result[RPKIT_CHARACTER.PROFILE_HIDDEN],
+                    isNameHidden = result[RPKIT_CHARACTER.NAME_HIDDEN],
+                    isGenderHidden = result[RPKIT_CHARACTER.GENDER_HIDDEN],
+                    isAgeHidden = result[RPKIT_CHARACTER.AGE_HIDDEN],
+                    isRaceHidden = result[RPKIT_CHARACTER.RACE_HIDDEN],
+                    isDescriptionHidden = result[RPKIT_CHARACTER.DESCRIPTION_HIDDEN]
             )
             cache?.put(id, character)
             return character
@@ -371,7 +309,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .from(RPKIT_CHARACTER)
                 .where(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
                 .fetchOne() ?: return null
-        return get(result.get(RPKIT_CHARACTER.ID))
+        return get(result[RPKIT_CHARACTER.ID])
     }
 
     fun get(profile: RPKProfile): List<RPKCharacter> {
@@ -380,7 +318,7 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .from(RPKIT_CHARACTER)
                 .where(RPKIT_CHARACTER.PROFILE_ID.eq(profile.id))
                 .fetch()
-        return results.map { result -> get(result.get(RPKIT_CHARACTER.ID)) }
+        return results.map { result -> get(result[RPKIT_CHARACTER.ID]) }
                 .filterNotNull()
     }
 
@@ -390,11 +328,11 @@ class RPKCharacterTable(database: Database, private val plugin: RPKCharactersBuk
                 .from(RPKIT_CHARACTER)
                 .where(RPKIT_CHARACTER.NAME.likeIgnoreCase("%$name%"))
                 .fetch()
-        return results.map { result -> get(result.get(RPKIT_CHARACTER.ID)) }
+        return results.map { result -> get(result[RPKIT_CHARACTER.ID]) }
                 .filterNotNull()
     }
 
-    override fun delete(entity: RPKCharacter) {
+    fun delete(entity: RPKCharacter) {
         database.create
                 .deleteFrom(RPKIT_CHARACTER)
                 .where(RPKIT_CHARACTER.ID.eq(entity.id))
