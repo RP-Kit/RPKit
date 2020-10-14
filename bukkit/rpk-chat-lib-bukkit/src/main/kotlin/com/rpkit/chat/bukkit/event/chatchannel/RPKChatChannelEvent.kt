@@ -20,7 +20,7 @@ import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.core.event.RPKEvent
 
 
-interface RPKChatChannelEvent: RPKEvent {
+interface RPKChatChannelEvent : RPKEvent {
 
     val chatChannel: RPKChatChannel?
 

@@ -27,10 +27,11 @@ class RPKBukkitChatChannelSwitchEvent(
         override val minecraftProfile: RPKMinecraftProfile,
         override val oldChannel: RPKChatChannel?,
         override var chatChannel: RPKChatChannel?
-): RPKBukkitEvent(), RPKChatChannelSwitchEvent, Cancellable {
+) : RPKBukkitEvent(), RPKChatChannelSwitchEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

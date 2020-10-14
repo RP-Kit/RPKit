@@ -19,13 +19,13 @@ package com.rpkit.chat.bukkit.speaker
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.chat.bukkit.database.table.RPKChatChannelSpeakerTable
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Provides chat channel speaker related operations.
  */
-class RPKChatChannelSpeakerProvider(private val plugin: RPKChatBukkit): ServiceProvider {
+class RPKChatChannelSpeakerService(override val plugin: RPKChatBukkit) : Service {
 
     /**
      * Gets which channel a Minecraft profile is speaking in.
@@ -35,7 +35,7 @@ class RPKChatChannelSpeakerProvider(private val plugin: RPKChatBukkit): ServiceP
      * @return The chat channel, or null if the Minecraft profile is not currently speaking
      */
     fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel? {
-        return plugin.core.database.getTable(RPKChatChannelSpeakerTable::class).get(minecraftProfile)?.chatChannel
+        return plugin.database.getTable(RPKChatChannelSpeakerTable::class).get(minecraftProfile)?.chatChannel
     }
 
     /**
@@ -45,7 +45,7 @@ class RPKChatChannelSpeakerProvider(private val plugin: RPKChatBukkit): ServiceP
      * @param chatChannel The chat channel to set
      */
     fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel?) {
-        val table = plugin.core.database.getTable(RPKChatChannelSpeakerTable::class)
+        val table = plugin.database.getTable(RPKChatChannelSpeakerTable::class)
         var chatChannelSpeaker = table.get(minecraftProfile)
         if (chatChannelSpeaker == null) {
             if (chatChannel != null) {
@@ -68,7 +68,7 @@ class RPKChatChannelSpeakerProvider(private val plugin: RPKChatBukkit): ServiceP
      * @param minecraftProfile The Minecraft profile to stop speaking
      */
     fun removeMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile) {
-        val table = plugin.core.database.getTable(RPKChatChannelSpeakerTable::class)
+        val table = plugin.database.getTable(RPKChatChannelSpeakerTable::class)
         val chatChannelSpeaker = table.get(minecraftProfile)
         if (chatChannelSpeaker != null) {
             table.delete(chatChannelSpeaker)

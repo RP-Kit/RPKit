@@ -24,7 +24,7 @@ import io.mockk.mockk
 import org.bukkit.World
 import org.bukkit.block.Block
 
-class RPKSelectionImplTests: WordSpec() {
+class RPKSelectionImplTests : WordSpec() {
 
     init {
         val world = mockk<World>()
@@ -41,7 +41,6 @@ class RPKSelectionImplTests: WordSpec() {
         every { maxPosition.z } returns 3
         every { world.getBlockAt(3, 3, 3) } returns maxPosition
         val selection = RPKSelectionImpl(
-                0,
                 mockk(),
                 world,
                 minPosition,

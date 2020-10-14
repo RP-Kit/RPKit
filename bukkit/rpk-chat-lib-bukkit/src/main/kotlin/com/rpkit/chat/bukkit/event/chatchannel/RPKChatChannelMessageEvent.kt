@@ -22,7 +22,7 @@ import com.rpkit.players.bukkit.event.profile.RPKThinProfileEvent
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 
 
-interface RPKChatChannelMessageEvent: RPKChatChannelEvent, RPKMinecraftProfileEvent, RPKThinProfileEvent {
+interface RPKChatChannelMessageEvent : RPKChatChannelEvent, RPKMinecraftProfileEvent, RPKThinProfileEvent {
 
     override val profile: RPKThinProfile
     override var chatChannel: RPKChatChannel

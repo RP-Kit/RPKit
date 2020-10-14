@@ -17,7 +17,6 @@
 package com.rpkit.payments.bukkit.group.invite
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 
 /**
@@ -27,7 +26,6 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroup
  * @property character The character
  */
 class RPKPaymentGroupInvite(
-        override var id: Int = 0,
         val paymentGroup: RPKPaymentGroup,
         val character: RPKCharacter
-): Entity
+)

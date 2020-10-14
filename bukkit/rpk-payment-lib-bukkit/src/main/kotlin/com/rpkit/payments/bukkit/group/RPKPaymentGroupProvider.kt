@@ -16,15 +16,15 @@
 
 package com.rpkit.payments.bukkit.group
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
  * Provides payment group related operations.
  */
-interface RPKPaymentGroupProvider: ServiceProvider {
+interface RPKPaymentGroupService : Service {
 
     /**
-     * A list of payment groups currently managed by this payment group provider.
+     * A list of payment groups currently managed by this payment group service.
      * This is immutable, payment groups must be added and removed using [addPaymentGroup] and [removePaymentGroup].
      */
     val paymentGroups: List<RPKPaymentGroup>
@@ -46,14 +46,14 @@ interface RPKPaymentGroupProvider: ServiceProvider {
     fun getPaymentGroup(name: String): RPKPaymentGroup?
 
     /**
-     * Adds a payment group to be tracked by this payment group provider.
+     * Adds a payment group to be tracked by this payment group service.
      *
      * @param paymentGroup The payment group to add
      */
     fun addPaymentGroup(paymentGroup: RPKPaymentGroup)
 
     /**
-     * Removes a payment group from being tracked by this payment group provider.
+     * Removes a payment group from being tracked by this payment group service.
      *
      * @param paymentGroup The payment group to remove
      */

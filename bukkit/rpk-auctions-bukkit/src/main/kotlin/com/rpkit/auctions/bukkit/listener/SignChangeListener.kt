@@ -17,8 +17,9 @@
 package com.rpkit.auctions.bukkit.listener
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
-import com.rpkit.auctions.bukkit.auction.RPKAuctionProvider
+import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.auctions.bukkit.bid.RPKBid
+import com.rpkit.core.service.Services
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -27,7 +28,7 @@ import org.bukkit.event.block.SignChangeEvent
 /**
  * Sign change listener for auction signs.
  */
-class SignChangeListener(private val plugin: RPKAuctionsBukkit): Listener {
+class SignChangeListener(private val plugin: RPKAuctionsBukkit) : Listener {
 
     @EventHandler
     fun onSignChange(event: SignChangeEvent) {
@@ -39,14 +40,18 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit): Listener {
                 return
             }
             try {
-                val auctionProvider = plugin.core.serviceManager.getServiceProvider(RPKAuctionProvider::class)
+                val auctionService = Services[RPKAuctionService::class]
+                if (auctionService == null) {
+                    event.player.sendMessage(plugin.messages["no-auction-service"])
+                    return
+                }
                 val auctionId = event.getLine(1)?.toInt()
                 if (auctionId == null) {
                     event.block.breakNaturally()
                     event.player.sendMessage(plugin.messages["auction-sign-invalid-id-not-a-number"])
                     return
                 }
-                val auction = auctionProvider.getAuction(auctionId)
+                val auction = auctionService.getAuction(auctionId)
                 if (auction == null) {
                     event.block.breakNaturally()
                     event.player.sendMessage(plugin.messages["auction-sign-invalid-auction-does-not-exist"])
@@ -56,7 +61,7 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit): Listener {
                     event.setLine(3, ((auction.bids
                             .sortedByDescending(RPKBid::amount)
                             .firstOrNull()
-                            ?.amount?:auction.startPrice) + auction.minimumBidIncrement).toString())
+                            ?.amount ?: auction.startPrice) + auction.minimumBidIncrement).toString())
                 }
             } catch (exception: NumberFormatException) {
                 event.block.breakNaturally()

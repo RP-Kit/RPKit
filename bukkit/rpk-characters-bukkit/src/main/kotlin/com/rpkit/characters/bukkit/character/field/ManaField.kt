@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * Character card field for mana.
  */
-class ManaField: CharacterCardField {
+class ManaField : CharacterCardField {
 
     override val name = "mana"
     override fun get(character: RPKCharacter): String {

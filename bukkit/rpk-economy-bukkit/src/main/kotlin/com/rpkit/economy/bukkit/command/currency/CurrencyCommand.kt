@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Currency command.
  * Parent command for all currency management commands.
  */
-class CurrencyCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
+class CurrencyCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
 
     private val currencyAddCommand = CurrencyAddCommand(plugin)
     private val currencyRemoveCommand = CurrencyRemoveCommand(plugin)

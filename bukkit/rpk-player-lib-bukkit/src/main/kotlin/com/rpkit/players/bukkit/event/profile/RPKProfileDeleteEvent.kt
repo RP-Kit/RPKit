@@ -19,7 +19,7 @@ package com.rpkit.players.bukkit.event.profile
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 
-interface RPKProfileDeleteEvent: RPKProfileEvent {
+interface RPKProfileDeleteEvent : RPKProfileEvent {
 
     override val profile: RPKProfile
 

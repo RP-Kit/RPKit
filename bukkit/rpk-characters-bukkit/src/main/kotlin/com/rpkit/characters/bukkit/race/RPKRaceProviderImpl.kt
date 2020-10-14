@@ -20,31 +20,23 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.table.RPKRaceTable
 
 /**
- * Race provider implementation.
+ * Race service implementation.
  */
-class RPKRaceProviderImpl(private val plugin: RPKCharactersBukkit): RPKRaceProvider {
+class RPKRaceServiceImpl(override val plugin: RPKCharactersBukkit) : RPKRaceService {
 
-    override fun getRace(id: Int): RPKRace? {
-        return plugin.core.database.getTable(RPKRaceTable::class)[id]
-    }
+    override fun getRace(id: Int): RPKRace? = plugin.database.getTable(RPKRaceTable::class)[id]
 
-    override fun getRace(name: String): RPKRace? {
-        val table = plugin.core.database.getTable(RPKRaceTable::class)
-        if (table is RPKRaceTable) {
-            return table[name]
-        }
-        return null
-    }
+    override fun getRace(name: String): RPKRace? = plugin.database.getTable(RPKRaceTable::class)[name]
 
     override val races: Collection<RPKRace>
-        get() = plugin.core.database.getTable(RPKRaceTable::class).getAll()
+        get() = plugin.database.getTable(RPKRaceTable::class).getAll()
 
     override fun addRace(race: RPKRace) {
-        plugin.core.database.getTable(RPKRaceTable::class).insert(race)
+        plugin.database.getTable(RPKRaceTable::class).insert(race)
     }
 
     override fun removeRace(race: RPKRace) {
-        plugin.core.database.getTable(RPKRaceTable::class).delete(race)
+        plugin.database.getTable(RPKRaceTable::class).delete(race)
     }
 
 }

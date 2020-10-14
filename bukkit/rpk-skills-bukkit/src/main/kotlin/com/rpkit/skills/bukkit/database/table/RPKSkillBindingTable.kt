@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,20 @@
 package com.rpkit.skills.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.util.toByteArray
 import com.rpkit.core.bukkit.util.toItemStack
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.RPKSkillsBukkit
-import com.rpkit.skills.bukkit.database.jooq.rpkit.Tables.RPKIT_SKILL_BINDING
+import com.rpkit.skills.bukkit.database.jooq.Tables.RPKIT_SKILL_BINDING
 import com.rpkit.skills.bukkit.skills.RPKSkillBinding
-import com.rpkit.skills.bukkit.skills.RPKSkillProvider
+import com.rpkit.skills.bukkit.skills.RPKSkillService
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
-
-class RPKSkillBindingTable(database: Database, private val plugin: RPKSkillsBukkit): Table<RPKSkillBinding>(database, RPKSkillBinding::class) {
+class RPKSkillBindingTable(private val database: Database, private val plugin: RPKSkillsBukkit): Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_skill_binding.id.enabled")) {
         database.cacheManager.createCache("rpk-skills-bukkit.rpkit_skill_binding.id", CacheConfigurationBuilder
@@ -42,26 +40,7 @@ class RPKSkillBindingTable(database: Database, private val plugin: RPKSkillsBukk
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_SKILL_BINDING)
-                .column(RPKIT_SKILL_BINDING.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_SKILL_BINDING.CHARACTER_ID, SQLDataType.INTEGER)
-                .column(RPKIT_SKILL_BINDING.ITEM, SQLDataType.BLOB)
-                .column(RPKIT_SKILL_BINDING.SKILL_NAME, SQLDataType.VARCHAR(256))
-                .constraints(
-                        constraint("pk_rpkit_skill_binding").primaryKey(RPKIT_SKILL_BINDING.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.8.0")
-        }
-    }
-
-    override fun insert(entity: RPKSkillBinding): Int {
+    fun insert(entity: RPKSkillBinding) {
         database.create
                 .insertInto(
                         RPKIT_SKILL_BINDING,
@@ -75,23 +54,18 @@ class RPKSkillBindingTable(database: Database, private val plugin: RPKSkillsBukk
                         entity.skill.name
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
     }
 
-    override fun update(entity: RPKSkillBinding) {
+    fun update(entity: RPKSkillBinding) {
         database.create.update(RPKIT_SKILL_BINDING)
                 .set(RPKIT_SKILL_BINDING.CHARACTER_ID, entity.character.id)
                 .set(RPKIT_SKILL_BINDING.ITEM, entity.item.toByteArray())
                 .set(RPKIT_SKILL_BINDING.SKILL_NAME, entity.skill.name)
                 .where(RPKIT_SKILL_BINDING.ID.eq(entity.id))
                 .execute()
-        cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKSkillBinding? {
+    fun get(id: Int): RPKSkillBinding? {
         if (cache?.containsKey(id) == true) {
             return cache[id]
         }
@@ -104,12 +78,12 @@ class RPKSkillBindingTable(database: Database, private val plugin: RPKSkillsBukk
                 .from(RPKIT_SKILL_BINDING)
                 .where(RPKIT_SKILL_BINDING.ID.eq(id))
                 .fetchOne() ?: return null
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+        val characterService = Services[RPKCharacterService::class] ?: return null
         val characterId = result[RPKIT_SKILL_BINDING.CHARACTER_ID]
-        val character = characterProvider.getCharacter(characterId)
-        val skillProvider = plugin.core.serviceManager.getServiceProvider(RPKSkillProvider::class)
+        val character = characterService.getCharacter(characterId)
+        val skillService = Services[RPKSkillService::class] ?: return null
         val skillName = result[RPKIT_SKILL_BINDING.SKILL_NAME]
-        val skill = skillProvider.getSkill(skillName)
+        val skill = skillService.getSkill(skillName)
         if (character != null && skill != null) {
             val skillBinding = RPKSkillBinding(
                     id,
@@ -131,18 +105,40 @@ class RPKSkillBindingTable(database: Database, private val plugin: RPKSkillsBukk
 
     fun get(character: RPKCharacter): List<RPKSkillBinding> {
         val results = database.create
-                .select(RPKIT_SKILL_BINDING.ID)
+                .select(
+                        RPKIT_SKILL_BINDING.ID,
+                        RPKIT_SKILL_BINDING.CHARACTER_ID,
+                        RPKIT_SKILL_BINDING.ITEM,
+                        RPKIT_SKILL_BINDING.SKILL_NAME
+                )
                 .from(RPKIT_SKILL_BINDING)
                 .where(RPKIT_SKILL_BINDING.CHARACTER_ID.eq(character.id))
-                .fetch()
-        return results.mapNotNull { result -> get(result[RPKIT_SKILL_BINDING.ID]) }
+                .fetch() ?: return emptyList()
+        val skillService = Services[RPKSkillService::class] ?: return emptyList()
+        return results.mapNotNull { result ->
+            val skillName = result[RPKIT_SKILL_BINDING.SKILL_NAME]
+            val skill = skillService.getSkill(skillName)
+            if (skill != null) {
+                val id = result[RPKIT_SKILL_BINDING.ID]
+                val skillBinding = RPKSkillBinding(
+                        id,
+                        character,
+                        result[RPKIT_SKILL_BINDING.ITEM].toItemStack(),
+                        skill
+                )
+                cache?.put(id, skillBinding)
+                skillBinding
+            } else {
+                null
+            }
+        }
     }
 
-    override fun delete(entity: RPKSkillBinding) {
+    fun delete(entity: RPKSkillBinding) {
         database.create
                 .deleteFrom(RPKIT_SKILL_BINDING)
-                .where(RPKIT_SKILL_BINDING.ID.eq(entity.id))
+                .where(RPKIT_SKILL_BINDING.CHARACTER_ID.eq(entity.character.id))
+                .and(RPKIT_SKILL_BINDING.ITEM.eq(entity.item.toByteArray()))
                 .execute()
-        cache?.remove(entity.id)
     }
 }

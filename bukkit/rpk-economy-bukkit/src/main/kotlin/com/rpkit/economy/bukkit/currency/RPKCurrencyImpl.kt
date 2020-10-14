@@ -22,11 +22,11 @@ import org.bukkit.Material
  * Currency implementation.
  */
 class RPKCurrencyImpl(
-        override var id: Int = 0,
+        override var id: Int? = null,
         override var name: String,
         override var nameSingular: String,
         override var namePlural: String,
         override var rate: Double,
         override var defaultAmount: Int,
         override var material: Material
-): RPKCurrency
+) : RPKCurrency

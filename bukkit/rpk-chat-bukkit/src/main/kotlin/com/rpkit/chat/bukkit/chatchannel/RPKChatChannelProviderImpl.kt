@@ -27,20 +27,21 @@ import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelCreateEvent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelDeleteEvent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelSwitchEvent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelUpdateEvent
-import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
+import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import java.awt.Color
 
 /**
- * Chat channel provider implementation.
+ * Chat channel service implementation.
  */
-class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChannelProvider {
+class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatChannelService {
 
     override val chatChannels: MutableList<RPKChatChannel> = plugin.config.getConfigurationSection("chat-channels")
-                ?.getKeys(false)
-                ?.mapIndexed { id, channelName -> RPKChatChannelImpl(
+            ?.getKeys(false)
+            ?.map { channelName ->
+                RPKChatChannelImpl(
                         plugin = plugin,
-                        id = id,
                         name = channelName,
                         color = Color(
                                 plugin.config.getInt("chat-channels.$channelName.color.red"),
@@ -54,13 +55,10 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
                         undirectedPipeline = plugin.config.getList("chat-channels.$channelName.undirected-pipeline") as List<UndirectedPipelineComponent>,
                         matchPattern = plugin.config.getString("chat-channels.$channelName.match-pattern"),
                         isJoinedByDefault = plugin.config.getBoolean("chat-channels.$channelName.joined-by-default")
-                ) }
-                ?.toMutableList<RPKChatChannel>()
-                ?: mutableListOf()
-
-    override fun getChatChannel(id: Int): RPKChatChannel? {
-        return chatChannels[id]
-    }
+                )
+            }
+            ?.toMutableList<RPKChatChannel>()
+            ?: mutableListOf()
 
     override fun getChatChannel(name: String): RPKChatChannel? {
         return chatChannels.firstOrNull { it.name == name }
@@ -86,7 +84,7 @@ class RPKChatChannelProviderImpl(private val plugin: RPKChatBukkit): RPKChatChan
     }
 
     override fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel? {
-        return plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).getMinecraftProfileChannel(minecraftProfile)
+        return Services[RPKChatChannelSpeakerService::class]?.getMinecraftProfileChannel(minecraftProfile)
     }
 
     override fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?, isAsync: Boolean) {

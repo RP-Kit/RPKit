@@ -21,7 +21,7 @@ import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 
-interface RPKChatChannelUnmuteEvent: RPKChatChannelEvent, RPKMinecraftProfileEvent {
+interface RPKChatChannelUnmuteEvent : RPKChatChannelEvent, RPKMinecraftProfileEvent {
 
     override val minecraftProfile: RPKMinecraftProfile
     override val chatChannel: RPKChatChannel

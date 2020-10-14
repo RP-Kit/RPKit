@@ -16,20 +16,22 @@
 
 package com.rpkit.itemquality.bukkit.listener
 
+import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.RPKItemQualityBukkit
-import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityProvider
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerItemDamageEvent
+import kotlin.math.roundToInt
 
 
-class PlayerItemDamageListener(private val plugin: RPKItemQualityBukkit): Listener {
+class PlayerItemDamageListener(private val plugin: RPKItemQualityBukkit) : Listener {
 
     @EventHandler
     fun onPlayerItemDamage(event: PlayerItemDamageEvent) {
-        val itemQualityProvider = plugin.core.serviceManager.getServiceProvider(RPKItemQualityProvider::class)
-        val itemQuality = itemQualityProvider.getItemQuality(event.item) ?: return
-        event.damage = Math.round(event.damage / itemQuality.durabilityModifier).toInt()
+        val itemQualityService = Services[RPKItemQualityService::class]
+        val itemQuality = itemQualityService?.getItemQuality(event.item) ?: return
+        event.damage = (event.damage / itemQuality.durabilityModifier).roundToInt()
     }
 
 }

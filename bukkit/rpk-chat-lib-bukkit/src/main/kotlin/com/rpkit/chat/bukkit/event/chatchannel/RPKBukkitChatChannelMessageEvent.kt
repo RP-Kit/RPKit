@@ -30,10 +30,11 @@ class RPKBukkitChatChannelMessageEvent(
         override var chatChannel: RPKChatChannel,
         override val message: String,
         isAsync: Boolean = false
-): RPKBukkitEvent(isAsync), RPKChatChannelMessageEvent, Cancellable {
+) : RPKBukkitEvent(isAsync), RPKChatChannelMessageEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

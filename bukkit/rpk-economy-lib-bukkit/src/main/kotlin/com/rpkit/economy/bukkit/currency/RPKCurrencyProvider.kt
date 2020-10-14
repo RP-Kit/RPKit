@@ -16,15 +16,15 @@
 
 package com.rpkit.economy.bukkit.currency
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
  * Provides currency related operations.
  */
-interface RPKCurrencyProvider: ServiceProvider {
+interface RPKCurrencyService : Service {
 
     /**
-     * A collection of all currencies currently managed by this currency provider.
+     * A collection of all currencies currently managed by this currency service.
      * The collection is immutable, to add or remove currencies, [addCurrency] or [removeCurrency] should be used.
      */
     val currencies: Collection<RPKCurrency>

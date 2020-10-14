@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,18 @@
 
 package com.rpkit.skills.bukkit.command
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.skills.bukkit.RPKSkillsBukkit
-import com.rpkit.skills.bukkit.skills.RPKSkillProvider
+import com.rpkit.skills.bukkit.skills.RPKSkillService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class UnbindSkillCommand(private val plugin: RPKSkillsBukkit): CommandExecutor {
+class UnbindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.skills.command.unbindskill")) {
             sender.sendMessage(plugin.messages["no-permission-unbind-skill"])
@@ -36,26 +37,38 @@ class UnbindSkillCommand(private val plugin: RPKSkillsBukkit): CommandExecutor {
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val character = characterProvider.getActiveCharacter(minecraftProfile)
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
-        val skillProvider = plugin.core.serviceManager.getServiceProvider(RPKSkillProvider::class)
+        val skillService = Services[RPKSkillService::class]
+        if (skillService == null) {
+            sender.sendMessage(plugin.messages["no-skill-service"])
+            return true
+        }
         val item = sender.inventory.itemInMainHand
-        val skill = skillProvider.getSkillBinding(character, item)
+        val skill = skillService.getSkillBinding(character, item)
         if (skill == null) {
             sender.sendMessage(plugin.messages["unbind-skill-invalid-no-binding"])
             return true
         }
-        skillProvider.setSkillBinding(character, item, null)
+        skillService.setSkillBinding(character, item, null)
         sender.sendMessage(plugin.messages["unbind-skill-valid", mapOf(
                 "character" to character.name,
                 "item" to item.type.toString().toLowerCase().replace('_', ' '),

@@ -16,41 +16,35 @@
 
 package com.rpkit.unconsciousness.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
-import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import org.bukkit.Location
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
 
 
-class PlayerMoveListener(private val plugin: RPKUnconsciousnessBukkit): Listener {
+class PlayerMoveListener : Listener {
 
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val unconsciousnessProvider = plugin.core.serviceManager.getServiceProvider(RPKUnconsciousnessProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
-        if (minecraftProfile != null) {
-            val character = characterProvider.getActiveCharacter(minecraftProfile)
-            if (character != null) {
-                if (unconsciousnessProvider.isUnconscious(character)) {
-                    if (event.from.blockX != event.to?.blockX || event.from.blockZ != event.to?.blockZ) {
-                        event.player.teleport(Location(
-                                event.from.world,
-                                event.from.blockX + 0.5,
-                                event.from.blockY + 0.5,
-                                event.from.blockZ + 0.5,
-                                event.to?.yaw ?: event.from.yaw,
-                                event.to?.pitch ?: event.from.pitch
-                        ))
-                    }
-                }
-            }
-        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val characterService = Services[RPKCharacterService::class] ?: return
+        val unconsciousnessService = Services[RPKUnconsciousnessService::class] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        if (!unconsciousnessService.isUnconscious(character)) return
+        if (event.from.blockX == event.to?.blockX && event.from.blockZ == event.to?.blockZ) return
+        event.player.teleport(Location(
+                event.from.world,
+                event.from.blockX + 0.5,
+                event.from.blockY + 0.5,
+                event.from.blockZ + 0.5,
+                event.to?.yaw ?: event.from.yaw,
+                event.to?.pitch ?: event.from.pitch
+        ))
     }
 
 }

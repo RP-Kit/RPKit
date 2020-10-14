@@ -25,7 +25,7 @@ import org.bukkit.event.server.PluginEnableEvent
 /**
  * Plugin enable listener for registering RPK plugins
  */
-class PluginEnableListener(private val plugin: RPKCoreBukkit): Listener {
+class PluginEnableListener(private val plugin: RPKCoreBukkit) : Listener {
 
     @EventHandler
     fun onPluginEnable(event: PluginEnableEvent) {

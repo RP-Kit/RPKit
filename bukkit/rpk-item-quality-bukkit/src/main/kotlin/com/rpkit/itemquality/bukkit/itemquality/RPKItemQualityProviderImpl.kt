@@ -25,7 +25,7 @@ import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.inventory.ItemStack
 
 
-class RPKItemQualityProviderImpl(private val plugin: RPKItemQualityBukkit): RPKItemQualityProvider {
+class RPKItemQualityServiceImpl(override val plugin: RPKItemQualityBukkit) : RPKItemQualityService {
 
     override val itemQualities: List<RPKItemQuality> = plugin.config.getConfigurationSection("item-qualities")
             ?.getValues(false)

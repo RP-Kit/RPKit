@@ -27,10 +27,11 @@ class RPKBukkitFeatureFlagSetEvent(
         override val profile: RPKProfile,
         override val featureFlag: RPKFeatureFlag,
         override var enabled: Boolean
-): RPKBukkitEvent(), RPKFeatureFlagSetEvent, Cancellable {
+) : RPKBukkitEvent(), RPKFeatureFlagSetEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

@@ -21,11 +21,11 @@ import java.time.LocalDateTime
 
 
 class RPKWarningImpl(
-        override var id: Int = 0,
+        override var id: Int? = null,
         override val reason: String,
         override val profile: RPKProfile,
         override val issuer: RPKProfile,
         override val time: LocalDateTime
-): RPKWarning {
-    constructor(reason: String, player: RPKProfile, issuer: RPKProfile): this(0, reason, player, issuer, LocalDateTime.now())
+) : RPKWarning {
+    constructor(reason: String, player: RPKProfile, issuer: RPKProfile) : this(0, reason, player, issuer, LocalDateTime.now())
 }

@@ -16,35 +16,88 @@
 
 package com.rpkit.professions.bukkit
 
-import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
+import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
-import com.rpkit.core.exception.UnregisteredServiceException
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.professions.bukkit.character.ProfessionField
 import com.rpkit.professions.bukkit.command.profession.ProfessionCommand
 import com.rpkit.professions.bukkit.database.table.RPKCharacterProfessionChangeCooldownTable
 import com.rpkit.professions.bukkit.database.table.RPKCharacterProfessionExperienceTable
 import com.rpkit.professions.bukkit.database.table.RPKCharacterProfessionTable
 import com.rpkit.professions.bukkit.database.table.RPKProfessionHiddenTable
-import com.rpkit.professions.bukkit.listener.*
-import com.rpkit.professions.bukkit.profession.RPKProfessionProviderImpl
+import com.rpkit.professions.bukkit.listener.BlockBreakListener
+import com.rpkit.professions.bukkit.listener.CraftItemListener
+import com.rpkit.professions.bukkit.listener.InventoryClickListener
+import com.rpkit.professions.bukkit.listener.PrepareItemCraftListener
+import com.rpkit.professions.bukkit.listener.RPKBukkitCharacterDeleteListener
+import com.rpkit.professions.bukkit.profession.RPKProfessionService
+import com.rpkit.professions.bukkit.profession.RPKProfessionServiceImpl
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
 
-class RPKProfessionsBukkit: RPKBukkitPlugin() {
+class RPKProfessionsBukkit : RPKBukkitPlugin() {
 
-    private var professionFieldInitialised = false
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 5352)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKProfessionProviderImpl(this)
-        )
-    }
 
-    override fun onPostEnable() {
-        attemptCharacterCardFieldInitialisation()
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/professions/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/professions/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_professions"
+                ),
+                classLoader
+        )
+        database.addTable(RPKCharacterProfessionChangeCooldownTable(database, this))
+        database.addTable(RPKCharacterProfessionExperienceTable(database, this))
+        database.addTable(RPKCharacterProfessionTable(database, this))
+        database.addTable(RPKProfessionHiddenTable(database, this))
+
+        Services[RPKProfessionService::class] = RPKProfessionServiceImpl(this)
+        Services.require(RPKCharacterCardFieldService::class).whenAvailable { service ->
+            service.characterCardFields.add(ProfessionField(this))
+        }
     }
 
     override fun registerCommands() {
@@ -53,20 +106,12 @@ class RPKProfessionsBukkit: RPKBukkitPlugin() {
 
     override fun registerListeners() {
         registerListeners(
-                RPKServiceProviderReadyListener(this),
                 BlockBreakListener(this),
                 CraftItemListener(this),
                 InventoryClickListener(this),
                 PrepareItemCraftListener(this),
                 RPKBukkitCharacterDeleteListener(this)
         )
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKCharacterProfessionChangeCooldownTable(database, this))
-        database.addTable(RPKCharacterProfessionExperienceTable(database, this))
-        database.addTable(RPKCharacterProfessionTable(database, this))
-        database.addTable(RPKProfessionHiddenTable(database, this))
     }
 
     override fun setDefaultMessages() {
@@ -130,16 +175,9 @@ class RPKProfessionsBukkit: RPKBukkitPlugin() {
         messages.setDefault("mine-experience", "&aMining experience gained: &e\$received-experience &ain \$profession &7(Lv&e\$level&7, &e\$experience&7/&e\$next-level-experience&7exp)")
         messages.setDefault("craft-experience", "&aCrafting experience gained: &e\$received-experience &ain \$profession &7(Lv&e\$level&7, &e\$experience&7/&e\$next-level-experience&7exp)")
         messages.setDefault("smelt-experience", "&aSmelting experience gained: &e\$received-experience &ain \$profession &7(Lv&e\$level&7, &e\$experience&7/&e\$next-level-experience&7exp)")
-    }
-
-    fun attemptCharacterCardFieldInitialisation() {
-        if (!professionFieldInitialised) {
-            try {
-                core.serviceManager.getServiceProvider(RPKCharacterCardFieldProvider::class)
-                        .characterCardFields.add(ProfessionField(this))
-                professionFieldInitialised = true
-            } catch (ignore: UnregisteredServiceException) {}
-        }
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-character-service", "&cThere is no character service available.")
+        messages.setDefault("no-profession-service", "&cThere is no profession service available.")
     }
 
 }

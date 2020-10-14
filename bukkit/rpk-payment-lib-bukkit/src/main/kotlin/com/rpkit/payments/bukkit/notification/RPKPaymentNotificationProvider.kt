@@ -17,15 +17,15 @@
 package com.rpkit.payments.bukkit.notification
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
  * Provides payment notification related operations.
  */
-interface RPKPaymentNotificationProvider: ServiceProvider {
+interface RPKPaymentNotificationService : Service {
 
     /**
-     * A list of payment notifications managed by this payment notification provider.
+     * A list of payment notifications managed by this payment notification service.
      * This is immutable, payment groups must be added and removed using [addPaymentNotification] and [removePaymentNotification]
      */
     val notifications: List<RPKPaymentNotification>
@@ -47,14 +47,14 @@ interface RPKPaymentNotificationProvider: ServiceProvider {
     fun getPaymentNotificationsFor(character: RPKCharacter): List<RPKPaymentNotification>
 
     /**
-     * Adds a payment notification to be tracked by this payment notification provider.
+     * Adds a payment notification to be tracked by this payment notification service.
      *
      * @param paymentNotification The payment notification to add
      */
     fun addPaymentNotification(paymentNotification: RPKPaymentNotification)
 
     /**
-     * Removes a payment notification from being tracked by this payment notification provider.
+     * Removes a payment notification from being tracked by this payment notification service.
      *
      * @param paymentNotification The payment notification to remove
      */

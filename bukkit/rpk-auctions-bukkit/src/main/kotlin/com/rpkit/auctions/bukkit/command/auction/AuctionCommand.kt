@@ -26,7 +26,7 @@ import org.bukkit.command.CommandSender
  * Parent for all auction management commands.
  * Currently, the only accepted operation is to create an auction by specifying 'create' or 'new'.
  */
-class AuctionCommand(private val plugin: RPKAuctionsBukkit): CommandExecutor {
+class AuctionCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
 
     private val auctionCreateCommand = AuctionCreateCommand(plugin)
 

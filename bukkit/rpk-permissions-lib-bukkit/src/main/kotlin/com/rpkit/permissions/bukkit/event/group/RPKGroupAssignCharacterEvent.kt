@@ -20,8 +20,9 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.event.character.RPKCharacterEvent
 
 
-interface RPKGroupAssignCharacterEvent: RPKGroupEvent, RPKCharacterEvent {
+interface RPKGroupAssignCharacterEvent : RPKGroupEvent, RPKCharacterEvent {
 
     override val character: RPKCharacter
+    val priority: Int
 
 }

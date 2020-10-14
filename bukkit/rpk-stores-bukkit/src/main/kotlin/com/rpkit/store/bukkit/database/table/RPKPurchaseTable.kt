@@ -21,15 +21,15 @@ import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.purchase.RPKPurchase
-import com.rpkit.stores.bukkit.database.jooq.rpkit.Tables.RPKIT_PURCHASE
+import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_PURCHASE
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
-import java.sql.Timestamp
 
 
-class RPKPurchaseTable(database: Database, private val plugin: RPKStoresBukkit): Table<RPKPurchase>(database, RPKPurchase::class) {
+class RPKPurchaseTable(
+        private val database: Database,
+        plugin: RPKStoresBukkit
+) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_purchase.id.enabled")) {
         database.cacheManager.createCache("rpkit-stores-bukkit.rpkit_purchase.id",
@@ -39,26 +39,7 @@ class RPKPurchaseTable(database: Database, private val plugin: RPKStoresBukkit):
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_PURCHASE)
-                .column(RPKIT_PURCHASE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_PURCHASE.STORE_ITEM_ID, SQLDataType.INTEGER)
-                .column(RPKIT_PURCHASE.PROFILE_ID, SQLDataType.INTEGER)
-                .column(RPKIT_PURCHASE.PURCHASE_DATE, SQLDataType.TIMESTAMP)
-                .constraints(
-                        constraint("pk_rpkit_purchase").primaryKey(RPKIT_PURCHASE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.6.0")
-        }
-    }
-
-    override fun insert(entity: RPKPurchase): Int {
+    fun insert(entity: RPKPurchase): Int {
         database.create
                 .insertInto(
                         RPKIT_PURCHASE,
@@ -69,7 +50,7 @@ class RPKPurchaseTable(database: Database, private val plugin: RPKStoresBukkit):
                 .values(
                         entity.storeItem.id,
                         entity.profile.id,
-                        Timestamp.valueOf(entity.purchaseDate)
+                        entity.purchaseDate
                 )
                 .execute()
         val id = database.create.lastID().toInt()
@@ -78,18 +59,18 @@ class RPKPurchaseTable(database: Database, private val plugin: RPKStoresBukkit):
         return id
     }
 
-    override fun update(entity: RPKPurchase) {
+    fun update(entity: RPKPurchase) {
         database.create
                 .update(RPKIT_PURCHASE)
                 .set(RPKIT_PURCHASE.STORE_ITEM_ID, entity.storeItem.id)
                 .set(RPKIT_PURCHASE.PROFILE_ID, entity.profile.id)
-                .set(RPKIT_PURCHASE.PURCHASE_DATE, Timestamp.valueOf(entity.purchaseDate))
+                .set(RPKIT_PURCHASE.PURCHASE_DATE, entity.purchaseDate)
                 .where(RPKIT_PURCHASE.ID.eq(entity.id))
                 .execute()
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKPurchase? {
+    operator fun get(id: Int): RPKPurchase? {
         if (cache?.containsKey(id) == true) return cache[id]
         var purchase: RPKPurchase? = database.getTable(RPKConsumablePurchaseTable::class)[id]
         if (purchase != null) {
@@ -123,7 +104,7 @@ class RPKPurchaseTable(database: Database, private val plugin: RPKStoresBukkit):
         )
     }
 
-    override fun delete(entity: RPKPurchase) {
+    fun delete(entity: RPKPurchase) {
         database.create
                 .deleteFrom(RPKIT_PURCHASE)
                 .where(RPKIT_PURCHASE.ID.eq(entity.id))

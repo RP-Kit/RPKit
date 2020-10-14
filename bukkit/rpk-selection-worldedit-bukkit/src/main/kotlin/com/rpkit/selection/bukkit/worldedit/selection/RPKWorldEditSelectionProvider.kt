@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,19 @@ package com.rpkit.selection.bukkit.worldedit.selection
 
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.selection.bukkit.selection.RPKSelection
-import com.rpkit.selection.bukkit.selection.RPKSelectionProvider
+import com.rpkit.selection.bukkit.selection.RPKSelectionService
 import com.rpkit.selection.bukkit.worldedit.RPKSelectionWorldEditBukkit
 import com.sk89q.worldedit.bukkit.WorldEditPlugin
 
 
-class RPKWorldEditSelectionProvider(private val plugin: RPKSelectionWorldEditBukkit): RPKSelectionProvider {
+class RPKWorldEditSelectionService(override val plugin: RPKSelectionWorldEditBukkit) : RPKSelectionService {
 
     override fun getSelection(minecraftProfile: RPKMinecraftProfile): RPKSelection {
         val worldEdit = plugin.server.pluginManager.getPlugin("WorldEdit") as WorldEditPlugin
-        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID) ?: return RPKWorldEditSelection(0, minecraftProfile, null)
+        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
+                ?: return RPKWorldEditSelection(minecraftProfile, null)
         val session = worldEdit.getSession(bukkitPlayer)
-        return RPKWorldEditSelection(0, minecraftProfile, session)
+        return RPKWorldEditSelection(minecraftProfile, session)
     }
 
     override fun updateSelection(selection: RPKSelection) {

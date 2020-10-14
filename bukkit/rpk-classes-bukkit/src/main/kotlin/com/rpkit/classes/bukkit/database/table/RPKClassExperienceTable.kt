@@ -1,50 +1,43 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.classes.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.classes.bukkit.RPKClassesBukkit
 import com.rpkit.classes.bukkit.classes.RPKClass
 import com.rpkit.classes.bukkit.classes.RPKClassExperience
-import com.rpkit.classes.bukkit.classes.RPKClassProvider
-import com.rpkit.classes.bukkit.database.jooq.rpkit.Tables.RPKIT_CLASS_EXPERIENCE
+import com.rpkit.classes.bukkit.database.jooq.Tables.RPKIT_CLASS_EXPERIENCE
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 
-class RPKClassExperienceTable(database: Database, private val plugin: RPKClassesBukkit): Table<RPKClassExperience>(database, RPKClassExperience::class) {
+class RPKClassExperienceTable(private val database: Database, private val plugin: RPKClassesBukkit) : Table {
 
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_class_experience.id.enabled")) {
-        database.cacheManager.createCache("rpk-classes-bukkit.rpkit_class_experience.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKClassExperience::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_class_experience.id.size"))))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_class_experience.character_id.enabled")) {
+        database.cacheManager.createCache("rpk-classes-bukkit.rpkit_class_experience.character_id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableMap::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_class_experience.character_id.size"))))
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_CLASS_EXPERIENCE)
-                .column(RPKIT_CLASS_EXPERIENCE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID, SQLDataType.INTEGER)
-                .column(RPKIT_CLASS_EXPERIENCE.CLASS_NAME, SQLDataType.VARCHAR(256))
-                .column(RPKIT_CLASS_EXPERIENCE.EXPERIENCE, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("pk_rpkit_class_experience").primaryKey(RPKIT_CLASS_EXPERIENCE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.2.0")
-        }
-    }
-
-    override fun insert(entity: RPKClassExperience): Int {
+    fun insert(entity: RPKClassExperience) {
         database.create
                 .insertInto(
                         RPKIT_CLASS_EXPERIENCE,
@@ -58,76 +51,59 @@ class RPKClassExperienceTable(database: Database, private val plugin: RPKClasses
                         entity.experience
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
+        val classMap = cache?.get(entity.character.id) as? MutableMap<String, RPKClassExperience> ?: mutableMapOf()
+        classMap[entity.`class`.name] = entity
+        cache?.put(entity.character.id, classMap)
     }
 
-    override fun update(entity: RPKClassExperience) {
+    fun update(entity: RPKClassExperience) {
         database.create
                 .update(RPKIT_CLASS_EXPERIENCE)
-                .set(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID, entity.character.id)
-                .set(RPKIT_CLASS_EXPERIENCE.CLASS_NAME, entity.`class`.name)
                 .set(RPKIT_CLASS_EXPERIENCE.EXPERIENCE, entity.experience)
-                .where(RPKIT_CLASS_EXPERIENCE.ID.eq(entity.id))
+                .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(entity.character.id))
+                .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(entity.`class`.name))
                 .execute()
-        cache?.put(entity.id, entity)
+        val classMap = cache?.get(entity.character.id) as? MutableMap<String, RPKClassExperience> ?: mutableMapOf()
+        classMap[entity.`class`.name] = entity
+        cache?.put(entity.character.id, classMap)
     }
 
-    override fun get(id: Int): RPKClassExperience? {
-        if (cache?.containsKey(id) == true) {
-            return cache.get(id)
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_CLASS_EXPERIENCE.CHARACTER_ID,
-                            RPKIT_CLASS_EXPERIENCE.CLASS_NAME,
-                            RPKIT_CLASS_EXPERIENCE.EXPERIENCE
-                    )
-                    .from(RPKIT_CLASS_EXPERIENCE)
-                    .fetchOne() ?: return null
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val characterId = result.get(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID)
-            val character = characterProvider.getCharacter(characterId)
-            val classProvider = plugin.core.serviceManager.getServiceProvider(RPKClassProvider::class)
-            val className = result.get(RPKIT_CLASS_EXPERIENCE.CLASS_NAME)
-            val `class` = classProvider.getClass(className)
-            if (character != null && `class` != null) {
-                val classExperience = RPKClassExperience(
-                        id,
-                        character,
-                        `class`,
-                        result.get(RPKIT_CLASS_EXPERIENCE.EXPERIENCE)
-                )
-                cache?.put(id, classExperience)
-                return classExperience
-            } else {
-                database.create
-                        .deleteFrom(RPKIT_CLASS_EXPERIENCE)
-                        .where(RPKIT_CLASS_EXPERIENCE.ID.eq(id))
-                        .execute()
-                return null
+    operator fun get(character: RPKCharacter, `class`: RPKClass): RPKClassExperience? {
+        if (cache?.containsKey(character.id) == true) {
+            if (cache[character.id].containsKey(`class`.name)) {
+                return cache[character.id][`class`.name] as RPKClassExperience
             }
         }
-    }
-
-    fun get(character: RPKCharacter, `class`: RPKClass): RPKClassExperience? {
         val result = database.create
-                .select(RPKIT_CLASS_EXPERIENCE.ID)
+                .select(
+                        RPKIT_CLASS_EXPERIENCE.CHARACTER_ID,
+                        RPKIT_CLASS_EXPERIENCE.CLASS_NAME,
+                        RPKIT_CLASS_EXPERIENCE.EXPERIENCE
+                )
                 .from(RPKIT_CLASS_EXPERIENCE)
                 .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(character.id))
                 .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(`class`.name))
                 .fetchOne() ?: return null
-        return get(result.get(RPKIT_CLASS_EXPERIENCE.ID))
+        val classExperience = RPKClassExperience(
+                character,
+                `class`,
+                result.get(RPKIT_CLASS_EXPERIENCE.EXPERIENCE)
+        )
+        val classMap = cache?.get(classExperience.character.id) as? MutableMap<String, RPKClassExperience> ?: mutableMapOf()
+        classMap[classExperience.`class`.name] = classExperience
+        cache?.put(classExperience.character.id, classMap)
+        return classExperience
     }
 
-    override fun delete(entity: RPKClassExperience) {
+    fun delete(entity: RPKClassExperience) {
         database.create
                 .deleteFrom(RPKIT_CLASS_EXPERIENCE)
-                .where(RPKIT_CLASS_EXPERIENCE.ID.eq(entity.id))
+                .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(entity.character.id))
+                .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(entity.`class`.name))
                 .execute()
-        cache?.remove(entity.id)
+        val classMap = cache?.get(entity.character.id) as? MutableMap<String, RPKClassExperience> ?: mutableMapOf()
+        classMap.remove(entity.`class`.name)
+        cache?.put(entity.character.id, classMap)
     }
 
 }

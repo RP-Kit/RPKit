@@ -10,31 +10,31 @@ softdepend:
 - rpk-chat-lib-bukkit
 api-version: '1.16'
 commands:
-    account:
-        description: |
-            Account management command
-            /account link [type] [name] - links the account of the given type
-        aliases: [acc]
-        usage: /<command> [link]
-    profile:
-        description: |
-            Profile management command
-            /profile create [name] [password] - creates a profile with the given name and password
-            /profile login [name] [password] - links a profile with the given name and password
-        usage: /<command> [create|login]
+  account:
+    description: |
+      Account management command
+      /account link [type] [name] - links the account of the given type
+    aliases: [acc]
+    usage: /<command> [link]
+  profile:
+    description: |
+      Profile management command
+      /profile create [name] [password] - creates a profile with the given name and password
+      /profile login [name] [password] - links a profile with the given name and password
+    usage: /<command> [create|login]
 permissions:
-    rpkit.players.command.account.link:
-        description: Allows linking other accounts
-        default: true
-    rpkit.players.command.account.link.irc:
-        description: Allows linking IRC account
-        default: true
-    rpkit.players.command.account.link.minecraft:
-        description: Allows linking Minecraft accounts
-        default: true
-    rpkit.players.command.profile.create:
-        description: Allows creating profiles
-        default: true
-    rpkit.players.command.profile.login:
-        description: Allows logging into profiles
-        default: true
+  rpkit.players.command.account.link:
+    description: Allows linking other accounts
+    default: true
+  rpkit.players.command.account.link.irc:
+    description: Allows linking IRC account
+    default: true
+  rpkit.players.command.account.link.minecraft:
+    description: Allows linking Minecraft accounts
+    default: true
+  rpkit.players.command.profile.create:
+    description: Allows creating profiles
+    default: true
+  rpkit.players.command.profile.login:
+    description: Allows logging into profiles
+    default: true

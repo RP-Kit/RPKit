@@ -16,14 +16,14 @@
 
 package com.rpkit.characters.bukkit.character
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 /**
  * Provides character-related operations.
  */
-interface RPKCharacterProvider: ServiceProvider {
+interface RPKCharacterService : Service {
 
     /**
      * Gets a character by ID.
@@ -69,14 +69,14 @@ interface RPKCharacterProvider: ServiceProvider {
     fun getCharacters(name: String): List<RPKCharacter>
 
     /**
-     * Adds a character to be tracked by this character provider.
+     * Adds a character to be tracked by this character service.
      *
      * @param character The character to add
      */
     fun addCharacter(character: RPKCharacter)
 
     /**
-     * Removes a character from being tracked by this character provider.
+     * Removes a character from being tracked by this character service.
      *
      * @param character The character to remove
      */

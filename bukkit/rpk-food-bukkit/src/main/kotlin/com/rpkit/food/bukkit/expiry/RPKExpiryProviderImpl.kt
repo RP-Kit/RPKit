@@ -22,7 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class RPKExpiryProviderImpl(private val plugin: RPKFoodBukkit): RPKExpiryProvider {
+class RPKExpiryServiceImpl(override val plugin: RPKFoodBukkit) : RPKExpiryService {
 
     val dateFormat = SimpleDateFormat(plugin.config.getString("date-format"))
 

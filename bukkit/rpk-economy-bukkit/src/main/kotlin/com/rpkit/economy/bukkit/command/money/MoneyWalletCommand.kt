@@ -16,16 +16,21 @@
 
 package com.rpkit.economy.bukkit.command.money
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
+import com.rpkit.economy.bukkit.economy.RPKEconomyService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.ValidatingPrompt
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
@@ -33,7 +38,7 @@ import org.bukkit.inventory.ItemStack
  * Money wallet command.
  * Opens the player's active character's wallet with a physical currency representation.
  */
-class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
+class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
 
     private val conversationFactory = ConversationFactory(plugin)
             .withModality(true)
@@ -50,86 +55,106 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
             }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("rpkit.economy.command.money.wallet")) {
-            if (sender is Player) {
-                val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                if (args.isNotEmpty()) {
-                    val currency = currencyProvider.getCurrency(args[0])
-                    if (currency != null) {
-                        showWallet(sender, currency)
-                    } else {
-                        sender.sendMessage(plugin.messages["money-wallet-currency-invalid-currency"])
-                    }
-                } else {
-                    val currency = currencyProvider.defaultCurrency
-                    if (currency != null) {
-                        showWallet(sender, currency)
-                    } else {
-                        conversationFactory.buildConversation(sender).begin()
-                    }
-                }
-            } else {
-                sender.sendMessage(plugin.messages["not-from-console"])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.economy.command.money.wallet")) {
             sender.sendMessage(plugin.messages["no-permission-money-wallet"])
+            return true
+        }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        val currencyService = Services[RPKCurrencyService::class]
+        if (currencyService == null) {
+            sender.sendMessage(plugin.messages["no-currency-service"])
+            return true
+        }
+        if (args.isNotEmpty()) {
+            val currency = currencyService.getCurrency(args[0])
+            if (currency == null) {
+                sender.sendMessage(plugin.messages["money-wallet-currency-invalid-currency"])
+                return true
+            }
+            showWallet(sender, currency)
+        } else {
+            val currency = currencyService.defaultCurrency
+            if (currency == null) {
+                conversationFactory.buildConversation(sender).begin()
+                return true
+            }
+            showWallet(sender, currency)
         }
         return true
     }
 
     private fun showWallet(bukkitPlayer: Player, currency: RPKCurrency) {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-        if (minecraftProfile != null) {
-            val character = characterProvider.getActiveCharacter(minecraftProfile)
-            if (character != null) {
-                val wallet = plugin.server.createInventory(null, 27, "Wallet [" + currency.name + "]")
-                val coin = ItemStack(currency.material)
-                val meta = coin.itemMeta ?: plugin.server.itemFactory.getItemMeta(coin.type) ?: return
-                meta.setDisplayName(currency.nameSingular)
-                coin.itemMeta = meta
-                val coinStack = ItemStack(currency.material, 64)
-                val stackMeta = coinStack.itemMeta ?: plugin.server.itemFactory.getItemMeta(coinStack.type) ?: return
-                stackMeta.setDisplayName(currency.nameSingular)
-                coinStack.itemMeta = stackMeta
-                val remainder = (economyProvider.getBalance(character, currency) % 64)
-                var i = 0
-                while (i < economyProvider.getBalance(character, currency)) {
-                    val leftover = wallet.addItem(coinStack)
-                    if (!leftover.isEmpty()) {
-                        bukkitPlayer.world.dropItem(bukkitPlayer.location, leftover.values.iterator().next())
-                    }
-                    i += 64
-                }
-                if (remainder != 0) {
-                    val remove = ItemStack(coin)
-                    remove.amount = 64 - remainder
-                    wallet.removeItem(remove)
-                }
-                bukkitPlayer.openInventory(wallet)
-            } else {
-                bukkitPlayer.sendMessage(plugin.messages["no-character"])
-            }
-        } else {
-            bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile"])
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return
         }
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            bukkitPlayer.sendMessage(plugin.messages["no-character-service"])
+            return
+        }
+        val economyService = Services[RPKEconomyService::class]
+        if (economyService == null) {
+            bukkitPlayer.sendMessage(plugin.messages["no-economy-service"])
+            return
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        if (minecraftProfile == null) {
+            bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile"])
+            return
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null) {
+            bukkitPlayer.sendMessage(plugin.messages["no-character"])
+            return
+        }
+        val wallet = plugin.server.createInventory(null, 27, "Wallet [" + currency.name + "]")
+        val coin = ItemStack(currency.material)
+        val meta = coin.itemMeta ?: plugin.server.itemFactory.getItemMeta(coin.type) ?: return
+        meta.setDisplayName(currency.nameSingular)
+        coin.itemMeta = meta
+        val coinStack = ItemStack(currency.material, 64)
+        val stackMeta = coinStack.itemMeta ?: plugin.server.itemFactory.getItemMeta(coinStack.type) ?: return
+        stackMeta.setDisplayName(currency.nameSingular)
+        coinStack.itemMeta = stackMeta
+        val remainder = (economyService.getBalance(character, currency) % 64)
+        var i = 0
+        while (i < economyService.getBalance(character, currency)) {
+            val leftover = wallet.addItem(coinStack)
+            if (leftover.isNotEmpty()) {
+                bukkitPlayer.world.dropItem(bukkitPlayer.location, leftover.values.iterator().next())
+            }
+            i += 64
+        }
+        if (remainder != 0) {
+            val remove = ItemStack(coin)
+            remove.amount = 64 - remainder
+            wallet.removeItem(remove)
+        }
+        bukkitPlayer.openInventory(wallet)
     }
 
-    private inner class CurrencyPrompt: ValidatingPrompt() {
+    private inner class CurrencyPrompt : ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(input) != null
+            val currencyService = Services[RPKCurrencyService::class] ?: return false
+            context.setSessionData("currencyService", currencyService)
+            return currencyService.getCurrency(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("currency", plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(input))
+            val currencyService = context.getSessionData("currencyService") as RPKCurrencyService
+            context.setSessionData("currency", currencyService.getCurrency(input))
             return CurrencySetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
+            val currencyService = Services[RPKCurrencyService::class] ?: return plugin.messages["no-currency-service"]
             return plugin.messages["money-subtract-currency-prompt"] + "\n" +
-                    plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
+                    currencyService.currencies
                             .joinToString("\n") { currency ->
                                 plugin.messages["money-subtract-currency-prompt-list-item", mapOf(
                                         Pair("currency", currency.name)
@@ -143,7 +168,7 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
 
     }
 
-    private inner class CurrencySetPrompt: MessagePrompt() {
+    private inner class CurrencySetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             showWallet(context.forWhom as Player, context.getSessionData("currency") as RPKCurrency)
             return END_OF_CONVERSATION

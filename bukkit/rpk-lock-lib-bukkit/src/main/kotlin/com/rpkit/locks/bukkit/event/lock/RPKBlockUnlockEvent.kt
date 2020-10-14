@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import org.bukkit.block.Block
 
 
-interface RPKBlockUnlockEvent: RPKEvent {
+interface RPKBlockUnlockEvent : RPKEvent {
 
     val block: Block
 

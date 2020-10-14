@@ -26,10 +26,11 @@ import org.bukkit.event.HandlerList
 class RPKBukkitChatChannelMuteEvent(
         override val minecraftProfile: RPKMinecraftProfile,
         override val chatChannel: RPKChatChannel
-): RPKBukkitEvent(), RPKChatChannelMuteEvent, Cancellable {
+) : RPKBukkitEvent(), RPKChatChannelMuteEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

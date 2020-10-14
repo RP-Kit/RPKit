@@ -16,10 +16,11 @@
 
 package com.rpkit.unconsciousness.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
-import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProvider
+import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -29,32 +30,23 @@ import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 
 
-class PlayerRespawnListener(private val plugin: RPKUnconsciousnessBukkit): Listener {
+class PlayerRespawnListener(private val plugin: RPKUnconsciousnessBukkit) : Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerRespawn(event: PlayerRespawnEvent) {
         val bukkitPlayer = event.player
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val unconsciousnessProvider = plugin.core.serviceManager.getServiceProvider(RPKUnconsciousnessProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-        if (minecraftProfile != null) {
-            val character = characterProvider.getActiveCharacter(minecraftProfile)
-            if (character != null) {
-                if (unconsciousnessProvider.isUnconscious(character)) {
-                    event.respawnLocation = event.player.location
-                    object: BukkitRunnable() {
-                        override fun run() {
-                            event.player.addPotionEffect(
-                                    PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0),
-                                    true
-                            )
-                        }
-                    }.runTaskLater(plugin, 20L)
-                }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val characterService = Services[RPKCharacterService::class] ?: return
+        val unconsciousnessService = Services[RPKUnconsciousnessService::class] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        if (!unconsciousnessService.isUnconscious(character)) return
+        event.respawnLocation = event.player.location
+        object : BukkitRunnable() {
+            override fun run() {
+                event.player.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, Int.MAX_VALUE, 0))
             }
-        }
-
+        }.runTaskLater(plugin, 20L)
     }
 
 }

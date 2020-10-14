@@ -16,27 +16,28 @@
 
 package com.rpkit.selection.bukkit.selection
 
-import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import org.bukkit.World
 import org.bukkit.block.Block
+import kotlin.math.max
+import kotlin.math.min
 
-interface RPKSelection: Entity {
+interface RPKSelection {
 
     val minecraftProfile: RPKMinecraftProfile
     var world: World
     val minimumPoint: Block
         get() = world.getBlockAt(
-                Math.min(point1.x, point2.x),
-                Math.min(point1.y, point2.y),
-                Math.min(point1.z, point2.z)
+                min(point1.x, point2.x),
+                min(point1.y, point2.y),
+                min(point1.z, point2.z)
         )
 
     val maximumPoint: Block
         get() = world.getBlockAt(
-                Math.max(point1.x, point2.x),
-                Math.max(point1.y, point2.y),
-                Math.max(point1.z, point2.z)
+                max(point1.x, point2.x),
+                max(point1.y, point2.y),
+                max(point1.z, point2.z)
         )
 
     var point1: Block

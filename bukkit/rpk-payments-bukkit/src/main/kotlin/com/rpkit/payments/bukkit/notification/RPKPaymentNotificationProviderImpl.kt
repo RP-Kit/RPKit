@@ -24,38 +24,38 @@ import com.rpkit.payments.bukkit.event.notification.RPKBukkitPaymentNotification
 import com.rpkit.payments.bukkit.event.notification.RPKBukkitPaymentNotificationUpdateEvent
 
 
-class RPKPaymentNotificationProviderImpl(private val plugin: RPKPaymentsBukkit): RPKPaymentNotificationProvider {
+class RPKPaymentNotificationServiceImpl(override val plugin: RPKPaymentsBukkit) : RPKPaymentNotificationService {
 
     override val notifications: List<RPKPaymentNotification>
-        get() = plugin.core.database.getTable(RPKPaymentNotificationTable::class).getAll()
+        get() = plugin.database.getTable(RPKPaymentNotificationTable::class).getAll()
 
     override fun getPaymentNotification(id: Int): RPKPaymentNotification? {
-        return plugin.core.database.getTable(RPKPaymentNotificationTable::class)[id]
+        return plugin.database.getTable(RPKPaymentNotificationTable::class)[id]
     }
 
     override fun getPaymentNotificationsFor(character: RPKCharacter): List<RPKPaymentNotification> {
-        return plugin.core.database.getTable(RPKPaymentNotificationTable::class).get(character)
+        return plugin.database.getTable(RPKPaymentNotificationTable::class).get(character)
     }
 
     override fun addPaymentNotification(paymentNotification: RPKPaymentNotification) {
         val event = RPKBukkitPaymentNotificationCreateEvent(paymentNotification)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKPaymentNotificationTable::class).insert(event.paymentNotification)
+        plugin.database.getTable(RPKPaymentNotificationTable::class).insert(event.paymentNotification)
     }
 
     override fun removePaymentNotification(paymentNotification: RPKPaymentNotification) {
         val event = RPKBukkitPaymentNotificationDeleteEvent(paymentNotification)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKPaymentNotificationTable::class).delete(event.paymentNotification)
+        plugin.database.getTable(RPKPaymentNotificationTable::class).delete(event.paymentNotification)
     }
 
     override fun updatePaymentNotification(paymentNotification: RPKPaymentNotification) {
         val event = RPKBukkitPaymentNotificationUpdateEvent(paymentNotification)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKPaymentNotificationTable::class).update(event.paymentNotification)
+        plugin.database.getTable(RPKPaymentNotificationTable::class).update(event.paymentNotification)
     }
 
 }

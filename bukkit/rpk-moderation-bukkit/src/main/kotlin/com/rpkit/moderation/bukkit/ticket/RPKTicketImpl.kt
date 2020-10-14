@@ -24,7 +24,7 @@ import java.time.LocalDateTime
 
 
 class RPKTicketImpl(
-        override var id: Int = 0,
+        override var id: Int? = null,
         override val reason: String,
         override val issuer: RPKProfile,
         override var resolver: RPKProfile?,
@@ -32,9 +32,9 @@ class RPKTicketImpl(
         override val openDate: LocalDateTime,
         override var closeDate: LocalDateTime?,
         override var isClosed: Boolean
-): RPKTicket {
+) : RPKTicket {
 
-    constructor(reason: String, issuer: RPKProfile, location: Location): this(
+    constructor(reason: String, issuer: RPKProfile, location: Location) : this(
             0,
             reason,
             issuer,

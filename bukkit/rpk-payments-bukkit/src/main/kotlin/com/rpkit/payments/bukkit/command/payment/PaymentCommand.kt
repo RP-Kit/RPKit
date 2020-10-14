@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Payment command.
  * Parent for all payment group management commands.
  */
-class PaymentCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
+class PaymentCommand(private val plugin: RPKPaymentsBukkit) : CommandExecutor {
 
     private val paymentCreateCommand = PaymentCreateCommand(plugin)
     private val paymentRemoveCommand = PaymentRemoveCommand(plugin)

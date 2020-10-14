@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,9 @@ import kotlin.math.floor
 
 
 class RPKWorldEditSelection(
-        override var id: Int = 0,
         override val minecraftProfile: RPKMinecraftProfile,
         val session: LocalSession?
-): RPKSelection {
+) : RPKSelection {
 
     override var point1: Block
         get() {
@@ -105,7 +104,8 @@ class RPKWorldEditSelection(
         }
 
     override fun contains(block: Block): Boolean {
-        return session?.getSelection(session.selectionWorld)?.contains(BukkitAdapter.asBlockVector(block.location)) ?: false
+        return session?.getSelection(session.selectionWorld)?.contains(BukkitAdapter.asBlockVector(block.location))
+                ?: false
     }
 
 }

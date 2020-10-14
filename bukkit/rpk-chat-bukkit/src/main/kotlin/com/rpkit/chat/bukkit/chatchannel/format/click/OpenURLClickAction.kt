@@ -34,7 +34,8 @@ class OpenURLClickAction(val url: String) : ClickAction, ConfigurationSerializab
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = OpenURLClickAction(
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = OpenURLClickAction(
                 serialized["url"] as String
         )
     }

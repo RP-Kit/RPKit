@@ -20,7 +20,7 @@
 package com.rpkit.core.database.jooq;
 
 
-import com.rpkit.core.database.jooq.rpkit.Rpkit;
+import com.rpkit.core.database.jooq.Rpkit;
 
 import java.util.ArrayList;
 import java.util.Arrays;

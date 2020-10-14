@@ -19,7 +19,7 @@ package com.rpkit.chat.bukkit.event.chatchannel
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 
 
-interface RPKChatChannelCreateEvent: RPKChatChannelEvent {
+interface RPKChatChannelCreateEvent : RPKChatChannelEvent {
 
     override val chatChannel: RPKChatChannel
 

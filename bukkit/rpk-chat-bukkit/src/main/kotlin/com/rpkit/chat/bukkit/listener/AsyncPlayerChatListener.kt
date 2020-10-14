@@ -17,8 +17,9 @@
 package com.rpkit.chat.bukkit.listener
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
@@ -28,19 +29,19 @@ import java.util.regex.Pattern
  * Player chat listener.
  * Cancels normal message processing and passes the message to the appropriate chat channel.
  */
-class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
+class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
 
     @EventHandler
     fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
         event.isCancelled = true
-        val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+        val chatChannelService = Services[RPKChatChannelService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
-            var chatChannel = chatChannelProvider.getMinecraftProfileChannel(minecraftProfile)
+            var chatChannel = chatChannelService.getMinecraftProfileChannel(minecraftProfile)
             var message = event.message
-            for (otherChannel in chatChannelProvider.chatChannels) {
+            for (otherChannel in chatChannelService.chatChannels) {
                 val matchPattern = otherChannel.matchPattern
                 if (matchPattern != null) {
                     if (matchPattern.isNotEmpty()) {
@@ -54,9 +55,10 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
                                 }
                             }
                             if (!chatChannel.listenerMinecraftProfiles.any { listenerMinecraftProfile ->
-                                        listenerMinecraftProfile.id == minecraftProfile.id }) {
+                                        listenerMinecraftProfile.id == minecraftProfile.id
+                                    }) {
                                 chatChannel.addListener(minecraftProfile, event.isAsynchronous)
-                                chatChannelProvider.updateChatChannel(chatChannel, event.isAsynchronous)
+                                chatChannelService.updateChatChannel(chatChannel, event.isAsynchronous)
                             }
                         }
                     }

@@ -23,40 +23,40 @@ import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyDeleteEvent
 import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyUpdateEvent
 
 /**
- * Currency provider implementation.
+ * Currency service implementation.
  */
-class RPKCurrencyProviderImpl(private val plugin: RPKEconomyBukkit): RPKCurrencyProvider {
+class RPKCurrencyServiceImpl(override val plugin: RPKEconomyBukkit) : RPKCurrencyService {
 
     override fun getCurrency(id: Int): RPKCurrency? {
-        return plugin.core.database.getTable(RPKCurrencyTable::class)[id]
+        return plugin.database.getTable(RPKCurrencyTable::class)[id]
     }
 
     override fun getCurrency(name: String): RPKCurrency? {
-        return plugin.core.database.getTable(RPKCurrencyTable::class).get(name)
+        return plugin.database.getTable(RPKCurrencyTable::class).get(name)
     }
 
     override val currencies: Collection<RPKCurrency>
-        get() = plugin.core.database.getTable(RPKCurrencyTable::class).getAll()
+        get() = plugin.database.getTable(RPKCurrencyTable::class).getAll()
 
     override fun addCurrency(currency: RPKCurrency) {
         val event = RPKBukkitCurrencyCreateEvent(currency)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKCurrencyTable::class).insert(event.currency)
+        plugin.database.getTable(RPKCurrencyTable::class).insert(event.currency)
     }
 
     override fun removeCurrency(currency: RPKCurrency) {
         val event = RPKBukkitCurrencyDeleteEvent(currency)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKCurrencyTable::class).delete(event.currency)
+        plugin.database.getTable(RPKCurrencyTable::class).delete(event.currency)
     }
 
     override fun updateCurrency(currency: RPKCurrency) {
         val event = RPKBukkitCurrencyUpdateEvent(currency)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKCurrencyTable::class).update(event.currency)
+        plugin.database.getTable(RPKCurrencyTable::class).update(event.currency)
     }
 
     override val defaultCurrency: RPKCurrency?

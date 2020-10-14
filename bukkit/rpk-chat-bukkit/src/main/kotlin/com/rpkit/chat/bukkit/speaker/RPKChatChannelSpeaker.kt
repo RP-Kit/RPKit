@@ -17,7 +17,6 @@
 package com.rpkit.chat.bukkit.speaker
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
-import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
@@ -27,7 +26,6 @@ import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
  * @property chatChannel The chat channel the player is speaking in
  */
 class RPKChatChannelSpeaker(
-        override var id: Int = 0,
         val minecraftProfile: RPKMinecraftProfile,
         var chatChannel: RPKChatChannel
-) : Entity
+)

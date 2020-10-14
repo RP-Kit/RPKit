@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Account link command.
  * Links another account to the current player.
  */
-class AccountLinkCommand(private val plugin: RPKPlayersBukkit): CommandExecutor {
+class AccountLinkCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
 
     private val accountLinkIRCCommand = AccountLinkIRCCommand(plugin)
     private val accountLinkMinecraftCommand = AccountLinkMinecraftCommand(plugin)

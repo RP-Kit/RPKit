@@ -20,7 +20,7 @@ import com.rpkit.players.bukkit.event.profile.RPKProfileEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 
-interface RPKFeatureFlagSetEvent: RPKProfileEvent, RPKFeatureFlagEvent {
+interface RPKFeatureFlagSetEvent : RPKProfileEvent, RPKFeatureFlagEvent {
 
     override val profile: RPKProfile
     var enabled: Boolean

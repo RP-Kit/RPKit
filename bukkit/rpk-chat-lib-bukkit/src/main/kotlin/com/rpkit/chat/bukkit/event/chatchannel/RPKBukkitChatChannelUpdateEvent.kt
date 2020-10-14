@@ -25,10 +25,11 @@ import org.bukkit.event.HandlerList
 class RPKBukkitChatChannelUpdateEvent(
         override val chatChannel: RPKChatChannel,
         isAsync: Boolean = false
-): RPKBukkitEvent(isAsync), RPKChatChannelUpdateEvent, Cancellable {
+) : RPKBukkitEvent(isAsync), RPKChatChannelUpdateEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

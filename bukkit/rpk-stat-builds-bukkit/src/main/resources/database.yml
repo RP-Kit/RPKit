@@ -1,0 +1,5 @@
+database:
+  url: jdbc:sqlite:rpkit_stat_builds.db
+  dialect: SQLITE
+  minimum-idle: 3
+  maximum-pool-size: 3

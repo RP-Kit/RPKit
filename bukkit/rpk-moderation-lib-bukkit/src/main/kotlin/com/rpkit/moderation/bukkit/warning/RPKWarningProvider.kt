@@ -16,13 +16,13 @@
 
 package com.rpkit.moderation.bukkit.warning
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 /**
  * Provides warning-related functionality
  */
-interface RPKWarningProvider: ServiceProvider {
+interface RPKWarningService : Service {
 
     /**
      * Gets a warning by ID.

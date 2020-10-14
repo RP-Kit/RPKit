@@ -16,9 +16,10 @@
 
 package com.rpkit.economy.bukkit.command.currency
 
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyImpl
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -30,19 +31,19 @@ import org.bukkit.entity.Player
  * Currency add command.
  * Adds a currency.
  */
-class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
+class CurrencyAddCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
     private val conversationFactory = ConversationFactory(plugin)
             .withModality(true)
             .withFirstPrompt(NamePrompt())
             .withEscapeSequence("cancel")
             .addConversationAbandonedListener { event ->
-        if (!event.gracefulExit()) {
-            val conversable = event.context.forWhom
-            if (conversable is Player) {
-                conversable.sendMessage(plugin.messages["operation-cancelled"])
+                if (!event.gracefulExit()) {
+                    val conversable = event.context.forWhom
+                    if (conversable is Player) {
+                        conversable.sendMessage(plugin.messages["operation-cancelled"])
+                    }
+                }
             }
-        }
-    }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender is Conversable) {
@@ -55,18 +56,19 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         return true
     }
 
-    private inner class NamePrompt: ValidatingPrompt() {
+    private inner class NamePrompt : ValidatingPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["currency-set-name-prompt"]
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            return currencyProvider.getCurrency(input) == null
+            val currencyService = Services[RPKCurrencyService::class] ?: return false
+            return currencyService.getCurrency(input) == null
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
+            if (Services[RPKCurrencyService::class] == null) return plugin.messages["no-currency-service"]
             return plugin.messages["currency-set-name-invalid-name"]
         }
 
@@ -77,7 +79,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
 
     }
 
-    private inner class NameSetPrompt: MessagePrompt() {
+    private inner class NameSetPrompt : MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return NameSingularPrompt()
@@ -89,7 +91,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
 
     }
 
-    private inner class NameSingularPrompt: StringPrompt() {
+    private inner class NameSingularPrompt : StringPrompt() {
         override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["currency-set-name-singular-prompt"]
         }
@@ -101,7 +103,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
 
     }
 
-    private inner class NameSingularSetPrompt: MessagePrompt() {
+    private inner class NameSingularSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return NamePluralPrompt()
         }
@@ -112,7 +114,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
 
     }
 
-    private inner class NamePluralPrompt: StringPrompt() {
+    private inner class NamePluralPrompt : StringPrompt() {
         override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["currency-set-name-plural-prompt"]
         }
@@ -124,7 +126,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
 
     }
 
-    private inner class NamePluralSetPrompt: MessagePrompt() {
+    private inner class NamePluralSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return RatePrompt()
         }
@@ -135,7 +137,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
 
     }
 
-    private inner class RatePrompt: NumericPrompt() {
+    private inner class RatePrompt : NumericPrompt() {
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
             context.setSessionData("rate", input.toDouble())
             return RateSetPrompt()
@@ -158,7 +160,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
     }
 
-    private inner class RateSetPrompt: MessagePrompt() {
+    private inner class RateSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return DefaultAmountPrompt()
         }
@@ -169,7 +171,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
 
     }
 
-    private inner class DefaultAmountPrompt: NumericPrompt() {
+    private inner class DefaultAmountPrompt : NumericPrompt() {
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
             context.setSessionData("default_amount", input.toInt())
             return DefaultAmountSetPrompt()
@@ -192,7 +194,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
         }
     }
 
-    private inner class DefaultAmountSetPrompt: MessagePrompt() {
+    private inner class DefaultAmountSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return MaterialPrompt()
         }
@@ -203,7 +205,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
 
     }
 
-    private inner class MaterialPrompt: ValidatingPrompt() {
+    private inner class MaterialPrompt : ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             return Material.matchMaterial(input) != null
         }
@@ -223,7 +225,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
 
     }
 
-    private inner class MaterialSetPrompt: MessagePrompt() {
+    private inner class MaterialSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return CurrencyAddedPrompt()
         }
@@ -234,10 +236,10 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit): CommandExecutor 
 
     }
 
-    private inner class CurrencyAddedPrompt: MessagePrompt() {
+    private inner class CurrencyAddedPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt? {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            currencyProvider.addCurrency(
+            val currencyService = Services[RPKCurrencyService::class] ?: return END_OF_CONVERSATION
+            currencyService.addCurrency(
                     RPKCurrencyImpl(
                             name = context.getSessionData("name") as String,
                             nameSingular = context.getSessionData("name_singular") as String,

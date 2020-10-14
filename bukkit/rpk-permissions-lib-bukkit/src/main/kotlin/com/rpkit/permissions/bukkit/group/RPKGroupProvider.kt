@@ -17,17 +17,17 @@
 package com.rpkit.permissions.bukkit.group
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 /**
  * Provides group related operations.
  */
-interface RPKGroupProvider: ServiceProvider {
+interface RPKGroupService : Service {
 
     /**
-     * A list of groups managed by this group provider.
+     * A list of groups managed by this group service.
      */
     val groups: List<RPKGroup>
 
@@ -45,6 +45,14 @@ interface RPKGroupProvider: ServiceProvider {
      *
      * @param profile The profile
      * @param group The group to add
+     * @param priority The priority at which to add the group, a higher priority value means the group will be assigned earlier
+     */
+    fun addGroup(profile: RPKProfile, group: RPKGroup, priority: Int)
+
+    /**
+     * Adds a group to a profile, at the lowest priority.
+     * @param profile The profile
+     * @param group The group to add
      */
     fun addGroup(profile: RPKProfile, group: RPKGroup)
 
@@ -52,6 +60,13 @@ interface RPKGroupProvider: ServiceProvider {
      * Adds a group to a character.
      * The group will only be applied while using this character.
      *
+     * @param character The character
+     * @param group The group to add
+     */
+    fun addGroup(character: RPKCharacter, group: RPKGroup, priority: Int)
+
+    /**
+     * Adds a group to a character, at the lowest priority.
      * @param character The character
      * @param group The group to add
      */

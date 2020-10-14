@@ -17,4 +17,4 @@
 package com.rpkit.players.bukkit.event.githubprofile
 
 
-interface RPKGitHubProfileUpdateEvent: RPKGitHubProfileEvent
+interface RPKGitHubProfileUpdateEvent : RPKGitHubProfileEvent

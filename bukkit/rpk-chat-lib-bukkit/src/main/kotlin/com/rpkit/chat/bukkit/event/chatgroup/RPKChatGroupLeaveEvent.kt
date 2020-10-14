@@ -19,4 +19,4 @@ package com.rpkit.chat.bukkit.event.chatgroup
 import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
 
 
-interface RPKChatGroupLeaveEvent: RPKChatGroupEvent, RPKMinecraftProfileEvent
+interface RPKChatGroupLeaveEvent : RPKChatGroupEvent, RPKMinecraftProfileEvent

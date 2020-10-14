@@ -16,9 +16,10 @@
 
 package com.rpkit.moderation.bukkit.command.ticket
 
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
-import com.rpkit.moderation.bukkit.ticket.RPKTicketProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.moderation.bukkit.ticket.RPKTicketService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -26,7 +27,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class TicketCloseCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class TicketCloseCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isEmpty()) {
@@ -37,8 +38,12 @@ class TicketCloseCommand(private val plugin: RPKModerationBukkit): CommandExecut
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -48,9 +53,13 @@ class TicketCloseCommand(private val plugin: RPKModerationBukkit): CommandExecut
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        val ticketProvider = plugin.core.serviceManager.getServiceProvider(RPKTicketProvider::class)
+        val ticketService = Services[RPKTicketService::class]
+        if (ticketService == null) {
+            sender.sendMessage(plugin.messages["no-ticket-service"])
+            return true
+        }
         try {
-            val ticket = ticketProvider.getTicket(args[0].toInt())
+            val ticket = ticketService.getTicket(args[0].toInt())
             if (ticket == null) {
                 sender.sendMessage(plugin.messages["ticket-close-invalid-ticket"])
                 return true
@@ -60,7 +69,7 @@ class TicketCloseCommand(private val plugin: RPKModerationBukkit): CommandExecut
                 return true
             }
             ticket.close(profile)
-            ticketProvider.updateTicket(ticket)
+            ticketService.updateTicket(ticket)
             sender.sendMessage(plugin.messages["ticket-close-valid"])
         } catch (exception: NumberFormatException) {
             sender.sendMessage(plugin.messages["ticket-close-invalid-id"])

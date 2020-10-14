@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitPurchaseDeleteEvent(
         override val purchase: RPKPurchase
-): RPKBukkitEvent(), RPKPurchaseDeleteEvent, Cancellable {
+) : RPKBukkitEvent(), RPKPurchaseDeleteEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

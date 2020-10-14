@@ -1,13 +1,13 @@
 distance-command:
-    maximum-distance: 64000
-    item-requirement:
-        ==: org.bukkit.inventory.ItemStack
-        type: COMPASS
+  maximum-distance: 64000
+  item-requirement:
+    ==: org.bukkit.inventory.ItemStack
+    type: COMPASS
 track-command:
-    maximum-distance: 1000
-    item-requirement:
-        ==: org.bukkit.inventory.ItemStack
-        type: COMPASS
+  maximum-distance: 1000
+  item-requirement:
+    ==: org.bukkit.inventory.ItemStack
+    type: COMPASS
 time-slow-factor: 4
 daily-messages:
 - '&7"That makes sense!"'
@@ -80,15 +80,15 @@ kits:
   - ==: org.bukkit.inventory.ItemStack
     type: EGG
 caching:
-    rpkit_log_messages_enabled:
-        id:
-            enabled: true
-            size: 20
-    rpkit_previous_location:
-        id:
-            enabled: true
-            size: 20
-    rpkit_tracking_enabled:
-        id:
-            enabled: true
-            size: 20
+  rpkit_log_messages_enabled:
+    minecraft_profile_id:
+      enabled: true
+      size: 20
+  rpkit_previous_location:
+    minecraft_profile_id:
+      enabled: true
+      size: 20
+  rpkit_tracking_enabled:
+    id:
+      enabled: true
+      size: 20

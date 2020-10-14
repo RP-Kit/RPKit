@@ -16,10 +16,12 @@
 
 package com.rpkit.characters.bukkit.character.field
 
+import com.rpkit.core.plugin.RPKPlugin
+
 /**
- * Character card field provider implementation.
+ * Character card field service implementation.
  */
-class RPKCharacterCardFieldProviderImpl: RPKCharacterCardFieldProvider {
+class RPKCharacterCardFieldServiceImpl(override val plugin: RPKPlugin) : RPKCharacterCardFieldService {
 
     override val characterCardFields = mutableListOf<CharacterCardField>()
 

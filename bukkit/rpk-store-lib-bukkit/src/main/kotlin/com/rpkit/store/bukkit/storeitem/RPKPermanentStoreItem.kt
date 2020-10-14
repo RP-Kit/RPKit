@@ -20,4 +20,4 @@ package com.rpkit.store.bukkit.storeitem
  * Represents a permanent store item.
  * A permanent store item stays attached to a profile indefinitely.
  */
-interface RPKPermanentStoreItem: RPKStoreItem
+interface RPKPermanentStoreItem : RPKStoreItem

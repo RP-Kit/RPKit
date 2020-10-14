@@ -8,19 +8,19 @@ depend:
 - rpk-store-lib-bukkit
 api-version: '1.16'
 commands:
-    claim:
-        description: Claims a consumable purchase
-        usage: /<command> [purchase id]
-    purchase:
-        description: Adds a purchase to an account
-        usage: /<command> [uuid|name] [store item id]
-    purchases:
-        description: Shows all purchases on your account
-        usage: /<command>
+  claim:
+    description: Claims a consumable purchase
+    usage: /<command> [purchase id]
+  purchase:
+    description: Adds a purchase to an account
+    usage: /<command> [uuid|name] [store item id]
+  purchases:
+    description: Shows all purchases on your account
+    usage: /<command>
 permissions:
-    rpkit.stores.command.purchases:
-        description: Allows the listing of purchases
-        default: true
-    rpkit.stores.command.claim:
-        description: Allows the claiming of purchases
-        default: true
+  rpkit.stores.command.purchases:
+    description: Allows the listing of purchases
+    default: true
+  rpkit.stores.command.claim:
+    description: Allows the claiming of purchases
+    default: true

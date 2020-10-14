@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitMinecraftProfileDeleteEvent(
         override val minecraftProfile: RPKMinecraftProfile
-): RPKBukkitEvent(), RPKMinecraftProfileDeleteEvent, Cancellable {
+) : RPKBukkitEvent(), RPKMinecraftProfileDeleteEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

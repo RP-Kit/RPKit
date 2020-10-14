@@ -17,7 +17,8 @@
 package com.rpkit.chat.bukkit.irc.command
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.irc.RPKIRCProvider
+import com.rpkit.chat.bukkit.irc.RPKIRCService
+import com.rpkit.core.service.Services
 import org.pircbotx.Channel
 import org.pircbotx.User
 
@@ -25,16 +26,20 @@ import org.pircbotx.User
  * IRC verify command.
  * Verifies the IRC bot with NickServ based on the password that was sent to the e-mail when the bot was registered.
  */
-class IRCVerifyCommand(private val plugin: RPKChatBukkit): IRCCommand("verify") {
+class IRCVerifyCommand(private val plugin: RPKChatBukkit) : IRCCommand("verify") {
 
     override fun execute(channel: Channel, sender: User, cmd: IRCCommand, label: String, args: Array<String>) {
-        val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
-        if (args.isNotEmpty()) {
-            ircProvider.ircBot.sendIRC().message("NickServ", "VERIFY REGISTER " + ircProvider.ircBot.nick + " " + args[0])
-            sender.send().message(plugin.messages["irc-verify-valid"])
-        } else {
-            sender.send().message(plugin.messages["irc-verify-invalid-verification-code-not-specified"])
+        val ircService = Services[RPKIRCService::class]
+        if (ircService == null) {
+            sender.send().message(plugin.messages["irc-no-irc-service"])
+            return
         }
+        if (args.isEmpty()) {
+            sender.send().message(plugin.messages["irc-verify-invalid-verification-code-not-specified"])
+            return
+        }
+        ircService.ircBot.sendIRC().message("NickServ", "VERIFY REGISTER " + ircService.ircBot.nick + " " + args[0])
+        sender.send().message(plugin.messages["irc-verify-valid"])
     }
 
 }

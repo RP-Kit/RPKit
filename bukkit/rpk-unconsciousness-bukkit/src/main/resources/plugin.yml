@@ -9,10 +9,10 @@ depend:
 - rpk-unconsciousness-lib-bukkit
 api-version: '1.16'
 commands:
-    wake:
-        description: Wakes a player from being unconscious
-        usage: /<command> (player)
+  wake:
+    description: Wakes a player from being unconscious
+    usage: /<command> (player)
 permissions:
-    rpkit.unconsciousness.unconscious.commands:
-        description: Allows using commands while unconscious
-        default: op
+  rpkit.unconsciousness.unconscious.commands:
+    description: Allows using commands while unconscious
+    default: op

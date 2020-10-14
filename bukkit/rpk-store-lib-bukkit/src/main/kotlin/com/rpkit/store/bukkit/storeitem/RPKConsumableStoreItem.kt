@@ -20,7 +20,7 @@ package com.rpkit.store.bukkit.storeitem
  * Represents a consumable store item.
  * A consumable store item has a limited number of uses.
  */
-interface RPKConsumableStoreItem: RPKStoreItem {
+interface RPKConsumableStoreItem : RPKStoreItem {
 
     /**
      * The amount of uses the store item has

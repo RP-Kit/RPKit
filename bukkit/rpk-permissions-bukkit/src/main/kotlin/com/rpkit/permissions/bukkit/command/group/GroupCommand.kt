@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Group command.
  * Parent command for all group management commands.
  */
-class GroupCommand(private val plugin: RPKPermissionsBukkit): CommandExecutor {
+class GroupCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
 
     private val groupAddCommand = GroupAddCommand(plugin)
     private val groupRemoveCommand = GroupRemoveCommand(plugin)

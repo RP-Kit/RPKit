@@ -17,4 +17,4 @@
 package com.rpkit.economy.bukkit.event.currency
 
 
-interface RPKCurrencyCreateEvent: RPKCurrencyEvent
+interface RPKCurrencyCreateEvent : RPKCurrencyEvent

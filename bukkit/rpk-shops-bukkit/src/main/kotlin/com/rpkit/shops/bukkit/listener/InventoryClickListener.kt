@@ -16,11 +16,12 @@
 
 package com.rpkit.shops.bukkit.listener
 
-import com.rpkit.banks.bukkit.bank.RPKBankProvider
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.banks.bukkit.bank.RPKBankService
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
+import com.rpkit.economy.bukkit.economy.RPKEconomyService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.shops.bukkit.RPKShopsBukkit
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.block.Block
@@ -38,67 +39,95 @@ import java.time.format.DateTimeFormatter
 /**
  * Inventory click listener for shops.
  */
-class InventoryClickListener(val plugin: RPKShopsBukkit): Listener {
+class InventoryClickListener(val plugin: RPKShopsBukkit) : Listener {
 
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
         val chest = event.inventory.holder
-        if (chest is Chest) {
-            val sign = chest.block.getRelative(UP).state
-            if (sign is Sign) {
-                if (sign.getLine(0) == "$GREEN[shop]") {
-                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-                    val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
-                    val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                    val sellerCharacter = if (sign.getLine(3).equals("admin", ignoreCase = true)) null else characterProvider.getCharacter(sign.getLine(3).toInt()) ?: return
-                    val buyerBukkitPlayer = event.whoClicked as? Player ?: return
-                    val buyerMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(buyerBukkitPlayer)
-                    if (buyerMinecraftProfile != null) {
-                        if (!validateRentSign(chest.block.getRelative(UP, 2))) {
-                            buyerBukkitPlayer.sendMessage(plugin.messages["rent-ended"])
-                            return
-                        }
-                        val buyerCharacter = characterProvider.getActiveCharacter(buyerMinecraftProfile)
-                        if (buyerCharacter == null) {
-                            buyerBukkitPlayer.sendMessage(plugin.messages["no-character"])
-                            return
-                        }
-                        if (buyerCharacter == sellerCharacter) {
-                            return
-                        }
-                        event.isCancelled = true
-                        if (sign.getLine(1).startsWith("buy")) {
-                            val amount = sign.getLine(1).split(Regex("\\s+"))[1].toInt()
-                            val price = sign.getLine(2).split(Regex("\\s+"))[1].toInt()
-                            val currencyWords = sign.getLine(2).split(Regex("\\s+"))
-                            val currency = currencyProvider.getCurrency(currencyWords.subList(2, currencyWords.size).joinToString(" ")) ?: return
-                            val item = event.currentItem ?: return
-                            val amtItem = ItemStack(item)
-                            amtItem.amount = amount
-                            if (chest.blockInventory.containsAtLeast(item, amount)) {
-                                if (economyProvider.getBalance(buyerCharacter, currency) >= price) {
-                                    economyProvider.setBalance(buyerCharacter, currency, economyProvider.getBalance(buyerCharacter, currency) - price)
-                                    if (sellerCharacter != null) {
-                                        bankProvider.setBalance(sellerCharacter, currency, bankProvider.getBalance(sellerCharacter, currency) + price)
-                                    }
-                                    buyerBukkitPlayer.inventory.addItem(amtItem)
-                                    chest.blockInventory.removeItem(amtItem)
-                                } else {
-                                    buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-money"])
-                                }
-                            } else {
-                                buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-shop-items"])
-                            }
-                        } else if (sign.getLine(1).startsWith("sell")) {
-                            event.whoClicked.sendMessage(plugin.messages["no-stealing"])
-                        }
-                    } else {
-                        event.whoClicked.sendMessage(plugin.messages["no-minecraft-profile"])
-                    }
-                }
+        if (chest !is Chest) return
+        val sign = chest.block.getRelative(UP).state
+        if (sign !is Sign) return
+        if (sign.getLine(0) != "$GREEN[shop]") return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            event.whoClicked.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            event.isCancelled = true
+            return
+        }
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            event.whoClicked.sendMessage(plugin.messages["no-character-service"])
+            event.isCancelled = true
+            return
+        }
+        val economyService = Services[RPKEconomyService::class]
+        if (economyService == null) {
+            event.whoClicked.sendMessage(plugin.messages["no-economy-service"])
+            event.isCancelled = true
+            return
+        }
+        val bankService = Services[RPKBankService::class]
+        if (bankService == null) {
+            event.whoClicked.sendMessage(plugin.messages["no-bank-service"])
+            event.isCancelled = true
+            return
+        }
+        val currencyService = Services[RPKCurrencyService::class]
+        if (currencyService == null) {
+            event.whoClicked.sendMessage(plugin.messages["no-currency-service"])
+            event.isCancelled = true
+            return
+        }
+        val sellerCharacter = if (sign.getLine(3).equals("admin", ignoreCase = true)) {
+            null
+        } else {
+            characterService.getCharacter(sign.getLine(3).toInt()) ?: return
+        }
+        val buyerBukkitPlayer = event.whoClicked as? Player ?: return
+        val buyerMinecraftProfile = minecraftProfileService.getMinecraftProfile(buyerBukkitPlayer)
+        if (buyerMinecraftProfile == null) {
+            event.whoClicked.sendMessage(plugin.messages["no-minecraft-profile"])
+            return
+        }
+        if (!validateRentSign(chest.block.getRelative(UP, 2))) {
+            buyerBukkitPlayer.sendMessage(plugin.messages["rent-ended"])
+            return
+        }
+        val buyerCharacter = characterService.getActiveCharacter(buyerMinecraftProfile)
+        if (buyerCharacter == null) {
+            buyerBukkitPlayer.sendMessage(plugin.messages["no-character"])
+            return
+        }
+        if (buyerCharacter == sellerCharacter) {
+            return
+        }
+        event.isCancelled = true
+        if (sign.getLine(1).startsWith("buy")) {
+            val amount = sign.getLine(1).split(Regex("\\s+"))[1].toInt()
+            val price = sign.getLine(2).split(Regex("\\s+"))[1].toInt()
+            val currencyWords = sign.getLine(2).split(Regex("\\s+"))
+            val currency = currencyService.getCurrency(currencyWords.subList(2, currencyWords.size).joinToString(" "))
+                    ?: return
+            val item = event.currentItem ?: return
+            val amtItem = ItemStack(item)
+            amtItem.amount = amount
+            if (!chest.blockInventory.containsAtLeast(item, amount)) {
+                buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-shop-items"])
+                return
             }
+            if (economyService.getBalance(buyerCharacter, currency) < price) {
+                buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-money"])
+                return
+            }
+            economyService.setBalance(buyerCharacter, currency, economyService.getBalance(buyerCharacter, currency) - price)
+            if (sellerCharacter != null) {
+                bankService.setBalance(sellerCharacter, currency, bankService.getBalance(sellerCharacter, currency) + price)
+            }
+            buyerBukkitPlayer.inventory.addItem(amtItem)
+            chest.blockInventory.removeItem(amtItem)
+        } else if (sign.getLine(1).startsWith("sell")) {
+            event.whoClicked.sendMessage(plugin.messages["no-stealing"])
+            event.isCancelled = true
         }
     }
 

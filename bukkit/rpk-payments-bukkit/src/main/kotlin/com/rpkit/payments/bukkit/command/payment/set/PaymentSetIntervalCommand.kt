@@ -16,22 +16,29 @@
 
 package com.rpkit.payments.bukkit.command.payment.set
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
-import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.NumericPrompt
+import org.bukkit.conversations.Prompt
 import org.bukkit.entity.Player
+import java.time.Duration
+import java.time.temporal.ChronoUnit.SECONDS
 
 /**
  * Payment set interval command.
  * Sets the interval at which the payment group charges.
  */
-class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
+class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit) : CommandExecutor {
     private val conversationFactory = ConversationFactory(plugin)
             .withModality(true)
             .withFirstPrompt(IntervalPrompt())
@@ -45,46 +52,60 @@ class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit): CommandE
                     }
                 }
             }
+
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("rpkit.payments.command.payment.set.interval")) {
-            if (sender is Player) {
-                if (args.isNotEmpty()) {
-                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                    if (minecraftProfile != null) {
-                        val character = characterProvider.getActiveCharacter(minecraftProfile)
-                        val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-                        val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
-                        if (paymentGroup != null) {
-                            if (paymentGroup.owners.contains(character)) {
-                                val conversation = conversationFactory.buildConversation(sender)
-                                conversation.context.setSessionData("payment_group", paymentGroup)
-                                conversation.begin()
-                            } else {
-                                sender.sendMessage(plugin.messages["payment-set-interval-invalid-owner"])
-                            }
-                        } else {
-                            sender.sendMessage(plugin.messages["payment-set-interval-invalid-group"])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["payment-set-interval-usage"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["not-from-console"])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.payments.command.payment.set.interval")) {
             sender.sendMessage(plugin.messages["no-permission-payment-set-interval"])
+            return true
         }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        if (args.isEmpty()) {
+            sender.sendMessage(plugin.messages["payment-set-interval-usage"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        val paymentGroupService = Services[RPKPaymentGroupService::class]
+        if (paymentGroupService == null) {
+            sender.sendMessage(plugin.messages["no-payment-group-service"])
+            return true
+        }
+        val paymentGroup = paymentGroupService.getPaymentGroup(args.joinToString(" "))
+        if (paymentGroup == null) {
+            sender.sendMessage(plugin.messages["payment-set-interval-invalid-group"])
+            return true
+        }
+        if (!paymentGroup.owners.contains(character)) {
+            sender.sendMessage(plugin.messages["payment-set-interval-invalid-owner"])
+            return true
+        }
+        val conversation = conversationFactory.buildConversation(sender)
+        conversation.context.setSessionData("payment_group", paymentGroup)
+        conversation.begin()
         return true
     }
 
-    private inner class IntervalPrompt: NumericPrompt() {
+    private inner class IntervalPrompt : NumericPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
+            if (Services[RPKPaymentGroupService::class] == null) return plugin.messages["no-payment-group-service"]
             return plugin.messages["payment-set-interval-prompt"]
         }
 
@@ -101,16 +122,16 @@ class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit): CommandE
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
-            val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
+            val paymentGroupService = Services[RPKPaymentGroupService::class] ?: return END_OF_CONVERSATION
             val paymentGroup = context.getSessionData("payment_group") as RPKPaymentGroup
-            paymentGroup.interval = input.toLong() * 1000L
-            paymentGroupProvider.updatePaymentGroup(paymentGroup)
+            paymentGroup.interval = Duration.of(input.toLong(), SECONDS)
+            paymentGroupService.updatePaymentGroup(paymentGroup)
             return IntervalSetPrompt()
         }
 
     }
 
-    private inner class IntervalSetPrompt: MessagePrompt() {
+    private inner class IntervalSetPrompt : MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return END_OF_CONVERSATION

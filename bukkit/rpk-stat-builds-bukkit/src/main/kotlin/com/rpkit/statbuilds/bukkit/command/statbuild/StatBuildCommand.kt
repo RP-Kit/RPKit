@@ -21,7 +21,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-class StatBuildCommand(private val plugin: RPKStatBuildsBukkit): CommandExecutor {
+class StatBuildCommand(private val plugin: RPKStatBuildsBukkit) : CommandExecutor {
 
     private val statBuildAssignPointCommand = StatBuildAssignPointCommand(plugin)
     private val statBuildViewCommand = StatBuildViewCommand(plugin)

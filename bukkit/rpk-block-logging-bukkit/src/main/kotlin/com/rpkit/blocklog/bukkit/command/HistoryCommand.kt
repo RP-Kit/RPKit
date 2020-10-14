@@ -1,18 +1,33 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.blocklog.bukkit.command
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockChange
-import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryProvider
-import org.bukkit.Material
+import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
+import com.rpkit.core.service.Services
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.format.DateTimeFormatter
 
 
-class HistoryCommand(private val plugin: RPKBlockLoggingBukkit): CommandExecutor {
+class HistoryCommand(private val plugin: RPKBlockLoggingBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender !is Player) {
@@ -23,13 +38,13 @@ class HistoryCommand(private val plugin: RPKBlockLoggingBukkit): CommandExecutor
             sender.sendMessage(plugin.messages["no-permission-history"])
             return true
         }
-        val targetBlock = sender.getTargetBlock(null as? HashSet<Material>, 8)
-        if (targetBlock == null) {
-            sender.sendMessage(plugin.messages["history-no-target-block"])
+        val targetBlock = sender.getTargetBlock(null, 8)
+        val blockHistoryService = Services[RPKBlockHistoryService::class]
+        if (blockHistoryService == null) {
+            sender.sendMessage(plugin.messages["no-block-history-service"])
             return true
         }
-        val blockHistoryProvider = plugin.core.serviceManager.getServiceProvider(RPKBlockHistoryProvider::class)
-        val blockHistory = blockHistoryProvider.getBlockHistory(targetBlock)
+        val blockHistory = blockHistoryService.getBlockHistory(targetBlock)
         val changes = blockHistory.changes
         if (changes.isEmpty()) {
             sender.sendMessage(plugin.messages["history-no-changes"])
@@ -37,10 +52,10 @@ class HistoryCommand(private val plugin: RPKBlockLoggingBukkit): CommandExecutor
         }
         for (change in changes.sortedBy(RPKBlockChange::time).take(100)) {
             sender.sendMessage(plugin.messages["history-change", mapOf(
-                    Pair("time", SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz").format(Date(change.time))),
-                    Pair("profile", change.profile?.name?:"None"),
-                    Pair("minecraft-profile", change.minecraftProfile?.minecraftUsername?:"None"),
-                    Pair("character", change.character?.name?:"None"),
+                    Pair("time", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time)),
+                    Pair("profile", change.profile?.name ?: "None"),
+                    Pair("minecraft-profile", change.minecraftProfile?.minecraftUsername ?: "None"),
+                    Pair("character", change.character?.name ?: "None"),
                     Pair("from", change.from.toString().toLowerCase().replace('_', ' ')),
                     Pair("to", change.to.toString().toLowerCase().replace('_', ' ')),
                     Pair("reason", change.reason)

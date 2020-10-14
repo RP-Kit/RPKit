@@ -17,4 +17,4 @@
 package com.rpkit.warp.bukkit.event.warp
 
 
-interface RPKWarpUpdateEvent: RPKWarpEvent
+interface RPKWarpUpdateEvent : RPKWarpEvent

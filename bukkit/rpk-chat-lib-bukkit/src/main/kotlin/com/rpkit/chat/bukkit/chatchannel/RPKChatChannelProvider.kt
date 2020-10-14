@@ -16,29 +16,20 @@
 
 package com.rpkit.chat.bukkit.chatchannel
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Provides chat channel related operations.
  */
-interface RPKChatChannelProvider: ServiceProvider {
+interface RPKChatChannelService : Service {
 
     /**
-     * A collection of all chat channels currently managed by this chat channel provider.
+     * A collection of all chat channels currently managed by this chat channel service.
      * The collection is immutable, chat channels must be added and removed using [addChatChannel] and
      * [removeChatChannel].
      */
     val chatChannels: Collection<RPKChatChannel>
-
-    /**
-     * Gets a chat channel by ID.
-     * If there is no chat channel with the given ID, null is returned.
-     *
-     * @param id The ID of the chat channel
-     * @return The chat channel, or null if no chat channel is found with the given ID
-     */
-    fun getChatChannel(id: Int): RPKChatChannel?
 
     /**
      * Gets a chat channel by name.
@@ -50,14 +41,14 @@ interface RPKChatChannelProvider: ServiceProvider {
     fun getChatChannel(name: String): RPKChatChannel?
 
     /**
-     * Adds a chat channel to be tracked by this chat channel provider.
+     * Adds a chat channel to be tracked by this chat channel service.
      *
      * @param chatChannel The chat channel to add
      */
     fun addChatChannel(chatChannel: RPKChatChannel)
 
     /**
-     * Removes a chat channel from being tracked by this chat channel provider.
+     * Removes a chat channel from being tracked by this chat channel service.
      *
      * @param chatChannel The chat channel to remove
      */

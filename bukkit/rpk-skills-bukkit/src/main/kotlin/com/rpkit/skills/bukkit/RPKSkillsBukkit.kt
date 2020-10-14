@@ -18,26 +18,79 @@ package com.rpkit.skills.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.command.BindSkillCommand
 import com.rpkit.skills.bukkit.command.SkillCommand
 import com.rpkit.skills.bukkit.command.UnbindSkillCommand
 import com.rpkit.skills.bukkit.database.table.RPKSkillBindingTable
 import com.rpkit.skills.bukkit.database.table.RPKSkillCooldownTable
 import com.rpkit.skills.bukkit.listener.PlayerInteractListener
-import com.rpkit.skills.bukkit.skills.RPKSkillProviderImpl
-import com.rpkit.skills.bukkit.skills.RPKSkillTypeProviderImpl
+import com.rpkit.skills.bukkit.skills.RPKSkillService
+import com.rpkit.skills.bukkit.skills.RPKSkillServiceImpl
+import com.rpkit.skills.bukkit.skills.RPKSkillTypeService
+import com.rpkit.skills.bukkit.skills.RPKSkillTypeServiceImpl
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
 
-class RPKSkillsBukkit: RPKBukkitPlugin() {
+class RPKSkillsBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 4417)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKSkillTypeProviderImpl(this),
-                RPKSkillProviderImpl(this)
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/skills/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/skills/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_skills"
+                ),
+                classLoader
         )
+
+        database.addTable(RPKSkillCooldownTable(database, this))
+        database.addTable(RPKSkillBindingTable(database, this))
+
+        Services[RPKSkillTypeService::class] = RPKSkillTypeServiceImpl(this)
+        Services[RPKSkillService::class] = RPKSkillServiceImpl(this)
     }
 
     override fun registerCommands() {
@@ -50,11 +103,6 @@ class RPKSkillsBukkit: RPKBukkitPlugin() {
         registerListeners(
                 PlayerInteractListener(this)
         )
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKSkillCooldownTable(database, this))
-        database.addTable(RPKSkillBindingTable(database, this))
     }
 
     override fun setDefaultMessages() {
@@ -77,6 +125,10 @@ class RPKSkillsBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-skill", "&cYou do not have permission to use skills.")
         messages.setDefault("no-permission-bind-skill", "&cYou do not have permission to bind skills.")
         messages.setDefault("no-permission-unbind-skill", "&cYou do not have permission to unbind skills.")
+        messages.setDefault("no-skill-service", "&cThere is no skill service available.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-character-service", "&cThere is no character service available.")
+        messages.setDefault("no-skill-service", "&cThere is no skill service available.")
     }
 
 }

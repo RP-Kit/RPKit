@@ -16,13 +16,13 @@
 
 package com.rpkit.chat.bukkit.snooper
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Provides snooper related operations.
  */
-interface RPKSnooperProvider: ServiceProvider {
+interface RPKSnooperService : Service {
 
     /**
      * A list of all Minecraft profiles who are currently snooping.

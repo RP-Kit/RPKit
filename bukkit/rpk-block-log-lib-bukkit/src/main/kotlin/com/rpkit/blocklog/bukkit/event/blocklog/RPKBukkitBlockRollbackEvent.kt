@@ -20,15 +20,17 @@ import com.rpkit.core.bukkit.event.RPKBukkitEvent
 import org.bukkit.block.Block
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
+import java.time.LocalDateTime
 
 
 class RPKBukkitBlockRollbackEvent(
         override val block: Block,
-        override var time: Long
-): RPKBukkitEvent(), RPKBlockRollbackEvent, Cancellable {
+        override var time: LocalDateTime
+) : RPKBukkitEvent(), RPKBlockRollbackEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

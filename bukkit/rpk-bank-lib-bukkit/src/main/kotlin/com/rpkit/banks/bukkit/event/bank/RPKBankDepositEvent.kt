@@ -21,7 +21,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 
 
-interface RPKBankDepositEvent: RPKEvent {
+interface RPKBankDepositEvent : RPKEvent {
 
     var character: RPKCharacter
     var currency: RPKCurrency

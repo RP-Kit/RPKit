@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.moderation.bukkit.ticket.RPKTicket
 
 
-interface RPKTicketEvent: RPKEvent {
+interface RPKTicketEvent : RPKEvent {
 
     val ticket: RPKTicket
 

@@ -17,59 +17,59 @@
 package com.rpkit.chat.bukkit.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.database.table.LastUsedChatGroupTable
 import com.rpkit.chat.bukkit.database.table.RPKChatGroupTable
+import com.rpkit.chat.bukkit.database.table.RPKLastUsedChatGroupTable
 import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupCreateEvent
 import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupDeleteEvent
 import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupUpdateEvent
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
- * Chat group provider implementation.
+ * Chat group service implementation.
  */
-class RPKChatGroupProviderImpl(private val plugin: RPKChatBukkit): RPKChatGroupProvider {
+class RPKChatGroupServiceImpl(override val plugin: RPKChatBukkit) : RPKChatGroupService {
 
     override fun getChatGroup(id: Int): RPKChatGroup? {
-        return plugin.core.database.getTable(RPKChatGroupTable::class)[id]
+        return plugin.database.getTable(RPKChatGroupTable::class)[id]
     }
 
     override fun getChatGroup(name: String): RPKChatGroup? {
-        return plugin.core.database.getTable(RPKChatGroupTable::class).get(name)
+        return plugin.database.getTable(RPKChatGroupTable::class)[name]
     }
 
     override fun addChatGroup(chatGroup: RPKChatGroup) {
         val event = RPKBukkitChatGroupCreateEvent(chatGroup)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKChatGroupTable::class).insert(event.chatGroup)
+        plugin.database.getTable(RPKChatGroupTable::class).insert(event.chatGroup)
     }
 
     override fun removeChatGroup(chatGroup: RPKChatGroup) {
         val event = RPKBukkitChatGroupDeleteEvent(chatGroup)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKChatGroupTable::class).delete(event.chatGroup)
+        plugin.database.getTable(RPKChatGroupTable::class).delete(event.chatGroup)
     }
 
     override fun updateChatGroup(chatGroup: RPKChatGroup) {
         val event = RPKBukkitChatGroupUpdateEvent(chatGroup)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKChatGroupTable::class).update(event.chatGroup)
+        plugin.database.getTable(RPKChatGroupTable::class).update(event.chatGroup)
     }
 
     override fun getLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile): RPKChatGroup? {
-        return plugin.core.database.getTable(LastUsedChatGroupTable::class).get(minecraftProfile)?.chatGroup
+        return plugin.database.getTable(RPKLastUsedChatGroupTable::class).get(minecraftProfile)?.chatGroup
     }
 
     override fun setLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile, chatGroup: RPKChatGroup) {
-        val lastUsedChatGroupTable = plugin.core.database.getTable(LastUsedChatGroupTable::class)
+        val lastUsedChatGroupTable = plugin.database.getTable(RPKLastUsedChatGroupTable::class)
         val lastUsedChatGroup = lastUsedChatGroupTable.get(minecraftProfile)
         if (lastUsedChatGroup != null) {
             lastUsedChatGroup.chatGroup = chatGroup
             lastUsedChatGroupTable.update(lastUsedChatGroup)
         } else {
-            lastUsedChatGroupTable.insert(LastUsedChatGroup(minecraftProfile = minecraftProfile, chatGroup = chatGroup))
+            lastUsedChatGroupTable.insert(RPKLastUsedChatGroup(minecraftProfile = minecraftProfile, chatGroup = chatGroup))
         }
     }
 

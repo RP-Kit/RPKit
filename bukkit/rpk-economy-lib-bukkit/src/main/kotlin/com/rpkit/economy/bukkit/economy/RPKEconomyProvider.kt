@@ -17,13 +17,13 @@
 package com.rpkit.economy.bukkit.economy
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 
 /**
  * Provides economy related services.
  */
-interface RPKEconomyProvider: ServiceProvider {
+interface RPKEconomyService : Service {
 
     /**
      * Gets the balance of a character in the given currency.

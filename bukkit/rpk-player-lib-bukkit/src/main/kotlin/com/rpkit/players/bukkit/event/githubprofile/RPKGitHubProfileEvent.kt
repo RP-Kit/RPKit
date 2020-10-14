@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.players.bukkit.profile.RPKGitHubProfile
 
 
-interface RPKGitHubProfileEvent: RPKEvent {
+interface RPKGitHubProfileEvent : RPKEvent {
 
     val githubProfile: RPKGitHubProfile
 

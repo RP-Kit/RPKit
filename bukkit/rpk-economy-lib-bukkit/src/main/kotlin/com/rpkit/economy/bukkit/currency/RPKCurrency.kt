@@ -16,14 +16,20 @@
 
 package com.rpkit.economy.bukkit.currency
 
-import com.rpkit.core.database.Entity
 import org.bukkit.Material
-import java.lang.Math.floor
+import kotlin.math.floor
 
 /**
  * Represents a currency.
  */
-interface RPKCurrency: Entity {
+interface RPKCurrency {
+
+    /**
+     * The ID of the currency.
+     * Guaranteed to be unique.
+     * Null if not yet inserted into the database.
+     */
+    var id: Int?
 
     /**
      * The name of the currency.

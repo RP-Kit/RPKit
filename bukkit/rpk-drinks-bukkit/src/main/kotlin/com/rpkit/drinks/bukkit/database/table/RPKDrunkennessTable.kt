@@ -1,47 +1,42 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.drinks.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.drinks.bukkit.RPKDrinksBukkit
-import com.rpkit.drinks.bukkit.database.jooq.rpkit.Tables.RPKIT_DRUNKENNESS
+import com.rpkit.drinks.bukkit.database.jooq.Tables.RPKIT_DRUNKENNESS
 import com.rpkit.drinks.bukkit.drink.RPKDrunkenness
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 
-class RPKDrunkennessTable(database: Database, private val plugin: RPKDrinksBukkit): Table<RPKDrunkenness>(database, RPKDrunkenness::class) {
+class RPKDrunkennessTable(private val database: Database, private val plugin: RPKDrinksBukkit) : Table {
 
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_drunkenness.id.enabled")) {
-        database.cacheManager.createCache("rpk-drinks-bukkit.rpkit_drunkenness.id",
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_drunkenness.character_id.enabled")) {
+        database.cacheManager.createCache("rpk-drinks-bukkit.rpkit_drunkenness.character_id",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKDrunkenness::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_drunkenness.id.size"))))
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_drunkenness.character_id.size"))))
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_DRUNKENNESS)
-                .column(RPKIT_DRUNKENNESS.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_DRUNKENNESS.CHARACTER_ID, SQLDataType.INTEGER)
-                .column(RPKIT_DRUNKENNESS.DRUNKENNESS, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("pk_rpkit_drunkenness").primaryKey(RPKIT_DRUNKENNESS.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.1.0")
-        }
-    }
-
-    override fun insert(entity: RPKDrunkenness): Int {
+    fun insert(entity: RPKDrunkenness) {
         database.create
                 .insertInto(
                         RPKIT_DRUNKENNESS,
@@ -53,25 +48,21 @@ class RPKDrunkennessTable(database: Database, private val plugin: RPKDrinksBukki
                         entity.drunkenness
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
+        cache?.put(entity.character.id, entity)
     }
 
-    override fun update(entity: RPKDrunkenness) {
+    fun update(entity: RPKDrunkenness) {
         database.create
                 .update(RPKIT_DRUNKENNESS)
-                .set(RPKIT_DRUNKENNESS.CHARACTER_ID, entity.character.id)
                 .set(RPKIT_DRUNKENNESS.DRUNKENNESS, entity.drunkenness)
-                .where(RPKIT_DRUNKENNESS.ID.eq(entity.id))
+                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.put(entity.character.id, entity)
     }
 
-    override fun get(id: Int): RPKDrunkenness? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(character: RPKCharacter): RPKDrunkenness? {
+        if (cache?.containsKey(character.id) == true) {
+            return cache[character.id]
         } else {
             val result = database.create
                     .select(
@@ -79,45 +70,23 @@ class RPKDrunkennessTable(database: Database, private val plugin: RPKDrinksBukki
                             RPKIT_DRUNKENNESS.DRUNKENNESS
                     )
                     .from(RPKIT_DRUNKENNESS)
-                    .where(RPKIT_DRUNKENNESS.ID.eq(id))
+                    .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(character.id))
                     .fetchOne() ?: return null
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val characterId = result.get(RPKIT_DRUNKENNESS.CHARACTER_ID)
-            val character = characterProvider.getCharacter(characterId)
-            if (character != null) {
-                val drunkenness = RPKDrunkenness(
-                        id,
-                        character,
-                        result.get(RPKIT_DRUNKENNESS.DRUNKENNESS)
-                )
-                cache?.put(id, drunkenness)
-                return drunkenness
-            } else {
-                database.create
-                        .deleteFrom(RPKIT_DRUNKENNESS)
-                        .where(RPKIT_DRUNKENNESS.ID.eq(id))
-                        .execute()
-                cache?.remove(id)
-                return null
-            }
+            val drunkenness = RPKDrunkenness(
+                    character,
+                    result.get(RPKIT_DRUNKENNESS.DRUNKENNESS)
+            )
+            cache?.put(character.id, drunkenness)
+            return drunkenness
         }
     }
 
-    fun get(character: RPKCharacter): RPKDrunkenness? {
-        val result = database.create
-                .select(RPKIT_DRUNKENNESS.ID)
-                .from(RPKIT_DRUNKENNESS)
-                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(character.id))
-                .fetchOne() ?: return null
-        return get(result[RPKIT_DRUNKENNESS.ID])
-    }
-
-    override fun delete(entity: RPKDrunkenness) {
+    fun delete(entity: RPKDrunkenness) {
         database.create
                 .deleteFrom(RPKIT_DRUNKENNESS)
-                .where(RPKIT_DRUNKENNESS.ID.eq(entity.id))
+                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(entity.character.id)
     }
 
 }

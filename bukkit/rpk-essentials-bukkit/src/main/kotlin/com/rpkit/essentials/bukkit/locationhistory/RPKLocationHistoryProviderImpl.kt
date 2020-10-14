@@ -18,20 +18,20 @@ package com.rpkit.essentials.bukkit.locationhistory
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.database.table.RPKPreviousLocationTable
-import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryProvider
+import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryService
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import org.bukkit.Location
 
 
-class RPKLocationHistoryProviderImpl(private val plugin: RPKEssentialsBukkit): RPKLocationHistoryProvider {
+class RPKLocationHistoryServiceImpl(override val plugin: RPKEssentialsBukkit) : RPKLocationHistoryService {
 
     override fun getPreviousLocation(minecraftProfile: RPKMinecraftProfile): Location? {
-        return plugin.core.database.getTable(RPKPreviousLocationTable::class).get(minecraftProfile)?.location
+        return plugin.database.getTable(RPKPreviousLocationTable::class).get(minecraftProfile)?.location
     }
 
     override fun setPreviousLocation(minecraftProfile: RPKMinecraftProfile, location: Location) {
-        val previousLocationTable = plugin.core.database.getTable(RPKPreviousLocationTable::class)
-        var previousLocation = previousLocationTable.get(minecraftProfile)
+        val previousLocationTable = plugin.database.getTable(RPKPreviousLocationTable::class)
+        var previousLocation = previousLocationTable[minecraftProfile]
         if (previousLocation != null) {
             previousLocation.location = location
             previousLocationTable.update(previousLocation)

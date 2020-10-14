@@ -26,7 +26,7 @@ import org.bukkit.configuration.serialization.SerializableAs
  * Sends message to the receiver.
  */
 @SerializableAs("SendMessageComponent")
-class SendMessageComponent: DirectedPostFormatPipelineComponent, ConfigurationSerializable {
+class SendMessageComponent : DirectedPostFormatPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: DirectedPostFormatMessageContext): DirectedPostFormatMessageContext {
         if (!context.isCancelled)

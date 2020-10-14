@@ -16,10 +16,10 @@
 
 package com.rpkit.chat.bukkit.chatchannel.directed.preformat
 
-import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineComponent
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
-import com.rpkit.chat.bukkit.snooper.RPKSnooperProvider
+import com.rpkit.chat.bukkit.snooper.RPKSnooperService
+import com.rpkit.core.service.Services
 import com.rpkit.core.util.MathUtils
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -32,14 +32,17 @@ import java.util.*
  * Garbles messages based on the distance between the sender and receiver of the message.
  */
 @SerializableAs("GarbleComponent")
-class GarbleComponent(private val plugin: RPKChatBukkit, var clearRadius: Double): DirectedPreFormatPipelineComponent, ConfigurationSerializable {
+class GarbleComponent(var clearRadius: Double) : DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
         if (context.isCancelled) return context // Don't bother garbling if the receiver won't receive anyway
-        val senderMinecraftProfile = context.senderMinecraftProfile ?: return context // Prevent garble if the message wasn't sent from Minecraft
+        val senderMinecraftProfile = context.senderMinecraftProfile
+                ?: return context // Prevent garble if the message wasn't sent from Minecraft
         val receiverMinecraftProfile = context.receiverMinecraftProfile
-        val snooperProvider = plugin.core.serviceManager.getServiceProvider(RPKSnooperProvider::class)
-        if (snooperProvider.isSnooping(receiverMinecraftProfile)) return context // Prevent garble if the receiver is snooping
+        val snooperService = Services[RPKSnooperService::class]
+        if (snooperService != null) {
+            if (snooperService.isSnooping(receiverMinecraftProfile)) return context // Prevent garble if the receiver is snooping
+        }
         val senderOfflineBukkitPlayer = Bukkit.getOfflinePlayer(senderMinecraftProfile.minecraftUUID)
         val receiverOfflineBukkitPlayer = Bukkit.getOfflinePlayer(receiverMinecraftProfile.minecraftUUID)
         val senderBukkitPlayer = senderOfflineBukkitPlayer.player
@@ -90,7 +93,6 @@ class GarbleComponent(private val plugin: RPKChatBukkit, var clearRadius: Double
         @JvmStatic
         fun deserialize(serialized: MutableMap<String, Any>): GarbleComponent {
             return GarbleComponent(
-                    Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
                     (serialized["clear-radius"] as Int).toDouble()
             )
         }

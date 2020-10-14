@@ -16,16 +16,17 @@
 
 package com.rpkit.players.bukkit.command.account
 
-import com.rpkit.chat.bukkit.discord.RPKDiscordProvider
+import com.rpkit.chat.bukkit.discord.RPKDiscordService
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class AccountLinkDiscordCommand(private val plugin: RPKPlayersBukkit): CommandExecutor {
+class AccountLinkDiscordCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender !is Player) {
             sender.sendMessage(plugin.messages["not-from-console"])
@@ -36,9 +37,13 @@ class AccountLinkDiscordCommand(private val plugin: RPKPlayersBukkit): CommandEx
             return true
         }
         val discordUserName = args[0]
-        val discordProvider = plugin.core.serviceManager.getServiceProvider(RPKDiscordProvider::class)
+        val discordService = Services[RPKDiscordService::class]
+        if (discordService == null) {
+            sender.sendMessage(plugin.messages["no-discord-service"])
+            return true
+        }
         val discordUser = try {
-            discordProvider.getUser(discordUserName)
+            discordService.getUser(discordUserName)
         } catch (exception: IllegalArgumentException) {
             sender.sendMessage(plugin.messages["account-link-discord-invalid-user-tag"])
             return true
@@ -47,8 +52,12 @@ class AccountLinkDiscordCommand(private val plugin: RPKPlayersBukkit): CommandEx
             sender.sendMessage(plugin.messages["account-link-discord-invalid-user"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
@@ -63,7 +72,7 @@ class AccountLinkDiscordCommand(private val plugin: RPKPlayersBukkit): CommandEx
                     "Press tick to accept this request.")
                     .queue { message ->
                         message.addReaction("\u2705").queue()
-                        discordProvider.setMessageAsProfileLinkRequest(message, profile)
+                        discordService.setMessageAsProfileLinkRequest(message, profile)
                     }
         }
         return true

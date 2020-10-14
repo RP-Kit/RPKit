@@ -22,7 +22,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 
-class TicketListCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class TicketListCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
 
     private val ticketListOpenCommand = TicketListOpenCommand(plugin)
     private val ticketListClosedCommand = TicketListClosedCommand(plugin)

@@ -17,9 +17,10 @@
 package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.characters.bukkit.race.RPKRaceProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -30,7 +31,7 @@ import org.bukkit.entity.Player
  * Character set race command.
  * Sets character's race.
  */
-class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -40,79 +41,86 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
                 .withEscapeSequence("cancel")
                 .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
                 .addConversationAbandonedListener { event ->
-            if (!event.gracefulExit()) {
-                val conversable = event.context.forWhom
-                if (conversable is Player) {
-                    conversable.sendMessage(plugin.messages["operation-cancelled"])
+                    if (!event.gracefulExit()) {
+                        val conversable = event.context.forWhom
+                        if (conversable is Player) {
+                            conversable.sendMessage(plugin.messages["operation-cancelled"])
+                        }
+                    }
                 }
-            }
-        }
     }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender is Player) {
-            if (sender.hasPermission("rpkit.characters.command.character.set.race")) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                if (minecraftProfile != null) {
-                    val character = characterProvider.getActiveCharacter(minecraftProfile)
-                    if (character != null) {
-                        if (args.isNotEmpty()) {
-                            val raceBuilder = StringBuilder()
-                            for (i in 0 until args.size - 1) {
-                                raceBuilder.append(args[i]).append(" ")
-                            }
-                            raceBuilder.append(args[args.size - 1])
-                            val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
-                            val race = raceProvider.getRace(raceBuilder.toString())
-                            if (race != null) {
-                                character.race = race
-                                characterProvider.updateCharacter(character)
-                                sender.sendMessage(plugin.messages["character-set-race-valid"])
-                                character.showCharacterCard(minecraftProfile)
-                            } else {
-                                sender.sendMessage(plugin.messages["character-set-race-invalid-race"])
-                            }
-                        } else {
-                            conversationFactory.buildConversation(sender).begin()
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["no-character"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["no-permission-character-set-race"])
-            }
-        } else {
+        if (sender !is Player) {
             sender.sendMessage(plugin.messages["not-from-console"])
+            return true
         }
+        if (!sender.hasPermission("rpkit.characters.command.character.set.race")) {
+            sender.sendMessage(plugin.messages["no-permission-character-set-race"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null) {
+            sender.sendMessage(plugin.messages["no-character"])
+            return true
+        }
+        if (args.isEmpty()) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        val raceBuilder = StringBuilder()
+        for (i in 0 until args.size - 1) {
+            raceBuilder.append(args[i]).append(" ")
+        }
+        raceBuilder.append(args[args.size - 1])
+        val raceService = Services[RPKRaceService::class]
+        if (raceService == null) {
+            sender.sendMessage(plugin.messages["no-race-service"])
+            return true
+        }
+        val race = raceService.getRace(raceBuilder.toString())
+        if (race == null) {
+            sender.sendMessage(plugin.messages["character-set-race-invalid-race"])
+            return true
+        }
+        character.race = race
+        characterService.updateCharacter(character)
+        sender.sendMessage(plugin.messages["character-set-race-valid"])
+        character.showCharacterCard(minecraftProfile)
         return true
     }
 
-    private inner class RacePrompt: ValidatingPrompt() {
+    private inner class RacePrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class).getRace(input) != null
+            return Services[RPKRaceService::class]?.getRace(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
-            if (conversable is Player) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
-                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(conversable)
-                if (minecraftProfile != null) {
-                    val character = characterProvider.getActiveCharacter(minecraftProfile)
-                    if (character != null) {
-                        character.race = raceProvider.getRace(input)!!
-                        characterProvider.updateCharacter(character)
-                    }
-                }
-            }
+            if (conversable !is Player) return RaceSetPrompt()
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return RaceSetPrompt()
+            val characterService = Services[RPKCharacterService::class] ?: return RaceSetPrompt()
+            val raceService = Services[RPKRaceService::class] ?: return RaceSetPrompt()
+            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return RaceSetPrompt()
+            val character = characterService.getActiveCharacter(minecraftProfile) ?: return RaceSetPrompt()
+            character.race = raceService.getRace(input)!!
+            characterService.updateCharacter(character)
             return RaceSetPrompt()
         }
 
@@ -121,9 +129,9 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
+            val raceService = Services[RPKRaceService::class] ?: return plugin.messages["no-race-service"]
             val raceListBuilder = StringBuilder()
-            for (race in raceProvider.races) {
+            for (race in raceService.races) {
                 raceListBuilder.append(plugin.messages["race-list-item", mapOf(
                         Pair("race", race.name)
                 )]).append('\n')
@@ -133,19 +141,32 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit): CommandE
 
     }
 
-    private inner class RaceSetPrompt: MessagePrompt() {
+    private inner class RaceSetPrompt : MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(context.forWhom as Player)
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+                if (minecraftProfileService == null) {
+                    conversable.sendMessage(plugin.messages["no-minecraft-profile-service"])
+                    return END_OF_CONVERSATION
+                }
+                val characterService = Services[RPKCharacterService::class]
+                if (characterService == null) {
+                    conversable.sendMessage(plugin.messages["no-character-service"])
+                    return END_OF_CONVERSATION
+                }
+                val raceService = Services[RPKRaceService::class]
+                if (raceService == null) {
+                    conversable.sendMessage(plugin.messages["no-race-service"])
+                    return END_OF_CONVERSATION
+                }
+                val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
                 if (minecraftProfile != null) {
-                    characterProvider.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                    characterService.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
                 }
             }
-            return Prompt.END_OF_CONVERSATION
+            return END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package com.rpkit.monsters.bukkit.command.monsterspawnarea
 
+import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaImpl
-import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import com.rpkit.selection.bukkit.selection.RPKSelectionProvider
+import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.selection.bukkit.selection.RPKSelectionService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class MonsterSpawnAreaCreateCommand(private val plugin: RPKMonstersBukkit): CommandExecutor {
+class MonsterSpawnAreaCreateCommand(private val plugin: RPKMonstersBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.monsters.command.monsterspawnarea.create")) {
@@ -38,16 +39,28 @@ class MonsterSpawnAreaCreateCommand(private val plugin: RPKMonstersBukkit): Comm
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
         }
-        val selectionProvider = plugin.core.serviceManager.getServiceProvider(RPKSelectionProvider::class)
-        val selection = selectionProvider.getSelection(minecraftProfile)
-        val monsterSpawnAreaProvider = plugin.core.serviceManager.getServiceProvider(RPKMonsterSpawnAreaProvider::class)
-        monsterSpawnAreaProvider.addSpawnArea(RPKMonsterSpawnAreaImpl(
+        val selectionService = Services[RPKSelectionService::class]
+        if (selectionService == null) {
+            sender.sendMessage(plugin.messages["no-selection-service"])
+            return true
+        }
+        val selection = selectionService.getSelection(minecraftProfile)
+        val monsterSpawnAreaService = Services[RPKMonsterSpawnAreaService::class]
+        if (monsterSpawnAreaService == null) {
+            sender.sendMessage(plugin.messages["no-monster-spawn-area-service"])
+            return true
+        }
+        monsterSpawnAreaService.addSpawnArea(RPKMonsterSpawnAreaImpl(
                 plugin,
                 minPoint = selection.minimumPoint.location,
                 maxPoint = selection.maximumPoint.location

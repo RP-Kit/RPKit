@@ -24,11 +24,11 @@ import io.kotlintest.specs.WordSpec
 import io.mockk.mockk
 
 
-class RPKStatImplTests: WordSpec() {
+class RPKStatImplTests : WordSpec() {
 
     init {
         val character = mockk<RPKCharacter>()
-        val statVariables = listOf(object: RPKStatVariable {
+        val statVariables = listOf(object : RPKStatVariable {
             override val name: String = "level"
 
             override fun get(character: RPKCharacter): Double {
@@ -37,7 +37,6 @@ class RPKStatImplTests: WordSpec() {
 
         })
         val stat = RPKStatImpl(
-                0,
                 "test",
                 "level*3"
         )

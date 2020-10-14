@@ -20,7 +20,6 @@ import com.rpkit.chat.bukkit.chatchannel.format.FormatPart
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPostFormatPipelineComponent
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineComponent
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
-import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import java.awt.Color
@@ -28,7 +27,7 @@ import java.awt.Color
 /**
  * Represents a chat channel
  */
-interface RPKChatChannel: Entity {
+interface RPKChatChannel {
 
     /**
      * The name of the chat channel.

@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.event.character.RPKCharacterEvent
 
 
-interface RPKPaymentGroupMemberRemoveEvent: RPKPaymentGroupEvent, RPKCharacterEvent {
+interface RPKPaymentGroupMemberRemoveEvent : RPKPaymentGroupEvent, RPKCharacterEvent {
 
     override val character: RPKCharacter
 

@@ -21,17 +21,18 @@ import com.rpkit.core.database.Table
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyImpl
-import com.rpkit.economy.bukkit.database.jooq.rpkit.Tables.RPKIT_CURRENCY
+import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_CURRENCY
 import org.bukkit.Material
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 /**
  * Represents the currency table.
  */
-class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit): Table<RPKCurrency>(database, RPKCurrency::class) {
+class RPKCurrencyTable(
+        private val database: Database,
+        plugin: RPKEconomyBukkit
+) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_currency.id.enabled")) {
         database.cacheManager.createCache("rpk-economy-bukkit.rpkit_currency.id",
@@ -49,29 +50,7 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_CURRENCY)
-                .column(RPKIT_CURRENCY.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_CURRENCY.NAME, SQLDataType.VARCHAR(256))
-                .column(RPKIT_CURRENCY.NAME_SINGULAR, SQLDataType.VARCHAR(256))
-                .column(RPKIT_CURRENCY.NAME_PLURAL, SQLDataType.VARCHAR(256))
-                .column(RPKIT_CURRENCY.RATE, SQLDataType.DOUBLE)
-                .column(RPKIT_CURRENCY.DEFAULT_AMOUNT, SQLDataType.INTEGER)
-                .column(RPKIT_CURRENCY.MATERIAL, SQLDataType.VARCHAR(256))
-                .constraints(
-                        constraint("pk_rpkit_currency").primaryKey(RPKIT_CURRENCY.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.2.0")
-        }
-    }
-
-    override fun insert(entity: RPKCurrency): Int {
+    fun insert(entity: RPKCurrency) {
         database.create
                 .insertInto(
                         RPKIT_CURRENCY,
@@ -95,10 +74,9 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
         entity.id = id
         cache?.put(id, entity)
         nameCache?.put(entity.name, id)
-        return id
     }
 
-    override fun update(entity: RPKCurrency) {
+    fun update(entity: RPKCurrency) {
         database.create
                 .update(RPKIT_CURRENCY)
                 .set(RPKIT_CURRENCY.NAME, entity.name)
@@ -113,7 +91,7 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
         nameCache?.put(entity.name, entity.id)
     }
 
-    override fun get(id: Int): RPKCurrency? {
+    operator fun get(id: Int): RPKCurrency? {
         if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
@@ -153,7 +131,7 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
      * @param name The name
      * @return The currency, or null if no currency is found with the given name
      */
-    fun get(name: String): RPKCurrency? {
+    operator fun get(name: String): RPKCurrency? {
         if (nameCache?.containsKey(name) == true) {
             return get(nameCache.get(name) as Int)
         } else {
@@ -181,7 +159,7 @@ class RPKCurrencyTable(database: Database, private val plugin: RPKEconomyBukkit)
         }.filterNotNull()
     }
 
-    override fun delete(entity: RPKCurrency) {
+    fun delete(entity: RPKCurrency) {
         database.create
                 .deleteFrom(RPKIT_CURRENCY)
                 .where(RPKIT_CURRENCY.ID.eq(entity.id))

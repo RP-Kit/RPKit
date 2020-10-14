@@ -1,49 +1,43 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.blocklog.bukkit.database.table
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistory
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryImpl
-import com.rpkit.blocklog.bukkit.database.jooq.rpkit.Tables.RPKIT_BLOCK_HISTORY
+import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_HISTORY
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.bukkit.block.Block
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 
-class RPKBlockHistoryTable(database: Database, private val plugin: RPKBlockLoggingBukkit): Table<RPKBlockHistory>(database, RPKBlockHistory::class) {
+class RPKBlockHistoryTable(private val database: Database, private val plugin: RPKBlockLoggingBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_block_history.id.enabled")) {
-                database.cacheManager.createCache("rpk-block-logging-bukkit.rpkit_block_history.id",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBlockHistory::class.java,
-                                ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_block_history.id.size"))))
+        database.cacheManager.createCache("rpk-block-logging-bukkit.rpkit_block_history.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBlockHistory::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_block_history.id.size"))))
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_BLOCK_HISTORY)
-                .column(RPKIT_BLOCK_HISTORY.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_BLOCK_HISTORY.WORLD, SQLDataType.VARCHAR(256))
-                .column(RPKIT_BLOCK_HISTORY.X, SQLDataType.INTEGER)
-                .column(RPKIT_BLOCK_HISTORY.Y, SQLDataType.INTEGER)
-                .column(RPKIT_BLOCK_HISTORY.Z, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("pk_rpkit_block_history").primaryKey(RPKIT_BLOCK_HISTORY.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.4.0")
-        }
-    }
-
-    override fun insert(entity: RPKBlockHistory): Int {
+    fun insert(entity: RPKBlockHistory) {
         database.create
                 .insertInto(
                         RPKIT_BLOCK_HISTORY,
@@ -62,10 +56,9 @@ class RPKBlockHistoryTable(database: Database, private val plugin: RPKBlockLoggi
         val id = database.create.lastID().toInt()
         entity.id = id
         cache?.put(id, entity)
-        return id
     }
 
-    override fun update(entity: RPKBlockHistory) {
+    fun update(entity: RPKBlockHistory) {
         database.create
                 .update(RPKIT_BLOCK_HISTORY)
                 .set(RPKIT_BLOCK_HISTORY.WORLD, entity.world.name)
@@ -77,7 +70,7 @@ class RPKBlockHistoryTable(database: Database, private val plugin: RPKBlockLoggi
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKBlockHistory? {
+    operator fun get(id: Int): RPKBlockHistory? {
         if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
@@ -130,7 +123,7 @@ class RPKBlockHistoryTable(database: Database, private val plugin: RPKBlockLoggi
         }
     }
 
-    override fun delete(entity: RPKBlockHistory) {
+    fun delete(entity: RPKBlockHistory) {
         database.create
                 .deleteFrom(RPKIT_BLOCK_HISTORY)
                 .where(RPKIT_BLOCK_HISTORY.ID.eq(entity.id))

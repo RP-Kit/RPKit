@@ -28,10 +28,11 @@ import com.rpkit.chat.bukkit.context.DirectedPostFormatMessageContext
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelMessageEvent
-import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteProvider
-import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
+import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteService
+import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import java.awt.Color
 
@@ -40,7 +41,6 @@ import java.awt.Color
  */
 class RPKChatChannelImpl(
         private val plugin: RPKChatBukkit,
-        override var id: Int = 0,
         override val name: String,
         override val color: Color,
         override val radius: Double,
@@ -54,32 +54,32 @@ class RPKChatChannelImpl(
 
     override val speakerMinecraftProfiles: List<RPKMinecraftProfile>
         get() = plugin.server.onlinePlayers
-                .mapNotNull { player -> plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class).getMinecraftProfile(player) }
-                .filter { minecraftProfile -> plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).getMinecraftProfileChannel(minecraftProfile) == this }
+                .mapNotNull { player -> Services[RPKMinecraftProfileService::class]?.getMinecraftProfile(player) }
+                .filter { minecraftProfile -> Services[RPKChatChannelSpeakerService::class]?.getMinecraftProfileChannel(minecraftProfile) == this }
 
     override val listenerMinecraftProfiles: List<RPKMinecraftProfile>
         get() = plugin.server.onlinePlayers
                 .filter { player -> player.hasPermission("rpkit.chat.listen.$name") }
-                .mapNotNull { player -> plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class).getMinecraftProfile(player) }
-                .filter { minecraftProfile -> !plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).hasMinecraftProfileMutedChatChannel(minecraftProfile, this) }
+                .mapNotNull { player -> Services[RPKMinecraftProfileService::class]?.getMinecraftProfile(player) }
+                .filter { minecraftProfile -> Services[RPKChatChannelMuteService::class]?.hasMinecraftProfileMutedChatChannel(minecraftProfile, this) == false }
 
     override fun addSpeaker(speaker: RPKMinecraftProfile) {
-        plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class).setMinecraftProfileChannel(speaker, this)
+        Services[RPKChatChannelSpeakerService::class]?.setMinecraftProfileChannel(speaker, this)
     }
 
     override fun removeSpeaker(speaker: RPKMinecraftProfile) {
-        val chatChannelSpeakerProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelSpeakerProvider::class)
-        if (chatChannelSpeakerProvider.getMinecraftProfileChannel(speaker) == this) {
-            chatChannelSpeakerProvider.removeMinecraftProfileChannel(speaker)
+        val chatChannelSpeakerService = Services[RPKChatChannelSpeakerService::class]
+        if (chatChannelSpeakerService?.getMinecraftProfileChannel(speaker) == this) {
+            chatChannelSpeakerService.removeMinecraftProfileChannel(speaker)
         }
     }
 
     override fun addListener(listener: RPKMinecraftProfile, isAsync: Boolean) {
-        plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).removeChatChannelMute(listener, this, isAsync)
+        Services[RPKChatChannelMuteService::class]?.removeChatChannelMute(listener, this, isAsync)
     }
 
     override fun removeListener(listener: RPKMinecraftProfile) {
-        plugin.core.serviceManager.getServiceProvider(RPKChatChannelMuteProvider::class).addChatChannelMute(listener, this)
+        Services[RPKChatChannelMuteService::class]?.addChatChannelMute(listener, this)
     }
 
     override fun sendMessage(

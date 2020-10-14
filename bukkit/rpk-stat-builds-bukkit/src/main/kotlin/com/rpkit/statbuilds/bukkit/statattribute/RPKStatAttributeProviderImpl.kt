@@ -18,7 +18,7 @@ package com.rpkit.statbuilds.bukkit.statattribute
 
 import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
 
-class RPKStatAttributeProviderImpl(private val plugin: RPKStatBuildsBukkit): RPKStatAttributeProvider {
+class RPKStatAttributeServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKStatAttributeService {
 
     private val statAttributeMap: Map<String, RPKStatAttribute> = plugin.config.getConfigurationSection("stat-attributes")
             ?.getKeys(false)

@@ -17,7 +17,8 @@
 package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
+import com.rpkit.core.service.Services
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -26,34 +27,38 @@ import org.bukkit.command.CommandSender
  * Chat group members command.
  * Views members of a chat group.
  */
-class ChatGroupMembersCommand(private val plugin: RPKChatBukkit): CommandExecutor {
+class ChatGroupMembersCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("rpkit.chat.command.chatgroup.members")) {
-            if (args.isNotEmpty()) {
-                val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
-                val chatGroup = chatGroupProvider.getChatGroup(args[0])
-                if (chatGroup != null) {
-                    sender.sendMessage(plugin.messages["chat-group-members-list-title"])
-                    for (player in chatGroup.members) {
-                        sender.sendMessage(plugin.messages["chat-group-members-list-item", mapOf(
-                                Pair("player", player.minecraftUsername)
-                        )])
-                    }
-                    sender.sendMessage(plugin.messages["chat-group-invitations-list-title"])
-                    for (player in chatGroup.invited) {
-                        sender.sendMessage(plugin.messages["chat-group-invitations-list-item", mapOf(
-                                Pair("player", player.minecraftUsername)
-                        )])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["chat-group-members-invalid-chat-group"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["chat-group-members-usage"])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.chat.command.chatgroup.members")) {
             sender.sendMessage(plugin.messages["no-permission-chat-group-members"])
+            return true
+        }
+        if (args.isEmpty()) {
+            sender.sendMessage(plugin.messages["chat-group-members-usage"])
+            return true
+        }
+        val chatGroupService = Services[RPKChatGroupService::class]
+        if (chatGroupService == null) {
+            sender.sendMessage(plugin.messages["no-chat-group-service"])
+            return true
+        }
+        val chatGroup = chatGroupService.getChatGroup(args[0])
+        if (chatGroup == null) {
+            sender.sendMessage(plugin.messages["chat-group-members-invalid-chat-group"])
+            return true
+        }
+        sender.sendMessage(plugin.messages["chat-group-members-list-title"])
+        for (player in chatGroup.members) {
+            sender.sendMessage(plugin.messages["chat-group-members-list-item", mapOf(
+                    Pair("player", player.minecraftUsername)
+            )])
+        }
+        sender.sendMessage(plugin.messages["chat-group-invitations-list-title"])
+        for (player in chatGroup.invited) {
+            sender.sendMessage(plugin.messages["chat-group-invitations-list-item", mapOf(
+                    Pair("player", player.minecraftUsername)
+            )])
         }
         return true
     }

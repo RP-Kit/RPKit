@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitGitHubProfileDeleteEvent(
         override val githubProfile: RPKGitHubProfile
-): RPKBukkitEvent(), RPKGitHubProfileDeleteEvent, Cancellable {
+) : RPKBukkitEvent(), RPKGitHubProfileDeleteEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.warp.bukkit.warp.RPKWarp
 
 
-interface RPKWarpEvent: RPKEvent {
+interface RPKWarpEvent : RPKEvent {
 
     val warp: RPKWarp
 

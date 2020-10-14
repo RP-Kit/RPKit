@@ -21,19 +21,19 @@ import com.rpkit.shops.bukkit.RPKShopsBukkit
 import com.rpkit.shops.bukkit.database.table.RPKShopCountTable
 
 /**
- * Shop count provider implementation.
+ * Shop count service implementation.
  */
-class RPKShopCountProviderImpl(private val plugin: RPKShopsBukkit): RPKShopCountProvider {
+class RPKShopCountServiceImpl(override val plugin: RPKShopsBukkit) : RPKShopCountService {
 
     override fun getShopCount(character: RPKCharacter): Int {
-        return plugin.core.database.getTable(RPKShopCountTable::class).get(character)?.count?:0
+        return plugin.database.getTable(RPKShopCountTable::class).get(character)?.count ?: 0
     }
 
     override fun setShopCount(character: RPKCharacter, amount: Int) {
-        val shopCount = plugin.core.database.getTable(RPKShopCountTable::class).get(character) ?:
-                RPKShopCount(0, character, 0)
+        val shopCount = plugin.database.getTable(RPKShopCountTable::class).get(character)
+                ?: RPKShopCount(character, 0)
         shopCount.count = amount
-        plugin.core.database.getTable(RPKShopCountTable::class).update(shopCount)
+        plugin.database.getTable(RPKShopCountTable::class).update(shopCount)
     }
 
 }

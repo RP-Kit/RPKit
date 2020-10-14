@@ -22,10 +22,11 @@ import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 
 
-class RPKBukkitTicketUpdateEvent(override val ticket: RPKTicket): RPKBukkitEvent(), RPKTicketUpdateEvent, Cancellable {
+class RPKBukkitTicketUpdateEvent(override val ticket: RPKTicket) : RPKBukkitEvent(), RPKTicketUpdateEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

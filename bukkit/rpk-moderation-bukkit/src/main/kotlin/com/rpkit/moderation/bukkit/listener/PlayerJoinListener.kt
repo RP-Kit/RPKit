@@ -16,38 +16,37 @@
 
 package com.rpkit.moderation.bukkit.listener
 
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
-import com.rpkit.moderation.bukkit.vanish.RPKVanishProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.moderation.bukkit.vanish.RPKVanishService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 
 
-class PlayerJoinListener(private val plugin: RPKModerationBukkit): Listener {
+class PlayerJoinListener(private val plugin: RPKModerationBukkit) : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val vanishProvider = plugin.core.serviceManager.getServiceProvider(RPKVanishProvider::class)
-        val observer = minecraftProfileProvider.getMinecraftProfile(event.player)
-        if (observer != null) {
-            plugin.server.onlinePlayers
-                    .filter { player -> event.player != player }
-                    .forEach { player ->
-                val target = minecraftProfileProvider.getMinecraftProfile(player)
-                if (target != null) {
-                    if (!vanishProvider.canSee(observer, target)) {
-                        event.player.hidePlayer(plugin, player)
-                    }
-                    if (!vanishProvider.canSee(target, observer)) {
-                        player.hidePlayer(plugin, event.player)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val vanishService = Services[RPKVanishService::class] ?: return
+        val observer = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        plugin.server.onlinePlayers
+                .filter { player -> event.player != player }
+                .forEach { player ->
+                    val target = minecraftProfileService.getMinecraftProfile(player)
+                    if (target != null) {
+                        if (!vanishService.canSee(observer, target)) {
+                            event.player.hidePlayer(plugin, player)
+                        }
+                        if (!vanishService.canSee(target, observer)) {
+                            player.hidePlayer(plugin, event.player)
+                        }
                     }
                 }
-            }
-            if (vanishProvider.isVanished(observer)) {
-                event.player.sendMessage(plugin.messages["vanish-invisible"])
-            }
+        if (vanishService.isVanished(observer)) {
+            event.player.sendMessage(plugin.messages["vanish-invisible"])
         }
     }
 

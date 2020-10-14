@@ -19,20 +19,20 @@ package com.rpkit.stats.bukkit.stat
 import com.rpkit.stats.bukkit.RPKStatsBukkit
 
 /**
- * Stat provider implementation.
+ * Stat service implementation.
  */
-class RPKStatProviderImpl(private val plugin: RPKStatsBukkit): RPKStatProvider {
+class RPKStatServiceImpl(override val plugin: RPKStatsBukkit) : RPKStatService {
 
     override val stats: List<RPKStat>
-            get() = plugin.config.getConfigurationSection("stats")
-                            ?.getKeys(false)
-                            ?.mapIndexed { id, name ->
-                                RPKStatImpl(id, name, plugin.config.getString("stats.$name") ?: "0")
-                            }
-                    ?: emptyList()
+        get() = plugin.config.getConfigurationSection("stats")
+                ?.getKeys(false)
+                ?.map { name ->
+                    RPKStatImpl(name, plugin.config.getString("stats.$name") ?: "0")
+                }
+                ?: emptyList()
 
     override fun addStat(stat: RPKStat) {
-        plugin.config.set("stats.${stat.name}", stat.script)
+        plugin.config.set("stats.${stat.name}", stat.formula)
         plugin.saveConfig()
     }
 

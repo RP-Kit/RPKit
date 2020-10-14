@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * Character card field for health.
  */
-class HealthField: CharacterCardField {
+class HealthField : CharacterCardField {
 
     override val name = "health"
     override fun get(character: RPKCharacter): String {

@@ -16,7 +16,7 @@
 
 package com.rpkit.locks.bukkit.lock
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
@@ -24,7 +24,7 @@ import org.bukkit.inventory.ItemStack
 /**
  * Provides lock related operations.
  */
-interface RPKLockProvider : ServiceProvider {
+interface RPKLockService : Service {
 
     /**
      * The item used to represent a lock.

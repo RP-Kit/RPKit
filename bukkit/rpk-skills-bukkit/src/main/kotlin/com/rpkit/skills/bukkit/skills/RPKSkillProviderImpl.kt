@@ -21,9 +21,12 @@ import com.rpkit.skills.bukkit.RPKSkillsBukkit
 import com.rpkit.skills.bukkit.database.table.RPKSkillBindingTable
 import com.rpkit.skills.bukkit.database.table.RPKSkillCooldownTable
 import org.bukkit.inventory.ItemStack
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit.SECONDS
+import kotlin.math.max
 
 
-class RPKSkillProviderImpl(private val plugin: RPKSkillsBukkit): RPKSkillProvider {
+class RPKSkillServiceImpl(override val plugin: RPKSkillsBukkit) : RPKSkillService {
 
     override val skills: MutableList<RPKSkill> = mutableListOf()
 
@@ -40,35 +43,35 @@ class RPKSkillProviderImpl(private val plugin: RPKSkillsBukkit): RPKSkillProvide
     }
 
     override fun getSkillCooldown(character: RPKCharacter, skill: RPKSkill): Int {
-        val skillCooldownTable = plugin.core.database.getTable(RPKSkillCooldownTable::class)
+        val skillCooldownTable = plugin.database.getTable(RPKSkillCooldownTable::class)
         val skillCooldown = skillCooldownTable.get(character, skill) ?: return 0
-        return Math.max(0, Math.ceil((skillCooldown.cooldownTimestamp - System.currentTimeMillis()) / 1000.0).toInt())
+        return max(0L, SECONDS.between(skillCooldown.cooldownTimestamp, LocalDateTime.now())).toInt()
     }
 
     override fun setSkillCooldown(character: RPKCharacter, skill: RPKSkill, seconds: Int) {
-        val skillCooldownTable = plugin.core.database.getTable(RPKSkillCooldownTable::class)
+        val skillCooldownTable = plugin.database.getTable(RPKSkillCooldownTable::class)
         var skillCooldown = skillCooldownTable.get(character, skill)
         if (skillCooldown == null) {
             skillCooldown = RPKSkillCooldown(
                     character = character,
                     skill = skill,
-                    cooldownTimestamp = System.currentTimeMillis() + (seconds * 1000)
+                    cooldownTimestamp = LocalDateTime.now().plus(seconds.toLong(), SECONDS)
             )
             skillCooldownTable.insert(skillCooldown)
         } else {
-            skillCooldown.cooldownTimestamp = System.currentTimeMillis() + (seconds * 1000)
+            skillCooldown.cooldownTimestamp = LocalDateTime.now().plus(seconds.toLong(), SECONDS)
             skillCooldownTable.update(skillCooldown)
         }
     }
 
     override fun getSkillBinding(character: RPKCharacter, item: ItemStack): RPKSkill? {
-        val skillBindingTable = plugin.core.database.getTable(RPKSkillBindingTable::class)
+        val skillBindingTable = plugin.database.getTable(RPKSkillBindingTable::class)
         val skillBindings = skillBindingTable.get(character)
         return skillBindings.firstOrNull { skillBinding -> skillBinding.item.isSimilar(item) }?.skill
     }
 
     override fun setSkillBinding(character: RPKCharacter, item: ItemStack, skill: RPKSkill?) {
-        val skillBindingTable = plugin.core.database.getTable(RPKSkillBindingTable::class)
+        val skillBindingTable = plugin.database.getTable(RPKSkillBindingTable::class)
         val skillBindings = skillBindingTable.get(character)
         if (skill != null) {
             if (skillBindings.none { skillBinding -> skillBinding.item.isSimilar(item) }) {

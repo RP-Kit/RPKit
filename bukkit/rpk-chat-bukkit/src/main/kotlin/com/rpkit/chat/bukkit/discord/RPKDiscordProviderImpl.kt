@@ -17,12 +17,13 @@
 package com.rpkit.chat.bukkit.discord
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfileService
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.User
 
-class RPKDiscordProviderImpl(private val plugin: RPKChatBukkit): RPKDiscordProvider {
+class RPKDiscordServiceImpl(override val plugin: RPKChatBukkit) : RPKDiscordService {
 
     private val serverName = plugin.config.getString("discord.server-name")
     val discordServer = if (serverName != null) DiscordServer(plugin, serverName) else null
@@ -45,7 +46,8 @@ class RPKDiscordProviderImpl(private val plugin: RPKChatBukkit): RPKDiscordProvi
     }
 
     override fun setMessageAsProfileLinkRequest(messageId: String, profile: RPKProfile) {
-        profileLinkMessages[messageId] = profile.id
+        val profileId = profile.id ?: return
+        profileLinkMessages[messageId] = profileId
     }
 
     override fun getMessageProfileLink(message: Message): RPKProfile? {
@@ -53,9 +55,9 @@ class RPKDiscordProviderImpl(private val plugin: RPKChatBukkit): RPKDiscordProvi
     }
 
     override fun getMessageProfileLink(messageId: String): RPKProfile? {
-        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
+        val profileService = Services[RPKProfileService::class] ?: return null
         val profileId = profileLinkMessages[messageId] ?: return null
-        return profileProvider.getProfile(profileId)
+        return profileService.getProfile(profileId)
     }
 
 }

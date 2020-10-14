@@ -30,9 +30,9 @@ import org.pircbotx.PircBotX
 import org.pircbotx.User
 
 /**
- * IRC provider implementation.
+ * IRC service implementation.
  */
-class RPKIRCProviderImpl(private val plugin: RPKChatBukkit): RPKIRCProvider {
+class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
 
     override val ircBot: PircBotX
     private val ircUsers: MutableMap<String, User> = mutableMapOf()
@@ -41,8 +41,8 @@ class RPKIRCProviderImpl(private val plugin: RPKChatBukkit): RPKIRCProvider {
         val configuration = Configuration.Builder()
                 .setAutoNickChange(true)
                 .setCapEnabled(true)
-                .addListener(IRCChannelJoinListener(plugin))
-                .addListener(IRCConnectListener(plugin))
+                .addListener(IRCChannelJoinListener())
+                .addListener(IRCConnectListener())
                 .addListener(IRCMessageListener(plugin))
                 .addListener(IRCUserListListener(plugin))
                 .addListener(IRCRegisterCommand(plugin))
@@ -101,7 +101,7 @@ class RPKIRCProviderImpl(private val plugin: RPKChatBukkit): RPKIRCProvider {
             configuration.nickservPassword = password
         }
         ircBot = PircBotX(configuration.buildConfiguration())
-        object: BukkitRunnable() {
+        object : BukkitRunnable() {
             override fun run() {
                 ircBot.startBot()
             }

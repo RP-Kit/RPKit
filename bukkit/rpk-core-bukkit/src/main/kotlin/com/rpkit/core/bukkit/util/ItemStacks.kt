@@ -94,7 +94,7 @@ fun ItemStack.withDisplayName(displayName: String): ItemStack {
  * Creates a clone of the [ItemStack] with the given lore.
  * If the [ItemStack] already has lore the lore is appended to the existing lore.
  *
- * 
+ *
  * @return A clone of the [ItemStack] with the given lore
  */
 fun ItemStack.withLore(lore: List<String>): ItemStack {

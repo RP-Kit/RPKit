@@ -16,14 +16,14 @@
 
 package com.rpkit.chat.bukkit.irc
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import org.pircbotx.PircBotX
 import org.pircbotx.User
 
 /**
  * Provides IRC related operations.
  */
-interface RPKIRCProvider: ServiceProvider {
+interface RPKIRCService : Service {
 
     /**
      * The IRC bot instance. May be used to send messages to the IRC server, among other operations.
@@ -40,7 +40,7 @@ interface RPKIRCProvider: ServiceProvider {
     fun getIRCUser(nick: String): User?
 
     /**
-     * Adds an IRC user to be tracked by this IRC provider.
+     * Adds an IRC user to be tracked by this IRC service.
      *
      * @param user The user to add
      */

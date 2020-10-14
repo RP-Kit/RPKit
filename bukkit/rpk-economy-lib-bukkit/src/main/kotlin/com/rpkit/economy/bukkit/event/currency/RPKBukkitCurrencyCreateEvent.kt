@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitCurrencyCreateEvent(
         override val currency: RPKCurrency
-): RPKBukkitEvent(), RPKCurrencyCreateEvent, Cancellable {
+) : RPKBukkitEvent(), RPKCurrencyCreateEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

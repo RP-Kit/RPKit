@@ -40,7 +40,7 @@ dependencies {
     implementation group: "org.ehcache", name: "ehcache", version: "3.8.1"
     implementation group: "org.jooq", name: "jooq", version: "3.13.2"
     implementation group: "org.kohsuke", name: "github-api", version: "1.112"
-    implementation (group: "net.dv8tion", name: "JDA", version: "4.1.1_155") {
+    implementation(group: "net.dv8tion", name: "JDA", version: "4.1.1_155") {
         exclude module: "opus-java"
     }
     implementation project(":rpk-core")

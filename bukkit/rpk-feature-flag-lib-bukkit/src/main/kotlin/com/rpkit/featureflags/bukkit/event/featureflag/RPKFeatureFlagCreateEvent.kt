@@ -17,4 +17,4 @@
 package com.rpkit.featureflags.bukkit.event.featureflag
 
 
-interface RPKFeatureFlagCreateEvent: RPKFeatureFlagEvent
+interface RPKFeatureFlagCreateEvent : RPKFeatureFlagEvent

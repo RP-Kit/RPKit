@@ -17,19 +17,20 @@
 package com.rpkit.chat.bukkit.irc.listener
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.irc.RPKIRCProvider
+import com.rpkit.chat.bukkit.irc.RPKIRCService
+import com.rpkit.core.service.Services
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.UserListEvent
 
 /**
  * IRC user list listener.
- * Registers all users in channels with the IRC provider upon receiving the user list.
+ * Registers all users in channels with the IRC service upon receiving the user list.
  */
-class IRCUserListListener(private val plugin: RPKChatBukkit): ListenerAdapter() {
+class IRCUserListListener(private val plugin: RPKChatBukkit) : ListenerAdapter() {
 
     override fun onUserList(event: UserListEvent) {
-        val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
-        event.users.forEach { user -> ircProvider.addIRCUser(user) }
+        val ircService = Services[RPKIRCService::class] ?: return
+        event.users.forEach { user -> ircService.addIRCUser(user) }
     }
 
 }

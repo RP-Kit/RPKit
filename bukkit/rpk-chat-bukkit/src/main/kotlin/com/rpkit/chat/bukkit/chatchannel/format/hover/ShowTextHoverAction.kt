@@ -20,6 +20,7 @@ import com.rpkit.chat.bukkit.chatchannel.format.FormatPart
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT
+import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
@@ -27,7 +28,7 @@ import org.bukkit.configuration.serialization.SerializableAs
 class ShowTextHoverAction(val text: List<FormatPart>) : HoverAction, ConfigurationSerializable {
     override fun toHoverEvent(context: DirectedPreFormatMessageContext) = HoverEvent(
             SHOW_TEXT,
-            text.flatMap { it.toChatComponents(context).toList() }.toTypedArray()
+            Text(text.flatMap { it.toChatComponents(context).toList() }.toTypedArray())
     )
 
     override fun serialize() = mutableMapOf(
@@ -35,7 +36,8 @@ class ShowTextHoverAction(val text: List<FormatPart>) : HoverAction, Configurati
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = ShowTextHoverAction(
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = ShowTextHoverAction(
                 serialized["text"] as List<FormatPart>
         )
     }

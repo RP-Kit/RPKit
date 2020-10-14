@@ -16,17 +16,18 @@
 
 package com.rpkit.statbuilds.bukkit.command.statbuild
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
-import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeProvider
-import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildProvider
+import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
+import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class StatBuildViewCommand(private val plugin: RPKStatBuildsBukkit): CommandExecutor {
+class StatBuildViewCommand(private val plugin: RPKStatBuildsBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.statbuilds.command.statbuild.view")) {
             sender.sendMessage(plugin.messages["no-permission-stat-build-view"])
@@ -36,31 +37,47 @@ class StatBuildViewCommand(private val plugin: RPKStatBuildsBukkit): CommandExec
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
         }
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val character = characterProvider.getActiveCharacter(minecraftProfile)
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character-self"])
             return true
         }
         sender.sendMessage(plugin.messages["stat-build-view-title"])
-        val statAttributeProvider = plugin.core.serviceManager.getServiceProvider(RPKStatAttributeProvider::class)
-        val statBuildProvider = plugin.core.serviceManager.getServiceProvider(RPKStatBuildProvider::class)
+        val statAttributeService = Services[RPKStatAttributeService::class]
+        if (statAttributeService == null) {
+            sender.sendMessage(plugin.messages["no-stat-attribute-service"])
+            return true
+        }
+        val statBuildService = Services[RPKStatBuildService::class]
+        if (statBuildService == null) {
+            sender.sendMessage(plugin.messages["no-stat-build-service"])
+            return true
+        }
         sender.sendMessage(plugin.messages["stat-build-view-points-assignment-count", mapOf(
-                "total" to statBuildProvider.getTotalStatPoints(character).toString(),
-                "assigned" to statBuildProvider.getAssignedStatPoints(character).toString(),
-                "unassigned" to statBuildProvider.getUnassignedStatPoints(character).toString()
+                "total" to statBuildService.getTotalStatPoints(character).toString(),
+                "assigned" to statBuildService.getAssignedStatPoints(character).toString(),
+                "unassigned" to statBuildService.getUnassignedStatPoints(character).toString()
         )])
-        statAttributeProvider.statAttributes.forEach { statAttribute ->
+        statAttributeService.statAttributes.forEach { statAttribute ->
             sender.sendMessage(plugin.messages["stat-build-view-item", mapOf(
                     "stat-attribute" to statAttribute.name,
-                    "points" to statBuildProvider.getStatPoints(character, statAttribute).toString(),
-                    "max-points" to statBuildProvider.getMaxStatPoints(character, statAttribute).toString()
+                    "points" to statBuildService.getStatPoints(character, statAttribute).toString(),
+                    "max-points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
             )])
         }
         return true

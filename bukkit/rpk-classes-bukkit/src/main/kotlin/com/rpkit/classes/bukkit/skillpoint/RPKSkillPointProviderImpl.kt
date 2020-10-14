@@ -18,18 +18,19 @@ package com.rpkit.classes.bukkit.skillpoint
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.classes.bukkit.RPKClassesBukkit
-import com.rpkit.classes.bukkit.classes.RPKClassProvider
-import com.rpkit.skills.bukkit.skills.RPKSkillPointProvider
+import com.rpkit.classes.bukkit.classes.RPKClassService
+import com.rpkit.core.service.Services
+import com.rpkit.skills.bukkit.skills.RPKSkillPointService
 import com.rpkit.skills.bukkit.skills.RPKSkillType
 
 
-class RPKSkillPointProviderImpl(private val plugin: RPKClassesBukkit): RPKSkillPointProvider {
+class RPKSkillPointServiceImpl(override val plugin: RPKClassesBukkit) : RPKSkillPointService {
 
     override fun getSkillPoints(character: RPKCharacter, skillType: RPKSkillType): Int {
-        val classProvider = plugin.core.serviceManager.getServiceProvider(RPKClassProvider::class)
-        val `class` = classProvider.getClass(character)
+        val classService = Services[RPKClassService::class] ?: return 0
+        val `class` = classService.getClass(character)
         if (`class` != null) {
-            return `class`.getSkillPoints(skillType, classProvider.getLevel(character, `class`))
+            return `class`.getSkillPoints(skillType, classService.getLevel(character, `class`))
         }
         return 0
     }

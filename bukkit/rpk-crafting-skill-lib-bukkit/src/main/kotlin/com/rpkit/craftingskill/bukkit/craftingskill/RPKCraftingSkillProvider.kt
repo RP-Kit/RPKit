@@ -17,12 +17,12 @@
 package com.rpkit.craftingskill.bukkit.craftingskill
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
 import org.bukkit.Material
 
 
-interface RPKCraftingSkillProvider: ServiceProvider {
+interface RPKCraftingSkillService : Service {
 
     fun getCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material): Int
     fun setCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material, experience: Int)

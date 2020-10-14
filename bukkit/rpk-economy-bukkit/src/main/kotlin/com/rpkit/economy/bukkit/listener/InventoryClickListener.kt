@@ -16,20 +16,21 @@
 
 package com.rpkit.economy.bukkit.listener
 
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.Material.AIR
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 
-class InventoryClickListener(private val plugin: RPKEconomyBukkit): Listener {
+class InventoryClickListener(private val plugin: RPKEconomyBukkit) : Listener {
 
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
         if (event.view.title.toLowerCase().contains("wallet")) {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            val currency = currencyProvider.getCurrency(
+            val currencyService = Services[RPKCurrencyService::class] ?: return
+            val currency = currencyService.getCurrency(
                     event.view.title.substringAfterLast("[").substringBeforeLast("]")
             ) ?: return
             val item = event.cursor ?: return

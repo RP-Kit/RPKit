@@ -1,58 +1,55 @@
 characters:
-    min-age: 0
-    max-age: 10000
-    defaults:
-        name: 'unset'
-        gender: null
-        age: 20
-        race: null
-        description: 'unset'
-        dead: false
-        inventory-contents: []
-        helmet: null
-        chestplate: null
-        leggings: null
-        boots: null
-        health: 20
-        max-health: 20
-        mana: 20
-        max-mana: 20
-        food-level: 20
-        thirst-level: 20
-        profile-hidden: false
-        name-hidden: false
-        gender-hidden: false
-        age-hidden: false
-        race-hidden: false
-        description-hidden: false
-    view-card-requires-sneak: true
-    kill-character-on-death: false
-    delete-character-on-death: false
-    set-player-display-name: false
-    new-character-cooldown: 604800000
+  min-age: 0
+  max-age: 10000
+  defaults:
+    name: 'unset'
+    gender: null
+    age: 20
+    race: null
+    description: 'unset'
+    dead: false
+    inventory-contents: []
+    helmet: null
+    chestplate: null
+    leggings: null
+    boots: null
+    health: 20
+    max-health: 20
+    mana: 20
+    max-mana: 20
+    food-level: 20
+    thirst-level: 20
+    profile-hidden: false
+    name-hidden: false
+    gender-hidden: false
+    age-hidden: false
+    race-hidden: false
+    description-hidden: false
+  view-card-requires-sneak: true
+  kill-character-on-death: false
+  delete-character-on-death: false
+  set-player-display-name: false
+  new-character-cooldown: 604800000
 caching:
-    rpkit_character:
-        id:
-            enabled: true
-            size: 40
-    rpkit_gender:
-        id:
-            enabled: true
-            size: 10
-        name:
-            enabled: true
-            size: 10
-    rpkit_new_character_cooldown:
-        id:
-            enabled: true
-            size: 20
-        profile_id:
-            enabled: true
-            size: 20
-    rpkit_race:
-        id:
-            enabled: true
-            size: 20
-        name:
-            enabled: true
-            size: 20
+  rpkit_character:
+    id:
+      enabled: true
+      size: 40
+  rpkit_gender:
+    id:
+      enabled: true
+      size: 10
+    name:
+      enabled: true
+      size: 10
+  rpkit_new_character_cooldown:
+    profile_id:
+      enabled: true
+      size: 20
+  rpkit_race:
+    id:
+      enabled: true
+      size: 20
+    name:
+      enabled: true
+      size: 20

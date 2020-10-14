@@ -16,83 +16,100 @@
 
 package com.rpkit.payments.bukkit.command.payment
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
-import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
-import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.text.SimpleDateFormat
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  * Payment leave command.
  * Leaves a payment group.
  */
-class PaymentLeaveCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
+class PaymentLeaveCommand(private val plugin: RPKPaymentsBukkit) : CommandExecutor {
     val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz")
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("rpkit.payments.command.payment.leave")) {
-            if (args.isNotEmpty()) {
-                if (sender is Player) {
-                    val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-                    val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
-                    if (paymentGroup != null) {
-                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                        if (minecraftProfile != null) {
-                            val character = characterProvider.getActiveCharacter(minecraftProfile)
-                            if (character != null) {
-                                if (paymentGroup.members.contains(character)) {
-                                    paymentGroup.removeMember(character)
-                                    sender.sendMessage(plugin.messages["payment-leave-valid"])
-                                    val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
-                                    val now = System.currentTimeMillis()
-                                    val ownerNotificationMessage = plugin.messages["payment-notification-member-leave", mapOf(
-                                            Pair("member", character.name),
-                                            Pair("group", paymentGroup.name),
-                                            Pair("date", dateFormat.format(Date(now)))
-                                    )]
-                                    paymentGroup.owners.forEach { owner ->
-                                        if (owner.minecraftProfile?.isOnline != true) {
-                                            paymentNotificationProvider.addPaymentNotification(
-                                                    RPKPaymentNotificationImpl(
-                                                            group = paymentGroup,
-                                                            to = owner,
-                                                            character = character,
-                                                            date = now,
-                                                            text = ownerNotificationMessage
-                                                    )
-                                            )
-                                        } else {
-                                            owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
-                                        }
-                                    }
-                                } else {
-                                    sender.sendMessage(plugin.messages["payment-leave-invalid-member"])
-                                }
-                            } else {
-                                sender.sendMessage(plugin.messages["payment-leave-invalid-character"])
-                            }
-                        } else {
-                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["payment-leave-invalid-group"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["not-from-console"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["payment-leave-usage"])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.payments.command.payment.leave")) {
             sender.sendMessage(plugin.messages["no-permission-payment-leave"])
+            return true
+        }
+        if (args.isEmpty()) {
+            sender.sendMessage(plugin.messages["payment-leave-usage"])
+            return true
+        }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        val paymentGroupService = Services[RPKPaymentGroupService::class]
+        if (paymentGroupService == null) {
+            sender.sendMessage(plugin.messages["no-payment-group-service"])
+            return true
+        }
+        val paymentGroup = paymentGroupService.getPaymentGroup(args.joinToString(" "))
+        if (paymentGroup == null) {
+            sender.sendMessage(plugin.messages["payment-leave-invalid-group"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null) {
+            sender.sendMessage(plugin.messages["payment-leave-invalid-character"])
+            return true
+        }
+        if (!paymentGroup.members.contains(character)) {
+            sender.sendMessage(plugin.messages["payment-leave-invalid-member"])
+            return true
+        }
+        paymentGroup.removeMember(character)
+        sender.sendMessage(plugin.messages["payment-leave-valid"])
+        val paymentNotificationService = Services[RPKPaymentNotificationService::class]
+        if (paymentNotificationService == null) {
+            sender.sendMessage(plugin.messages["no-payment-notification-service"])
+            return true
+        }
+        val now = LocalDateTime.now()
+        val ownerNotificationMessage = plugin.messages["payment-notification-member-leave", mapOf(
+                "member" to character.name,
+                "group" to paymentGroup.name,
+                "date" to dateFormat.format(now)
+        )]
+        paymentGroup.owners.forEach { owner ->
+            if (owner.minecraftProfile?.isOnline != true) {
+                paymentNotificationService.addPaymentNotification(
+                        RPKPaymentNotificationImpl(
+                                group = paymentGroup,
+                                to = owner,
+                                character = character,
+                                date = now,
+                                text = ownerNotificationMessage
+                        )
+                )
+            } else {
+                owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
+            }
         }
         return true
     }

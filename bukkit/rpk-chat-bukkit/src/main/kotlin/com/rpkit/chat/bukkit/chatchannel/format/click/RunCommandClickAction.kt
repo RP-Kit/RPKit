@@ -34,7 +34,8 @@ class RunCommandClickAction(val command: String) : ClickAction, ConfigurationSer
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = RunCommandClickAction(
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = RunCommandClickAction(
                 serialized["command"] as String
         )
     }

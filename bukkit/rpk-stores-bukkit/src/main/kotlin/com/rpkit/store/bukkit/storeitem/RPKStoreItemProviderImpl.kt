@@ -27,18 +27,18 @@ import com.rpkit.store.bukkit.event.storeitem.RPKBukkitStoreItemDeleteEvent
 import com.rpkit.store.bukkit.event.storeitem.RPKBukkitStoreItemUpdateEvent
 
 
-class RPKStoreItemProviderImpl(private val plugin: RPKStoresBukkit): RPKStoreItemProvider {
+class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreItemService {
 
     override fun getStoreItem(plugin: RPKBukkitPlugin, identifier: String): RPKStoreItem? {
-        return this.plugin.core.database.getTable(RPKStoreItemTable::class).get(plugin, identifier)
+        return this.plugin.database.getTable(RPKStoreItemTable::class).get(plugin, identifier)
     }
 
     override fun getStoreItem(id: Int): RPKStoreItem? {
-        return plugin.core.database.getTable(RPKStoreItemTable::class)[id]
+        return plugin.database.getTable(RPKStoreItemTable::class)[id]
     }
 
     override fun getStoreItems(): List<RPKStoreItem> {
-        return plugin.core.database.getTable(RPKStoreItemTable::class).getAll()
+        return plugin.database.getTable(RPKStoreItemTable::class).getAll()
     }
 
     override fun addStoreItem(storeItem: RPKStoreItem) {
@@ -47,9 +47,9 @@ class RPKStoreItemProviderImpl(private val plugin: RPKStoresBukkit): RPKStoreIte
         if (event.isCancelled) return
         val eventStoreItem = event.storeItem
         when (eventStoreItem) {
-            is RPKConsumableStoreItem -> plugin.core.database.getTable(RPKConsumableStoreItemTable::class).insert(eventStoreItem)
-            is RPKPermanentStoreItem -> plugin.core.database.getTable(RPKPermanentStoreItemTable::class).insert(eventStoreItem)
-            is RPKTimedStoreItem -> plugin.core.database.getTable(RPKTimedStoreItemTable::class).insert(eventStoreItem)
+            is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class).insert(eventStoreItem)
+            is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class).insert(eventStoreItem)
+            is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class).insert(eventStoreItem)
         }
     }
 
@@ -59,9 +59,9 @@ class RPKStoreItemProviderImpl(private val plugin: RPKStoresBukkit): RPKStoreIte
         if (event.isCancelled) return
         val eventStoreItem = event.storeItem
         when (eventStoreItem) {
-            is RPKConsumableStoreItem -> plugin.core.database.getTable(RPKConsumableStoreItemTable::class).update(eventStoreItem)
-            is RPKPermanentStoreItem -> plugin.core.database.getTable(RPKPermanentStoreItemTable::class).update(eventStoreItem)
-            is RPKTimedStoreItem -> plugin.core.database.getTable(RPKTimedStoreItemTable::class).update(eventStoreItem)
+            is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class).update(eventStoreItem)
+            is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class).update(eventStoreItem)
+            is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class).update(eventStoreItem)
         }
     }
 
@@ -71,9 +71,9 @@ class RPKStoreItemProviderImpl(private val plugin: RPKStoresBukkit): RPKStoreIte
         if (event.isCancelled) return
         val eventStoreItem = event.storeItem
         when (eventStoreItem) {
-            is RPKConsumableStoreItem -> plugin.core.database.getTable(RPKConsumableStoreItemTable::class).delete(eventStoreItem)
-            is RPKPermanentStoreItem -> plugin.core.database.getTable(RPKPermanentStoreItemTable::class).delete(eventStoreItem)
-            is RPKTimedStoreItem -> plugin.core.database.getTable(RPKTimedStoreItemTable::class).delete(eventStoreItem)
+            is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class).delete(eventStoreItem)
+            is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class).delete(eventStoreItem)
+            is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class).delete(eventStoreItem)
         }
     }
 }

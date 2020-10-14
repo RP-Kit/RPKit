@@ -17,10 +17,10 @@
 package com.rpkit.skills.bukkit.skills
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 
-interface RPKSkillPointProvider: ServiceProvider {
+interface RPKSkillPointService : Service {
 
     fun getSkillPoints(character: RPKCharacter, skillType: RPKSkillType): Int
 

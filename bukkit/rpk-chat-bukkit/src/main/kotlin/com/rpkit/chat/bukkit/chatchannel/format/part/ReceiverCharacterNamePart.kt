@@ -16,18 +16,16 @@
 
 package com.rpkit.chat.bukkit.chatchannel.format.part
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.chat.bukkit.chatchannel.format.click.ClickAction
 import com.rpkit.chat.bukkit.chatchannel.format.hover.HoverAction
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
-import org.bukkit.Bukkit
+import com.rpkit.core.service.Services
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
 @SerializableAs("ReceiverCharacterNamePart")
 class ReceiverCharacterNamePart(
-        private val plugin: RPKChatBukkit,
         font: String? = null,
         color: String? = null,
         isBold: Boolean? = null,
@@ -52,7 +50,7 @@ class ReceiverCharacterNamePart(
 ), ConfigurationSerializable {
 
     override fun getText(context: DirectedPreFormatMessageContext) = context.receiverMinecraftProfile
-            .let { plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(it)?.name }
+            .let { Services[RPKCharacterService::class]?.getActiveCharacter(it)?.name }
             ?: ""
 
     override fun serialize() = mutableMapOf(
@@ -69,8 +67,8 @@ class ReceiverCharacterNamePart(
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = ReceiverCharacterNamePart(
-                Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = ReceiverCharacterNamePart(
                 serialized["font"] as? String,
                 serialized["color"] as? String,
                 serialized["bold"] as? Boolean,

@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitPaymentNotificationUpdateEvent(
         override val paymentNotification: RPKPaymentNotification
-): RPKBukkitEvent(), RPKPaymentNotificationUpdateEvent, Cancellable {
+) : RPKBukkitEvent(), RPKPaymentNotificationUpdateEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

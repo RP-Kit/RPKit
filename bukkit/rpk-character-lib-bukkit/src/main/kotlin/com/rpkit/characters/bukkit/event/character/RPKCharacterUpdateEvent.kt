@@ -17,4 +17,4 @@
 package com.rpkit.characters.bukkit.event.character
 
 
-interface RPKCharacterUpdateEvent: RPKCharacterEvent
+interface RPKCharacterUpdateEvent : RPKCharacterEvent

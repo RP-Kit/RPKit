@@ -18,7 +18,7 @@ package com.rpkit.languages.bukkit.language
 
 import com.rpkit.languages.bukkit.RPKLanguagesBukkit
 
-class RPKLanguageProviderImpl(private val plugin: RPKLanguagesBukkit): RPKLanguageProvider {
+class RPKLanguageServiceImpl(override val plugin: RPKLanguagesBukkit) : RPKLanguageService {
     override val languages = plugin.config
             .getConfigurationSection("languages")
             ?.getKeys(false)
@@ -42,7 +42,9 @@ class RPKLanguageProviderImpl(private val plugin: RPKLanguagesBukkit): RPKLangua
                                 ?: emptyMap(),
                         plugin.config.getConfigurationSection("languages.$languageName.cypher")
                                 ?.getKeys(false)
-                                ?.map { key -> Pair(key, plugin.config.getString("languages.$languageName.cypher.$key") ?: key) }
+                                ?.map { key ->
+                                    Pair(key, plugin.config.getString("languages.$languageName.cypher.$key") ?: key)
+                                }
                                 ?.toMap()
                                 ?: emptyMap()
                 )

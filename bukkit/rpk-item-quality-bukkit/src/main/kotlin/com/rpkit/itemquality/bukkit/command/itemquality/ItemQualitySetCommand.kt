@@ -16,16 +16,17 @@
 
 package com.rpkit.itemquality.bukkit.command.itemquality
 
+import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.RPKItemQualityBukkit
-import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityProvider
-import org.bukkit.Material
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
+import org.bukkit.Material.AIR
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class ItemQualitySetCommand(private val plugin: RPKItemQualityBukkit): CommandExecutor {
+class ItemQualitySetCommand(private val plugin: RPKItemQualityBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender !is Player) {
@@ -40,18 +41,22 @@ class ItemQualitySetCommand(private val plugin: RPKItemQualityBukkit): CommandEx
             sender.sendMessage(plugin.messages["itemquality-set-usage"])
             return true
         }
-        val itemQualityProvider = plugin.core.serviceManager.getServiceProvider(RPKItemQualityProvider::class)
-        val itemQuality = itemQualityProvider.getItemQuality(args.joinToString(" "))
+        val itemQualityService = Services[RPKItemQualityService::class]
+        if (itemQualityService == null) {
+            sender.sendMessage(plugin.messages["no-item-quality-service"])
+            return true
+        }
+        val itemQuality = itemQualityService.getItemQuality(args.joinToString(" "))
         if (itemQuality == null) {
             sender.sendMessage(plugin.messages["itemquality-set-invalid-quality"])
             return true
         }
         val item = sender.inventory.itemInMainHand
-        if (item.type == Material.AIR) {
+        if (item.type == AIR) {
             sender.sendMessage(plugin.messages["itemquality-set-invalid-item-none"])
             return true
         }
-        itemQualityProvider.setItemQuality(item, itemQuality)
+        itemQualityService.setItemQuality(item, itemQuality)
         sender.inventory.setItemInMainHand(item)
         sender.sendMessage(plugin.messages["itemquality-set-valid", mapOf(
                 Pair("quality", itemQuality.name)

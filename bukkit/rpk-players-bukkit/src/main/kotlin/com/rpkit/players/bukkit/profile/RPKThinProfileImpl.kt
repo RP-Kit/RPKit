@@ -16,4 +16,4 @@
 
 package com.rpkit.players.bukkit.profile
 
-class RPKThinProfileImpl(override val name: String): RPKThinProfile
+class RPKThinProfileImpl(override val name: String) : RPKThinProfile

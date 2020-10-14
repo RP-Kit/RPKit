@@ -4,7 +4,7 @@ unconscious-time: 600000
 allowed-commands:
 - wake
 caching:
-    rpkit_unconscious_state:
-        id:
-            enabled: true
-            size: 20
+  rpkit_unconscious_state:
+    character_id:
+      enabled: true
+      size: 20

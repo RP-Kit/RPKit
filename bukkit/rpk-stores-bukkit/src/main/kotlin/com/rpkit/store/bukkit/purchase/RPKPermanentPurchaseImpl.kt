@@ -22,8 +22,8 @@ import java.time.LocalDateTime
 
 
 class RPKPermanentPurchaseImpl(
-        override var id: Int = 0,
+        override var id: Int? = null,
         override val storeItem: RPKPermanentStoreItem,
         override val profile: RPKProfile,
         override val purchaseDate: LocalDateTime
-): RPKPermanentPurchase
+) : RPKPermanentPurchase

@@ -16,11 +16,12 @@
 
 package com.rpkit.payments.bukkit.command.payment
 
-import com.rpkit.banks.bukkit.bank.RPKBankProvider
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.banks.bukkit.bank.RPKBankService
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
-import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -30,64 +31,80 @@ import org.bukkit.entity.Player
  * Payment deposit command.
  * Deposits money into a payment group.
  */
-class PaymentDepositCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
+class PaymentDepositCommand(private val plugin: RPKPaymentsBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("rpkit.payments.command.payment.deposit")) {
-            if (sender is Player) {
-                if (args.size > 1) {
-                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-                    val bankProvider = plugin.core.serviceManager.getServiceProvider(RPKBankProvider::class)
-                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                    if (minecraftProfile != null) {
-                        val character = characterProvider.getActiveCharacter(minecraftProfile)
-                        if (character != null) {
-                            val paymentGroup = paymentGroupProvider.getPaymentGroup(args.dropLast(1).joinToString(" "))
-                            if (paymentGroup != null) {
-                                if (paymentGroup.owners.contains(character)) {
-                                    val currency = paymentGroup.currency
-                                    if (currency != null) {
-                                        try {
-                                            val amount = args.last().toInt()
-                                            if (amount > 0) {
-                                                if (bankProvider.getBalance(character, currency) >= amount) {
-                                                    bankProvider.setBalance(character, currency, bankProvider.getBalance(character, currency) - amount)
-                                                    paymentGroup.balance = paymentGroup.balance + amount
-                                                    paymentGroupProvider.updatePaymentGroup(paymentGroup)
-                                                    sender.sendMessage(plugin.messages["payment-deposit-valid"])
-                                                } else {
-                                                    sender.sendMessage(plugin.messages["payment-deposit-invalid-balance"])
-                                                }
-                                            } else {
-                                                sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
-                                            }
-                                        } catch (exception: NumberFormatException) {
-                                            sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
-                                        }
-                                    } else {
-                                        sender.sendMessage(plugin.messages["payment-deposit-invalid-currency"])
-                                    }
-                                } else {
-                                    sender.sendMessage(plugin.messages["payment-deposit-invalid-owner"])
-                                }
-                            } else {
-                                sender.sendMessage(plugin.messages["payment-deposit-invalid-group"])
-                            }
-                        } else {
-                            sender.sendMessage(plugin.messages["payment-deposit-invalid-character"])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["payment-deposit-usage"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["not-from-console"])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.payments.command.payment.deposit")) {
             sender.sendMessage(plugin.messages["no-permission-payment-deposit"])
+            return true
+        }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        if (args.size <= 1) {
+            sender.sendMessage(plugin.messages["payment-deposit-usage"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val paymentGroupService = Services[RPKPaymentGroupService::class]
+        if (paymentGroupService == null) {
+            sender.sendMessage(plugin.messages["no-payment-group-service"])
+            return true
+        }
+        val bankService = Services[RPKBankService::class]
+        if (bankService == null) {
+            sender.sendMessage(plugin.messages["no-bank-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null) {
+            sender.sendMessage(plugin.messages["payment-deposit-invalid-character"])
+            return true
+        }
+        val paymentGroup = paymentGroupService.getPaymentGroup(args.dropLast(1).joinToString(" "))
+        if (paymentGroup == null) {
+            sender.sendMessage(plugin.messages["payment-deposit-invalid-group"])
+            return true
+        }
+        if (!paymentGroup.owners.contains(character)) {
+            sender.sendMessage(plugin.messages["payment-deposit-invalid-owner"])
+            return true
+        }
+        val currency = paymentGroup.currency
+        if (currency == null) {
+            sender.sendMessage(plugin.messages["payment-deposit-invalid-currency"])
+            return true
+        }
+        try {
+            val amount = args.last().toInt()
+            if (amount <= 0) {
+                sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
+                return true
+            }
+            if (bankService.getBalance(character, currency) >= amount) {
+                bankService.setBalance(character, currency, bankService.getBalance(character, currency) - amount)
+                paymentGroup.balance = paymentGroup.balance + amount
+                paymentGroupService.updatePaymentGroup(paymentGroup)
+                sender.sendMessage(plugin.messages["payment-deposit-valid"])
+            } else {
+                sender.sendMessage(plugin.messages["payment-deposit-invalid-balance"])
+            }
+        } catch (exception: NumberFormatException) {
+            sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
         }
         return true
     }

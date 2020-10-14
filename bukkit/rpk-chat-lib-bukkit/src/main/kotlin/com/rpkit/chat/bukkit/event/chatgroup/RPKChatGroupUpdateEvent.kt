@@ -17,4 +17,4 @@
 package com.rpkit.chat.bukkit.event.chatgroup
 
 
-interface RPKChatGroupUpdateEvent: RPKChatGroupEvent
+interface RPKChatGroupUpdateEvent : RPKChatGroupEvent

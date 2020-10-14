@@ -17,4 +17,4 @@
 package com.rpkit.economy.bukkit.event.currency
 
 
-interface RPKCurrencyDeleteEvent: RPKCurrencyEvent
+interface RPKCurrencyDeleteEvent : RPKCurrencyEvent

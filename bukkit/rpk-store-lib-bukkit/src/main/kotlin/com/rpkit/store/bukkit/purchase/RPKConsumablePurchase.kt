@@ -22,7 +22,7 @@ import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItem
  * Represents a consumable purchase.
  * A consumable purchase has a limited number of uses.
  */
-interface RPKConsumablePurchase: RPKPurchase {
+interface RPKConsumablePurchase : RPKPurchase {
 
     /**
      * The store item that has been purchased

@@ -10,10 +10,10 @@ depend:
 - rpk-item-quality-lib-bukkit
 - rpk-crafting-skill-lib-bukkit
 commands:
-    craftingskill:
-        description: Displays crafting skill for a given action and material
-        usage: /<command> [action] [material]
+  craftingskill:
+    description: Displays crafting skill for a given action and material
+    usage: /<command> [action] [material]
 permissions:
-    rpkit.craftingskill.command.craftingskill:
-        description: Allows viewing crafting skill
-        default: true
+  rpkit.craftingskill.command.craftingskill:
+    description: Allows viewing crafting skill
+    default: true

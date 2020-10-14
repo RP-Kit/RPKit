@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.event.character.RPKCharacterEvent
 import com.rpkit.drink.bukkit.drink.RPKDrink
 
 
-interface RPKDrinkEvent: RPKCharacterEvent {
+interface RPKDrinkEvent : RPKCharacterEvent {
 
     override val character: RPKCharacter
     val drink: RPKDrink

@@ -17,7 +17,6 @@
 package com.rpkit.economy.bukkit.wallet
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 
 /**
@@ -28,8 +27,7 @@ import com.rpkit.economy.bukkit.currency.RPKCurrency
  * @property balance The balance currently contained in the wallet
  */
 data class RPKWallet(
-        override var id: Int = 0,
         val character: RPKCharacter,
         val currency: RPKCurrency,
         var balance: Int
-): Entity
+)

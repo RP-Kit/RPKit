@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.event.character.RPKCharacterEvent
 import com.rpkit.classes.bukkit.classes.RPKClass
 
 
-interface RPKClassChangeEvent: RPKClassEvent, RPKCharacterEvent {
+interface RPKClassChangeEvent : RPKClassEvent, RPKCharacterEvent {
 
     override val character: RPKCharacter
     val oldClass: RPKClass?

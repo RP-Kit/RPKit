@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 
-interface RPKSnooperEvent: RPKEvent {
+interface RPKSnooperEvent : RPKEvent {
 
     val snooper: RPKMinecraftProfile
 

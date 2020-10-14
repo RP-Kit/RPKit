@@ -17,8 +17,9 @@
 package com.rpkit.characters.bukkit.command.character.hide
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -28,33 +29,41 @@ import org.bukkit.entity.Player
  * Character hide race command.
  * Hides character's race.
  */
-class CharacterHideRaceCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class CharacterHideRaceCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender is Player) {
-            if (sender.hasPermission("rpkit.characters.command.character.hide.race")) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                if (minecraftProfile != null) {
-                    val character = characterProvider.getActiveCharacter(minecraftProfile)
-                    if (character != null) {
-                        character.isRaceHidden = true
-                        characterProvider.updateCharacter(character)
-                        sender.sendMessage(plugin.messages["character-hide-race-valid"])
-                        character.showCharacterCard(minecraftProfile)
-                    } else {
-                        sender.sendMessage(plugin.messages["no-character"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["no-permission-character-hide-race"])
-            }
-        } else {
+        if (sender !is Player) {
             sender.sendMessage(plugin.messages["not-from-console"])
+            return true
         }
+        if (!sender.hasPermission("rpkit.characters.command.character.hide.race")) {
+            sender.sendMessage(plugin.messages["no-permission-character-hide-race"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null) {
+            sender.sendMessage(plugin.messages["no-character"])
+            return true
+        }
+        character.isRaceHidden = true
+        characterService.updateCharacter(character)
+        sender.sendMessage(plugin.messages["character-hide-race-valid"])
+        character.showCharacterCard(minecraftProfile)
         return true
     }
 

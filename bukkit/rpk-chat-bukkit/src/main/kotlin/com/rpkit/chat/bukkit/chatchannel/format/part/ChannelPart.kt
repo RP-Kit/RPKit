@@ -63,7 +63,8 @@ class ChannelPart(
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = ChannelPart(
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = ChannelPart(
                 serialized["font"] as? String,
                 serialized["color"] as? String,
                 serialized["bold"] as? Boolean,

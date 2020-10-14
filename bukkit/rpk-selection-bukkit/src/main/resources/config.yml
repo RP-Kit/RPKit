@@ -1,15 +1,15 @@
 wand-item:
-    ==: org.bukkit.inventory.ItemStack
-    v: 1976
-    type: STICK
-    meta:
-        ==: ItemMeta
-        meta-type: UNSPECIFIC
-        display-name: Wand
-        lore:
-        - Creates selections
+  ==: org.bukkit.inventory.ItemStack
+  v: 1976
+  type: STICK
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    display-name: Wand
+    lore:
+    - Creates selections
 caching:
-    rpkit_selection:
-        id:
-            enabled: true
-            size: 20
+  rpkit_selection:
+    minecraft_profile_id:
+      enabled: true
+      size: 20

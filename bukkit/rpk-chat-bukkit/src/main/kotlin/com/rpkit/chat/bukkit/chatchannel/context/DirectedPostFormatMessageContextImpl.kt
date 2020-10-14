@@ -23,10 +23,10 @@ import com.rpkit.players.bukkit.profile.RPKThinProfile
 import net.md_5.bungee.api.chat.BaseComponent
 
 class DirectedPostFormatMessageContextImpl(
-    override val chatChannel: RPKChatChannel,
-    override val senderProfile: RPKThinProfile,
-    override val senderMinecraftProfile: RPKMinecraftProfile?,
-    override val receiverMinecraftProfile: RPKMinecraftProfile,
-    override var message: Array<BaseComponent>,
-    override var isCancelled: Boolean = false
+        override val chatChannel: RPKChatChannel,
+        override val senderProfile: RPKThinProfile,
+        override val senderMinecraftProfile: RPKMinecraftProfile?,
+        override val receiverMinecraftProfile: RPKMinecraftProfile,
+        override var message: Array<BaseComponent>,
+        override var isCancelled: Boolean = false
 ) : DirectedPostFormatMessageContext

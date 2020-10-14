@@ -17,4 +17,4 @@
 package com.rpkit.payments.bukkit.event.group
 
 
-interface RPKPaymentGroupUpdateEvent: RPKPaymentGroupEvent
+interface RPKPaymentGroupUpdateEvent : RPKPaymentGroupEvent

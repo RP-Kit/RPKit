@@ -18,32 +18,85 @@ package com.rpkit.permissions.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.command.charactergroup.CharacterGroupCommand
 import com.rpkit.permissions.bukkit.command.group.GroupCommand
 import com.rpkit.permissions.bukkit.database.table.RPKCharacterGroupTable
 import com.rpkit.permissions.bukkit.database.table.RPKProfileGroupTable
 import com.rpkit.permissions.bukkit.group.RPKGroupImpl
-import com.rpkit.permissions.bukkit.group.RPKGroupProviderImpl
+import com.rpkit.permissions.bukkit.group.RPKGroupService
+import com.rpkit.permissions.bukkit.group.RPKGroupServiceImpl
 import com.rpkit.permissions.bukkit.listener.PlayerJoinListener
 import com.rpkit.permissions.bukkit.listener.PlayerQuitListener
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
+import java.io.File
 
 /**
  * RPK permissions plugin default implementation.
  */
-class RPKPermissionsBukkit: RPKBukkitPlugin() {
+class RPKPermissionsBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 4407)
         ConfigurationSerialization.registerClass(RPKGroupImpl::class.java, "RPKGroupImpl")
         saveDefaultConfig()
         config.options().pathSeparator('/')
-        val groupProvider = RPKGroupProviderImpl(this)
-        serviceProviders = arrayOf(groupProvider)
-        groupProvider.groups.forEach { group ->
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/permissions/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/permissions/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_permissions"
+                ),
+                classLoader
+        )
+        database.addTable(RPKProfileGroupTable(database, this))
+        database.addTable(RPKCharacterGroupTable(database, this))
+
+        val groupService = RPKGroupServiceImpl(this)
+        Services[RPKGroupService::class] = RPKGroupServiceImpl(this)
+        groupService.groups.forEach { group ->
             server.pluginManager.addPermission(Permission(
                     "rpkit.permissions.command.group.add.${group.name}",
                     "Allows adding the ${group.name} group to players",
@@ -63,12 +116,7 @@ class RPKPermissionsBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerListeners() {
-        registerListeners(PlayerJoinListener(this), PlayerQuitListener(this))
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKProfileGroupTable(database, this))
-        database.addTable(RPKCharacterGroupTable(database, this))
+        registerListeners(PlayerJoinListener(), PlayerQuitListener())
     }
 
     override fun setDefaultMessages() {
@@ -100,5 +148,8 @@ class RPKPermissionsBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-group-add-group", "&cYou do not have permission to add \$group to players.")
         messages.setDefault("no-permission-group-remove-group", "&cYou do not have permission to remove \$group from players.")
         messages.setDefault("no-permission-group-list", "&cYou do not have permission to list groups.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-character-service", "&cThere is no character service available.")
+        messages.setDefault("no-group-service", "&cThere is no group service available.")
     }
 }

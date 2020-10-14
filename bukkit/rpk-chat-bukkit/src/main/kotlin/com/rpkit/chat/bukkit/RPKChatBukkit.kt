@@ -16,19 +16,36 @@
 
 package com.rpkit.chat.bukkit
 
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProviderImpl
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelServiceImpl
 import com.rpkit.chat.bukkit.chatchannel.directed.postformat.SendMessageComponent
 import com.rpkit.chat.bukkit.chatchannel.directed.postformat.SnoopComponent
 import com.rpkit.chat.bukkit.chatchannel.directed.preformat.DrunkenSlurComponent
 import com.rpkit.chat.bukkit.chatchannel.directed.preformat.GarbleComponent
 import com.rpkit.chat.bukkit.chatchannel.directed.preformat.LanguageComponent
 import com.rpkit.chat.bukkit.chatchannel.directed.preformat.RadiusFilterComponent
-import com.rpkit.chat.bukkit.chatchannel.format.click.*
+import com.rpkit.chat.bukkit.chatchannel.format.click.CopyToClipboardClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.OpenFileClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.OpenURLClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.RunCommandClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.SuggestCommandClickAction
 import com.rpkit.chat.bukkit.chatchannel.format.hover.ShowTextHoverAction
-import com.rpkit.chat.bukkit.chatchannel.format.part.*
-import com.rpkit.chat.bukkit.chatchannel.undirected.*
-import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProviderImpl
+import com.rpkit.chat.bukkit.chatchannel.format.part.ChannelPart
+import com.rpkit.chat.bukkit.chatchannel.format.part.MessagePart
+import com.rpkit.chat.bukkit.chatchannel.format.part.ReceiverCharacterNamePart
+import com.rpkit.chat.bukkit.chatchannel.format.part.ReceiverPrefixPart
+import com.rpkit.chat.bukkit.chatchannel.format.part.ReceiverProfileNamePart
+import com.rpkit.chat.bukkit.chatchannel.format.part.SenderCharacterNamePart
+import com.rpkit.chat.bukkit.chatchannel.format.part.SenderPrefixPart
+import com.rpkit.chat.bukkit.chatchannel.format.part.SenderProfileNamePart
+import com.rpkit.chat.bukkit.chatchannel.format.part.TextPart
+import com.rpkit.chat.bukkit.chatchannel.undirected.DiscordComponent
+import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
+import com.rpkit.chat.bukkit.chatchannel.undirected.LogComponent
+import com.rpkit.chat.bukkit.chatchannel.undirected.UndirectedFormatComponent
+import com.rpkit.chat.bukkit.chatchannel.undirected.WebComponent
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupServiceImpl
 import com.rpkit.chat.bukkit.command.chatchannel.ChatChannelCommand
 import com.rpkit.chat.bukkit.command.chatgroup.ChatGroupCommand
 import com.rpkit.chat.bukkit.command.listchatchannels.ListChatChannelsCommand
@@ -37,34 +54,44 @@ import com.rpkit.chat.bukkit.command.mute.MuteCommand
 import com.rpkit.chat.bukkit.command.reply.ReplyCommand
 import com.rpkit.chat.bukkit.command.snoop.SnoopCommand
 import com.rpkit.chat.bukkit.command.unmute.UnmuteCommand
-import com.rpkit.chat.bukkit.database.table.*
-import com.rpkit.chat.bukkit.discord.RPKDiscordProviderImpl
-import com.rpkit.chat.bukkit.irc.RPKIRCProvider
-import com.rpkit.chat.bukkit.irc.RPKIRCProviderImpl
+import com.rpkit.chat.bukkit.database.table.RPKChatChannelMuteTable
+import com.rpkit.chat.bukkit.database.table.RPKChatChannelSpeakerTable
+import com.rpkit.chat.bukkit.database.table.RPKChatGroupInviteTable
+import com.rpkit.chat.bukkit.database.table.RPKChatGroupMemberTable
+import com.rpkit.chat.bukkit.database.table.RPKChatGroupTable
+import com.rpkit.chat.bukkit.database.table.RPKLastUsedChatGroupTable
+import com.rpkit.chat.bukkit.database.table.RPKSnooperTable
+import com.rpkit.chat.bukkit.discord.RPKDiscordService
+import com.rpkit.chat.bukkit.discord.RPKDiscordServiceImpl
+import com.rpkit.chat.bukkit.irc.RPKIRCService
+import com.rpkit.chat.bukkit.irc.RPKIRCServiceImpl
 import com.rpkit.chat.bukkit.listener.AsyncPlayerChatListener
 import com.rpkit.chat.bukkit.listener.PlayerCommandPreprocessListener
-import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteProvider
-import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
-import com.rpkit.chat.bukkit.prefix.RPKPrefixProviderImpl
-import com.rpkit.chat.bukkit.servlet.ChatServlet
-import com.rpkit.chat.bukkit.servlet.websocket.ChatWebSocketServlet
-import com.rpkit.chat.bukkit.servlet.websocket.RPKChatWebSocketProvider
-import com.rpkit.chat.bukkit.snooper.RPKSnooperProviderImpl
-import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
+import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteService
+import com.rpkit.chat.bukkit.prefix.RPKPrefixService
+import com.rpkit.chat.bukkit.prefix.RPKPrefixServiceImpl
+import com.rpkit.chat.bukkit.snooper.RPKSnooperService
+import com.rpkit.chat.bukkit.snooper.RPKSnooperServiceImpl
+import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
-import com.rpkit.core.web.NavigationLink
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.eclipse.jetty.servlet.ServletHolder
+import java.io.File
 
 /**
  * RPK chat plugin default implementation.
  */
-class RPKChatBukkit: RPKBukkitPlugin() {
+class RPKChatBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 4383)
@@ -108,54 +135,80 @@ class RPKChatBukkit: RPKBukkitPlugin() {
 
         saveDefaultConfig()
 
-        val ircProvider = if (config.getBoolean("irc.enabled")) {
-            RPKIRCProviderImpl(this)
-        } else null
-
-        val discordProvider = if (config.getBoolean("discord.enabled")) {
-            RPKDiscordProviderImpl(this)
-        } else null
-
-        val prefixProvider = RPKPrefixProviderImpl(this)
-        val chatChannelProvider = RPKChatChannelProviderImpl(this)
-        val chatChannelMuteProvider = RPKChatChannelMuteProvider(this)
-        val chatChannelSpeakerProvider = RPKChatChannelSpeakerProvider(this)
-        val chatGroupProvider = RPKChatGroupProviderImpl(this)
-        val snooperProvider =  RPKSnooperProviderImpl(this)
-        val chatWebSocketProvider = RPKChatWebSocketProvider()
-
-        serviceProviders = listOfNotNull(
-                ircProvider,
-                discordProvider,
-                prefixProvider,
-                chatChannelProvider,
-                chatChannelMuteProvider,
-                chatChannelSpeakerProvider,
-                chatGroupProvider,
-                snooperProvider,
-                chatWebSocketProvider
-        ).toTypedArray()
-
-        registerChatChannelPermissions(chatChannelProvider)
-        registerPrefixPermissions(prefixProvider)
-        servlets = arrayOf(
-                ChatServlet(this)
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/chat/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/chat/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_chat"
+                ),
+                classLoader
         )
-    }
+        database.addTable(RPKChatChannelMuteTable(database, this))
+        database.addTable(RPKChatChannelSpeakerTable(database, this))
+        database.addTable(RPKChatGroupTable(database, this))
+        database.addTable(RPKChatGroupInviteTable(database))
+        database.addTable(RPKChatGroupMemberTable(database, this))
+        database.addTable(RPKLastUsedChatGroupTable(database, this))
+        database.addTable(RPKSnooperTable(database, this))
 
-    override fun onPostEnable() {
-        core.web.navigationBar.add(NavigationLink("Chat", "/chat/"))
-        val originalClassLoader = Thread.currentThread().contextClassLoader
-        Thread.currentThread().contextClassLoader = javaClass.classLoader
-        (core.web.server.handler as ServletContextHandler).addServlet(ServletHolder(ChatWebSocketServlet(this)), "/chat/ws")
-        Thread.currentThread().contextClassLoader = originalClassLoader
+        if (config.getBoolean("irc.enabled")) {
+            Services[RPKIRCService::class] = RPKIRCServiceImpl(this)
+        }
+
+        if (config.getBoolean("discord.enabled")) {
+            Services[RPKDiscordService::class] = RPKDiscordServiceImpl(this)
+        }
+
+        val prefixService = RPKPrefixServiceImpl(this)
+        Services[RPKPrefixService::class] = prefixService
+        val chatChannelService = RPKChatChannelServiceImpl(this)
+        Services[RPKChatChannelService::class] = chatChannelService
+        Services[RPKChatChannelMuteService::class] = RPKChatChannelMuteService(this)
+        Services[RPKChatChannelSpeakerService::class] = RPKChatChannelSpeakerService(this)
+        Services[RPKChatGroupService::class] = RPKChatGroupServiceImpl(this)
+        Services[RPKSnooperService::class] = RPKSnooperServiceImpl(this)
+
+        registerChatChannelPermissions(chatChannelService)
+        registerPrefixPermissions(prefixService)
     }
 
     override fun onDisable() {
         if (config.getBoolean("irc.enabled")) {
-            val ircBot = core.serviceManager.getServiceProvider(RPKIRCProvider::class).ircBot
-            ircBot.stopBotReconnect()
-            ircBot.sendIRC().quitServer(messages["irc-quit"])
+            val ircBot = Services[RPKIRCService::class]?.ircBot
+            ircBot?.stopBotReconnect()
+            ircBot?.sendIRC()?.quitServer(messages["irc-quit"])
         }
     }
 
@@ -177,18 +230,8 @@ class RPKChatBukkit: RPKBukkitPlugin() {
         )
     }
 
-    override fun createTables(database: Database) {
-        database.addTable(RPKChatChannelMuteTable(database, this))
-        database.addTable(RPKChatChannelSpeakerTable(database, this))
-        database.addTable(RPKChatGroupTable(database, this))
-        database.addTable(ChatGroupInviteTable(database, this))
-        database.addTable(ChatGroupMemberTable(database, this))
-        database.addTable(LastUsedChatGroupTable(database, this))
-        database.addTable(RPKSnooperTable(database, this))
-    }
-
-    private fun registerChatChannelPermissions(chatChannelProvider: RPKChatChannelProvider) {
-        chatChannelProvider.chatChannels.forEach { chatChannel ->
+    private fun registerChatChannelPermissions(chatChannelService: RPKChatChannelService) {
+        chatChannelService.chatChannels.forEach { chatChannel ->
             server.pluginManager.addPermission(Permission(
                     "rpkit.chat.command.chatchannel.${chatChannel.name}",
                     "Allows speaking in ${chatChannel.name}",
@@ -212,8 +255,8 @@ class RPKChatBukkit: RPKBukkitPlugin() {
         }
     }
 
-    private fun registerPrefixPermissions(prefixProvider: RPKPrefixProvider) {
-        prefixProvider.prefixes.forEach { prefix ->
+    private fun registerPrefixPermissions(prefixService: RPKPrefixService) {
+        prefixService.prefixes.forEach { prefix ->
             server.pluginManager.addPermission(Permission(
                     "rpkit.chat.prefix.${prefix.name}",
                     "Gives the player the prefix ${prefix.name}",
@@ -310,6 +353,11 @@ class RPKChatBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-reply", "&cYou do not have permission to reply to messages.")
         messages.setDefault("command-snoop", "&2[command] \$sender-player: \$command")
         messages.setDefault("account-link-discord-successful", "&aDiscord profile \$discord-tag successfully linked.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-chat-channel-service", "&cThere is no chat channel service available.")
+        messages.setDefault("no-chat-group-service", "&cThere is no chat group service available.")
+        messages.setDefault("no-snooper-service", "&cThere is no snooper service available.")
+        messages.setDefault("irc-no-irc-service", "There is no IRC service available.")
     }
 
 }

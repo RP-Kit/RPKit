@@ -20,7 +20,7 @@ import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 
-interface RPKWarpUseEvent: RPKWarpEvent, RPKMinecraftProfileEvent {
+interface RPKWarpUseEvent : RPKWarpEvent, RPKMinecraftProfileEvent {
 
     override val minecraftProfile: RPKMinecraftProfile
 

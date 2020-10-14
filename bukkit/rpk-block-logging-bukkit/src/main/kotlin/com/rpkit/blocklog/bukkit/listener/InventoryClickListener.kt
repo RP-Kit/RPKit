@@ -17,10 +17,11 @@
 package com.rpkit.blocklog.bukkit.listener
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
-import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryProvider
+import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChangeImpl
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.block.BlockState
 import org.bukkit.entity.Player
@@ -29,41 +30,40 @@ import org.bukkit.event.EventPriority.MONITOR
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.scheduler.BukkitRunnable
+import java.time.LocalDateTime
 
 
-class InventoryClickListener(private val plugin: RPKBlockLoggingBukkit): Listener {
+class InventoryClickListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
 
     @EventHandler(priority = MONITOR)
     fun onInventoryClick(event: InventoryClickEvent) {
-        val blockHistoryProvider = plugin.core.serviceManager.getServiceProvider(RPKBlockHistoryProvider::class)
+        val blockHistoryService = Services[RPKBlockHistoryService::class] ?: return
         val inventoryHolder = event.inventory.holder
-        if (inventoryHolder is BlockState) {
-            val whoClicked = event.whoClicked
-            if (whoClicked is Player) {
-                val oldContents = event.inventory.contents
-                object: BukkitRunnable() {
-                    override fun run() {
-                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(whoClicked)
-                        val profile = minecraftProfile?.profile as? RPKProfile
-                        val character = if (minecraftProfile == null) null else characterProvider.getActiveCharacter(minecraftProfile)
-                        val blockHistory = blockHistoryProvider.getBlockHistory(inventoryHolder.block)
-                        val blockInventoryChange = RPKBlockInventoryChangeImpl(
-                                blockHistory = blockHistory,
-                                time = System.currentTimeMillis(),
-                                profile = profile,
-                                minecraftProfile = minecraftProfile,
-                                character = character,
-                                from = oldContents,
-                                to = event.inventory.contents,
-                                reason = "CLICK"
-                        )
-                        blockHistoryProvider.addBlockInventoryChange(blockInventoryChange)
-                    }
-                }.runTaskLater(plugin, 1L) // Scheduled 1 tick later to allow inventory change to take place.
+        if (inventoryHolder !is BlockState) return
+        val whoClicked = event.whoClicked
+        if (whoClicked !is Player) return
+        val oldContents = event.inventory.contents
+        object : BukkitRunnable() {
+            override fun run() {
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+                val characterService = Services[RPKCharacterService::class] ?: return
+                val minecraftProfile = minecraftProfileService.getMinecraftProfile(whoClicked)
+                val profile = minecraftProfile?.profile as? RPKProfile
+                val character = if (minecraftProfile == null) null else characterService.getActiveCharacter(minecraftProfile)
+                val blockHistory = blockHistoryService.getBlockHistory(inventoryHolder.block)
+                val blockInventoryChange = RPKBlockInventoryChangeImpl(
+                        blockHistory = blockHistory,
+                        time = LocalDateTime.now(),
+                        profile = profile,
+                        minecraftProfile = minecraftProfile,
+                        character = character,
+                        from = oldContents,
+                        to = event.inventory.contents,
+                        reason = "CLICK"
+                )
+                blockHistoryService.addBlockInventoryChange(blockInventoryChange)
             }
-        }
+        }.runTaskLater(plugin, 1L) // Scheduled 1 tick later to allow inventory change to take place.
     }
 
 }

@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.event.character.RPKCharacterEvent
 
 
-interface RPKUnconsciousnessStateChangeEvent: RPKCharacterEvent {
+interface RPKUnconsciousnessStateChangeEvent : RPKCharacterEvent {
 
     override val character: RPKCharacter
     var isUnconscious: Boolean

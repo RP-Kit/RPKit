@@ -22,7 +22,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 
-class OnlineStaffCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class OnlineStaffCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("rpkit.moderation.command.onlinestaff")) {
             sender.sendMessage(plugin.messages["online-staff-title"])

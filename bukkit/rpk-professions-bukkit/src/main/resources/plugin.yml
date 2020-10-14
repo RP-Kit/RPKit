@@ -10,60 +10,60 @@ depend:
 - rpk-professions-lib-bukkit
 api-version: '1.16'
 commands:
-    profession:
-        description: |
-            Profession management command
-            /profession list - Lists professions
-            /profession set (player) [profession] - Set profession to a chosen profession
-            /profession unset (player) [profession] - Unsets profession from a chosen profession
-            /profession view (player) - Views a player's professions
-            /profession experience add (player) [profession] [amount] - Adds experience to a player's profession
-            /profession experience remove (player) [profession] [amount] - Removes experience from a player's profession
-            /profession experience view (player) [profession] - View experience for a player in their active character's profession
-        usage: /<command> [list|set|unset|view|experience]
+  profession:
+    description: |
+      Profession management command
+      /profession list - Lists professions
+      /profession set (player) [profession] - Set profession to a chosen profession
+      /profession unset (player) [profession] - Unsets profession from a chosen profession
+      /profession view (player) - Views a player's professions
+      /profession experience add (player) [profession] [amount] - Adds experience to a player's profession
+      /profession experience remove (player) [profession] [amount] - Removes experience from a player's profession
+      /profession experience view (player) [profession] - View experience for a player in their active character's profession
+    usage: /<command> [list|set|unset|view|experience]
 permissions:
-    rpkit.professions.command.profession.list:
-        description: Allows listing professions
-        default: true
-    rpkit.professions.command.profession.set:
-        description: Allows setting professions
-        default: true
-    rpkit.professions.command.profession.set.other:
-        description: Allows setting professions for other players
-        default: op
-    rpkit.professions.command.profession.unset:
-        description: Allows unsetting professions
-        default: true
-    rpkit.professions.command.profession.unset.other:
-        description: Allows unsetting professions for other players
-        default: op
-    rpkit.professions.command.profession.view:
-        description: Allows viewing professions
-        default: true
-    rpkit.professions.command.profession.view.other:
-        description: Allows viewing professions of other players
-        default: op
-    rpkit.professions.command.profession.experience.add:
-        description: Allows adding profession experience
-        default: op
-    rpkit.professions.command.profession.experience.add.other:
-        description: Allows adding profession experience to other players
-        default: op
-    rpkit.professions.command.profession.experience.remove:
-        description: Allows removing profession experience
-        default: op
-    rpkit.professions.command.profession.experience.remove.other:
-        description: Allows removing profession experience from other players
-        default: op
-    rpkit.professions.command.profession.experience.set:
-        description: Allows setting profession experience
-        default: op
-    rpkit.professions.command.profession.experience.set.other:
-        description: Allows setting profession experience for other players
-        default: op
-    rpkit.professions.command.profession.experience.view:
-        description: Allows viewing profession experience
-        default: true
-    rpkit.professions.command.profession.experience.view.other:
-        description: Allows viewing other players' profession experience
-        default: op
+  rpkit.professions.command.profession.list:
+    description: Allows listing professions
+    default: true
+  rpkit.professions.command.profession.set:
+    description: Allows setting professions
+    default: true
+  rpkit.professions.command.profession.set.other:
+    description: Allows setting professions for other players
+    default: op
+  rpkit.professions.command.profession.unset:
+    description: Allows unsetting professions
+    default: true
+  rpkit.professions.command.profession.unset.other:
+    description: Allows unsetting professions for other players
+    default: op
+  rpkit.professions.command.profession.view:
+    description: Allows viewing professions
+    default: true
+  rpkit.professions.command.profession.view.other:
+    description: Allows viewing professions of other players
+    default: op
+  rpkit.professions.command.profession.experience.add:
+    description: Allows adding profession experience
+    default: op
+  rpkit.professions.command.profession.experience.add.other:
+    description: Allows adding profession experience to other players
+    default: op
+  rpkit.professions.command.profession.experience.remove:
+    description: Allows removing profession experience
+    default: op
+  rpkit.professions.command.profession.experience.remove.other:
+    description: Allows removing profession experience from other players
+    default: op
+  rpkit.professions.command.profession.experience.set:
+    description: Allows setting profession experience
+    default: op
+  rpkit.professions.command.profession.experience.set.other:
+    description: Allows setting profession experience for other players
+    default: op
+  rpkit.professions.command.profession.experience.view:
+    description: Allows viewing profession experience
+    default: true
+  rpkit.professions.command.profession.experience.view.other:
+    description: Allows viewing other players' profession experience
+    default: op

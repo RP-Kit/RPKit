@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.event.character.RPKCharacterEvent
 import com.rpkit.economy.bukkit.event.currency.RPKCurrencyEvent
 
 
-interface RPKBalanceChangeEvent: RPKCharacterEvent, RPKCurrencyEvent {
+interface RPKBalanceChangeEvent : RPKCharacterEvent, RPKCurrencyEvent {
 
     override val character: RPKCharacter
     val oldBalance: Int

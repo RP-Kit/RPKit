@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.rpkit.core.bukkit.event.provider
+package com.rpkit.core.bukkit.event.service
 
 import com.rpkit.core.event.RPKEvent
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
-interface RPKServiceProviderReadyEvent: RPKEvent {
+interface RPKServiceServiceReadyEvent : RPKEvent {
 
-    val serviceProvider: ServiceProvider
+    val service: Service
 
 }

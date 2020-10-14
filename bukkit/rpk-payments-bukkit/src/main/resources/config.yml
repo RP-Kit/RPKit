@@ -1,29 +1,17 @@
 payment-groups:
-    defaults:
-        # The amount a payment group should pay.
-        # A positive amount pays out to members, whereas a negative amount takes money from members.
-        amount: 0
-        # How often each payment should happen, measured in milliseconds.
-        # The default, 604800000 is one week.
-        interval: 604800000
+  defaults:
+    # The amount a payment group should pay.
+    # A positive amount pays out to members, whereas a negative amount takes money from members.
+    amount: 0
+    # How often each payment should happen, measured in milliseconds.
+    # The default, 604800000 is one week.
+    interval: 604800000
 caching:
-    rpkit_payment_group_invite:
-        id:
-            enabled: true
-            size: 400
-    rpkit_payment_group_member:
-        id:
-            enabled: true
-            size: 400
-    rpkit_payment_group_owner:
-        id:
-            enabled: true
-            size: 400
-    rpkit_payment_group:
-        id:
-            enabled: true
-            size: 20
-    rpkit_payment_group_notification:
-        id:
-            enabled: true
-            size: 20
+  rpkit_payment_group:
+    id:
+      enabled: true
+      size: 20
+  rpkit_payment_group_notification:
+    id:
+      enabled: true
+      size: 20

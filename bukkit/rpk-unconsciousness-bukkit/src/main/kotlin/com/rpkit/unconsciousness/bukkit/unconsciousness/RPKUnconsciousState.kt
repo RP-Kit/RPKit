@@ -17,11 +17,10 @@
 package com.rpkit.unconsciousness.bukkit.unconsciousness
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
+import java.time.LocalDateTime
 
 
 class RPKUnconsciousState(
-        override var id: Int = 0,
         val character: RPKCharacter,
-        var deathTime: Long
-) : Entity
+        var deathTime: LocalDateTime
+)

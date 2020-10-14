@@ -1,25 +1,22 @@
 payments:
-    maximum-distance: 8
+  maximum-distance: 8
 currency:
-    default: null
+  default: null
 dynamic-exchanges:
-    rate-change: 0.01
+  rate-change: 0.01
 caching:
-    money_hidden:
-        id:
-            enabled: true
-            size: 20
-        character_id:
-            enabled: true
-            size: 20
-    rpkit_currency:
-        id:
-            enabled: true
-            size: 5
-        name:
-            enabled: true
-            size: 5
-    rpkit_wallet:
-        id:
-            enabled: true
-            size: 20
+  rpkit_money_hidden:
+    character_id:
+      enabled: true
+      size: 20
+  rpkit_currency:
+    id:
+      enabled: true
+      size: 5
+    name:
+      enabled: true
+      size: 5
+  rpkit_wallet:
+    character_id:
+      enabled: true
+      size: 20

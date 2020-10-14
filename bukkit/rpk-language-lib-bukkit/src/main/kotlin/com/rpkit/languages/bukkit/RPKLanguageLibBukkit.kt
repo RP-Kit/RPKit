@@ -19,7 +19,7 @@ package com.rpkit.languages.bukkit
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import org.bstats.bukkit.Metrics
 
-class RPKLanguageLibBukkit: RPKBukkitPlugin() {
+class RPKLanguageLibBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 6763)

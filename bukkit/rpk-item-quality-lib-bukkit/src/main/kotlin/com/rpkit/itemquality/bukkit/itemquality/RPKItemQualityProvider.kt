@@ -16,11 +16,11 @@
 
 package com.rpkit.itemquality.bukkit.itemquality
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import org.bukkit.inventory.ItemStack
 
 
-interface RPKItemQualityProvider: ServiceProvider {
+interface RPKItemQualityService : Service {
 
     val itemQualities: List<RPKItemQuality>
 

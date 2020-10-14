@@ -20,7 +20,7 @@ import com.rpkit.chat.bukkit.chatgroup.RPKChatGroup
 import com.rpkit.core.event.RPKEvent
 
 
-interface RPKChatGroupEvent: RPKEvent {
+interface RPKChatGroupEvent : RPKEvent {
 
     val chatGroup: RPKChatGroup
 

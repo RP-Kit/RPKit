@@ -16,66 +16,98 @@
 
 package com.rpkit.economy.bukkit
 
-import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
+import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
-import com.rpkit.core.exception.UnregisteredServiceException
-import com.rpkit.core.web.NavigationLink
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.character.MoneyField
 import com.rpkit.economy.bukkit.command.currency.CurrencyCommand
 import com.rpkit.economy.bukkit.command.money.MoneyCommand
 import com.rpkit.economy.bukkit.command.money.MoneyPayCommand
 import com.rpkit.economy.bukkit.command.money.MoneyWalletCommand
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProviderImpl
-import com.rpkit.economy.bukkit.database.table.MoneyHiddenTable
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
+import com.rpkit.economy.bukkit.currency.RPKCurrencyServiceImpl
 import com.rpkit.economy.bukkit.database.table.RPKCurrencyTable
+import com.rpkit.economy.bukkit.database.table.RPKMoneyHiddenTable
 import com.rpkit.economy.bukkit.database.table.RPKWalletTable
-import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.economy.bukkit.economy.RPKEconomyProviderImpl
-import com.rpkit.economy.bukkit.listener.*
-import com.rpkit.economy.bukkit.servlet.CurrencyServlet
-import com.rpkit.economy.bukkit.servlet.MoneyServlet
-import com.rpkit.economy.bukkit.servlet.api.MoneyAPIServlet
+import com.rpkit.economy.bukkit.economy.RPKEconomyService
+import com.rpkit.economy.bukkit.economy.RPKEconomyServiceImpl
+import com.rpkit.economy.bukkit.listener.InventoryClickListener
+import com.rpkit.economy.bukkit.listener.InventoryCloseListener
+import com.rpkit.economy.bukkit.listener.PlayerInteractListener
+import com.rpkit.economy.bukkit.listener.SignChangeListener
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
 /**
  * RPK economy plugin default implementation.
  */
-class RPKEconomyBukkit: RPKBukkitPlugin() {
+class RPKEconomyBukkit : RPKBukkitPlugin() {
 
-    private lateinit var currencyProvider: RPKCurrencyProvider
-    private lateinit var economyProvider: RPKEconomyProvider
-    private var moneyFieldInitialised: Boolean = false
+    lateinit var database: Database
+
+    private lateinit var currencyService: RPKCurrencyService
+    private lateinit var economyService: RPKEconomyService
 
     override fun onEnable() {
         Metrics(this, 4390)
         saveDefaultConfig()
-        currencyProvider = RPKCurrencyProviderImpl(this)
-        economyProvider = RPKEconomyProviderImpl(this)
-        serviceProviders = arrayOf(
-                currencyProvider,
-                economyProvider
-        )
-        servlets = arrayOf(
-                CurrencyServlet(this),
-                MoneyServlet(this),
-                MoneyAPIServlet(this)
-        )
-    }
 
-    override fun onPostEnable() {
-        core.web.navigationBar.add(NavigationLink("Money", "/money/"))
-        attemptCharacterCardFieldInitialisation()
-    }
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/economy/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/economy/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_economy"
+                ),
+                classLoader
+        )
+        database.addTable(RPKCurrencyTable(database, this))
+        database.addTable(RPKWalletTable(database, this))
+        database.addTable(RPKMoneyHiddenTable(database, this))
 
-    fun attemptCharacterCardFieldInitialisation() {
-        if (!moneyFieldInitialised) {
-            try {
-                core.serviceManager.getServiceProvider(RPKCharacterCardFieldProvider::class)
-                        .characterCardFields.add(MoneyField(this))
-                moneyFieldInitialised = true
-            } catch (ignore: UnregisteredServiceException) {}
+        currencyService = RPKCurrencyServiceImpl(this)
+        economyService = RPKEconomyServiceImpl(this)
+        Services[RPKCurrencyService::class] = currencyService
+        Services[RPKEconomyService::class] = economyService
+
+        Services.require(RPKCharacterCardFieldService::class).whenAvailable { service ->
+            service.characterCardFields.add(MoneyField(this))
         }
     }
 
@@ -89,17 +121,10 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
     override fun registerListeners() {
         registerListeners(
                 InventoryClickListener(this),
-                InventoryCloseListener(this),
+                InventoryCloseListener(),
                 PlayerInteractListener(this),
-                RPKServiceProviderReadyListener(this),
                 SignChangeListener(this)
         )
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKCurrencyTable(database, this))
-        database.addTable(RPKWalletTable(database, this))
-        database.addTable(MoneyHiddenTable(database, this))
     }
 
     override fun setDefaultMessages() {
@@ -253,6 +278,8 @@ class RPKEconomyBukkit: RPKBukkitPlugin() {
         messages.setDefault("recipient-no-character", "&cThe recipient needs a character to transfer money to. Please get them to create one.")
         messages.setDefault("no-profile", "&cYour Minecraft profile is not linked to a profile. Please link it on the server's web UI.")
         messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
+        messages.setDefault("no-economy-service", "&cThere is no economy service available.")
+        messages.setDefault("no-currency-service", "&cThere is no currency service available.")
     }
 
 }

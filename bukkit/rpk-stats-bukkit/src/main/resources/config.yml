@@ -2,7 +2,7 @@
 # Built in variables are:
 # character: The character (RPKCharacter)
 # minecraftLevel: The player's level in Minecraft (Integer)
-# characterGender: The character's gender from the character implementation (RPKGender)
+# characterGender: The character's gender from the character implementation (String)
 # characterAge: The character's age from the character implementation (Integer)
 # characterRace: The character's race from the character implementation (RPKRace)
 # characterHelmet: The character's helmet from the character implementation (ItemStack)
@@ -16,6 +16,6 @@
 # characterFoodLevel: The character's food level from the character implementation (Integer)
 # characterThirstLevel: The character's thirst level from the character implementation (Integer)
 stats:
-    strength: strength
-    agility: agility
-    intelligence: intelligence
+  strength: strength
+  agility: agility
+  intelligence: intelligence

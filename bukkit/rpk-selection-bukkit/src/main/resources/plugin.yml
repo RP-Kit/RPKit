@@ -8,13 +8,13 @@ depend:
 - rpk-selection-lib-bukkit
 api-version: '1.16'
 commands:
-    wand:
-        description: Gives you a wand item
-        usage: /<command>
-    setwand:
-        description: Sets the wand item
-        usage: /<command>
+  wand:
+    description: Gives you a wand item
+    usage: /<command>
+  setwand:
+    description: Sets the wand item
+    usage: /<command>
 permissions:
-    rpkit.selection.command.wand:
-        description: Allows creating a wand
-        default: op
+  rpkit.selection.command.wand:
+    description: Allows creating a wand
+    default: op

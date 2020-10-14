@@ -17,11 +17,10 @@
 package com.rpkit.permissions.bukkit.group
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 
 
 class RPKCharacterGroup(
-        override var id: Int = 0,
         val character: RPKCharacter,
-        val group: RPKGroup
-): Entity
+        val group: RPKGroup,
+        val priority: Int
+)

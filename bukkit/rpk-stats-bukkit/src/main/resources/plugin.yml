@@ -9,10 +9,10 @@ depend:
 - rpk-stat-lib-bukkit
 api-version: '1.16'
 commands:
-    stats:
-        description: Shows your stats
-        usage: /<command>
+  stats:
+    description: Shows your stats
+    usage: /<command>
 permissions:
-    rpkit.stats.command.stats:
-        description: Allows viewing stats
-        default: true
+  rpkit.stats.command.stats:
+    description: Allows viewing stats
+    default: true

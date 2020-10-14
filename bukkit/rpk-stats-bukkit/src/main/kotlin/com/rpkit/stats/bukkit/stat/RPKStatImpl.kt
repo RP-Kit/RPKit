@@ -24,9 +24,8 @@ import kotlin.math.roundToInt
  * Stat implementation.
  */
 class RPKStatImpl(
-        override var id: Int = 0,
         override val name: String,
-        override val script: String
+        override val formula: String
 ) : RPKStat {
     override fun get(character: RPKCharacter, variables: List<RPKStatVariable>): Int {
         val parser = JEP()
@@ -38,7 +37,7 @@ class RPKStatImpl(
                 parser.addVariableAsObject(variable.name, value)
             }
         }
-        parser.parseExpression(script)
+        parser.parseExpression(formula)
         return parser.value.roundToInt()
     }
 }

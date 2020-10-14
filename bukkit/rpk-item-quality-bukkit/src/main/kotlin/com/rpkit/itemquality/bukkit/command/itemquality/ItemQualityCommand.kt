@@ -22,7 +22,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 
-class ItemQualityCommand(private val plugin: RPKItemQualityBukkit): CommandExecutor {
+class ItemQualityCommand(private val plugin: RPKItemQualityBukkit) : CommandExecutor {
 
     private val itemQualityListCommand = ItemQualityListCommand(plugin)
     private val itemQualitySetCommand = ItemQualitySetCommand(plugin)

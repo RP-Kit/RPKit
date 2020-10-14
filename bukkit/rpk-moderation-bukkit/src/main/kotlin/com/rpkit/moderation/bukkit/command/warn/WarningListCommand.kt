@@ -16,9 +16,10 @@
 
 package com.rpkit.moderation.bukkit.command.warn
 
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
-import com.rpkit.moderation.bukkit.warning.RPKWarningProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.moderation.bukkit.warning.RPKWarningService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -26,7 +27,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.time.format.DateTimeFormatter
 
-class WarningListCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class WarningListCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.moderation.command.warning.list")) {
@@ -47,9 +48,17 @@ class WarningListCommand(private val plugin: RPKModerationBukkit): CommandExecut
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val warningProvider = plugin.core.serviceManager.getServiceProvider(RPKWarningProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(player)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val warningService = Services[RPKWarningService::class]
+        if (warningService == null) {
+            sender.sendMessage(plugin.messages["no-warning-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(player)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -59,7 +68,7 @@ class WarningListCommand(private val plugin: RPKModerationBukkit): CommandExecut
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        val warnings = warningProvider.getWarnings(profile)
+        val warnings = warningService.getWarnings(profile)
         sender.sendMessage(plugin.messages["warning-list-title"])
         for ((index, warning) in warnings.withIndex()) {
             sender.sendMessage(plugin.messages["warning-list-item", mapOf(

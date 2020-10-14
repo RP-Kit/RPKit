@@ -16,10 +16,10 @@
 
 package com.rpkit.players.bukkit.profile
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import net.dv8tion.jda.api.entities.User
 
-interface RPKDiscordProfileProvider: ServiceProvider {
+interface RPKDiscordProfileService : Service {
 
     fun getDiscordProfile(id: Int): RPKDiscordProfile?
     fun getDiscordProfile(user: User): RPKDiscordProfile

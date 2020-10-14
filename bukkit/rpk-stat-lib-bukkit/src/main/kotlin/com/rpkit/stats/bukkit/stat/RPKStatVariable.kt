@@ -31,8 +31,8 @@ interface RPKStatVariable {
 
     /**
      * Gets the value of the variable for the given character.
-     * This may be any type, and should be documented with the supplier of the variable implementation.
+     * This may be any numerical type.
      */
-    fun get(character: RPKCharacter): Any?
+    fun get(character: RPKCharacter): Number?
 
 }

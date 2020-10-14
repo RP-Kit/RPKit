@@ -17,20 +17,21 @@
 package com.rpkit.itemquality.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.command.itemquality.ItemQualityCommand
-import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityProviderImpl
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityServiceImpl
 import com.rpkit.itemquality.bukkit.listener.PlayerItemDamageListener
 import org.bstats.bukkit.Metrics
 
 
-class RPKItemQualityBukkit: RPKBukkitPlugin() {
+class RPKItemQualityBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 6658)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKItemQualityProviderImpl(this)
-        )
+
+        Services[RPKItemQualityService::class] = RPKItemQualityServiceImpl(this)
     }
 
     override fun registerListeners() {
@@ -54,6 +55,7 @@ class RPKItemQualityBukkit: RPKBukkitPlugin() {
         messages.setDefault("itemquality-list-title", "&7Item Qualities:")
         messages.setDefault("itemquality-list-item", "&7- &f\$quality")
         messages.setDefault("itemquality-usage", "&cUsage: /itemquality [list|set]")
+        messages.setDefault("no-item-quality-service", "&cThere is no item quality service available.")
     }
 
 }

@@ -20,13 +20,13 @@ import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.table.RPKDiscordProfileTable
 import net.dv8tion.jda.api.entities.User
 
-class RPKDiscordProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPKDiscordProfileProvider {
+class RPKDiscordProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKDiscordProfileService {
     override fun getDiscordProfile(id: Int): RPKDiscordProfile? {
-        return plugin.core.database.getTable(RPKDiscordProfileTable::class).get(id)
+        return plugin.database.getTable(RPKDiscordProfileTable::class).get(id)
     }
 
     override fun getDiscordProfile(user: User): RPKDiscordProfile {
-        val discordProfileTable = plugin.core.database.getTable(RPKDiscordProfileTable::class)
+        val discordProfileTable = plugin.database.getTable(RPKDiscordProfileTable::class)
         var discordProfile = discordProfileTable.get(user)
         if (discordProfile == null) {
             discordProfile = RPKDiscordProfileImpl(discordId = user.idLong, profile = RPKThinProfileImpl(user.name))
@@ -36,18 +36,18 @@ class RPKDiscordProfileProviderImpl(private val plugin: RPKPlayersBukkit): RPKDi
     }
 
     override fun getDiscordProfiles(profile: RPKProfile): List<RPKDiscordProfile> {
-        return plugin.core.database.getTable(RPKDiscordProfileTable::class).get(profile)
+        return plugin.database.getTable(RPKDiscordProfileTable::class).get(profile)
     }
 
     override fun addDiscordProfile(profile: RPKDiscordProfile) {
-        plugin.core.database.getTable(RPKDiscordProfileTable::class).insert(profile)
+        plugin.database.getTable(RPKDiscordProfileTable::class).insert(profile)
     }
 
     override fun updateDiscordProfile(profile: RPKDiscordProfile) {
-        plugin.core.database.getTable(RPKDiscordProfileTable::class).update(profile)
+        plugin.database.getTable(RPKDiscordProfileTable::class).update(profile)
     }
 
     override fun removeDiscordProfile(profile: RPKDiscordProfile) {
-        plugin.core.database.getTable(RPKDiscordProfileTable::class).delete(profile)
+        plugin.database.getTable(RPKDiscordProfileTable::class).delete(profile)
     }
 }

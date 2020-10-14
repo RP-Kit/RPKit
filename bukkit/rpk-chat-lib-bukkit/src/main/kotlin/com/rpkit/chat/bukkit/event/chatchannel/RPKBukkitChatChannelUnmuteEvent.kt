@@ -27,10 +27,11 @@ class RPKBukkitChatChannelUnmuteEvent(
         override val minecraftProfile: RPKMinecraftProfile,
         override val chatChannel: RPKChatChannel,
         isAsync: Boolean = false
-): RPKBukkitEvent(isAsync), RPKChatChannelUnmuteEvent, Cancellable {
+) : RPKBukkitEvent(isAsync), RPKChatChannelUnmuteEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

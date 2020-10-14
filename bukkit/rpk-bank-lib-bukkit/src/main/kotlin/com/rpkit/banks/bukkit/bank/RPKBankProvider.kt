@@ -17,19 +17,19 @@
 package com.rpkit.banks.bukkit.bank
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 
 /**
- * Represents a bank provider.
+ * Represents a bank service.
  * Banks allow storage of unlimited currency, as opposed to the wallet in the economy plugin,
  * so for large transactions it may be required to retrieve money from the bank.
  * Each character is currently assumed to have a single global bank account per currency, which may be accessed at any
  * bank for that currency.
- * A bank provider stores the balance for the character, and has convenience methods to withdraw and deposit money
+ * A bank service stores the balance for the character, and has convenience methods to withdraw and deposit money
  * to the character's wallet.
  */
-interface RPKBankProvider: ServiceProvider {
+interface RPKBankService : Service {
     fun getBalance(character: RPKCharacter, currency: RPKCurrency): Int
     fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int)
     fun deposit(character: RPKCharacter, currency: RPKCurrency, amount: Int)

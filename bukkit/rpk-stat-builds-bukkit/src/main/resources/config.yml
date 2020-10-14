@@ -22,3 +22,8 @@ skill-points:
   magic_sword: strength + intelligence
   speed_nimble: agility * 2
   support_perform: intelligence + agility
+caching:
+  rpkit_character_stat_points:
+    character_id:
+      enabled: true
+      size: 80

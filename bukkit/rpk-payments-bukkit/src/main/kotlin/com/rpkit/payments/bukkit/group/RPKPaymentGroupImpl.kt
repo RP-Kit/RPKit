@@ -22,46 +22,53 @@ import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupInviteTable
 import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupMemberTable
 import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupOwnerTable
-import com.rpkit.payments.bukkit.event.group.*
+import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupInviteEvent
+import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupMemberAddEvent
+import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupMemberRemoveEvent
+import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupOwnerAddEvent
+import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupOwnerRemoveEvent
+import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupUninviteEvent
 import com.rpkit.payments.bukkit.group.invite.RPKPaymentGroupInvite
 import com.rpkit.payments.bukkit.group.member.RPKPaymentGroupMember
 import com.rpkit.payments.bukkit.group.owner.RPKPaymentGroupOwner
+import java.time.Duration
+import java.time.LocalDateTime
 
 /**
  * Payment group implementation.
  */
 class RPKPaymentGroupImpl(
         val plugin: RPKPaymentsBukkit,
-        override var id: Int = 0,
+        override var id: Int? = null,
         override var name: String,
         override var amount: Int,
         override var currency: RPKCurrency?,
-        override var interval: Long,
-        override var lastPaymentTime: Long,
+        override var interval: Duration,
+        override var lastPaymentTime: LocalDateTime,
         override var balance: Int
-): RPKPaymentGroup {
+) : RPKPaymentGroup {
 
     override val owners: List<RPKCharacter>
-        get() = plugin.core.database.getTable(RPKPaymentGroupOwnerTable::class).get(this).map { owner -> owner.character }
+        get() = plugin.database.getTable(RPKPaymentGroupOwnerTable::class).get(this).map { owner -> owner.character }
 
     override val members: List<RPKCharacter>
-        get() = plugin.core.database.getTable(RPKPaymentGroupMemberTable::class).get(this).map { owner -> owner.character }
+        get() = plugin.database.getTable(RPKPaymentGroupMemberTable::class).get(this).map { owner -> owner.character }
 
     override val invites: List<RPKCharacter>
-        get() = plugin.core.database.getTable(RPKPaymentGroupInviteTable::class).get(this).map { owner -> owner.character }
+        get() = plugin.database.getTable(RPKPaymentGroupInviteTable::class).get(this).map { owner -> owner.character }
 
     override fun addOwner(character: RPKCharacter) {
         val event = RPKBukkitPaymentGroupOwnerAddEvent(this, character)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKPaymentGroupOwnerTable::class).insert(RPKPaymentGroupOwner(paymentGroup = event.paymentGroup, character = event.character))
+        plugin.database.getTable(RPKPaymentGroupOwnerTable::class).insert(RPKPaymentGroupOwner(paymentGroup = event.paymentGroup, character = event.character))
     }
 
     override fun removeOwner(character: RPKCharacter) {
         val event = RPKBukkitPaymentGroupOwnerRemoveEvent(this, character)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        val ownerTable = plugin.core.database.getTable(RPKPaymentGroupOwnerTable::class)
+        val ownerTable = plugin.database.getTable(RPKPaymentGroupOwnerTable::class)
         val owner = ownerTable.get(event.paymentGroup).firstOrNull { it.character == event.character }
         if (owner != null) {
             ownerTable.delete(owner)
@@ -72,14 +79,14 @@ class RPKPaymentGroupImpl(
         val event = RPKBukkitPaymentGroupMemberAddEvent(this, character)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKPaymentGroupMemberTable::class).insert(RPKPaymentGroupMember(paymentGroup = event.paymentGroup, character = event.character))
+        plugin.database.getTable(RPKPaymentGroupMemberTable::class).insert(RPKPaymentGroupMember(paymentGroup = event.paymentGroup, character = event.character))
     }
 
     override fun removeMember(character: RPKCharacter) {
         val event = RPKBukkitPaymentGroupMemberRemoveEvent(this, character)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        val memberTable = plugin.core.database.getTable(RPKPaymentGroupMemberTable::class)
+        val memberTable = plugin.database.getTable(RPKPaymentGroupMemberTable::class)
         val member = memberTable.get(event.paymentGroup).firstOrNull { it.character == event.character }
         if (member != null) {
             memberTable.delete(member)
@@ -90,16 +97,16 @@ class RPKPaymentGroupImpl(
         val event = RPKBukkitPaymentGroupInviteEvent(this, character)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKPaymentGroupInviteTable::class).insert(RPKPaymentGroupInvite(paymentGroup = event.paymentGroup, character = event.character))
+        plugin.database.getTable(RPKPaymentGroupInviteTable::class).insert(RPKPaymentGroupInvite(paymentGroup = event.paymentGroup, character = event.character))
     }
 
     override fun removeInvite(character: RPKCharacter) {
         val event = RPKBukkitPaymentGroupUninviteEvent(this, character)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        val invite = plugin.core.database.getTable(RPKPaymentGroupInviteTable::class).get(event.paymentGroup).firstOrNull { it.character == event.character }
+        val invite = plugin.database.getTable(RPKPaymentGroupInviteTable::class).get(event.paymentGroup).firstOrNull { it.character == event.character }
         if (invite != null) {
-            plugin.core.database.getTable(RPKPaymentGroupInviteTable::class).delete(invite)
+            plugin.database.getTable(RPKPaymentGroupInviteTable::class).delete(invite)
         }
     }
 

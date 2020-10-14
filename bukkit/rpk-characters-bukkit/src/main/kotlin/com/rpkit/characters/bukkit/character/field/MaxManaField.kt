@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * Character card field for max mana.
  */
-class MaxManaField: CharacterCardField {
+class MaxManaField : CharacterCardField {
 
     override val name = "max-mana"
     override fun get(character: RPKCharacter): String {

@@ -17,4 +17,4 @@
 package com.rpkit.players.bukkit.event.ircprofile
 
 
-interface RPKIRCProfileUpdateEvent: RPKIRCProfileEvent
+interface RPKIRCProfileUpdateEvent : RPKIRCProfileEvent

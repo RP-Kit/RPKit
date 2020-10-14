@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlag
 
 
-interface RPKFeatureFlagEvent: RPKEvent {
+interface RPKFeatureFlagEvent : RPKEvent {
 
     val featureFlag: RPKFeatureFlag
 

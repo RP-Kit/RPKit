@@ -16,11 +16,10 @@
 
 package com.rpkit.players.bukkit.profile
 
-import com.rpkit.core.database.Entity
 
+interface RPKIRCProfile {
 
-interface RPKIRCProfile: Entity {
-
+    var id: Int?
     val profile: RPKThinProfile
     val nick: String
 

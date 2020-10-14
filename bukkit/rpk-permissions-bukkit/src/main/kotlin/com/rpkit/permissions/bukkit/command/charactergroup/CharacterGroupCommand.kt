@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Character group command.
  * Parent command for all character group management commands.
  */
-class CharacterGroupCommand(private val plugin: RPKPermissionsBukkit): CommandExecutor {
+class CharacterGroupCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
 
     private val characterGroupAddCommand = CharacterGroupAddCommand(plugin)
     private val characterGroupRemoveCommand = CharacterGroupRemoveCommand(plugin)

@@ -17,4 +17,4 @@
 package com.rpkit.moderation.bukkit.event.warning
 
 
-interface RPKWarningCreateEvent: RPKWarningEvent
+interface RPKWarningCreateEvent : RPKWarningEvent

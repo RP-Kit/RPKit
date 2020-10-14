@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,14 @@ package com.rpkit.professions.bukkit.character
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
+import com.rpkit.core.service.Services
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.database.table.RPKProfessionHiddenTable
 import com.rpkit.professions.bukkit.profession.RPKProfession
-import com.rpkit.professions.bukkit.profession.RPKProfessionProvider
+import com.rpkit.professions.bukkit.profession.RPKProfessionService
 
 
-class ProfessionField(val plugin: RPKProfessionsBukkit): HideableCharacterCardField {
+class ProfessionField(val plugin: RPKProfessionsBukkit) : HideableCharacterCardField {
 
     override val name = "profession"
 
@@ -32,17 +33,18 @@ class ProfessionField(val plugin: RPKProfessionsBukkit): HideableCharacterCardFi
         return if (isHidden(character)) {
             "[HIDDEN]"
         } else {
-            val professionProvider = plugin.core.serviceManager.getServiceProvider(RPKProfessionProvider::class)
-            professionProvider.getProfessions(character).map(RPKProfession::name).joinToString(", ")
+            val professionService = Services[RPKProfessionService::class]
+            if (professionService == null) return plugin.messages["no-profession-service"]
+            professionService.getProfessions(character).map(RPKProfession::name).joinToString(", ")
         }
     }
 
     override fun isHidden(character: RPKCharacter): Boolean {
-        return plugin.core.database.getTable(RPKProfessionHiddenTable::class).get(character) != null
+        return plugin.database.getTable(RPKProfessionHiddenTable::class).get(character) != null
     }
 
     override fun setHidden(character: RPKCharacter, hidden: Boolean) {
-        val professionHiddenTable = plugin.core.database.getTable(RPKProfessionHiddenTable::class)
+        val professionHiddenTable = plugin.database.getTable(RPKProfessionHiddenTable::class)
         if (hidden) {
             if (professionHiddenTable.get(character) == null) {
                 professionHiddenTable.insert(RPKProfessionHidden(character = character))

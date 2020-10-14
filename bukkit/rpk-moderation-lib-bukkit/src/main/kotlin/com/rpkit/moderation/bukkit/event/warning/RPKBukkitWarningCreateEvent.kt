@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitWarningCreateEvent(
         override val warning: RPKWarning
-): RPKBukkitEvent(), RPKWarningCreateEvent, Cancellable {
+) : RPKBukkitEvent(), RPKWarningCreateEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

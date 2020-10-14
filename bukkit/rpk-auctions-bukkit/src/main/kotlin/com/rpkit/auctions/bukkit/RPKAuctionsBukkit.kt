@@ -16,8 +16,10 @@
 
 package com.rpkit.auctions.bukkit
 
-import com.rpkit.auctions.bukkit.auction.RPKAuctionProviderImpl
-import com.rpkit.auctions.bukkit.bid.RPKBidProviderImpl
+import com.rpkit.auctions.bukkit.auction.RPKAuctionService
+import com.rpkit.auctions.bukkit.auction.RPKAuctionServiceImpl
+import com.rpkit.auctions.bukkit.bid.RPKBidService
+import com.rpkit.auctions.bukkit.bid.RPKBidServiceImpl
 import com.rpkit.auctions.bukkit.command.auction.AuctionCommand
 import com.rpkit.auctions.bukkit.command.bid.BidCommand
 import com.rpkit.auctions.bukkit.database.table.RPKAuctionTable
@@ -26,21 +28,70 @@ import com.rpkit.auctions.bukkit.listener.PlayerInteractListener
 import com.rpkit.auctions.bukkit.listener.SignChangeListener
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
 /**
  * RPK auctions plugin default implementation.
  */
-class RPKAuctionsBukkit: RPKBukkitPlugin() {
+class RPKAuctionsBukkit : RPKBukkitPlugin() {
 
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 4376)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKAuctionProviderImpl(this),
-                RPKBidProviderImpl(this)
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/auctions/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/auctions/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_auctions"
+                ),
+                classLoader
         )
+        database.addTable(RPKAuctionTable(database, this))
+        database.addTable(RPKBidTable(database, this))
+
+        Services[RPKAuctionService::class] = RPKAuctionServiceImpl(this)
+        Services[RPKBidService::class] = RPKBidServiceImpl(this)
     }
 
     override fun registerCommands() {
@@ -53,11 +104,6 @@ class RPKAuctionsBukkit: RPKBukkitPlugin() {
                 SignChangeListener(this),
                 PlayerInteractListener(this)
         )
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKAuctionTable(database, this))
-        database.addTable(RPKBidTable(database, this))
     }
 
     override fun setDefaultMessages() {
@@ -114,6 +160,11 @@ class RPKAuctionsBukkit: RPKBukkitPlugin() {
         messages.setDefault("bid-create-failed", "&cFailed to create bid.")
         messages.setDefault("bid-update-failed", "&cFailed to update bid.")
         messages.setDefault("bid-delete-failed", "&cFailed to delete bid.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-character-service", "&cThere is no character service available.")
+        messages.setDefault("no-currency-service", "&cThere is no currency service available.")
+        messages.setDefault("no-economy-service", "&cThere is no economy service available.")
+        messages.setDefault("no-auction-service", "&cThere is no auction service available.")
     }
 
 }

@@ -16,9 +16,9 @@
 
 package com.rpkit.statbuilds.bukkit.statattribute
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
-interface RPKStatAttributeProvider: ServiceProvider {
+interface RPKStatAttributeService : Service {
 
     val statAttributes: List<RPKStatAttribute>
     fun getStatAttribute(name: String): RPKStatAttribute?

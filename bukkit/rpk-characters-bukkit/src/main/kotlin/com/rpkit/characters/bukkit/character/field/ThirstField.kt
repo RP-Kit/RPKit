@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * Character card field for thirst.
  */
-class ThirstField: CharacterCardField {
+class ThirstField : CharacterCardField {
 
     override val name = "thirst"
     override fun get(character: RPKCharacter): String {

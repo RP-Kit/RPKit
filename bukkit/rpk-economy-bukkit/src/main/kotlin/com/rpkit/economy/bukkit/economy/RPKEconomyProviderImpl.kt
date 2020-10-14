@@ -22,14 +22,15 @@ import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.database.table.RPKWalletTable
 import com.rpkit.economy.bukkit.event.economy.RPKBukkitBalanceChangeEvent
 import com.rpkit.economy.bukkit.exception.NegativeBalanceException
+import com.rpkit.economy.bukkit.wallet.RPKWallet
 
 /**
- * Economy provider implementation.
+ * Economy service implementation.
  */
-class RPKEconomyProviderImpl(val plugin: RPKEconomyBukkit): RPKEconomyProvider {
+class RPKEconomyServiceImpl(override val plugin: RPKEconomyBukkit) : RPKEconomyService {
 
     override fun getBalance(character: RPKCharacter, currency: RPKCurrency): Int {
-        return plugin.core.database.getTable(RPKWalletTable::class).get(character, currency).balance
+        return plugin.database.getTable(RPKWalletTable::class).get(character, currency)?.balance ?: currency.defaultAmount
     }
 
     override fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int) {
@@ -37,9 +38,11 @@ class RPKEconomyProviderImpl(val plugin: RPKEconomyBukkit): RPKEconomyProvider {
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         if (event.newBalance < 0) throw NegativeBalanceException()
-        val wallet = plugin.core.database.getTable(RPKWalletTable::class).get(event.character, event.currency)
+        val walletTable = plugin.database.getTable(RPKWalletTable::class)
+        val wallet = walletTable.get(event.character, event.currency)
+                ?: RPKWallet(event.character, event.currency, event.newBalance).also { walletTable.insert(it) }
         wallet.balance = event.newBalance
-        plugin.core.database.getTable(RPKWalletTable::class).update(wallet)
+        walletTable.update(wallet)
     }
 
     override fun transfer(from: RPKCharacter, to: RPKCharacter, currency: RPKCurrency, amount: Int) {
@@ -48,7 +51,7 @@ class RPKEconomyProviderImpl(val plugin: RPKEconomyBukkit): RPKEconomyProvider {
     }
 
     override fun getRichestCharacters(currency: RPKCurrency, amount: Int): List<RPKCharacter> {
-        return plugin.core.database.getTable(RPKWalletTable::class).getTop(amount, currency)
+        return plugin.database.getTable(RPKWalletTable::class).getTop(amount, currency).map(RPKWallet::character)
     }
 
 }

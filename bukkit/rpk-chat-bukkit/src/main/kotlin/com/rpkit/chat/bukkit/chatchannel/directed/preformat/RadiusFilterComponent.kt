@@ -27,7 +27,7 @@ import org.bukkit.configuration.serialization.SerializableAs
  * Filters out messages if they are beyond the radius of the channel.
  */
 @SerializableAs("RadiusFilterComponent")
-class RadiusFilterComponent: DirectedPreFormatPipelineComponent, ConfigurationSerializable {
+class RadiusFilterComponent : DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
         if (context.isCancelled) return context

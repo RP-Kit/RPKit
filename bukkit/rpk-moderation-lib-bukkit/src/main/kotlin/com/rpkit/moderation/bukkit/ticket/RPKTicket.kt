@@ -16,14 +16,14 @@
 
 package com.rpkit.moderation.bukkit.ticket
 
-import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Location
 import java.time.LocalDateTime
 
 
-interface RPKTicket: Entity {
+interface RPKTicket {
 
+    var id: Int?
     val reason: String
     val issuer: RPKProfile
     var resolver: RPKProfile?

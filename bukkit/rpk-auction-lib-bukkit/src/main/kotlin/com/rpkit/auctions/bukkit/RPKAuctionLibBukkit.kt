@@ -23,11 +23,10 @@ import org.bstats.bukkit.Metrics
  * Class to allow auction lib to load as a plugin.
  * This allows plugins requiring auctions or implementing auctions to depend on the plugin.
  */
-class RPKAuctionLibBukkit: RPKBukkitPlugin() {
+class RPKAuctionLibBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4375)
-        serviceProviders = arrayOf()
     }
 
 }

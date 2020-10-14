@@ -16,11 +16,10 @@
 
 package com.rpkit.chat.bukkit.chatchannel.directed.postformat
 
-import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPostFormatPipelineComponent
 import com.rpkit.chat.bukkit.context.DirectedPostFormatMessageContext
-import com.rpkit.chat.bukkit.snooper.RPKSnooperProvider
-import org.bukkit.Bukkit
+import com.rpkit.chat.bukkit.snooper.RPKSnooperService
+import com.rpkit.core.service.Services
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
@@ -29,12 +28,12 @@ import org.bukkit.configuration.serialization.SerializableAs
  * Sends message to snoopers if the message would not be sent to them otherwise.
  */
 @SerializableAs("SnoopComponent")
-class SnoopComponent(private val plugin: RPKChatBukkit): DirectedPostFormatPipelineComponent, ConfigurationSerializable {
+class SnoopComponent : DirectedPostFormatPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: DirectedPostFormatMessageContext): DirectedPostFormatMessageContext {
         if (!context.isCancelled) return context
-        val snooperProvider = plugin.core.serviceManager.getServiceProvider(RPKSnooperProvider::class)
-        if (snooperProvider.snoopers.contains(context.receiverMinecraftProfile)) {
+        val snooperService = Services[RPKSnooperService::class] ?: return context
+        if (snooperService.snoopers.contains(context.receiverMinecraftProfile)) {
             context.receiverMinecraftProfile.sendMessage(*context.message)
         }
         return context
@@ -47,7 +46,7 @@ class SnoopComponent(private val plugin: RPKChatBukkit): DirectedPostFormatPipel
     companion object {
         @JvmStatic
         fun deserialize(serialized: MutableMap<String, Any>): SnoopComponent {
-            return SnoopComponent(Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit)
+            return SnoopComponent()
         }
     }
 

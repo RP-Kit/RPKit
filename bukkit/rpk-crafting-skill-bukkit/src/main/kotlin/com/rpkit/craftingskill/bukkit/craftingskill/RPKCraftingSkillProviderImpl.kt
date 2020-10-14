@@ -17,21 +17,21 @@
 package com.rpkit.craftingskill.bukkit.craftingskill
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.exception.UnregisteredServiceException
+import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.*
 import com.rpkit.craftingskill.bukkit.database.table.RPKCraftingExperienceTable
 import com.rpkit.craftingskill.bukkit.event.craftingskill.RPKBukkitCraftingSkillExperienceChangeEvent
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
-import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityProvider
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import org.bukkit.Material
 import java.lang.Math.min
 
 
-class RPKCraftingSkillProviderImpl(private val plugin: RPKCraftingSkillBukkit): RPKCraftingSkillProvider {
+class RPKCraftingSkillServiceImpl(override val plugin: RPKCraftingSkillBukkit) : RPKCraftingSkillService {
 
     override fun getCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material): Int {
-        return plugin.core.database.getTable(RPKCraftingExperienceTable::class)
+        return plugin.database.getTable(RPKCraftingExperienceTable::class)
                 .get(character, action, material)?.experience ?: 0
     }
 
@@ -47,7 +47,7 @@ class RPKCraftingSkillProviderImpl(private val plugin: RPKCraftingSkillBukkit): 
                 ?.max()
                 ?: 0
         if (maxExperience == 0) return
-        val craftingExperienceTable = plugin.core.database.getTable(RPKCraftingExperienceTable::class)
+        val craftingExperienceTable = plugin.database.getTable(RPKCraftingExperienceTable::class)
         val event = RPKBukkitCraftingSkillExperienceChangeEvent(
                 character,
                 action,
@@ -74,11 +74,8 @@ class RPKCraftingSkillProviderImpl(private val plugin: RPKCraftingSkillBukkit): 
     }
 
     override fun getQualityFor(action: RPKCraftingAction, material: Material, experience: Int): RPKItemQuality? {
-        val itemQualityProvider = try {
-            plugin.core.serviceManager.getServiceProvider(RPKItemQualityProvider::class)
-        } catch (exception: UnregisteredServiceException) {
-            return null
-        }
+        val itemQualityService = Services[RPKItemQualityService::class]
+        if (itemQualityService == null) return null
         val actionConfigSectionName = when (action) {
             CRAFT -> "crafting"
             SMELT -> "smelting"
@@ -92,7 +89,7 @@ class RPKCraftingSkillProviderImpl(private val plugin: RPKCraftingSkillBukkit): 
                 ?.dropWhile { requiredExperience -> requiredExperience > experience }
                 ?.mapNotNull { requiredExperience -> plugin.config.getString("$actionConfigSectionName.$material.$requiredExperience.quality") }
                 ?.firstOrNull() ?: return null
-        return itemQualityProvider.getItemQuality(itemQualityName)
+        return itemQualityService.getItemQuality(itemQualityName)
     }
 
     override fun getAmountFor(action: RPKCraftingAction, material: Material, experience: Int): Double {

@@ -20,7 +20,7 @@ import com.rpkit.players.bukkit.event.profile.RPKProfileEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 
-interface RPKTicketCloseEvent: RPKTicketEvent, RPKProfileEvent {
+interface RPKTicketCloseEvent : RPKTicketEvent, RPKProfileEvent {
 
     override val profile: RPKProfile
 

@@ -53,7 +53,8 @@ shadowJar {
         include(dependency("org.bstats:bstats-bukkit"))
     }
 
-    relocate "org.bstats", "com.rpkit.moderation.bukkit.shadow.impl.org.bstats"}
+    relocate "org.bstats", "com.rpkit.moderation.bukkit.shadow.impl.org.bstats"
+}
 
 artifacts {
     archives shadowJar

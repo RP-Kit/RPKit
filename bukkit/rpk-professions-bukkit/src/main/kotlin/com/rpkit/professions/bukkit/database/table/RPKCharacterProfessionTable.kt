@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,55 +17,22 @@
 package com.rpkit.professions.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
-import com.rpkit.professions.bukkit.database.jooq.rpkit.Tables.RPKIT_CHARACTER_PROFESSION
+import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_CHARACTER_PROFESSION
 import com.rpkit.professions.bukkit.profession.RPKCharacterProfession
 import com.rpkit.professions.bukkit.profession.RPKProfession
-import com.rpkit.professions.bukkit.profession.RPKProfessionProvider
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
+import com.rpkit.professions.bukkit.profession.RPKProfessionService
 
 
 class RPKCharacterProfessionTable(
-        database: Database,
+        private val database: Database,
         val plugin: RPKProfessionsBukkit
-): Table<RPKCharacterProfession>(
-        database,
-        RPKCharacterProfession::class
-) {
+) : Table {
 
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_character_profession.id.enabled")) {
-        database.cacheManager.createCache("rpk-professions-bukkit.rpkit_character_profession.id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacterProfession::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character_profession.id.size"))).build())
-    } else {
-        null
-    }
-
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_CHARACTER_PROFESSION)
-                .column(RPKIT_CHARACTER_PROFESSION.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID, SQLDataType.INTEGER)
-                .column(RPKIT_CHARACTER_PROFESSION.PROFESSION, SQLDataType.VARCHAR(256))
-                .constraints(
-                        constraint("pk_rpkit_character_profession").primaryKey(RPKIT_CHARACTER_PROFESSION.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.7.0")
-        }
-    }
-
-    override fun insert(entity: RPKCharacterProfession): Int {
+    fun insert(entity: RPKCharacterProfession) {
         database.create
                 .insertInto(
                         RPKIT_CHARACTER_PROFESSION,
@@ -77,87 +44,57 @@ class RPKCharacterProfessionTable(
                         entity.profession.name
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
     }
 
-    override fun update(entity: RPKCharacterProfession) {
+    fun update(entity: RPKCharacterProfession) {
         database.create
                 .update(RPKIT_CHARACTER_PROFESSION)
-                .set(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID, entity.character.id)
                 .set(RPKIT_CHARACTER_PROFESSION.PROFESSION, entity.profession.name)
-                .where(RPKIT_CHARACTER_PROFESSION.ID.eq(entity.id))
+                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKCharacterProfession? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(character: RPKCharacter): List<RPKCharacterProfession> {
+        val results = database.create
+                .select(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID)
+                .from(RPKIT_CHARACTER_PROFESSION)
+                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(character.id))
+                .fetch() ?: return emptyList()
+        val professionService = Services[RPKProfessionService::class] ?: return emptyList()
+        return results.mapNotNull { result ->
+            val profession = professionService.getProfession(result[RPKIT_CHARACTER_PROFESSION.PROFESSION])
+            if (profession == null) {
+                database.create
+                        .deleteFrom(RPKIT_CHARACTER_PROFESSION)
+                        .where(RPKIT_CHARACTER_PROFESSION.PROFESSION.eq(result[RPKIT_CHARACTER_PROFESSION.PROFESSION]))
+                        .execute()
+                return@mapNotNull null
+            }
+            return@mapNotNull RPKCharacterProfession(
+                    character,
+                    profession
+            )
         }
-        val result = database.create
+    }
+
+    fun get(character: RPKCharacter, profession: RPKProfession): RPKCharacterProfession? {
+        database.create
                 .select(
                         RPKIT_CHARACTER_PROFESSION.CHARACTER_ID,
                         RPKIT_CHARACTER_PROFESSION.PROFESSION
                 )
                 .from(RPKIT_CHARACTER_PROFESSION)
-                .where(RPKIT_CHARACTER_PROFESSION.ID.eq(id))
-                .fetchOne() ?: return null
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val character = characterProvider.getCharacter(result[RPKIT_CHARACTER_PROFESSION.CHARACTER_ID])
-        if (character == null) {
-            database.create
-                    .deleteFrom(RPKIT_CHARACTER_PROFESSION)
-                    .where(RPKIT_CHARACTER_PROFESSION.ID.eq(id))
-                    .execute()
-            cache?.remove(id)
-            return null
-        }
-        val professionProvider = plugin.core.serviceManager.getServiceProvider(RPKProfessionProvider::class)
-        val profession = professionProvider.getProfession(result[RPKIT_CHARACTER_PROFESSION.PROFESSION])
-        if (profession == null) {
-            database.create
-                    .deleteFrom(RPKIT_CHARACTER_PROFESSION)
-                    .where(RPKIT_CHARACTER_PROFESSION.ID.eq(id))
-                    .execute()
-            cache?.remove(id)
-            return null
-        }
-        val characterProfession = RPKCharacterProfession(
-                id,
-                character,
-                profession
-        )
-        cache?.put(id, characterProfession)
-        return characterProfession
-    }
-
-    fun get(character: RPKCharacter): List<RPKCharacterProfession> {
-        val results = database.create
-                .select(RPKIT_CHARACTER_PROFESSION.ID)
-                .from(RPKIT_CHARACTER_PROFESSION)
-                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(character.id))
-                .fetch()
-        return results.mapNotNull { result -> get(result[RPKIT_CHARACTER_PROFESSION.ID]) }
-    }
-
-    fun get(character: RPKCharacter, profession: RPKProfession): RPKCharacterProfession? {
-        val result = database.create
-                .select(RPKIT_CHARACTER_PROFESSION.ID)
-                .from(RPKIT_CHARACTER_PROFESSION)
                 .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(character.id))
                 .and(RPKIT_CHARACTER_PROFESSION.PROFESSION.eq(profession.name))
-                .fetchOne()
-        return get(result[RPKIT_CHARACTER_PROFESSION.ID])
+                .fetchOne() ?: return null
+        return RPKCharacterProfession(character, profession)
     }
 
-    override fun delete(entity: RPKCharacterProfession) {
+    fun delete(entity: RPKCharacterProfession) {
         database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION)
-                .where(RPKIT_CHARACTER_PROFESSION.ID.eq(entity.id))
+                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(entity.character.id))
+                .and(RPKIT_CHARACTER_PROFESSION.PROFESSION.eq(entity.profession.name))
                 .execute()
-        cache?.remove(entity.id)
     }
 }

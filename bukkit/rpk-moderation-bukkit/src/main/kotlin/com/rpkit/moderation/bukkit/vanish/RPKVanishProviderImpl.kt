@@ -16,49 +16,46 @@
 
 package com.rpkit.moderation.bukkit.vanish
 
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.database.table.RPKVanishStateTable
 import com.rpkit.moderation.bukkit.event.vanish.RPKBukkitUnvanishEvent
 import com.rpkit.moderation.bukkit.event.vanish.RPKBukkitVanishEvent
-import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 
 
-class RPKVanishProviderImpl(private val plugin: RPKModerationBukkit): RPKVanishProvider {
+class RPKVanishServiceImpl(override val plugin: RPKModerationBukkit) : RPKVanishService {
 
     override fun isVanished(minecraftProfile: RPKMinecraftProfile): Boolean {
-        return plugin.core.database.getTable(RPKVanishStateTable::class).get(minecraftProfile)?.isVanished?:false
+        return plugin.database.getTable(RPKVanishStateTable::class)[minecraftProfile] != null
     }
 
     override fun setVanished(minecraftProfile: RPKMinecraftProfile, vanished: Boolean) {
-        val event: RPKMinecraftProfileEvent = if (vanished) {
+        if (vanished) {
             val event = RPKBukkitVanishEvent(minecraftProfile)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
-            event
         } else {
             val event = RPKBukkitUnvanishEvent(minecraftProfile)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
-            event
         }
-        val vanishStateTable = plugin.core.database.getTable(RPKVanishStateTable::class)
-        var vanishState = vanishStateTable.get(event.minecraftProfile!!)
+        val vanishStateTable = plugin.database.getTable(RPKVanishStateTable::class)
+        var vanishState = vanishStateTable[minecraftProfile]
         if (vanishState == null) {
-            vanishState = RPKVanishState(0, event.minecraftProfile!!, vanished)
+            vanishState = RPKVanishState(minecraftProfile)
             vanishStateTable.insert(vanishState)
         } else {
-            vanishState.isVanished = vanished
-            vanishStateTable.update(vanishState)
+            vanishStateTable.delete(vanishState)
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val target = plugin.server.getPlayer(event.minecraftProfile!!.minecraftUUID) ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val target = plugin.server.getPlayer(minecraftProfile.minecraftUUID) ?: return
         if (vanished) {
             for (observer in plugin.server.onlinePlayers) {
-                val observerMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(observer)
+                val observerMinecraftProfile = minecraftProfileService.getMinecraftProfile(observer)
                 if (observerMinecraftProfile != null) {
-                    if (!canSee(observerMinecraftProfile, event.minecraftProfile!!)) {
+                    if (!canSee(observerMinecraftProfile, minecraftProfile)) {
                         observer.hidePlayer(plugin, target)
                     }
                 }

@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.permissions.bukkit.group.RPKGroup
 
 
-interface RPKGroupEvent: RPKEvent {
+interface RPKGroupEvent : RPKEvent {
 
     val group: RPKGroup
 

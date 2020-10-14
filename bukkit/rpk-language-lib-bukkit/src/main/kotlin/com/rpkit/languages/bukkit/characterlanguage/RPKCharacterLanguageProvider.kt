@@ -17,10 +17,10 @@
 package com.rpkit.languages.bukkit.characterlanguage
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.languages.bukkit.language.RPKLanguage
 
-interface RPKCharacterLanguageProvider: ServiceProvider {
+interface RPKCharacterLanguageService : Service {
 
     /**
      * Gets a character's understanding of a language. The understanding is returned as a float, with a minimum value of

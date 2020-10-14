@@ -16,13 +16,15 @@
 
 package com.rpkit.players.bukkit.listener
 
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import net.md_5.bungee.api.ChatColor.GREEN
 import net.md_5.bungee.api.ChatColor.RED
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
+import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -30,33 +32,29 @@ import org.bukkit.event.player.PlayerJoinEvent
 /**
  * Player join listener for creating player instance.
  */
-class PlayerJoinListener(private val plugin: RPKPlayersBukkit): Listener {
+class PlayerJoinListener(private val plugin: RPKPlayersBukkit) : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        // If the player's Minecraft profile is not linked to a profile, run the player through linking their profile.
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
-        if (minecraftProfile != null) { // Minecraft profile should never be null due to the PlayerLoginListener creating these, but it doesn't hurt to be safe
-            val minecraftProfileLinkRequests = minecraftProfileProvider.getMinecraftProfileLinkRequests(minecraftProfile)
-            if (!minecraftProfileLinkRequests.isEmpty()) {
-                minecraftProfileLinkRequests.forEach {
-                    val messageComponent = TextComponent.fromLegacyText(plugin.messages["profile-link-request", mapOf(
-                            Pair("profile", it.profile.name)
-                    )])
-                    val yesComponent = TextComponent(plugin.messages["yes"])
-                    yesComponent.color = GREEN
-                    yesComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/account confirmlink minecraft ${it.profile.id}")
-                    yesComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, arrayOf(TextComponent("Click to link account to ${it.profile.name}")))
-                    val noComponent = TextComponent(plugin.messages["no"])
-                    noComponent.color = RED
-                    noComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/account denylink minecraft ${it.profile.id}")
-                    noComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, arrayOf(TextComponent("Click to cancel linking to ${it.profile.name}")))
-                    event.player.spigot().sendMessage(*messageComponent)
-                    event.player.spigot().sendMessage(yesComponent)
-                    event.player.spigot().sendMessage(noComponent)
-                }
-            }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        val minecraftProfileLinkRequests = minecraftProfileService.getMinecraftProfileLinkRequests(minecraftProfile)
+        if (minecraftProfileLinkRequests.isEmpty()) return
+        minecraftProfileLinkRequests.forEach {
+            val messageComponent = TextComponent.fromLegacyText(plugin.messages["profile-link-request", mapOf(
+                    "profile" to it.profile.name
+            )])
+            val yesComponent = TextComponent(plugin.messages["yes"])
+            yesComponent.color = GREEN
+            yesComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/account confirmlink minecraft ${it.profile.id}")
+            yesComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to link account to ${it.profile.name}"))
+            val noComponent = TextComponent(plugin.messages["no"])
+            noComponent.color = RED
+            noComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/account denylink minecraft ${it.profile.id}")
+            noComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to cancel linking to ${it.profile.name}"))
+            event.player.spigot().sendMessage(*messageComponent)
+            event.player.spigot().sendMessage(yesComponent)
+            event.player.spigot().sendMessage(noComponent)
         }
     }
 

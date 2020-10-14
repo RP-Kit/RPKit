@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitPrefixDeleteEvent(
         override val prefix: RPKPrefix
-): RPKBukkitEvent(), RPKPrefixDeleteEvent, Cancellable {
+) : RPKBukkitEvent(), RPKPrefixDeleteEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

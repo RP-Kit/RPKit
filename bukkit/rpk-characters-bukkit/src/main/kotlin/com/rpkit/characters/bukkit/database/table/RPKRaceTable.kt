@@ -17,25 +17,23 @@
 package com.rpkit.characters.bukkit.database.table
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.database.jooq.rpkit.Tables.RPKIT_RACE
+import com.rpkit.characters.bukkit.database.jooq.Tables.RPKIT_RACE
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceImpl
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 /**
  * Represents the race table.
  */
-class RPKRaceTable(database: Database, private val plugin: RPKCharactersBukkit): Table<RPKRace>(database, RPKRace::class) {
+class RPKRaceTable(private val database: Database, private val plugin: RPKCharactersBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_race.id.enabled")) {
-                database.cacheManager.createCache("rpk-characters-bukkit.rpkit_race.id",
-                        CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKRace::class.java,
-                                ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_race.id.size"))).build())
+        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_race.id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKRace::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_race.id.size"))).build())
     } else {
         null
     }
@@ -48,24 +46,7 @@ class RPKRaceTable(database: Database, private val plugin: RPKCharactersBukkit):
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_RACE)
-                .column(RPKIT_RACE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_RACE.NAME, SQLDataType.VARCHAR(256))
-                .constraints(
-                        constraint("pk_rpkit_race").primaryKey(RPKIT_RACE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.1.0")
-        }
-    }
-
-    override fun insert(entity: RPKRace): Int {
+    fun insert(entity: RPKRace) {
         database.create
                 .insertInto(
                         RPKIT_RACE,
@@ -78,10 +59,9 @@ class RPKRaceTable(database: Database, private val plugin: RPKCharactersBukkit):
         val id = database.create.lastID().toInt()
         cache?.put(id, entity)
         nameCache?.put(entity.name, id)
-        return id
     }
 
-    override fun update(entity: RPKRace) {
+    fun update(entity: RPKRace) {
         database.create
                 .update(RPKIT_RACE)
                 .set(RPKIT_RACE.NAME, entity.name)
@@ -91,7 +71,7 @@ class RPKRaceTable(database: Database, private val plugin: RPKCharactersBukkit):
         nameCache?.put(entity.name, entity.id)
     }
 
-    override fun get(id: Int): RPKRace? {
+    operator fun get(id: Int): RPKRace? {
         if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
@@ -149,7 +129,7 @@ class RPKRaceTable(database: Database, private val plugin: RPKCharactersBukkit):
         }
     }
 
-    override fun delete(entity: RPKRace) {
+    fun delete(entity: RPKRace) {
         database.create
                 .deleteFrom(RPKIT_RACE)
                 .where(RPKIT_RACE.ID.eq(entity.id))

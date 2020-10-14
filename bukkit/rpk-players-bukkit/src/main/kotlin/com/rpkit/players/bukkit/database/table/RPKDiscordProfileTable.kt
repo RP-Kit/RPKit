@@ -16,23 +16,25 @@
 
 package com.rpkit.players.bukkit.database.table
 
-import com.rpkit.chat.bukkit.discord.RPKDiscordProvider
+import com.rpkit.chat.bukkit.discord.RPKDiscordService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.database.jooq.rpkit.Tables.RPKIT_DISCORD_PROFILE
-import com.rpkit.players.bukkit.profile.*
+import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_DISCORD_PROFILE
+import com.rpkit.players.bukkit.profile.RPKDiscordProfile
+import com.rpkit.players.bukkit.profile.RPKDiscordProfileImpl
+import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
 import net.dv8tion.jda.api.entities.User
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType.BIGINT
-import org.jooq.impl.SQLDataType.INTEGER
 
 class RPKDiscordProfileTable(
-        database: Database,
-        private val plugin: RPKPlayersBukkit
-): Table<RPKDiscordProfile>(database, RPKDiscordProfile::class) {
+        private val database: Database,
+        plugin: RPKPlayersBukkit
+) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_discord_profile.id.enabled")) {
         database.cacheManager.createCache("rpk-players-bukkit.rpkit_discord_profile.id",
@@ -42,25 +44,7 @@ class RPKDiscordProfileTable(
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_DISCORD_PROFILE)
-                .column(RPKIT_DISCORD_PROFILE.ID, INTEGER.identity(true))
-                .column(RPKIT_DISCORD_PROFILE.PROFILE_ID, INTEGER)
-                .column(RPKIT_DISCORD_PROFILE.DISCORD_ID, BIGINT)
-                .constraints(
-                        constraint("pk_rpkit_discord_profile").primaryKey(RPKIT_DISCORD_PROFILE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.8.0")
-        }
-    }
-
-    override fun insert(entity: RPKDiscordProfile): Int {
+    fun insert(entity: RPKDiscordProfile) {
         val profile = entity.profile
         database.create
                 .insertInto(
@@ -80,10 +64,9 @@ class RPKDiscordProfileTable(
         val id = database.create.lastID().toInt()
         entity.id = id
         cache?.put(id, entity)
-        return id
     }
 
-    override fun update(entity: RPKDiscordProfile) {
+    fun update(entity: RPKDiscordProfile) {
         val profile = entity.profile
         database.create
                 .update(RPKIT_DISCORD_PROFILE)
@@ -101,7 +84,7 @@ class RPKDiscordProfileTable(
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKDiscordProfile? {
+    operator fun get(id: Int): RPKDiscordProfile? {
         if (cache?.containsKey(id) == true) {
             return cache[id]
         }
@@ -114,13 +97,14 @@ class RPKDiscordProfileTable(
                 .where(RPKIT_DISCORD_PROFILE.ID.eq(id))
                 .fetchOne() ?: return null
         val profileId = result[RPKIT_DISCORD_PROFILE.PROFILE_ID]
-        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-        val discordProvider = plugin.core.serviceManager.getServiceProvider(RPKDiscordProvider::class)
+        val profileService = Services[RPKProfileService::class] ?: return null
+        val discordService = Services[RPKDiscordService::class] ?: return null
         val profile = if (profileId != null) {
-            profileProvider.getProfile(profileId)
+            profileService.getProfile(profileId)
         } else {
             null
-        } ?: RPKThinProfileImpl(discordProvider.getUser(result[RPKIT_DISCORD_PROFILE.DISCORD_ID])?.name ?: "Unknown Discord user")
+        } ?: RPKThinProfileImpl(discordService.getUser(result[RPKIT_DISCORD_PROFILE.DISCORD_ID])?.name
+                ?: "Unknown Discord user")
         val discordProfile = RPKDiscordProfileImpl(
                 id,
                 profile,
@@ -150,7 +134,7 @@ class RPKDiscordProfileTable(
         }
     }
 
-    override fun delete(entity: RPKDiscordProfile) {
+    fun delete(entity: RPKDiscordProfile) {
         database.create
                 .deleteFrom(RPKIT_DISCORD_PROFILE)
                 .where(RPKIT_DISCORD_PROFILE.ID.eq(entity.id))

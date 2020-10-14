@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package com.rpkit.monsters.bukkit.listener
 
+import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
-import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatProviderImpl
+import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatServiceImpl
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -25,18 +26,18 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageEvent
 
 
-class EntityDamageListener(private val plugin: RPKMonstersBukkit): Listener {
+class EntityDamageListener(private val plugin: RPKMonstersBukkit) : Listener {
 
     @EventHandler
     fun onEntityDamage(event: EntityDamageEvent) {
-        if (plugin.config.getBoolean("monsters.${event.entityType}.ignored", plugin.config.getBoolean("monsters.default.ignored"))) {
+        if (plugin.config.getBoolean("monsters.${event.entityType}.ignored",
+                        plugin.config.getBoolean("monsters.default.ignored"))) {
             return
         }
         val entity = event.entity
-        if (entity is LivingEntity && entity !is Player) {
-            val monsterStatProvider = plugin.core.serviceManager.getServiceProvider(RPKMonsterStatProviderImpl::class)
-            monsterStatProvider.setMonsterNameplate(entity, health = entity.health - event.finalDamage)
-        }
+        if (entity !is LivingEntity || entity is Player) return
+        val monsterStatService = Services[RPKMonsterStatServiceImpl::class] ?: return
+        monsterStatService.setMonsterNameplate(entity, health = entity.health - event.finalDamage)
     }
 
 }

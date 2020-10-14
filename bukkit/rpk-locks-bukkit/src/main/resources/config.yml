@@ -1,33 +1,33 @@
 lock-item:
-    ==: org.bukkit.inventory.ItemStack
-    type: IRON_INGOT
-    meta:
-        ==: ItemMeta
-        meta-type: UNSPECIFIC
-        display-name: Lock
-        lore:
-        - Used for locking chests
+  ==: org.bukkit.inventory.ItemStack
+  type: IRON_INGOT
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    display-name: Lock
+    lore:
+    - Used for locking chests
 key-item:
-    ==: org.bukkit.inventory.ItemStack
-    type: IRON_INGOT
-    meta:
-        ==: ItemMeta
-        meta-type: UNSPECIFIC
-        display-name: Key
+  ==: org.bukkit.inventory.ItemStack
+  type: IRON_INGOT
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    display-name: Key
 caching:
-    rpkit_keyring:
-        id:
-            enabled: true
-            size: 20
-    rpkit_locked_block:
-        id:
-            enabled: true
-            size: 100
-    rpkit_player_getting_key:
-        id:
-            enabled: true
-            size: 20
-    rpkit_player_unclaiming:
-        id:
-            enabled: true
-            size: 20
+  rpkit_keyring:
+    character_id:
+      enabled: true
+      size: 20
+  rpkit_locked_block:
+    block:
+      enabled: true
+      size: 100
+  rpkit_player_getting_key:
+    minecraft_profile_id:
+      enabled: true
+      size: 20
+  rpkit_player_unclaiming:
+    minecraft_profile_id:
+      enabled: true
+      size: 20

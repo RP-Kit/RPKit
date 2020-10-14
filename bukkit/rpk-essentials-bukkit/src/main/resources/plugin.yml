@@ -15,194 +15,194 @@ depend:
 - rpk-daily-quote-lib-bukkit
 api-version: '1.16'
 commands:
-    back:
-        description: Teleports to the last location teleported to
-        usage: /<command>
-    clone:
-        description: Clones the item in your hand
-        usage: /<command>
-    deletewarp:
-        description: Deletes a warp
-        usage: /<command> [name]
-    distance:
-        description: Calculates the distance to a player
-        usage: /<command> [player]
-    enchant:
-        description: Enchants the item in your hand
-        usage: /<command> [enchantment] [level]
-    feed:
-        description: Feeds a player
-        usage: /<command> (player)
-    fly:
-        description: Allows a player to fly
-        usage: /<command> (player)
-    getbook:
-        description: Gets a book
-        usage: /<command>
-    getsign:
-        description: Gets a sign
-        usage: /<command>
-    heal:
-        description: Heals a player
-        usage: /<command> (player)
-    toggletracking:
-        description: Hides or unhides yourself from /distance and /track
-        usage: /<command>
-    inventory:
-        description: Opens someone's inventory
-        usage: /<command> [player]
-    item:
-        description: Spawns an item
-        usage: /<command> [material] (amount)
-        aliases: [i, giveme]
-    itemmeta:
-        description: Edits the item meta of the item in your hand
-        usage: /<command> [setname|addlore|removelore] [name|lore]
-    jump:
-        description: Jumps to the location in your line of sight
-        usage: /<command>
-        aliases: [jumpto, j]
-    kit:
-        description: Claims a kit
-        usage: /<command> (kit)
-    msg:
-        description: Messages a player
-        usage: /<command> [player] [message]
-    repair:
-        description: Repairs the item in your hand
-        usage: /<command>
-    runas:
-        description: Runs a command as another player
-        usage: /<command> [player] [command]
-    seen:
-        description: Shows when a player was last seen
-        usage: /<command> [player]
-    smite:
-        description: Smites the player
-        usage: /<command> [player]
-    setspawn:
-        description: Sets the worlds spawn location
-        usage: /<command>
-    setwarp:
-        description: Sets a warp at your current location
-        usage: /<command> [name]
-    spawn:
-        description: Teleports you to your worlds spawn
-        usage: /<command>
-    spawner:
-        description: Sets the entity a spawner will spawn
-        usage: /<command> [entity type]
-    spawnmob:
-        description: Spawns mobs at your location
-        usage: /<command> [entity type] [amount]
-    speed:
-        description: Sets your flyspeed
-        usage: /<command> (player) [speed]
-        aliases: [flyspeed]
-    sudo:
-        description: Runs a command with elevated priveledges
-        usage: /<command> [command]
-    togglelogmessages:
-        description: Toggles messages when players log in and out
-        usage: /<command>
-        aliases: [tlm]
-    track:
-        description: Tracks a player with your compass
-        usage: /<command> [player]
-    unsign:
-        description: Unsigns written books
-        usage: /<command>
-    warp:
-        description: Warps to a location
-        usage: /<command> [warp]
+  back:
+    description: Teleports to the last location teleported to
+    usage: /<command>
+  clone:
+    description: Clones the item in your hand
+    usage: /<command>
+  deletewarp:
+    description: Deletes a warp
+    usage: /<command> [name]
+  distance:
+    description: Calculates the distance to a player
+    usage: /<command> [player]
+  enchant:
+    description: Enchants the item in your hand
+    usage: /<command> [enchantment] [level]
+  feed:
+    description: Feeds a player
+    usage: /<command> (player)
+  fly:
+    description: Allows a player to fly
+    usage: /<command> (player)
+  getbook:
+    description: Gets a book
+    usage: /<command>
+  getsign:
+    description: Gets a sign
+    usage: /<command>
+  heal:
+    description: Heals a player
+    usage: /<command> (player)
+  toggletracking:
+    description: Hides or unhides yourself from /distance and /track
+    usage: /<command>
+  inventory:
+    description: Opens someone's inventory
+    usage: /<command> [player]
+  item:
+    description: Spawns an item
+    usage: /<command> [material] (amount)
+    aliases: [i, giveme]
+  itemmeta:
+    description: Edits the item meta of the item in your hand
+    usage: /<command> [setname|addlore|removelore] [name|lore]
+  jump:
+    description: Jumps to the location in your line of sight
+    usage: /<command>
+    aliases: [jumpto, j]
+  kit:
+    description: Claims a kit
+    usage: /<command> (kit)
+  msg:
+    description: Messages a player
+    usage: /<command> [player] [message]
+  repair:
+    description: Repairs the item in your hand
+    usage: /<command>
+  runas:
+    description: Runs a command as another player
+    usage: /<command> [player] [command]
+  seen:
+    description: Shows when a player was last seen
+    usage: /<command> [player]
+  smite:
+    description: Smites the player
+    usage: /<command> [player]
+  setspawn:
+    description: Sets the worlds spawn location
+    usage: /<command>
+  setwarp:
+    description: Sets a warp at your current location
+    usage: /<command> [name]
+  spawn:
+    description: Teleports you to your worlds spawn
+    usage: /<command>
+  spawner:
+    description: Sets the entity a spawner will spawn
+    usage: /<command> [entity type]
+  spawnmob:
+    description: Spawns mobs at your location
+    usage: /<command> [entity type] [amount]
+  speed:
+    description: Sets your flyspeed
+    usage: /<command> (player) [speed]
+    aliases: [flyspeed]
+  sudo:
+    description: Runs a command with elevated priveledges
+    usage: /<command> [command]
+  togglelogmessages:
+    description: Toggles messages when players log in and out
+    usage: /<command>
+    aliases: [tlm]
+  track:
+    description: Tracks a player with your compass
+    usage: /<command> [player]
+  unsign:
+    description: Unsigns written books
+    usage: /<command>
+  warp:
+    description: Warps to a location
+    usage: /<command> [warp]
 permissions:
-    rpkit.essentials.sign.warp.create:
-        description: Allows you to create warp signs
-        default: op
-    rpkit.essentials.command.back:
-        description: Allows you to teleport to the last location teleported to
-        default: op
-    rpkit.essentials.command.clone:
-        description: Allows you to clone the item in your hand
-        default: op
-    rpkit.essentials.command.distance:
-        description: Allows you to check your distance to players
-        default: true
-    rpkit.essentials.command.enchant:
-        description: Allows you to enchant items by command
-        default: op
-    rpkit.essentials.command.enchant.unsafe:
-        description: Allows you to add "unsafe" enchantments when enchanting by command
-        default: op
-    rpkit.essentials.command.feed:
-        description: Allows you to feed players
-        default: op
-    rpkit.essentials.command.fly:
-        description: Allows you to fly
-        default: op
-    rpkit.essentials.command.getbook:
-        description: Allows you to get a book
-        default: true
-    rpkit.essentials.command.getsign:
-        description: Allows you to get a sign
-        default: true
-    rpkit.essentials.command.heal:
-        description: Allows you to heal players
-        default: op
-    rpkit.essentials.command.inventory:
-        description: Allows you to open other people's inventories
-        default: op
-    rpkit.essentials.command.item:
-        description: Allows the spawning of items
-        default: op
-    rpkit.essentials.command.itemmeta:
-        description: Allows you to modify item meta
-        default: op
-    rpkit.essentials.command.jump:
-        description: Allows you to jump to locations
-        default: op
-    rpkit.essentials.command.kit:
-        description: Allows you to claim kits
-        default: op
-    rpkit.essentials.command.repair:
-        description: Allows you to repair items
-        default: op
-    rpkit.essentials.command.runas:
-        description: Allows you to run a command as another player
-        default: op
-    rpkit.essentials.command.seen:
-        description: Allows you to see when a player was last seen online
-        default: op
-    rpkit.essentials.command.setspawn:
-        description: Allows you to set the spawn
-        default: op
-    rpkit.essentials.command.smite:
-        description: Smites the player
-        default: op
-    rpkit.essentials.command.spawn:
-        description: Allows you to teleport to the spawn
-        default: op
-    rpkit.essentials.command.spawner:
-        description: Allows you to change the entity spawned by a spawner
-        default: op
-    rpkit.essentials.command.spawnmob:
-        description: Allows you to spawn mobs
-        default: op
-    rpkit.essentials.command.speed:
-        description: Allows you to set your or someone elses flyspeed
-        default: op
-    rpkit.essentials.command.sudo:
-        description: Allows you to run a command with elevated priveledges
-        default: op
-    rpkit.essentials.command.togglelogmessages:
-        description: Allows you to toggle log in/out messages
-        default: op
-    rpkit.essentials.command.toggletracking:
-        description: Allows you to hide from /track and /distance
-        default: true
-    rpkit.essentials.command.track:
-        description: Allows you to track players
-        default: true
-    rpkit.essentials.command.unsign:
-        description: Allows you to unsign books
-        default: true
+  rpkit.essentials.sign.warp.create:
+    description: Allows you to create warp signs
+    default: op
+  rpkit.essentials.command.back:
+    description: Allows you to teleport to the last location teleported to
+    default: op
+  rpkit.essentials.command.clone:
+    description: Allows you to clone the item in your hand
+    default: op
+  rpkit.essentials.command.distance:
+    description: Allows you to check your distance to players
+    default: true
+  rpkit.essentials.command.enchant:
+    description: Allows you to enchant items by command
+    default: op
+  rpkit.essentials.command.enchant.unsafe:
+    description: Allows you to add "unsafe" enchantments when enchanting by command
+    default: op
+  rpkit.essentials.command.feed:
+    description: Allows you to feed players
+    default: op
+  rpkit.essentials.command.fly:
+    description: Allows you to fly
+    default: op
+  rpkit.essentials.command.getbook:
+    description: Allows you to get a book
+    default: true
+  rpkit.essentials.command.getsign:
+    description: Allows you to get a sign
+    default: true
+  rpkit.essentials.command.heal:
+    description: Allows you to heal players
+    default: op
+  rpkit.essentials.command.inventory:
+    description: Allows you to open other people's inventories
+    default: op
+  rpkit.essentials.command.item:
+    description: Allows the spawning of items
+    default: op
+  rpkit.essentials.command.itemmeta:
+    description: Allows you to modify item meta
+    default: op
+  rpkit.essentials.command.jump:
+    description: Allows you to jump to locations
+    default: op
+  rpkit.essentials.command.kit:
+    description: Allows you to claim kits
+    default: op
+  rpkit.essentials.command.repair:
+    description: Allows you to repair items
+    default: op
+  rpkit.essentials.command.runas:
+    description: Allows you to run a command as another player
+    default: op
+  rpkit.essentials.command.seen:
+    description: Allows you to see when a player was last seen online
+    default: op
+  rpkit.essentials.command.setspawn:
+    description: Allows you to set the spawn
+    default: op
+  rpkit.essentials.command.smite:
+    description: Smites the player
+    default: op
+  rpkit.essentials.command.spawn:
+    description: Allows you to teleport to the spawn
+    default: op
+  rpkit.essentials.command.spawner:
+    description: Allows you to change the entity spawned by a spawner
+    default: op
+  rpkit.essentials.command.spawnmob:
+    description: Allows you to spawn mobs
+    default: op
+  rpkit.essentials.command.speed:
+    description: Allows you to set your or someone elses flyspeed
+    default: op
+  rpkit.essentials.command.sudo:
+    description: Allows you to run a command with elevated priveledges
+    default: op
+  rpkit.essentials.command.togglelogmessages:
+    description: Allows you to toggle log in/out messages
+    default: op
+  rpkit.essentials.command.toggletracking:
+    description: Allows you to hide from /track and /distance
+    default: true
+  rpkit.essentials.command.track:
+    description: Allows you to track players
+    default: true
+  rpkit.essentials.command.unsign:
+    description: Allows you to unsign books
+    default: true

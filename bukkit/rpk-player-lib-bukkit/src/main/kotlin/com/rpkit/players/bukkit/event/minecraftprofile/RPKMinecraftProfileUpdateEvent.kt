@@ -19,7 +19,7 @@ package com.rpkit.players.bukkit.event.minecraftprofile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 
-interface RPKMinecraftProfileUpdateEvent: RPKMinecraftProfileEvent {
+interface RPKMinecraftProfileUpdateEvent : RPKMinecraftProfileEvent {
 
     override val minecraftProfile: RPKMinecraftProfile
 

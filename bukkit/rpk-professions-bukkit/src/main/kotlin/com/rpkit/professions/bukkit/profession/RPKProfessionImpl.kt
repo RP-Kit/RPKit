@@ -16,8 +16,9 @@
 
 package com.rpkit.professions.bukkit.profession
 
+import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
-import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityProvider
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import org.bukkit.Material
 import org.nfunk.jep.JEP
@@ -25,11 +26,10 @@ import kotlin.math.roundToInt
 
 
 class RPKProfessionImpl(
-        override var id: Int = 0,
         override val name: String,
         override val maxLevel: Int,
         val plugin: RPKProfessionsBukkit
-): RPKProfession {
+) : RPKProfession {
     override fun getAmountFor(action: RPKCraftingAction, material: Material, level: Int): Double {
         val actionConfigSectionName = when (action) {
             RPKCraftingAction.CRAFT -> "crafting"
@@ -50,14 +50,14 @@ class RPKProfessionImpl(
             RPKCraftingAction.SMELT -> "smelting"
             RPKCraftingAction.MINE -> "mining"
         }
-        val itemQualityProvider = plugin.core.serviceManager.getServiceProvider(RPKItemQualityProvider::class)
+        val itemQualityService = Services[RPKItemQualityService::class] ?: return null
         val itemQualityName = plugin.config.getString("professions.$name.$actionConfigSectionName.$level.$material.quality")
                 ?: when {
                     level > 1 -> return getQualityFor(action, material, level - 1)
                     else -> plugin.config.getString("default.$actionConfigSectionName.$material.quality")
                 }
                 ?: return null
-        return itemQualityProvider.getItemQuality(itemQualityName)
+        return itemQualityService.getItemQuality(itemQualityName)
     }
 
     override fun getExperienceNeededForLevel(level: Int): Int {
