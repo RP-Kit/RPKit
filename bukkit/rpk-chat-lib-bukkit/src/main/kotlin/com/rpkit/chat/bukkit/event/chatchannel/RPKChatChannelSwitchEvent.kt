@@ -20,7 +20,7 @@ import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
 
 
-interface RPKChatChannelSwitchEvent: RPKChatChannelEvent, RPKMinecraftProfileEvent {
+interface RPKChatChannelSwitchEvent : RPKChatChannelEvent, RPKMinecraftProfileEvent {
 
     val oldChannel: RPKChatChannel?
     override var chatChannel: RPKChatChannel?

@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Character set command.
  * Parent command for commands used to set character attributes.
  */
-class CharacterSetCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class CharacterSetCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
     private val characterSetProfileCommand = CharacterSetProfileCommand(plugin)
     private val characterSetNameCommand = CharacterSetNameCommand(plugin)

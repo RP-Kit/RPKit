@@ -16,7 +16,6 @@
 
 package com.rpkit.store.bukkit.purchase
 
-import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.store.bukkit.storeitem.RPKStoreItem
 import java.time.LocalDateTime
@@ -25,7 +24,14 @@ import java.time.LocalDateTime
  * Represents a purchase.
  * A purchase is tied to an individual profile.
  */
-interface RPKPurchase: Entity {
+interface RPKPurchase {
+
+    /**
+     * The ID of the purchase.
+     * Guaranteed to be unique.
+     * Null if it has not yet been inserted into the database.
+     */
+    var id: Int?
 
     /**
      * The store item that has been purchased

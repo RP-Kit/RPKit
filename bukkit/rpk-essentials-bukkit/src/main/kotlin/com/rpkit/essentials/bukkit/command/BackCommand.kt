@@ -1,8 +1,25 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.essentials.bukkit.command
 
+import com.rpkit.core.service.Services
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -11,28 +28,36 @@ import org.bukkit.entity.Player
 class BackCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender is Player) {
-            if (sender.hasPermission("rpkit.essentials.command.back")) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val locationHistoryProvider = plugin.core.serviceManager.getServiceProvider(RPKLocationHistoryProvider::class)
-                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                if (minecraftProfile != null) {
-                    val previousLocation = locationHistoryProvider.getPreviousLocation(minecraftProfile)
-                    if (previousLocation != null) {
-                        sender.teleport(previousLocation)
-                        sender.sendMessage(plugin.messages["back-valid"])
-                    } else {
-                        sender.sendMessage(plugin.messages["back-invalid-no-locations"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["no-permission-back"])
-            }
-        } else {
+        if (sender !is Player) {
             sender.sendMessage(plugin.messages["not-from-console"])
+            return true
         }
+        if (!sender.hasPermission("rpkit.essentials.command.back")) {
+            sender.sendMessage(plugin.messages["no-permission-back"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val locationHistoryService = Services[RPKLocationHistoryService::class]
+        if (locationHistoryService == null) {
+            sender.sendMessage(plugin.messages["no-location-history-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val previousLocation = locationHistoryService.getPreviousLocation(minecraftProfile)
+        if (previousLocation == null) {
+            sender.sendMessage(plugin.messages["back-invalid-no-locations"])
+            return true
+        }
+        sender.teleport(previousLocation)
+        sender.sendMessage(plugin.messages["back-valid"])
         return true
     }
 }

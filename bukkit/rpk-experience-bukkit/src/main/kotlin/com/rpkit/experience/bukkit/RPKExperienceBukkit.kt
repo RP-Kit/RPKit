@@ -16,58 +16,90 @@
 
 package com.rpkit.experience.bukkit
 
-import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
+import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
-import com.rpkit.core.exception.UnregisteredServiceException
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.experience.bukkit.character.ExperienceField
 import com.rpkit.experience.bukkit.character.LevelField
 import com.rpkit.experience.bukkit.command.experience.ExperienceCommand
 import com.rpkit.experience.bukkit.database.table.RPKExperienceTable
-import com.rpkit.experience.bukkit.experience.RPKExperienceProviderImpl
+import com.rpkit.experience.bukkit.experience.RPKExperienceService
+import com.rpkit.experience.bukkit.experience.RPKExperienceServiceImpl
 import com.rpkit.experience.bukkit.listener.PlayerExpChangeListener
 import com.rpkit.experience.bukkit.listener.PlayerJoinListener
-import com.rpkit.experience.bukkit.listener.RPKServiceProviderReadyListener
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
 
-class RPKExperienceBukkit: RPKBukkitPlugin() {
+class RPKExperienceBukkit : RPKBukkitPlugin() {
 
-    private var experienceFieldsInitialised = false
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 4393)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKExperienceProviderImpl(this)
-        )
-    }
 
-    override fun onPostEnable() {
-        attemptCharacterCardFieldInitialisation()
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/experience/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/experience/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_experience"
+                ),
+                classLoader
+        )
+        database.addTable(RPKExperienceTable(database, this))
+
+        Services[RPKExperienceService::class] = RPKExperienceServiceImpl(this)
+
+        Services.require(RPKCharacterCardFieldService::class).whenAvailable { service ->
+            service.characterCardFields.add(ExperienceField(this))
+            service.characterCardFields.add(LevelField(this))
+        }
     }
 
     override fun registerListeners() {
-        registerListeners(PlayerExpChangeListener(), PlayerJoinListener(this), RPKServiceProviderReadyListener(this))
+        registerListeners(PlayerExpChangeListener(), PlayerJoinListener())
     }
 
     override fun registerCommands() {
         getCommand("experience")?.setExecutor(ExperienceCommand(this))
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKExperienceTable(database, this))
-    }
-
-    fun attemptCharacterCardFieldInitialisation() {
-        if (!experienceFieldsInitialised) {
-            try {
-                val characterCardFieldProvider = core.serviceManager.getServiceProvider(RPKCharacterCardFieldProvider::class)
-                characterCardFieldProvider.characterCardFields.add(ExperienceField(this))
-                characterCardFieldProvider.characterCardFields.add(LevelField(this))
-                experienceFieldsInitialised = true
-            } catch (ignore: UnregisteredServiceException) {}
-        }
     }
 
     override fun setDefaultMessages() {
@@ -90,6 +122,9 @@ class RPKExperienceBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-experience-set", "&cYou do not have permission to set experience.")
         messages.setDefault("no-permission-experience-setlevel", "&cYou do not have permission to set level.")
         messages.setDefault("no-permission-experience-add", "&cYou do not have permission to add experience.")
+        messages.setDefault("no-experience-service", "&cThere is no experience service available.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-character-service", "&cThere is no character service available.")
     }
 
 }

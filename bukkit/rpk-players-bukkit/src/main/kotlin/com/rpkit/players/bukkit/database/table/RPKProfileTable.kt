@@ -1,18 +1,32 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.players.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.database.jooq.rpkit.Tables.RPKIT_PROFILE
+import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_PROFILE
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 
-class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKProfile>(database, RPKProfile::class) {
+class RPKProfileTable(private val database: Database, private val plugin: RPKPlayersBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_profile.id.enabled")) {
         database.cacheManager.createCache("rpk-players-bukkit.rpkit_profile.id",
@@ -22,27 +36,7 @@ class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit):
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_PROFILE)
-                .column(RPKIT_PROFILE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_PROFILE.NAME, SQLDataType.VARCHAR(16))
-                .column(RPKIT_PROFILE.PASSWORD_HASH, SQLDataType.BLOB)
-                .column(RPKIT_PROFILE.PASSWORD_SALT, SQLDataType.BLOB)
-                .constraints(
-                        constraint("pk_rpkit_profile").primaryKey(RPKIT_PROFILE.ID),
-                        constraint("uk_rpkit_profile_name").unique(RPKIT_PROFILE.NAME)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.3.0")
-        }
-    }
-
-    override fun insert(entity: RPKProfile): Int {
+    fun insert(entity: RPKProfile) {
         database.create
                 .insertInto(
                         RPKIT_PROFILE,
@@ -59,10 +53,9 @@ class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit):
         val id = database.create.lastID().toInt()
         entity.id = id
         cache?.put(id, entity)
-        return id
     }
 
-    override fun update(entity: RPKProfile) {
+    fun update(entity: RPKProfile) {
         database.create
                 .update(RPKIT_PROFILE)
                 .set(RPKIT_PROFILE.NAME, entity.name)
@@ -73,7 +66,7 @@ class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit):
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKProfile? {
+    operator fun get(id: Int): RPKProfile? {
         if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
@@ -106,7 +99,7 @@ class RPKProfileTable(database: Database, private val plugin: RPKPlayersBukkit):
         return get(result.get(RPKIT_PROFILE.ID))
     }
 
-    override fun delete(entity: RPKProfile) {
+    fun delete(entity: RPKProfile) {
         database.create
                 .deleteFrom(RPKIT_PROFILE)
                 .where(RPKIT_PROFILE.ID.eq(entity.id))

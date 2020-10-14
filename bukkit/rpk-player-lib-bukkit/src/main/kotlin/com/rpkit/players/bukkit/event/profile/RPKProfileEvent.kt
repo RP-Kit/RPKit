@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 
-interface RPKProfileEvent: RPKEvent {
+interface RPKProfileEvent : RPKEvent {
 
     val profile: RPKProfile?
 

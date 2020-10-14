@@ -18,49 +18,98 @@ package com.rpkit.players.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
-import com.rpkit.core.web.NavigationLink
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.command.account.AccountCommand
 import com.rpkit.players.bukkit.command.profile.ProfileCommand
-import com.rpkit.players.bukkit.database.table.*
+import com.rpkit.players.bukkit.database.table.RPKDiscordProfileTable
+import com.rpkit.players.bukkit.database.table.RPKGitHubProfileTable
+import com.rpkit.players.bukkit.database.table.RPKIRCProfileTable
+import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileLinkRequestTable
+import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileTable
+import com.rpkit.players.bukkit.database.table.RPKProfileTable
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
 import com.rpkit.players.bukkit.listener.PlayerLoginListener
-import com.rpkit.players.bukkit.profile.*
-import com.rpkit.players.bukkit.servlet.*
+import com.rpkit.players.bukkit.profile.RPKDiscordProfileService
+import com.rpkit.players.bukkit.profile.RPKDiscordProfileServiceImpl
+import com.rpkit.players.bukkit.profile.RPKGitHubProfileService
+import com.rpkit.players.bukkit.profile.RPKGitHubProfileServiceImpl
+import com.rpkit.players.bukkit.profile.RPKIRCProfileService
+import com.rpkit.players.bukkit.profile.RPKIRCProfileServiceImpl
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileServiceImpl
+import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.RPKProfileServiceImpl
 import org.bstats.bukkit.Metrics
-import java.sql.SQLException
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
 /**
  * RPK players plugin default implementation.
  */
-class RPKPlayersBukkit: RPKBukkitPlugin() {
+class RPKPlayersBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 4409)
-        saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKDiscordProfileProviderImpl(this),
-                RPKGitHubProfileProviderImpl(this),
-                RPKIRCProfileProviderImpl(this),
-                RPKMinecraftProfileProviderImpl(this),
-                RPKProfileProviderImpl(this)
-        )
-        servlets = arrayOf(
-                ProfilesServlet(this),
-                ProfileServlet(this),
-                ProfileSignInServlet(this),
-                ProfileSignOutServlet(this),
-                ProfileSignUpServlet(this),
-                // API v1
-                com.rpkit.players.bukkit.servlet.api.v1.ProfileAPIServlet(this),
-                com.rpkit.players.bukkit.servlet.api.v1.GitHubProfileAPIServlet(this),
-                com.rpkit.players.bukkit.servlet.api.v1.IRCProfileAPIServlet(this),
-                com.rpkit.players.bukkit.servlet.api.v1.MinecraftProfileAPIServlet(this),
-                com.rpkit.players.bukkit.servlet.api.v1.SignInServlet(this)
-        )
-    }
 
-    override fun onPostEnable() {
-        core.web.navigationBar.add(NavigationLink("Profiles", "/profiles/"))
+        saveDefaultConfig()
+
+        Services[RPKDiscordProfileService::class] = RPKDiscordProfileServiceImpl(this)
+        Services[RPKGitHubProfileService::class] = RPKGitHubProfileServiceImpl(this)
+        Services[RPKIRCProfileService::class] = RPKIRCProfileServiceImpl(this)
+        Services[RPKMinecraftProfileService::class] = RPKMinecraftProfileServiceImpl(this)
+        Services[RPKProfileService::class] = RPKProfileServiceImpl(this)
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/players/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/players/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_players"
+                ),
+                classLoader
+        )
+        database.addTable(RPKDiscordProfileTable(database, this))
+        database.addTable(RPKGitHubProfileTable(database, this))
+        database.addTable(RPKIRCProfileTable(database, this))
+        database.addTable(RPKMinecraftProfileTable(database, this))
+        database.addTable(RPKMinecraftProfileLinkRequestTable(database))
+        database.addTable(RPKProfileTable(database, this))
     }
 
     override fun registerCommands() {
@@ -69,18 +118,7 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerListeners() {
-        registerListeners(PlayerJoinListener(this), PlayerLoginListener(this))
-    }
-
-    @Throws(SQLException::class)
-    override fun createTables(database: Database) {
-        database.addTable(RPKDiscordProfileTable(database, this))
-        database.addTable(RPKGitHubProfileTable(database, this))
-        database.addTable(RPKIRCProfileTable(database, this))
-        database.addTable(RPKMinecraftProfileTable(database, this))
-        database.addTable(RPKMinecraftProfileTokenTable(database, this))
-        database.addTable(RPKMinecraftProfileLinkRequestTable(database, this))
-        database.addTable(RPKProfileTable(database, this))
+        registerListeners(PlayerJoinListener(this), PlayerLoginListener())
     }
 
     override fun setDefaultMessages() {
@@ -91,8 +129,8 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
         messages.setDefault("account-link-irc-usage", "&cUsage: /account link irc [nick]")
         messages.setDefault("account-link-irc-invalid-already-linked", "&cThat IRC user is already linked to a Minecraft user.")
         messages.setDefault("account-link-irc-invalid-nick", "&cThere is no IRC user by that name online.")
-        messages.setDefault("account-link-irc-invalid-no-irc-provider", "&cThere is no IRC provider registered, so IRC accounts cannot be linked.")
-        messages.setDefault("account-link-irc-invalid-no-player-provider", "&cThere is no player provider registered, so IRC accounts cannot be linked.")
+        messages.setDefault("account-link-irc-invalid-no-irc-service", "&cThere is no IRC service registered, so IRC accounts cannot be linked.")
+        messages.setDefault("account-link-irc-invalid-no-player-service", "&cThere is no player service registered, so IRC accounts cannot be linked.")
         messages.setDefault("account-link-irc-valid", "&aAccount linked.")
         messages.setDefault("account-link-minecraft-usage", "&cUsage: /account link minecraft [name] [token]")
         messages.setDefault("account-link-minecraft-invalid-player", "&cThere is no player by that name.")
@@ -128,6 +166,10 @@ class RPKPlayersBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-account-link-minecraft", "&cYou do not have permission to link Minecraft accounts.")
         messages.setDefault("no-permission-profile-create", "&cYou do not have permission to create profiles.")
         messages.setDefault("no-permission-profile-login", "&cYou do not have permission to login to profiles.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-irc-profile-service", "&cThere is not IRC profile service available.")
+        messages.setDefault("no-profile-service", "&cThere is no profile service available.")
+        messages.setDefault("no-discord-service", "&cThere is no Discord service available.")
     }
 
 }

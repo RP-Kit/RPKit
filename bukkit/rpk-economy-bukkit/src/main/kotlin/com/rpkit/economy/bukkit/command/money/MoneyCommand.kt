@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Money command.
  * Parent command for all money management commands.
  */
-class MoneyCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
+class MoneyCommand(val plugin: RPKEconomyBukkit) : CommandExecutor {
 
     private val moneySubtractCommand = MoneySubtractCommand(plugin)
     private val moneyAddCommand = MoneyAddCommand(plugin)

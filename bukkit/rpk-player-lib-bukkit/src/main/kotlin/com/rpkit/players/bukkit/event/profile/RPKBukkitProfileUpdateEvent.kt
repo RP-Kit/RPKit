@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitProfileUpdateEvent(
         override val profile: RPKProfile
-): RPKBukkitEvent(), RPKProfileUpdateEvent, Cancellable {
+) : RPKBukkitEvent(), RPKProfileUpdateEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

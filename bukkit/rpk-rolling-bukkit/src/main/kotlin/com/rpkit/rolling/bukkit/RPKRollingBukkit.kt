@@ -20,7 +20,7 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import org.bstats.bukkit.Metrics
 
 
-class RPKRollingBukkit: RPKBukkitPlugin() {
+class RPKRollingBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4410)
@@ -37,6 +37,8 @@ class RPKRollingBukkit: RPKBukkitPlugin() {
         messages.setDefault("roll-usage", "&cUsage: /roll [roll]")
         messages.setDefault("not-from-console", "&cYou must be a player to perform that command.")
         messages.setDefault("no-character", "&cYou must have a character to perform that command.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-character-service", "&cThere is no character service available.")
     }
 
 }

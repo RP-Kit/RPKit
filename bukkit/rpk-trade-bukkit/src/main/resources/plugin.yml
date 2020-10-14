@@ -11,15 +11,15 @@ softdepend:
 - rpk-food-lib-bukkit
 api-version: '1.16'
 permissions:
-    rpkit.trade.sign.trader.buy:
-        description: Allows buying from trader signs
-        default: true
-    rpkit.trade.sign.trader.sell:
-        description: Allows selling to trader signs
-        default: true
-    rpkit.trade.sign.trader.create:
-        description: Allows creating trader signs
-        default: op
-    rpkit.trade.sign.trader.destroy:
-        description: Allows destroying trader signs
-        default: op
+  rpkit.trade.sign.trader.buy:
+    description: Allows buying from trader signs
+    default: true
+  rpkit.trade.sign.trader.sell:
+    description: Allows selling to trader signs
+    default: true
+  rpkit.trade.sign.trader.create:
+    description: Allows creating trader signs
+    default: op
+  rpkit.trade.sign.trader.destroy:
+    description: Allows destroying trader signs
+    default: op

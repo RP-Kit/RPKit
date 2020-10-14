@@ -34,7 +34,8 @@ class CopyToClipboardClickAction(val text: String) : ClickAction, ConfigurationS
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = CopyToClipboardClickAction(
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = CopyToClipboardClickAction(
                 serialized["text"] as String
         )
     }

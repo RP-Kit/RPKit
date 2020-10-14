@@ -27,10 +27,11 @@ class RPKBukkitCharacterSwitchEvent(
         override val minecraftProfile: RPKMinecraftProfile,
         override val fromCharacter: RPKCharacter?,
         override var character: RPKCharacter?
-): RPKBukkitEvent(), RPKCharacterSwitchEvent, Cancellable {
+) : RPKBukkitEvent(), RPKCharacterSwitchEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

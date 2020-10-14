@@ -63,7 +63,8 @@ class SenderProfileNamePart(
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = SenderProfileNamePart(
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = SenderProfileNamePart(
                 serialized["font"] as? String,
                 serialized["color"] as? String,
                 serialized["bold"] as? Boolean,

@@ -17,7 +17,8 @@
 package com.rpkit.banks.bukkit.listener
 
 import com.rpkit.banks.bukkit.RPKBanksBukkit
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
+import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -26,7 +27,7 @@ import org.bukkit.event.block.SignChangeEvent
 /**
  * Sign change listener for bank signs.
  */
-class SignChangeListener(private val plugin: RPKBanksBukkit): Listener {
+class SignChangeListener(private val plugin: RPKBanksBukkit) : Listener {
     @EventHandler
     fun onSignChange(event: SignChangeEvent) {
         if (event.getLine(0).equals("[bank]", ignoreCase = true)) {
@@ -46,10 +47,15 @@ class SignChangeListener(private val plugin: RPKBanksBukkit): Listener {
             } else {
                 event.setLine(2, "1")
             }
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
+            val currencyService = Services[RPKCurrencyService::class]
+            if (currencyService == null) {
+                event.block.breakNaturally()
+                event.player.sendMessage(plugin.messages["no-currency-service"])
+                return
+            }
             val currencyName = event.getLine(3)
-            if (currencyName == null || currencyProvider.getCurrency(currencyName) == null) {
-                val defaultCurrency = currencyProvider.defaultCurrency
+            if (currencyName == null || currencyService.getCurrency(currencyName) == null) {
+                val defaultCurrency = currencyService.defaultCurrency
                 if (defaultCurrency == null) {
                     event.block.breakNaturally()
                     event.player.sendMessage(plugin.messages["bank-sign-invalid-currency"])

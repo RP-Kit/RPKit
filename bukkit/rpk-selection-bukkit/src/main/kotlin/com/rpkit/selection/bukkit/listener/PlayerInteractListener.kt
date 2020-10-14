@@ -16,9 +16,10 @@
 
 package com.rpkit.selection.bukkit.listener
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.selection.bukkit.RPKSelectionBukkit
-import com.rpkit.selection.bukkit.selection.RPKSelectionProvider
+import com.rpkit.selection.bukkit.selection.RPKSelectionService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
@@ -26,23 +27,31 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 
 
-class PlayerInteractListener(private val plugin: RPKSelectionBukkit): Listener {
+class PlayerInteractListener(private val plugin: RPKSelectionBukkit) : Listener {
 
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val bukkitPlayer = event.player
         if (bukkitPlayer.inventory.itemInMainHand.isSimilar(plugin.config.getItemStack("wand-item"))) {
             event.isCancelled = true
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val selectionProvider = plugin.core.serviceManager.getServiceProvider(RPKSelectionProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer) ?: return
-            val selection = selectionProvider.getSelection(minecraftProfile)
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+            if (minecraftProfileService == null) {
+                bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile-service"])
+                return
+            }
+            val selectionService = Services[RPKSelectionService::class]
+            if (selectionService == null) {
+                bukkitPlayer.sendMessage(plugin.messages["no-selection-service"])
+                return
+            }
+            val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
+            val selection = selectionService.getSelection(minecraftProfile)
             val clickedBlock = event.clickedBlock ?: return
             when (event.action) {
                 Action.LEFT_CLICK_BLOCK -> {
                     selection.world = clickedBlock.world
                     selection.point1 = clickedBlock
-                    selectionProvider.updateSelection(selection)
+                    selectionService.updateSelection(selection)
                     event.player.sendMessage(plugin.messages["wand-primary", mapOf(
                             Pair("world", clickedBlock.world.name),
                             Pair("x", clickedBlock.x.toString()),
@@ -54,7 +63,7 @@ class PlayerInteractListener(private val plugin: RPKSelectionBukkit): Listener {
                     if (event.hand == EquipmentSlot.HAND) {
                         selection.world = clickedBlock.world
                         selection.point2 = clickedBlock
-                        selectionProvider.updateSelection(selection)
+                        selectionService.updateSelection(selection)
                         event.player.sendMessage(plugin.messages["wand-secondary", mapOf(
                                 Pair("world", clickedBlock.world.name),
                                 Pair("x", clickedBlock.x.toString()),

@@ -18,20 +18,18 @@ package com.rpkit.moderation.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
-import com.rpkit.moderation.bukkit.database.jooq.rpkit.Tables.RPKIT_WARNING
+import com.rpkit.moderation.bukkit.database.jooq.Tables.RPKIT_WARNING
 import com.rpkit.moderation.bukkit.warning.RPKWarning
 import com.rpkit.moderation.bukkit.warning.RPKWarningImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
-import java.sql.Timestamp
 
 
-class RPKWarningTable(database: Database, private val plugin: RPKModerationBukkit): Table<RPKWarning>(database, RPKWarning::class) {
+class RPKWarningTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_warning.id.enabled")) {
         database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_warning.id", CacheConfigurationBuilder
@@ -41,35 +39,7 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_WARNING)
-                .column(RPKIT_WARNING.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_WARNING.REASON, SQLDataType.VARCHAR.length(1024))
-                .column(RPKIT_WARNING.PROFILE_ID, SQLDataType.INTEGER)
-                .column(RPKIT_WARNING.ISSUER_ID, SQLDataType.INTEGER)
-                .column(RPKIT_WARNING.TIME, SQLDataType.TIMESTAMP)
-                .constraints(
-                        constraint("pk_rpkit_warning").primaryKey(RPKIT_WARNING.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.5.2")
-        }
-        if (database.getTableVersion(this) == "1.5.0") {
-            database.create
-                    .alterTable(RPKIT_WARNING)
-                    .alterColumn(RPKIT_WARNING.ID)
-                        .set(SQLDataType.INTEGER.identity(true))
-                    .execute()
-            database.setTableVersion(this, "1.5.2")
-        }
-    }
-
-    override fun insert(entity: RPKWarning): Int {
+    fun insert(entity: RPKWarning) {
         database.create
                 .insertInto(
                         RPKIT_WARNING,
@@ -82,28 +52,27 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
                         entity.reason,
                         entity.profile.id,
                         entity.issuer.id,
-                        Timestamp.valueOf(entity.time)
+                        entity.time
                 )
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
         cache?.put(id, entity)
-        return id
     }
 
-    override fun update(entity: RPKWarning) {
+    fun update(entity: RPKWarning) {
         database.create
                 .update(RPKIT_WARNING)
                 .set(RPKIT_WARNING.REASON, entity.reason)
                 .set(RPKIT_WARNING.PROFILE_ID, entity.profile.id)
                 .set(RPKIT_WARNING.ISSUER_ID, entity.issuer.id)
-                .set(RPKIT_WARNING.TIME, Timestamp.valueOf(entity.time))
+                .set(RPKIT_WARNING.TIME, entity.time)
                 .where(RPKIT_WARNING.ID.eq(entity.id))
                 .execute()
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKWarning? {
+    operator fun get(id: Int): RPKWarning? {
         val result = database.create
                 .select(
                         RPKIT_WARNING.REASON,
@@ -114,16 +83,16 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
                 .from(RPKIT_WARNING)
                 .where(RPKIT_WARNING.ID.eq(id))
                 .fetchOne() ?: return null
-        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-        val profile = profileProvider.getProfile(result[RPKIT_WARNING.PROFILE_ID])
-        val issuer = profileProvider.getProfile(result[RPKIT_WARNING.ISSUER_ID])
+        val profileService = Services[RPKProfileService::class] ?: return null
+        val profile = profileService.getProfile(result[RPKIT_WARNING.PROFILE_ID])
+        val issuer = profileService.getProfile(result[RPKIT_WARNING.ISSUER_ID])
         if (profile != null && issuer != null) {
             val warning = RPKWarningImpl(
                     id,
                     result[RPKIT_WARNING.REASON],
                     profile,
                     issuer,
-                    result[RPKIT_WARNING.TIME].toLocalDateTime()
+                    result[RPKIT_WARNING.TIME]
             )
             cache?.put(id, warning)
             return warning
@@ -146,7 +115,7 @@ class RPKWarningTable(database: Database, private val plugin: RPKModerationBukki
         return results.map { get(it[RPKIT_WARNING.ID]) }.filterNotNull()
     }
 
-    override fun delete(entity: RPKWarning) {
+    fun delete(entity: RPKWarning) {
         database.create
                 .deleteFrom(RPKIT_WARNING)
                 .where(RPKIT_WARNING.ID.eq(entity.id))

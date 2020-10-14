@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import com.rpkit.monsters.bukkit.database.table.RPKMonsterSpawnAreaTable
 import org.bukkit.Location
 
 
-class RPKMonsterSpawnAreaProviderImpl(private val plugin: RPKMonstersBukkit): RPKMonsterSpawnAreaProvider {
+class RPKMonsterSpawnAreaServiceImpl(override val plugin: RPKMonstersBukkit) : RPKMonsterSpawnAreaService {
 
     override fun getSpawnArea(location: Location): RPKMonsterSpawnArea? {
-        return plugin.core.database.getTable(RPKMonsterSpawnAreaTable::class).getAll().firstOrNull { spawnArea ->
+        return plugin.database.getTable(RPKMonsterSpawnAreaTable::class).getAll().firstOrNull { spawnArea ->
             location.world == spawnArea.minPoint.world
                     && location.x >= spawnArea.minPoint.x
                     && location.y >= spawnArea.minPoint.y
@@ -36,11 +36,11 @@ class RPKMonsterSpawnAreaProviderImpl(private val plugin: RPKMonstersBukkit): RP
     }
 
     override fun addSpawnArea(monsterSpawnArea: RPKMonsterSpawnArea) {
-        plugin.core.database.getTable(RPKMonsterSpawnAreaTable::class).insert(monsterSpawnArea)
+        plugin.database.getTable(RPKMonsterSpawnAreaTable::class).insert(monsterSpawnArea)
     }
 
     override fun removeSpawnArea(monsterSpawnArea: RPKMonsterSpawnArea) {
-        plugin.core.database.getTable(RPKMonsterSpawnAreaTable::class).delete(monsterSpawnArea)
+        plugin.database.getTable(RPKMonsterSpawnAreaTable::class).delete(monsterSpawnArea)
     }
 
 }

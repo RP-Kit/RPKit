@@ -11,49 +11,49 @@ depend:
 - rpk-payment-lib-bukkit
 api-version: '1.16'
 commands:
-    payment:
-        description: Payment management command
-        usage: /<command> [set|create|remove|deposit|info|invite|join|kick|leave|list|set|withdraw]
+  payment:
+    description: Payment management command
+    usage: /<command> [set|create|remove|deposit|info|invite|join|kick|leave|list|set|withdraw]
 permissions:
-    rpkit.payments.command.payment.set.amount:
-        description: Allows setting payment group amounts where the user is an owner
-        default: true
-    rpkit.payments.command.payment.set.currency:
-        description: Allows setting payment group currencies where the user is an owner
-        default: true
-    rpkit.payments.command.payment.set.interval:
-        description: Allows setting payment group intervals where the user is an owner
-        default: true
-    rpkit.payments.command.payment.set.name:
-        description: Allows setting payment group names where the user is an owner
-        default: true
-    rpkit.payments.command.payment.create:
-        description: Allows creating payment groups
-        default: true
-    rpkit.payments.command.payment.remove:
-        description: Allows removing payment groups
-        default: true
-    rpkit.payments.command.payment.deposit:
-        description: Allows depositing into a payment group where the user is an owner
-        default: true
-    rpkit.payments.command.payment.info:
-        description: Allows displaying information on a payment group
-        default: true
-    rpkit.payments.command.payment.invite:
-        description: Allows inviting players to a payment group where the user is an owner
-        default: true
-    rpkit.payments.command.payment.join:
-        description: Allows joining payments groups to which the user has been invited
-        default: true
-    rpkit.payments.command.payment.kick:
-        description: Allows kicking players from payment groups where the user is an owner
-        default: true
-    rpkit.payments.command.payment.leave:
-        description: Allows leaving payment groups which have been joined
-        default: true
-    rpkit.payments.command.payment.list:
-        description: Allows listing payment groups which the user is involved in
-        default: true
-    rpkit.payments.command.payment.withdraw:
-        description: Allows withdrawing from a payment group where the user is an owner
-        default: true
+  rpkit.payments.command.payment.set.amount:
+    description: Allows setting payment group amounts where the user is an owner
+    default: true
+  rpkit.payments.command.payment.set.currency:
+    description: Allows setting payment group currencies where the user is an owner
+    default: true
+  rpkit.payments.command.payment.set.interval:
+    description: Allows setting payment group intervals where the user is an owner
+    default: true
+  rpkit.payments.command.payment.set.name:
+    description: Allows setting payment group names where the user is an owner
+    default: true
+  rpkit.payments.command.payment.create:
+    description: Allows creating payment groups
+    default: true
+  rpkit.payments.command.payment.remove:
+    description: Allows removing payment groups
+    default: true
+  rpkit.payments.command.payment.deposit:
+    description: Allows depositing into a payment group where the user is an owner
+    default: true
+  rpkit.payments.command.payment.info:
+    description: Allows displaying information on a payment group
+    default: true
+  rpkit.payments.command.payment.invite:
+    description: Allows inviting players to a payment group where the user is an owner
+    default: true
+  rpkit.payments.command.payment.join:
+    description: Allows joining payments groups to which the user has been invited
+    default: true
+  rpkit.payments.command.payment.kick:
+    description: Allows kicking players from payment groups where the user is an owner
+    default: true
+  rpkit.payments.command.payment.leave:
+    description: Allows leaving payment groups which have been joined
+    default: true
+  rpkit.payments.command.payment.list:
+    description: Allows listing payment groups which the user is involved in
+    default: true
+  rpkit.payments.command.payment.withdraw:
+    description: Allows withdrawing from a payment group where the user is an owner
+    default: true

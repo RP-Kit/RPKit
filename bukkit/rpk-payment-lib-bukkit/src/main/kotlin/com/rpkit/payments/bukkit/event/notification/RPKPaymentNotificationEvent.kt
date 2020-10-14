@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotification
 
 
-interface RPKPaymentNotificationEvent: RPKEvent {
+interface RPKPaymentNotificationEvent : RPKEvent {
 
     val paymentNotification: RPKPaymentNotification
 

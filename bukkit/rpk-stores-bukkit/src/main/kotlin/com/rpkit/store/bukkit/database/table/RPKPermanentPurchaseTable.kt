@@ -18,22 +18,24 @@ package com.rpkit.store.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.purchase.RPKPermanentPurchase
 import com.rpkit.store.bukkit.purchase.RPKPermanentPurchaseImpl
 import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
-import com.rpkit.store.bukkit.storeitem.RPKStoreItemProvider
-import com.rpkit.stores.bukkit.database.jooq.rpkit.Tables.RPKIT_PERMANENT_PURCHASE
-import com.rpkit.stores.bukkit.database.jooq.rpkit.Tables.RPKIT_PURCHASE
+import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
+import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_PERMANENT_PURCHASE
+import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_PURCHASE
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL
-import org.jooq.impl.SQLDataType
 
 
-class RPKPermanentPurchaseTable(database: Database, private val plugin: RPKStoresBukkit): Table<RPKPermanentPurchase>(database, RPKPermanentPurchase::class) {
+class RPKPermanentPurchaseTable(
+        private val database: Database,
+        plugin: RPKStoresBukkit
+) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_permanent_purchase.id.enabled")) {
         database.cacheManager.createCache("rpkit-stores-bukkit.rpkit_permanent_purchase.id",
@@ -43,23 +45,7 @@ class RPKPermanentPurchaseTable(database: Database, private val plugin: RPKStore
         null
     }
 
-    override fun create() {
-        database.create.createTableIfNotExists(RPKIT_PERMANENT_PURCHASE)
-                .column(RPKIT_PERMANENT_PURCHASE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_PERMANENT_PURCHASE.PURCHASE_ID, SQLDataType.INTEGER)
-                .constraints(
-                        DSL.constraint("pk_rpkit_permanent_purchase").primaryKey(RPKIT_PERMANENT_PURCHASE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.6.0")
-        }
-    }
-
-    override fun insert(entity: RPKPermanentPurchase): Int {
+    fun insert(entity: RPKPermanentPurchase) {
         val id = database.getTable(RPKPurchaseTable::class).insert(entity)
         database.create
                 .insertInto(
@@ -72,15 +58,14 @@ class RPKPermanentPurchaseTable(database: Database, private val plugin: RPKStore
                 .execute()
         entity.id = id
         cache?.put(id, entity)
-        return id
     }
 
-    override fun update(entity: RPKPermanentPurchase) {
+    fun update(entity: RPKPermanentPurchase) {
         database.getTable(RPKPurchaseTable::class).update(entity)
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKPermanentPurchase? {
+    operator fun get(id: Int): RPKPermanentPurchase? {
         val result = database.create
                 .select(
                         RPKIT_PURCHASE.STORE_ITEM_ID,
@@ -95,8 +80,8 @@ class RPKPermanentPurchaseTable(database: Database, private val plugin: RPKStore
                 .where(RPKIT_PURCHASE.ID.eq(id))
                 .and(RPKIT_PERMANENT_PURCHASE.PURCHASE_ID.eq(RPKIT_PURCHASE.ID))
                 .fetchOne() ?: return null
-        val storeItemProvider = plugin.core.serviceManager.getServiceProvider(RPKStoreItemProvider::class)
-        val storeItem = storeItemProvider.getStoreItem(result[RPKIT_PURCHASE.STORE_ITEM_ID]) as? RPKPermanentStoreItem
+        val storeItemService = Services[RPKStoreItemService::class] ?: return null
+        val storeItem = storeItemService.getStoreItem(result[RPKIT_PURCHASE.STORE_ITEM_ID]) as? RPKPermanentStoreItem
         if (storeItem == null) {
             database.create
                     .deleteFrom(RPKIT_PURCHASE)
@@ -109,8 +94,8 @@ class RPKPermanentPurchaseTable(database: Database, private val plugin: RPKStore
             cache?.remove(id)
             return null
         }
-        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-        val profile = profileProvider.getProfile(result[RPKIT_PURCHASE.PROFILE_ID])
+        val profileService = Services[RPKProfileService::class] ?: return null
+        val profile = profileService.getProfile(result[RPKIT_PURCHASE.PROFILE_ID])
         if (profile == null) {
             database.create
                     .deleteFrom(RPKIT_PURCHASE)
@@ -127,7 +112,7 @@ class RPKPermanentPurchaseTable(database: Database, private val plugin: RPKStore
                 id,
                 storeItem,
                 profile,
-                result[RPKIT_PURCHASE.PURCHASE_DATE].toLocalDateTime()
+                result[RPKIT_PURCHASE.PURCHASE_DATE]
         )
         cache?.put(id, permanentPurchase)
         return permanentPurchase
@@ -146,7 +131,7 @@ class RPKPermanentPurchaseTable(database: Database, private val plugin: RPKStore
         return result.mapNotNull { row -> get(row[RPKIT_PERMANENT_PURCHASE.PURCHASE_ID]) }
     }
 
-    override fun delete(entity: RPKPermanentPurchase) {
+    fun delete(entity: RPKPermanentPurchase) {
         database.getTable(RPKPurchaseTable::class).delete(entity)
         database.create
                 .deleteFrom(RPKIT_PERMANENT_PURCHASE)

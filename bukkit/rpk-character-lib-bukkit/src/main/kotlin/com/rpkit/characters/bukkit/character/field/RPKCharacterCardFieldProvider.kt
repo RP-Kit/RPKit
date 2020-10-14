@@ -16,15 +16,15 @@
 
 package com.rpkit.characters.bukkit.character.field
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
- * Represents a character card field provider.
+ * Represents a character card field service.
  * Character card fields may be added to the list of character card fields in order to allow display on character cards.
- * Each character card field available from the character card field provider is usable on character cards where the
+ * Each character card field available from the character card field service is usable on character cards where the
  * character card implementation permits usage of such variables.
  */
-interface RPKCharacterCardFieldProvider: ServiceProvider {
+interface RPKCharacterCardFieldService : Service {
 
     /**
      * A list of all character card fields.

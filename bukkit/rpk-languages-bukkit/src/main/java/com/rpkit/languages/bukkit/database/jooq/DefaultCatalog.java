@@ -20,8 +20,6 @@
 package com.rpkit.languages.bukkit.database.jooq;
 
 
-import com.rpkit.languages.bukkit.database.jooq.rpkit.Rpkit;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,7 +33,7 @@ import org.jooq.impl.CatalogImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class DefaultCatalog extends CatalogImpl {
 
-    private static final long serialVersionUID = 1872535329;
+    private static final long serialVersionUID = 1180291894;
 
     /**
      * The reference instance of <code>DEFAULT_CATALOG</code>
@@ -43,9 +41,9 @@ public class DefaultCatalog extends CatalogImpl {
     public static final DefaultCatalog DEFAULT_CATALOG = new DefaultCatalog();
 
     /**
-     * The schema <code>rpkit</code>.
+     * The schema <code>rpkit_languages</code>.
      */
-    public final Rpkit RPKIT = Rpkit.RPKIT;
+    public final RpkitLanguages RPKIT_LANGUAGES = RpkitLanguages.RPKIT_LANGUAGES;
 
     /**
      * No further instances allowed
@@ -57,6 +55,6 @@ public class DefaultCatalog extends CatalogImpl {
     @Override
     public final List<Schema> getSchemas() {
         return Arrays.<Schema>asList(
-            Rpkit.RPKIT);
+            RpkitLanguages.RPKIT_LANGUAGES);
     }
 }

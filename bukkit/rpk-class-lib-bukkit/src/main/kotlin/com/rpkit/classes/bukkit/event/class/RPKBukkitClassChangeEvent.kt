@@ -27,10 +27,11 @@ class RPKBukkitClassChangeEvent(
         override val character: RPKCharacter,
         override val oldClass: RPKClass?,
         override val `class`: RPKClass
-): RPKBukkitEvent(), RPKClassChangeEvent, Cancellable {
+) : RPKBukkitEvent(), RPKClassChangeEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

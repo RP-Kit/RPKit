@@ -37,15 +37,11 @@ groups:
   deny: []
 default-group: *default
 caching:
-    player_group:
-        id:
-            enabled: true
-            size: 20
-    rpkit_character_group:
-        id:
-            enabled: true
-            size: 20
-    rpkit_profile_group:
-        id:
-            enabled: true
-            size: 20
+  rpkit_character_group:
+    character_id:
+      enabled: true
+      size: 20
+  rpkit_profile_group:
+    profile_id:
+      enabled: true
+      size: 20

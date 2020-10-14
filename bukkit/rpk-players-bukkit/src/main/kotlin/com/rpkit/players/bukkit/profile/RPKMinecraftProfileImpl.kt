@@ -21,7 +21,7 @@ import org.bukkit.Bukkit
 import java.util.*
 
 class RPKMinecraftProfileImpl(
-        override var id: Int = 0,
+        override var id: Int? = null,
         override var profile: RPKThinProfile,
         override val minecraftUUID: UUID
 ) : RPKMinecraftProfile {

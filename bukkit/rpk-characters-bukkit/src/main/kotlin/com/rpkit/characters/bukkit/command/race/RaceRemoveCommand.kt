@@ -17,7 +17,8 @@
 package com.rpkit.characters.bukkit.command.race
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.race.RPKRaceProvider
+import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.core.service.Services
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -28,7 +29,7 @@ import org.bukkit.entity.Player
  * Race remove command.
  * Removes a race.
  */
-class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class RaceRemoveCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -37,51 +38,58 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
                 .withFirstPrompt(RacePrompt())
                 .withEscapeSequence("cancel")
                 .addConversationAbandonedListener { event ->
-            if (!event.gracefulExit()) {
-                val conversable = event.context.forWhom
-                if (conversable is Player) {
-                    conversable.sendMessage(plugin.messages["operation-cancelled"])
+                    if (!event.gracefulExit()) {
+                        val conversable = event.context.forWhom
+                        if (conversable is Player) {
+                            conversable.sendMessage(plugin.messages["operation-cancelled"])
+                        }
+                    }
                 }
-            }
-        }
     }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender is Conversable) {
-            if (sender.hasPermission("rpkit.characters.command.race.remove")) {
-                if (args.isNotEmpty()) {
-                    val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
-                    val raceBuilder = StringBuilder()
-                    for (i in 0 until args.size - 1) {
-                        raceBuilder.append(args[i]).append(' ')
-                    }
-                    raceBuilder.append(args[args.size - 1])
-                    val race = raceProvider.getRace(raceBuilder.toString())
-                    if (race != null) {
-                        raceProvider.removeRace(race)
-                        sender.sendMessage(plugin.messages["race-remove-valid"])
-                    } else {
-                        sender.sendMessage(plugin.messages["race-remove-invalid-race"])
-                    }
-                } else {
-                    conversationFactory.buildConversation(sender).begin()
-                }
-            } else {
-                sender.sendMessage(plugin.messages["no-permission-race-remove"])
-            }
+        if (sender !is Conversable) return true
+        if (!sender.hasPermission("rpkit.characters.command.race.remove")) {
+            sender.sendMessage(plugin.messages["no-permission-race-remove"])
+            return true
+        }
+        if (args.isEmpty()) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        val raceService = Services[RPKRaceService::class]
+        if (raceService == null) {
+            sender.sendMessage(plugin.messages["no-race-service"])
+            return true
+        }
+        val raceBuilder = StringBuilder()
+        for (i in 0 until args.size - 1) {
+            raceBuilder.append(args[i]).append(' ')
+        }
+        raceBuilder.append(args[args.size - 1])
+        val race = raceService.getRace(raceBuilder.toString())
+        if (race == null) {
+            sender.sendMessage(plugin.messages["race-remove-invalid-race"])
+            return true
+        } else {
+            raceService.removeRace(race)
+            sender.sendMessage(plugin.messages["race-remove-valid"])
         }
         return true
     }
 
-    private inner class RacePrompt: ValidatingPrompt() {
+    private inner class RacePrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class).getRace(input) != null
+            return Services[RPKRaceService::class]?.getRace(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val raceProvider = plugin.core.serviceManager.getServiceProvider(RPKRaceProvider::class)
-            raceProvider.removeRace(raceProvider.getRace(input)!!)
+            val raceService = Services[RPKRaceService::class] ?: return RaceSetPrompt()
+            context.setSessionData("raceService", raceService)
+            val race = raceService.getRace(input) ?: return RaceSetPrompt()
+            context.setSessionData("race", race)
+            raceService.removeRace(race)
             return RaceSetPrompt()
         }
 
@@ -95,13 +103,15 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit): CommandExecuto
 
     }
 
-    private inner class RaceSetPrompt: MessagePrompt() {
+    private inner class RaceSetPrompt : MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return Prompt.END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
+            if (context.getSessionData("raceService") == null) return plugin.messages["no-race-service"]
+            if (context.getSessionData("race") == null) return plugin.messages["race-remove-invalid-race"]
             return plugin.messages["race-remove-valid"]
         }
 

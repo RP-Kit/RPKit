@@ -17,7 +17,7 @@
 package com.rpkit.store.bukkit.resolver
 
 
-interface RPKPurchaseResolverProvider {
+interface RPKPurchaseResolverService {
 
     fun getPurchaseResolver(identifier: String): RPKPurchaseResolver
 

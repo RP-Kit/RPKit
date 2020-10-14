@@ -28,10 +28,11 @@ class RPKBukkitBalanceChangeEvent(
         override val currency: RPKCurrency,
         override val oldBalance: Int,
         override var newBalance: Int
-): RPKBukkitEvent(), RPKBalanceChangeEvent, Cancellable {
+) : RPKBukkitEvent(), RPKBalanceChangeEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

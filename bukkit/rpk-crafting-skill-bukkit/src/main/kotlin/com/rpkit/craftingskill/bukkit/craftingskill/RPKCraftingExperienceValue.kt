@@ -17,14 +17,12 @@
 package com.rpkit.craftingskill.bukkit.craftingskill
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 import org.bukkit.Material
 
 
 class RPKCraftingExperienceValue(
-        override var id: Int = 0,
         val character: RPKCharacter,
         val action: RPKCraftingAction,
         val material: Material,
         var experience: Int
-): Entity
+)

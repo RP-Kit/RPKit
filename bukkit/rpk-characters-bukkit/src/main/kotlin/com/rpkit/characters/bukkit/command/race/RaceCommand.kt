@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Race command.
  * Parent for all race management commands.
  */
-class RaceCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class RaceCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
     private val raceAddCommand = RaceAddCommand(plugin)
     private val raceRemoveCommand = RaceRemoveCommand(plugin)

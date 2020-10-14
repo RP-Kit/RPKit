@@ -16,12 +16,13 @@
 
 package com.rpkit.craftingskill.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.util.addLore
+import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction
-import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.GameMode
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -32,21 +33,33 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 
 
-class BlockBreakListener(private val plugin: RPKCraftingSkillBukkit): Listener {
+class BlockBreakListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
 
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
         val bukkitPlayer = event.player
         if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val craftingSkillProvider = plugin.core.serviceManager.getServiceProvider(RPKCraftingSkillProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            event.isDropItems = false
+            return
+        }
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            event.isDropItems = false
+            return
+        }
+        val craftingSkillService = Services[RPKCraftingSkillService::class]
+        if (craftingSkillService == null) {
+            event.isDropItems = false
+            return
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             event.isDropItems = false
             return
         }
-        val character = characterProvider.getActiveCharacter(minecraftProfile)
+        val character = characterService.getActiveCharacter(minecraftProfile)
         if (character == null) {
             event.isDropItems = false
             return
@@ -54,9 +67,9 @@ class BlockBreakListener(private val plugin: RPKCraftingSkillBukkit): Listener {
         val itemsToDrop = mutableListOf<ItemStack>()
         for (item in event.block.getDrops(event.player.inventory.itemInMainHand)) {
             val material = item.type
-            val craftingSkill = craftingSkillProvider.getCraftingExperience(character, RPKCraftingAction.MINE, material)
-            val quality = craftingSkillProvider.getQualityFor(RPKCraftingAction.MINE, material, craftingSkill)
-            val amount = craftingSkillProvider.getAmountFor(RPKCraftingAction.MINE, material, craftingSkill)
+            val craftingSkill = craftingSkillService.getCraftingExperience(character, RPKCraftingAction.MINE, material)
+            val quality = craftingSkillService.getQualityFor(RPKCraftingAction.MINE, material, craftingSkill)
+            val amount = craftingSkillService.getAmountFor(RPKCraftingAction.MINE, material, craftingSkill)
             if (quality != null) {
                 item.addLore(quality.lore)
             }
@@ -79,7 +92,7 @@ class BlockBreakListener(private val plugin: RPKCraftingSkillBukkit): Listener {
                     ?: 0
             if (maxExperience != 0 && craftingSkill < maxExperience) {
                 val totalExperience = min(craftingSkill + item.amount, maxExperience)
-                craftingSkillProvider.setCraftingExperience(character, RPKCraftingAction.MINE, material, totalExperience)
+                craftingSkillService.setCraftingExperience(character, RPKCraftingAction.MINE, material, totalExperience)
                 event.player.sendMessage(plugin.messages["mine-experience", mapOf(
                         Pair("total-experience", totalExperience.toString()),
                         Pair("received-experience", item.amount.toString())

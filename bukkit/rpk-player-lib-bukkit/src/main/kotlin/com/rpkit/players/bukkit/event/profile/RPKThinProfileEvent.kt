@@ -19,7 +19,7 @@ package com.rpkit.players.bukkit.event.profile
 import com.rpkit.core.event.RPKEvent
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 
-interface RPKThinProfileEvent: RPKEvent {
+interface RPKThinProfileEvent : RPKEvent {
 
     val profile: RPKThinProfile
 

@@ -18,150 +18,77 @@ package com.rpkit.chat.bukkit.database.table
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
-import com.rpkit.chat.bukkit.database.jooq.rpkit.Tables.RPKIT_CHAT_CHANNEL_MUTE
+import com.rpkit.chat.bukkit.database.jooq.Tables.RPKIT_CHAT_CHANNEL_MUTE
 import com.rpkit.chat.bukkit.mute.RPKChatChannelMute
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.DSL.field
-import org.jooq.impl.SQLDataType
 
 /**
  * Represents the chat channel mute table
  */
-class RPKChatChannelMuteTable(database: Database, private val plugin: RPKChatBukkit): Table<RPKChatChannelMute>(database, RPKChatChannelMute::class) {
+class RPKChatChannelMuteTable(private val database: Database, private val plugin: RPKChatBukkit) : Table {
 
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_chat_channel_mute.id.enabled")) {
-        database.cacheManager.createCache("rpk-chat-bukkit.rpkit_chat_channel_mute.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKChatChannelMute::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_chat_channel_mute.id.size"))).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_chat_channel_mute.minecraft_profile_id.enabled")) {
+        database.cacheManager.createCache("rpk-chat-bukkit.rpkit_chat_channel_mute.minecraft_profile_id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableMap::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_chat_channel_mute.minecraft_profile_id.size"))).build())
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_CHAT_CHANNEL_MUTE)
-                .column(RPKIT_CHAT_CHANNEL_MUTE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
-                .column(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_ID, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("pk_rpkit_chat_channel_mute").primaryKey(RPKIT_CHAT_CHANNEL_MUTE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.3.0")
-        }
-        if (database.getTableVersion(this) == "0.4.0") {
-            database.create
-                    .truncate(RPKIT_CHAT_CHANNEL_MUTE)
-                    .execute()
-            database.create.alterTable(RPKIT_CHAT_CHANNEL_MUTE)
-                    .dropColumn(field("player_id"))
-                    .execute()
-            database.create.alterTable(RPKIT_CHAT_CHANNEL_MUTE)
-                    .addColumn(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID, SQLDataType.INTEGER)
-                    .execute()
-            database.setTableVersion(this, "1.3.0")
-        }
-    }
-
-    override fun insert(entity: RPKChatChannelMute): Int {
+    fun insert(entity: RPKChatChannelMute) {
         database.create
                 .insertInto(
                         RPKIT_CHAT_CHANNEL_MUTE,
                         RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID,
-                        RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_ID
+                        RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME
                 )
                 .values(
                         entity.minecraftProfile.id,
-                        entity.chatChannel.id
+                        entity.chatChannel.name
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
+        val chatChannelMutes = cache?.get(entity.minecraftProfile.id) as? MutableMap<String, RPKChatChannelMute> ?: mutableMapOf()
+        chatChannelMutes[entity.chatChannel.name] = entity
+        cache?.put(entity.minecraftProfile.id, chatChannelMutes)
     }
 
-    override fun update(entity: RPKChatChannelMute) {
-        database.create
-                .update(RPKIT_CHAT_CHANNEL_MUTE)
-                .set(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
-                .set(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_ID, entity.chatChannel.id)
-                .where(RPKIT_CHAT_CHANNEL_MUTE.ID.eq(entity.id))
-                .execute()
-        cache?.put(entity.id, entity)
-    }
-
-    override fun get(id: Int): RPKChatChannelMute? {
-        if (cache?.containsKey(id) == true) {
-            return cache.get(id)
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID,
-                            RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_ID
-                    )
-                    .from(RPKIT_CHAT_CHANNEL_MUTE)
-                    .where(RPKIT_CHAT_CHANNEL_MUTE.ID.eq(id))
-                    .fetchOne() ?: return null
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfileId = result.get(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(minecraftProfileId)
-            val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
-            val chatChannelId = result.get(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_ID)
-            val chatChannel = chatChannelProvider.getChatChannel(chatChannelId)
-            return if (minecraftProfile != null && chatChannel != null) {
-                val chatChannelMute = RPKChatChannelMute(
-                        id,
-                        minecraftProfile,
-                        chatChannel
-                )
-                cache?.put(id, chatChannelMute)
-                chatChannelMute
-            } else {
-                database.create
-                        .deleteFrom(RPKIT_CHAT_CHANNEL_MUTE)
-                        .where(RPKIT_CHAT_CHANNEL_MUTE.ID.eq(id))
-                        .execute()
-                null
+    fun get(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): RPKChatChannelMute? {
+        if (cache?.containsKey(minecraftProfile.id) == true) {
+            val chatChannelMutes = cache[minecraftProfile.id] as MutableMap<String, RPKChatChannelMute>
+            if (chatChannelMutes.containsKey(chatChannel.name)) {
+                return chatChannelMutes[chatChannel.name]
             }
         }
-    }
-
-    /**
-     * Gets the chat channel mute instance for a Minecraft profile in a channel, or null if there is none.
-     *
-     * @param minecraftProfile The Minecraft profile
-     * @param chatChannel The chat channel
-     * @return A chat channel mute instance, or null if none exists
-     */
-    fun get(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): RPKChatChannelMute? {
-        val result = database.create
-                .select(RPKIT_CHAT_CHANNEL_MUTE.ID)
+        database.create
+                .select(
+                        RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID,
+                        RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME
+                )
                 .from(RPKIT_CHAT_CHANNEL_MUTE)
                 .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
-                .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_ID.eq(chatChannel.id))
+                .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME.eq(chatChannel.name))
                 .fetchOne() ?: return null
-        return get(result.get(RPKIT_CHAT_CHANNEL_MUTE.ID))
+        val chatChannelMute = RPKChatChannelMute(
+                minecraftProfile,
+                chatChannel
+        )
+        val chatChannelMutes = cache?.get(chatChannelMute.minecraftProfile.id) as? MutableMap<String, RPKChatChannelMute>
+                ?: mutableMapOf()
+        chatChannelMutes[chatChannelMute.chatChannel.name] = chatChannelMute
+        cache?.put(chatChannelMute.minecraftProfile.id, chatChannelMutes)
+        return chatChannelMute
     }
 
-    override fun delete(entity: RPKChatChannelMute) {
+    fun delete(entity: RPKChatChannelMute) {
         database.create
                 .deleteFrom(RPKIT_CHAT_CHANNEL_MUTE)
-                .where(RPKIT_CHAT_CHANNEL_MUTE.ID.eq(entity.id))
+                .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(entity.minecraftProfile.id)
     }
-
 
 }

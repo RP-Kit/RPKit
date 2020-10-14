@@ -1,29 +1,21 @@
 caching:
-    rpkit_discord_profile:
-        id:
-            enabled: true
-            size: 20
-    rpkit_github_profile:
-        id:
-            enabled: true
-            size: 20
-    rpkit_irc_profile:
-        id:
-            enabled: true
-            size: 20
-    rpkit_minecraft_profile_link_request:
-        id:
-            enabled: true
-            size: 20
-    rpkit_minecraft_profile:
-        id:
-            enabled: true
-            size: 20
-    rpkit_minecraft_profile_token:
-        id:
-            enabled: true
-            size: 20
-    rpkit_profile:
-        id:
-            enabled: true
-            size: 20
+  rpkit_discord_profile:
+    id:
+      enabled: true
+      size: 20
+  rpkit_github_profile:
+    id:
+      enabled: true
+      size: 20
+  rpkit_irc_profile:
+    id:
+      enabled: true
+      size: 20
+  rpkit_minecraft_profile:
+    id:
+      enabled: true
+      size: 20
+  rpkit_profile:
+    id:
+      enabled: true
+      size: 20

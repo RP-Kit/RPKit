@@ -16,16 +16,17 @@
 
 package com.rpkit.store.bukkit.command
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.purchase.RPKConsumablePurchaseImpl
 import com.rpkit.store.bukkit.purchase.RPKPermanentPurchaseImpl
-import com.rpkit.store.bukkit.purchase.RPKPurchaseProvider
+import com.rpkit.store.bukkit.purchase.RPKPurchaseService
 import com.rpkit.store.bukkit.purchase.RPKTimedPurchaseImpl
 import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
-import com.rpkit.store.bukkit.storeitem.RPKStoreItemProvider
+import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
 import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItem
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -33,7 +34,7 @@ import org.bukkit.command.CommandSender
 import java.time.LocalDateTime
 import java.util.*
 
-class PurchaseCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
+class PurchaseCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender != plugin.server.consoleSender) {
@@ -51,8 +52,12 @@ class PurchaseCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
             val playerName = args[0]
             plugin.server.getOfflinePlayer(playerName)
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-other", mapOf(
                     Pair("name", bukkitOfflinePlayer.name ?: ""),
@@ -74,13 +79,21 @@ class PurchaseCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
             sender.sendMessage(plugin.messages["purchase-store-item-id-invalid-integer"])
             return true
         }
-        val storeItemProvider = plugin.core.serviceManager.getServiceProvider(RPKStoreItemProvider::class)
-        val storeItem = storeItemProvider.getStoreItem(storeItemId)
+        val storeItemService = Services[RPKStoreItemService::class]
+        if (storeItemService == null) {
+            sender.sendMessage(plugin.messages["no-store-item-service"])
+            return true
+        }
+        val storeItem = storeItemService.getStoreItem(storeItemId)
         if (storeItem == null) {
             sender.sendMessage(plugin.messages["purchase-store-item-id-invalid-item"])
             return true
         }
-        val purchaseProvider = plugin.core.serviceManager.getServiceProvider(RPKPurchaseProvider::class)
+        val purchaseService = Services[RPKPurchaseService::class]
+        if (purchaseService == null) {
+            sender.sendMessage(plugin.messages["no-purchase-service"])
+            return true
+        }
         val purchase = when (storeItem) {
             is RPKConsumableStoreItem -> RPKConsumablePurchaseImpl(
                     storeItem = storeItem,
@@ -104,7 +117,7 @@ class PurchaseCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
             sender.sendMessage(plugin.messages["purchase-store-item-id-invalid-item"])
             return true
         }
-        purchaseProvider.addPurchase(purchase)
+        purchaseService.addPurchase(purchase)
         sender.sendMessage(plugin.messages["purchase-successful", mapOf(
                 Pair("player-name", bukkitOfflinePlayer.name ?: ""),
                 Pair("player-uuid", bukkitOfflinePlayer.uniqueId.toString()),

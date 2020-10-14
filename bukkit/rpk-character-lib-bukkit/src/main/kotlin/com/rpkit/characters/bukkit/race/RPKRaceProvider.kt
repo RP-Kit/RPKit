@@ -16,15 +16,15 @@
 
 package com.rpkit.characters.bukkit.race
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
  * Provides race-related services.
  */
-interface RPKRaceProvider: ServiceProvider {
+interface RPKRaceService : Service {
 
     /**
-     * A collection of races currently managed by this race provider.
+     * A collection of races currently managed by this race service.
      * This is immutable, races must be added and removed using [addRace] and [removeRace].
      */
     val races: Collection<RPKRace>
@@ -48,14 +48,14 @@ interface RPKRaceProvider: ServiceProvider {
     fun getRace(name: String): RPKRace?
 
     /**
-     * Adds a race to be tracked by this race provider.
+     * Adds a race to be tracked by this race service.
      *
      * @param race The race to add
      */
     fun addRace(race: RPKRace)
 
     /**
-     * Removes a race from being tracked by this race provider.
+     * Removes a race from being tracked by this race service.
      *
      * @param race The race to remove
      */

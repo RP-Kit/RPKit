@@ -23,40 +23,40 @@ import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupDeleteEvent
 import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupUpdateEvent
 
 /**
- * Payment group provider implementation.
+ * Payment group service implementation.
  */
-class RPKPaymentGroupProviderImpl(private val plugin: RPKPaymentsBukkit): RPKPaymentGroupProvider {
+class RPKPaymentGroupServiceImpl(override val plugin: RPKPaymentsBukkit) : RPKPaymentGroupService {
 
     override val paymentGroups: List<RPKPaymentGroup>
-        get() = plugin.core.database.getTable(RPKPaymentGroupTable::class).getAll()
+        get() = plugin.database.getTable(RPKPaymentGroupTable::class).getAll()
 
     override fun getPaymentGroup(id: Int): RPKPaymentGroup? {
-        return plugin.core.database.getTable(RPKPaymentGroupTable::class)[id]
+        return plugin.database.getTable(RPKPaymentGroupTable::class)[id]
     }
 
     override fun getPaymentGroup(name: String): RPKPaymentGroup? {
-        return plugin.core.database.getTable(RPKPaymentGroupTable::class).get(name)
+        return plugin.database.getTable(RPKPaymentGroupTable::class).get(name)
     }
 
     override fun addPaymentGroup(paymentGroup: RPKPaymentGroup) {
         val event = RPKBukkitPaymentGroupCreateEvent(paymentGroup)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKPaymentGroupTable::class).insert(event.paymentGroup)
+        plugin.database.getTable(RPKPaymentGroupTable::class).insert(event.paymentGroup)
     }
 
     override fun removePaymentGroup(paymentGroup: RPKPaymentGroup) {
         val event = RPKBukkitPaymentGroupDeleteEvent(paymentGroup)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKPaymentGroupTable::class).delete(event.paymentGroup)
+        plugin.database.getTable(RPKPaymentGroupTable::class).delete(event.paymentGroup)
     }
 
     override fun updatePaymentGroup(paymentGroup: RPKPaymentGroup) {
         val event = RPKBukkitPaymentGroupUpdateEvent(paymentGroup)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKPaymentGroupTable::class).update(event.paymentGroup)
+        plugin.database.getTable(RPKPaymentGroupTable::class).update(event.paymentGroup)
     }
 
 }

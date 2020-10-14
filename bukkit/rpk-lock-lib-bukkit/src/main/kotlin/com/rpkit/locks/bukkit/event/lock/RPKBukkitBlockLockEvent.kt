@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitBlockLockEvent(
         override val block: Block
-): RPKBukkitEvent(), RPKBlockLockEvent, Cancellable {
+) : RPKBukkitEvent(), RPKBlockLockEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

@@ -23,11 +23,10 @@ import org.bstats.bukkit.Metrics
  * Class to allow shop lib to load as a plugin.
  * This allows plugins requiring shops or implementing shops to depend on the plugin.
  */
-class RPKShopLibBukkit: RPKBukkitPlugin() {
+class RPKShopLibBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4414)
-        serviceProviders = arrayOf()
     }
 
 }

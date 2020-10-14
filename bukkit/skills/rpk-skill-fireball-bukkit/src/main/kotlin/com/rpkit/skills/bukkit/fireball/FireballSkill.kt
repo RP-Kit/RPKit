@@ -17,9 +17,10 @@
 package com.rpkit.skills.bukkit.fireball
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkill
-import com.rpkit.skills.bukkit.skills.RPKSkillPointProvider
-import com.rpkit.skills.bukkit.skills.RPKSkillTypeProvider
+import com.rpkit.skills.bukkit.skills.RPKSkillPointService
+import com.rpkit.skills.bukkit.skills.RPKSkillTypeService
 import org.bukkit.Bukkit
 import org.bukkit.entity.Fireball
 
@@ -38,12 +39,12 @@ class FireballSkill(private val plugin: RPKFireballSkillBukkit) : RPKSkill {
     }
 
     override fun canUse(character: RPKCharacter): Boolean {
-        val skillTypeProvider = plugin.core.serviceManager.getServiceProvider(RPKSkillTypeProvider::class)
-        val skillPointProvider = plugin.core.serviceManager.getServiceProvider(RPKSkillPointProvider::class)
+        val skillTypeService = Services[RPKSkillTypeService::class] ?: return false
+        val skillPointService = Services[RPKSkillPointService::class] ?: return false
         return plugin.config.getConfigurationSection("requirements")
                 ?.getKeys(false)
                 ?.mapNotNull { skillTypeName ->
-                    val skillType = skillTypeProvider.getSkillType(skillTypeName)
+                    val skillType = skillTypeService.getSkillType(skillTypeName)
                     if (skillType != null) {
                         val skillPoints = plugin.config.getInt("requirements.${skillType.name}")
                         skillType to skillPoints
@@ -52,7 +53,7 @@ class FireballSkill(private val plugin: RPKFireballSkillBukkit) : RPKSkill {
                     }
                 }
                 ?.all { (skillType, requiredPoints) ->
-                    skillPointProvider.getSkillPoints(character, skillType) >= requiredPoints
+                    skillPointService.getSkillPoints(character, skillType) >= requiredPoints
                 } ?: false
     }
 }

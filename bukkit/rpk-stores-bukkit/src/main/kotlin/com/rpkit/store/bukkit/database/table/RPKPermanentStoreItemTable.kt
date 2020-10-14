@@ -21,15 +21,16 @@ import com.rpkit.core.database.Table
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItemImpl
-import com.rpkit.stores.bukkit.database.jooq.rpkit.Tables.RPKIT_PERMANENT_STORE_ITEM
-import com.rpkit.stores.bukkit.database.jooq.rpkit.Tables.RPKIT_STORE_ITEM
+import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_PERMANENT_STORE_ITEM
+import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_STORE_ITEM
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 
-class RPKPermanentStoreItemTable(database: Database, private val plugin: RPKStoresBukkit): Table<RPKPermanentStoreItem>(database, RPKPermanentStoreItem::class) {
+class RPKPermanentStoreItemTable(
+        private val database: Database,
+        plugin: RPKStoresBukkit
+) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_permanent_store_item.id.enabled")) {
         database.cacheManager.createCache("rpkit-stores-bukkit.rpkit_permanent_store_item.id",
@@ -39,25 +40,7 @@ class RPKPermanentStoreItemTable(database: Database, private val plugin: RPKStor
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_PERMANENT_STORE_ITEM)
-                .column(RPKIT_PERMANENT_STORE_ITEM.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_PERMANENT_STORE_ITEM.STORE_ITEM_ID, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("pk_rpkit_permanent_store_item").primaryKey(RPKIT_PERMANENT_STORE_ITEM.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.6.0")
-        }
-
-    }
-
-    override fun insert(entity: RPKPermanentStoreItem): Int {
+    fun insert(entity: RPKPermanentStoreItem) {
         val id = database.getTable(RPKStoreItemTable::class).insert(entity)
         database.create
                 .insertInto(
@@ -70,15 +53,14 @@ class RPKPermanentStoreItemTable(database: Database, private val plugin: RPKStor
                 .execute()
         entity.id = id
         cache?.put(id, entity)
-        return id
     }
 
-    override fun update(entity: RPKPermanentStoreItem) {
+    fun update(entity: RPKPermanentStoreItem) {
         database.getTable(RPKStoreItemTable::class).update(entity)
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKPermanentStoreItem? {
+    operator fun get(id: Int): RPKPermanentStoreItem? {
         if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
@@ -108,7 +90,7 @@ class RPKPermanentStoreItemTable(database: Database, private val plugin: RPKStor
         }
     }
 
-    override fun delete(entity: RPKPermanentStoreItem) {
+    fun delete(entity: RPKPermanentStoreItem) {
         database.getTable(RPKStoreItemTable::class).delete(entity)
         database.create
                 .deleteFrom(RPKIT_PERMANENT_STORE_ITEM)

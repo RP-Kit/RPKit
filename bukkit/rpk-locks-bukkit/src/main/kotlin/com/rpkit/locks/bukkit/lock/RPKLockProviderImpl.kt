@@ -19,6 +19,7 @@ package com.rpkit.locks.bukkit.lock
 import com.rpkit.core.bukkit.util.withDisplayName
 import com.rpkit.core.bukkit.util.withLore
 import com.rpkit.core.bukkit.util.withoutLoreMatching
+import com.rpkit.core.service.Services
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.database.table.RPKLockedBlockTable
 import com.rpkit.locks.bukkit.database.table.RPKPlayerGettingKeyTable
@@ -31,7 +32,7 @@ import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
 
 
-class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
+class RPKLockServiceImpl(override val plugin: RPKLocksBukkit) : RPKLockService {
 
     override val lockItem: ItemStack = plugin.config.getItemStack("lock-item")
             ?: ItemStack(Material.IRON_INGOT).withDisplayName("Lock")
@@ -39,11 +40,11 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
             ?: ItemStack(Material.IRON_INGOT).withDisplayName("Key")
 
     override fun isLocked(block: Block): Boolean {
-        return plugin.core.database.getTable(RPKLockedBlockTable::class).get(block) != null
+        return plugin.database.getTable(RPKLockedBlockTable::class).get(block) != null
     }
 
     override fun setLocked(block: Block, locked: Boolean) {
-        val lockedBlockTable = plugin.core.database.getTable(RPKLockedBlockTable::class)
+        val lockedBlockTable = plugin.database.getTable(RPKLockedBlockTable::class)
         if (locked) {
             val event = RPKBukkitBlockLockEvent(block)
             plugin.server.pluginManager.callEvent(event)
@@ -65,30 +66,28 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
 
     override fun isClaiming(minecraftProfile: RPKMinecraftProfile): Boolean {
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
-        val bukkitPlayer = bukkitOfflinePlayer.player
-        if (bukkitPlayer != null) {
-            val item = bukkitPlayer.inventory.itemInMainHand
-            val lockProvider = plugin.core.serviceManager.getServiceProvider(RPKLockProvider::class)
-            if (item.isSimilar(lockProvider.lockItem)) {
-                return true
-            }
+        val bukkitPlayer = bukkitOfflinePlayer.player ?: return false
+        val item = bukkitPlayer.inventory.itemInMainHand
+        val lockService = Services[RPKLockService::class] ?: return false
+        if (item.isSimilar(lockService.lockItem)) {
+            return true
         }
         return false
     }
 
     override fun isUnclaiming(minecraftProfile: RPKMinecraftProfile): Boolean {
-        return plugin.core.database.getTable(RPKPlayerUnclaimingTable::class).get(minecraftProfile) != null
+        return plugin.database.getTable(RPKPlayerUnclaimingTable::class)[minecraftProfile] != null
     }
 
     override fun setUnclaiming(minecraftProfile: RPKMinecraftProfile, unclaiming: Boolean) {
-        val playerUnclaimingTable = plugin.core.database.getTable(RPKPlayerUnclaimingTable::class)
+        val playerUnclaimingTable = plugin.database.getTable(RPKPlayerUnclaimingTable::class)
         if (unclaiming) {
-            val playerUnclaiming = playerUnclaimingTable.get(minecraftProfile)
+            val playerUnclaiming = playerUnclaimingTable[minecraftProfile]
             if (playerUnclaiming == null) {
                 playerUnclaimingTable.insert(RPKPlayerUnclaiming(minecraftProfile = minecraftProfile))
             }
         } else {
-            val playerUnclaiming = playerUnclaimingTable.get(minecraftProfile)
+            val playerUnclaiming = playerUnclaimingTable[minecraftProfile]
             if (playerUnclaiming != null) {
                 playerUnclaimingTable.delete(playerUnclaiming)
             }
@@ -96,11 +95,11 @@ class RPKLockProviderImpl(private val plugin: RPKLocksBukkit): RPKLockProvider {
     }
 
     override fun isGettingKey(minecraftProfile: RPKMinecraftProfile): Boolean {
-        return plugin.core.database.getTable(RPKPlayerGettingKeyTable::class).get(minecraftProfile) != null
+        return plugin.database.getTable(RPKPlayerGettingKeyTable::class).get(minecraftProfile) != null
     }
 
     override fun setGettingKey(minecraftProfile: RPKMinecraftProfile, gettingKey: Boolean) {
-        val playerGettingKeyTable = plugin.core.database.getTable(RPKPlayerGettingKeyTable::class)
+        val playerGettingKeyTable = plugin.database.getTable(RPKPlayerGettingKeyTable::class)
         if (gettingKey) {
             val playerGettingKey = playerGettingKeyTable.get(minecraftProfile)
             if (playerGettingKey == null) {

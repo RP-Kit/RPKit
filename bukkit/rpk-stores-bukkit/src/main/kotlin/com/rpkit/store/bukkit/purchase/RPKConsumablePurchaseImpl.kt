@@ -22,9 +22,9 @@ import java.time.LocalDateTime
 
 
 class RPKConsumablePurchaseImpl(
-        override var id: Int = 0,
+        override var id: Int? = null,
         override val storeItem: RPKConsumableStoreItem,
         override var remainingUses: Int,
         override val profile: RPKProfile,
         override val purchaseDate: LocalDateTime
-): RPKConsumablePurchase
+) : RPKConsumablePurchase

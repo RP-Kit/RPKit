@@ -17,12 +17,12 @@
 package com.rpkit.store.bukkit.storeitem
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
  * Provides store item related operations
  */
-interface RPKStoreItemProvider: ServiceProvider {
+interface RPKStoreItemService : Service {
 
     /**
      * Gets a store item by plugin and identifier.

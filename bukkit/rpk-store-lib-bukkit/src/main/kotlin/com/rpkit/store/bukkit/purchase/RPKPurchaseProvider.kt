@@ -16,13 +16,13 @@
 
 package com.rpkit.store.bukkit.purchase
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 /**
  * Provides purchase related operations.
  */
-interface RPKPurchaseProvider: ServiceProvider {
+interface RPKPurchaseService : Service {
 
     /**
      * Gets a list of purchases by a given profile

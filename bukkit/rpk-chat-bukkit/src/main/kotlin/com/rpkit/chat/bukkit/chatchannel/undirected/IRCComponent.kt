@@ -19,7 +19,8 @@ package com.rpkit.chat.bukkit.chatchannel.undirected
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
-import com.rpkit.chat.bukkit.irc.RPKIRCProvider
+import com.rpkit.chat.bukkit.irc.RPKIRCService
+import com.rpkit.core.service.Services
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
@@ -34,13 +35,13 @@ class IRCComponent(
         private val plugin: RPKChatBukkit,
         val ircChannel: String,
         val isIRCWhitelisted: Boolean
-): UndirectedPipelineComponent, ConfigurationSerializable {
+) : UndirectedPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         if (!context.isCancelled) {
-            val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
-            if (ircProvider.ircBot.isConnected) {
-                ircProvider.ircBot.sendIRC().message(ircChannel, ChatColor.stripColor(context.message))
+            val ircService = Services[RPKIRCService::class] ?: return context
+            if (ircService.ircBot.isConnected) {
+                ircService.ircBot.sendIRC().message(ircChannel, ChatColor.stripColor(context.message))
             }
         }
         return context

@@ -17,12 +17,12 @@
 package com.rpkit.auctions.bukkit.bid
 
 import com.rpkit.auctions.bukkit.auction.RPKAuction
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
  * Provides bid-related operations.
  */
-interface RPKBidProvider: ServiceProvider {
+interface RPKBidService : Service {
 
     /**
      * Adds a bid.

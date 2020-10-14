@@ -16,8 +16,8 @@
 
 package com.rpkit.food.bukkit.listener
 
-import com.rpkit.food.bukkit.RPKFoodBukkit
-import com.rpkit.food.bukkit.expiry.RPKExpiryProviderImpl
+import com.rpkit.core.service.Services
+import com.rpkit.food.bukkit.expiry.RPKExpiryServiceImpl
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.PrepareItemCraftEvent
@@ -25,15 +25,15 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent
 /**
  * Craft item listener for adding expiry dates.
  */
-class PrepareItemCraftListener(private val plugin: RPKFoodBukkit): Listener {
+class PrepareItemCraftListener : Listener {
 
     @EventHandler
     fun onPrepareItemCraft(event: PrepareItemCraftEvent) {
         val item = event.inventory.result
         if (item != null) {
             if (item.type.isEdible) {
-                val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProviderImpl::class)
-                expiryProvider.setExpiry(item)
+                val expiryService = Services[RPKExpiryServiceImpl::class] ?: return
+                expiryService.setExpiry(item)
                 event.inventory.result = item
             }
         }

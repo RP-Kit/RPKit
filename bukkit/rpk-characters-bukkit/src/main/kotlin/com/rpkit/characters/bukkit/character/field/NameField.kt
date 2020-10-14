@@ -21,15 +21,17 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * Character card field for name.
  */
-class NameField: HideableCharacterCardField {
+class NameField : HideableCharacterCardField {
 
     override val name = "name"
     override fun get(character: RPKCharacter): String {
         return if (isHidden(character)) "[HIDDEN]" else character.name
     }
+
     override fun isHidden(character: RPKCharacter): Boolean {
         return character.isNameHidden
     }
+
     override fun setHidden(character: RPKCharacter, hidden: Boolean) {
         character.isNameHidden = hidden
     }

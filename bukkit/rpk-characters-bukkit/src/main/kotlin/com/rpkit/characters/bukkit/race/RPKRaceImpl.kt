@@ -20,6 +20,6 @@ package com.rpkit.characters.bukkit.race
  * Race implementation.
  */
 class RPKRaceImpl(
-        override var id: Int = 0,
+        override var id: Int? = null,
         override val name: String
-): RPKRace
+) : RPKRace

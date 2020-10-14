@@ -18,12 +18,16 @@ package com.rpkit.auctions.bukkit.bid
 
 import com.rpkit.auctions.bukkit.auction.RPKAuction
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 
 /**
  * Represents a bid.
  */
-interface RPKBid: Entity {
+interface RPKBid {
+
+    /**
+     * The bid ID. Guaranteed to be unique.
+     */
+    var id: Int?
 
     /**
      * The auction that this bid is for.

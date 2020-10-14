@@ -18,6 +18,10 @@ package com.rpkit.moderation.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.command.amivanished.AmIVanishedCommand
 import com.rpkit.moderation.bukkit.command.onlinestaff.OnlineStaffCommand
 import com.rpkit.moderation.bukkit.command.ticket.TicketCommand
@@ -30,21 +34,73 @@ import com.rpkit.moderation.bukkit.database.table.RPKTicketTable
 import com.rpkit.moderation.bukkit.database.table.RPKVanishStateTable
 import com.rpkit.moderation.bukkit.database.table.RPKWarningTable
 import com.rpkit.moderation.bukkit.listener.PlayerJoinListener
-import com.rpkit.moderation.bukkit.ticket.RPKTicketProviderImpl
-import com.rpkit.moderation.bukkit.vanish.RPKVanishProviderImpl
-import com.rpkit.moderation.bukkit.warning.RPKWarningProviderImpl
+import com.rpkit.moderation.bukkit.ticket.RPKTicketService
+import com.rpkit.moderation.bukkit.ticket.RPKTicketServiceImpl
+import com.rpkit.moderation.bukkit.vanish.RPKVanishService
+import com.rpkit.moderation.bukkit.vanish.RPKVanishServiceImpl
+import com.rpkit.moderation.bukkit.warning.RPKWarningService
+import com.rpkit.moderation.bukkit.warning.RPKWarningServiceImpl
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
 
-class RPKModerationBukkit: RPKBukkitPlugin() {
+class RPKModerationBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 4403)
-        serviceProviders = arrayOf(
-                RPKTicketProviderImpl(this),
-                RPKVanishProviderImpl(this),
-                RPKWarningProviderImpl(this)
+
+        saveDefaultConfig()
+
+        Services[RPKTicketService::class] = RPKTicketServiceImpl(this)
+        Services[RPKVanishService::class] = RPKVanishServiceImpl(this)
+        Services[RPKWarningService::class] = RPKWarningServiceImpl(this)
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/moderation/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/moderation/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_players"
+                ),
+                classLoader
         )
+        database.addTable(RPKTicketTable(database, this))
+        database.addTable(RPKVanishStateTable(database, this))
+        database.addTable(RPKWarningTable(database, this))
     }
 
     override fun registerCommands() {
@@ -113,12 +169,10 @@ class RPKModerationBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-warning-create", "&cYou do not have permission to issue warnings.")
         messages.setDefault("no-permission-warning-list", "&cYou do not have permission to list your warnings.")
         messages.setDefault("no-permission-warning-remove", "&cYou do not have permission to remove warnings.")
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKTicketTable(database, this))
-        database.addTable(RPKVanishStateTable(database, this))
-        database.addTable(RPKWarningTable(database, this))
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-vanish-service", "&cThere is no vanish service available.")
+        messages.setDefault("no-ticket-service", "&cThere is no ticket service available.")
+        messages.setDefault("no-warning-service", "&cThere is no warning service available.")
     }
 
 }

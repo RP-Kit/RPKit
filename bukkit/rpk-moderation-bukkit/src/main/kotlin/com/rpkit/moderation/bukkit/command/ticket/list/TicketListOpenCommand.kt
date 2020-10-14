@@ -16,22 +16,27 @@
 
 package com.rpkit.moderation.bukkit.command.ticket.list
 
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
-import com.rpkit.moderation.bukkit.ticket.RPKTicketProvider
+import com.rpkit.moderation.bukkit.ticket.RPKTicketService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import java.time.format.DateTimeFormatter
 
 
-class TicketListOpenCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class TicketListOpenCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.moderation.command.ticket.list.open")) {
             sender.sendMessage(plugin.messages["no-permission-ticket-list-open"])
         }
-        val ticketProvider = plugin.core.serviceManager.getServiceProvider(RPKTicketProvider::class)
-        val openTickets = ticketProvider.getOpenTickets()
+        val ticketService = Services[RPKTicketService::class]
+        if (ticketService == null) {
+            sender.sendMessage(plugin.messages["no-ticket-service"])
+            return true
+        }
+        val openTickets = ticketService.getOpenTickets()
         sender.sendMessage(plugin.messages["ticket-list-title"])
         val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         openTickets.forEach { ticket ->
@@ -41,7 +46,7 @@ class TicketListOpenCommand(private val plugin: RPKModerationBukkit): CommandExe
                     Pair("reason", ticket.reason),
                     Pair("location", "${ticket.location?.world} ${ticket.location?.blockX}, ${ticket.location?.blockY}, ${ticket.location?.blockZ}"),
                     Pair("issuer", ticket.issuer.name),
-                    Pair("resolver", ticket.resolver?.name?:"none"),
+                    Pair("resolver", ticket.resolver?.name ?: "none"),
                     Pair("open-date", dateTimeFormatter.format(ticket.openDate)),
                     Pair("close-date", if (closeDate == null) "none" else dateTimeFormatter.format(ticket.closeDate)),
                     Pair("closed", ticket.isClosed.toString())

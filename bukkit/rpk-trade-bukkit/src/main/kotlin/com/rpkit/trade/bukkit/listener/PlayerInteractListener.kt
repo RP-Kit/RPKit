@@ -16,12 +16,12 @@
 
 package com.rpkit.trade.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.core.exception.UnregisteredServiceException
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.food.bukkit.expiry.RPKExpiryProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
+import com.rpkit.economy.bukkit.economy.RPKEconomyService
+import com.rpkit.food.bukkit.expiry.RPKExpiryService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.trade.bukkit.RPKTradeBukkit
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material
@@ -36,12 +36,11 @@ import org.bukkit.inventory.ItemStack
 /**
  * Player interact listener for trader signs.
  */
-class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
+class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
 
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
-        val clickedBlock = event.clickedBlock
-        if (clickedBlock == null) return
+        val clickedBlock = event.clickedBlock ?: return
         if (clickedBlock.state !is Sign) return
         val sign = clickedBlock.state as Sign
         if (sign.getLine(0) != "$GREEN[trader]") return
@@ -54,23 +53,40 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
             return
         }
         val amount = if (sign.getLine(1).matches(Regex("\\d+\\s+.*"))) sign.getLine(1).split(Regex("\\s+"))[0].toInt() else 1
-        var buyPrice = sign.getLine(2).split(" | ")[0].toInt()
-        var sellPrice = sign.getLine(2).split(" | ")[1].toInt()
+        val buyPrice = sign.getLine(2).split(" | ")[0].toInt()
+        val sellPrice = sign.getLine(2).split(" | ")[1].toInt()
         var actualPrice = arrayOf(buyPrice, sellPrice).average()
-        val currency = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(sign.getLine(3))
+        val currencyService = Services[RPKCurrencyService::class]
+        if (currencyService == null) {
+            event.player.sendMessage(plugin.messages["no-currency-service"])
+            return
+        }
+        val currency = currencyService.getCurrency(sign.getLine(3))
         if (currency == null) {
             event.player.sendMessage(plugin.messages["trader-invalid-currency"])
             return
         }
         if (event.action === RIGHT_CLICK_BLOCK) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+            if (minecraftProfileService == null) {
+                event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
+                return
+            }
+            val characterService = Services[RPKCharacterService::class]
+            if (characterService == null) {
+                event.player.sendMessage(plugin.messages["no-character-service"])
+                return
+            }
+            val economyService = Services[RPKEconomyService::class]
+            if (economyService == null) {
+                event.player.sendMessage(plugin.messages["no-economy-service"])
+                return
+            }
+            val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
             if (minecraftProfile == null) {
                 event.player.sendMessage(plugin.messages["no-minecraft-profile"])
             } else {
-                val character = characterProvider.getActiveCharacter(minecraftProfile)
+                val character = characterService.getActiveCharacter(minecraftProfile)
                 if (character == null) {
                     event.player.sendMessage(plugin.messages["no-character"])
                     return
@@ -79,16 +95,13 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                     event.player.sendMessage(plugin.messages["no-permission-trader-buy"])
                     return
                 }
-                if (economyProvider.getBalance(character, currency) < buyPrice) {
+                if (economyService.getBalance(character, currency) < buyPrice) {
                     event.player.sendMessage(plugin.messages["trader-buy-insufficient-funds"])
                     return
                 }
-                economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - buyPrice)
+                economyService.setBalance(character, currency, economyService.getBalance(character, currency) - buyPrice)
                 val item = ItemStack(material, amount)
-                try {
-                    val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProvider::class)
-                    expiryProvider.setExpiry(item)
-                } catch (ignore: UnregisteredServiceException) {}
+                Services[RPKExpiryService::class]?.setExpiry(item)
                 event.player.inventory.addItem(item)
                 event.player.sendMessage(plugin.messages["trader-buy", mapOf(
                         Pair("quantity", amount.toString()),
@@ -99,15 +112,27 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                 updatePrices(sign, material, actualPrice)
             }
         } else if (event.action == LEFT_CLICK_BLOCK) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+            if (minecraftProfileService == null) {
+                event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
+                return
+            }
+            val characterService = Services[RPKCharacterService::class]
+            if (characterService == null) {
+                event.player.sendMessage(plugin.messages["no-character-service"])
+                return
+            }
+            val economyService = Services[RPKEconomyService::class]
+            if (economyService == null) {
+                event.player.sendMessage(plugin.messages["no-economy-service"])
+                return
+            }
+            val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
             if (minecraftProfile == null) {
                 event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                 return
             }
-            val character = characterProvider.getActiveCharacter(minecraftProfile)
+            val character = characterService.getActiveCharacter(minecraftProfile)
             if (character == null) {
                 event.player.sendMessage(plugin.messages["no-character"])
                 return
@@ -120,11 +145,11 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit): Listener {
                 event.player.sendMessage(plugin.messages["trader-sell-insufficient-items"])
                 return
             }
-            if (economyProvider.getBalance(character, currency) + sellPrice > 1728) {
+            if (economyService.getBalance(character, currency) + sellPrice > 1728) {
                 event.player.sendMessage(plugin.messages["trader-sell-insufficient-wallet-space"])
                 return
             }
-            economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + sellPrice)
+            economyService.setBalance(character, currency, economyService.getBalance(character, currency) + sellPrice)
             var amountRemaining = amount
             val contents = event.player.inventory.contents
             contents

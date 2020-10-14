@@ -17,4 +17,4 @@
 package com.rpkit.store.bukkit.event.purchase
 
 
-interface RPKPurchaseDeleteEvent: RPKPurchaseEvent
+interface RPKPurchaseDeleteEvent : RPKPurchaseEvent

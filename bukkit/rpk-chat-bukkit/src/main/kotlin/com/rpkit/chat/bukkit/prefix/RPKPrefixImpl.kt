@@ -20,7 +20,6 @@ package com.rpkit.chat.bukkit.prefix
  * Prefix implementation.
  */
 class RPKPrefixImpl(
-        override var id: Int = 0,
         override val name: String,
         override var prefix: String
-): RPKPrefix
+) : RPKPrefix

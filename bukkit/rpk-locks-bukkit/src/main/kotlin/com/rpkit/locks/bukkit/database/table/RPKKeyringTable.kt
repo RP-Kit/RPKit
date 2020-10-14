@@ -1,49 +1,44 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.locks.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.bukkit.util.toByteArray
 import com.rpkit.core.bukkit.util.toItemStackArray
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.locks.bukkit.RPKLocksBukkit
-import com.rpkit.locks.bukkit.database.jooq.rpkit.Tables.RPKIT_KEYRING
+import com.rpkit.locks.bukkit.database.jooq.Tables.RPKIT_KEYRING
 import com.rpkit.locks.bukkit.keyring.RPKKeyring
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 
-class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): Table<RPKKeyring>(database, RPKKeyring::class) {
+class RPKKeyringTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
 
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_keyring.id.enabled")) {
-        database.cacheManager.createCache("rpk-locks-bukkit.rpkit_keyring.id",
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_keyring.character_id.enabled")) {
+        database.cacheManager.createCache("rpk-locks-bukkit.rpkit_keyring.character_id",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKKeyring::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_keyring.id.size"))))
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_keyring.character_id.size"))))
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_KEYRING)
-                .column(RPKIT_KEYRING.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_KEYRING.CHARACTER_ID, SQLDataType.INTEGER)
-                .column(RPKIT_KEYRING.ITEMS, SQLDataType.BLOB)
-                .constraints(
-                        constraint("pk_rpkit_keyring").primaryKey(RPKIT_KEYRING.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.1.0")
-        }
-    }
-
-    override fun insert(entity: RPKKeyring): Int {
+    fun insert(entity: RPKKeyring) {
         database.create
                 .insertInto(
                         RPKIT_KEYRING,
@@ -55,25 +50,21 @@ class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): T
                         entity.items.toTypedArray().toByteArray()
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
+        cache?.put(entity.character.id, entity)
     }
 
-    override fun update(entity: RPKKeyring) {
+    fun update(entity: RPKKeyring) {
         database.create
                 .update(RPKIT_KEYRING)
-                .set(RPKIT_KEYRING.CHARACTER_ID, entity.character.id)
                 .set(RPKIT_KEYRING.ITEMS, entity.items.toTypedArray().toByteArray())
-                .where(RPKIT_KEYRING.ID.eq(entity.id))
+                .where(RPKIT_KEYRING.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.put(entity.character.id, entity)
     }
 
-    override fun get(id: Int): RPKKeyring? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(character: RPKCharacter): RPKKeyring? {
+        if (cache?.containsKey(character.id) == true) {
+            return cache[character.id]
         } else {
             val result = database.create
                     .select(
@@ -81,44 +72,22 @@ class RPKKeyringTable(database: Database, private val plugin: RPKLocksBukkit): T
                             RPKIT_KEYRING.ITEMS
                     )
                     .from(RPKIT_KEYRING)
-                    .where(RPKIT_KEYRING.ID.eq(id))
+                    .where(RPKIT_KEYRING.CHARACTER_ID.eq(character.id))
                     .fetchOne() ?: return null
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val characterId = result.get(RPKIT_KEYRING.CHARACTER_ID)
-            val character = characterProvider.getCharacter(characterId)
-            if (character != null) {
-                val keyring = RPKKeyring(
-                        id,
-                        character,
-                        result.get(RPKIT_KEYRING.ITEMS).toItemStackArray().toMutableList()
-                )
-                cache?.put(id, keyring)
-                return keyring
-            } else {
-                database.create
-                        .deleteFrom(RPKIT_KEYRING)
-                        .where(RPKIT_KEYRING.ID.eq(id))
-                        .execute()
-                cache?.remove(id)
-                return null
-            }
+            val keyring = RPKKeyring(
+                    character,
+                    result.get(RPKIT_KEYRING.ITEMS).toItemStackArray().toMutableList()
+            )
+            cache?.put(character.id, keyring)
+            return keyring
         }
     }
 
-    fun get(character: RPKCharacter): RPKKeyring? {
-        val result = database.create
-                .select(RPKIT_KEYRING.ID)
-                .from(RPKIT_KEYRING)
-                .where(RPKIT_KEYRING.CHARACTER_ID.eq(character.id))
-                .fetchOne() ?: return null
-        return get(result[RPKIT_KEYRING.ID])
-    }
-
-    override fun delete(entity: RPKKeyring) {
+    fun delete(entity: RPKKeyring) {
         database.create
                 .deleteFrom(RPKIT_KEYRING)
-                .where(RPKIT_KEYRING.ID.eq(entity.id))
+                .where(RPKIT_KEYRING.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(entity.character.id)
     }
 }

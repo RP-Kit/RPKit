@@ -16,34 +16,28 @@
 
 package com.rpkit.unconsciousness.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
-import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
-import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
+import org.bukkit.potion.PotionEffectType.BLINDNESS
 
 
-class PlayerJoinListener(private val plugin: RPKUnconsciousnessBukkit): Listener {
+class PlayerJoinListener : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
         val bukkitPlayer = event.player
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val unconsciousnessProvider = plugin.core.serviceManager.getServiceProvider(RPKUnconsciousnessProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-        if (minecraftProfile != null) {
-            val character = characterProvider.getActiveCharacter(minecraftProfile)
-            if (character != null) {
-                if (!unconsciousnessProvider.isUnconscious(character)) {
-                    event.player.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 0,0), true)
-                }
-            }
-        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val characterService = Services[RPKCharacterService::class] ?: return
+        val unconsciousnessService = Services[RPKUnconsciousnessService::class] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        if (unconsciousnessService.isUnconscious(character)) return
+        event.player.removePotionEffect(BLINDNESS)
     }
 
 }

@@ -16,13 +16,13 @@
 
 package com.rpkit.chat.bukkit.chatgroup
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Provides chat group related operations.
  */
-interface RPKChatGroupProvider: ServiceProvider {
+interface RPKChatGroupService : Service {
 
     /**
      * Gets a chat group by ID.
@@ -43,14 +43,14 @@ interface RPKChatGroupProvider: ServiceProvider {
     fun getChatGroup(name: String): RPKChatGroup?
 
     /**
-     * Adds a chat group to be tracked by this chat group provider.
+     * Adds a chat group to be tracked by this chat group service.
      *
      * @param chatGroup The chat group to add
      */
     fun addChatGroup(chatGroup: RPKChatGroup)
 
     /**
-     * Removes a chat group from being tracked by this chat group provider.
+     * Removes a chat group from being tracked by this chat group service.
      *
      * @param chatGroup The chat group to remove
      */

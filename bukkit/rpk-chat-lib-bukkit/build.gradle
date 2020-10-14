@@ -33,7 +33,7 @@ dependencies {
     implementation group: "org.bstats", name: "bstats-bukkit", version: "1.7"
     implementation group: "net.milkbowl.vault", name: "VaultAPI", version: "1.7"
     implementation group: "org.pircbotx", name: "pircbotx", version: "2.1"
-    implementation (group: "net.dv8tion", name: "JDA", version: "4.1.1_155") {
+    implementation(group: "net.dv8tion", name: "JDA", version: "4.1.1_155") {
         exclude module: "opus-java"
     }
     implementation project(":rpk-core")
@@ -56,7 +56,8 @@ shadowJar {
         include(dependency("org.bstats:bstats-bukkit"))
     }
 
-    relocate "org.bstats", "com.rpkit.chat.bukkit.shadow.lib.org.bstats"}
+    relocate "org.bstats", "com.rpkit.chat.bukkit.shadow.lib.org.bstats"
+}
 
 artifacts {
     archives shadowJar

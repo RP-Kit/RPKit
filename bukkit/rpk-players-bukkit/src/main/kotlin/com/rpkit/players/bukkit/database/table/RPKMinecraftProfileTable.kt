@@ -18,18 +18,21 @@ package com.rpkit.players.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.database.jooq.rpkit.Tables.RPKIT_MINECRAFT_PROFILE
-import com.rpkit.players.bukkit.profile.*
+import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_MINECRAFT_PROFILE
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileImpl
+import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
 import org.bukkit.OfflinePlayer
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 import java.util.*
 
 
-class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKMinecraftProfile>(database, RPKMinecraftProfile::class) {
+class RPKMinecraftProfileTable(private val database: Database, private val plugin: RPKPlayersBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_minecraft_profile.id.enabled")) {
         database.cacheManager.createCache("rpk-players-bukkit.rpkit_minecraft_profile.id",
@@ -39,25 +42,7 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_MINECRAFT_PROFILE)
-                .column(RPKIT_MINECRAFT_PROFILE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_MINECRAFT_PROFILE.PROFILE_ID, SQLDataType.INTEGER)
-                .column(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID, SQLDataType.VARCHAR(36))
-                .constraints(
-                        constraint("pk_rpkit_minecraft_profile").primaryKey(RPKIT_MINECRAFT_PROFILE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.3.0")
-        }
-    }
-
-    override fun insert(entity: RPKMinecraftProfile): Int {
+    fun insert(entity: RPKMinecraftProfile) {
         val profile = entity.profile
         database.create
                 .insertInto(
@@ -77,10 +62,9 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
         val id = database.create.lastID().toInt()
         entity.id = id
         cache?.put(id, entity)
-        return id
     }
 
-    override fun update(entity: RPKMinecraftProfile) {
+    fun update(entity: RPKMinecraftProfile) {
         val profile = entity.profile
         database.create
                 .update(RPKIT_MINECRAFT_PROFILE)
@@ -98,7 +82,7 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKMinecraftProfile? {
+    operator fun get(id: Int): RPKMinecraftProfile? {
         if (cache?.containsKey(id) == true) {
             return cache.get(id)
         } else {
@@ -110,10 +94,10 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
                     .from(RPKIT_MINECRAFT_PROFILE)
                     .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id))
                     .fetchOne() ?: return null
-            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
+            val profileService = Services[RPKProfileService::class]
             val profileId = result.get(RPKIT_MINECRAFT_PROFILE.PROFILE_ID)
-            val profile = if (profileId != null) {
-                profileProvider.getProfile(profileId)
+            val profile = if (profileId != null && profileService != null) {
+                profileService.getProfile(profileId)
             } else {
                 null
             } ?: RPKThinProfileImpl(
@@ -151,7 +135,7 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
         return get(result.get(RPKIT_MINECRAFT_PROFILE.ID))
     }
 
-    override fun delete(entity: RPKMinecraftProfile) {
+    fun delete(entity: RPKMinecraftProfile) {
         database.create
                 .deleteFrom(RPKIT_MINECRAFT_PROFILE)
                 .where(RPKIT_MINECRAFT_PROFILE.ID.eq(entity.id))

@@ -13,20 +13,20 @@ depend:
 - rpk-stat-lib-bukkit
 - rpk-monster-lib-bukkit
 commands:
-    monsterspawnarea:
-        description: Monster spawn area management command
-        usage: /<command> [create|remove|addmonster|removemonster]
-        aliases: [msa]
+  monsterspawnarea:
+    description: Monster spawn area management command
+    usage: /<command> [create|remove|addmonster|removemonster]
+    aliases: [msa]
 permissions:
-    rpkit.monsters.command.monsterspawnarea.create:
-        description: Allows creating monster spawn areas
-        default: op
-    rpkit.monsters.command.monsterspawnarea.remove:
-        description: Allows removing monster spawn areas
-        default: op
-    rpkit.monsters.command.monsterspawnarea.addmonster:
-        description: Allows adding monsters to spawn areas
-        default: op
-    rpkit.monsters.command.monsterspawnarea.removemonster:
-        description: Allows removing monsters from spawn areas
-        default: op
+  rpkit.monsters.command.monsterspawnarea.create:
+    description: Allows creating monster spawn areas
+    default: op
+  rpkit.monsters.command.monsterspawnarea.remove:
+    description: Allows removing monster spawn areas
+    default: op
+  rpkit.monsters.command.monsterspawnarea.addmonster:
+    description: Allows adding monsters to spawn areas
+    default: op
+  rpkit.monsters.command.monsterspawnarea.removemonster:
+    description: Allows removing monsters from spawn areas
+    default: op

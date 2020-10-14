@@ -26,10 +26,11 @@ import org.bukkit.event.HandlerList
 class RPKBukkitDrinkEvent(
         override val character: RPKCharacter,
         override val drink: RPKDrink
-): RPKBukkitEvent(), RPKDrinkEvent, Cancellable {
+) : RPKBukkitEvent(), RPKDrinkEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

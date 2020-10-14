@@ -16,13 +16,13 @@
 
 package com.rpkit.moderation.bukkit.vanish
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Provides vanish related functionality
  */
-interface RPKVanishProvider: ServiceProvider {
+interface RPKVanishService : Service {
 
     /**
      * Checks if the player is currently vanished.

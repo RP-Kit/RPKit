@@ -10,52 +10,52 @@ depend:
 - rpk-economy-lib-bukkit
 api-version: '1.16'
 commands:
-    money:
-        description: Money management command
-        usage: /<command> [add|pay|set|subtract|view|wallet]
-    pay:
-        description: Pays money
-        usage: /<command>
-    wallet:
-        description: Shows your wallet
-        usage: /<command>
-    currency:
-        description: Currency management command
-        usage: /<command> [add|remove|list]
+  money:
+    description: Money management command
+    usage: /<command> [add|pay|set|subtract|view|wallet]
+  pay:
+    description: Pays money
+    usage: /<command>
+  wallet:
+    description: Shows your wallet
+    usage: /<command>
+  currency:
+    description: Currency management command
+    usage: /<command> [add|remove|list]
 permissions:
-    rpkit.economy.command.currency.add:
-        description: Allows adding currencies
-        default: op
-    rpkit.economy.command.currency.remove:
-        description: Allows removing currencies
-        default: op
-    rpkit.economy.command.currency.list:
-        description: Allows listing currencies
-        default: true
-    rpkit.economy.command.money.add:
-        description: Allows adding money to a player''s balance
-        default: op
-    rpkit.economy.command.money.subtract:
-        description: Allows subtracting money from a player''s balance
-        default: op
-    rpkit.economy.command.money.set:
-        description: Allows setting a player''s balance
-        default: op
-    rpkit.economy.command.money.pay:
-        description: Allows paying other players money
-        default: true
-    rpkit.economy.command.money.view.self:
-        description: Allows viewing your own balance
-        default: true
-    rpkit.economy.command.money.view.other:
-        description: Allows viewing other player''s balances
-        default: op
-    rpkit.economy.command.money.wallet:
-        description: Allows opening your wallet
-        default: true
-    rpkit.economy.sign.dynexchange:
-        description: Allows creating dynamic exchange signs
-        default: op
-    rpkit.economy.sign.exchange:
-        description: Allows creating exchange signs
-        default: op
+  rpkit.economy.command.currency.add:
+    description: Allows adding currencies
+    default: op
+  rpkit.economy.command.currency.remove:
+    description: Allows removing currencies
+    default: op
+  rpkit.economy.command.currency.list:
+    description: Allows listing currencies
+    default: true
+  rpkit.economy.command.money.add:
+    description: Allows adding money to a player''s balance
+    default: op
+  rpkit.economy.command.money.subtract:
+    description: Allows subtracting money from a player''s balance
+    default: op
+  rpkit.economy.command.money.set:
+    description: Allows setting a player''s balance
+    default: op
+  rpkit.economy.command.money.pay:
+    description: Allows paying other players money
+    default: true
+  rpkit.economy.command.money.view.self:
+    description: Allows viewing your own balance
+    default: true
+  rpkit.economy.command.money.view.other:
+    description: Allows viewing other player''s balances
+    default: op
+  rpkit.economy.command.money.wallet:
+    description: Allows opening your wallet
+    default: true
+  rpkit.economy.sign.dynexchange:
+    description: Allows creating dynamic exchange signs
+    default: op
+  rpkit.economy.sign.exchange:
+    description: Allows creating exchange signs
+    default: op

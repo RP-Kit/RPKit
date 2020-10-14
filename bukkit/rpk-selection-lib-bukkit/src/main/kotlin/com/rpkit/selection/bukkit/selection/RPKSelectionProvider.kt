@@ -16,11 +16,11 @@
 
 package com.rpkit.selection.bukkit.selection
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 
-interface RPKSelectionProvider: ServiceProvider {
+interface RPKSelectionService : Service {
 
     fun getSelection(minecraftProfile: RPKMinecraftProfile): RPKSelection
     fun updateSelection(selection: RPKSelection)

@@ -16,149 +16,90 @@
 
 package com.rpkit.payments.bukkit
 
-import com.rpkit.banks.bukkit.bank.RPKBankProvider
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.command.payment.PaymentCommand
-import com.rpkit.payments.bukkit.database.table.*
-import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
-import com.rpkit.payments.bukkit.group.RPKPaymentGroupProviderImpl
+import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupInviteTable
+import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupMemberTable
+import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupOwnerTable
+import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupTable
+import com.rpkit.payments.bukkit.database.table.RPKPaymentNotificationTable
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupServiceImpl
 import com.rpkit.payments.bukkit.listener.PlayerJoinListener
-import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
-import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProvider
-import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProviderImpl
+import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationService
+import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationServiceImpl
 import org.bstats.bukkit.Metrics
-import org.bukkit.scheduler.BukkitRunnable
-import java.text.SimpleDateFormat
-import java.util.*
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
 /**
  * RPK payments plugin default implementation.
  */
-class RPKPaymentsBukkit: RPKBukkitPlugin() {
+class RPKPaymentsBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 4406)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKPaymentGroupProviderImpl(this),
-                RPKPaymentNotificationProviderImpl(this)
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/payments/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/payments/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_payments"
+                ),
+                classLoader
         )
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz")
-        object: BukkitRunnable() {
-            override fun run() {
-                val paymentGroupProvider = core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-                val bankProvider = core.serviceManager.getServiceProvider(RPKBankProvider::class)
-                val paymentNotificationProvider = core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
-                paymentGroupProvider.paymentGroups
-                        .filter { group -> group.lastPaymentTime + group.interval < System.currentTimeMillis() }
-                        .forEach { group ->
-                            val currency = group.currency
-                            if (currency != null) {
-                                val now = System.currentTimeMillis()
-                                group.members.forEach { member ->
-                                    if (group.amount < 0) { // Character -> Payment Group, requires balance check on character
-                                        if (bankProvider.getBalance(member, currency) >= -group.amount) { // If character has enough money
-                                            bankProvider.setBalance(member, currency, bankProvider.getBalance(member, currency) + group.amount)
-                                            group.balance -= group.amount
-                                            paymentGroupProvider.updatePaymentGroup(group)
-                                        } else { // If character doesn't have enough money
-                                            // Send notification to member
-                                            val notificationMessage = messages["payment-notification-member-fail-to-pay", mapOf(
-                                                    Pair("member", member.name),
-                                                    Pair("group", group.name),
-                                                    Pair("date", dateFormat.format(Date(now)))
-                                            )]
-                                            if (member.minecraftProfile?.isOnline != true) { // If offline
-                                                paymentNotificationProvider.addPaymentNotification(
-                                                        RPKPaymentNotificationImpl(
-                                                                group = group,
-                                                                to = member,
-                                                                character = member,
-                                                                date = now,
-                                                                text = notificationMessage
-                                                        )
-                                                )
-                                            } else { // If online
-                                                member.minecraftProfile?.sendMessage(notificationMessage)
-                                            }
-                                            val ownerNotificationMessage = messages["payment-notification-owner-fail-to-pay", mapOf(
-                                                    Pair("member", member.name),
-                                                    Pair("group", group.name),
-                                                    Pair("date", dateFormat.format(Date(now)))
-                                            )]
-                                            group.owners.forEach { owner ->
-                                                if (owner.minecraftProfile?.isOnline != true) {
-                                                    paymentNotificationProvider.addPaymentNotification(
-                                                            RPKPaymentNotificationImpl(
-                                                                    group = group,
-                                                                    to = owner,
-                                                                    character = member,
-                                                                    date = now,
-                                                                    text = ownerNotificationMessage
-                                                            )
-                                                    )
-                                                } else {
-                                                    owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
-                                                }
-                                            }
-                                        }
-                                    } else if (group.amount > 0) { // Payment Group -> Character, requires balance check on group
-                                        if (group.balance >= group.amount) { // If group has enough money
-                                            bankProvider.setBalance(member, currency, bankProvider.getBalance(member, currency) + group.amount)
-                                            group.balance -= group.amount
-                                            paymentGroupProvider.updatePaymentGroup(group)
-                                        } else { // If group doesn't have enough money
-                                            // Send notification to member
-                                            val notificationMessage = messages["payment-notification-member-fail-to-be-paid", mapOf(
-                                                    Pair("member", member.name),
-                                                    Pair("group", group.name),
-                                                    Pair("date", dateFormat.format(Date(now)))
-                                            )]
-                                            if (member.minecraftProfile?.isOnline != true) { // If offline
-                                                paymentNotificationProvider.addPaymentNotification(
-                                                        RPKPaymentNotificationImpl(
-                                                                group = group,
-                                                                to = member,
-                                                                character = member,
-                                                                date = now,
-                                                                text = notificationMessage
-                                                        )
-                                                )
-                                            } else { // If online
-                                                member.minecraftProfile?.sendMessage(notificationMessage)
-                                            }
-                                            // Send notification to owners
-                                            val ownerNotificationMessage = messages["payment-notification-owner-fail-to-be-paid", mapOf(
-                                                    Pair("member", member.name),
-                                                    Pair("group", group.name),
-                                                    Pair("date", dateFormat.format(Date(now)))
-                                            )]
-                                            group.owners.forEach { owner ->
-                                                if (owner.minecraftProfile?.isOnline != true) { // If offline
-                                                    paymentNotificationProvider.addPaymentNotification(
-                                                            RPKPaymentNotificationImpl(
-                                                                    group = group,
-                                                                    to = owner,
-                                                                    character = member,
-                                                                    date = now,
-                                                                    text = ownerNotificationMessage
-                                                            )
-                                                    )
-                                                } else { // If online
-                                                    owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                // Update last payment time to avoid charging again in 1 minute
-                                group.lastPaymentTime = System.currentTimeMillis()
-                                paymentGroupProvider.updatePaymentGroup(group)
-                            }
-                        }
-            }
-        }.runTaskTimer(this, 1200L, 1200L) // Keep payments accurate to 1 minute (60 seconds * 20 ticks)
+        database.addTable(RPKPaymentGroupTable(database, this))
+        database.addTable(RPKPaymentGroupInviteTable(database))
+        database.addTable(RPKPaymentGroupMemberTable(database))
+        database.addTable(RPKPaymentGroupOwnerTable(database))
+        database.addTable(RPKPaymentNotificationTable(database, this))
+
+        Services[RPKPaymentGroupService::class] = RPKPaymentGroupServiceImpl(this)
+        Services[RPKPaymentNotificationService::class] = RPKPaymentNotificationServiceImpl(this)
+
+        // Keep payments accurate to 1 minute (60 seconds * 20 ticks)
+        PaymentTask(this)
+                .runTaskTimer(this, 1200L, 1200L)
     }
 
     override fun registerCommands() {
@@ -166,15 +107,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
     }
 
     override fun registerListeners() {
-        registerListeners(PlayerJoinListener(this))
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKPaymentGroupTable(database, this))
-        database.addTable(RPKPaymentGroupInviteTable(database, this))
-        database.addTable(RPKPaymentGroupMemberTable(database, this))
-        database.addTable(RPKPaymentGroupOwnerTable(database, this))
-        database.addTable(RPKPaymentNotificationTable(database, this))
+        registerListeners(PlayerJoinListener())
     }
 
     override fun setDefaultMessages() {
@@ -193,6 +126,7 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
         messages.setDefault("payment-invite-invalid-group", "&cThere is no payment group by that name.")
         messages.setDefault("payment-invite-usage", "&cUsage: /payment invite [group] [player]")
         messages.setDefault("payment-kick-valid", "&aCharacter kicked from payment group.")
+        messages.setDefault("payment-kick-invalid-player", "&cThere is no player by that name online.")
         messages.setDefault("payment-kick-invalid-character", "&cThat player does not have an active character.")
         messages.setDefault("payment-kick-invalid-group", "&cThere is no payment group by that name.")
         messages.setDefault("payment-kick-usage", "&cUsage: /payment kick [group] [player]")
@@ -225,26 +159,26 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
         messages.setDefault("payment-list-title", "&fPayment groups:")
         messages.setDefault("payment-list-item", "&f- &7\$name &f(&7\$rank&f)")
         messages.setDefault("payment-info-owner", listOf(
-            "&7\$name (&a&l\$edit(name)&7)",
-            "&7Owners: &f\$owners",
-            "&7Members: &f\$members",
-            "&7Invites: &f\$invites",
-            "&7Amount: &f\$amount &7(&a&l\$edit(amount)&7)",
-            "&7Currency: &f\$currency &7(&a&l\$edit(currency)&7)",
-            "&7Interval: &f\$interval &7(&a&l\$edit(interval)&7)",
-            "&7Last payment time: &f\$last-payment-time",
-            "&7Balance: &f\$balance"
+                "&7\$name (&a&l\$edit(name)&7)",
+                "&7Owners: &f\$owners",
+                "&7Members: &f\$members",
+                "&7Invites: &f\$invites",
+                "&7Amount: &f\$amount &7(&a&l\$edit(amount)&7)",
+                "&7Currency: &f\$currency &7(&a&l\$edit(currency)&7)",
+                "&7Interval: &f\$interval &7(&a&l\$edit(interval)&7)",
+                "&7Last payment time: &f\$last-payment-time",
+                "&7Balance: &f\$balance"
         ))
         messages.setDefault("payment-info-not-owner", listOf(
-            "&7$name",
-            "&7Owners: &f\$owners",
-            "&7Members: &f\$members",
-            "&7Invites: &f\$invites",
-            "&7Amount: &f\$amount",
-            "&7Currency: &f\$currency",
-            "&7Interval: &f\$interval",
-            "&7Last payment time: &f\$last-payment-time",
-            "&7Balance: &f\$balance"
+                "&7$name",
+                "&7Owners: &f\$owners",
+                "&7Members: &f\$members",
+                "&7Invites: &f\$invites",
+                "&7Amount: &f\$amount",
+                "&7Currency: &f\$currency",
+                "&7Interval: &f\$interval",
+                "&7Last payment time: &f\$last-payment-time",
+                "&7Balance: &f\$balance"
         ))
         messages.setDefault("payment-info-invalid-group", "&cThere is no payment group by that name.")
         messages.setDefault("payment-info-usage", "&cUsage: /payment info [group]")
@@ -301,5 +235,11 @@ class RPKPaymentsBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-payment-leave", "&cYou do not have permission to leave payment groups.")
         messages.setDefault("no-permission-payment-list", "&cYou do not have permission to list payment groups.")
         messages.setDefault("no-permission-payment-withdraw", "&cYou do not have permission to withdraw from payment groups.")
+        messages.setDefault("no-payment-group-service", "&cThere is no payment group service available.")
+        messages.setDefault("no-currency-service", "&cThere is no currency service available.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-bank-service", "&cThere is no bank service available.")
+        messages.setDefault("no-economy-service", "&cThere is no economy service available.")
+        messages.setDefault("no-payment-notification-service", "&cThere is no payment notification service available.")
     }
 }

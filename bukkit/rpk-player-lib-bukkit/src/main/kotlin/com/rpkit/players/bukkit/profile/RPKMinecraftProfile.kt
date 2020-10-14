@@ -16,13 +16,13 @@
 
 package com.rpkit.players.bukkit.profile
 
-import com.rpkit.core.database.Entity
 import net.md_5.bungee.api.chat.BaseComponent
 import java.util.*
 
 
-interface RPKMinecraftProfile: Entity {
+interface RPKMinecraftProfile {
 
+    var id: Int?
     var profile: RPKThinProfile
     val minecraftUUID: UUID
     val minecraftUsername: String

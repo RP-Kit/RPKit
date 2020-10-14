@@ -17,33 +17,34 @@
 package com.rpkit.food.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.food.bukkit.expiry.RPKExpiryProviderImpl
+import com.rpkit.core.service.Services
+import com.rpkit.food.bukkit.expiry.RPKExpiryService
+import com.rpkit.food.bukkit.expiry.RPKExpiryServiceImpl
 import com.rpkit.food.bukkit.listener.*
 import org.bstats.bukkit.Metrics
 
 /**
  * RPK food plugin default implementation.
  */
-class RPKFoodBukkit: RPKBukkitPlugin() {
+class RPKFoodBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4397)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKExpiryProviderImpl(this)
-        )
+
+        Services[RPKExpiryService::class] = RPKExpiryServiceImpl(this)
     }
 
     override fun registerListeners() {
         registerListeners(
-                EntityDeathListener(this),
+                EntityDeathListener(),
                 FurnaceSmeltListener(this),
-                InventoryOpenListener(this),
-                PlayerFishListener(this),
+                InventoryOpenListener(),
+                PlayerFishListener(),
                 PlayerItemConsumeListener(this),
-                PlayerJoinListener(this),
-                PlayerPickupItemListener(this),
-                PrepareItemCraftListener(this)
+                PlayerJoinListener(),
+                EntityPickupItemListener(),
+                PrepareItemCraftListener()
         )
     }
 

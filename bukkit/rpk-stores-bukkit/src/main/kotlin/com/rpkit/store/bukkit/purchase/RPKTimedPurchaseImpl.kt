@@ -22,8 +22,8 @@ import java.time.LocalDateTime
 
 
 class RPKTimedPurchaseImpl(
-        override var id: Int = 0,
+        override var id: Int? = null,
         override val storeItem: RPKTimedStoreItem,
         override val profile: RPKProfile,
         override val purchaseDate: LocalDateTime
-): RPKTimedPurchase
+) : RPKTimedPurchase

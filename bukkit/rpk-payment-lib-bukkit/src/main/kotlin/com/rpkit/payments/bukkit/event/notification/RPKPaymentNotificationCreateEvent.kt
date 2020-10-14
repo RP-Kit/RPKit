@@ -17,4 +17,4 @@
 package com.rpkit.payments.bukkit.event.notification
 
 
-interface RPKPaymentNotificationCreateEvent: RPKPaymentNotificationEvent
+interface RPKPaymentNotificationCreateEvent : RPKPaymentNotificationEvent

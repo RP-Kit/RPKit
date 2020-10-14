@@ -19,9 +19,9 @@ package com.rpkit.stats.bukkit.stat
 import com.rpkit.stats.bukkit.RPKStatsBukkit
 
 /**
- * Stat variable provider implementation.
+ * Stat variable service implementation.
  */
-class RPKStatVariableProviderImpl(private val plugin: RPKStatsBukkit): RPKStatVariableProvider {
+class RPKStatVariableServiceImpl(override val plugin: RPKStatsBukkit) : RPKStatVariableService {
 
     override val statVariables: MutableList<RPKStatVariable> = mutableListOf()
 

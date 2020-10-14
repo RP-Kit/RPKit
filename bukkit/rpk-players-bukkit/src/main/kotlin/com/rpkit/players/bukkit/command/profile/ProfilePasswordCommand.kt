@@ -16,16 +16,17 @@
 
 package com.rpkit.players.bukkit.command.profile
 
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class ProfilePasswordCommand(private val plugin: RPKPlayersBukkit): CommandExecutor {
+class ProfilePasswordCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isEmpty()) {
             sender.sendMessage(plugin.messages["profile-password-usage"])
@@ -35,8 +36,12 @@ class ProfilePasswordCommand(private val plugin: RPKPlayersBukkit): CommandExecu
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
@@ -47,9 +52,13 @@ class ProfilePasswordCommand(private val plugin: RPKPlayersBukkit): CommandExecu
             return true
         }
         val password = args.joinToString(" ")
-        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
+        val profileService = Services[RPKProfileService::class]
+        if (profileService == null) {
+            sender.sendMessage(plugin.messages["no-profile-service"])
+            return true
+        }
         profile.setPassword(password.toCharArray())
-        profileProvider.updateProfile(profile)
+        profileService.updateProfile(profile)
         sender.sendMessage(plugin.messages["profile-password-valid"])
         return true
     }

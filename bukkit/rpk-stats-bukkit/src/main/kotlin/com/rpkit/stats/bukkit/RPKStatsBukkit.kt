@@ -17,166 +17,52 @@
 package com.rpkit.stats.bukkit
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.characters.bukkit.gender.RPKGender
-import com.rpkit.characters.bukkit.race.RPKRace
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.core.service.Services
 import com.rpkit.stats.bukkit.command.stats.StatsCommand
-import com.rpkit.stats.bukkit.stat.RPKStatProviderImpl
+import com.rpkit.stats.bukkit.stat.RPKStatService
+import com.rpkit.stats.bukkit.stat.RPKStatServiceImpl
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
-import com.rpkit.stats.bukkit.stat.RPKStatVariableProviderImpl
+import com.rpkit.stats.bukkit.stat.RPKStatVariableService
+import com.rpkit.stats.bukkit.stat.RPKStatVariableServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.attribute.Attribute
-import org.bukkit.inventory.ItemStack
 
 /**
  * RPK stats plugin default implementation.
  */
-class RPKStatsBukkit: RPKBukkitPlugin() {
+class RPKStatsBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4419)
         saveDefaultConfig()
-        val statVariableProvider = RPKStatVariableProviderImpl(this)
-        val statProvider = RPKStatProviderImpl(this)
-        serviceProviders = arrayOf(
-                statVariableProvider,
-                statProvider
-        )
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
-            override val name = "character"
-            override fun get(character: RPKCharacter): RPKCharacter {
-                return character
-            }
-        })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
-            override val name = "profile"
-            override fun get(character: RPKCharacter): RPKProfile? {
-                return character.profile
-            }
-        })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
-            override val name = "minecraftProfile"
-            override fun get(character: RPKCharacter): RPKMinecraftProfile? {
-                return character.minecraftProfile
-            }
-        })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
+        val statVariableService = RPKStatVariableServiceImpl(this)
+        val statService = RPKStatServiceImpl(this)
+        Services[RPKStatVariableService::class] = statVariableService
+        Services[RPKStatService::class] = statService
+        statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "minecraftLevel"
             override fun get(character: RPKCharacter): Int {
                 val minecraftProfile = character.minecraftProfile
                 if (minecraftProfile != null) {
-                    return server.getPlayer(minecraftProfile.minecraftUUID)?.level?:0
+                    return server.getPlayer(minecraftProfile.minecraftUUID)?.level ?: 0
                 }
                 return 0
             }
         })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
-            override val name = "characterGender"
-            override fun get(character: RPKCharacter): RPKGender? {
-                return character.gender
-            }
-        })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
+        statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterAge"
             override fun get(character: RPKCharacter): Int {
                 return character.age
             }
         })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
-            override val name = "characterRace"
-            override fun get(character: RPKCharacter): RPKRace? {
-                return character.race
-            }
-        })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
-            override val name = "characterHelmet"
-            override fun get(character: RPKCharacter): ItemStack? {
-                val minecraftProfile = character.minecraftProfile
-                return if (minecraftProfile != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
-                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
-                        if (bukkitPlayer != null) {
-                            bukkitPlayer.inventory.helmet
-                        } else {
-                            character.helmet
-                        }
-                    } else {
-                        character.helmet
-                    }
-                } else {
-                    character.helmet
-                }
-            }
-        })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
-            override val name = "characterChestplate"
-            override fun get(character: RPKCharacter): ItemStack? {
-                val minecraftProfile = character.minecraftProfile
-                return if (minecraftProfile != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
-                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
-                        if (bukkitPlayer != null) {
-                            bukkitPlayer.inventory.chestplate
-                        } else {
-                            character.chestplate
-                        }
-                    } else {
-                        character.chestplate
-                    }
-                } else {
-                    character.chestplate
-                }
-            }
-        })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
-            override val name = "characterLeggings"
-            override fun get(character: RPKCharacter): ItemStack? {
-                val minecraftProfile = character.minecraftProfile
-                return if (minecraftProfile != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
-                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
-                        if (bukkitPlayer != null) {
-                            bukkitPlayer.inventory.leggings
-                        } else {
-                            character.leggings
-                        }
-                    } else {
-                        character.leggings
-                    }
-                } else {
-                    character.leggings
-                }
-            }
-        })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
-            override val name = "characterBoots"
-            override fun get(character: RPKCharacter): ItemStack? {
-                val minecraftProfile = character.minecraftProfile
-                return if (minecraftProfile != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
-                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
-                        if (bukkitPlayer != null) {
-                            bukkitPlayer.inventory.boots
-                        } else {
-                            character.boots
-                        }
-                    } else {
-                        character.boots
-                    }
-                } else {
-                    character.boots
-                }
-            }
-        })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
+        statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterHealth"
             override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
+                    if (Services[RPKCharacterService::class]?.getActiveCharacter(minecraftProfile) == character) {
                         val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
                         bukkitPlayer?.health ?: character.health
                     } else {
@@ -187,12 +73,12 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
                 }
             }
         })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
+        statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterMaxHealth"
             override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
+                    if (Services[RPKCharacterService::class]?.getActiveCharacter(minecraftProfile) == character) {
                         val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
                         if (bukkitPlayer != null) {
                             bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: character.maxHealth
@@ -207,24 +93,24 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
                 }
             }
         })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
+        statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterMana"
             override fun get(character: RPKCharacter): Int {
                 return character.mana
             }
         })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
+        statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterMaxMana"
             override fun get(character: RPKCharacter): Int {
                 return character.maxMana
             }
         })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
+        statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterFoodLevel"
             override fun get(character: RPKCharacter): Int {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
-                    if (core.serviceManager.getServiceProvider(RPKCharacterProvider::class).getActiveCharacter(minecraftProfile) == character) {
+                    if (Services[RPKCharacterService::class]?.getActiveCharacter(minecraftProfile) == character) {
                         val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
                         bukkitPlayer?.foodLevel ?: character.foodLevel
                     } else {
@@ -235,7 +121,7 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
                 }
             }
         })
-        statVariableProvider.addStatVariable(object: RPKStatVariable {
+        statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterThirstLevel"
             override fun get(character: RPKCharacter): Int {
                 return character.thirstLevel
@@ -254,6 +140,10 @@ class RPKStatsBukkit: RPKBukkitPlugin() {
         messages.setDefault("not-from-console", "&cYou must be a player to perform this command.")
         messages.setDefault("no-permission-stats", "&cYou do not have permission to view your stats.")
         messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-character-service", "&cThere is no character service available.")
+        messages.setDefault("no-stats-service", "&cThere is no stats service available.")
+        messages.setDefault("no-stat-variable-service", "&cThere is no stat variable service available.")
     }
 
 }

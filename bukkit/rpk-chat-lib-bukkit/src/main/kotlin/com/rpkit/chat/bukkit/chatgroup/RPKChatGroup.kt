@@ -16,13 +16,19 @@
 
 package com.rpkit.chat.bukkit.chatgroup
 
-import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Represents a chat group.
  */
-interface RPKChatGroup: Entity {
+interface RPKChatGroup {
+
+    /**
+     * The ID of the chat group.
+     * Guaranteed to be unique.
+     * Null if not yet inserted into the database.
+     */
+    var id: Int?
 
     /**
      * The name of the chat group.

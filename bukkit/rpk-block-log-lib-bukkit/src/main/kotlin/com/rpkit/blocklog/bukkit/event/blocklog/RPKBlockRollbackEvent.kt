@@ -18,11 +18,12 @@ package com.rpkit.blocklog.bukkit.event.blocklog
 
 import com.rpkit.core.event.RPKEvent
 import org.bukkit.block.Block
+import java.time.LocalDateTime
 
 
-interface RPKBlockRollbackEvent: RPKEvent {
+interface RPKBlockRollbackEvent : RPKEvent {
 
     val block: Block
-    var time: Long
+    var time: LocalDateTime
 
 }

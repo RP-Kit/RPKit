@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.event.character.RPKCharacterEvent
 
 
-interface RPKExperienceChangeEvent: RPKCharacterEvent {
+interface RPKExperienceChangeEvent : RPKCharacterEvent {
 
     override val character: RPKCharacter
     val oldExperience: Int

@@ -17,7 +17,8 @@
 package com.rpkit.chat.bukkit.irc.command
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.irc.RPKIRCProvider
+import com.rpkit.chat.bukkit.irc.RPKIRCService
+import com.rpkit.core.service.Services
 import org.pircbotx.Channel
 import org.pircbotx.User
 
@@ -25,20 +26,24 @@ import org.pircbotx.User
  * IRC register command.
  * Registers the IRC bot with NickServ on the server using the password given in the config, and the e-mail specified.
  */
-class IRCRegisterCommand(private val plugin: RPKChatBukkit): IRCCommand("register") {
+class IRCRegisterCommand(private val plugin: RPKChatBukkit) : IRCCommand("register") {
 
     override fun execute(channel: Channel, sender: User, cmd: IRCCommand, label: String, args: Array<String>) {
-        val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
-        if (args.isNotEmpty()) {
-            if (args[0].matches(Regex("(\\w[-._\\w]*\\w@\\w[-._\\w]*\\w\\.\\w{2,3})"))) {
-                ircProvider.ircBot.sendIRC().message("NickServ", "REGISTER " + plugin.config.getString("irc.password") + " " + args[0])
-                sender.send().message(plugin.messages["irc-register-valid"])
-            } else {
-                sender.send().message(plugin.messages["irc-register-invalid-email-invalid"])
-            }
-        } else {
-            sender.send().message(plugin.messages["irc-register-invalid-email-not-specified"])
+        val ircService = Services[RPKIRCService::class]
+        if (ircService == null) {
+            sender.send().message(plugin.messages["irc-no-irc-service"])
+            return
         }
+        if (args.isEmpty()) {
+            sender.send().message(plugin.messages["irc-register-invalid-email-not-specified"])
+            return
+        }
+        if (!args[0].matches(Regex("(\\w[-._\\w]*\\w@\\w[-._\\w]*\\w\\.\\w{2,3})"))) {
+            sender.send().message(plugin.messages["irc-register-invalid-email-invalid"])
+            return
+        }
+        ircService.ircBot.sendIRC().message("NickServ", "REGISTER " + plugin.config.getString("irc.password") + " " + args[0])
+        sender.send().message(plugin.messages["irc-register-valid"])
     }
 
 }

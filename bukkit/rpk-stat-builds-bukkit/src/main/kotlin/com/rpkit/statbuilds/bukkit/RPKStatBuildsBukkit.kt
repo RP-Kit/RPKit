@@ -19,51 +19,96 @@ package com.rpkit.statbuilds.bukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
-import com.rpkit.core.exception.UnregisteredServiceException
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
+import com.rpkit.skills.bukkit.skills.RPKSkillPointService
 import com.rpkit.statbuilds.bukkit.command.statattribute.StatAttributeCommand
 import com.rpkit.statbuilds.bukkit.command.statbuild.StatBuildCommand
 import com.rpkit.statbuilds.bukkit.database.table.RPKCharacterStatPointsTable
-import com.rpkit.statbuilds.bukkit.listener.RPKServiceProviderReadyListener
-import com.rpkit.statbuilds.bukkit.skillpoint.RPKSkillPointProviderImpl
-import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeProvider
-import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeProviderImpl
-import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildProvider
-import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildProviderImpl
+import com.rpkit.statbuilds.bukkit.skillpoint.RPKSkillPointServiceImpl
+import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
+import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeServiceImpl
+import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildService
+import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildServiceImpl
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
-import com.rpkit.stats.bukkit.stat.RPKStatVariableProvider
+import com.rpkit.stats.bukkit.stat.RPKStatVariableService
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
-class RPKStatBuildsBukkit: RPKBukkitPlugin() {
+class RPKStatBuildsBukkit : RPKBukkitPlugin() {
 
-    private var statsInitialized = false
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 6663)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKStatAttributeProviderImpl(this),
-                RPKStatBuildProviderImpl(this),
-                RPKSkillPointProviderImpl(this)
-        )
-    }
 
-    override fun onPostEnable() {
-        attemptStatRegistration()
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/statbuilds/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/statbuilds/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_stat_builds"
+                ),
+                classLoader
+        )
+        database.addTable(RPKCharacterStatPointsTable(database, this))
+
+        val statAttributeService = RPKStatAttributeServiceImpl(this)
+        Services[RPKStatAttributeService::class] = statAttributeService
+        val statBuildService = RPKStatBuildServiceImpl(this)
+        Services[RPKStatBuildService::class] = statBuildService
+        Services[RPKSkillPointService::class] = RPKSkillPointServiceImpl(this)
+
+        Services.require(RPKStatVariableService::class).whenAvailable { statVariableService ->
+            statAttributeService.statAttributes.forEach { statAttribute ->
+                statVariableService.addStatVariable(object : RPKStatVariable {
+                    override val name = statAttribute.name
+                    override fun get(character: RPKCharacter) =
+                            statBuildService.getStatPoints(character, statAttribute)
+                })
+            }
+        }
+
     }
 
     override fun registerCommands() {
         getCommand("statbuild")?.setExecutor(StatBuildCommand(this))
         getCommand("statattribute")?.setExecutor(StatAttributeCommand(this))
-    }
-
-    override fun registerListeners() {
-        registerListeners(
-                RPKServiceProviderReadyListener(this)
-        )
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKCharacterStatPointsTable(database, this))
     }
 
     override fun setDefaultMessages() {
@@ -86,23 +131,10 @@ class RPKStatBuildsBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-stat-attribute-list", "&cYou do not have permission to list stat attributes.")
         messages.setDefault("stat-attribute-list-title", "&fStat attributes:")
         messages.setDefault("stat-attribute-list-item", "&7 - &f\$stat-attribute")
-    }
-
-    fun attemptStatRegistration() {
-        if (statsInitialized) return
-        try {
-            val statVariableProvider = core.serviceManager.getServiceProvider(RPKStatVariableProvider::class)
-            val statAttributeProvider = core.serviceManager.getServiceProvider(RPKStatAttributeProvider::class)
-            val statBuildProvider = core.serviceManager.getServiceProvider(RPKStatBuildProvider::class)
-            statAttributeProvider.statAttributes.forEach { statAttribute ->
-                statVariableProvider.addStatVariable(object: RPKStatVariable {
-                    override val name = statAttribute.name
-                    override fun get(character: RPKCharacter): Any? {
-                        return statBuildProvider.getStatPoints(character, statAttribute)
-                    }
-                })
-            }
-        } catch (ignore: UnregisteredServiceException) {}
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-character-service", "&cThere is no character service available.")
+        messages.setDefault("no-stat-attribute-service", "&cThere is no stat attribute service available.")
+        messages.setDefault("no-stat-build-service", "&cThere is no stat build service available.")
     }
 
 }

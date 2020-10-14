@@ -26,10 +26,11 @@ import org.bukkit.event.HandlerList
 class RPKBukkitGroupUnassignCharacterEvent(
         override val group: RPKGroup,
         override val character: RPKCharacter
-): RPKBukkitEvent(), RPKGroupUnassignCharacterEvent, Cancellable {
+) : RPKBukkitEvent(), RPKGroupUnassignCharacterEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

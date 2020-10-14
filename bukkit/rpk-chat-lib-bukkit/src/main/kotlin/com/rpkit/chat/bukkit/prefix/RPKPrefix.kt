@@ -16,12 +16,10 @@
 
 package com.rpkit.chat.bukkit.prefix
 
-import com.rpkit.core.database.Entity
-
 /**
  * Represents a prefix.
  */
-interface RPKPrefix: Entity {
+interface RPKPrefix {
 
     /**
      * The name of the prefix.

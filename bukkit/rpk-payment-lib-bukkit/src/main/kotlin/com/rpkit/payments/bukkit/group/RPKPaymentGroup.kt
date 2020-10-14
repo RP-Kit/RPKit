@@ -17,14 +17,22 @@
 package com.rpkit.payments.bukkit.group
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 import com.rpkit.economy.bukkit.currency.RPKCurrency
+import java.time.Duration
+import java.time.LocalDateTime
 
 /**
  * Represents a payment group.
  * Payments are made to or from the balance of the group by its members. Owners may deposit and withdraw from the balance.
  */
-interface RPKPaymentGroup: Entity {
+interface RPKPaymentGroup {
+
+    /**
+     * The ID of the payment group.
+     * Guaranteed to be unique.
+     * Null if the payment group has not yet been inserted.
+     */
+    var id: Int?
 
     /**
      * The name of the group.
@@ -66,14 +74,14 @@ interface RPKPaymentGroup: Entity {
      * The interval at which payments should occur.
      * Measured in milliseconds.
      */
-    var interval: Long
+    var interval: Duration
 
     /**
      * The last payment time as a system timestamp.
      * This should be checked just before doing a payout or collection, and updated every time a payout or collection
      * occurs.
      */
-    var lastPaymentTime: Long
+    var lastPaymentTime: LocalDateTime
 
     /**
      * The balance of the payment group.

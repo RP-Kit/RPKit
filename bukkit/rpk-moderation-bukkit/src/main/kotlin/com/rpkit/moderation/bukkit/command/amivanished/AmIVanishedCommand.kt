@@ -16,16 +16,17 @@
 
 package com.rpkit.moderation.bukkit.command.amivanished
 
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
-import com.rpkit.moderation.bukkit.vanish.RPKVanishProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.moderation.bukkit.vanish.RPKVanishService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class AmIVanishedCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class AmIVanishedCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.moderation.command.amivanished")) {
             sender.sendMessage(plugin.messages["no-permission-amivanished"])
@@ -35,14 +36,22 @@ class AmIVanishedCommand(private val plugin: RPKModerationBukkit): CommandExecut
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val vanishProvider = plugin.core.serviceManager.getServiceProvider(RPKVanishProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val vanishService = Services[RPKVanishService::class]
+        if (vanishService == null) {
+            sender.sendMessage(plugin.messages["no-vanish-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        if (vanishProvider.isVanished(minecraftProfile)) {
+        if (vanishService.isVanished(minecraftProfile)) {
             sender.sendMessage(plugin.messages["amivanished-vanished"])
         } else {
             sender.sendMessage(plugin.messages["amivanished-unvanished"])

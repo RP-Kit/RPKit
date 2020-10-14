@@ -20,7 +20,7 @@ import com.rpkit.players.bukkit.event.profile.RPKProfileEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 
-interface RPKGroupUnassignProfileEvent: RPKGroupEvent, RPKProfileEvent {
+interface RPKGroupUnassignProfileEvent : RPKGroupEvent, RPKProfileEvent {
 
     override val profile: RPKProfile
 

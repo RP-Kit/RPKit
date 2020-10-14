@@ -18,37 +18,120 @@ package com.rpkit.essentials.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
-import com.rpkit.essentials.bukkit.command.*
-import com.rpkit.essentials.bukkit.dailyquote.RPKDailyQuoteProviderImpl
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
+import com.rpkit.dailyquote.bukkit.dailyquote.RPKDailyQuoteService
+import com.rpkit.essentials.bukkit.command.BackCommand
+import com.rpkit.essentials.bukkit.command.CloneCommand
+import com.rpkit.essentials.bukkit.command.DistanceCommand
+import com.rpkit.essentials.bukkit.command.EnchantCommand
+import com.rpkit.essentials.bukkit.command.FeedCommand
+import com.rpkit.essentials.bukkit.command.FlyCommand
+import com.rpkit.essentials.bukkit.command.GetBookCommand
+import com.rpkit.essentials.bukkit.command.GetSignCommand
+import com.rpkit.essentials.bukkit.command.HealCommand
+import com.rpkit.essentials.bukkit.command.InventoryCommand
+import com.rpkit.essentials.bukkit.command.ItemCommand
+import com.rpkit.essentials.bukkit.command.ItemMetaCommand
+import com.rpkit.essentials.bukkit.command.JumpCommand
+import com.rpkit.essentials.bukkit.command.KitCommand
+import com.rpkit.essentials.bukkit.command.RepairCommand
+import com.rpkit.essentials.bukkit.command.RunAsCommand
+import com.rpkit.essentials.bukkit.command.SeenCommand
+import com.rpkit.essentials.bukkit.command.SetSpawnCommand
+import com.rpkit.essentials.bukkit.command.SmiteCommand
+import com.rpkit.essentials.bukkit.command.SpawnCommand
+import com.rpkit.essentials.bukkit.command.SpawnMobCommand
+import com.rpkit.essentials.bukkit.command.SpawnerCommand
+import com.rpkit.essentials.bukkit.command.SpeedCommand
+import com.rpkit.essentials.bukkit.command.SudoCommand
+import com.rpkit.essentials.bukkit.command.ToggleLogMessagesCommand
+import com.rpkit.essentials.bukkit.command.ToggleTrackingCommand
+import com.rpkit.essentials.bukkit.command.TrackCommand
+import com.rpkit.essentials.bukkit.command.UnsignCommand
+import com.rpkit.essentials.bukkit.dailyquote.RPKDailyQuoteServiceImpl
 import com.rpkit.essentials.bukkit.database.table.RPKLogMessagesEnabledTable
 import com.rpkit.essentials.bukkit.database.table.RPKPreviousLocationTable
-import com.rpkit.essentials.bukkit.database.table.RPKTrackingEnabledTable
+import com.rpkit.essentials.bukkit.database.table.RPKTrackingDisabledTable
 import com.rpkit.essentials.bukkit.kit.RPKKitImpl
-import com.rpkit.essentials.bukkit.kit.RPKKitProviderImpl
+import com.rpkit.essentials.bukkit.kit.RPKKitServiceImpl
 import com.rpkit.essentials.bukkit.listener.PlayerJoinListener
 import com.rpkit.essentials.bukkit.listener.PlayerQuitListener
 import com.rpkit.essentials.bukkit.listener.PlayerTeleportListener
-import com.rpkit.essentials.bukkit.locationhistory.RPKLocationHistoryProviderImpl
-import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageProvider
+import com.rpkit.essentials.bukkit.locationhistory.RPKLocationHistoryServiceImpl
+import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageService
 import com.rpkit.essentials.bukkit.time.TimeSlowRunnable
-import com.rpkit.essentials.bukkit.tracking.RPKTrackingProviderImpl
+import com.rpkit.essentials.bukkit.tracking.RPKTrackingServiceImpl
+import com.rpkit.kit.bukkit.kit.RPKKitService
+import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryService
+import com.rpkit.tracking.bukkit.tracking.RPKTrackingService
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
+import java.io.File
 
 
-class RPKEssentialsBukkit: RPKBukkitPlugin() {
+class RPKEssentialsBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 4392)
         ConfigurationSerialization.registerClass(RPKKitImpl::class.java)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKDailyQuoteProviderImpl(this),
-                RPKKitProviderImpl(this),
-                RPKLocationHistoryProviderImpl(this),
-                RPKLogMessageProvider(this),
-                RPKTrackingProviderImpl(this)
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/essentials/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/essentials/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_players"
+                ),
+                classLoader
         )
+        database.addTable(RPKLogMessagesEnabledTable(database, this))
+        database.addTable(RPKPreviousLocationTable(database, this))
+        database.addTable(RPKTrackingDisabledTable(database, this))
+
+        Services[RPKDailyQuoteService::class] = RPKDailyQuoteServiceImpl(this)
+        Services[RPKKitService::class] = RPKKitServiceImpl(this)
+        Services[RPKLocationHistoryService::class] = RPKLocationHistoryServiceImpl(this)
+        Services[RPKLogMessageService::class] = RPKLogMessageService(this)
+        Services[RPKTrackingService::class] = RPKTrackingServiceImpl(this)
+
         TimeSlowRunnable(this).runTaskTimer(this, 100L, 100L)
     }
 
@@ -87,14 +170,8 @@ class RPKEssentialsBukkit: RPKBukkitPlugin() {
         registerListeners(
                 PlayerJoinListener(this),
                 PlayerQuitListener(this),
-                PlayerTeleportListener(this)
+                PlayerTeleportListener()
         )
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKLogMessagesEnabledTable(database, this))
-        database.addTable(RPKPreviousLocationTable(database, this))
-        database.addTable(RPKTrackingEnabledTable(database, this))
     }
 
     override fun setDefaultMessages() {
@@ -224,6 +301,12 @@ class RPKEssentialsBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-character-self", "&cYou must have a character to perform that command.")
         messages.setDefault("no-character-other", "&cThat player must have a character to perform that command.")
         messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-character-service", "&cThere is no character service available.")
+        messages.setDefault("no-location-history-service", "&cThere is no location history service available.")
+        messages.setDefault("no-kit-service", "&cThere is no kit service available.")
+        messages.setDefault("no-log-message-service", "&cThere is no log message service.")
+        messages.setDefault("no-tracking-service", "&cThere is no tracking service available.")
     }
 
 }

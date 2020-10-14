@@ -25,12 +25,11 @@ import org.bstats.bukkit.Metrics
 /**
  * RPK trade plugin default implementation.
  */
-class RPKTradeBukkit: RPKBukkitPlugin() {
+class RPKTradeBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4423)
         saveDefaultConfig()
-        serviceProviders = arrayOf()
     }
 
     override fun registerListeners() {
@@ -59,6 +58,10 @@ class RPKTradeBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-character", "&cYou need a character to perform that action. Please create one.")
         messages.setDefault("no-profile", "&cYour Minecraft profile is not linked to a profile. Please link it on the server's web UI.")
         messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-character-service", "&cThere is no character service available.")
+        messages.setDefault("no-currency-service", "&cThere is no currency service available.")
+        messages.setDefault("no-economy-service", "&cThere is no economy service available.")
     }
 
 }

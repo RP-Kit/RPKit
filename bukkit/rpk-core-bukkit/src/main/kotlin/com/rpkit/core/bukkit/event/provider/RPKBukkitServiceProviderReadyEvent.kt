@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.rpkit.core.bukkit.event.provider
+package com.rpkit.core.bukkit.event.service
 
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import org.bukkit.event.HandlerList
 
-class RPKBukkitServiceProviderReadyEvent(override val serviceProvider: ServiceProvider) : RPKBukkitEvent(), RPKServiceProviderReadyEvent {
+class RPKBukkitServiceServiceReadyEvent(override val service: Service) : RPKBukkitEvent(), RPKServiceServiceReadyEvent {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     override fun getHandlers(): HandlerList {

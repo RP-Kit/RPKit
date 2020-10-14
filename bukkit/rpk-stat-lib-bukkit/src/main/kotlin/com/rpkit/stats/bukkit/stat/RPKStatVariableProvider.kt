@@ -16,29 +16,29 @@
 
 package com.rpkit.stats.bukkit.stat
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
  * Provides stat variable related operations.
  */
-interface RPKStatVariableProvider : ServiceProvider {
+interface RPKStatVariableService : Service {
 
     /**
-     * A list of stat variables managed by this stat variable provider.
+     * A list of stat variables managed by this stat variable service.
      * The list is immutable, to add and remove stat variables, [addStatVariable] and [removeStatVariable] should be
      * used.
      */
     val statVariables: List<RPKStatVariable>
 
     /**
-     * Adds a stat variable to be managed by this stat variable provider.
+     * Adds a stat variable to be managed by this stat variable service.
      *
      * @param statVariable The stat variable to add
      */
     fun addStatVariable(statVariable: RPKStatVariable)
 
     /**
-     * Removes a stat variable from being managed by this stat variable provider.
+     * Removes a stat variable from being managed by this stat variable service.
      *
      * @param statVariable The stat variable to remove
      */

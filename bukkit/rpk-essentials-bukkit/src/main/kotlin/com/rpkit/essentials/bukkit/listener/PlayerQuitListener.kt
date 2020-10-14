@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,26 @@
 
 package com.rpkit.essentials.bukkit.listener
 
+import com.rpkit.core.service.Services
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 
 
-
-
-class PlayerQuitListener(private val plugin: RPKEssentialsBukkit): Listener {
+class PlayerQuitListener(private val plugin: RPKEssentialsBukkit) : Listener {
 
     @EventHandler
     fun onPlayerQuit(event: PlayerQuitEvent) {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val logMessageProvider = plugin.core.serviceManager.getServiceProvider(RPKLogMessageProvider::class)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val logMessageService = Services[RPKLogMessageService::class] ?: return
         val quitMessage = event.quitMessage
         if (quitMessage != null) {
             plugin.server.onlinePlayers
-                    .mapNotNull { player -> minecraftProfileProvider.getMinecraftProfile(player) }
-                    .filter { minecraftProfile -> logMessageProvider.isLogMessagesEnabled(minecraftProfile) }
+                    .mapNotNull { player -> minecraftProfileService.getMinecraftProfile(player) }
+                    .filter { minecraftProfile -> logMessageService.isLogMessagesEnabled(minecraftProfile) }
                     .forEach { minecraftProfile ->
                         minecraftProfile.sendMessage(quitMessage)
                     }

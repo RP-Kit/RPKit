@@ -23,13 +23,13 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
 
-class RPKBukkitCharacterDeleteListener(private val plugin: RPKCraftingSkillBukkit): Listener {
+class RPKBukkitCharacterDeleteListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
 
     @EventHandler
     fun onCharacterDelete(event: RPKBukkitCharacterDeleteEvent) {
-        val craftingExperienceTable = plugin.core.database.getTable(RPKCraftingExperienceTable::class)
+        val craftingExperienceTable = plugin.database.getTable(RPKCraftingExperienceTable::class)
         craftingExperienceTable.get(event.character)
-                .forEach { craftingExperienceTable.delete(it)}
+                .forEach { craftingExperienceTable.delete(it) }
     }
 
 }

@@ -17,4 +17,4 @@
 package com.rpkit.moderation.bukkit.event.ticket
 
 
-interface RPKTicketCreateEvent: RPKTicketEvent
+interface RPKTicketCreateEvent : RPKTicketEvent

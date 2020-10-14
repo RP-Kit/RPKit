@@ -17,48 +17,26 @@
 package com.rpkit.unconsciousness.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
-import com.rpkit.unconsciousness.bukkit.database.jooq.rpkit.Tables.RPKIT_UNCONSCIOUS_STATE
+import com.rpkit.unconsciousness.bukkit.database.jooq.Tables.RPKIT_UNCONSCIOUS_STATE
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousState
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
-import java.sql.Timestamp
 
 
-class RPKUnconsciousStateTable(database: Database, private val plugin: RPKUnconsciousnessBukkit): Table<RPKUnconsciousState>(database, RPKUnconsciousState::class) {
+class RPKUnconsciousStateTable(private val database: Database, private val plugin: RPKUnconsciousnessBukkit) : Table {
 
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_unconscious_state.id.enabled")) {
-        database.cacheManager.createCache("rpk-unconsciousness-bukkit.rpkit_unconscious_state.id",
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_unconscious_state.character_id.enabled")) {
+        database.cacheManager.createCache("rpk-unconsciousness-bukkit.rpkit_unconscious_state.character_id",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType,
-                        RPKUnconsciousState::class.java, ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_unconscious_state.id.size"))).build())
+                        RPKUnconsciousState::class.java, ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_unconscious_state.character_id.size"))).build())
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_UNCONSCIOUS_STATE)
-                .column(RPKIT_UNCONSCIOUS_STATE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID, SQLDataType.INTEGER)
-                .column(RPKIT_UNCONSCIOUS_STATE.DEATH_TIME, SQLDataType.TIMESTAMP)
-                .constraints(
-                        constraint("pk_rpkit_unconscious_state").primaryKey(RPKIT_UNCONSCIOUS_STATE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.5.0")
-        }
-    }
-
-    override fun insert(entity: RPKUnconsciousState): Int {
+    fun insert(entity: RPKUnconsciousState) {
         database.create
                 .insertInto(
                         RPKIT_UNCONSCIOUS_STATE,
@@ -67,27 +45,24 @@ class RPKUnconsciousStateTable(database: Database, private val plugin: RPKUncons
                 )
                 .values(
                         entity.character.id,
-                        Timestamp(entity.deathTime)
+                        entity.deathTime
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
+        cache?.put(entity.character.id, entity)
     }
 
-    override fun update(entity: RPKUnconsciousState) {
+    fun update(entity: RPKUnconsciousState) {
         database.create
                 .update(RPKIT_UNCONSCIOUS_STATE)
                 .set(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID, entity.character.id)
-                .set(RPKIT_UNCONSCIOUS_STATE.DEATH_TIME, Timestamp(entity.deathTime))
+                .set(RPKIT_UNCONSCIOUS_STATE.DEATH_TIME, entity.deathTime)
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.put(entity.character.id, entity)
     }
 
-    override fun get(id: Int): RPKUnconsciousState? {
-        if (cache?.containsKey(id) == true) {
-            return cache.get(id)
+    operator fun get(character: RPKCharacter): RPKUnconsciousState? {
+        if (cache?.containsKey(character.id) == true) {
+            return cache.get(character.id)
         } else {
             val result = database.create
                     .select(
@@ -95,45 +70,24 @@ class RPKUnconsciousStateTable(database: Database, private val plugin: RPKUncons
                             RPKIT_UNCONSCIOUS_STATE.DEATH_TIME
                     )
                     .from(RPKIT_UNCONSCIOUS_STATE)
-                    .where(RPKIT_UNCONSCIOUS_STATE.ID.eq(id))
+                    .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(character.id))
                     .fetchOne() ?: return null
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val character = characterProvider.getCharacter(result[RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID])
             val deathTime = result[RPKIT_UNCONSCIOUS_STATE.DEATH_TIME]
-            if (character != null) {
-                val unconsciousState = RPKUnconsciousState(
-                        id,
-                        character,
-                        deathTime.time
-                )
-                cache?.put(id, unconsciousState)
-                return unconsciousState
-            } else {
-                database.create
-                        .deleteFrom(RPKIT_UNCONSCIOUS_STATE)
-                        .where(RPKIT_UNCONSCIOUS_STATE.ID.eq(id))
-                        .execute()
-                cache?.remove(id)
-                return null
-            }
+            val unconsciousState = RPKUnconsciousState(
+                    character,
+                    deathTime
+            )
+            cache?.put(character.id, unconsciousState)
+            return unconsciousState
         }
     }
 
-    fun get(character: RPKCharacter): RPKUnconsciousState? {
-        val result = database.create
-                .select(RPKIT_UNCONSCIOUS_STATE.ID)
-                .from(RPKIT_UNCONSCIOUS_STATE)
-                .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(character.id))
-                .fetchOne() ?: return null
-        return get(result[RPKIT_UNCONSCIOUS_STATE.ID])
-    }
-
-    override fun delete(entity: RPKUnconsciousState) {
+    fun delete(entity: RPKUnconsciousState) {
         database.create
                 .deleteFrom(RPKIT_UNCONSCIOUS_STATE)
-                .where(RPKIT_UNCONSCIOUS_STATE.ID.eq(entity.id))
+                .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(entity.character.id)
     }
 
 }

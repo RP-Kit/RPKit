@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitWarpDeleteEvent(
         override val warp: RPKWarp
-): RPKBukkitEvent(), RPKWarpDeleteEvent, Cancellable {
+) : RPKBukkitEvent(), RPKWarpDeleteEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

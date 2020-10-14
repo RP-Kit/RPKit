@@ -27,16 +27,16 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.attribute.Attribute
 
 /**
- * Character provider implementation.
+ * Character service implementation.
  */
-class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCharacterProvider {
+class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCharacterService {
 
     override fun getCharacter(id: Int): RPKCharacter? {
-        return plugin.core.database.getTable(RPKCharacterTable::class)[id]
+        return plugin.database.getTable(RPKCharacterTable::class)[id]
     }
 
     override fun getActiveCharacter(minecraftProfile: RPKMinecraftProfile): RPKCharacter? {
-        return plugin.core.database.getTable(RPKCharacterTable::class).get(minecraftProfile)
+        return plugin.database.getTable(RPKCharacterTable::class).get(minecraftProfile)
     }
 
     override fun setActiveCharacter(minecraftProfile: RPKMinecraftProfile, character: RPKCharacter?) {
@@ -85,18 +85,18 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
     }
 
     override fun getCharacters(profile: RPKProfile): List<RPKCharacter> {
-        return plugin.core.database.getTable(RPKCharacterTable::class).get(profile)
+        return plugin.database.getTable(RPKCharacterTable::class).get(profile)
     }
 
     override fun getCharacters(name: String): List<RPKCharacter> {
-        return plugin.core.database.getTable(RPKCharacterTable::class).get(name)
+        return plugin.database.getTable(RPKCharacterTable::class).get(name)
     }
 
     override fun addCharacter(character: RPKCharacter) {
         val event = RPKBukkitCharacterCreateEvent(character)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKCharacterTable::class).insert(event.character)
+        plugin.database.getTable(RPKCharacterTable::class).insert(event.character)
     }
 
     override fun removeCharacter(character: RPKCharacter) {
@@ -109,7 +109,7 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
                 setActiveCharacter(minecraftProfile, null)
             }
         }
-        plugin.core.database.getTable(RPKCharacterTable::class).delete(event.character)
+        plugin.database.getTable(RPKCharacterTable::class).delete(event.character)
     }
 
     override fun updateCharacter(character: RPKCharacter) {
@@ -119,7 +119,7 @@ class RPKCharacterProviderImpl(private val plugin: RPKCharactersBukkit) : RPKCha
             val event = RPKBukkitCharacterUpdateEvent(character)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
-            plugin.core.database.getTable(RPKCharacterTable::class).update(event.character)
+            plugin.database.getTable(RPKCharacterTable::class).update(event.character)
         }
     }
 

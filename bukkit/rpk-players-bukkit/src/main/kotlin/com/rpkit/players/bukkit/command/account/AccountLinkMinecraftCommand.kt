@@ -16,6 +16,7 @@
 
 package com.rpkit.players.bukkit.command.account
 
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.*
 import org.bukkit.command.Command
@@ -24,7 +25,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class AccountLinkMinecraftCommand(private val plugin: RPKPlayersBukkit): CommandExecutor {
+class AccountLinkMinecraftCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender !is Player) {
             sender.sendMessage(plugin.messages["not-from-console"])
@@ -40,13 +41,17 @@ class AccountLinkMinecraftCommand(private val plugin: RPKPlayersBukkit): Command
         }
         val minecraftUsername = args[0]
         val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftUsername)
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        var minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        var minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
         if (minecraftProfile != null) {
             sender.sendMessage(plugin.messages["account-link-minecraft-invalid-minecraft-profile"])
             return true
         }
-        val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (senderMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
@@ -56,10 +61,11 @@ class AccountLinkMinecraftCommand(private val plugin: RPKPlayersBukkit): Command
             sender.sendMessage(plugin.messages["no-profile-self"])
             return true
         }
-        minecraftProfile = RPKMinecraftProfileImpl(profile = RPKThinProfileImpl(bukkitPlayer.name ?: "Unknown Minecraft user"), minecraftUUID = bukkitPlayer.uniqueId)
-        minecraftProfileProvider.addMinecraftProfile(minecraftProfile)
+        minecraftProfile = RPKMinecraftProfileImpl(profile = RPKThinProfileImpl(bukkitPlayer.name
+                ?: "Unknown Minecraft user"), minecraftUUID = bukkitPlayer.uniqueId)
+        minecraftProfileService.addMinecraftProfile(minecraftProfile)
         val minecraftProfileLinkRequest = RPKMinecraftProfileLinkRequestImpl(profile = profile, minecraftProfile = minecraftProfile)
-        minecraftProfileProvider.addMinecraftProfileLinkRequest(minecraftProfileLinkRequest)
+        minecraftProfileService.addMinecraftProfileLinkRequest(minecraftProfileLinkRequest)
         sender.sendMessage(plugin.messages["account-link-minecraft-valid"])
         return true
     }

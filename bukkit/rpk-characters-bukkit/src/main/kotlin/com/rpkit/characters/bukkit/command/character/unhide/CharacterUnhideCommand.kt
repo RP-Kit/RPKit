@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Character unhide command.
  * Parent command for commands to unhide different character card fields.
  */
-class CharacterUnhideCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class CharacterUnhideCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
     private val characterUnhideProfileCommand = CharacterUnhideProfileCommand(plugin)
     private val characterUnhideNameCommand = CharacterUnhideNameCommand(plugin)

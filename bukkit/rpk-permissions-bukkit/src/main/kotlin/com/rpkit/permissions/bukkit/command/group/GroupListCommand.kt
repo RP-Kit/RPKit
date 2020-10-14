@@ -16,21 +16,27 @@
 
 package com.rpkit.permissions.bukkit.command.group
 
+import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
-import com.rpkit.permissions.bukkit.group.RPKGroupProvider
+import com.rpkit.permissions.bukkit.group.RPKGroupService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 
-class GroupListCommand(private val plugin: RPKPermissionsBukkit): CommandExecutor {
+class GroupListCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.permissions.command.group.list")) {
             sender.sendMessage(plugin.messages["no-permission-group-list"])
             return true
         }
         sender.sendMessage(plugin.messages["group-list-title"])
-        plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class).groups.forEach { group ->
+        val groupService = Services[RPKGroupService::class]
+        if (groupService == null) {
+            sender.sendMessage(plugin.messages["no-group-service"])
+            return true
+        }
+        groupService.groups.forEach { group ->
             sender.sendMessage(plugin.messages["group-list-item", mapOf(Pair("group", group.name))])
         }
         return true

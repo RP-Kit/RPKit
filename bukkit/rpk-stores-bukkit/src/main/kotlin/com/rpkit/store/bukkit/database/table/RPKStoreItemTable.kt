@@ -21,14 +21,15 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.storeitem.RPKStoreItem
-import com.rpkit.stores.bukkit.database.jooq.rpkit.Tables.RPKIT_STORE_ITEM
+import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_STORE_ITEM
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 
-class RPKStoreItemTable(database: Database, private val plugin: RPKStoresBukkit): Table<RPKStoreItem>(database, RPKStoreItem::class) {
+class RPKStoreItemTable(
+        private val database: Database,
+        plugin: RPKStoresBukkit
+) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_store_item.id.enabled")) {
         database.cacheManager.createCache("rpkit-stores-bukkit.rpkit_store_item.id",
@@ -38,28 +39,7 @@ class RPKStoreItemTable(database: Database, private val plugin: RPKStoresBukkit)
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_STORE_ITEM)
-                .column(RPKIT_STORE_ITEM.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_STORE_ITEM.PLUGIN, SQLDataType.VARCHAR(128))
-                .column(RPKIT_STORE_ITEM.IDENTIFIER, SQLDataType.VARCHAR(128))
-                .column(RPKIT_STORE_ITEM.DESCRIPTION, SQLDataType.VARCHAR(2048))
-                .column(RPKIT_STORE_ITEM.COST, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("pk_rpkit_store_item").primaryKey(RPKIT_STORE_ITEM.ID),
-                        constraint("uk_rpkit_store_item").unique(RPKIT_STORE_ITEM.PLUGIN, RPKIT_STORE_ITEM.IDENTIFIER)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.6.0")
-        }
-    }
-
-    override fun insert(entity: RPKStoreItem): Int {
+    fun insert(entity: RPKStoreItem): Int {
         database.create
                 .insertInto(
                         RPKIT_STORE_ITEM,
@@ -81,7 +61,7 @@ class RPKStoreItemTable(database: Database, private val plugin: RPKStoresBukkit)
         return id
     }
 
-    override fun update(entity: RPKStoreItem) {
+    fun update(entity: RPKStoreItem) {
         database.create
                 .update(RPKIT_STORE_ITEM)
                 .set(RPKIT_STORE_ITEM.PLUGIN, entity.plugin)
@@ -93,7 +73,7 @@ class RPKStoreItemTable(database: Database, private val plugin: RPKStoresBukkit)
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKStoreItem? {
+    operator fun get(id: Int): RPKStoreItem? {
         if (cache?.containsKey(id) == true) return cache[id]
         var storeItem: RPKStoreItem? = database.getTable(RPKConsumableStoreItemTable::class)[id]
         if (storeItem != null) {
@@ -137,7 +117,7 @@ class RPKStoreItemTable(database: Database, private val plugin: RPKStoresBukkit)
         return result.mapNotNull { row -> get(row[RPKIT_STORE_ITEM.ID]) }
     }
 
-    override fun delete(entity: RPKStoreItem) {
+    fun delete(entity: RPKStoreItem) {
         database.create
                 .deleteFrom(RPKIT_STORE_ITEM)
                 .where(RPKIT_STORE_ITEM.ID.eq(entity.id))

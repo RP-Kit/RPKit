@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 
 
-interface RPKCurrencyEvent: RPKEvent {
+interface RPKCurrencyEvent : RPKEvent {
 
     val currency: RPKCurrency
 

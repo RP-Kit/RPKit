@@ -19,44 +19,57 @@ package com.rpkit.banks.bukkit.bank
 import com.rpkit.banks.bukkit.RPKBanksBukkit
 import com.rpkit.banks.bukkit.database.table.RPKBankTable
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrency
-import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
+import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.economy.bukkit.exception.NegativeBalanceException
 
 /**
- * Bank provider implementation.
+ * Bank service implementation.
  */
-class RPKBankProviderImpl(private val plugin: RPKBanksBukkit): RPKBankProvider {
+class RPKBankServiceImpl(override val plugin: RPKBanksBukkit) : RPKBankService {
 
     override fun getBalance(character: RPKCharacter, currency: RPKCurrency): Int {
-        return plugin.core.database.getTable(RPKBankTable::class).get(character, currency).balance
+        return plugin.database.getTable(RPKBankTable::class)[character, currency]?.balance ?: 0
     }
 
     override fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int) {
         if (amount < 0) throw NegativeBalanceException()
-        val bank = plugin.core.database.getTable(RPKBankTable::class).get(character, currency)
-        bank.balance = amount
-        plugin.core.database.getTable(RPKBankTable::class).update(bank)
+        val bankTable = plugin.database.getTable(RPKBankTable::class)
+        var bank = bankTable[character, currency]
+        if (bank != null) {
+            bank.balance = amount
+            bankTable.update(bank)
+        } else {
+            bank = RPKBank(
+                    character,
+                    currency,
+                    amount
+            )
+            bankTable.insert(bank)
+        }
     }
 
     override fun deposit(character: RPKCharacter, currency: RPKCurrency, amount: Int) {
-        val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-        if (economyProvider.getBalance(character, currency) >= amount) {
-            economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - amount)
+        val economyService = Services[RPKEconomyService::class] ?: return
+        if (economyService.getBalance(character, currency) >= amount) {
+            economyService.setBalance(character, currency, economyService.getBalance(character, currency) - amount)
             setBalance(character, currency, getBalance(character, currency) + amount)
         }
     }
 
     override fun withdraw(character: RPKCharacter, currency: RPKCurrency, amount: Int) {
-        val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
+        val economyService = Services[RPKEconomyService::class] ?: return
         if (getBalance(character, currency) >= amount) {
-            economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) + amount)
+            economyService.setBalance(character, currency, economyService.getBalance(character, currency) + amount)
             setBalance(character, currency, getBalance(character, currency) - amount)
         }
     }
 
     override fun getRichestCharacters(currency: RPKCurrency, amount: Int): List<RPKCharacter> {
-        return plugin.core.database.getTable(RPKBankTable::class).getTop(amount, currency)
+        return plugin.database.getTable(RPKBankTable::class)
+                .getTop(amount, currency)
+                .map(RPKBank::character)
     }
 
 }

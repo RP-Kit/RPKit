@@ -22,7 +22,7 @@ import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItem
  * Represents a timed purchase.
  * A timed store item expires after a certain amount of time has passed.
  */
-interface RPKTimedPurchase: RPKPurchase {
+interface RPKTimedPurchase : RPKPurchase {
 
     /**
      * The store item that has been purchased

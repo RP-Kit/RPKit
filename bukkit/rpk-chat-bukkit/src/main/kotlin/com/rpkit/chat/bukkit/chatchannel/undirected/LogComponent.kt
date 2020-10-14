@@ -34,7 +34,7 @@ import java.util.*
  * Logs messages to a dated log file.
  */
 @SerializableAs("LogComponent")
-class LogComponent(private val plugin: RPKChatBukkit): UndirectedPipelineComponent, ConfigurationSerializable {
+class LogComponent(private val plugin: RPKChatBukkit) : UndirectedPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         val logDirectory = File(plugin.dataFolder, "logs")

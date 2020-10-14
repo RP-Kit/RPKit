@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,15 @@ package com.rpkit.monsters.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
-import com.rpkit.monsters.bukkit.database.jooq.rpkit.Tables.RPKIT_MONSTER_SPAWN_AREA
+import com.rpkit.monsters.bukkit.database.jooq.Tables.RPKIT_MONSTER_SPAWN_AREA
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnArea
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaImpl
 import org.bukkit.Location
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 
-class RPKMonsterSpawnAreaTable(database: Database, private val plugin: RPKMonstersBukkit): Table<RPKMonsterSpawnArea>(database, RPKMonsterSpawnArea::class) {
+class RPKMonsterSpawnAreaTable(private val database: Database, private val plugin: RPKMonstersBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_monster_spawn_area.id.enabled")) {
         database.cacheManager.createCache("rpk-monsters-bukkit.rpkit_monster_spawn_area.id",
@@ -42,30 +40,7 @@ class RPKMonsterSpawnAreaTable(database: Database, private val plugin: RPKMonste
     private val allSpawnAreas = mutableSetOf<RPKMonsterSpawnArea>()
     private var allFetched = false
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_MONSTER_SPAWN_AREA)
-                .column(RPKIT_MONSTER_SPAWN_AREA.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_MONSTER_SPAWN_AREA.WORLD, SQLDataType.VARCHAR(256))
-                .column(RPKIT_MONSTER_SPAWN_AREA.MIN_X, SQLDataType.INTEGER)
-                .column(RPKIT_MONSTER_SPAWN_AREA.MIN_Y, SQLDataType.INTEGER)
-                .column(RPKIT_MONSTER_SPAWN_AREA.MIN_Z, SQLDataType.INTEGER)
-                .column(RPKIT_MONSTER_SPAWN_AREA.MAX_X, SQLDataType.INTEGER)
-                .column(RPKIT_MONSTER_SPAWN_AREA.MAX_Y, SQLDataType.INTEGER)
-                .column(RPKIT_MONSTER_SPAWN_AREA.MAX_Z, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("pk_rpkit_monster_spawn_area").primaryKey(RPKIT_MONSTER_SPAWN_AREA.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.8.0")
-        }
-    }
-
-    override fun insert(entity: RPKMonsterSpawnArea): Int {
+    fun insert(entity: RPKMonsterSpawnArea) {
         database.create
                 .insertInto(
                         RPKIT_MONSTER_SPAWN_AREA,
@@ -93,10 +68,9 @@ class RPKMonsterSpawnAreaTable(database: Database, private val plugin: RPKMonste
         if (!allSpawnAreas.contains(entity)) {
             allSpawnAreas.add(entity)
         }
-        return id
     }
 
-    override fun update(entity: RPKMonsterSpawnArea) {
+    fun update(entity: RPKMonsterSpawnArea) {
         database.create
                 .update(RPKIT_MONSTER_SPAWN_AREA)
                 .set(RPKIT_MONSTER_SPAWN_AREA.WORLD, entity.minPoint.world?.name)
@@ -114,19 +88,19 @@ class RPKMonsterSpawnAreaTable(database: Database, private val plugin: RPKMonste
         }
     }
 
-    override fun get(id: Int): RPKMonsterSpawnArea? {
+    operator fun get(id: Int): RPKMonsterSpawnArea? {
         if (cache?.containsKey(id) == true) {
             return cache[id]
         }
         val result = database.create.select(
-                        RPKIT_MONSTER_SPAWN_AREA.WORLD,
-                        RPKIT_MONSTER_SPAWN_AREA.MIN_X,
-                        RPKIT_MONSTER_SPAWN_AREA.MIN_Y,
-                        RPKIT_MONSTER_SPAWN_AREA.MIN_Z,
-                        RPKIT_MONSTER_SPAWN_AREA.MAX_X,
-                        RPKIT_MONSTER_SPAWN_AREA.MAX_Y,
-                        RPKIT_MONSTER_SPAWN_AREA.MAX_Z
-                )
+                RPKIT_MONSTER_SPAWN_AREA.WORLD,
+                RPKIT_MONSTER_SPAWN_AREA.MIN_X,
+                RPKIT_MONSTER_SPAWN_AREA.MIN_Y,
+                RPKIT_MONSTER_SPAWN_AREA.MIN_Z,
+                RPKIT_MONSTER_SPAWN_AREA.MAX_X,
+                RPKIT_MONSTER_SPAWN_AREA.MAX_Y,
+                RPKIT_MONSTER_SPAWN_AREA.MAX_Z
+        )
                 .from(RPKIT_MONSTER_SPAWN_AREA)
                 .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(id))
                 .fetchOne() ?: return null
@@ -166,7 +140,7 @@ class RPKMonsterSpawnAreaTable(database: Database, private val plugin: RPKMonste
         return allSpawnAreas.toList()
     }
 
-    override fun delete(entity: RPKMonsterSpawnArea) {
+    fun delete(entity: RPKMonsterSpawnArea) {
         database.create
                 .deleteFrom(RPKIT_MONSTER_SPAWN_AREA)
                 .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(entity.id))

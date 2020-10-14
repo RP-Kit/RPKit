@@ -23,7 +23,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class WandCommand(private val plugin: RPKSelectionBukkit): CommandExecutor {
+class WandCommand(private val plugin: RPKSelectionBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.selection.command.wand")) {

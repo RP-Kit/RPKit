@@ -26,7 +26,7 @@ import org.bukkit.event.block.BlockBreakEvent
 /**
  * Block break listener for trader signs.
  */
-class BlockBreakListener(private val plugin: RPKTradeBukkit): Listener {
+class BlockBreakListener(private val plugin: RPKTradeBukkit) : Listener {
 
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {

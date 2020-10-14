@@ -16,13 +16,18 @@
 
 package com.rpkit.store.bukkit.storeitem
 
-import com.rpkit.core.database.Entity
-
 /**
  * Represents a store item.
  * This may be purchased by many different people.
  */
-interface RPKStoreItem: Entity {
+interface RPKStoreItem {
+
+    /**
+     * The ID of the store item.
+     * Guaranteed to be unique.
+     * Null if it has not yet been inserted into the database.
+     */
+    var id: Int?
 
     /**
      * The plugin providing the store item

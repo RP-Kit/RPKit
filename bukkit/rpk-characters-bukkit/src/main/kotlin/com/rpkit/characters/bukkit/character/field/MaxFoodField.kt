@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * Character card field for max food.
  */
-class MaxFoodField: CharacterCardField {
+class MaxFoodField : CharacterCardField {
 
     override val name = "max-food"
     override fun get(character: RPKCharacter): String {

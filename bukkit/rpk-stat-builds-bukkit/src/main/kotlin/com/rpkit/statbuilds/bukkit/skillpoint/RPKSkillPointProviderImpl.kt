@@ -17,28 +17,31 @@
 package com.rpkit.statbuilds.bukkit.skillpoint
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.experience.bukkit.experience.RPKExperienceProvider
-import com.rpkit.skills.bukkit.skills.RPKSkillPointProvider
+import com.rpkit.core.service.Services
+import com.rpkit.experience.bukkit.experience.RPKExperienceService
+import com.rpkit.skills.bukkit.skills.RPKSkillPointService
 import com.rpkit.skills.bukkit.skills.RPKSkillType
 import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
-import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeProvider
-import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildProvider
+import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
+import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildService
 import org.nfunk.jep.JEP
 import kotlin.math.roundToInt
 
-class RPKSkillPointProviderImpl(private val plugin: RPKStatBuildsBukkit): RPKSkillPointProvider {
+class RPKSkillPointServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKSkillPointService {
     override fun getSkillPoints(character: RPKCharacter, skillType: RPKSkillType): Int {
         val expression = plugin.config.getString("skill-points.${skillType.name}")
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
-        val statBuildProvider = plugin.core.serviceManager.getServiceProvider(RPKStatBuildProvider::class)
-        plugin.core.serviceManager.getServiceProvider(RPKStatAttributeProvider::class)
+        val statBuildService = Services[RPKStatBuildService::class] ?: return 0
+        val statAttributeService = Services[RPKStatAttributeService::class] ?: return 0
+        statAttributeService
                 .statAttributes
                 .forEach { statAttribute ->
-                    parser.addVariable(statAttribute.name, statBuildProvider.getStatPoints(character, statAttribute).toDouble())
+                    parser.addVariable(statAttribute.name, statBuildService.getStatPoints(character, statAttribute).toDouble())
                 }
-        parser.addVariable("level", plugin.core.serviceManager.getServiceProvider(RPKExperienceProvider::class).getLevel(character).toDouble())
+        val experienceService = Services[RPKExperienceService::class] ?: return 0
+        parser.addVariable("level", experienceService.getLevel(character).toDouble())
         parser.parseExpression(expression)
         return parser.value.roundToInt()
     }

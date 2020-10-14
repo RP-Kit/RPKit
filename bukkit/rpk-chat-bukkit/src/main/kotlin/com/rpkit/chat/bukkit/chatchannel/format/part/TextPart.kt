@@ -65,7 +65,8 @@ class TextPart(
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = TextPart(
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = TextPart(
                 serialized["text"] as String,
                 serialized["font"] as? String,
                 serialized["color"] as? String,

@@ -16,19 +16,17 @@
 
 package com.rpkit.chat.bukkit.chatchannel.format.part
 
-import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.format.click.ClickAction
 import com.rpkit.chat.bukkit.chatchannel.format.hover.HoverAction
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
-import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
+import com.rpkit.chat.bukkit.prefix.RPKPrefixService
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
-import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
 @SerializableAs("SenderPrefixPart")
 class SenderPrefixPart(
-        private val plugin: RPKChatBukkit,
         font: String? = null,
         color: String? = null,
         isBold: Boolean? = null,
@@ -53,7 +51,7 @@ class SenderPrefixPart(
 ), ConfigurationSerializable {
 
     override fun getText(context: DirectedPreFormatMessageContext) = (context.senderProfile as? RPKProfile)
-            ?.let { plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class).getPrefix(it) }
+            ?.let { Services[RPKPrefixService::class]?.getPrefix(it) }
             ?: ""
 
     override fun serialize() = mutableMapOf(
@@ -70,8 +68,8 @@ class SenderPrefixPart(
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = SenderPrefixPart(
-                Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = SenderPrefixPart(
                 serialized["font"] as? String,
                 serialized["color"] as? String,
                 serialized["bold"] as? Boolean,

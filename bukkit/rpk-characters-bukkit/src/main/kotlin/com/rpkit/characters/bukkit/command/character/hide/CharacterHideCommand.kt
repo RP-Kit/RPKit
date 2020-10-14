@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Character hide command.
  * Parent command for commands to hide different character card fields.
  */
-class CharacterHideCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class CharacterHideCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
     private val characterHideProfileCommand = CharacterHideProfileCommand(plugin)
     private val characterHideNameCommand = CharacterHideNameCommand(plugin)

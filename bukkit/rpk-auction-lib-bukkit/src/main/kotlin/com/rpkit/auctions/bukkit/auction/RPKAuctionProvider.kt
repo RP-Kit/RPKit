@@ -16,15 +16,15 @@
 
 package com.rpkit.auctions.bukkit.auction
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
  * Provides auction-related operations.
  */
-interface RPKAuctionProvider: ServiceProvider {
+interface RPKAuctionService : Service {
 
     /**
-     * Adds an auction to be tracked by this auction provider.
+     * Adds an auction to be tracked by this auction service.
      *
      * @param auction The auction to add
      * @return Whether adding the auction was successful
@@ -40,7 +40,7 @@ interface RPKAuctionProvider: ServiceProvider {
     fun updateAuction(auction: RPKAuction): Boolean
 
     /**
-     * Removes an auction from being tracked by this auction provider.
+     * Removes an auction from being tracked by this auction service.
      *
      * @param auction The auction to update
      * @return Whether removing the auction was successful
@@ -57,9 +57,9 @@ interface RPKAuctionProvider: ServiceProvider {
     fun getAuction(id: Int): RPKAuction?
 
     /**
-     * Gets a list of all auctions tracked by this auction provider.
+     * Gets a list of all auctions tracked by this auction service.
      *
-     * @return A list of all auctions tracked by this auction provider
+     * @return A list of all auctions tracked by this auction service
      */
     fun getAuctions(): List<RPKAuction>
 

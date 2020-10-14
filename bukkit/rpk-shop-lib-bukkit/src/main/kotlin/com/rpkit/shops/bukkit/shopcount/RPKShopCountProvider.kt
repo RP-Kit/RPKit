@@ -17,12 +17,12 @@
 package com.rpkit.shops.bukkit.shopcount
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
  * Provides shop count related operations.
  */
-interface RPKShopCountProvider: ServiceProvider {
+interface RPKShopCountService : Service {
 
     /**
      * Gets the shop count of a character.

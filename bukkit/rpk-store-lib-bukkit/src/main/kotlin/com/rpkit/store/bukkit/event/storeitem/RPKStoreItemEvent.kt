@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.store.bukkit.storeitem.RPKStoreItem
 
 
-interface RPKStoreItemEvent: RPKEvent {
+interface RPKStoreItemEvent : RPKEvent {
 
     val storeItem: RPKStoreItem
 

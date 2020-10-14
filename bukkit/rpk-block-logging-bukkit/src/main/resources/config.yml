@@ -1,13 +1,13 @@
 caching:
-    rpkit_block_change:
-        id:
-            enabled: true
-            size: 200
-    rpkit_block_history:
-        id:
-            enabled: true
-            size: 200
-    rpkit_block_inventory_change:
-        id:
-            enabled: true
-            size: 200
+  rpkit_block_change:
+    id:
+      enabled: true
+      size: 200
+  rpkit_block_history:
+    id:
+      enabled: true
+      size: 200
+  rpkit_block_inventory_change:
+    id:
+      enabled: true
+      size: 200

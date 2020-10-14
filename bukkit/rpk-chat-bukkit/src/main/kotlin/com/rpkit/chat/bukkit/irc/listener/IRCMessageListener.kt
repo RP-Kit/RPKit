@@ -17,9 +17,10 @@
 package com.rpkit.chat.bukkit.irc.listener
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
-import com.rpkit.players.bukkit.profile.RPKIRCProfileProvider
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKIRCProfileService
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.MessageEvent
 
@@ -27,33 +28,29 @@ import org.pircbotx.hooks.events.MessageEvent
  * IRC message listener.
  * Sends messages to chat channels when received in IRC.
  */
-class IRCMessageListener(private val plugin: RPKChatBukkit): ListenerAdapter() {
+class IRCMessageListener(private val plugin: RPKChatBukkit) : ListenerAdapter() {
 
     override fun onMessage(event: MessageEvent) {
         // Commands all extend ListenerAdapter as well, and have their own handling.
         // This stops commands from being sent to chat.
         if (event.message.startsWith("!")) return
 
-        val ircProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProfileProvider::class)
-        val user = event.user
+        val ircProfileService = Services[RPKIRCProfileService::class] ?: return
         // According to PircBotX documentation, user can be null if the hostmask doesn't match a user at creation time.
-        if (user != null) {
-            val senderIRCProfile = ircProfileProvider.getIRCProfile(user)
-            if (senderIRCProfile != null) {
-                val senderProfile = senderIRCProfile.profile
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
-                val chatChannel = chatChannelProvider.getChatChannelFromIRCChannel(event.channel.name)
-                chatChannel?.sendMessage(
-                        senderProfile,
-                        null,
-                        event.message,
-                        chatChannel.directedPreFormatPipeline,
-                        chatChannel.format,
-                        chatChannel.directedPostFormatPipeline,
-                        chatChannel.undirectedPipeline.filter { it !is IRCComponent }
-                )
-            }
-        }
+        val user = event.user ?: return
+        val senderIRCProfile = ircProfileService.getIRCProfile(user) ?: return
+        val senderProfile = senderIRCProfile.profile
+        val chatChannelService = Services[RPKChatChannelService::class] ?: return
+        val chatChannel = chatChannelService.getChatChannelFromIRCChannel(event.channel.name)
+        chatChannel?.sendMessage(
+                senderProfile,
+                null,
+                event.message,
+                chatChannel.directedPreFormatPipeline,
+                chatChannel.format,
+                chatChannel.directedPostFormatPipeline,
+                chatChannel.undirectedPipeline.filter { it !is IRCComponent }
+        )
     }
 
 }

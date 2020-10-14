@@ -18,7 +18,6 @@ package com.rpkit.auctions.bukkit.auction
 
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
@@ -26,7 +25,12 @@ import org.bukkit.inventory.ItemStack
 /**
  * Represents an auction.
  */
-interface RPKAuction: Entity {
+interface RPKAuction {
+
+    /**
+     * The auction ID. Guaranteed to be unique.
+     */
+    var id: Int?
 
     /**
      * The item being auctioned.

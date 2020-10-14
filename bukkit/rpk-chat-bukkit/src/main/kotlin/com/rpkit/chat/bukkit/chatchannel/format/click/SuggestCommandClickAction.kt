@@ -34,7 +34,8 @@ class SuggestCommandClickAction(val command: String) : ClickAction, Configuratio
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = SuggestCommandClickAction(
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = SuggestCommandClickAction(
                 serialized["command"] as String
         )
     }

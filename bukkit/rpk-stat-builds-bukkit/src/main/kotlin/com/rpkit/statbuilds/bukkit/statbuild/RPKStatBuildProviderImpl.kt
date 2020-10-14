@@ -17,22 +17,24 @@
 package com.rpkit.statbuilds.bukkit.statbuild
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.experience.bukkit.experience.RPKExperienceProvider
+import com.rpkit.core.service.Services
+import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
 import com.rpkit.statbuilds.bukkit.database.table.RPKCharacterStatPointsTable
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttribute
-import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeProvider
+import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
 import org.nfunk.jep.JEP
 import kotlin.math.roundToInt
 
-class RPKStatBuildProviderImpl(private val plugin: RPKStatBuildsBukkit): RPKStatBuildProvider {
+class RPKStatBuildServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKStatBuildService {
 
     override fun getStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int {
-        return plugin.core.database.getTable(RPKCharacterStatPointsTable::class).get(character, statAttribute)?.points ?: 0
+        return plugin.database.getTable(RPKCharacterStatPointsTable::class)[character, statAttribute]?.points
+                ?: 0
     }
 
     override fun setStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute, amount: Int) {
-        val characterStatPointsTable = plugin.core.database.getTable(RPKCharacterStatPointsTable::class)
+        val characterStatPointsTable = plugin.database.getTable(RPKCharacterStatPointsTable::class)
         var characterStatPoints = characterStatPointsTable.get(character, statAttribute)
         if (characterStatPoints == null) {
             characterStatPoints = RPKCharacterStatPoints(
@@ -52,7 +54,7 @@ class RPKStatBuildProviderImpl(private val plugin: RPKStatBuildsBukkit): RPKStat
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
-        parser.addVariable("level", plugin.core.serviceManager.getServiceProvider(RPKExperienceProvider::class).getLevel(character).toDouble())
+        parser.addVariable("level", Services[RPKExperienceService::class]?.getLevel(character)?.toDouble() ?: 1.0)
         parser.parseExpression(expression)
         return parser.value.roundToInt()
     }
@@ -62,7 +64,7 @@ class RPKStatBuildProviderImpl(private val plugin: RPKStatBuildsBukkit): RPKStat
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
-        parser.addVariable("level", plugin.core.serviceManager.getServiceProvider(RPKExperienceProvider::class).getLevel(character).toDouble())
+        parser.addVariable("level", Services[RPKExperienceService::class]?.getLevel(character)?.toDouble() ?: 1.0)
         parser.parseExpression(expression)
         return parser.value.roundToInt()
     }
@@ -72,8 +74,11 @@ class RPKStatBuildProviderImpl(private val plugin: RPKStatBuildsBukkit): RPKStat
     }
 
     override fun getAssignedStatPoints(character: RPKCharacter): Int {
-        return plugin.core.serviceManager.getServiceProvider(RPKStatAttributeProvider::class)
-                .statAttributes.map { statAttribute -> getStatPoints(character, statAttribute) }.sum()
+        return Services[RPKStatAttributeService::class]
+                ?.statAttributes
+                ?.map { statAttribute -> getStatPoints(character, statAttribute) }
+                ?.sum()
+                ?: 0
     }
 
 

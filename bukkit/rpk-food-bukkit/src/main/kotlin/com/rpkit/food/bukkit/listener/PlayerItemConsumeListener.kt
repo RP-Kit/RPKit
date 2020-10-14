@@ -16,8 +16,9 @@
 
 package com.rpkit.food.bukkit.listener
 
+import com.rpkit.core.service.Services
 import com.rpkit.food.bukkit.RPKFoodBukkit
-import com.rpkit.food.bukkit.expiry.RPKExpiryProviderImpl
+import com.rpkit.food.bukkit.expiry.RPKExpiryServiceImpl
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerItemConsumeEvent
@@ -27,14 +28,14 @@ import org.bukkit.potion.PotionEffectType
 /**
  * Item consume listener for checking expiry dates.
  */
-class PlayerItemConsumeListener(private val plugin: RPKFoodBukkit): Listener {
+class PlayerItemConsumeListener(private val plugin: RPKFoodBukkit) : Listener {
 
     @EventHandler
     fun onPlayerItemConsume(event: PlayerItemConsumeEvent) {
         val item = event.item
-        val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProviderImpl::class)
+        val expiryService = Services[RPKExpiryServiceImpl::class]
         if (item.type.isEdible) {
-            if (expiryProvider.isExpired(item)) {
+            if (expiryService?.isExpired(item) != false) {
                 event.player.addPotionEffect(PotionEffect(PotionEffectType.HUNGER, 1200, 0))
                 event.player.addPotionEffect(PotionEffect(PotionEffectType.POISON, 300, 0))
                 event.player.addPotionEffect(PotionEffect(PotionEffectType.CONFUSION, 300, 0))

@@ -18,6 +18,10 @@ package com.rpkit.locks.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.locks.bukkit.command.GetKeyCommand
 import com.rpkit.locks.bukkit.command.KeyringCommand
 import com.rpkit.locks.bukkit.command.UnlockCommand
@@ -25,29 +29,79 @@ import com.rpkit.locks.bukkit.database.table.RPKKeyringTable
 import com.rpkit.locks.bukkit.database.table.RPKLockedBlockTable
 import com.rpkit.locks.bukkit.database.table.RPKPlayerGettingKeyTable
 import com.rpkit.locks.bukkit.database.table.RPKPlayerUnclaimingTable
-import com.rpkit.locks.bukkit.keyring.RPKKeyringProviderImpl
+import com.rpkit.locks.bukkit.keyring.RPKKeyringService
+import com.rpkit.locks.bukkit.keyring.RPKKeyringServiceImpl
 import com.rpkit.locks.bukkit.listener.CraftItemListener
 import com.rpkit.locks.bukkit.listener.InventoryClickListener
 import com.rpkit.locks.bukkit.listener.InventoryCloseListener
 import com.rpkit.locks.bukkit.listener.PlayerInteractListener
-import com.rpkit.locks.bukkit.lock.RPKLockProviderImpl
+import com.rpkit.locks.bukkit.lock.RPKLockService
+import com.rpkit.locks.bukkit.lock.RPKLockServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.Material.IRON_BLOCK
 import org.bukkit.Material.IRON_INGOT
 import org.bukkit.NamespacedKey
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ShapedRecipe
+import java.io.File
 
-class RPKLocksBukkit: RPKBukkitPlugin() {
+class RPKLocksBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 4402)
         saveDefaultConfig()
-        val lockProvider = RPKLockProviderImpl(this)
-        serviceProviders = arrayOf(
-                RPKKeyringProviderImpl(this),
-                lockProvider
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/locks/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/locks/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_locks"
+                ),
+                classLoader
         )
-        val lockRecipe = ShapedRecipe(NamespacedKey(this, "lock"), lockProvider.lockItem)
+        database.addTable(RPKKeyringTable(database, this))
+        database.addTable(RPKLockedBlockTable(database, this))
+        database.addTable(RPKPlayerGettingKeyTable(database, this))
+        database.addTable(RPKPlayerUnclaimingTable(database, this))
+
+        val lockService = RPKLockServiceImpl(this)
+        Services[RPKLockService::class] = lockService
+        Services[RPKKeyringService::class] = RPKKeyringServiceImpl(this)
+        val lockRecipe = ShapedRecipe(NamespacedKey(this, "lock"), lockService.lockItem)
         lockRecipe.shape("I", "B").setIngredient('I', IRON_INGOT).setIngredient('B', IRON_BLOCK)
         server.addRecipe(lockRecipe)
     }
@@ -65,13 +119,6 @@ class RPKLocksBukkit: RPKBukkitPlugin() {
                 InventoryCloseListener(this),
                 PlayerInteractListener(this)
         )
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKKeyringTable(database, this))
-        database.addTable(RPKLockedBlockTable(database, this))
-        database.addTable(RPKPlayerGettingKeyTable(database, this))
-        database.addTable(RPKPlayerUnclaimingTable(database, this))
     }
 
     override fun setDefaultMessages() {
@@ -93,6 +140,10 @@ class RPKLocksBukkit: RPKBukkitPlugin() {
         messages.setDefault("no-permission-get-key", "&cYou do not have permission to get keys.")
         messages.setDefault("no-permission-keyring", "&cYou do not have permission to view your keyring.")
         messages.setDefault("no-permission-unlock", "&cYou do not have permission to remove locks.")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-character-service", "&cThere is no character service available.")
+        messages.setDefault("no-lock-service", "&cThere is no lock service available.")
+        messages.setDefault("no-keyring-service", "&cThere is no keyring service available.")
     }
-    
+
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.blocklog.bukkit.block
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
@@ -8,60 +24,61 @@ import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
+import java.time.LocalDateTime
 
 
-class RPKBlockHistoryProviderImpl(private val plugin: RPKBlockLoggingBukkit): RPKBlockHistoryProvider {
+class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : RPKBlockHistoryService {
 
     override fun getBlockHistory(id: Int): RPKBlockHistory? {
-        return plugin.core.database.getTable(RPKBlockHistoryTable::class)[id]
+        return plugin.database.getTable(RPKBlockHistoryTable::class)[id]
     }
 
     override fun addBlockHistory(blockHistory: RPKBlockHistory) {
-        plugin.core.database.getTable(RPKBlockHistoryTable::class).insert(blockHistory)
+        plugin.database.getTable(RPKBlockHistoryTable::class).insert(blockHistory)
     }
 
     override fun updateBlockHistory(blockHistory: RPKBlockHistory) {
-        plugin.core.database.getTable(RPKBlockHistoryTable::class).update(blockHistory)
+        plugin.database.getTable(RPKBlockHistoryTable::class).update(blockHistory)
     }
 
     override fun removeBlockHistory(blockHistory: RPKBlockHistory) {
-        plugin.core.database.getTable(RPKBlockHistoryTable::class).delete(blockHistory)
+        plugin.database.getTable(RPKBlockHistoryTable::class).delete(blockHistory)
     }
 
     override fun getBlockChange(id: Int): RPKBlockChange? {
-        return plugin.core.database.getTable(RPKBlockChangeTable::class)[id]
+        return plugin.database.getTable(RPKBlockChangeTable::class)[id]
     }
 
     override fun addBlockChange(blockChange: RPKBlockChange) {
-        plugin.core.database.getTable(RPKBlockChangeTable::class).insert(blockChange)
+        plugin.database.getTable(RPKBlockChangeTable::class).insert(blockChange)
     }
 
     override fun updateBlockChange(blockChange: RPKBlockChange) {
-        plugin.core.database.getTable(RPKBlockChangeTable::class).update(blockChange)
+        plugin.database.getTable(RPKBlockChangeTable::class).update(blockChange)
     }
 
     override fun removeBlockChange(blockChange: RPKBlockChange) {
-        plugin.core.database.getTable(RPKBlockChangeTable::class).delete(blockChange)
+        plugin.database.getTable(RPKBlockChangeTable::class).delete(blockChange)
     }
 
     override fun getBlockInventoryChange(id: Int): RPKBlockInventoryChange? {
-        return plugin.core.database.getTable(RPKBlockInventoryChangeTable::class)[id]
+        return plugin.database.getTable(RPKBlockInventoryChangeTable::class)[id]
     }
 
     override fun addBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange) {
-        plugin.core.database.getTable(RPKBlockInventoryChangeTable::class).insert(blockInventoryChange)
+        plugin.database.getTable(RPKBlockInventoryChangeTable::class).insert(blockInventoryChange)
     }
 
     override fun updateBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange) {
-        plugin.core.database.getTable(RPKBlockInventoryChangeTable::class).update(blockInventoryChange)
+        plugin.database.getTable(RPKBlockInventoryChangeTable::class).update(blockInventoryChange)
     }
 
     override fun removeBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange) {
-        plugin.core.database.getTable(RPKBlockInventoryChangeTable::class).delete(blockInventoryChange)
+        plugin.database.getTable(RPKBlockInventoryChangeTable::class).delete(blockInventoryChange)
     }
 
     override fun getBlockHistory(block: Block): RPKBlockHistory {
-        var blockHistory = plugin.core.database.getTable(RPKBlockHistoryTable::class).get(block)
+        var blockHistory = plugin.database.getTable(RPKBlockHistoryTable::class).get(block)
         if (blockHistory == null) {
             blockHistory = RPKBlockHistoryImpl(
                     plugin,
@@ -75,7 +92,7 @@ class RPKBlockHistoryProviderImpl(private val plugin: RPKBlockLoggingBukkit): RP
         return blockHistory
     }
 
-    override fun getBlockTypeAtTime(block: Block, time: Long): Material {
+    override fun getBlockTypeAtTime(block: Block, time: LocalDateTime): Material {
         val history = getBlockHistory(block)
         var type = block.type
         history.changes
@@ -85,9 +102,9 @@ class RPKBlockHistoryProviderImpl(private val plugin: RPKBlockLoggingBukkit): RP
         return type
     }
 
-    override fun getBlockInventoryAtTime(block: Block, time: Long): Array<ItemStack> {
+    override fun getBlockInventoryAtTime(block: Block, time: LocalDateTime): Array<ItemStack> {
         val history = getBlockHistory(block)
-        var inventoryContents = (block.state as? InventoryHolder)?.inventory?.contents?:emptyArray<ItemStack>()
+        var inventoryContents = (block.state as? InventoryHolder)?.inventory?.contents ?: emptyArray<ItemStack>()
         history.inventoryChanges
                 .asReversed()
                 .takeWhile { time <= it.time }

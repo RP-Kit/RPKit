@@ -16,9 +16,9 @@
 
 package com.rpkit.languages.bukkit.language
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
-interface RPKLanguageProvider: ServiceProvider {
+interface RPKLanguageService : Service {
 
     val languages: List<RPKLanguage>
 

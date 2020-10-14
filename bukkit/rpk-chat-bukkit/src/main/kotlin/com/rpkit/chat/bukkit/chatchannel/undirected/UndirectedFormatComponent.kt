@@ -16,28 +16,27 @@
 
 package com.rpkit.chat.bukkit.chatchannel.undirected
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
-import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
+import com.rpkit.chat.bukkit.prefix.RPKPrefixService
 import com.rpkit.core.bukkit.util.closestChatColor
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
-import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
 @SerializableAs("UndirectedFormatComponent")
-class UndirectedFormatComponent(private val plugin: RPKChatBukkit, var formatString: String): UndirectedPipelineComponent, ConfigurationSerializable {
+class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val prefixProvider = plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class)
+        val characterService = Services[RPKCharacterService::class]
+        val prefixService = Services[RPKPrefixService::class]
         val senderMinecraftProfile = context.senderMinecraftProfile
         val senderProfile = context.senderProfile
         val senderCharacter = if (senderMinecraftProfile != null)
-            characterProvider.getActiveCharacter(senderMinecraftProfile)
+            characterService?.getActiveCharacter(senderMinecraftProfile)
         else
             null
         val chatChannel = context.chatChannel
@@ -47,7 +46,7 @@ class UndirectedFormatComponent(private val plugin: RPKChatBukkit, var formatStr
         }
         if (formattedMessage.contains("\$sender-prefix")) {
             formattedMessage = if (senderProfile is RPKProfile) {
-                formattedMessage.replace("\$sender-prefix", prefixProvider.getPrefix(senderProfile))
+                formattedMessage.replace("\$sender-prefix", prefixService?.getPrefix(senderProfile) ?: "")
             } else {
                 formattedMessage.replace("\$sender-prefix", "")
             }
@@ -83,7 +82,6 @@ class UndirectedFormatComponent(private val plugin: RPKChatBukkit, var formatStr
         @JvmStatic
         fun deserialize(serialized: MutableMap<String, Any>): UndirectedFormatComponent {
             return UndirectedFormatComponent(
-                    Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
                     serialized["format"] as String
             )
         }

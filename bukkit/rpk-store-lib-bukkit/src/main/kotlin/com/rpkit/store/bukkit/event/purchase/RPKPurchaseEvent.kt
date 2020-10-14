@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.store.bukkit.purchase.RPKPurchase
 
 
-interface RPKPurchaseEvent: RPKEvent {
+interface RPKPurchaseEvent : RPKEvent {
 
     val purchase: RPKPurchase
 

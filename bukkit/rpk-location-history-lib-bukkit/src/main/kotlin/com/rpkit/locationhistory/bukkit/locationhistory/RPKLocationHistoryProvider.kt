@@ -16,14 +16,14 @@
 
 package com.rpkit.locationhistory.bukkit.locationhistory
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import org.bukkit.Location
 
 /**
  * Provides history of locations of players, used with commands such as /back.
  */
-interface RPKLocationHistoryProvider: ServiceProvider {
+interface RPKLocationHistoryService : Service {
 
     /**
      * Gets the previous location of the Minecraft profile.

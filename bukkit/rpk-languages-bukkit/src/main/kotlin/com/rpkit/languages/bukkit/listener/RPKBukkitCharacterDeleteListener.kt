@@ -22,11 +22,11 @@ import com.rpkit.languages.bukkit.database.table.RPKCharacterLanguageTable
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
-class RPKBukkitCharacterDeleteListener(private val plugin: RPKLanguagesBukkit): Listener {
+class RPKBukkitCharacterDeleteListener(private val plugin: RPKLanguagesBukkit) : Listener {
 
     @EventHandler
     fun onCharacterDelete(event: RPKBukkitCharacterDeleteEvent) {
-        val characterLanguageTable = plugin.core.database.getTable(RPKCharacterLanguageTable::class)
+        val characterLanguageTable = plugin.database.getTable(RPKCharacterLanguageTable::class)
         val characterLanguages = characterLanguageTable.get(event.character)
         characterLanguages.forEach { characterLanguageTable.delete(it) }
     }

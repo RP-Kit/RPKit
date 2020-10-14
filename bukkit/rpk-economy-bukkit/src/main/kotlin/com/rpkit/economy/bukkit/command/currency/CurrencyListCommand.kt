@@ -16,8 +16,9 @@
 
 package com.rpkit.economy.bukkit.command.currency
 
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -26,19 +27,23 @@ import org.bukkit.command.CommandSender
  * Currency list command.
  * Lists available currencies.
  */
-class CurrencyListCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
+class CurrencyListCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender.hasPermission("rpkit.economy.command.currency.list")) {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            sender.sendMessage(plugin.messages["currency-list-title"])
-            for (currency in currencyProvider.currencies) {
-                sender.sendMessage(plugin.messages["currency-list-item", mapOf(
-                        Pair("currency", currency.name)
-                )])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.economy.command.currency.list")) {
             sender.sendMessage(plugin.messages["no-permission-currency-list"])
+            return true
+        }
+        val currencyService = Services[RPKCurrencyService::class]
+        if (currencyService == null) {
+            sender.sendMessage(plugin.messages["no-currency-service"])
+            return true
+        }
+        sender.sendMessage(plugin.messages["currency-list-title"])
+        for (currency in currencyService.currencies) {
+            sender.sendMessage(plugin.messages["currency-list-item", mapOf(
+                    Pair("currency", currency.name)
+            )])
         }
         return true
     }

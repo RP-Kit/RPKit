@@ -16,28 +16,19 @@
 
 package com.rpkit.core.bukkit.plugin
 
-import com.rpkit.core.RPKCore
-import com.rpkit.core.database.Database
 import com.rpkit.core.message.Messages
-import com.rpkit.core.service.ServiceProvider
-import com.rpkit.core.web.RPKServlet
+import com.rpkit.core.plugin.RPKPlugin
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
-import java.sql.SQLException
 
 /**
  * Represents an RPK plugin.
- * Provides convenience methods for registering listeners, commands, database tables, and provides service providers and
+ * Provides convenience methods for registering listeners, commands, database tables, and provides service services and
  * servlets.
  */
-abstract class RPKBukkitPlugin: JavaPlugin() {
+abstract class RPKBukkitPlugin : JavaPlugin(), RPKPlugin {
 
-    lateinit var core: RPKCore
     lateinit var messages: Messages
-
-    open fun onPostEnable() {
-
-    }
 
     open fun registerCommands() {
 
@@ -52,13 +43,6 @@ abstract class RPKBukkitPlugin: JavaPlugin() {
             server.pluginManager.registerEvents(listener, this)
         }
     }
-
-    @Throws(SQLException::class)
-    open fun createTables(database: Database) {
-    }
-
-    var serviceProviders = arrayOf<ServiceProvider>()
-    var servlets = arrayOf<RPKServlet>()
 
     open fun setDefaultMessages() {
 

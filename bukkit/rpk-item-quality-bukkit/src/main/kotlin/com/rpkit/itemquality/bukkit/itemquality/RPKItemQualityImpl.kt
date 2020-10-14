@@ -25,7 +25,7 @@ class RPKItemQualityImpl(
         override val lore: List<String>,
         override val durabilityModifier: Double,
         override val applicableItems: List<Material>
-): RPKItemQuality {
+) : RPKItemQuality {
 
     override fun isApplicableFor(item: ItemStack): Boolean {
         return applicableItems.contains(item.type)

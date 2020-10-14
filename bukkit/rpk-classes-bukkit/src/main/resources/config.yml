@@ -1,154 +1,154 @@
 classes:
-    swordsman:
-        max-level: 20
-        skill-points:
-            base:
-                melee_offence: 10
-                melee_defence: 10
-                ranged_offence: 2
-                ranged_defence: 2
-                magic_offence: 0
-                magic_defence: 0
-                magic_healing: 0
-                magic_nature: 0
-                magic_illusion: 0
-                magic_summoning: 0
-                magic_sword: 1
-                speed_nimble: 3
-                support_perform: 3
-            level:
-                melee_offence: 5
-                melee_defence: 5
-                ranged_offence: 2
-                ranged_defence: 2
-                magic_offence: 0
-                magic_defence: 0
-                magic_healing: 0
-                magic_nature: 0
-                magic_illusion: 0
-                magic_summoning: 0
-                magic_sword: 1
-                speed_nimble: 3
-                support_perform: 3
-        stat-variables:
-            strength: 8 + (level * 5)
-            agility: 6 + (level * 2)
-            intelligence: 3 + level
-    bowman:
-        max-level: 20
-        skill-points:
-            base:
-                melee_offence: 2
-                melee_defence: 2
-                ranged_offence: 10
-                ranged_defence: 10
-                magic_offence: 0
-                magic_defence: 0
-                magic_healing: 0
-                magic_nature: 0
-                magic_illusion: 0
-                magic_summoning: 0
-                magic_sword: 0
-                speed_nimble: 5
-                support_perform: 5
-            level:
-                melee_offence: 2
-                melee_defence: 2
-                ranged_offence: 5
-                ranged_defence: 5
-                magic_offence: 0
-                magic_defence: 0
-                magic_healing: 0
-                magic_nature: 0
-                magic_illusion: 0
-                magic_summoning: 0
-                magic_sword: 0
-                speed_nimble: 10
-                support_perform: 5
-        stat-variables:
-            strength: 5 + (level * 2)
-            agility: 7 + (level * 4)
-            intelligence: 5 + (level * 2)
-    wizard:
-        max-level: 20
-        skill-points:
-            base:
-                melee_offence: 1
-                melee_defence: 1
-                ranged_offence: 1
-                ranged_defence: 1
-                magic_offence: 5
-                magic_defence: 5
-                magic_healing: 5
-                magic_nature: 5
-                magic_illusion: 5
-                magic_summoning: 5
-                magic_sword: 1
-                speed_nimble: 3
-                support_perform: 3
-            level:
-                melee_offence: 1
-                melee_defence: 1
-                ranged_offence: 1
-                ranged_defence: 1
-                magic_offence: 5
-                magic_defence: 5
-                magic_healing: 5
-                magic_nature: 5
-                magic_illusion: 5
-                magic_summoning: 5
-                magic_sword: 5
-                speed_nimble: 1
-                support_perform: 5
-        stat-variables:
-            strength: 3 + level
-            agility: 6 + (level * 2)
-            intelligence: 8 + (level * 5)
-    freelancer:
-        max-level: 50
-        prerequisites:
-            swordsman: 20
-            bowman: 20
-            wizard: 20
-        skill-points:
-            base:
-                melee_offence: 5
-                melee_defence: 5
-                ranged_offence: 5
-                ranged_defence: 5
-                magic_offence: 5
-                magic_defence: 5
-                magic_healing: 5
-                magic_nature: 5
-                magic_illusion: 5
-                magic_summoning: 5
-                magic_sword: 5
-                speed_nimble: 5
-                support_perform: 5
-            level:
-                melee_offence: 5
-                melee_defence: 5
-                ranged_offence: 5
-                ranged_defence: 5
-                magic_offence: 5
-                magic_defence: 5
-                magic_healing: 5
-                magic_nature: 5
-                magic_illusion: 5
-                magic_summoning: 5
-                magic_sword: 5
-                speed_nimble: 5
-                support_perform: 5
-        stat-variables:
-            strength: 5 + (level * 2)
-            agility: 5 + (level * 2)
-            intelligence: 5 + (level * 2)
+  swordsman:
+    max-level: 20
+    skill-points:
+      base:
+        melee_offence: 10
+        melee_defence: 10
+        ranged_offence: 2
+        ranged_defence: 2
+        magic_offence: 0
+        magic_defence: 0
+        magic_healing: 0
+        magic_nature: 0
+        magic_illusion: 0
+        magic_summoning: 0
+        magic_sword: 1
+        speed_nimble: 3
+        support_perform: 3
+      level:
+        melee_offence: 5
+        melee_defence: 5
+        ranged_offence: 2
+        ranged_defence: 2
+        magic_offence: 0
+        magic_defence: 0
+        magic_healing: 0
+        magic_nature: 0
+        magic_illusion: 0
+        magic_summoning: 0
+        magic_sword: 1
+        speed_nimble: 3
+        support_perform: 3
+    stat-variables:
+      strength: 8 + (level * 5)
+      agility: 6 + (level * 2)
+      intelligence: 3 + level
+  bowman:
+    max-level: 20
+    skill-points:
+      base:
+        melee_offence: 2
+        melee_defence: 2
+        ranged_offence: 10
+        ranged_defence: 10
+        magic_offence: 0
+        magic_defence: 0
+        magic_healing: 0
+        magic_nature: 0
+        magic_illusion: 0
+        magic_summoning: 0
+        magic_sword: 0
+        speed_nimble: 5
+        support_perform: 5
+      level:
+        melee_offence: 2
+        melee_defence: 2
+        ranged_offence: 5
+        ranged_defence: 5
+        magic_offence: 0
+        magic_defence: 0
+        magic_healing: 0
+        magic_nature: 0
+        magic_illusion: 0
+        magic_summoning: 0
+        magic_sword: 0
+        speed_nimble: 10
+        support_perform: 5
+    stat-variables:
+      strength: 5 + (level * 2)
+      agility: 7 + (level * 4)
+      intelligence: 5 + (level * 2)
+  wizard:
+    max-level: 20
+    skill-points:
+      base:
+        melee_offence: 1
+        melee_defence: 1
+        ranged_offence: 1
+        ranged_defence: 1
+        magic_offence: 5
+        magic_defence: 5
+        magic_healing: 5
+        magic_nature: 5
+        magic_illusion: 5
+        magic_summoning: 5
+        magic_sword: 1
+        speed_nimble: 3
+        support_perform: 3
+      level:
+        melee_offence: 1
+        melee_defence: 1
+        ranged_offence: 1
+        ranged_defence: 1
+        magic_offence: 5
+        magic_defence: 5
+        magic_healing: 5
+        magic_nature: 5
+        magic_illusion: 5
+        magic_summoning: 5
+        magic_sword: 5
+        speed_nimble: 1
+        support_perform: 5
+    stat-variables:
+      strength: 3 + level
+      agility: 6 + (level * 2)
+      intelligence: 8 + (level * 5)
+  freelancer:
+    max-level: 50
+    prerequisites:
+      swordsman: 20
+      bowman: 20
+      wizard: 20
+    skill-points:
+      base:
+        melee_offence: 5
+        melee_defence: 5
+        ranged_offence: 5
+        ranged_defence: 5
+        magic_offence: 5
+        magic_defence: 5
+        magic_healing: 5
+        magic_nature: 5
+        magic_illusion: 5
+        magic_summoning: 5
+        magic_sword: 5
+        speed_nimble: 5
+        support_perform: 5
+      level:
+        melee_offence: 5
+        melee_defence: 5
+        ranged_offence: 5
+        ranged_defence: 5
+        magic_offence: 5
+        magic_defence: 5
+        magic_healing: 5
+        magic_nature: 5
+        magic_illusion: 5
+        magic_summoning: 5
+        magic_sword: 5
+        speed_nimble: 5
+        support_perform: 5
+    stat-variables:
+      strength: 5 + (level * 2)
+      agility: 5 + (level * 2)
+      intelligence: 5 + (level * 2)
 caching:
-    rpkit_character_class:
-        id:
-            enabled: true
-            size: 20
-    rpkit_class_experience:
-        id:
-            enabled: true
-            size: 20
+  rpkit_character_class:
+    character_id:
+      enabled: true
+      size: 20
+  rpkit_class_experience:
+    id:
+      enabled: true
+      size: 20

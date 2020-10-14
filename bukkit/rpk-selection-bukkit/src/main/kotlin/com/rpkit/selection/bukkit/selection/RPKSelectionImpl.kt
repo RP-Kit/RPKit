@@ -22,12 +22,11 @@ import org.bukkit.block.Block
 
 
 class RPKSelectionImpl(
-        override var id: Int = 0,
         override val minecraftProfile: RPKMinecraftProfile,
         override var world: World,
         override var point1: Block,
         override var point2: Block
-): RPKSelection {
+) : RPKSelection {
 
     override val minimumPoint: Block
         get() = world.getBlockAt(

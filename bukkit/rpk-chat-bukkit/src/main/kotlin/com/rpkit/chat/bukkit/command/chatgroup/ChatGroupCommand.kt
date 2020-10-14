@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Chat group command.
  * Parent command for all chat group management commands.
  */
-class ChatGroupCommand(private val plugin: RPKChatBukkit): CommandExecutor {
+class ChatGroupCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
 
     private val chatGroupCreateCommand = ChatGroupCreateCommand(plugin)
     private val chatGroupDisbandCommand = ChatGroupDisbandCommand(plugin)

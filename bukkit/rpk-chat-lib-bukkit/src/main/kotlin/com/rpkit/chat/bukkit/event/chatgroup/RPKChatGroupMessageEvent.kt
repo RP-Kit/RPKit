@@ -19,7 +19,7 @@ package com.rpkit.chat.bukkit.event.chatgroup
 import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
 
 
-interface RPKChatGroupMessageEvent: RPKChatGroupEvent, RPKMinecraftProfileEvent {
+interface RPKChatGroupMessageEvent : RPKChatGroupEvent, RPKMinecraftProfileEvent {
 
     var message: String
 

@@ -16,22 +16,20 @@
 
 package com.rpkit.chat.bukkit.chatchannel.undirected
 
-import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
-import com.rpkit.chat.bukkit.discord.RPKDiscordProvider
-import org.bukkit.Bukkit
+import com.rpkit.chat.bukkit.discord.RPKDiscordService
+import com.rpkit.core.service.Services
 import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 
 class DiscordComponent(
-        private val plugin: RPKChatBukkit,
         val discordChannel: String
-): UndirectedPipelineComponent, ConfigurationSerializable {
+) : UndirectedPipelineComponent, ConfigurationSerializable {
     override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         if (!context.isCancelled) {
-            val discordProvider = plugin.core.serviceManager.getServiceProvider(RPKDiscordProvider::class)
-            discordProvider.sendMessage(discordChannel, ChatColor.stripColor(context.message)!!)
+            val discordService = Services[RPKDiscordService::class]
+            discordService?.sendMessage(discordChannel, ChatColor.stripColor(context.message)!!)
         }
         return context
     }
@@ -43,9 +41,9 @@ class DiscordComponent(
     }
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>): DiscordComponent {
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>): DiscordComponent {
             return DiscordComponent(
-                    Bukkit.getServer().pluginManager.getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
                     serialized["discord-channel"] as String
             )
         }

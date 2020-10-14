@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.experience.bukkit.experience
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
@@ -8,7 +24,7 @@ import org.nfunk.jep.JEP
 import kotlin.math.roundToInt
 
 
-class RPKExperienceProviderImpl(private val plugin: RPKExperienceBukkit): RPKExperienceProvider {
+class RPKExperienceServiceImpl(override val plugin: RPKExperienceBukkit) : RPKExperienceService {
 
     override fun getLevel(character: RPKCharacter): Int {
         val experience = getExperience(character)
@@ -24,16 +40,16 @@ class RPKExperienceProviderImpl(private val plugin: RPKExperienceBukkit): RPKExp
     }
 
     override fun getExperience(character: RPKCharacter): Int {
-        val experienceTable = plugin.core.database.getTable(RPKExperienceTable::class)
+        val experienceTable = plugin.database.getTable(RPKExperienceTable::class)
         val experienceValue = experienceTable.get(character)
-        return experienceValue?.value?:0
+        return experienceValue?.value ?: 0
     }
 
     override fun setExperience(character: RPKCharacter, experience: Int) {
         val event = RPKBukkitExperienceChangeEvent(character, getExperience(character), experience)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        val experienceTable = plugin.core.database.getTable(RPKExperienceTable::class)
+        val experienceTable = plugin.database.getTable(RPKExperienceTable::class)
         var experienceValue = experienceTable.get(character)
         if (experienceValue == null) {
             experienceValue = RPKExperienceValue(character = character, value = event.experience)
@@ -62,7 +78,7 @@ class RPKExperienceProviderImpl(private val plugin: RPKExperienceBukkit): RPKExp
     }
 
     override fun getExperienceNeededForLevel(level: Int): Int {
-        val expression = plugin.config.getString("experience.equation")
+        val expression = plugin.config.getString("experience.formula")
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()

@@ -17,4 +17,4 @@
 package com.rpkit.store.bukkit.event.storeitem
 
 
-interface RPKStoreItemCreateEvent: RPKStoreItemEvent
+interface RPKStoreItemCreateEvent : RPKStoreItemEvent

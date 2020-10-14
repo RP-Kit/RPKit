@@ -10,6 +10,6 @@ depend:
 - rpk-bank-lib-bukkit
 api-version: '1.16'
 permissions:
-    rpkit.banks.sign.bank:
-        description: Allows the creation of bank signs
-        default: op
+  rpkit.banks.sign.bank:
+    description: Allows the creation of bank signs
+    default: op

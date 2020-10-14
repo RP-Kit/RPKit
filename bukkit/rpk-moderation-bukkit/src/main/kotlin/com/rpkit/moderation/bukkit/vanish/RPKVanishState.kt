@@ -16,12 +16,9 @@
 
 package com.rpkit.moderation.bukkit.vanish
 
-import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 
 class RPKVanishState(
-        override var id: Int = 0,
-        val minecraftProfile: RPKMinecraftProfile,
-        var isVanished: Boolean
-): Entity
+        val minecraftProfile: RPKMinecraftProfile
+)

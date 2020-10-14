@@ -17,4 +17,4 @@
 package com.rpkit.store.bukkit.event.purchase
 
 
-interface RPKPurchaseCreateEvent: RPKPurchaseEvent
+interface RPKPurchaseCreateEvent : RPKPurchaseEvent

@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 
-interface RPKCharacterSwitchEvent: RPKCharacterEvent {
+interface RPKCharacterSwitchEvent : RPKCharacterEvent {
 
     val minecraftProfile: RPKMinecraftProfile
     val fromCharacter: RPKCharacter?

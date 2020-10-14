@@ -20,19 +20,21 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixCreateEvent
 import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixDeleteEvent
 import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixUpdateEvent
-import com.rpkit.permissions.bukkit.group.RPKGroupProvider
+import com.rpkit.core.service.Services
+import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.ChatColor
 
 /**
- * Prefix provider implementation.
+ * Prefix service implementation.
  */
-class RPKPrefixProviderImpl(private val plugin: RPKChatBukkit): RPKPrefixProvider {
+class RPKPrefixServiceImpl(override val plugin: RPKChatBukkit) : RPKPrefixService {
 
     override val prefixes: List<RPKPrefix> = plugin.config.getConfigurationSection("prefixes")
             ?.getKeys(false)
-            ?.mapIndexed { id, name ->
-                    RPKPrefixImpl(id, name, ChatColor.translateAlternateColorCodes('&', plugin.config.getString("prefixes.$name") ?: ""))
+            ?.map { name ->
+                RPKPrefixImpl(name, ChatColor.translateAlternateColorCodes('&', plugin.config.getString("prefixes.$name")
+                        ?: ""))
             }
             ?: emptyList()
 
@@ -65,10 +67,10 @@ class RPKPrefixProviderImpl(private val plugin: RPKChatBukkit): RPKPrefixProvide
     }
 
     override fun getPrefix(profile: RPKProfile): String {
-        val groupProvider = plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class)
+        val groupService = Services[RPKGroupService::class]
         val prefixBuilder = StringBuilder()
         prefixes
-                .filter { groupProvider.hasPermission(profile, "rpkit.chat.prefix.${it.name}") }
+                .filter { groupService?.hasPermission(profile, "rpkit.chat.prefix.${it.name}") == true }
                 .forEach { prefixBuilder.append(it.prefix).append(' ') }
         return prefixBuilder.toString()
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package com.rpkit.monsters.bukkit.monsterlevel
 
+import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
-import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaProvider
-import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatProviderImpl
+import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaService
+import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatServiceImpl
 import org.bukkit.ChatColor.YELLOW
 import org.bukkit.entity.LivingEntity
 import kotlin.random.Random
 
 
-class RPKMonsterLevelProviderImpl(private val plugin: RPKMonstersBukkit): RPKMonsterLevelProvider {
+class RPKMonsterLevelServiceImpl(override val plugin: RPKMonstersBukkit) : RPKMonsterLevelService {
 
     override fun getMonsterLevel(monster: LivingEntity): Int {
         val monsterNameplate = monster.customName
@@ -35,20 +36,21 @@ class RPKMonsterLevelProviderImpl(private val plugin: RPKMonstersBukkit): RPKMon
             if (level != null) {
                 try {
                     return level.toInt()
-                } catch (ignored: NumberFormatException) {}
+                } catch (ignored: NumberFormatException) {
+                }
             }
         }
         return calculateMonsterLevel(monster)
     }
 
     override fun setMonsterLevel(monster: LivingEntity, level: Int) {
-        val monsterStatProvider = plugin.core.serviceManager.getServiceProvider(RPKMonsterStatProviderImpl::class)
-        monsterStatProvider.setMonsterNameplate(monster, level = level)
+        val monsterStatService = Services[RPKMonsterStatServiceImpl::class] ?: return
+        monsterStatService.setMonsterNameplate(monster, level = level)
     }
 
     fun calculateMonsterLevel(monster: LivingEntity): Int {
-        val spawnAreaProvider = plugin.core.serviceManager.getServiceProvider(RPKMonsterSpawnAreaProvider::class)
-        val spawnArea = spawnAreaProvider.getSpawnArea(monster.location)
+        val spawnAreaService = Services[RPKMonsterSpawnAreaService::class] ?: return 0
+        val spawnArea = spawnAreaService.getSpawnArea(monster.location)
         if (spawnArea != null) {
             return Random.nextInt(
                     spawnArea.getMinLevel(monster.type),

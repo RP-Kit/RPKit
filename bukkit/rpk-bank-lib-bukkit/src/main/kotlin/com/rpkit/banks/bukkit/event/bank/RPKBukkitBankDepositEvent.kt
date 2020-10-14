@@ -27,10 +27,11 @@ class RPKBukkitBankDepositEvent(
         override var character: RPKCharacter,
         override var currency: RPKCurrency,
         override var amount: Int
-): RPKBukkitEvent(), RPKBankDepositEvent, Cancellable {
+) : RPKBukkitEvent(), RPKBankDepositEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

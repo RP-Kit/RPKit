@@ -1,61 +1,60 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.featureflags.bukkit.featureflag
 
 import com.rpkit.featureflags.bukkit.RPKFeatureFlagsBukkit
-import com.rpkit.featureflags.bukkit.database.table.RPKFeatureFlagTable
 import com.rpkit.featureflags.bukkit.database.table.RPKProfileFeatureFlagTable
-import com.rpkit.featureflags.bukkit.event.featureflag.RPKBukkitFeatureFlagCreateEvent
-import com.rpkit.featureflags.bukkit.event.featureflag.RPKBukkitFeatureFlagDeleteEvent
 import com.rpkit.featureflags.bukkit.event.featureflag.RPKBukkitFeatureFlagSetEvent
-import com.rpkit.featureflags.bukkit.event.featureflag.RPKBukkitFeatureFlagUpdateEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 
-class RPKFeatureFlagProviderImpl(private val plugin: RPKFeatureFlagsBukkit): RPKFeatureFlagProvider {
+class RPKFeatureFlagServiceImpl(override val plugin: RPKFeatureFlagsBukkit) : RPKFeatureFlagService {
 
-    override fun getFeatureFlag(id: Int): RPKFeatureFlag? {
-        return plugin.core.database.getTable(RPKFeatureFlagTable::class)[id]
-    }
+    private val featureFlags = mutableMapOf<String, RPKFeatureFlag>()
 
     override fun getFeatureFlag(name: String): RPKFeatureFlag? {
-        return plugin.core.database.getTable(RPKFeatureFlagTable::class).get(name)
+        return featureFlags[name]
     }
 
-    override fun addFeatureFlag(featureFlag: RPKFeatureFlag) {
-        val event = RPKBukkitFeatureFlagCreateEvent(featureFlag)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.core.database.getTable(RPKFeatureFlagTable::class).insert(event.featureFlag)
+    override fun createFeatureFlag(name: String, isEnabledByDefault: Boolean): RPKFeatureFlag {
+        val featureFlag = RPKFeatureFlagImpl(plugin, name, isEnabledByDefault)
+        featureFlags[name] = featureFlag
+        return featureFlag
     }
 
     override fun removeFeatureFlag(featureFlag: RPKFeatureFlag) {
-        val event = RPKBukkitFeatureFlagDeleteEvent(featureFlag)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.core.database.getTable(RPKFeatureFlagTable::class).delete(event.featureFlag)
-    }
-
-    override fun updateFeatureFlag(featureFlag: RPKFeatureFlag) {
-        val event = RPKBukkitFeatureFlagUpdateEvent(featureFlag)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.core.database.getTable(RPKFeatureFlagTable::class).update(event.featureFlag)
+        featureFlags.remove(featureFlag.name)
     }
 
     override fun setFeatureFlag(profile: RPKProfile, featureFlag: RPKFeatureFlag, enabled: Boolean) {
         val event = RPKBukkitFeatureFlagSetEvent(profile, featureFlag, enabled)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        val profileFeatureFlagTable = plugin.core.database.getTable(RPKProfileFeatureFlagTable::class)
+        val profileFeatureFlagTable = plugin.database.getTable(RPKProfileFeatureFlagTable::class)
         var profileFeatureFlag = profileFeatureFlagTable.get(event.profile, event.featureFlag)
         if (profileFeatureFlag == null) {
             profileFeatureFlag = RPKProfileFeatureFlag(
                     profile = event.profile,
                     featureFlag = event.featureFlag,
-                    enabled = event.enabled
+                    isEnabled = event.enabled
             )
             profileFeatureFlagTable.insert(profileFeatureFlag)
         } else {
-            profileFeatureFlag.enabled = event.enabled
+            profileFeatureFlag.isEnabled = event.enabled
             profileFeatureFlagTable.update(profileFeatureFlag)
         }
     }

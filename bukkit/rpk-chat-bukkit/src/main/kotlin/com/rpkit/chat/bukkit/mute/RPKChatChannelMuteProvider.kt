@@ -21,13 +21,13 @@ import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.chat.bukkit.database.table.RPKChatChannelMuteTable
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelMuteEvent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelUnmuteEvent
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
  * Provides chat channel mute related services.
  */
-class RPKChatChannelMuteProvider(private val plugin: RPKChatBukkit): ServiceProvider {
+class RPKChatChannelMuteService(override val plugin: RPKChatBukkit) : Service {
 
     /**
      * Adds a chat channel mute.
@@ -39,7 +39,7 @@ class RPKChatChannelMuteProvider(private val plugin: RPKChatBukkit): ServiceProv
             val event = RPKBukkitChatChannelMuteEvent(minecraftProfile, chatChannel)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
-            plugin.core.database.getTable(RPKChatChannelMuteTable::class).insert(
+            plugin.database.getTable(RPKChatChannelMuteTable::class).insert(
                     RPKChatChannelMute(
                             minecraftProfile = event.minecraftProfile,
                             chatChannel = event.chatChannel
@@ -57,7 +57,7 @@ class RPKChatChannelMuteProvider(private val plugin: RPKChatBukkit): ServiceProv
         val event = RPKBukkitChatChannelUnmuteEvent(minecraftProfile, chatChannel, isAsync)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        val chatChannelMuteTable = plugin.core.database.getTable(RPKChatChannelMuteTable::class)
+        val chatChannelMuteTable = plugin.database.getTable(RPKChatChannelMuteTable::class)
         val chatChannelMute = chatChannelMuteTable.get(event.minecraftProfile, event.chatChannel)
         if (chatChannelMute != null) {
             chatChannelMuteTable.delete(chatChannelMute)
@@ -72,7 +72,7 @@ class RPKChatChannelMuteProvider(private val plugin: RPKChatBukkit): ServiceProv
      * @return Whether the Minecraft profile has muted the chat channel
      */
     fun hasMinecraftProfileMutedChatChannel(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): Boolean {
-        return plugin.core.database.getTable(RPKChatChannelMuteTable::class).get(minecraftProfile, chatChannel) != null
+        return plugin.database.getTable(RPKChatChannelMuteTable::class).get(minecraftProfile, chatChannel) != null
     }
 
 }

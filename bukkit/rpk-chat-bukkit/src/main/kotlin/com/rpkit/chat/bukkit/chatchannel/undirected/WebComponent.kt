@@ -16,22 +16,20 @@
 
 package com.rpkit.chat.bukkit.chatchannel.undirected
 
-import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
-import com.rpkit.chat.bukkit.servlet.websocket.RPKChatWebSocketProvider
-import org.bukkit.Bukkit
-import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 
 
-class WebComponent(private val plugin: RPKChatBukkit): UndirectedPipelineComponent, ConfigurationSerializable {
+class WebComponent : UndirectedPipelineComponent, ConfigurationSerializable {
     override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         if (context.isCancelled) return context
-        plugin.core.serviceManager.getServiceProvider(RPKChatWebSocketProvider::class).sockets
-                .filter { socket -> socket.value.session?.isOpen == true }
-                .forEach { socket -> socket.value.session?.remote
-                        ?.sendStringByFuture("${context.chatChannel.name}:::${ChatColor.stripColor(context.message)}") }
+//        Services[RPKChatWebSocketService::class].sockets
+//                .filter { socket -> socket.value.session?.isOpen == true }
+//                .forEach { socket ->
+//                    socket.value.session?.remote
+//                            ?.sendStringByFuture("${context.chatChannel.name}:::${ChatColor.stripColor(context.message)}")
+//                }
         return context
     }
 
@@ -42,9 +40,7 @@ class WebComponent(private val plugin: RPKChatBukkit): UndirectedPipelineCompone
     companion object {
         @JvmStatic
         fun deserialize(serialized: MutableMap<String, Any>): WebComponent {
-            return WebComponent(
-                    Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit
-            )
+            return WebComponent()
         }
     }
 }

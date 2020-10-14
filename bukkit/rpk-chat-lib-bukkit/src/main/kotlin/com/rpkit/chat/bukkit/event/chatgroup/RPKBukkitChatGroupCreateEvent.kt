@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitChatGroupCreateEvent(
         override val chatGroup: RPKChatGroup
-): RPKBukkitEvent(), RPKChatGroupCreateEvent, Cancellable {
+) : RPKBukkitEvent(), RPKChatGroupCreateEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

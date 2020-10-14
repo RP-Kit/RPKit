@@ -22,7 +22,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 
-class WarningCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class WarningCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
 
     private val warningCreateCommand = WarningCreateCommand(plugin)
     private val warningRemoveCommand = WarningRemoveCommand(plugin)

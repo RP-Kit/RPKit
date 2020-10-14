@@ -21,20 +21,21 @@ import com.rpkit.selection.bukkit.RPKSelectionBukkit
 import com.rpkit.selection.bukkit.database.table.RPKSelectionTable
 
 
-class RPKSelectionProviderImpl(private val plugin: RPKSelectionBukkit): RPKSelectionProvider {
+class RPKSelectionServiceImpl(override val plugin: RPKSelectionBukkit) : RPKSelectionService {
 
     override fun getSelection(minecraftProfile: RPKMinecraftProfile): RPKSelection {
-        var selection = plugin.core.database.getTable(RPKSelectionTable::class).get(minecraftProfile)
+        var selection = plugin.database.getTable(RPKSelectionTable::class).get(minecraftProfile)
         if (selection != null) return selection
-        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID) ?: throw IllegalArgumentException("Invalid Minecraft profile")
+        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
+                ?: throw IllegalArgumentException("Invalid Minecraft profile")
         val world = bukkitPlayer.world
-        selection = RPKSelectionImpl(0, minecraftProfile, world, world.getBlockAt(world.spawnLocation), world.getBlockAt(world.spawnLocation))
-        plugin.core.database.getTable(RPKSelectionTable::class).insert(selection)
+        selection = RPKSelectionImpl(minecraftProfile, world, world.getBlockAt(world.spawnLocation), world.getBlockAt(world.spawnLocation))
+        plugin.database.getTable(RPKSelectionTable::class).insert(selection)
         return selection
     }
 
     override fun updateSelection(selection: RPKSelection) {
-        plugin.core.database.getTable(RPKSelectionTable::class).update(selection)
+        plugin.database.getTable(RPKSelectionTable::class).update(selection)
     }
 
 }

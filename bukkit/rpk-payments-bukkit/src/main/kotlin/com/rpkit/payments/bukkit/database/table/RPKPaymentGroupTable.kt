@@ -18,21 +18,24 @@ package com.rpkit.payments.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
+import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
-import com.rpkit.payments.bukkit.database.jooq.rpkit.Tables.RPKIT_PAYMENT_GROUP
+import com.rpkit.payments.bukkit.database.jooq.Tables.RPKIT_PAYMENT_GROUP
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
-import java.sql.Timestamp
+import java.time.Duration
+import java.time.temporal.ChronoUnit.MILLIS
 
 /**
  * Represents payment group table.
  */
-class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBukkit): Table<RPKPaymentGroup>(database, RPKPaymentGroup::class) {
+class RPKPaymentGroupTable(
+        private val database: Database,
+        private val plugin: RPKPaymentsBukkit
+) : Table {
 
     val cache = if (plugin.config.getBoolean("caching.rpkit_payment_group.id.enabled")) {
         database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_group.id", CacheConfigurationBuilder
@@ -42,29 +45,7 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_PAYMENT_GROUP)
-                .column(RPKIT_PAYMENT_GROUP.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_PAYMENT_GROUP.NAME, SQLDataType.VARCHAR(256))
-                .column(RPKIT_PAYMENT_GROUP.AMOUNT, SQLDataType.INTEGER)
-                .column(RPKIT_PAYMENT_GROUP.CURRENCY_ID, SQLDataType.INTEGER.nullable(true))
-                .column(RPKIT_PAYMENT_GROUP.INTERVAL, SQLDataType.BIGINT)
-                .column(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME, SQLDataType.TIMESTAMP)
-                .column(RPKIT_PAYMENT_GROUP.BALANCE, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("pk_rpkit_payment_group").primaryKey(RPKIT_PAYMENT_GROUP.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.4.0")
-        }
-    }
-
-    override fun insert(entity: RPKPaymentGroup): Int {
+    fun insert(entity: RPKPaymentGroup) {
         database.create
                 .insertInto(
                         RPKIT_PAYMENT_GROUP,
@@ -79,32 +60,31 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                         entity.name,
                         entity.amount,
                         entity.currency?.id,
-                        entity.interval,
-                        Timestamp(entity.lastPaymentTime),
+                        entity.interval.toMillis(),
+                        entity.lastPaymentTime,
                         entity.balance
                 )
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
         cache?.put(id, entity)
-        return id
     }
 
-    override fun update(entity: RPKPaymentGroup) {
+    fun update(entity: RPKPaymentGroup) {
         database.create
                 .update(RPKIT_PAYMENT_GROUP)
                 .set(RPKIT_PAYMENT_GROUP.NAME, entity.name)
                 .set(RPKIT_PAYMENT_GROUP.AMOUNT, entity.amount)
                 .set(RPKIT_PAYMENT_GROUP.CURRENCY_ID, entity.currency?.id)
-                .set(RPKIT_PAYMENT_GROUP.INTERVAL, entity.interval)
-                .set(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME, Timestamp(entity.lastPaymentTime))
+                .set(RPKIT_PAYMENT_GROUP.INTERVAL, entity.interval.toMillis())
+                .set(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME, entity.lastPaymentTime)
                 .set(RPKIT_PAYMENT_GROUP.BALANCE, entity.balance)
                 .where(RPKIT_PAYMENT_GROUP.ID.eq(entity.id))
                 .execute()
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKPaymentGroup? {
+    operator fun get(id: Int): RPKPaymentGroup? {
         if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
@@ -120,17 +100,17 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                     .from(RPKIT_PAYMENT_GROUP)
                     .where(RPKIT_PAYMENT_GROUP.ID.eq(id))
                     .fetchOne()
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
+            val currencyService = Services[RPKCurrencyService::class] ?: return null
             val currencyId = result.get(RPKIT_PAYMENT_GROUP.CURRENCY_ID)
-            val currency = if (currencyId == null) null else currencyProvider.getCurrency(currencyId)
+            val currency = if (currencyId == null) null else currencyService.getCurrency(currencyId)
             val paymentGroup = RPKPaymentGroupImpl(
                     plugin,
                     id,
                     result.get(RPKIT_PAYMENT_GROUP.NAME),
                     result.get(RPKIT_PAYMENT_GROUP.AMOUNT),
                     currency,
-                    result.get(RPKIT_PAYMENT_GROUP.INTERVAL),
-                    result.get(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME).time,
+                    Duration.of(result.get(RPKIT_PAYMENT_GROUP.INTERVAL), MILLIS),
+                    result.get(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME),
                     result.get(RPKIT_PAYMENT_GROUP.BALANCE)
             )
             cache?.put(id, paymentGroup)
@@ -156,7 +136,7 @@ class RPKPaymentGroupTable(database: Database, private val plugin: RPKPaymentsBu
                 .filterNotNull()
     }
 
-    override fun delete(entity: RPKPaymentGroup) {
+    fun delete(entity: RPKPaymentGroup) {
         database.create
                 .deleteFrom(RPKIT_PAYMENT_GROUP)
                 .where(RPKIT_PAYMENT_GROUP.ID.eq(entity.id))

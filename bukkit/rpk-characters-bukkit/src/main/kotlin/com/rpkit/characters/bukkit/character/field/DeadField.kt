@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * A character card field for dead.
  */
-class DeadField: CharacterCardField {
+class DeadField : CharacterCardField {
 
     override val name = "dead"
     override fun get(character: RPKCharacter): String {

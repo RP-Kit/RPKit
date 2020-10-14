@@ -16,13 +16,13 @@
 
 package com.rpkit.moderation.bukkit.warning
 
-import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.time.LocalDateTime
 
 
-interface RPKWarning: Entity {
+interface RPKWarning {
 
+    var id: Int?
     val reason: String
     val profile: RPKProfile
     val issuer: RPKProfile

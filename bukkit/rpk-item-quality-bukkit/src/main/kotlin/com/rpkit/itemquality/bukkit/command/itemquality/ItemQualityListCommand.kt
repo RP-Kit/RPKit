@@ -16,22 +16,27 @@
 
 package com.rpkit.itemquality.bukkit.command.itemquality
 
+import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.RPKItemQualityBukkit
-import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityProvider
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 
-class ItemQualityListCommand(private val plugin: RPKItemQualityBukkit): CommandExecutor {
+class ItemQualityListCommand(private val plugin: RPKItemQualityBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.itemquality.command.itemquality.list")) {
             sender.sendMessage(plugin.messages["no-permission-itemquality-list"])
             return true
         }
         sender.sendMessage(plugin.messages["itemquality-list-title"])
-        val itemQualityProvider = plugin.core.serviceManager.getServiceProvider(RPKItemQualityProvider::class)
-        itemQualityProvider.itemQualities.forEach { quality ->
+        val itemQualityService = Services[RPKItemQualityService::class]
+        if (itemQualityService == null) {
+            sender.sendMessage(plugin.messages["no-item-quality-service"])
+            return true
+        }
+        itemQualityService.itemQualities.forEach { quality ->
             sender.sendMessage(plugin.messages["itemquality-list-item", mapOf(
                     Pair("quality", quality.name)
             )])

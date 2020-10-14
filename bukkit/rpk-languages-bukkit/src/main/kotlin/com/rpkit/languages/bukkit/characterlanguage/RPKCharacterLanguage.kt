@@ -17,12 +17,10 @@
 package com.rpkit.languages.bukkit.characterlanguage
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 import com.rpkit.languages.bukkit.language.RPKLanguage
 
 class RPKCharacterLanguage(
-        override var id: Int = 0,
         val character: RPKCharacter,
         val language: RPKLanguage,
         var understanding: Float
-) : Entity
+)

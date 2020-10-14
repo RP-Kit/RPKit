@@ -22,7 +22,7 @@ import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
  * Represents a permanent purchase.
  * This type of purchase stays attached a profile indefinitely.
  */
-interface RPKPermanentPurchase: RPKPurchase {
+interface RPKPermanentPurchase : RPKPurchase {
 
     /**
      * The store item that has been purchased

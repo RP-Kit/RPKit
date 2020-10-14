@@ -17,12 +17,11 @@
 package com.rpkit.stats.bukkit.stat
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 
 /**
  * Represents a stat.
  */
-interface RPKStat: Entity {
+interface RPKStat {
 
     /**
      * The name of the stat.
@@ -30,17 +29,16 @@ interface RPKStat: Entity {
     val name: String
 
     /**
-     * The script used to calculate the stat.
-     * Written in JavaScript, parsed with Nashorn.
+     * The expression used to calculate the stat.
      */
-    val script: String
+    val formula: String
 
     /**
      * Gets the stat for the given character, and the given stat variables.
      *
      * @param character The character
      * @param variables A list containing all variables required to get the stat.
-     *                  Usually [RPKStatVariableProvider.statVariables]
+     *                  Usually [RPKStatVariableService.statVariables]
      */
     fun get(character: RPKCharacter, variables: List<RPKStatVariable>): Int
 

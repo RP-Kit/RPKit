@@ -25,7 +25,7 @@ class RPKLanguageImpl(
         private val minimumUnderstandingIncrement: Map<String, Float>,
         private val maximumUnderstandingIncrement: Map<String, Float>,
         private val cypher: Map<String, String>
-): RPKLanguage {
+) : RPKLanguage {
 
     override fun getBaseUnderstanding(race: RPKRace): Float {
         return baseUnderstanding[race.name] ?: 0f

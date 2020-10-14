@@ -18,10 +18,10 @@ package com.rpkit.store.bukkit.storeitem
 
 
 class RPKConsumableStoreItemImpl(
-        override var id: Int = 0,
+        override var id: Int? = null,
         override val uses: Int,
         override val plugin: String,
         override val identifier: String,
         override val description: String,
         override val cost: Int
-): RPKConsumableStoreItem
+) : RPKConsumableStoreItem

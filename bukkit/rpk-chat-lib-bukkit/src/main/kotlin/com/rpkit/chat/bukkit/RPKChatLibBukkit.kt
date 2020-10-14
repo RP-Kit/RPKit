@@ -30,11 +30,10 @@ import org.bukkit.plugin.ServicePriority.Normal
  * If chat plugins wish to provide their own chat service, they should register on [ServicePriority.High]
  * or [ServicePriority.Highest].
  */
-class RPKChatLibBukkit: RPKBukkitPlugin() {
+class RPKChatLibBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4384)
-        serviceProviders = arrayOf()
         if (server.pluginManager.getPlugin("Vault") != null) {
             server.servicesManager.register(Chat::class.java, RPKChatVaultChat(this), this, Normal)
         }

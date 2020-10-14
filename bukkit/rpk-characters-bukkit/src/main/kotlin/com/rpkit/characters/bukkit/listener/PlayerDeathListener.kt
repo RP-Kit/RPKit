@@ -17,8 +17,9 @@
 package com.rpkit.characters.bukkit.listener
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
@@ -27,22 +28,17 @@ import org.bukkit.event.entity.PlayerDeathEvent
  * Player death listener for characters.
  * If server is configured to kill characters upon death, this will be done with this listener.
  */
-class PlayerDeathListener(private val plugin: RPKCharactersBukkit): Listener {
+class PlayerDeathListener(private val plugin: RPKCharactersBukkit) : Listener {
 
     @EventHandler
     fun onPlayerDeath(event: PlayerDeathEvent) {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.entity)
-        if (minecraftProfile != null) {
-            val character = characterProvider.getActiveCharacter(minecraftProfile)
-            if (character != null) {
-                if (plugin.config.getBoolean("characters.kill-character-on-death")) {
-                        character.isDead = true
-                        characterProvider.updateCharacter(character)
-                }
-            }
-        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val characterService = Services[RPKCharacterService::class] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.entity) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        if (!plugin.config.getBoolean("characters.kill-character-on-death")) return
+        character.isDead = true
+        characterService.updateCharacter(character)
     }
 
 }

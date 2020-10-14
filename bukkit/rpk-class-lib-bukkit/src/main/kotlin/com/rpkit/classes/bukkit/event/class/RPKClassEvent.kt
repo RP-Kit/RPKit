@@ -20,7 +20,7 @@ import com.rpkit.classes.bukkit.classes.RPKClass
 import com.rpkit.core.event.RPKEvent
 
 
-interface RPKClassEvent: RPKEvent {
+interface RPKClassEvent : RPKEvent {
 
     val `class`: RPKClass
 

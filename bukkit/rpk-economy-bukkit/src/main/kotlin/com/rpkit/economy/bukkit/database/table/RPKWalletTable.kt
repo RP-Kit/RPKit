@@ -17,52 +17,38 @@
 package com.rpkit.economy.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.economy.bukkit.database.jooq.rpkit.Tables.RPKIT_WALLET
+import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_WALLET
 import com.rpkit.economy.bukkit.wallet.RPKWallet
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 /**
  * Represents the wallet table.
  */
-class RPKWalletTable(database: Database, private val plugin: RPKEconomyBukkit) : Table<RPKWallet>(database, RPKWallet::class.java) {
+class RPKWalletTable(
+        private val database: Database,
+        plugin: RPKEconomyBukkit
+) : Table {
 
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_wallet.id.enabled")) {
-        database.cacheManager.createCache("rpk-economy-bukkit.rpkit_wallet.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKWallet::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_wallet.id.size"))).build())
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_wallet.character_id.enabled")) {
+        database.cacheManager.createCache("rpk-economy-bukkit.rpkit_wallet.character_id",
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(
+                        Int::class.javaObjectType,
+                        MutableMap::class.java,
+                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_wallet.character_id.size"))
+                ).build()
+        )
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_WALLET)
-                .column(RPKIT_WALLET.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_WALLET.CHARACTER_ID, SQLDataType.INTEGER)
-                .column(RPKIT_WALLET.CURRENCY_ID, SQLDataType.INTEGER)
-                .column(RPKIT_WALLET.BALANCE, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("pk_rpkit_wallet").primaryKey(RPKIT_WALLET.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.2.0")
-        }
-    }
-
-    override fun insert(entity: RPKWallet): Int {
+    fun insert(entity: RPKWallet) {
         database.create
                 .insertInto(
                         RPKIT_WALLET,
@@ -76,111 +62,97 @@ class RPKWalletTable(database: Database, private val plugin: RPKEconomyBukkit) :
                         entity.balance
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
+        cacheInsert(entity)
     }
 
-    override fun update(entity: RPKWallet) {
+    fun update(entity: RPKWallet) {
         database.create
                 .update(RPKIT_WALLET)
-                .set(RPKIT_WALLET.CHARACTER_ID, entity.character.id)
-                .set(RPKIT_WALLET.CURRENCY_ID, entity.currency.id)
                 .set(RPKIT_WALLET.BALANCE, entity.balance)
-                .where(RPKIT_WALLET.ID.eq(entity.id))
+                .where(RPKIT_WALLET.CHARACTER_ID.eq(entity.character.id))
+                .and(RPKIT_WALLET.CURRENCY_ID.eq(entity.currency.id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cacheInsert(entity)
     }
 
-    override fun get(id: Int): RPKWallet? {
-        if (cache?.containsKey(id) == true) {
-            return cache.get(id)
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_WALLET.CHARACTER_ID,
-                            RPKIT_WALLET.CURRENCY_ID,
-                            RPKIT_WALLET.BALANCE
-                    )
-                    .from(RPKIT_WALLET)
-                    .where(RPKIT_WALLET.ID.eq(id))
-                    .fetchOne() ?: return null
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val characterId = result.get(RPKIT_WALLET.CHARACTER_ID)
-            val character = characterProvider.getCharacter(characterId)
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            val currencyId = result.get(RPKIT_WALLET.CURRENCY_ID)
-            val currency = currencyProvider.getCurrency(currencyId)
-            if (character != null && currency != null) {
-                val wallet = RPKWallet(
-                        id,
-                        character,
-                        currency,
-                        result.get(RPKIT_WALLET.BALANCE)
-                )
-                cache?.put(id, wallet)
-                return wallet
-            } else {
-                database.create
-                        .deleteFrom(RPKIT_WALLET)
-                        .where(RPKIT_WALLET.ID.eq(id))
-                        .execute()
-                return null
+    fun get(character: RPKCharacter, currency: RPKCurrency): RPKWallet? {
+        val characterId = character.id
+        val currencyId = currency.id
+        if (characterId == null || currencyId == null) return null
+        if (cache?.containsKey(characterId) == true) {
+            val currencyWallets = cache[characterId] as? MutableMap<Int, RPKWallet>
+            if (currencyWallets?.containsKey(currencyId) == true) {
+                return currencyWallets[currencyId]
             }
         }
-    }
-
-    fun get(character: RPKCharacter, currency: RPKCurrency): RPKWallet {
         val result = database.create
-                .select(RPKIT_WALLET.ID)
+                .select(RPKIT_WALLET.BALANCE)
                 .from(RPKIT_WALLET)
                 .where(RPKIT_WALLET.CHARACTER_ID.eq(character.id))
                 .and(RPKIT_WALLET.CURRENCY_ID.eq(currency.id))
-                .fetchOne()
-        if (result == null) {
-            val wallet = RPKWallet(
-                    character = character,
-                    currency = currency,
-                    balance = currency.defaultAmount
-            )
-            insert(wallet)
-            return wallet
-        }
-        var wallet = get(result.get(RPKIT_WALLET.ID))
-        if (wallet == null) {
-            wallet = RPKWallet(
-                    character = character,
-                    currency = currency,
-                    balance = currency.defaultAmount
-            )
-            insert(wallet)
-        }
+                .fetchOne() ?: return null
+        val wallet = RPKWallet(
+                character,
+                currency,
+                result[RPKIT_WALLET.BALANCE]
+        )
+        cacheInsert(wallet)
         return wallet
     }
 
-    fun getTop(amount: Int = 5, currency: RPKCurrency): List<RPKCharacter> {
+    fun getTop(amount: Int = 5, currency: RPKCurrency): List<RPKWallet> {
         val results = database.create
-                .select(RPKIT_WALLET.ID)
+                .select(
+                        RPKIT_WALLET.CHARACTER_ID,
+                        RPKIT_WALLET.BALANCE
+                )
                 .from(RPKIT_WALLET)
                 .where(RPKIT_WALLET.CURRENCY_ID.eq(currency.id))
                 .orderBy(RPKIT_WALLET.BALANCE.desc())
                 .limit(amount)
                 .fetch()
+        val characterService = Services[RPKCharacterService::class] ?: return emptyList()
         return results
-                .map { result ->
-                    get(result.get(RPKIT_WALLET.ID))
+                .mapNotNull { result ->
+                    val characterId = result[RPKIT_WALLET.CHARACTER_ID]
+                    val character = characterService.getCharacter(characterId) ?: return@mapNotNull null
+                    val wallet = RPKWallet(
+                            character,
+                            currency,
+                            result[RPKIT_WALLET.BALANCE]
+                    )
+                    cacheInsert(wallet)
+                    return@mapNotNull wallet
                 }
-                .filterNotNull()
-                .map(RPKWallet::character)
     }
 
-    override fun delete(entity: RPKWallet) {
+    fun delete(entity: RPKWallet) {
         database.create
                 .deleteFrom(RPKIT_WALLET)
-                .where(RPKIT_WALLET.ID.eq(entity.id))
+                .where(RPKIT_WALLET.CHARACTER_ID.eq(entity.character.id))
+                .and(RPKIT_WALLET.CURRENCY_ID.eq(entity.currency.id))
                 .execute()
-        cache?.remove(entity.id)
+        cacheRemove(entity)
+    }
+
+    private fun cacheInsert(entity: RPKWallet) {
+        if (cache == null) return
+        val characterId = entity.character.id
+        val currencyId = entity.currency.id
+        if (characterId == null || currencyId == null) return
+        val currencyWallets = cache[characterId] as? MutableMap<Int, RPKWallet> ?: mutableMapOf()
+        currencyWallets[currencyId] = entity
+        cache.put(characterId, currencyWallets)
+    }
+
+    private fun cacheRemove(entity: RPKWallet) {
+        if (cache == null) return
+        val characterId = entity.character.id
+        val currencyId = entity.currency.id
+        if (characterId == null || currencyId == null) return
+        val currencyWallets = cache[characterId] as? MutableMap<Int, RPKWallet> ?: mutableMapOf()
+        currencyWallets.remove(currencyId)
+        cache.put(characterId, currencyWallets)
     }
 
 }

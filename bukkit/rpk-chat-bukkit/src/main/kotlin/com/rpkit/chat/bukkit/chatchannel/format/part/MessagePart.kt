@@ -63,7 +63,8 @@ class MessagePart(
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = MessagePart(
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = MessagePart(
                 serialized["font"] as? String,
                 serialized["color"] as? String,
                 serialized["bold"] as? Boolean,

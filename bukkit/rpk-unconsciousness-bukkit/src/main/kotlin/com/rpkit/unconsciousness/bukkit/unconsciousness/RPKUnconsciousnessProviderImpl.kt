@@ -22,17 +22,19 @@ import com.rpkit.unconsciousness.bukkit.database.table.RPKUnconsciousStateTable
 import com.rpkit.unconsciousness.bukkit.event.unconsciousness.RPKBukkitUnconsciousnessStateChangeEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 
-class RPKUnconsciousnessProviderImpl(private val plugin: RPKUnconsciousnessBukkit): RPKUnconsciousnessProvider {
+class RPKUnconsciousnessServiceImpl(override val plugin: RPKUnconsciousnessBukkit) : RPKUnconsciousnessService {
 
     override fun isUnconscious(character: RPKCharacter): Boolean {
-        val unconsciousStateTable = plugin.core.database.getTable(RPKUnconsciousStateTable::class)
+        val unconsciousStateTable = plugin.database.getTable(RPKUnconsciousStateTable::class)
         val unconsciousState = unconsciousStateTable.get(character)
         return if (unconsciousState == null) {
             false
         } else {
-            unconsciousState.deathTime + plugin.config.getLong("unconscious-time") > System.currentTimeMillis()
+            unconsciousState.deathTime.plus(plugin.config.getLong("unconscious-time"), ChronoUnit.MILLIS) > LocalDateTime.now()
         }
     }
 
@@ -40,14 +42,14 @@ class RPKUnconsciousnessProviderImpl(private val plugin: RPKUnconsciousnessBukki
         val event = RPKBukkitUnconsciousnessStateChangeEvent(character, unconscious)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        val unconsciousStateTable = plugin.core.database.getTable(RPKUnconsciousStateTable::class)
+        val unconsciousStateTable = plugin.database.getTable(RPKUnconsciousStateTable::class)
         var unconsciousState = unconsciousStateTable.get(event.character)
         if (unconsciousState != null) {
             if (event.isUnconscious) {
-                unconsciousState.deathTime = System.currentTimeMillis()
+                unconsciousState.deathTime = LocalDateTime.now()
                 unconsciousStateTable.update(unconsciousState)
                 val minecraftUUID = event.character.minecraftProfile?.minecraftUUID ?: return
-                plugin.server.getPlayer(minecraftUUID)?.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0), true)
+                plugin.server.getPlayer(minecraftUUID)?.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0))
             } else {
                 unconsciousStateTable.delete(unconsciousState)
             }
@@ -55,7 +57,7 @@ class RPKUnconsciousnessProviderImpl(private val plugin: RPKUnconsciousnessBukki
             if (event.isUnconscious) {
                 unconsciousState = RPKUnconsciousState(
                         character = event.character,
-                        deathTime = System.currentTimeMillis()
+                        deathTime = LocalDateTime.now()
                 )
                 unconsciousStateTable.insert(unconsciousState)
             }

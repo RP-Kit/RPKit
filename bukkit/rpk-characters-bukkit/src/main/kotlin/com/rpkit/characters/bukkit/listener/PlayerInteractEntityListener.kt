@@ -17,8 +17,9 @@
 package com.rpkit.characters.bukkit.listener
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -29,36 +30,39 @@ import org.bukkit.inventory.EquipmentSlot.HAND
  * Player interact entity listener for character cards.
  * This shows character cards upon right-clicking players.
  */
-class PlayerInteractEntityListener(private val plugin: RPKCharactersBukkit): Listener {
+class PlayerInteractEntityListener(private val plugin: RPKCharactersBukkit) : Listener {
 
     @EventHandler
     fun onPlayerInteractEntity(event: PlayerInteractEntityEvent) {
-        if (event.hand == HAND) {
-            if (event.player.isSneaking || !plugin.config.getBoolean("characters.view-card-requires-sneak")) {
-                if (event.rightClicked is Player) {
-                    if (event.player.hasPermission("rpkit.characters.command.character.card.other")) {
-                        val bukkitPlayer = event.rightClicked as Player
-                        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-                        if (minecraftProfile != null) {
-                            val character = characterProvider.getActiveCharacter(minecraftProfile)
-                            if (character != null) {
-                                val rightClicker = minecraftProfileProvider.getMinecraftProfile(event.player)
-                                if (rightClicker != null) {
-                                    character.showCharacterCard(rightClicker)
-                                }
-                            } else {
-                                event.player.sendMessage(plugin.messages["no-character-other"])
-                            }
-                        } else {
-                            event.player.sendMessage(plugin.messages["no-minecraft-profile"])
-                        }
-                    } else {
-                        event.player.sendMessage(plugin.messages["no-permission-character-card-other"])
-                    }
-                }
-            }
+        if (event.hand != HAND) return
+        if (!event.player.isSneaking && plugin.config.getBoolean("characters.view-card-requires-sneak")) return
+        if (event.rightClicked !is Player) return
+        if (!event.player.hasPermission("rpkit.characters.command.character.card.other")) {
+            event.player.sendMessage(plugin.messages["no-permission-character-card-other"])
+            return
         }
+        val bukkitPlayer = event.rightClicked as Player
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return
+        }
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            event.player.sendMessage(plugin.messages["no-character-service"])
+            return
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        if (minecraftProfile == null) {
+            event.player.sendMessage(plugin.messages["no-minecraft-profile"])
+            return
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null) {
+            event.player.sendMessage(plugin.messages["no-character-other"])
+            return
+        }
+        val rightClicker = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        character.showCharacterCard(rightClicker)
     }
 }

@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 
 
-interface RPKPaymentGroupEvent: RPKEvent {
+interface RPKPaymentGroupEvent : RPKEvent {
 
     val paymentGroup: RPKPaymentGroup
 

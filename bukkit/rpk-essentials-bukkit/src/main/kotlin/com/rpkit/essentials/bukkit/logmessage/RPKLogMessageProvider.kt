@@ -16,27 +16,29 @@
 
 package com.rpkit.essentials.bukkit.logmessage
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.database.table.RPKLogMessagesEnabledTable
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 
-class RPKLogMessageProvider(private val plugin: RPKEssentialsBukkit): ServiceProvider {
+class RPKLogMessageService(override val plugin: RPKEssentialsBukkit) : Service {
 
     fun isLogMessagesEnabled(minecraftProfile: RPKMinecraftProfile): Boolean {
-        return plugin.core.database.getTable(RPKLogMessagesEnabledTable::class).get(minecraftProfile)?.enabled?:false
+        return plugin.database.getTable(RPKLogMessagesEnabledTable::class)[minecraftProfile] != null
     }
 
     fun setLogMessagesEnabled(minecraftProfile: RPKMinecraftProfile, enabled: Boolean) {
-        val logMessagesEnabledTable = plugin.core.database.getTable(RPKLogMessagesEnabledTable::class)
-        var logMessagesEnabled = logMessagesEnabledTable.get(minecraftProfile)
+        val logMessagesEnabledTable = plugin.database.getTable(RPKLogMessagesEnabledTable::class)
+        val logMessagesEnabled = logMessagesEnabledTable[minecraftProfile]
         if (logMessagesEnabled != null) {
-            logMessagesEnabled.enabled = enabled
-            logMessagesEnabledTable.update(logMessagesEnabled)
+            if (!enabled) {
+                logMessagesEnabledTable.delete(logMessagesEnabled)
+            }
         } else {
-            logMessagesEnabled = RPKLogMessagesEnabled(minecraftProfile = minecraftProfile, enabled = enabled)
-            logMessagesEnabledTable.insert(logMessagesEnabled)
+            if (enabled) {
+                logMessagesEnabledTable.insert(RPKLogMessagesEnabled(minecraftProfile))
+            }
         }
     }
 

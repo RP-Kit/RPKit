@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 
-class MonsterSpawnAreaCommand(private val plugin: RPKMonstersBukkit): CommandExecutor {
+class MonsterSpawnAreaCommand(private val plugin: RPKMonstersBukkit) : CommandExecutor {
 
     private val monsterSpawnAreaCreateCommand = MonsterSpawnAreaCreateCommand(plugin)
     private val monsterSpawnAreaDeleteCommand = MonsterSpawnAreaDeleteCommand(plugin)

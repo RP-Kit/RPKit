@@ -18,6 +18,10 @@ package com.rpkit.monsters.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.command.monsterspawnarea.MonsterSpawnAreaCommand
 import com.rpkit.monsters.bukkit.database.table.RPKMonsterSpawnAreaMonsterTable
 import com.rpkit.monsters.bukkit.database.table.RPKMonsterSpawnAreaTable
@@ -25,24 +29,74 @@ import com.rpkit.monsters.bukkit.listener.CreatureSpawnListener
 import com.rpkit.monsters.bukkit.listener.EntityDamageByEntityListener
 import com.rpkit.monsters.bukkit.listener.EntityDamageListener
 import com.rpkit.monsters.bukkit.listener.EntityDeathListener
-import com.rpkit.monsters.bukkit.monsterexperience.RPKMonsterExperienceProviderImpl
-import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelProviderImpl
-import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaProviderImpl
-import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatProviderImpl
+import com.rpkit.monsters.bukkit.monsterexperience.RPKMonsterExperienceService
+import com.rpkit.monsters.bukkit.monsterexperience.RPKMonsterExperienceServiceImpl
+import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelService
+import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelServiceImpl
+import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaService
+import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaServiceImpl
+import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatService
+import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatServiceImpl
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
 
-class RPKMonstersBukkit: RPKBukkitPlugin() {
+class RPKMonstersBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
 
     override fun onEnable() {
         Metrics(this, 6661)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKMonsterExperienceProviderImpl(this),
-                RPKMonsterLevelProviderImpl(this),
-                RPKMonsterSpawnAreaProviderImpl(this),
-                RPKMonsterStatProviderImpl(this)
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/monsters/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/monsters/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_monsters"
+                ),
+                classLoader
         )
+        database.addTable(RPKMonsterSpawnAreaMonsterTable(database, this))
+        database.addTable(RPKMonsterSpawnAreaTable(database, this))
+
+        Services[RPKMonsterExperienceService::class] = RPKMonsterExperienceServiceImpl(this)
+        Services[RPKMonsterLevelService::class] = RPKMonsterLevelServiceImpl(this)
+        Services[RPKMonsterSpawnAreaService::class] = RPKMonsterSpawnAreaServiceImpl(this)
+        Services[RPKMonsterStatService::class] = RPKMonsterStatServiceImpl(this)
     }
 
     override fun registerCommands() {
@@ -56,11 +110,6 @@ class RPKMonstersBukkit: RPKBukkitPlugin() {
                 EntityDamageListener(this),
                 EntityDeathListener(this)
         )
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKMonsterSpawnAreaMonsterTable(database, this))
-        database.addTable(RPKMonsterSpawnAreaTable(database, this))
     }
 
     override fun setDefaultMessages() {
@@ -84,6 +133,9 @@ class RPKMonstersBukkit: RPKBukkitPlugin() {
         messages.setDefault("monster-spawn-area-remove-monster-invalid-monster-type", "&cInvalid monster type.")
         messages.setDefault("monster-spawn-area-remove-monster-valid", "&aRemoved monster from spawn area.")
         messages.setDefault("experience-gained", "&e+\$experience-gainedexp &7(\$experience/\$required-experience)")
+        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
+        messages.setDefault("no-selection-service", "&cThere is no selection service available.")
+        messages.setDefault("no-monster-spawn-area-service", "&cThere is no monster spawn area service available.")
     }
 
 }

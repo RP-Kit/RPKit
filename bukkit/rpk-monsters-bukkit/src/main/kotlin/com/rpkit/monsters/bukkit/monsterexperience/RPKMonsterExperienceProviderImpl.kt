@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
 package com.rpkit.monsters.bukkit.monsterexperience
 
 import com.rpkit.core.expression.function.addRPKitFunctions
+import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
-import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelProvider
+import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelService
 import org.bukkit.entity.LivingEntity
 import org.nfunk.jep.JEP
 import kotlin.math.roundToInt
 
 
-class RPKMonsterExperienceProviderImpl(private val plugin: RPKMonstersBukkit): RPKMonsterExperienceProvider {
+class RPKMonsterExperienceServiceImpl(override val plugin: RPKMonstersBukkit) : RPKMonsterExperienceService {
 
     override fun getExperienceFor(monster: LivingEntity): Int {
         val entityType = monster.type
@@ -33,8 +34,8 @@ class RPKMonsterExperienceProviderImpl(private val plugin: RPKMonstersBukkit): R
         parser.addStandardConstants()
         parser.addStandardFunctions()
         parser.addRPKitFunctions()
-        val monsterLevelProvider = plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class)
-        parser.addVariable("level", monsterLevelProvider.getMonsterLevel(monster).toDouble())
+        val monsterLevelService = Services[RPKMonsterLevelService::class] ?: return 0
+        parser.addVariable("level", monsterLevelService.getMonsterLevel(monster).toDouble())
         parser.parseExpression(expression)
         return parser.value.roundToInt()
     }

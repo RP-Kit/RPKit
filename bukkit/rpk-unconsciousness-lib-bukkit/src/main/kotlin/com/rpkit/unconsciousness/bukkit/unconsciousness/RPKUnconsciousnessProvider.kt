@@ -17,12 +17,12 @@
 package com.rpkit.unconsciousness.bukkit.unconsciousness
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
  * Provides unconsciousness-related operations
  */
-interface RPKUnconsciousnessProvider: ServiceProvider {
+interface RPKUnconsciousnessService : Service {
 
     /**
      * Gets whether a character is unconscious

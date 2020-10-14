@@ -17,12 +17,10 @@
 package com.rpkit.statbuilds.bukkit.statbuild
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttribute
 
 class RPKCharacterStatPoints(
-        override var id: Int = 0,
         val character: RPKCharacter,
         val statAttribute: RPKStatAttribute,
         var points: Int
-): Entity
+)

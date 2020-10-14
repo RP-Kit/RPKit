@@ -16,13 +16,14 @@
 
 package com.rpkit.professions.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.util.addLore
+import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.profession.RPKCraftingAction
-import com.rpkit.professions.bukkit.profession.RPKProfessionProvider
+import com.rpkit.professions.bukkit.profession.RPKProfessionService
 import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -32,25 +33,25 @@ import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 
-class PrepareItemCraftListener(private val plugin: RPKProfessionsBukkit): Listener {
+class PrepareItemCraftListener(private val plugin: RPKProfessionsBukkit) : Listener {
 
     @EventHandler
     fun onPrepareItemCraft(event: PrepareItemCraftEvent) {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val professionProvider = plugin.core.serviceManager.getServiceProvider(RPKProfessionProvider::class)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val characterService = Services[RPKCharacterService::class] ?: return
+        val professionService = Services[RPKProfessionService::class] ?: return
         val bukkitPlayer = event.viewers.firstOrNull() as? Player
         if (bukkitPlayer == null) {
             event.inventory.result = null
             return
         }
         if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             event.inventory.result = null
             return
         }
-        val character = characterProvider.getActiveCharacter(minecraftProfile)
+        val character = characterService.getActiveCharacter(minecraftProfile)
         if (character == null) {
             event.inventory.result = null
             return
@@ -60,9 +61,9 @@ class PrepareItemCraftListener(private val plugin: RPKProfessionsBukkit): Listen
             event.inventory.result = null
             return
         }
-        val professions = professionProvider.getProfessions(character)
+        val professions = professionService.getProfessions(character)
         val professionLevels = professions
-                .associateWith { profession -> professionProvider.getProfessionLevel(character, profession) }
+                .associateWith { profession -> professionService.getProfessionLevel(character, profession) }
         val amount = professionLevels.entries
                 .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.CRAFT, material, level) }
                 .max() ?: plugin.config.getDouble("default.crafting.$material.amount", 1.0)

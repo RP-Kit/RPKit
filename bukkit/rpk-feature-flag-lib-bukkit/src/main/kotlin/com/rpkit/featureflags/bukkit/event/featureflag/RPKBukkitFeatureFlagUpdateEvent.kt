@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitFeatureFlagUpdateEvent(
         override val featureFlag: RPKFeatureFlag
-): RPKBukkitEvent(), RPKFeatureFlagUpdateEvent, Cancellable {
+) : RPKBukkitEvent(), RPKFeatureFlagUpdateEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

@@ -16,12 +16,12 @@
 
 package com.rpkit.chat.bukkit.discord
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.User
 
-interface RPKDiscordProvider: ServiceProvider {
+interface RPKDiscordService : Service {
 
     fun sendMessage(channel: String, message: String)
     fun getUser(discordId: Long): User?

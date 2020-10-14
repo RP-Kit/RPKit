@@ -23,15 +23,15 @@ import com.rpkit.languages.bukkit.language.RPKLanguage
 import kotlin.math.max
 import kotlin.math.min
 
-class RPKCharacterLanguageProviderImpl(private val plugin: RPKLanguagesBukkit): RPKCharacterLanguageProvider {
+class RPKCharacterLanguageServiceImpl(override val plugin: RPKLanguagesBukkit) : RPKCharacterLanguageService {
     override fun getCharacterLanguageUnderstanding(character: RPKCharacter, language: RPKLanguage): Float {
         val race = character.race
-        return plugin.core.database.getTable(RPKCharacterLanguageTable::class).get(character, language)?.understanding
+        return plugin.database.getTable(RPKCharacterLanguageTable::class).get(character, language)?.understanding
                 ?: if (race != null) language.getBaseUnderstanding(race) else 0f
     }
 
     override fun setCharacterLanguageUnderstanding(character: RPKCharacter, language: RPKLanguage, understanding: Float) {
-        val characterLanguageTable = plugin.core.database.getTable(RPKCharacterLanguageTable::class)
+        val characterLanguageTable = plugin.database.getTable(RPKCharacterLanguageTable::class)
         val characterLanguage = characterLanguageTable.get(character, language)
         if (characterLanguage != null) {
             characterLanguage.understanding = max(min(understanding, 100f), 0f)

@@ -25,7 +25,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
  * What should be visible when the character card field is hidden is up to the implementation, and should be included
  * in the [get] method.
  */
-interface HideableCharacterCardField: CharacterCardField {
+interface HideableCharacterCardField : CharacterCardField {
 
     /**
      * Checks whether the field is hidden for the given character.

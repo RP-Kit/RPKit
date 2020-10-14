@@ -16,12 +16,13 @@
 
 package com.rpkit.craftingskill.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.util.addLore
+import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction
-import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -34,28 +35,28 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 
 
-class InventoryClickListener(private val plugin: RPKCraftingSkillBukkit): Listener {
+class InventoryClickListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
 
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
         if (event.clickedInventory !is FurnaceInventory) return
         if (event.slotType != InventoryType.SlotType.RESULT) return
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val craftingSkillProvider = plugin.core.serviceManager.getServiceProvider(RPKCraftingSkillProvider::class)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val characterService = Services[RPKCharacterService::class] ?: return
+        val craftingSkillService = Services[RPKCraftingSkillService::class] ?: return
         val bukkitPlayer = event.whoClicked as? Player ?: return
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer) ?: return
-        val character = characterProvider.getActiveCharacter(minecraftProfile) ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
         val item = event.currentItem ?: return
         if (item.amount == 0 || item.type == Material.AIR) return
         val material = item.type
-        val craftingSkill = craftingSkillProvider.getCraftingExperience(character, RPKCraftingAction.SMELT, material)
-        val quality = craftingSkillProvider.getQualityFor(RPKCraftingAction.SMELT, material, craftingSkill)
-        val amount = craftingSkillProvider.getAmountFor(RPKCraftingAction.SMELT, material, craftingSkill) * item.amount
+        val craftingSkill = craftingSkillService.getCraftingExperience(character, RPKCraftingAction.SMELT, material)
+        val quality = craftingSkillService.getQualityFor(RPKCraftingAction.SMELT, material, craftingSkill)
+        val amount = craftingSkillService.getAmountFor(RPKCraftingAction.SMELT, material, craftingSkill) * item.amount
         if (quality != null) {
             item.addLore(quality.lore)
         }
-        if (amount > 1)  {
+        if (amount > 1) {
             item.amount = amount.roundToInt()
         } else if (amount < 1) {
             val random = Random.nextDouble()
@@ -74,7 +75,7 @@ class InventoryClickListener(private val plugin: RPKCraftingSkillBukkit): Listen
                 ?: 0
         if (maxExperience != 0 && craftingSkill < maxExperience) {
             val totalExperience = min(craftingSkill + item.amount, maxExperience)
-            craftingSkillProvider.setCraftingExperience(character, RPKCraftingAction.SMELT, item.type, totalExperience)
+            craftingSkillService.setCraftingExperience(character, RPKCraftingAction.SMELT, item.type, totalExperience)
             event.whoClicked.sendMessage(plugin.messages["smelt-experience", mapOf(
                     Pair("total-experience", totalExperience.toString()),
                     Pair("received-experience", item.amount.toString())

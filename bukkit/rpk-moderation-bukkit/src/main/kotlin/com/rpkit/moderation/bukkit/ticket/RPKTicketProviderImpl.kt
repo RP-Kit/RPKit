@@ -23,39 +23,39 @@ import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketDeleteEvent
 import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketUpdateEvent
 
 
-class RPKTicketProviderImpl(private val plugin: RPKModerationBukkit): RPKTicketProvider {
+class RPKTicketServiceImpl(override val plugin: RPKModerationBukkit) : RPKTicketService {
 
     override fun getTicket(id: Int): RPKTicket? {
-        return plugin.core.database.getTable(RPKTicketTable::class)[id]
+        return plugin.database.getTable(RPKTicketTable::class)[id]
     }
 
     override fun getOpenTickets(): List<RPKTicket> {
-        return plugin.core.database.getTable(RPKTicketTable::class).getOpenTickets()
+        return plugin.database.getTable(RPKTicketTable::class).getOpenTickets()
     }
 
     override fun getClosedTickets(): List<RPKTicket> {
-        return plugin.core.database.getTable(RPKTicketTable::class).getClosedTickets()
+        return plugin.database.getTable(RPKTicketTable::class).getClosedTickets()
     }
 
     override fun addTicket(ticket: RPKTicket) {
         val event = RPKBukkitTicketCreateEvent(ticket)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKTicketTable::class).insert(event.ticket)
+        plugin.database.getTable(RPKTicketTable::class).insert(event.ticket)
     }
 
     override fun updateTicket(ticket: RPKTicket) {
         val event = RPKBukkitTicketUpdateEvent(ticket)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKTicketTable::class).update(event.ticket)
+        plugin.database.getTable(RPKTicketTable::class).update(event.ticket)
     }
 
     override fun removeTicket(ticket: RPKTicket) {
         val event = RPKBukkitTicketDeleteEvent(ticket)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        plugin.core.database.getTable(RPKTicketTable::class).delete(event.ticket)
+        plugin.database.getTable(RPKTicketTable::class).delete(event.ticket)
     }
 
 }

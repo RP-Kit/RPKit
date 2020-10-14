@@ -16,12 +16,12 @@
 
 package com.rpkit.players.bukkit.profile
 
-import com.rpkit.core.database.Entity
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.User
 
-interface RPKDiscordProfile: Entity {
+interface RPKDiscordProfile {
 
+    var id: Int?
     var profile: RPKThinProfile
     val discordId: Long
 

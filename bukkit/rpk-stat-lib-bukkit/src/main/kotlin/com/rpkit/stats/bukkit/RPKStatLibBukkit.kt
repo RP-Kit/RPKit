@@ -23,7 +23,7 @@ import org.bstats.bukkit.Metrics
  * Class to allow stat lib to load as a plugin.
  * This allows plugins requiring stats or implementing stats to depend on the plugin.
  */
-class RPKStatLibBukkit: RPKBukkitPlugin() {
+class RPKStatLibBukkit : RPKBukkitPlugin() {
     override fun onEnable() {
         Metrics(this, 4418)
     }

@@ -17,17 +17,17 @@
 package com.rpkit.selection.bukkit.worldedit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.selection.bukkit.worldedit.selection.RPKWorldEditSelectionProvider
+import com.rpkit.core.service.Services
+import com.rpkit.selection.bukkit.selection.RPKSelectionService
+import com.rpkit.selection.bukkit.worldedit.selection.RPKWorldEditSelectionService
 import org.bstats.bukkit.Metrics
 
 
-class RPKSelectionWorldEditBukkit: RPKBukkitPlugin() {
+class RPKSelectionWorldEditBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4413)
-        serviceProviders = arrayOf(
-                RPKWorldEditSelectionProvider(this)
-        )
+        Services[RPKSelectionService::class] = RPKWorldEditSelectionService(this)
     }
 
 }

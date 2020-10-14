@@ -16,15 +16,16 @@
 
 package com.rpkit.moderation.bukkit.command.ticket
 
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
-import com.rpkit.moderation.bukkit.ticket.RPKTicketProvider
+import com.rpkit.moderation.bukkit.ticket.RPKTicketService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class TicketTeleportCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class TicketTeleportCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.moderation.command.ticket.teleport")) {
@@ -37,10 +38,15 @@ class TicketTeleportCommand(private val plugin: RPKModerationBukkit): CommandExe
         }
         if (args.isEmpty()) {
             sender.sendMessage(plugin.messages["ticket-teleport-usage"])
+            return true
         }
-        val ticketProvider = plugin.core.serviceManager.getServiceProvider(RPKTicketProvider::class)
+        val ticketService = Services[RPKTicketService::class]
+        if (ticketService == null) {
+            sender.sendMessage(plugin.messages["no-ticket-service"])
+            return true
+        }
         try {
-            val ticket = ticketProvider.getTicket(args[0].toInt())
+            val ticket = ticketService.getTicket(args[0].toInt())
             if (ticket == null) {
                 sender.sendMessage(plugin.messages["ticket-teleport-invalid-ticket"])
                 return true

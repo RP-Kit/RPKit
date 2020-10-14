@@ -23,19 +23,19 @@ import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionDeleteEvent
 import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionUpdateEvent
 
 /**
- * Auction provider implementation.
+ * Auction service implementation.
  */
-class RPKAuctionProviderImpl(private val plugin: RPKAuctionsBukkit): RPKAuctionProvider {
+class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuctionService {
 
     override fun getAuction(id: Int): RPKAuction? {
-        return plugin.core.database.getTable(RPKAuctionTable::class)[id]
+        return plugin.database.getTable(RPKAuctionTable::class)[id]
     }
 
     override fun addAuction(auction: RPKAuction): Boolean {
         val event = RPKBukkitAuctionCreateEvent(auction)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return false
-        plugin.core.database.getTable(RPKAuctionTable::class).insert(event.auction)
+        plugin.database.getTable(RPKAuctionTable::class).insert(event.auction)
         return true
     }
 
@@ -43,7 +43,7 @@ class RPKAuctionProviderImpl(private val plugin: RPKAuctionsBukkit): RPKAuctionP
         val event = RPKBukkitAuctionUpdateEvent(auction)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return false
-        plugin.core.database.getTable(RPKAuctionTable::class).update(event.auction)
+        plugin.database.getTable(RPKAuctionTable::class).update(event.auction)
         return true
     }
 
@@ -51,11 +51,11 @@ class RPKAuctionProviderImpl(private val plugin: RPKAuctionsBukkit): RPKAuctionP
         val event = RPKBukkitAuctionDeleteEvent(auction)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return false
-        plugin.core.database.getTable(RPKAuctionTable::class).delete(event.auction)
+        plugin.database.getTable(RPKAuctionTable::class).delete(event.auction)
         return true
     }
 
     override fun getAuctions(): List<RPKAuction> {
-        return plugin.core.database.getTable(RPKAuctionTable::class).getAll()
+        return plugin.database.getTable(RPKAuctionTable::class).getAll()
     }
 }

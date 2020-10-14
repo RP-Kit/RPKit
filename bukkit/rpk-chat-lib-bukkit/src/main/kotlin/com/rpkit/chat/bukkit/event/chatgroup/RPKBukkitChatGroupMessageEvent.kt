@@ -27,10 +27,11 @@ class RPKBukkitChatGroupMessageEvent(
         override val minecraftProfile: RPKMinecraftProfile,
         override val chatGroup: RPKChatGroup,
         override var message: String
-): RPKBukkitEvent(), RPKChatGroupMessageEvent, Cancellable {
+) : RPKBukkitEvent(), RPKChatGroupMessageEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

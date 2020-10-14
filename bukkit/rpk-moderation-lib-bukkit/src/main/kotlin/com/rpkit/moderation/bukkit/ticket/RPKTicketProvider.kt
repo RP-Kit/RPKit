@@ -16,12 +16,12 @@
 
 package com.rpkit.moderation.bukkit.ticket
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 
 /**
  * Provides ticket related functionality
  */
-interface RPKTicketProvider: ServiceProvider {
+interface RPKTicketService : Service {
 
     /**
      * Gets a ticket by ID.

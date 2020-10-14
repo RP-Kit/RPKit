@@ -16,11 +16,10 @@
 
 package com.rpkit.players.bukkit.profile
 
-import com.rpkit.core.database.Entity
 
+interface RPKProfile : RPKThinProfile {
 
-interface RPKProfile: Entity, RPKThinProfile {
-
+    var id: Int?
     override var name: String
     var passwordHash: ByteArray
     var passwordSalt: ByteArray

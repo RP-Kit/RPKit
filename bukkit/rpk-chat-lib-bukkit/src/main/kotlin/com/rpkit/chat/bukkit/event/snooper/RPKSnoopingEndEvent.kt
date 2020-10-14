@@ -17,4 +17,4 @@
 package com.rpkit.chat.bukkit.event.snooper
 
 
-interface RPKSnoopingEndEvent: RPKSnooperEvent
+interface RPKSnoopingEndEvent : RPKSnooperEvent

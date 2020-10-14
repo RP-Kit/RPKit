@@ -17,4 +17,4 @@
 package com.rpkit.chat.bukkit.event.prefix
 
 
-interface RPKPrefixUpdateEvent: RPKPrefixEvent
+interface RPKPrefixUpdateEvent : RPKPrefixEvent

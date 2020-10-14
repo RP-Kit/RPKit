@@ -16,8 +16,9 @@
 
 package com.rpkit.food.bukkit.listener
 
+import com.rpkit.core.service.Services
 import com.rpkit.food.bukkit.RPKFoodBukkit
-import com.rpkit.food.bukkit.expiry.RPKExpiryProviderImpl
+import com.rpkit.food.bukkit.expiry.RPKExpiryServiceImpl
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.FurnaceSmeltEvent
@@ -25,16 +26,14 @@ import org.bukkit.event.inventory.FurnaceSmeltEvent
 /**
  * Furnace smelt listener for adding expiry dates.
  */
-class FurnaceSmeltListener(private val plugin: RPKFoodBukkit): Listener {
+class FurnaceSmeltListener(private val plugin: RPKFoodBukkit) : Listener {
 
     @EventHandler
     fun onFurnaceSmelt(event: FurnaceSmeltEvent) {
         val item = event.result
-        if (item != null) {
-            val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProviderImpl::class)
-            expiryProvider.setExpiry(item)
-            event.result = item
-        }
+        val expiryService = Services[RPKExpiryServiceImpl::class]
+        expiryService?.setExpiry(item)
+        event.result = item
     }
 
 }

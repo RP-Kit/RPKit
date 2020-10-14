@@ -19,6 +19,6 @@ package com.rpkit.characters.bukkit.event.character
 import com.rpkit.characters.bukkit.character.RPKCharacter
 
 
-interface RPKCharacterDeleteEvent: RPKCharacterEvent {
+interface RPKCharacterDeleteEvent : RPKCharacterEvent {
     override val character: RPKCharacter
 }

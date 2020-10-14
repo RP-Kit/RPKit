@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-class ProfessionExperienceCommand(val plugin: RPKProfessionsBukkit): CommandExecutor {
+class ProfessionExperienceCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor {
 
     private val professionExperienceAddCommand = ProfessionExperienceAddCommand(plugin)
     private val professionExperienceRemoveCommand = ProfessionExperienceRemoveCommand(plugin)

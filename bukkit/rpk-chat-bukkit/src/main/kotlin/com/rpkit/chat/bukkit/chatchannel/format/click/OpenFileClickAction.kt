@@ -34,7 +34,8 @@ class OpenFileClickAction(val file: String) : ClickAction, ConfigurationSerializ
     )
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>) = OpenFileClickAction(
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>) = OpenFileClickAction(
                 serialized["file"] as String
         )
     }

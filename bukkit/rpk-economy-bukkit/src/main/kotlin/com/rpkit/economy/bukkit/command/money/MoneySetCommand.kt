@@ -17,25 +17,31 @@
 package com.rpkit.economy.bukkit.command.money
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
+import com.rpkit.economy.bukkit.economy.RPKEconomyService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.NumericPrompt
+import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.ValidatingPrompt
 import org.bukkit.entity.Player
 
 /**
  * Money set command.
  * Sets the amount of money a player's active character has.
  */
-class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
+class MoneySetCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
 
     private val conversationFactory = ConversationFactory(plugin)
             .withModality(true)
@@ -50,104 +56,121 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
                     }
                 }
             }
-    
-    
+
+
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender is Player) {
-            if (sender.hasPermission("rpkit.economy.command.money.set")) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-                val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                val fromMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                if (fromMinecraftProfile != null) {
-                    val fromCharacter = characterProvider.getActiveCharacter(fromMinecraftProfile)
-                    if (fromCharacter != null) {
-                        if (args.isNotEmpty()) {
-                            val toBukkitPlayer = plugin.server.getPlayer(args[0])
-                            if (toBukkitPlayer != null) {
-                                val toMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(toBukkitPlayer)
-                                if (toMinecraftProfile != null) {
-                                    val toProfile = toMinecraftProfile.profile
-                                    if (toProfile is RPKProfile) {
-                                        if (args.size > 1) {
-                                            val character = characterProvider.getCharacters(toProfile)
-                                                    .firstOrNull { character -> character.name.startsWith(args[1]) }
-                                            if (character != null) {
-                                                if (args.size > 2) {
-                                                    val currency = currencyProvider.getCurrency(args[2])
-                                                    if (currency != null) {
-                                                        if (args.size > 3) {
-                                                            try {
-                                                                val amount = args[3].toInt()
-                                                                if (amount >= 0) {
-                                                                    if (amount <= 1728) {
-                                                                        economyProvider.setBalance(character, currency, amount)
-                                                                        sender.sendMessage(plugin.messages["money-set-amount-valid"])
-                                                                        sender.sendMessage(plugin.messages["money-set-valid"])
-                                                                    } else {
-                                                                        sender.sendMessage(plugin.messages["money-set-amount-invalid-amount-limit"])
-                                                                    }
-                                                                } else {
-                                                                    sender.sendMessage(plugin.messages["money-set-amount-invalid-amount-negative"])
-                                                                }
-                                                            } catch (exception: NumberFormatException) {
-                                                                sender.sendMessage(plugin.messages["money-set-amount-invalid-amount-number"])
-                                                            }
-                                                        } else {
-                                                            conversationFactory.buildConversation(sender).begin()
-                                                        }
-                                                    } else {
-                                                        sender.sendMessage(plugin.messages["money-set-currency-invalid-currency"])
-                                                    }
-                                                } else {
-                                                    conversationFactory.buildConversation(sender).begin()
-                                                }
-                                            } else {
-                                                sender.sendMessage(plugin.messages["money-set-character-invalid-character"])
-                                            }
-                                        } else {
-                                            conversationFactory.buildConversation(sender).begin()
-                                        }
-                                    } else {
-                                        sender.sendMessage(plugin.messages["no-profile"])
-                                    }
-                                } else {
-                                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                                }
-                            } else {
-                                sender.sendMessage(plugin.messages["money-set-profile-invalid-profile"])
-                            }
-                        } else {
-                            conversationFactory.buildConversation(sender).begin()
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["no-character"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["no-permission-money-set"])
-            }
-        } else {
+        if (sender !is Player) {
             sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        if (!sender.hasPermission("rpkit.economy.command.money.set")) {
+            sender.sendMessage(plugin.messages["no-permission-money-set"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val economyService = Services[RPKEconomyService::class]
+        if (economyService == null) {
+            sender.sendMessage(plugin.messages["no-economy-service"])
+            return true
+        }
+        val currencyService = Services[RPKCurrencyService::class]
+        if (currencyService == null) {
+            sender.sendMessage(plugin.messages["no-currency-service"])
+            return true
+        }
+        val fromMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (fromMinecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val fromCharacter = characterService.getActiveCharacter(fromMinecraftProfile)
+        if (fromCharacter == null) {
+            sender.sendMessage(plugin.messages["no-character"])
+            return true
+        }
+        if (args.isEmpty()) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        val toBukkitPlayer = plugin.server.getPlayer(args[0])
+        if (toBukkitPlayer == null) {
+            sender.sendMessage(plugin.messages["money-set-profile-invalid-profile"])
+            return true
+        }
+        val toMinecraftProfile = minecraftProfileService.getMinecraftProfile(toBukkitPlayer)
+        if (toMinecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val toProfile = toMinecraftProfile.profile
+        if (toProfile !is RPKProfile) {
+            sender.sendMessage(plugin.messages["no-profile"])
+            return true
+        }
+        if (args.size <= 1) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        val character = characterService.getCharacters(toProfile)
+                .firstOrNull { character -> character.name.startsWith(args[1]) }
+        if (character == null) {
+            sender.sendMessage(plugin.messages["money-set-character-invalid-character"])
+            return true
+        }
+        if (args.size <= 2) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        val currency = currencyService.getCurrency(args[2])
+        if (currency == null) {
+            sender.sendMessage(plugin.messages["money-set-currency-invalid-currency"])
+            return true
+        }
+        if (args.size <= 3) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        try {
+            val amount = args[3].toInt()
+            if (amount < 0) {
+                sender.sendMessage(plugin.messages["money-set-amount-invalid-amount-negative"])
+                return true
+            }
+            if (amount > 1728) {
+                sender.sendMessage(plugin.messages["money-set-amount-invalid-amount-limit"])
+                return true
+            }
+            economyService.setBalance(character, currency, amount)
+            sender.sendMessage(plugin.messages["money-set-amount-valid"])
+            sender.sendMessage(plugin.messages["money-set-valid"])
+        } catch (exception: NumberFormatException) {
+            sender.sendMessage(plugin.messages["money-set-amount-invalid-amount-number"])
         }
         return true
     }
 
-    private inner class ProfilePrompt: ValidatingPrompt() {
+    private inner class ProfilePrompt : ValidatingPrompt() {
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-            val profile = profileProvider.getProfile(input)
+            val profileService = context.getSessionData("profileService") as RPKProfileService
+            val profile = profileService.getProfile(input)
             context.setSessionData("profile", profile)
             return ProfileSetPrompt()
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-            return profileProvider.getProfile(input) != null
+            val profileService = Services[RPKProfileService::class] ?: return false
+            context.setSessionData("profileService", profileService)
+            return profileService.getProfile(input) != null
         }
 
         override fun getPromptText(context: ConversationContext): String {
@@ -155,6 +178,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
+            if (Services[RPKProfileService::class] == null) return plugin.messages["no-profile-service"]
             return plugin.messages["money-set-profile-invalid-profile"]
         }
 
@@ -162,24 +186,29 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
 
     private inner class ProfileSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
+            val characterService = Services[RPKCharacterService::class] ?: return END_OF_CONVERSATION
+            context.setSessionData("characterService", characterService)
             return CharacterPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
+            if (Services[RPKCharacterService::class] == null) return plugin.messages["no-character-service"]
             return plugin.messages["money-set-profile-valid"]
         }
 
     }
 
-    private inner class CharacterPrompt: ValidatingPrompt() {
+    private inner class CharacterPrompt : ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterService = context.getSessionData("characterService") as RPKCharacterService
+            return characterService
                     .getCharacters(context.getSessionData("profile") as RPKProfile)
                     .any { character -> character.name == input }
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("character", plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterService = context.getSessionData("characterService") as RPKCharacterService
+            context.setSessionData("character", characterService
                     .getCharacters(context.getSessionData("profile") as RPKProfile)
                     .first { character -> character.name == input }
             )
@@ -187,9 +216,10 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
+            val characterService = context.getSessionData("characterService") as RPKCharacterService
             return plugin.messages["money-set-character-prompt"] +
                     "\n" +
-                    plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                    characterService
                             .getCharacters(context.getSessionData("profile") as RPKProfile)
                             .joinToString("\n") { character ->
                                 plugin.messages["money-set-character-prompt-list-item", mapOf(
@@ -203,33 +233,40 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
     }
 
-    private inner class CharacterSetPrompt: MessagePrompt() {
+    private inner class CharacterSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
+            val currencyService = Services[RPKCurrencyService::class] ?: return END_OF_CONVERSATION
+            context.setSessionData("currencyService", currencyService)
             return CurrencyPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
+            if (Services[RPKCurrencyService::class] == null) return plugin.messages["no-currency-service"]
             return plugin.messages["money-set-character-valid"]
         }
 
     }
 
-    private inner class CurrencyPrompt: ValidatingPrompt() {
+    private inner class CurrencyPrompt : ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(input) != null
+            val currencyService = Services[RPKCurrencyService::class] ?: return false
+            context.setSessionData("currencyService", currencyService)
+            return currencyService.getCurrency(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("currency", plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(input))
+            val currencyService = context.getSessionData("currencyService") as RPKCurrencyService
+            context.setSessionData("currency", currencyService.getCurrency(input))
             return CurrencySetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
+            val currencyService = context.getSessionData("currencyService") as RPKCurrencyService
             return plugin.messages["money-set-currency-prompt"] + "\n" +
-                    plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
+                    currencyService.currencies
                             .joinToString("\n") { currency ->
                                 plugin.messages["money-set-currency-prompt-list-item", mapOf(
-                                        Pair("currency", currency.name)
+                                        "currency" to currency.name
                                 )]
                             }
         }
@@ -239,7 +276,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
         }
     }
 
-    private inner class CurrencySetPrompt: MessagePrompt() {
+    private inner class CurrencySetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return AmountPrompt()
         }
@@ -250,7 +287,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class AmountPrompt: NumericPrompt() {
+    private inner class AmountPrompt : NumericPrompt() {
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
             return input.toInt() in 0..1728
@@ -279,7 +316,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class AmountSetPrompt: MessagePrompt() {
+    private inner class AmountSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return MoneySetCompletePrompt()
         }
@@ -290,20 +327,21 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class MoneySetCompletePrompt: MessagePrompt() {
+    private inner class MoneySetCompletePrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt? {
-            val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
+            val economyService = Services[RPKEconomyService::class] ?: return END_OF_CONVERSATION
             val character = context.getSessionData("character") as RPKCharacter
             val currency = context.getSessionData("currency") as RPKCurrency
             val amount = context.getSessionData("amount") as Int
-            economyProvider.setBalance(character, currency, amount)
+            economyService.setBalance(character, currency, amount)
             return END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
+            if (Services[RPKEconomyService::class] == null) return plugin.messages["no-economy-service"]
             return plugin.messages["money-set-valid"]
         }
 
     }
-    
+
 }

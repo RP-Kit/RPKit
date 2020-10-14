@@ -16,7 +16,8 @@
 
 package com.rpkit.trade.bukkit.listener
 
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
+import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.trade.bukkit.RPKTradeBukkit
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material
@@ -27,7 +28,7 @@ import org.bukkit.event.block.SignChangeEvent
 /**
  * Sign change listener for trader signs.
  */
-class SignChangeListener(private val plugin: RPKTradeBukkit): Listener {
+class SignChangeListener(private val plugin: RPKTradeBukkit) : Listener {
 
     @EventHandler
     fun onSignChange(event: SignChangeEvent) {
@@ -48,7 +49,13 @@ class SignChangeListener(private val plugin: RPKTradeBukkit): Listener {
             event.player.sendMessage(plugin.messages["trader-sign-invalid-price"])
             return
         }
-        if (plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(event.getLine(3) ?: "") == null) {
+        val currencyService = Services[RPKCurrencyService::class]
+        if (currencyService == null) {
+            event.block.breakNaturally()
+            event.player.sendMessage(plugin.messages["no-currency-service"])
+            return
+        }
+        if (currencyService.getCurrency(event.getLine(3) ?: "") == null) {
             event.block.breakNaturally()
             event.player.sendMessage(plugin.messages["trader-sign-invalid-currency"])
             return

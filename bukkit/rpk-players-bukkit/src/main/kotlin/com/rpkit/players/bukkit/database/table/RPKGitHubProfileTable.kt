@@ -1,21 +1,36 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.players.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.database.jooq.rpkit.Tables.RPKIT_GITHUB_PROFILE
+import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_GITHUB_PROFILE
 import com.rpkit.players.bukkit.profile.RPKGitHubProfile
 import com.rpkit.players.bukkit.profile.RPKGitHubProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 import org.kohsuke.github.GHUser
 
 
-class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKGitHubProfile>(database, RPKGitHubProfile::class) {
+class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_github_profile.id.enabled")) {
         database.cacheManager.createCache("rpk-players-bukkit.rpkit_github_profile.id",
@@ -25,26 +40,7 @@ class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBu
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_GITHUB_PROFILE)
-                .column(RPKIT_GITHUB_PROFILE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_GITHUB_PROFILE.PROFILE_ID, SQLDataType.INTEGER)
-                .column(RPKIT_GITHUB_PROFILE.NAME, SQLDataType.VARCHAR(256))
-                .column(RPKIT_GITHUB_PROFILE.OAUTH_TOKEN, SQLDataType.VARCHAR(1024))
-                .constraints(
-                        constraint("pk_rpkit_github_profile").primaryKey(RPKIT_GITHUB_PROFILE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.3.0")
-        }
-    }
-
-    override fun insert(entity: RPKGitHubProfile): Int {
+    fun insert(entity: RPKGitHubProfile) {
         database.create
                 .insertInto(
                         RPKIT_GITHUB_PROFILE,
@@ -61,10 +57,9 @@ class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBu
         val id = database.create.lastID().toInt()
         entity.id = id
         cache?.put(id, entity)
-        return id
     }
 
-    override fun update(entity: RPKGitHubProfile) {
+    fun update(entity: RPKGitHubProfile) {
         database.create
                 .update(RPKIT_GITHUB_PROFILE)
                 .set(RPKIT_GITHUB_PROFILE.PROFILE_ID, entity.profile.id)
@@ -75,38 +70,37 @@ class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBu
         cache?.put(entity.id, entity)
     }
 
-    override fun get(id: Int): RPKGitHubProfile? {
+    operator fun get(id: Int): RPKGitHubProfile? {
         if (cache?.containsKey(id) == true) {
             return cache.get(id)
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_GITHUB_PROFILE.PROFILE_ID,
-                            RPKIT_GITHUB_PROFILE.NAME,
-                            RPKIT_GITHUB_PROFILE.OAUTH_TOKEN
-                    )
-                    .from(RPKIT_GITHUB_PROFILE)
-                    .where(RPKIT_GITHUB_PROFILE.ID.eq(id))
-                    .fetchOne() ?: return null
-            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-            val profileId = result.get(RPKIT_GITHUB_PROFILE.PROFILE_ID)
-            val profile = profileProvider.getProfile(profileId)
-            if (profile != null) {
-                val githubProfile = RPKGitHubProfileImpl(
-                        id,
-                        profile,
-                        result.get(RPKIT_GITHUB_PROFILE.NAME),
-                        result.get(RPKIT_GITHUB_PROFILE.OAUTH_TOKEN)
+        }
+        val result = database.create
+                .select(
+                        RPKIT_GITHUB_PROFILE.PROFILE_ID,
+                        RPKIT_GITHUB_PROFILE.NAME,
+                        RPKIT_GITHUB_PROFILE.OAUTH_TOKEN
                 )
-                cache?.put(githubProfile.id, githubProfile)
-                return githubProfile
-            } else {
-                database.create
-                        .deleteFrom(RPKIT_GITHUB_PROFILE)
-                        .where(RPKIT_GITHUB_PROFILE.ID.eq(id))
-                        .execute()
-                return null
-            }
+                .from(RPKIT_GITHUB_PROFILE)
+                .where(RPKIT_GITHUB_PROFILE.ID.eq(id))
+                .fetchOne() ?: return null
+        val profileService = Services[RPKProfileService::class] ?: return null
+        val profileId = result.get(RPKIT_GITHUB_PROFILE.PROFILE_ID)
+        val profile = profileService.getProfile(profileId)
+        if (profile != null) {
+            val githubProfile = RPKGitHubProfileImpl(
+                    id,
+                    profile,
+                    result.get(RPKIT_GITHUB_PROFILE.NAME),
+                    result.get(RPKIT_GITHUB_PROFILE.OAUTH_TOKEN)
+            )
+            cache?.put(githubProfile.id, githubProfile)
+            return githubProfile
+        } else {
+            database.create
+                    .deleteFrom(RPKIT_GITHUB_PROFILE)
+                    .where(RPKIT_GITHUB_PROFILE.ID.eq(id))
+                    .execute()
+            return null
         }
     }
 
@@ -130,7 +124,7 @@ class RPKGitHubProfileTable(database: Database, private val plugin: RPKPlayersBu
         return get(result.get(RPKIT_GITHUB_PROFILE.ID))
     }
 
-    override fun delete(entity: RPKGitHubProfile) {
+    fun delete(entity: RPKGitHubProfile) {
         database.create
                 .deleteFrom(RPKIT_GITHUB_PROFILE)
                 .where(RPKIT_GITHUB_PROFILE.ID.eq(entity.id))

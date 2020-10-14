@@ -16,16 +16,16 @@
 
 package com.rpkit.chat.bukkit.prefix
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 /**
  * Provides prefix related operations.
  */
-interface RPKPrefixProvider: ServiceProvider {
+interface RPKPrefixService : Service {
 
     /**
-     * A list of prefixes currently managed by this prefix provider.
+     * A list of prefixes currently managed by this prefix service.
      * The list is immutable, so to add or remove prefixes, [addPrefix] or [removePrefix] should be used.
      */
     val prefixes: List<RPKPrefix>
@@ -48,7 +48,7 @@ interface RPKPrefixProvider: ServiceProvider {
     fun getPrefix(name: String): RPKPrefix?
 
     /**
-     * Adds a prefix to be tracked by this prefix provider.
+     * Adds a prefix to be tracked by this prefix service.
      *
      * @param prefix The prefix to add
      */
@@ -62,7 +62,7 @@ interface RPKPrefixProvider: ServiceProvider {
     fun updatePrefix(prefix: RPKPrefix)
 
     /**
-     * Removes a prefix from being tracked by this prefix provider.
+     * Removes a prefix from being tracked by this prefix service.
      *
      * @param prefix The prefix
      */

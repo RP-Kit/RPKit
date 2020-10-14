@@ -17,8 +17,9 @@
 package com.rpkit.chat.bukkit.command.snoop
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.snooper.RPKSnooperProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.chat.bukkit.snooper.RPKSnooperService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -28,57 +29,65 @@ import org.bukkit.entity.Player
  * Snoop command.
  * Toggles snoop state.
  */
-class SnoopCommand(private val plugin: RPKChatBukkit): CommandExecutor {
+class SnoopCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        val snooperProvider = plugin.core.serviceManager.getServiceProvider(RPKSnooperProvider::class)
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        if (sender is Player) {
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-            if (minecraftProfile != null) {
-                if (args.isNotEmpty()) {
-                    if (args[0].equals("on", ignoreCase = true)) {
-                        if (sender.hasPermission("rpkit.chat.command.snoop.on")) {
-                            if (!snooperProvider.snoopers.contains(minecraftProfile)) {
-                                snooperProvider.addSnooper(minecraftProfile)
-                                sender.sendMessage(plugin.messages["snoop-enabled"])
-                            } else {
-                                sender.sendMessage(plugin.messages["snoop-already-enabled"])
-                            }
-                        } else {
-                            sender.sendMessage(plugin.messages["no-permission-snoop-on"])
-                        }
-                    } else if (args[0].equals("off", ignoreCase = true)) {
-                        if (sender.hasPermission("rpkit.chat.command.snoop.off")) {
-                            if (snooperProvider.snoopers.contains(minecraftProfile)) {
-                                snooperProvider.removeSnooper(minecraftProfile)
-                                sender.sendMessage(plugin.messages["snoop-disabled"])
-                            } else {
-                                sender.sendMessage(plugin.messages["snoop-already-disabled"])
-                            }
-                        } else {
-                            sender.sendMessage(plugin.messages["no-permission-snoop-off"])
-                        }
-                    } else if (args[0].equals("check", ignoreCase = true)) {
-                        if (sender.hasPermission("rpkit.chat.command.snoop.check")) {
-                            if (snooperProvider.snoopers.contains(minecraftProfile)) {
-                                sender.sendMessage(plugin.messages["snoop-check-on"])
-                            } else {
-                                sender.sendMessage(plugin.messages["snoop-check-off"])
-                            }
-                        } else {
-                            sender.sendMessage(plugin.messages["no-permission-snoop-check"])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["snoop-usage"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["snoop-usage"])
-                }
+        val snooperService = Services[RPKSnooperService::class]
+        if (snooperService == null) {
+            sender.sendMessage(plugin.messages["no-snooper-service"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        if (args.isEmpty()) {
+            sender.sendMessage(plugin.messages["snoop-usage"])
+            return true
+        }
+        if (args[0].equals("on", ignoreCase = true)) {
+            if (!sender.hasPermission("rpkit.chat.command.snoop.on")) {
+                sender.sendMessage(plugin.messages["no-permission-snoop-on"])
+                return true
+            }
+            if (snooperService.snoopers.contains(minecraftProfile)) {
+                sender.sendMessage(plugin.messages["snoop-already-enabled"])
+                return true
+            }
+            snooperService.addSnooper(minecraftProfile)
+            sender.sendMessage(plugin.messages["snoop-enabled"])
+        } else if (args[0].equals("off", ignoreCase = true)) {
+            if (!sender.hasPermission("rpkit.chat.command.snoop.off")) {
+                sender.sendMessage(plugin.messages["no-permission-snoop-off"])
+                return true
+            }
+            if (!snooperService.snoopers.contains(minecraftProfile)) {
+                sender.sendMessage(plugin.messages["snoop-already-disabled"])
+                return true
+            }
+            snooperService.removeSnooper(minecraftProfile)
+            sender.sendMessage(plugin.messages["snoop-disabled"])
+        } else if (args[0].equals("check", ignoreCase = true)) {
+            if (!sender.hasPermission("rpkit.chat.command.snoop.check")) {
+                sender.sendMessage(plugin.messages["no-permission-snoop-check"])
+                return true
+            }
+            if (snooperService.snoopers.contains(minecraftProfile)) {
+                sender.sendMessage(plugin.messages["snoop-check-on"])
             } else {
-                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                sender.sendMessage(plugin.messages["snoop-check-off"])
             }
         } else {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages["snoop-usage"])
         }
         return true
     }

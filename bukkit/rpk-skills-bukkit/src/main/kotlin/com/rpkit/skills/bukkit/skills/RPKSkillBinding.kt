@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 package com.rpkit.skills.bukkit.skills
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 import org.bukkit.inventory.ItemStack
 
 
 class RPKSkillBinding(
-        override var id: Int = 0,
+        var id: Int? = null,
         val character: RPKCharacter,
         val item: ItemStack,
         val skill: RPKSkill
-): Entity
+)

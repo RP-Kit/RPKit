@@ -20,7 +20,7 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import org.bstats.bukkit.Metrics
 
 
-class RPKMonsterLibBukkit: RPKBukkitPlugin() {
+class RPKMonsterLibBukkit : RPKBukkitPlugin() {
     override fun onEnable() {
         Metrics(this, 6660)
     }

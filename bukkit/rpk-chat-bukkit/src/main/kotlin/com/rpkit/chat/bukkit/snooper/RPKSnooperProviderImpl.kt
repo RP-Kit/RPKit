@@ -23,24 +23,24 @@ import com.rpkit.chat.bukkit.event.snooper.RPKBukkitSnoopingEndEvent
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
 /**
- * Snooper provider implementation.
+ * Snooper service implementation.
  */
-class RPKSnooperProviderImpl(private val plugin: RPKChatBukkit): RPKSnooperProvider {
+class RPKSnooperServiceImpl(override val plugin: RPKChatBukkit) : RPKSnooperService {
 
     override val snoopers: List<RPKMinecraftProfile>
-        get() = plugin.core.database.getTable(RPKSnooperTable::class).getAll().map(RPKSnooper::minecraftProfile)
+        get() = plugin.database.getTable(RPKSnooperTable::class).getAll().map(RPKSnooper::minecraftProfile)
 
     override fun addSnooper(minecraftProfile: RPKMinecraftProfile) {
         if (!this.snoopers.contains(minecraftProfile)) {
             val event = RPKBukkitSnoopingBeginEvent(minecraftProfile)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
-            plugin.core.database.getTable(RPKSnooperTable::class).insert(RPKSnooper(minecraftProfile = minecraftProfile))
+            plugin.database.getTable(RPKSnooperTable::class).insert(RPKSnooper(minecraftProfile = minecraftProfile))
         }
     }
 
     override fun removeSnooper(minecraftProfile: RPKMinecraftProfile) {
-        val snooperTable = plugin.core.database.getTable(RPKSnooperTable::class)
+        val snooperTable = plugin.database.getTable(RPKSnooperTable::class)
         val snooper = snooperTable.get(minecraftProfile)
         if (snooper != null) {
             val event = RPKBukkitSnoopingEndEvent(minecraftProfile)
@@ -51,7 +51,7 @@ class RPKSnooperProviderImpl(private val plugin: RPKChatBukkit): RPKSnooperProvi
     }
 
     override fun isSnooping(minecraftProfile: RPKMinecraftProfile): Boolean {
-        val snooperTable = plugin.core.database.getTable(RPKSnooperTable::class)
+        val snooperTable = plugin.database.getTable(RPKSnooperTable::class)
         return snooperTable.get(minecraftProfile) != null
     }
 

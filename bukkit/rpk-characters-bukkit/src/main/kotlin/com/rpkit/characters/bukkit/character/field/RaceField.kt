@@ -21,15 +21,17 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * Character card field for race.
  */
-class RaceField: HideableCharacterCardField {
+class RaceField : HideableCharacterCardField {
 
     override val name = "race"
     override fun get(character: RPKCharacter): String {
-        return if (isHidden(character)) "[HIDDEN]" else character.race?.name?:"unset"
+        return if (isHidden(character)) "[HIDDEN]" else character.race?.name ?: "unset"
     }
+
     override fun isHidden(character: RPKCharacter): Boolean {
         return character.isRaceHidden
     }
+
     override fun setHidden(character: RPKCharacter, hidden: Boolean) {
         character.isRaceHidden = hidden
     }

@@ -18,8 +18,9 @@ package com.rpkit.classes.bukkit.classes
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.classes.bukkit.RPKClassesBukkit
+import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkillType
-import com.rpkit.skills.bukkit.skills.RPKSkillTypeProvider
+import com.rpkit.skills.bukkit.skills.RPKSkillTypeService
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
 import org.nfunk.jep.JEP
 import kotlin.math.roundToInt
@@ -38,37 +39,31 @@ class RPKClassImpl(
     val prerequisites: Map<RPKClass, Int>
         get() = prerequisitesByName
                 .map { entry ->
-                    Pair(
-                            plugin.core.serviceManager.getServiceProvider(RPKClassProvider::class).getClass(entry.key)!!,
-                            entry.value
-                    )
+                    Services[RPKClassService::class]?.getClass(entry.key) to entry.value
                 }
+                .mapNotNull { (`class`, level) -> if (`class` == null) null else `class` to level }
                 .toMap()
 
     val baseSkillPoints: Map<RPKSkillType, Int>
         get() = baseSkillPointsByName
                 .map { entry ->
-                    Pair(
-                            plugin.core.serviceManager.getServiceProvider(RPKSkillTypeProvider::class).getSkillType(entry.key)!!,
-                            entry.value
-                    )
+                    Services[RPKSkillTypeService::class]?.getSkillType(entry.key) to entry.value
                 }
+                .mapNotNull { (skillType, points) -> if (skillType == null) null else skillType to points}
                 .toMap()
 
     val levelSkillPoints: Map<RPKSkillType, Int>
         get() = levelSkillPointsByName
                 .map { entry ->
-                    Pair(
-                            plugin.core.serviceManager.getServiceProvider(RPKSkillTypeProvider::class).getSkillType(entry.key)!!,
-                            entry.value
-                    )
+                    Services[RPKSkillTypeService::class]?.getSkillType(entry.key) to entry.value
                 }
+                .mapNotNull { (skillType, points) -> if (skillType == null) null else skillType to points }
                 .toMap()
 
     override fun hasPrerequisites(character: RPKCharacter): Boolean {
-        val classProvider = plugin.core.serviceManager.getServiceProvider(RPKClassProvider::class)
+        val classService = Services[RPKClassService::class] ?: return false
         for ((`class`, level) in prerequisites) {
-            if (classProvider.getLevel(character, `class`) < level) {
+            if (classService.getLevel(character, `class`) < level) {
                 return false
             }
         }
@@ -76,7 +71,7 @@ class RPKClassImpl(
     }
 
     override fun getSkillPoints(skillType: RPKSkillType, level: Int): Int {
-        return baseSkillPoints[skillType]?:0 + (levelSkillPoints[skillType]?:0 * level)
+        return baseSkillPoints[skillType] ?: 0 + (levelSkillPoints[skillType] ?: 0 * level)
     }
 
     override fun getStatVariableValue(statVariable: RPKStatVariable, level: Int): Int {

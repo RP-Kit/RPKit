@@ -19,7 +19,7 @@ package com.rpkit.characters.bukkit.event.character
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.event.RPKEvent
 
-interface RPKCharacterEvent: RPKEvent {
+interface RPKCharacterEvent : RPKEvent {
 
     val character: RPKCharacter?
 

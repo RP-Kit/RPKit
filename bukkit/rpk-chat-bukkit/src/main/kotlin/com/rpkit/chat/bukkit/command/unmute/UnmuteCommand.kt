@@ -17,8 +17,9 @@
 package com.rpkit.chat.bukkit.command.unmute
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -28,39 +29,47 @@ import org.bukkit.entity.Player
  * Unmute command.
  * Unmutes a chat channel.
  */
-class UnmuteCommand(private val plugin: RPKChatBukkit): CommandExecutor {
+class UnmuteCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender is Player) {
-            if (args.isNotEmpty()) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
-                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                if (minecraftProfile != null) {
-                    val chatChannel = chatChannelProvider.getChatChannel(args[0])
-                    if (chatChannel != null) {
-                        if (sender.hasPermission("rpkit.chat.command.unmute.${chatChannel.name}")) {
-                            chatChannel.addListener(minecraftProfile)
-                            sender.sendMessage(plugin.messages["unmute-valid", mapOf(
-                                    Pair("channel", chatChannel.name)
-                            )])
-                        } else {
-                            sender.sendMessage(plugin.messages["no-permission-unmute", mapOf(
-                                    Pair("channel", chatChannel.name)
-                            )])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["unmute-invalid-chatchannel"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["unmute-usage"])
-            }
-        } else {
+        if (sender !is Player) {
             sender.sendMessage(plugin.messages["not-from-console"])
+            return true
         }
+        if (args.isEmpty()) {
+            sender.sendMessage(plugin.messages["unmute-usage"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val chatChannelService = Services[RPKChatChannelService::class]
+        if (chatChannelService == null) {
+            sender.sendMessage(plugin.messages["no-chat-channel-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val chatChannel = chatChannelService.getChatChannel(args[0])
+        if (chatChannel == null) {
+            sender.sendMessage(plugin.messages["unmute-invalid-chatchannel"])
+            return true
+        }
+        if (!sender.hasPermission("rpkit.chat.command.unmute.${chatChannel.name}")) {
+            sender.sendMessage(plugin.messages["no-permission-unmute", mapOf(
+                    Pair("channel", chatChannel.name)
+            )])
+            return true
+        }
+        chatChannel.addListener(minecraftProfile)
+        sender.sendMessage(plugin.messages["unmute-valid", mapOf(
+                Pair("channel", chatChannel.name)
+        )])
         return true
     }
 

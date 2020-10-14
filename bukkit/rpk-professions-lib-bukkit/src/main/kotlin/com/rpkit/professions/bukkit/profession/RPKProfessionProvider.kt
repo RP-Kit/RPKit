@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 package com.rpkit.professions.bukkit.profession
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import java.time.Duration
 
 
-interface RPKProfessionProvider: ServiceProvider {
+interface RPKProfessionService : Service {
 
     val professions: List<RPKProfession>
 

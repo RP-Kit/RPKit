@@ -1,8 +1,25 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.essentials.bukkit.command
 
+import com.rpkit.core.service.Services
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageService
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -11,25 +28,33 @@ import org.bukkit.entity.Player
 class ToggleLogMessagesCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender.hasPermission("rpkit.essentials.command.togglelogmessages")) {
-            if (sender is Player) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val logMessageProvider = plugin.core.serviceManager.getServiceProvider(RPKLogMessageProvider::class)
-                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                if (minecraftProfile != null) {
-                    logMessageProvider.setLogMessagesEnabled(minecraftProfile, !logMessageProvider.isLogMessagesEnabled(minecraftProfile))
-                    sender.sendMessage(plugin.messages["toggle-log-messages-valid", mapOf(
-                            Pair("enabled", if (logMessageProvider.isLogMessagesEnabled(minecraftProfile)) "enabled" else "disabled")
-                    )])
-                } else {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["not-from-console"])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.essentials.command.togglelogmessages")) {
             sender.sendMessage(plugin.messages["no-permission-toggle-log-messages"])
+            return true
         }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val logMessageService = Services[RPKLogMessageService::class]
+        if (logMessageService == null) {
+            sender.sendMessage(plugin.messages["no-log-message-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        logMessageService.setLogMessagesEnabled(minecraftProfile, !logMessageService.isLogMessagesEnabled(minecraftProfile))
+        sender.sendMessage(plugin.messages["toggle-log-messages-valid", mapOf(
+                "enabled" to if (logMessageService.isLogMessagesEnabled(minecraftProfile)) "enabled" else "disabled"
+        )])
         return true
     }
 }

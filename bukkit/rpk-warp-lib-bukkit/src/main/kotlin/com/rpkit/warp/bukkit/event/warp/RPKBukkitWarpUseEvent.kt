@@ -26,10 +26,11 @@ import org.bukkit.event.HandlerList
 class RPKBukkitWarpUseEvent(
         override val warp: RPKWarp,
         override val minecraftProfile: RPKMinecraftProfile
-): RPKBukkitEvent(), RPKWarpUseEvent, Cancellable {
+) : RPKBukkitEvent(), RPKWarpUseEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

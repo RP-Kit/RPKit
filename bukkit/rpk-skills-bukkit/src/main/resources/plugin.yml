@@ -9,25 +9,25 @@ depend:
 - rpk-skill-lib-bukkit
 api-version: '1.16'
 commands:
-    skill:
-        description: Uses a skill
-        usage: /<command> [skill]
-        aliases: [cast]
-    bindskill:
-        description: Binds a skill to your currently held item
-        usage: /<command> [skill]
-        aliases: [skillbind]
-    unbindskill:
-        description: Unbinds a skill from your currently held item
-        usage: /<command>
-        aliases: [skillunbind]
+  skill:
+    description: Uses a skill
+    usage: /<command> [skill]
+    aliases: [cast]
+  bindskill:
+    description: Binds a skill to your currently held item
+    usage: /<command> [skill]
+    aliases: [skillbind]
+  unbindskill:
+    description: Unbinds a skill from your currently held item
+    usage: /<command>
+    aliases: [skillunbind]
 permissions:
-    rpkit.skills.command.skill:
-        description: Allows using skills
-        default: true
-    rpkit.skills.command.bindskill:
-        description: Allows binding skills to items
-        default: true
-    rpkit.skills.command.unbindskill:
-        description: Allows unbinding skills from items
-        default: true
+  rpkit.skills.command.skill:
+    description: Allows using skills
+    default: true
+  rpkit.skills.command.bindskill:
+    description: Allows binding skills to items
+    default: true
+  rpkit.skills.command.unbindskill:
+    description: Allows unbinding skills from items
+    default: true

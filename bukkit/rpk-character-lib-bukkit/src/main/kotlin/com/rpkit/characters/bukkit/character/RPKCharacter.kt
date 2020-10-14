@@ -17,7 +17,7 @@
 package com.rpkit.characters.bukkit.character
 
 import com.rpkit.characters.bukkit.race.RPKRace
-import com.rpkit.characters.bukkit.race.RPKRaceProvider
+import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Location
@@ -26,7 +26,7 @@ import org.bukkit.inventory.ItemStack
 /**
  * Represents a character.
  * Players may have multiple characters, so data that is dependant on the character is stored in the character.
- * Each player has a currently-active character retrievable from the [RPKCharacterProvider].
+ * Each player has a currently-active character retrievable from the [RPKCharacterService].
  */
 interface RPKCharacter {
 
@@ -71,7 +71,7 @@ interface RPKCharacter {
 
     /**
      * The race of the character.
-     * May be set to any race implementation, as long as it has been registered with the [RPKRaceProvider].
+     * May be set to any race implementation, as long as it has been registered with the [RPKRaceService].
      * This may be set to null, which is the current default in the config, as races must be set up by the admins of
      * the server.
      */

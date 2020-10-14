@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 package com.rpkit.monsters.bukkit.monsterstat
 
 import com.rpkit.core.expression.function.addRPKitFunctions
+import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
-import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelProvider
+import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelService
 import org.bukkit.ChatColor
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.EntityType
@@ -26,7 +27,7 @@ import org.bukkit.entity.LivingEntity
 import org.nfunk.jep.JEP
 
 
-class RPKMonsterStatProviderImpl(private val plugin: RPKMonstersBukkit): RPKMonsterStatProvider {
+class RPKMonsterStatServiceImpl(override val plugin: RPKMonstersBukkit) : RPKMonsterStatService {
 
     override fun getMonsterHealth(monster: LivingEntity): Double {
         return monster.health
@@ -39,7 +40,7 @@ class RPKMonsterStatProviderImpl(private val plugin: RPKMonstersBukkit): RPKMons
 
     override fun getMonsterMaxHealth(monster: LivingEntity): Double {
         val monsterNameplate = monster.customName
-        val monsterLevelProvider = plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class)
+        val monsterLevelService = Services[RPKMonsterLevelService::class] ?: return monster.health
         val maxHealth = if (monsterNameplate != null) {
             val maxHealthString = Regex("${ChatColor.RED}❤ ${ChatColor.WHITE}(\\d+\\.\\d+)/(\\d+\\.\\d+)")
                     .find(monsterNameplate)
@@ -49,13 +50,13 @@ class RPKMonsterStatProviderImpl(private val plugin: RPKMonstersBukkit): RPKMons
                 try {
                     maxHealthString.toDouble()
                 } catch (ignored: NumberFormatException) {
-                    calculateMonsterMaxHealth(monster.type, monsterLevelProvider.getMonsterLevel(monster))
+                    calculateMonsterMaxHealth(monster.type, monsterLevelService.getMonsterLevel(monster))
                 }
             } else {
-                calculateMonsterMaxHealth(monster.type, monsterLevelProvider.getMonsterLevel(monster))
+                calculateMonsterMaxHealth(monster.type, monsterLevelService.getMonsterLevel(monster))
             }
         } else {
-            calculateMonsterMaxHealth(monster.type, monsterLevelProvider.getMonsterLevel(monster))
+            calculateMonsterMaxHealth(monster.type, monsterLevelService.getMonsterLevel(monster))
         }
         monster.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.baseValue = maxHealth
         return monster.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: monster.health
@@ -79,11 +80,13 @@ class RPKMonsterStatProviderImpl(private val plugin: RPKMonstersBukkit): RPKMons
             if (minDamage != null) {
                 try {
                     return minDamage.toDouble()
-                } catch (ignored: NumberFormatException) {}
+                } catch (ignored: NumberFormatException) {
+                }
             }
         }
-        val monsterLevelProvider = plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class)
-        return calculateMonsterMinDamageMultiplier(monster.type, monsterLevelProvider.getMonsterLevel(monster)) * (monster.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)?.value ?: 1.0)
+        val monsterLevelService = Services[RPKMonsterLevelService::class] ?: return 1.0
+        return calculateMonsterMinDamageMultiplier(monster.type, monsterLevelService.getMonsterLevel(monster)) * (monster.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)?.value
+                ?: 1.0)
     }
 
     override fun setMonsterMinDamage(monster: LivingEntity, minDamage: Double) {
@@ -108,11 +111,13 @@ class RPKMonsterStatProviderImpl(private val plugin: RPKMonstersBukkit): RPKMons
             if (maxDamage != null) {
                 try {
                     return maxDamage.toDouble()
-                } catch (ignored: NumberFormatException) {}
+                } catch (ignored: NumberFormatException) {
+                }
             }
         }
-        val monsterLevelProvider = plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class)
-        return calculateMonsterMaxDamageMultiplier(monster.type, monsterLevelProvider.getMonsterLevel(monster)) * (monster.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)?.value ?: 1.0)
+        val monsterLevelService = Services[RPKMonsterLevelService::class] ?: return 1.0
+        return calculateMonsterMaxDamageMultiplier(monster.type, monsterLevelService.getMonsterLevel(monster)) * (monster.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)?.value
+                ?: 1.0)
     }
 
     override fun setMonsterMaxDamage(monster: LivingEntity, maxDamage: Double) {
@@ -157,13 +162,15 @@ class RPKMonsterStatProviderImpl(private val plugin: RPKMonstersBukkit): RPKMons
 
     fun setMonsterNameplate(
             monster: LivingEntity,
-            level: Int = plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class).getMonsterLevel(monster),
+            level: Int = Services[RPKMonsterLevelService::class]?.getMonsterLevel(monster) ?: 1,
             health: Double = getMonsterHealth(monster),
             maxHealth: Double = getMonsterMaxHealth(monster),
             minDamageMultiplier: Double = getMonsterMinDamageMultiplier(monster),
             maxDamageMultiplier: Double = getMonsterMaxDamageMultiplier(monster),
-            minDamage: Double = (minDamageMultiplier * (monster.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)?.value ?: 1.0)),
-            maxDamage: Double = (maxDamageMultiplier * (monster.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)?.value ?: 1.0))
+            minDamage: Double = (minDamageMultiplier * (monster.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)?.value
+                    ?: 1.0)),
+            maxDamage: Double = (maxDamageMultiplier * (monster.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)?.value
+                    ?: 1.0))
     ) {
         val monsterName = monster.type.toString().toLowerCase().replace('_', ' ')
         val formattedHealth = String.format("%.2f", health)

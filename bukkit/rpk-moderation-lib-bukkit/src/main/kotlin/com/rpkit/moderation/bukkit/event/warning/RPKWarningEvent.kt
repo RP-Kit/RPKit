@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.moderation.bukkit.warning.RPKWarning
 
 
-interface RPKWarningEvent: RPKEvent {
+interface RPKWarningEvent : RPKEvent {
 
     val warning: RPKWarning
 

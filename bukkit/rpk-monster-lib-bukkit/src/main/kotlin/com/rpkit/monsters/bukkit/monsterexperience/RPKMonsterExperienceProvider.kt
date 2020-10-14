@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package com.rpkit.monsters.bukkit.monsterexperience
 
-import com.rpkit.core.service.ServiceProvider
+import com.rpkit.core.service.Service
 import org.bukkit.entity.LivingEntity
 
 
-interface RPKMonsterExperienceProvider: ServiceProvider {
+interface RPKMonsterExperienceService : Service {
 
     fun getExperienceFor(monster: LivingEntity): Int
 
