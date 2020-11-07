@@ -66,7 +66,8 @@ class RPKLanguageImpl(
         var result = ""
         msg@ while (pos < message.length) {
             for (cypherKey in cypher.keys) {
-                if (message.substring(pos, pos + cypherKey.length) == cypherKey) {
+                if (pos + cypherKey.length <= message.length
+                        && message.substring(pos, pos + cypherKey.length) == cypherKey) {
                     result += if (understanding >= Random.nextFloat() * 100) {
                         cypherKey
                     } else {
