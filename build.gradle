@@ -42,7 +42,7 @@ allprojects {
     apply plugin: "maven"
     apply plugin: "org.jetbrains.dokka"
     group = "com.rpkit"
-    version = "1.9.1-SNAPSHOT"
+    version = "1.9.1"
 }
 
 subprojects {
