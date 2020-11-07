@@ -22,7 +22,16 @@ import com.rpkit.core.database.Database
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
 import com.rpkit.unconsciousness.bukkit.command.WakeCommand
 import com.rpkit.unconsciousness.bukkit.database.table.RPKUnconsciousStateTable
-import com.rpkit.unconsciousness.bukkit.listener.*
+import com.rpkit.unconsciousness.bukkit.listener.EntityDamageByEntityListener
+import com.rpkit.unconsciousness.bukkit.listener.EntityDamageListener
+import com.rpkit.unconsciousness.bukkit.listener.EntityTargetListener
+import com.rpkit.unconsciousness.bukkit.listener.PlayerCommandPreprocessListener
+import com.rpkit.unconsciousness.bukkit.listener.PlayerDeathListener
+import com.rpkit.unconsciousness.bukkit.listener.PlayerInteractEntityListener
+import com.rpkit.unconsciousness.bukkit.listener.PlayerInteractListener
+import com.rpkit.unconsciousness.bukkit.listener.PlayerJoinListener
+import com.rpkit.unconsciousness.bukkit.listener.PlayerMoveListener
+import com.rpkit.unconsciousness.bukkit.listener.PlayerRespawnListener
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProvider
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProviderImpl
 import org.bstats.bukkit.Metrics
@@ -92,6 +101,7 @@ class RPKUnconsciousnessBukkit: RPKBukkitPlugin() {
         messages.setDefault("unconscious-command-blocked", "&cYou are not permitted to use that command while unconscious.")
         messages.setDefault("wake-success", "&aWoke \$character.")
         messages.setDefault("wake-already-awake", "&c\$character is already awake.")
+        messages.setDefault("no-permission-wake", "&cYou do not have permission to wake people up.")
         messages.setDefault("no-character-other", "&c\$player does not have an active character.")
         messages.setDefault("no-minecraft-profile-other", "&c\$player does not have a Minecraft profile.")
     }

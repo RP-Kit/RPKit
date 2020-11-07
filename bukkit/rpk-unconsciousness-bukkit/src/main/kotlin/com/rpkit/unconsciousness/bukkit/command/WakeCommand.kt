@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@ import org.bukkit.entity.Player
 
 class WakeCommand(private val plugin: RPKUnconsciousnessBukkit): CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+        if (!sender.hasPermission("rpkit.unconsciousness.command.wake")) {
+            sender.sendMessage(plugin.messages["no-permission-wake"])
+            return true
+        }
         val target = if (args.isNotEmpty()) plugin.server.getPlayer(args[0]) ?: sender as? Player else sender as? Player
         if (target != null) {
             val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
