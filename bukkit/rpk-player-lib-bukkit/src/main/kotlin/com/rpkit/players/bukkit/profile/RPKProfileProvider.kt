@@ -22,10 +22,11 @@ import javax.servlet.http.HttpServletRequest
 interface RPKProfileService : Service {
 
     fun getProfile(id: Int): RPKProfile?
-    fun getProfile(name: String): RPKProfile?
+    fun getProfile(name: String, discriminator: Int): RPKProfile?
     fun addProfile(profile: RPKProfile)
     fun updateProfile(profile: RPKProfile)
     fun removeProfile(profile: RPKProfile)
+    fun generateDiscriminatorFor(name: String): Int
     fun getActiveProfile(req: HttpServletRequest): RPKProfile?
     fun setActiveProfile(req: HttpServletRequest, profile: RPKProfile?)
 

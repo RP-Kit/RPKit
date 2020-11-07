@@ -20,51 +20,58 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-
-class ProfileNameCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
+class ProfileViewCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.isEmpty()) {
-            sender.sendMessage(plugin.messages["profile-name-usage"])
-            return true
+        var target: Player? = null
+        if (args.isNotEmpty() && sender.hasPermission("rpkit.players.profile.view.other")) {
+            target = plugin.server.getPlayer(args[0])
         }
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
-            return true
+        if (target == null) {
+            if (!sender.hasPermission("rpkit.players.profile.view.self")) {
+                sender.sendMessage(plugin.messages["no-permission-profile-view-self"])
+                return true
+            }
+            if (sender is Player) {
+                target = sender
+            } else {
+                sender.sendMessage(plugin.messages["profile-view-invalid-target"])
+                return true
+            }
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
+            if (sender == target) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
+            } else {
+                sender.sendMessage(plugin.messages["no-minecraft-profile-other"])
+            }
             return true
         }
         val profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
-            sender.sendMessage(plugin.messages["no-profile-self"])
+            if (sender == target) {
+                sender.sendMessage(plugin.messages["no-profile-self"])
+            } else {
+                sender.sendMessage(plugin.messages["no-profile-other"])
+            }
             return true
         }
-        val name = args[0]
-        if (!name.matches(Regex("[A-z0-9_]{3,16}"))) {
-            sender.sendMessage(plugin.messages["profile-name-invalid-name"])
-            return true
-        }
-        val profileService = Services[RPKProfileService::class]
-        if (profileService == null) {
-            sender.sendMessage(plugin.messages["no-profile-service"])
-            return true
-        }
-        profile.name = name
-        profileService.updateProfile(profile)
-        sender.sendMessage(plugin.messages["profile-name-valid", mapOf(Pair("name", name))])
+        sender.sendMessage(
+                plugin.messages.getList("profile-view-valid", mapOf(
+                        "name" to profile.name,
+                        "discriminator" to profile.discriminator.toString()
+                )).toTypedArray()
+        )
         return true
     }
 }

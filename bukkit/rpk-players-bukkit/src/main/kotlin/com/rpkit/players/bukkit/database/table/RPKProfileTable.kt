@@ -24,6 +24,7 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileImpl
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
+import org.jooq.impl.DSL.max
 
 
 class RPKProfileTable(private val database: Database, private val plugin: RPKPlayersBukkit) : Table {
@@ -41,11 +42,13 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                 .insertInto(
                         RPKIT_PROFILE,
                         RPKIT_PROFILE.NAME,
+                        RPKIT_PROFILE.DISCRIMINATOR,
                         RPKIT_PROFILE.PASSWORD_HASH,
                         RPKIT_PROFILE.PASSWORD_SALT
                 )
                 .values(
                         entity.name,
+                        entity.discriminator,
                         entity.passwordHash,
                         entity.passwordSalt
                 )
@@ -59,6 +62,7 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
         database.create
                 .update(RPKIT_PROFILE)
                 .set(RPKIT_PROFILE.NAME, entity.name)
+                .set(RPKIT_PROFILE.DISCRIMINATOR, entity.discriminator)
                 .set(RPKIT_PROFILE.PASSWORD_HASH, entity.passwordHash)
                 .set(RPKIT_PROFILE.PASSWORD_SALT, entity.passwordSalt)
                 .where(RPKIT_PROFILE.ID.eq(entity.id))
@@ -73,6 +77,7 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
             val result = database.create
                     .select(
                             RPKIT_PROFILE.NAME,
+                            RPKIT_PROFILE.DISCRIMINATOR,
                             RPKIT_PROFILE.PASSWORD_HASH,
                             RPKIT_PROFILE.PASSWORD_SALT
                     )
@@ -82,6 +87,7 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
             val profile = RPKProfileImpl(
                     id,
                     result.get(RPKIT_PROFILE.NAME),
+                    result.get(RPKIT_PROFILE.DISCRIMINATOR),
                     result.get(RPKIT_PROFILE.PASSWORD_HASH),
                     result.get(RPKIT_PROFILE.PASSWORD_SALT)
             )
@@ -90,11 +96,12 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
         }
     }
 
-    fun get(name: String): RPKProfile? {
+    fun get(name: String, discriminator: Int): RPKProfile? {
         val result = database.create
                 .select(RPKIT_PROFILE.ID)
                 .from(RPKIT_PROFILE)
                 .where(RPKIT_PROFILE.NAME.eq(name))
+                .and(RPKIT_PROFILE.DISCRIMINATOR.eq(discriminator))
                 .fetchOne() ?: return null
         return get(result.get(RPKIT_PROFILE.ID))
     }
@@ -105,6 +112,15 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                 .where(RPKIT_PROFILE.ID.eq(entity.id))
                 .execute()
         cache?.remove(entity.id)
+    }
+
+    fun generateDiscriminatorFor(name: String): Int {
+        val result = database.create
+                .select(max(RPKIT_PROFILE.DISCRIMINATOR))
+                .from(RPKIT_PROFILE)
+                .where(RPKIT_PROFILE.NAME.eq(name))
+                .fetchOne()
+        return result?.get(0, Int::class.javaObjectType)?.plus(1) ?: 1
     }
 
 }

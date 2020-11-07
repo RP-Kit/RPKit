@@ -48,6 +48,7 @@ class PlayerLoginListener : Listener {
         if (profile !is RPKProfile) {
             profile = RPKProfileImpl(
                     event.player.name,
+                    profileService.generateDiscriminatorFor(event.player.name),
                     ""
             )
             profileService.addProfile(profile)

@@ -30,8 +30,8 @@ class RPKProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKProfileS
         return plugin.database.getTable(RPKProfileTable::class)[id]
     }
 
-    override fun getProfile(name: String): RPKProfile? {
-        return plugin.database.getTable(RPKProfileTable::class).get(name)
+    override fun getProfile(name: String, discriminator: Int): RPKProfile? {
+        return plugin.database.getTable(RPKProfileTable::class).get(name, discriminator)
     }
 
     override fun addProfile(profile: RPKProfile) {
@@ -53,6 +53,10 @@ class RPKProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKProfileS
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKProfileTable::class).delete(event.profile)
+    }
+
+    override fun generateDiscriminatorFor(name: String): Int {
+        return plugin.database.getTable(RPKProfileTable::class).generateDiscriminatorFor(name)
     }
 
     override fun getActiveProfile(req: HttpServletRequest): RPKProfile? {

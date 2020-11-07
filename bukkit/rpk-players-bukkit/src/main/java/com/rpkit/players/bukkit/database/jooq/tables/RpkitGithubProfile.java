@@ -48,7 +48,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitGithubProfile extends TableImpl<RpkitGithubProfileRecord> {
 
-    private static final long serialVersionUID = -1347791980;
+    private static final long serialVersionUID = 1502006966;
 
     /**
      * The reference instance of <code>rpkit_players.rpkit_github_profile</code>
@@ -71,7 +71,7 @@ public class RpkitGithubProfile extends TableImpl<RpkitGithubProfileRecord> {
     /**
      * The column <code>rpkit_players.rpkit_github_profile.profile_id</code>.
      */
-    public final TableField<RpkitGithubProfileRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<RpkitGithubProfileRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), org.jooq.impl.SQLDataType.INTEGER.defaultValue(DSL.inline("NULL", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_players.rpkit_github_profile.name</code>.

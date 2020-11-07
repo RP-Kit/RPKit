@@ -75,6 +75,7 @@ class AccountDenyLinkCommand(private val plugin: RPKPlayersBukkit) : CommandExec
                 }
                 val profile = RPKProfileImpl(
                         minecraftProfile.minecraftUsername,
+                        profileService.generateDiscriminatorFor(minecraftProfile.minecraftUsername),
                         ""
                 )
                 profileService.addProfile(profile)
