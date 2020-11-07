@@ -24,7 +24,11 @@ import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.ValidatingPrompt
 import org.bukkit.entity.Player
 
 /**
@@ -89,7 +93,17 @@ class CharacterSetProfileCommand(private val plugin: RPKCharactersBukkit) : Comm
             sender.sendMessage(plugin.messages["no-profile-service"])
             return true
         }
-        val newProfile = profileService.getProfile(args[0])
+        if (!args[0].contains("#")) {
+            sender.sendMessage(plugin.messages["character-set-profile-invalid-no-discriminator"])
+            return true
+        }
+        val (name, discriminatorString) = args[0].split("#")
+        val discriminator = discriminatorString.toIntOrNull()
+        if (discriminator == null) {
+            sender.sendMessage(plugin.messages["character-set-profile-invalid-discriminator"])
+            return true
+        }
+        val newProfile = profileService.getProfile(name, discriminator)
         if (newProfile == null) {
             sender.sendMessage(plugin.messages["character-set-profile-invalid-profile"])
             return true
@@ -109,13 +123,15 @@ class CharacterSetProfileCommand(private val plugin: RPKCharactersBukkit) : Comm
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
-            if (conversable !is Player) return ProfileSetPrompt()
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return ProfileSetPrompt()
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return ProfileSetPrompt()
-            val characterService = Services[RPKCharacterService::class] ?: return ProfileSetPrompt()
-            val character = characterService.getActiveCharacter(minecraftProfile) ?: return ProfileSetPrompt()
-            val profileService = Services[RPKProfileService::class] ?: return ProfileSetPrompt()
-            val newProfile = profileService.getProfile(input) ?: return ProfileSetPrompt()
+            if (conversable !is Player) return END_OF_CONVERSATION
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return END_OF_CONVERSATION
+            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return END_OF_CONVERSATION
+            val characterService = Services[RPKCharacterService::class] ?: return END_OF_CONVERSATION
+            val character = characterService.getActiveCharacter(minecraftProfile) ?: return END_OF_CONVERSATION
+            val profileService = Services[RPKProfileService::class] ?: return END_OF_CONVERSATION
+            val (name, discriminatorString) = input.split("#")
+            val discriminator = discriminatorString.toIntOrNull() ?: return END_OF_CONVERSATION
+            val newProfile = profileService.getProfile(name, discriminator) ?: return END_OF_CONVERSATION
             character.profile = newProfile
             characterService.updateCharacter(character)
             characterService.setActiveCharacter(minecraftProfile, null)
@@ -129,7 +145,10 @@ class CharacterSetProfileCommand(private val plugin: RPKCharactersBukkit) : Comm
             val characterService = Services[RPKCharacterService::class] ?: return false
             characterService.getActiveCharacter(minecraftProfile) ?: return false
             val profileService = Services[RPKProfileService::class] ?: return false
-            profileService.getProfile(input) ?: return false
+            if (!input.contains("#")) return false
+            val (name, discriminatorString) = input.split("#")
+            val discriminator = discriminatorString.toIntOrNull() ?: return false
+            profileService.getProfile(name, discriminator) ?: return false
             return true
         }
 
@@ -140,7 +159,12 @@ class CharacterSetProfileCommand(private val plugin: RPKCharactersBukkit) : Comm
                     ?: return plugin.messages["no-minecraft-profile"]
             val characterService = Services[RPKCharacterService::class] ?: return plugin.messages["no-character-service"]
             characterService.getActiveCharacter(minecraftProfile) ?: return plugin.messages["no-character"]
-            return plugin.messages["character-set-profile-invalid-profile"]
+            val profileService = Services[RPKProfileService::class] ?: return plugin.messages["character-set-profile-invalid-profile"]
+            if (!invalidInput.contains("#")) return plugin.messages["character-set-profile-invalid-no-discriminator"]
+            val (name, discriminatorString) = invalidInput.split("#")
+            val discriminator = discriminatorString.toIntOrNull() ?: return plugin.messages["character-set-profile-invalid-discriminator"]
+            profileService.getProfile(name, discriminator) ?: return plugin.messages["character-set-profile-invalid-profile"]
+            return ""
         }
 
     }

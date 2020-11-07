@@ -32,7 +32,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row4;
+import org.jooq.Row5;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -48,7 +48,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitProfile extends TableImpl<RpkitProfileRecord> {
 
-    private static final long serialVersionUID = 1916780435;
+    private static final long serialVersionUID = 1553495777;
 
     /**
      * The reference instance of <code>rpkit_players.rpkit_profile</code>
@@ -74,14 +74,19 @@ public class RpkitProfile extends TableImpl<RpkitProfileRecord> {
     public final TableField<RpkitProfileRecord, String> NAME = createField(DSL.name("name"), org.jooq.impl.SQLDataType.VARCHAR(16).nullable(false), this, "");
 
     /**
+     * The column <code>rpkit_players.rpkit_profile.discriminator</code>.
+     */
+    public final TableField<RpkitProfileRecord, Integer> DISCRIMINATOR = createField(DSL.name("discriminator"), org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
      * The column <code>rpkit_players.rpkit_profile.password_hash</code>.
      */
-    public final TableField<RpkitProfileRecord, byte[]> PASSWORD_HASH = createField(DSL.name("password_hash"), org.jooq.impl.SQLDataType.BLOB, this, "");
+    public final TableField<RpkitProfileRecord, byte[]> PASSWORD_HASH = createField(DSL.name("password_hash"), org.jooq.impl.SQLDataType.BLOB.defaultValue(DSL.inline("NULL", org.jooq.impl.SQLDataType.BLOB)), this, "");
 
     /**
      * The column <code>rpkit_players.rpkit_profile.password_salt</code>.
      */
-    public final TableField<RpkitProfileRecord, byte[]> PASSWORD_SALT = createField(DSL.name("password_salt"), org.jooq.impl.SQLDataType.BLOB, this, "");
+    public final TableField<RpkitProfileRecord, byte[]> PASSWORD_SALT = createField(DSL.name("password_salt"), org.jooq.impl.SQLDataType.BLOB.defaultValue(DSL.inline("NULL", org.jooq.impl.SQLDataType.BLOB)), this, "");
 
     /**
      * Create a <code>rpkit_players.rpkit_profile</code> table reference
@@ -163,11 +168,11 @@ public class RpkitProfile extends TableImpl<RpkitProfileRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row4 type methods
+    // Row5 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row4<Integer, String, byte[], byte[]> fieldsRow() {
-        return (Row4) super.fieldsRow();
+    public Row5<Integer, String, Integer, byte[], byte[]> fieldsRow() {
+        return (Row5) super.fieldsRow();
     }
 }

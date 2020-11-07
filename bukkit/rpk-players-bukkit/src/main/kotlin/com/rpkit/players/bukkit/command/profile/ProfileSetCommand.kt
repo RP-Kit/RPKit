@@ -21,23 +21,22 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
+class ProfileSetCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
 
-class ProfileCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
-
-    private val profileViewCommand = ProfileViewCommand(plugin)
-    private val profileSetCommand = ProfileSetCommand(plugin)
+    private val profileSetNameCommand = ProfileSetNameCommand(plugin)
+    private val profileSetPasswordCommand = ProfileSetPasswordCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isEmpty()) {
-            sender.sendMessage(plugin.messages["profile-usage"])
+            sender.sendMessage(plugin.messages["profile-set-usage"])
             return true
         }
         val newArgs = args.drop(1).toTypedArray()
         return when (args[0].toLowerCase()) {
-            "view" -> profileViewCommand.onCommand(sender, command, label, newArgs)
-            "set" -> profileSetCommand.onCommand(sender, command, label, newArgs)
+            "name" -> profileSetNameCommand.onCommand(sender, command, label, newArgs)
+            "password" -> profileSetPasswordCommand.onCommand(sender, command, label, newArgs)
             else -> {
-                sender.sendMessage(plugin.messages["profile-usage"])
+                sender.sendMessage(plugin.messages["profile-set-usage"])
                 true
             }
         }

@@ -170,6 +170,8 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
         messages.setDefault("character-set-description-valid", "&aDescription set.")
         messages.setDefault("character-set-profile-prompt", "&fWhat profile do you want to assign this character to? &7(Type cancel to cancel)")
         messages.setDefault("character-set-profile-invalid-profile", "&cThere is no profile by that name.")
+        messages.setDefault("character-set-profile-invalid-no-discriminator", "&cProfile name must be in the format \"name#discriminator\".")
+        messages.setDefault("character-set-profile-invalid-discriminator", "&cDiscriminator must be a number.")
         messages.setDefault("character-set-profile-valid", "&aYour character was assigned to a different profile. Please create a new character or switch to an old one.")
         messages.setDefault("character-set-name-prompt", "&fWhat is your character's name? &7(Type cancel to cancel)")
         messages.setDefault("character-set-name-valid", "&aName set.")

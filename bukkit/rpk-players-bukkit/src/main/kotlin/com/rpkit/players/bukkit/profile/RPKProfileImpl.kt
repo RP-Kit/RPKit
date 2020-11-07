@@ -26,19 +26,22 @@ class RPKProfileImpl : RPKProfile {
 
     override var id: Int? = null
     override var name: String
+    override var discriminator: Int
     override var passwordHash: ByteArray
     override var passwordSalt: ByteArray
 
-    constructor(id: Int, name: String, passwordHash: ByteArray, passwordSalt: ByteArray) {
+    constructor(id: Int, name: String, discriminator: Int, passwordHash: ByteArray, passwordSalt: ByteArray) {
         this.id = id
         this.name = name
+        this.discriminator = discriminator
         this.passwordHash = passwordHash
         this.passwordSalt = passwordSalt
     }
 
-    constructor(name: String, password: String) {
+    constructor(name: String, discriminator: Int, password: String) {
         this.id = 0
         this.name = name
+        this.discriminator = discriminator
         val random = SecureRandom()
         passwordSalt = ByteArray(16)
         random.nextBytes(passwordSalt)

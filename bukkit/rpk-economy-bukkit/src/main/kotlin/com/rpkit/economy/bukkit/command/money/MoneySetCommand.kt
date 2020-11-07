@@ -34,6 +34,7 @@ import org.bukkit.conversations.ConversationFactory
 import org.bukkit.conversations.MessagePrompt
 import org.bukkit.conversations.NumericPrompt
 import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.StringPrompt
 import org.bukkit.conversations.ValidatingPrompt
 import org.bukkit.entity.Player
 
@@ -45,7 +46,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
 
     private val conversationFactory = ConversationFactory(plugin)
             .withModality(true)
-            .withFirstPrompt(ProfilePrompt())
+            .withFirstPrompt(ProfileNamePrompt())
             .withEscapeSequence("cancel")
             .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
@@ -158,42 +159,56 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
         return true
     }
 
-    private inner class ProfilePrompt : ValidatingPrompt() {
-
-        override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val profileService = context.getSessionData("profileService") as RPKProfileService
-            val profile = profileService.getProfile(input)
-            context.setSessionData("profile", profile)
-            return ProfileSetPrompt()
-        }
-
-        override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val profileService = Services[RPKProfileService::class] ?: return false
-            context.setSessionData("profileService", profileService)
-            return profileService.getProfile(input) != null
-        }
+    private inner class ProfileNamePrompt : StringPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages["money-set-profile-prompt"]
+            return plugin.messages["money-set-profile-name-prompt"]
         }
 
-        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            if (Services[RPKProfileService::class] == null) return plugin.messages["no-profile-service"]
-            return plugin.messages["money-set-profile-invalid-profile"]
+        override fun acceptInput(context: ConversationContext, input: String?): Prompt {
+            context.setSessionData("profileName", input)
+            return ProfileDiscriminatorPrompt()
+        }
+
+    }
+
+    private inner class ProfileDiscriminatorPrompt : NumericPrompt() {
+        override fun getPromptText(context: ConversationContext): String {
+            return plugin.messages["money-set-profile-discriminator-prompt"]
+        }
+
+        override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
+            context.setSessionData("profileDiscriminator", input.toInt())
+            val profileService = Services[RPKProfileService::class] ?: return ProfileInvalidPrompt()
+            val profile = profileService.getProfile(
+                    context.getSessionData("profileName") as String,
+                    context.getSessionData("profileDiscriminator") as Int
+            ) ?: return ProfileInvalidPrompt()
+            context.setSessionData("profileService", profileService)
+            context.setSessionData("profile", profile)
+            return ProfileSetPrompt()
         }
 
     }
 
     private inner class ProfileSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
-            val characterService = Services[RPKCharacterService::class] ?: return END_OF_CONVERSATION
-            context.setSessionData("characterService", characterService)
             return CharacterPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            if (Services[RPKCharacterService::class] == null) return plugin.messages["no-character-service"]
             return plugin.messages["money-set-profile-valid"]
+        }
+
+    }
+
+    private inner class ProfileInvalidPrompt : MessagePrompt() {
+        override fun getPromptText(context: ConversationContext): String {
+            return plugin.messages["money-set-profile-invalid-profile"]
+        }
+
+        override fun getNextPrompt(context: ConversationContext): Prompt? {
+            return ProfileNamePrompt()
         }
 
     }

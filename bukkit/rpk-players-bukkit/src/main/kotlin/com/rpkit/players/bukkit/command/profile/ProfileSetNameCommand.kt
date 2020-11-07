@@ -26,10 +26,11 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class ProfilePasswordCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
+
+class ProfileSetNameCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isEmpty()) {
-            sender.sendMessage(plugin.messages["profile-password-usage"])
+            sender.sendMessage(plugin.messages["profile-set-name-usage"])
             return true
         }
         if (sender !is Player) {
@@ -51,15 +52,20 @@ class ProfilePasswordCommand(private val plugin: RPKPlayersBukkit) : CommandExec
             sender.sendMessage(plugin.messages["no-profile-self"])
             return true
         }
-        val password = args.joinToString(" ")
+        val name = args[0]
+        if (!name.matches(Regex("[A-z0-9_]{3,16}"))) {
+            sender.sendMessage(plugin.messages["profile-set-name-invalid-name"])
+            return true
+        }
         val profileService = Services[RPKProfileService::class]
         if (profileService == null) {
             sender.sendMessage(plugin.messages["no-profile-service"])
             return true
         }
-        profile.setPassword(password.toCharArray())
+        profile.name = name
+        profile.discriminator = profileService.generateDiscriminatorFor(name)
         profileService.updateProfile(profile)
-        sender.sendMessage(plugin.messages["profile-password-valid"])
+        sender.sendMessage(plugin.messages["profile-set-name-valid", mapOf("name" to name)])
         return true
     }
 }

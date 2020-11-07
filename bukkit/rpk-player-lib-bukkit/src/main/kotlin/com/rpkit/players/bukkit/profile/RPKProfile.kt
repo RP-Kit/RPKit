@@ -21,6 +21,7 @@ interface RPKProfile : RPKThinProfile {
 
     var id: Int?
     override var name: String
+    var discriminator: Int
     var passwordHash: ByteArray
     var passwordSalt: ByteArray
     fun setPassword(password: CharArray)

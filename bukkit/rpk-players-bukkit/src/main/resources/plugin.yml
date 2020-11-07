@@ -32,6 +32,11 @@ permissions:
   rpkit.players.command.account.link.minecraft:
     description: Allows linking Minecraft accounts
     default: true
+  rpkit.players.command.profile.view.self:
+    description: Allows viewing your own profile
+    default: true
+  rpkit.players.command.profile.view.other:
+    description: Allows viewing other people'you need to sets profiles
   rpkit.players.command.profile.create:
     description: Allows creating profiles
     default: true
