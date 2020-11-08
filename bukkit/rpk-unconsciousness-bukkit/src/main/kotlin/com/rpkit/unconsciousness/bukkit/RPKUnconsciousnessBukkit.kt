@@ -122,6 +122,7 @@ class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
         messages.setDefault("unconscious-command-blocked", "&cYou are not permitted to use that command while unconscious.")
         messages.setDefault("wake-success", "&aWoke \$character.")
         messages.setDefault("wake-already-awake", "&c\$character is already awake.")
+        messages.setDefault("no-permission-wake", "&cYou do not have permission to wake people up.")
         messages.setDefault("no-character-other", "&c\$player does not have an active character.")
         messages.setDefault("no-minecraft-profile-other", "&c\$player does not have a Minecraft profile.")
         messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
