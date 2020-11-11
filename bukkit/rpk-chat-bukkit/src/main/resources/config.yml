@@ -280,8 +280,14 @@ chat-channels:
     - ==: UndirectedFormatComponent
       format: '$color&o$sender-character $message'
     - ==: LogComponent
-    match-pattern: '\*([^\*]+)\*?'
     joined-by-default: true
+match-patterns:
+  '\*([^\*]+)\*':
+    groups:
+      '1': emote
+  '\"([^\"]+)\"':
+    groups:
+      '1': say
 irc:
   enabled: false
   name: 'rpkit'

@@ -94,13 +94,6 @@ interface RPKChatChannel {
     val undirectedPipeline: List<UndirectedPipelineComponent>
 
     /**
-     * The match pattern for this channel.
-     * If a player's message matches the match pattern, it should be directed to this channel.
-     * In the case of a chat channel not having a match pattern, this may be set to null.
-     */
-    val matchPattern: String?
-
-    /**
      * Whether this channel should be joined by default.
      * If a channel is joined by default, all new players are added as listeners to the channel upon joining for the
      * first time. If they are not, the channel is muted until they join it.

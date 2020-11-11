@@ -48,8 +48,7 @@ class RPKChatChannelImpl(
         override val format: List<FormatPart>,
         override val directedPostFormatPipeline: List<DirectedPostFormatPipelineComponent>,
         override val undirectedPipeline: List<UndirectedPipelineComponent>,
-        override val matchPattern: String?,
-        override var isJoinedByDefault: Boolean
+        override val isJoinedByDefault: Boolean
 ) : RPKChatChannel {
 
     override val speakerMinecraftProfiles: List<RPKMinecraftProfile>

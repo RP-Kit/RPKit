@@ -17,13 +17,16 @@
 package com.rpkit.chat.bukkit.listener
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.RPKThinProfile
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
-import java.util.regex.Pattern
 
 /**
  * Player chat listener.
@@ -39,38 +42,84 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
-            var chatChannel = chatChannelService.getMinecraftProfileChannel(minecraftProfile)
-            var message = event.message
-            for (otherChannel in chatChannelService.chatChannels) {
-                val matchPattern = otherChannel.matchPattern
-                if (matchPattern != null) {
-                    if (matchPattern.isNotEmpty()) {
-                        if (message.matches(matchPattern.toRegex())) {
-                            chatChannel = otherChannel
-                            val pattern = Pattern.compile(matchPattern)
-                            val matcher = pattern.matcher(message)
-                            if (matcher.matches()) {
-                                if (matcher.groupCount() > 0) {
-                                    message = matcher.group(1)
-                                }
-                            }
-                            if (!chatChannel.listenerMinecraftProfiles.any { listenerMinecraftProfile ->
-                                        listenerMinecraftProfile.id == minecraftProfile.id
-                                    }) {
-                                chatChannel.addListener(minecraftProfile, event.isAsynchronous)
-                                chatChannelService.updateChatChannel(chatChannel, event.isAsynchronous)
+            val chatChannel = chatChannelService.getMinecraftProfileChannel(minecraftProfile)
+            val message = event.message
+            var readMessageIndex = 0
+            chatChannelService.matchPatterns
+                    .map { matchPattern ->
+                        val matches = matchPattern.regex.findAll(message).toList()
+                        matches to matchPattern
+                    }
+                    .flatMap { (matches, matchPattern) -> matches.associateWith { matchPattern }.toList() }
+                    .sortedBy { (match, _) -> match.range.first }
+                    .forEach { (match, matchPattern) ->
+                        sendMessage(
+                                chatChannelService,
+                                chatChannel,
+                                message.substring(readMessageIndex, match.range.first),
+                                event.player,
+                                profile,
+                                minecraftProfile,
+                                event.isAsynchronous
+                        )
+                        match.groupValues.forEachIndexed { index, value ->
+                            val otherChatChannel = matchPattern.groups[index]
+                            if (otherChatChannel != null) {
+                                sendMessage(
+                                        chatChannelService,
+                                        otherChatChannel,
+                                        value,
+                                        event.player,
+                                        profile,
+                                        minecraftProfile,
+                                        event.isAsynchronous
+                                )
                             }
                         }
+                        readMessageIndex = match.range.last + 1
                     }
-                }
-            }
-            if (chatChannel != null) {
-                chatChannel.sendMessage(profile, minecraftProfile, message, event.isAsynchronous)
-            } else {
-                event.player.sendMessage(plugin.messages["no-chat-channel"])
+            if (readMessageIndex < message.length) {
+                sendMessage(
+                        chatChannelService,
+                        chatChannel,
+                        message.substring(readMessageIndex, message.length),
+                        event.player,
+                        profile,
+                        minecraftProfile,
+                        event.isAsynchronous
+                )
             }
         } else {
             event.player.sendMessage(plugin.messages["no-minecraft-profile"])
+        }
+    }
+
+    private fun sendMessage(
+            chatChannelService: RPKChatChannelService,
+            chatChannel: RPKChatChannel?,
+            message: String,
+            bukkitPlayer: Player,
+            profile: RPKThinProfile,
+            minecraftProfile: RPKMinecraftProfile,
+            isAsynchronous: Boolean
+    ) {
+        if (chatChannel != null) {
+            if (!chatChannel.listenerMinecraftProfiles.any { listenerMinecraftProfile ->
+                        listenerMinecraftProfile.id == minecraftProfile.id
+                    }) {
+                chatChannel.addListener(minecraftProfile, isAsynchronous)
+                chatChannelService.updateChatChannel(chatChannel, isAsynchronous)
+            }
+            if (message.isNotBlank()) {
+                chatChannel.sendMessage(
+                        profile,
+                        minecraftProfile,
+                        message,
+                        isAsynchronous
+                )
+            }
+        } else {
+            bukkitPlayer.sendMessage(plugin.messages["no-chat-channel"])
         }
     }
 

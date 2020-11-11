@@ -18,6 +18,8 @@ package com.rpkit.chat.bukkit.chatchannel
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.format.FormatPart
+import com.rpkit.chat.bukkit.chatchannel.matchpattern.RPKChatChannelMatchPattern
+import com.rpkit.chat.bukkit.chatchannel.matchpattern.RPKChatChannelMatchPatternImpl
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPostFormatPipelineComponent
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineComponent
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
@@ -53,12 +55,27 @@ class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatCha
                         format = plugin.config.getList("chat-channels.$channelName.format") as List<FormatPart>,
                         directedPostFormatPipeline = plugin.config.getList("chat-channels.$channelName.directed-post-format-pipeline") as List<DirectedPostFormatPipelineComponent>,
                         undirectedPipeline = plugin.config.getList("chat-channels.$channelName.undirected-pipeline") as List<UndirectedPipelineComponent>,
-                        matchPattern = plugin.config.getString("chat-channels.$channelName.match-pattern"),
                         isJoinedByDefault = plugin.config.getBoolean("chat-channels.$channelName.joined-by-default")
                 )
             }
             ?.toMutableList<RPKChatChannel>()
             ?: mutableListOf()
+
+    override val matchPatterns: List<RPKChatChannelMatchPattern> = plugin.config.getConfigurationSection("match-patterns")
+            ?.getKeys(false)
+            ?.map { pattern ->
+                RPKChatChannelMatchPatternImpl(
+                        regex = pattern.toRegex(),
+                        groups = plugin.config.getConfigurationSection("match-patterns.$pattern.groups")
+                                ?.getKeys(false)
+                                ?.map { group -> group.toInt() to plugin.config.getString("match-patterns.$pattern.groups.$group")?.let { getChatChannel(it) } }
+                                ?.filter { (_, chatChannel) -> chatChannel != null }
+                                ?.filterIsInstance<Pair<Int, RPKChatChannel>>()
+                                ?.toMap()
+                                ?: emptyMap()
+                )
+            }
+            ?: emptyList()
 
     override fun getChatChannel(name: String): RPKChatChannel? {
         return chatChannels.firstOrNull { it.name == name }
