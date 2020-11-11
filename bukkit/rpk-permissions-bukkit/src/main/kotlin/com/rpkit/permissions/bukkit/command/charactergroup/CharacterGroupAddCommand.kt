@@ -20,6 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupService
+import com.rpkit.permissions.bukkit.group.addGroup
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -77,14 +78,14 @@ class CharacterGroupAddCommand(private val plugin: RPKPermissionsBukkit) : Comma
         }
         if (!sender.hasPermission("rpkit.permissions.command.group.add.${group.name}")) {
             sender.sendMessage(plugin.messages["no-permission-group-add-group", mapOf(
-                    Pair("group", group.name)
+                    "group" to group.name
             )])
             return true
         }
-        groupService.addGroup(character, group, groupService.getGroups(character).size)
+        character.addGroup(group)
         sender.sendMessage(plugin.messages["character-group-add-valid", mapOf(
-                Pair("group", group.name),
-                Pair("character", character.name)
+                "group" to group.name,
+                "character" to character.name
         )])
         return true
     }

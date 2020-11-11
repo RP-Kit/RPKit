@@ -31,11 +31,12 @@ import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.RPKGroupServiceImpl
 import com.rpkit.permissions.bukkit.listener.PlayerJoinListener
 import com.rpkit.permissions.bukkit.listener.PlayerQuitListener
+import com.rpkit.permissions.bukkit.listener.RPKBukkitCharacterSwitchListener
+import com.rpkit.permissions.bukkit.permissions.RPKPermissionsService
+import com.rpkit.permissions.bukkit.permissions.RPKPermissionsServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
-import org.bukkit.permissions.Permission
-import org.bukkit.permissions.PermissionDefault
 import java.io.File
 
 /**
@@ -94,20 +95,8 @@ class RPKPermissionsBukkit : RPKBukkitPlugin() {
         database.addTable(RPKProfileGroupTable(database, this))
         database.addTable(RPKCharacterGroupTable(database, this))
 
-        val groupService = RPKGroupServiceImpl(this)
         Services[RPKGroupService::class] = RPKGroupServiceImpl(this)
-        groupService.groups.forEach { group ->
-            server.pluginManager.addPermission(Permission(
-                    "rpkit.permissions.command.group.add.${group.name}",
-                    "Allows adding the ${group.name} group to players",
-                    PermissionDefault.OP
-            ))
-            server.pluginManager.addPermission(Permission(
-                    "rpkit.permissions.command.group.remove.${group.name}",
-                    "Allows removing the ${group.name} group from players",
-                    PermissionDefault.OP
-            ))
-        }
+        Services[RPKPermissionsService::class] = RPKPermissionsServiceImpl(this)
     }
 
     override fun registerCommands() {
@@ -116,7 +105,11 @@ class RPKPermissionsBukkit : RPKBukkitPlugin() {
     }
 
     override fun registerListeners() {
-        registerListeners(PlayerJoinListener(), PlayerQuitListener())
+        registerListeners(
+                PlayerJoinListener(),
+                PlayerQuitListener(),
+                RPKBukkitCharacterSwitchListener()
+        )
     }
 
     override fun setDefaultMessages() {

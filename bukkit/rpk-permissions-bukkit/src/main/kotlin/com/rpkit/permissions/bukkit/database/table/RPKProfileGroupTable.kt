@@ -44,11 +44,13 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
                 .insertInto(
                         RPKIT_PROFILE_GROUP,
                         RPKIT_PROFILE_GROUP.PROFILE_ID,
-                        RPKIT_PROFILE_GROUP.GROUP_NAME
+                        RPKIT_PROFILE_GROUP.GROUP_NAME,
+                        RPKIT_PROFILE_GROUP.PRIORITY
                 )
                 .values(
                         entity.profile.id,
-                        entity.group.name
+                        entity.group.name,
+                        entity.priority
                 )
                 .execute()
         val groupMap = cache?.get(entity.profile.id) as? MutableMap<String, RPKProfileGroup> ?: mutableMapOf()

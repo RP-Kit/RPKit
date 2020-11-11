@@ -20,8 +20,7 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixCreateEvent
 import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixDeleteEvent
 import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixUpdateEvent
-import com.rpkit.core.service.Services
-import com.rpkit.permissions.bukkit.group.RPKGroupService
+import com.rpkit.permissions.bukkit.group.hasPermission
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.ChatColor
 
@@ -67,10 +66,9 @@ class RPKPrefixServiceImpl(override val plugin: RPKChatBukkit) : RPKPrefixServic
     }
 
     override fun getPrefix(profile: RPKProfile): String {
-        val groupService = Services[RPKGroupService::class]
         val prefixBuilder = StringBuilder()
         prefixes
-                .filter { groupService?.hasPermission(profile, "rpkit.chat.prefix.${it.name}") == true }
+                .filter { profile.hasPermission("rpkit.chat.prefix.${it.name}") }
                 .forEach { prefixBuilder.append(it.prefix).append(' ') }
         return prefixBuilder.toString()
     }
