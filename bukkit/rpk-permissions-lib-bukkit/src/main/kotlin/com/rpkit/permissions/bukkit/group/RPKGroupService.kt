@@ -18,7 +18,6 @@ package com.rpkit.permissions.bukkit.group
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 /**
@@ -105,48 +104,5 @@ interface RPKGroupService : Service {
      * @return A list of groups assigned to the character
      */
     fun getGroups(character: RPKCharacter): List<RPKGroup>
-
-    /**
-     * Checks whether a group has a permissions node
-     *
-     * @param group The group
-     * @param node The permissions node to check
-     * @return Whether the group has the given permissions node
-     */
-    fun hasPermission(group: RPKGroup, node: String): Boolean
-
-    /**
-     * Checks whether a group has a permissions node, using a specified default
-     *
-     * @param group The group
-     * @param node The permissions node to check
-     * @param default The default to use if the group does not have the node set
-     * @return Whether the group has the given permissions node when assuming the provided default
-     */
-    fun hasPermission(group: RPKGroup, node: String, default: Boolean): Boolean
-
-    /**
-     * Checks whether a profile has a permissions node
-     */
-    fun hasPermission(profile: RPKProfile, node: String): Boolean
-
-    /**
-     * Checks whether a character has a permissions node
-     */
-    fun hasPermission(character: RPKCharacter, node: String): Boolean
-
-    /**
-     * Assigns permissions to a player in Minecraft
-     *
-     * @param minecraftProfile The Minecraft profile to assign permissions to
-     */
-    fun assignPermissions(minecraftProfile: RPKMinecraftProfile)
-
-    /**
-     * Unassigns permissions from a player in Minecraft
-     *
-     * @param minecraftProfile
-     */
-    fun unassignPermissions(minecraftProfile: RPKMinecraftProfile)
 
 }

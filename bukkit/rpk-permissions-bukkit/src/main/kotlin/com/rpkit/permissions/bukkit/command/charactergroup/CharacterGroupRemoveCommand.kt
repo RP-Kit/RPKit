@@ -20,6 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupService
+import com.rpkit.permissions.bukkit.group.removeGroup
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -75,7 +76,7 @@ class CharacterGroupRemoveCommand(private val plugin: RPKPermissionsBukkit) : Co
             sender.sendMessage(plugin.messages["character-group-remove-invalid-group"])
             return true
         }
-        groupService.removeGroup(character, group)
+        character.removeGroup(group)
         sender.sendMessage(plugin.messages["character-group-remove-valid", mapOf(
                 Pair("group", group.name),
                 Pair("character", character.name)
