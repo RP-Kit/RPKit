@@ -16,6 +16,7 @@
 
 package com.rpkit.chat.bukkit.chatchannel
 
+import com.rpkit.chat.bukkit.chatchannel.matchpattern.RPKChatChannelMatchPattern
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 
@@ -95,4 +96,5 @@ interface RPKChatChannelService : Service {
      */
     fun getChatChannelFromDiscordChannel(discordChannel: String): RPKChatChannel?
 
+    val matchPatterns: List<RPKChatChannelMatchPattern>
 }
