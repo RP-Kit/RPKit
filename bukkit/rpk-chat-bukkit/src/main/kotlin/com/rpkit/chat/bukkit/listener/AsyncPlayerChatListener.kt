@@ -114,7 +114,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
                 chatChannel.sendMessage(
                         profile,
                         minecraftProfile,
-                        message,
+                        message.trim(),
                         isAsynchronous
                 )
             }
