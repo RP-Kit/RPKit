@@ -27,8 +27,8 @@ if (propertiesFile.exists()) {
 }
 
 dependencies {
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.3.72"
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.3.72"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.4.21"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.4.21"
     implementation group: "org.spigotmc", name: "spigot-api", version: "1.16.1-R0.1-SNAPSHOT"
     implementation group: "org.bstats", name: "bstats-bukkit", version: "1.7"
     implementation project(":rpk-core")
@@ -47,9 +47,18 @@ apply plugin: "com.github.johnrengelman.shadow"
 shadowJar {
 
     dependencies {
+        include(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8"))
+        include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
+        include(dependency("org.jetbrains.kotlin:kotlin-stdlib-common"))
+        include(dependency("org.jetbrains:annotations"))
+        include(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7"))
+        include(dependency("org.jetbrains.kotlin:kotlin-reflect"))
         include(dependency("org.bstats:bstats-bukkit"))
     }
 
+    relocate "kotlin", "com.rpkit.kit.bukkit.shadow.lib.kotlin"
+    relocate "org.jetbrains", "com.rpkit.kit.bukkit.shadow.lib.org.jetbrains"
+    relocate "org.intellij", "com.rpkit.kit.bukkit.shadow.lib.org.intellij"
     relocate "org.bstats", "com.rpkit.kit.bukkit.shadow.lib.org.bstats"
 }
 

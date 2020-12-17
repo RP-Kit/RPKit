@@ -18,7 +18,7 @@ package com.rpkit.players.bukkit.command.account
 
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.bukkit.command.Command
@@ -45,7 +45,7 @@ class AccountDenyLinkCommand(private val plugin: RPKPlayersBukkit) : CommandExec
                     sender.sendMessage(plugin.messages["account-deny-link-invalid-id"])
                     return true
                 }
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
                     sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
                     return true
@@ -68,7 +68,7 @@ class AccountDenyLinkCommand(private val plugin: RPKPlayersBukkit) : CommandExec
                 }
                 // If they no longer have any link requests pending, we can create a new profile for them based on their
                 // Minecraft profile.
-                val profileService = Services[RPKProfileService::class]
+                val profileService = Services[RPKProfileService::class.java]
                 if (profileService == null) {
                     sender.sendMessage(plugin.messages["no-profile-service"])
                     return true

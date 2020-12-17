@@ -42,6 +42,8 @@ class RPKShopsBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.shops.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4415)
         saveDefaultConfig()
 
@@ -87,7 +89,7 @@ class RPKShopsBukkit : RPKBukkitPlugin() {
         )
         database.addTable(RPKShopCountTable(database, this))
 
-        Services[RPKShopCountService::class] = RPKShopCountServiceImpl(this)
+        Services[RPKShopCountService::class.java] = RPKShopCountServiceImpl(this)
     }
 
     override fun registerListeners() {

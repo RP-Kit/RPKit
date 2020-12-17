@@ -20,8 +20,8 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.chat.bukkit.snooper.RPKSnooperService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
@@ -41,7 +41,7 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
     }
 
     private fun handleSnooping(event: PlayerCommandPreprocessEvent) {
-        val snooperService = Services[RPKSnooperService::class] ?: return
+        val snooperService = Services[RPKSnooperService::class.java] ?: return
         snooperService.snoopers
                 .filter(RPKMinecraftProfile::isOnline)
                 .forEach { minecraftProfile ->
@@ -54,7 +54,7 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
 
     private fun handleQuickChannelSwitch(event: PlayerCommandPreprocessEvent) {
         val chatChannelName = event.message.split(Regex("\\s+"))[0].drop(1)
-        val chatChannelService = Services[RPKChatChannelService::class] ?: return
+        val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
         val chatChannel = chatChannelService.getChatChannel(chatChannelName) ?: return
         if (!event.player.hasPermission("rpkit.chat.command.chatchannel.${chatChannel.name}")) {
             event.isCancelled = true
@@ -64,7 +64,7 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
             return
         }
         event.isCancelled = true
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         if (minecraftProfile == null) {
             event.player.sendMessage(plugin.messages["no-minecraft-profile"])

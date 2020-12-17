@@ -29,7 +29,7 @@ class PlayerItemDamageListener(private val plugin: RPKItemQualityBukkit) : Liste
 
     @EventHandler
     fun onPlayerItemDamage(event: PlayerItemDamageEvent) {
-        val itemQualityService = Services[RPKItemQualityService::class]
+        val itemQualityService = Services[RPKItemQualityService::class.java]
         val itemQuality = itemQualityService?.getItemQuality(event.item) ?: return
         event.damage = (event.damage / itemQuality.durabilityModifier).roundToInt()
     }

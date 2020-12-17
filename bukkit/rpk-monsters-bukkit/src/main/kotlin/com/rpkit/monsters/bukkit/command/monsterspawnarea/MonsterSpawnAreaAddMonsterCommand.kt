@@ -35,7 +35,7 @@ class MonsterSpawnAreaAddMonsterCommand(private val plugin: RPKMonstersBukkit) :
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val monsterSpawnAreaService = Services[RPKMonsterSpawnAreaService::class]
+        val monsterSpawnAreaService = Services[RPKMonsterSpawnAreaService::class.java]
         if (monsterSpawnAreaService == null) {
             sender.sendMessage(plugin.messages["no-monster-spawn-area-service"])
             return true

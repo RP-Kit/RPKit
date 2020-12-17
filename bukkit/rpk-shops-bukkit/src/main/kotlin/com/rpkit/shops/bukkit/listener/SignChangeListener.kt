@@ -19,7 +19,7 @@ package com.rpkit.shops.bukkit.listener
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.shops.bukkit.RPKShopsBukkit
 import com.rpkit.shops.bukkit.shopcount.RPKShopCountService
 import org.bukkit.ChatColor.GREEN
@@ -47,25 +47,25 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-permission-shop"])
                 return
             }
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             if (minecraftProfileService == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
                 return
             }
-            val characterService = Services[RPKCharacterService::class]
+            val characterService = Services[RPKCharacterService::class.java]
             if (characterService == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-character-service"])
                 return
             }
-            val currencyService = Services[RPKCurrencyService::class]
+            val currencyService = Services[RPKCurrencyService::class.java]
             if (currencyService == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-currency-service"])
                 return
             }
-            val shopCountService = Services[RPKShopCountService::class]
+            val shopCountService = Services[RPKShopCountService::class.java]
             if (shopCountService == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-shop-count-service"])
@@ -138,19 +138,19 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-permission-rent"])
                 return
             }
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             if (minecraftProfileService == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
                 return
             }
-            val characterService = Services[RPKCharacterService::class]
+            val characterService = Services[RPKCharacterService::class.java]
             if (characterService == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-character-service"])
                 return
             }
-            val currencyService = Services[RPKCurrencyService::class]
+            val currencyService = Services[RPKCurrencyService::class.java]
             if (currencyService == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-currency-service"])

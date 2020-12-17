@@ -19,7 +19,7 @@ package com.rpkit.moderation.bukkit.command.warn
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.warning.RPKWarningService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -48,12 +48,12 @@ class WarningListCommand(private val plugin: RPKModerationBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val warningService = Services[RPKWarningService::class]
+        val warningService = Services[RPKWarningService::class.java]
         if (warningService == null) {
             sender.sendMessage(plugin.messages["no-warning-service"])
             return true

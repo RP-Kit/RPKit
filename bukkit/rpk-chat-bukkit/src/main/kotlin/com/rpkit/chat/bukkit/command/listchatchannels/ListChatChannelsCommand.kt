@@ -18,15 +18,14 @@ package com.rpkit.chat.bukkit.command.listchatchannels
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
-import com.rpkit.core.bukkit.util.closestChatColor
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.chat.hover.content.Text
-import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -47,7 +46,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -58,7 +57,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
             return true
         }
         sender.sendMessage(plugin.messages["listchatchannels-title"])
-        val chatChannelService = Services[RPKChatChannelService::class]
+        val chatChannelService = Services[RPKChatChannelService::class.java]
         if (chatChannelService == null) {
             sender.sendMessage(plugin.messages["no-chat-channel-service"])
             return true
@@ -67,7 +66,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
             val messageComponents = mutableListOf<BaseComponent>()
             val pattern = Pattern.compile("(\\\$channel)|(\\\$mute)|(${ChatColor.COLOR_CHAR}[0-9a-f])")
             val template = plugin.messages["listchatchannels-item", mapOf(
-                    Pair("color", chatChannel.color.closestChatColor().toString())
+                    Pair("color", ChatColor.of(chatChannel.color).toString())
             )]
             val matcher = pattern.matcher(template)
             var chatColor: ChatColor? = null
@@ -77,7 +76,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                 if (index != matcher.start()) {
                     val textComponent = TextComponent(template.substring(index, matcher.start()))
                     if (chatColor != null) {
-                        textComponent.color = chatColor.asBungee()
+                        textComponent.color = chatColor
                     }
                     if (chatFormat != null) {
                         textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
@@ -93,7 +92,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                     chatChannelComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/chatchannel ${chatChannel.name}")
                     chatChannelComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to talk in ${chatChannel.name}"))
                     if (chatColor != null) {
-                        chatChannelComponent.color = chatColor.asBungee()
+                        chatChannelComponent.color = chatColor
                     }
                     if (chatFormat != null) {
                         chatChannelComponent.isObfuscated = chatFormat == ChatColor.MAGIC
@@ -111,7 +110,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                         muteComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mute ${chatChannel.name}")
                         muteComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to mute ${chatChannel.name}"))
                         if (chatColor != null) {
-                            muteComponent.color = chatColor.asBungee()
+                            muteComponent.color = chatColor
                         }
                         if (chatFormat != null) {
                             muteComponent.isObfuscated = chatFormat == ChatColor.MAGIC
@@ -126,7 +125,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                         unmuteComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/unmute ${chatChannel.name}")
                         unmuteComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to unmute ${chatChannel.name}"))
                         if (chatColor != null) {
-                            unmuteComponent.color = chatColor.asBungee()
+                            unmuteComponent.color = chatColor
                         }
                         if (chatFormat != null) {
                             unmuteComponent.isObfuscated = chatFormat == ChatColor.MAGIC
@@ -138,12 +137,12 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                         messageComponents.add(unmuteComponent)
                     }
                 } else {
-                    val colorOrFormat = ChatColor.getByChar(matcher.group().drop(1))
-                    if (colorOrFormat?.isColor == true) {
+                    val colorOrFormat = ChatColor.getByChar(matcher.group().drop(1)[0])
+                    if (colorOrFormat?.color != null) {
                         chatColor = colorOrFormat
                         chatFormat = null
                     }
-                    if (colorOrFormat?.isFormat == true) {
+                    if (colorOrFormat?.color == null) {
                         chatFormat = colorOrFormat
                     }
                     if (colorOrFormat == ChatColor.RESET) {
@@ -155,7 +154,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
             }
             val textComponent = TextComponent(template.substring(index, template.length))
             if (chatColor != null) {
-                textComponent.color = chatColor.asBungee()
+                textComponent.color = chatColor
             }
             if (chatFormat != null) {
                 textComponent.isObfuscated = chatFormat == ChatColor.MAGIC

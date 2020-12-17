@@ -18,25 +18,26 @@ package com.rpkit.chat.bukkit.chatchannel.undirected
 
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
+import com.rpkit.chat.bukkit.discord.DiscordChannel
 import com.rpkit.chat.bukkit.discord.RPKDiscordService
 import com.rpkit.core.service.Services
 import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 
 class DiscordComponent(
-        val discordChannel: String
+        val discordChannel: DiscordChannel
 ) : UndirectedPipelineComponent, ConfigurationSerializable {
     override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         if (!context.isCancelled) {
-            val discordService = Services[RPKDiscordService::class]
-            discordService?.sendMessage(discordChannel, ChatColor.stripColor(context.message)!!)
+            val discordService = Services[RPKDiscordService::class.java] ?: return context
+            discordService.sendMessage(discordChannel, ChatColor.stripColor(context.message)!!)
         }
         return context
     }
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-                "discord-channel" to discordChannel
+                "discord-channel-id" to discordChannel.id
         )
     }
 
@@ -44,7 +45,7 @@ class DiscordComponent(
         @JvmStatic
         fun deserialize(serialized: Map<String, Any>): DiscordComponent {
             return DiscordComponent(
-                    serialized["discord-channel"] as String
+                    DiscordChannel(serialized["discord-channel-id"] as Long)
             )
         }
     }

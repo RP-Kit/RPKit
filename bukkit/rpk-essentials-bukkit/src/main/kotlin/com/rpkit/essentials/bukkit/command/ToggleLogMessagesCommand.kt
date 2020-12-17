@@ -19,7 +19,7 @@ package com.rpkit.essentials.bukkit.command
 import com.rpkit.core.service.Services
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -36,12 +36,12 @@ class ToggleLogMessagesCommand(private val plugin: RPKEssentialsBukkit) : Comman
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val logMessageService = Services[RPKLogMessageService::class]
+        val logMessageService = Services[RPKLogMessageService::class.java]
         if (logMessageService == null) {
             sender.sendMessage(plugin.messages["no-log-message-service"])
             return true

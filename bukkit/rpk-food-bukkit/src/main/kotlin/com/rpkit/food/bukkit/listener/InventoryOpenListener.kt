@@ -27,7 +27,7 @@ class InventoryOpenListener : Listener {
 
     @EventHandler
     fun onInventoryOpen(event: InventoryOpenEvent) {
-        val expiryService = Services[RPKExpiryService::class] ?: return
+        val expiryService = Services[RPKExpiryService::class.java] ?: return
         event.inventory.contents
                 .filterNotNull()
                 .filter { it.type.isEdible }

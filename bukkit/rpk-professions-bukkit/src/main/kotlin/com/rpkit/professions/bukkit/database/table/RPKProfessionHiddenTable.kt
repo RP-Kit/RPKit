@@ -21,9 +21,8 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.character.RPKProfessionHidden
+import com.rpkit.professions.bukkit.database.create
 import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_PROFESSION_HIDDEN
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKProfessionHiddenTable(
@@ -32,54 +31,61 @@ class RPKProfessionHiddenTable(
 ) : Table {
 
     private val characterCache = if (plugin.config.getBoolean("caching.rpkit_profession_hidden.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-professions-bukkit.rpkit_profession_hidden.character_id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKProfessionHidden::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_profession_hidden.character_id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-professions-bukkit.rpkit_profession_hidden.character_id",
+            Int::class.javaObjectType,
+            RPKProfessionHidden::class.java,
+            plugin.config.getLong("caching.rpkit_profession_hidden.character_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKProfessionHidden) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_PROFESSION_HIDDEN,
                         RPKIT_PROFESSION_HIDDEN.CHARACTER_ID
                 )
                 .values(
-                        entity.character.id
+                    characterId
                 )
                 .execute()
-        characterCache?.put(entity.character.id, entity)
+        characterCache?.set(characterId, entity)
     }
 
     fun update(entity: RPKProfessionHidden) {
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_PROFESSION_HIDDEN)
-                .set(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID, entity.character.id)
-                .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(entity.character.id))
+                .set(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID, characterId)
+                .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(characterId))
                 .execute()
-        characterCache?.put(entity.character.id, entity)
+        characterCache?.set(characterId, entity)
     }
 
     operator fun get(character: RPKCharacter): RPKProfessionHidden? {
-        if (characterCache?.containsKey(character.id) == true) {
-            return characterCache[character.id]
+        val characterId = character.id ?: return null
+        if (characterCache?.containsKey(characterId) == true) {
+            return characterCache[characterId]
         }
         database.create
                 .select(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID)
                 .from(RPKIT_PROFESSION_HIDDEN)
-                .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(character.id))
+                .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(characterId))
                 .fetchOne() ?: return null
         val professionHidden = RPKProfessionHidden(character)
-        characterCache?.put(character.id, professionHidden)
+        characterCache?.set(characterId, professionHidden)
         return professionHidden
     }
 
     fun delete(entity: RPKProfessionHidden) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_PROFESSION_HIDDEN)
-                .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(characterId))
                 .execute()
-        characterCache?.remove(entity.character.id)
+        characterCache?.remove(characterId)
     }
 }

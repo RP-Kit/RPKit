@@ -19,6 +19,7 @@ package com.rpkit.characters.bukkit.database.table
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterImpl
+import com.rpkit.characters.bukkit.database.create
 import com.rpkit.characters.bukkit.database.jooq.Tables.RPKIT_CHARACTER
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.core.bukkit.util.toByteArray
@@ -27,13 +28,11 @@ import com.rpkit.core.bukkit.util.toItemStackArray
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.Location
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 /**
  * Represents the character table.
@@ -41,9 +40,12 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 class RPKCharacterTable(private val database: Database, private val plugin: RPKCharactersBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_character.id.enabled")) {
-        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_character.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacter::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-characters-bukkit.rpkit_character.id",
+            Int::class.javaObjectType,
+            RPKCharacter::class.java,
+            plugin.config.getLong("caching.rpkit_character.id.size")
+        )
     } else {
         null
     }
@@ -120,10 +122,11 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKCharacter) {
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_CHARACTER)
                 .set(RPKIT_CHARACTER.PROFILE_ID, entity.profile?.id)
@@ -157,14 +160,14 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .set(RPKIT_CHARACTER.AGE_HIDDEN, entity.isAgeHidden)
                 .set(RPKIT_CHARACTER.RACE_HIDDEN, entity.isRaceHidden)
                 .set(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, entity.isDescriptionHidden)
-                .where(RPKIT_CHARACTER.ID.eq(entity.id))
+                .where(RPKIT_CHARACTER.ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
     }
 
     operator fun get(id: Int): RPKCharacter? {
         if (cache?.containsKey(id) == true) {
-            return cache.get(id)
+            return cache[id]
         } else {
             val result = database.create
                     .select(
@@ -205,9 +208,9 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                     .where(RPKIT_CHARACTER.ID.eq(id))
                     .fetchOne() ?: return null
 
-            val profileService = Services[RPKProfileService::class]
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
-            val raceService = Services[RPKRaceService::class]
+            val profileService = Services[RPKProfileService::class.java]
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+            val raceService = Services[RPKRaceService::class.java]
             val profileId = result[RPKIT_CHARACTER.PROFILE_ID]
             val profile = if (profileId == null) null else profileService?.getProfile(profileId)
             val minecraftProfileId = result[RPKIT_CHARACTER.MINECRAFT_PROFILE_ID]
@@ -251,7 +254,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                     isRaceHidden = result[RPKIT_CHARACTER.RACE_HIDDEN],
                     isDescriptionHidden = result[RPKIT_CHARACTER.DESCRIPTION_HIDDEN]
             )
-            cache?.put(id, character)
+            cache?.set(id, character)
             return character
         }
     }
@@ -286,11 +289,12 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
     }
 
     fun delete(entity: RPKCharacter) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHARACTER)
-                .where(RPKIT_CHARACTER.ID.eq(entity.id))
+                .where(RPKIT_CHARACTER.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 
 }

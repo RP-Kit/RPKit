@@ -31,7 +31,7 @@ class BlockSpreadListener(private val plugin: RPKBlockLoggingBukkit) : Listener 
 
     @EventHandler(priority = MONITOR)
     fun onBlockSpread(event: BlockSpreadEvent) {
-        val blockHistoryService = Services[RPKBlockHistoryService::class] ?: return
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
         val blockHistory = blockHistoryService.getBlockHistory(event.block)
         val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,

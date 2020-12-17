@@ -40,7 +40,7 @@ class TicketTeleportCommand(private val plugin: RPKModerationBukkit) : CommandEx
             sender.sendMessage(plugin.messages["ticket-teleport-usage"])
             return true
         }
-        val ticketService = Services[RPKTicketService::class]
+        val ticketService = Services[RPKTicketService::class.java]
         if (ticketService == null) {
             sender.sendMessage(plugin.messages["no-ticket-service"])
             return true

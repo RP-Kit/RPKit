@@ -38,7 +38,7 @@ class ChatGroupMembersCommand(private val plugin: RPKChatBukkit) : CommandExecut
             sender.sendMessage(plugin.messages["chat-group-members-usage"])
             return true
         }
-        val chatGroupService = Services[RPKChatGroupService::class]
+        val chatGroupService = Services[RPKChatGroupService::class.java]
         if (chatGroupService == null) {
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true

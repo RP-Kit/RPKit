@@ -20,21 +20,23 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
+import com.rpkit.moderation.bukkit.database.create
 import com.rpkit.moderation.bukkit.database.jooq.Tables.RPKIT_WARNING
 import com.rpkit.moderation.bukkit.warning.RPKWarning
 import com.rpkit.moderation.bukkit.warning.RPKWarningImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKWarningTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_warning.id.enabled")) {
-        database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_warning.id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKWarning::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_warning.id.size"))))
+        database.cacheManager.createCache(
+            "rpk-moderation-bukkit.rpkit_warning.id",
+            Int::class.javaObjectType,
+            RPKWarning::class.java,
+            plugin.config.getLong("caching.rpkit_warning.id.size")
+        )
     } else {
         null
     }
@@ -57,19 +59,20 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKWarning) {
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_WARNING)
                 .set(RPKIT_WARNING.REASON, entity.reason)
                 .set(RPKIT_WARNING.PROFILE_ID, entity.profile.id)
                 .set(RPKIT_WARNING.ISSUER_ID, entity.issuer.id)
                 .set(RPKIT_WARNING.TIME, entity.time)
-                .where(RPKIT_WARNING.ID.eq(entity.id))
+                .where(RPKIT_WARNING.ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
     }
 
     operator fun get(id: Int): RPKWarning? {
@@ -83,7 +86,7 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                 .from(RPKIT_WARNING)
                 .where(RPKIT_WARNING.ID.eq(id))
                 .fetchOne() ?: return null
-        val profileService = Services[RPKProfileService::class] ?: return null
+        val profileService = Services[RPKProfileService::class.java] ?: return null
         val profile = profileService.getProfile(result[RPKIT_WARNING.PROFILE_ID])
         val issuer = profileService.getProfile(result[RPKIT_WARNING.ISSUER_ID])
         if (profile != null && issuer != null) {
@@ -94,7 +97,7 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                     issuer,
                     result[RPKIT_WARNING.TIME]
             )
-            cache?.put(id, warning)
+            cache?.set(id, warning)
             return warning
         } else {
             database.create
@@ -116,10 +119,11 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
     }
 
     fun delete(entity: RPKWarning) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_WARNING)
-                .where(RPKIT_WARNING.ID.eq(entity.id))
+                .where(RPKIT_WARNING.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 }

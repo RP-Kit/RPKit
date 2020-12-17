@@ -46,6 +46,8 @@ class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.unconsciousness.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4425)
         saveDefaultConfig()
 
@@ -91,7 +93,7 @@ class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
         )
         database.addTable(RPKUnconsciousStateTable(database, this))
 
-        Services[RPKUnconsciousnessService::class] = RPKUnconsciousnessServiceImpl(this)
+        Services[RPKUnconsciousnessService::class.java] = RPKUnconsciousnessServiceImpl(this)
 
         WakeTask(this).runTaskTimer(this, 200L, 200L)
         server.worlds.forEach { world ->

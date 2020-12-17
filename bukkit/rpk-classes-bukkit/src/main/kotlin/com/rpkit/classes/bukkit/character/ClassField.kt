@@ -27,7 +27,7 @@ class ClassField : CharacterCardField {
     override val name = "class"
 
     override fun get(character: RPKCharacter): String {
-        return Services[RPKClassService::class]?.getClass(character)?.name ?: "unset"
+        return Services[RPKClassService::class.java]?.getClass(character)?.name ?: "unset"
     }
 
 }

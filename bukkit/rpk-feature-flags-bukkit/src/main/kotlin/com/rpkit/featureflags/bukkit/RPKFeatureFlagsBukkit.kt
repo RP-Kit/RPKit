@@ -35,6 +35,8 @@ class RPKFeatureFlagsBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.featureflags.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4396)
         saveDefaultConfig()
 
@@ -80,7 +82,7 @@ class RPKFeatureFlagsBukkit : RPKBukkitPlugin() {
         )
         database.addTable(RPKProfileFeatureFlagTable(database, this))
 
-        Services[RPKFeatureFlagService::class] = RPKFeatureFlagServiceImpl(this)
+        Services[RPKFeatureFlagService::class.java] = RPKFeatureFlagServiceImpl(this)
     }
 
 }

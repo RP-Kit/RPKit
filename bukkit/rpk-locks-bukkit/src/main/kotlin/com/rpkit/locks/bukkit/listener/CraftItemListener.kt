@@ -28,7 +28,7 @@ class CraftItemListener(private val plugin: RPKLocksBukkit) : Listener {
 
     @EventHandler
     fun onCraftItem(event: CraftItemEvent) {
-        val lockService = Services[RPKLockService::class]
+        val lockService = Services[RPKLockService::class.java]
         if (lockService == null) {
             event.whoClicked.sendMessage(plugin.messages["no-lock-service"])
             return

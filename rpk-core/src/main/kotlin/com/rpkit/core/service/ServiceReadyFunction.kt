@@ -18,4 +18,4 @@ package com.rpkit.core.service
 
 import kotlin.reflect.KClass
 
-class ServiceReadyFunction<T: Service>(val type: KClass<T>, val function: (T) -> Unit) : (T) -> Unit by function
+class ServiceReadyFunction<T: Service>(val type: KClass<T>, val action: ServiceRequirementAction<T>)

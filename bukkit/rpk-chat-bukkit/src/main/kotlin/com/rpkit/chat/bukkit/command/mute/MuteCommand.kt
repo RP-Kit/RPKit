@@ -19,7 +19,7 @@ package com.rpkit.chat.bukkit.command.mute
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -40,12 +40,12 @@ class MuteCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["mute-usage"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val chatChannelService = Services[RPKChatChannelService::class]
+        val chatChannelService = Services[RPKChatChannelService::class.java]
         if (chatChannelService == null) {
             sender.sendMessage(plugin.messages["no-chat-channel-service"])
             return true

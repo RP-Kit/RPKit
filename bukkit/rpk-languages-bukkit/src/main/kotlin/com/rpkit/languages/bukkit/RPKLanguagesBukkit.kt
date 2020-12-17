@@ -37,6 +37,8 @@ class RPKLanguagesBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.languages.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 6764)
         saveDefaultConfig()
 
@@ -82,8 +84,8 @@ class RPKLanguagesBukkit : RPKBukkitPlugin() {
         )
         database.addTable(RPKCharacterLanguageTable(database, this))
 
-        Services[RPKLanguageService::class] = RPKLanguageServiceImpl(this)
-        Services[RPKCharacterLanguageService::class] = RPKCharacterLanguageServiceImpl(this)
+        Services[RPKLanguageService::class.java] = RPKLanguageServiceImpl(this)
+        Services[RPKCharacterLanguageService::class.java] = RPKCharacterLanguageServiceImpl(this)
     }
 
     override fun registerListeners() {

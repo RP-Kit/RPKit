@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.event.chatgroup
 
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroup
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 

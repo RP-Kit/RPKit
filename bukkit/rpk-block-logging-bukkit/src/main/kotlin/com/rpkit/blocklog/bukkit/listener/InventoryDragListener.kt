@@ -21,7 +21,7 @@ import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChangeImpl
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.block.BlockState
 import org.bukkit.entity.Player
@@ -36,7 +36,7 @@ class InventoryDragListener(private val plugin: RPKBlockLoggingBukkit) : Listene
 
     @EventHandler(priority = MONITOR)
     fun onInventoryDrag(event: InventoryDragEvent) {
-        val blockHistoryService = Services[RPKBlockHistoryService::class] ?: return
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
         val inventoryHolder = event.inventory.holder
         if (inventoryHolder !is BlockState) return
         val whoClicked = event.whoClicked
@@ -44,8 +44,8 @@ class InventoryDragListener(private val plugin: RPKBlockLoggingBukkit) : Listene
         val oldContents = event.inventory.contents
         object : BukkitRunnable() {
             override fun run() {
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-                val characterService = Services[RPKCharacterService::class] ?: return
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+                val characterService = Services[RPKCharacterService::class.java] ?: return
                 val minecraftProfile = minecraftProfileService.getMinecraftProfile(whoClicked)
                 val profile = minecraftProfile?.profile as? RPKProfile
                 val character = if (minecraftProfile == null) null else characterService.getActiveCharacter(minecraftProfile)

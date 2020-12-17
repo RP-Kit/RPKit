@@ -20,7 +20,7 @@ import com.rpkit.chat.bukkit.chatchannel.format.FormatPart
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPostFormatPipelineComponent
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineComponent
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import java.awt.Color
 

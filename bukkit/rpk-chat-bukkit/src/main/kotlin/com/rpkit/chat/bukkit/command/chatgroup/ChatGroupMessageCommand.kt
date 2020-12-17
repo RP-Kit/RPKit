@@ -19,7 +19,7 @@ package com.rpkit.chat.bukkit.command.chatgroup
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -40,12 +40,12 @@ class ChatGroupMessageCommand(private val plugin: RPKChatBukkit) : CommandExecut
             sender.sendMessage(plugin.messages["chat-group-message-usage"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val chatGroupService = Services[RPKChatGroupService::class]
+        val chatGroupService = Services[RPKChatGroupService::class.java]
         if (chatGroupService == null) {
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true

@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.util.addLore
 import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.profession.RPKCraftingAction
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
@@ -39,17 +39,17 @@ class BlockBreakListener(private val plugin: RPKProfessionsBukkit) : Listener {
     fun onBlockBreak(event: BlockBreakEvent) {
         val bukkitPlayer = event.player
         if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             event.isDropItems = false
             return
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             event.isDropItems = false
             return
         }
-        val professionService = Services[RPKProfessionService::class]
+        val professionService = Services[RPKProfessionService::class.java]
         if (professionService == null) {
             event.isDropItems = false
             return

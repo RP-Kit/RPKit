@@ -31,7 +31,7 @@ class TicketListOpenCommand(private val plugin: RPKModerationBukkit) : CommandEx
         if (!sender.hasPermission("rpkit.moderation.command.ticket.list.open")) {
             sender.sendMessage(plugin.messages["no-permission-ticket-list-open"])
         }
-        val ticketService = Services[RPKTicketService::class]
+        val ticketService = Services[RPKTicketService::class.java]
         if (ticketService == null) {
             sender.sendMessage(plugin.messages["no-ticket-service"])
             return true

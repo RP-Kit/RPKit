@@ -19,6 +19,7 @@ package com.rpkit.chat.bukkit.irc.command
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.irc.IRCNick
 import org.pircbotx.Channel
 import org.pircbotx.User
 
@@ -29,7 +30,7 @@ import org.pircbotx.User
 class IRCRegisterCommand(private val plugin: RPKChatBukkit) : IRCCommand("register") {
 
     override fun execute(channel: Channel, sender: User, cmd: IRCCommand, label: String, args: Array<String>) {
-        val ircService = Services[RPKIRCService::class]
+        val ircService = Services[RPKIRCService::class.java]
         if (ircService == null) {
             sender.send().message(plugin.messages["irc-no-irc-service"])
             return
@@ -42,7 +43,7 @@ class IRCRegisterCommand(private val plugin: RPKChatBukkit) : IRCCommand("regist
             sender.send().message(plugin.messages["irc-register-invalid-email-invalid"])
             return
         }
-        ircService.ircBot.sendIRC().message("NickServ", "REGISTER " + plugin.config.getString("irc.password") + " " + args[0])
+        ircService.sendMessage(IRCNick("NickServ"), "REGISTER " + plugin.config.getString("irc.password") + " " + args[0])
         sender.send().message(plugin.messages["irc-register-valid"])
     }
 

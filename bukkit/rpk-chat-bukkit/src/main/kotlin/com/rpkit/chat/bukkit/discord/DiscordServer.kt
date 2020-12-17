@@ -22,8 +22,9 @@ import com.rpkit.chat.bukkit.chatchannel.undirected.DiscordComponent
 import com.rpkit.chat.bukkit.discord.command.DiscordCommand
 import com.rpkit.chat.bukkit.discord.command.DiscordListCommand
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKDiscordProfileService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.discord.DiscordUserId
+import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.ReadyEvent
@@ -86,11 +87,11 @@ class DiscordServer(
                 event.channel.sendMessage("Invalid command: $commandName").queue()
             }
         } else {
-            val discordProfileService = Services[RPKDiscordProfileService::class] ?: return
-            val discordProfile = discordProfileService.getDiscordProfile(author)
+            val discordProfileService = Services[RPKDiscordProfileService::class.java] ?: return
+            val discordProfile = discordProfileService.getDiscordProfile(DiscordUserId(author.idLong))
             val profile = discordProfile.profile
-            val chatChannelService = Services[RPKChatChannelService::class] ?: return
-            val chatChannel = chatChannelService.getChatChannelFromDiscordChannel(event.channel.name)
+            val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
+            val chatChannel = chatChannelService.getChatChannelFromDiscordChannel(DiscordChannel(event.channel.idLong))
             chatChannel?.sendMessage(
                     profile,
                     null,
@@ -107,15 +108,15 @@ class DiscordServer(
     override fun onPrivateMessageReactionAdd(event: PrivateMessageReactionAddEvent) {
         if (event.user == jda.selfUser) return
         if (event.reaction.reactionEmote.emoji != "\u2705") return
-        val messageId = event.messageId
-        val discordService = Services[RPKDiscordService::class] ?: return
+        val messageId = event.messageIdLong
+        val discordService = Services[RPKDiscordService::class.java] ?: return
         val profile = discordService.getMessageProfileLink(messageId) ?: return
-        val discordProfileService = Services[RPKDiscordProfileService::class] ?: return
+        val discordProfileService = Services[RPKDiscordProfileService::class.java] ?: return
         val user = event.user ?: return
-        val discordProfile = discordProfileService.getDiscordProfile(user)
+        val discordProfile = discordProfileService.getDiscordProfile(DiscordUserId(user.idLong))
         discordProfile.profile = profile
         discordProfileService.updateDiscordProfile(discordProfile)
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         user.openPrivateChannel().queue { privateChannel ->
             privateChannel.sendMessage("Your Discord profile has been successfully linked to ${profile.name}.").queue()
             minecraftProfileService.getMinecraftProfiles(profile)
@@ -128,23 +129,29 @@ class DiscordServer(
         }
     }
 
-    fun sendMessage(channel: String, message: String) {
+    fun sendMessage(channel: DiscordChannel, message: String) {
         if (!ready) return
         jda.getGuildsByName(guildName, false).forEach { guild ->
-            guild.getTextChannelsByName(channel, false).forEach { channel ->
-                channel.sendMessage(
-                        ChatColor.stripColor(message)!!
-                ).queue()
-            }
+            guild.getTextChannelById(channel.id)?.sendMessage(
+                ChatColor.stripColor(message)!!
+            )?.queue()
         }
     }
 
-    fun getUser(discordId: Long): User? {
-        return jda.getUserById(discordId)
+    fun getUser(discordId: DiscordUserId): User? {
+        return jda.getUserById(discordId.value)
     }
 
     fun getUser(userName: String): User? {
         return jda.getUserByTag(userName)
+    }
+
+    fun getChannel(name: String): DiscordChannel? {
+        return jda.getGuildsByName(guildName, false)
+                .flatMap { guild -> guild.getTextChannelsByName(name, false) }
+                .firstOrNull()
+                ?.idLong
+                ?.let(::DiscordChannel)
     }
 
 }

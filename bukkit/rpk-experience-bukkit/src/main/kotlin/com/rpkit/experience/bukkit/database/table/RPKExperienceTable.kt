@@ -20,33 +20,37 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.experience.bukkit.RPKExperienceBukkit
+import com.rpkit.experience.bukkit.database.create
 import com.rpkit.experience.bukkit.database.jooq.Tables.RPKIT_EXPERIENCE_
 import com.rpkit.experience.bukkit.experience.RPKExperienceValue
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKExperienceTable(private val database: Database, private val plugin: RPKExperienceBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_experience.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-experience-bukkit.rpkit_experience.character_id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKExperienceValue::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_experience.character_id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-experience-bukkit.rpkit_experience.character_id",
+            Int::class.javaObjectType,
+            RPKExperienceValue::class.java,
+            plugin.config.getLong("caching.rpkit_experience.character_id.size")
+        )
     } else {
         null
     }
 
     fun delete(entity: RPKExperienceValue) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_EXPERIENCE_)
                 .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        cache?.remove(entity.character.id)
+        cache?.remove(characterId)
     }
 
     operator fun get(character: RPKCharacter): RPKExperienceValue? {
-        if (cache?.containsKey(character.id) == true) {
-            return cache.get(character.id)
+        val characterId = character.id ?: return null
+        if (cache?.containsKey(characterId) == true) {
+            return cache[characterId]
         } else {
             val result = database.create
                     .select(
@@ -54,18 +58,19 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
                             RPKIT_EXPERIENCE_.VALUE
                     )
                     .from(RPKIT_EXPERIENCE_)
-                    .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(character.id))
+                    .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId))
                     .fetchOne() ?: return null
             val experienceValue = RPKExperienceValue(
                     character,
                     result.get(RPKIT_EXPERIENCE_.VALUE)
             )
-            cache?.put(character.id, experienceValue)
+            cache?.set(characterId, experienceValue)
             return experienceValue
         }
     }
 
     fun insert(entity: RPKExperienceValue) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_EXPERIENCE_,
@@ -77,16 +82,17 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
                         entity.value
                 )
                 .execute()
-        cache?.put(entity.character.id, entity)
+        cache?.set(characterId, entity)
     }
 
     fun update(entity: RPKExperienceValue) {
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_EXPERIENCE_)
                 .set(RPKIT_EXPERIENCE_.VALUE, entity.value)
                 .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        cache?.put(entity.character.id, entity)
+        cache?.set(characterId, entity)
     }
 
 }

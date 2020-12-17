@@ -21,7 +21,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.CRAFT
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -41,9 +41,9 @@ class CraftItemListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
         val bukkitPlayer = event.whoClicked
         if (bukkitPlayer !is Player) return
         if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val characterService = Services[RPKCharacterService::class] ?: return
-        val craftingSkillService = Services[RPKCraftingSkillService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val craftingSkillService = Services[RPKCraftingSkillService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             event.isCancelled = true

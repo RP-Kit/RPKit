@@ -23,7 +23,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -59,17 +59,17 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["no-permission-auction-create"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
         if (currencyService == null) {
             sender.sendMessage(plugin.messages["no-currency-service"])
             return true
@@ -91,17 +91,17 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
     private inner class CurrencyPrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return Services[RPKCurrencyService::class]?.getCurrency(input) != null
+            return Services[RPKCurrencyService::class.java]?.getCurrency(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("currency", Services[RPKCurrencyService::class]?.getCurrency(input))
+            context.setSessionData("currency", Services[RPKCurrencyService::class.java]?.getCurrency(input))
             return CurrencySetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["auction-set-currency-prompt"] + "\n" +
-                    Services[RPKCurrencyService::class]
+                    Services[RPKCurrencyService::class.java]
                             ?.currencies
                             ?.joinToString("\n") { currency ->
                                 plugin.messages["auction-set-currency-prompt-list-item", mapOf(
@@ -315,11 +315,11 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
     private inner class AuctionCreatedPrompt : MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                     ?: return AuctionErrorPrompt(plugin.messages["no-minecraft-profile-service"])
-            val characterService = Services[RPKCharacterService::class]
+            val characterService = Services[RPKCharacterService::class.java]
                     ?: return AuctionErrorPrompt(plugin.messages["no-character-service"])
-            val auctionService = Services[RPKAuctionService::class]
+            val auctionService = Services[RPKAuctionService::class.java]
                     ?: return AuctionErrorPrompt(plugin.messages["no-auction-service"])
             val bukkitPlayer = context.forWhom as Player
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)

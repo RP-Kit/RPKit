@@ -19,7 +19,7 @@ package com.rpkit.essentials.bukkit.command
 import com.rpkit.core.service.Services
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -36,12 +36,12 @@ class BackCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-permission-back"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val locationHistoryService = Services[RPKLocationHistoryService::class]
+        val locationHistoryService = Services[RPKLocationHistoryService::class.java]
         if (locationHistoryService == null) {
             sender.sendMessage(plugin.messages["no-location-history-service"])
             return true

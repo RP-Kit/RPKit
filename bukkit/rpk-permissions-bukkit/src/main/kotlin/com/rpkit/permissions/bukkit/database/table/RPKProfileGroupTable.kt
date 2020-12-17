@@ -20,26 +20,35 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
+import com.rpkit.permissions.bukkit.database.create
 import com.rpkit.permissions.bukkit.database.jooq.Tables.RPKIT_PROFILE_GROUP
 import com.rpkit.permissions.bukkit.group.RPKGroup
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.RPKProfileGroup
 import com.rpkit.players.bukkit.profile.RPKProfile
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKProfileGroupTable(private val database: Database, private val plugin: RPKPermissionsBukkit) : Table {
 
+    private data class ProfileGroupCacheKey(
+        val profileId: Int,
+        val groupName: String
+    )
+
     private val cache = if (plugin.config.getBoolean("caching.rpkit_profile_group.profile_id.enabled")) {
-        database.cacheManager.createCache("rpk-permissions-bukkit.rpkit_profile_group.profile_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Map::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_profile_group.profile_id.size"))))
+        database.cacheManager.createCache(
+            "rpk-permissions-bukkit.rpkit_profile_group.profile_id",
+            ProfileGroupCacheKey::class.java,
+            RPKProfileGroup::class.java,
+            plugin.config.getLong("caching.rpkit_profile_group.profile_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKProfileGroup) {
+        val profileId = entity.profile.id ?: return
+        val groupName = entity.group.name
         database.create
                 .insertInto(
                         RPKIT_PROFILE_GROUP,
@@ -53,29 +62,27 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
                         entity.priority
                 )
                 .execute()
-        val groupMap = cache?.get(entity.profile.id) as? MutableMap<String, RPKProfileGroup> ?: mutableMapOf()
-        groupMap[entity.group.name] = entity
-        cache?.put(entity.profile.id, groupMap)
+        cache?.set(ProfileGroupCacheKey(profileId, groupName), entity)
     }
 
     fun update(entity: RPKProfileGroup) {
+        val profileId = entity.profile.id ?: return
+        val groupName = entity.group.name
         database.create
                 .update(RPKIT_PROFILE_GROUP)
                 .set(RPKIT_PROFILE_GROUP.PRIORITY, entity.priority)
-                .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(entity.profile.id))
-                .and(RPKIT_PROFILE_GROUP.GROUP_NAME.eq(entity.group.name))
+                .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId))
+                .and(RPKIT_PROFILE_GROUP.GROUP_NAME.eq(groupName))
                 .execute()
-        val groupMap = cache?.get(entity.profile.id) as? MutableMap<String, RPKProfileGroup> ?: mutableMapOf()
-        groupMap[entity.group.name] = entity
-        cache?.put(entity.profile.id, groupMap)
+        cache?.set(ProfileGroupCacheKey(profileId, groupName), entity)
     }
 
     operator fun get(profile: RPKProfile, group: RPKGroup): RPKProfileGroup? {
-        if (cache?.containsKey(profile.id) == true) {
-            val groupMap = cache[profile.id] as? MutableMap<String, RPKProfileGroup> ?: mutableMapOf()
-            if (groupMap.contains(group.name)) {
-                return groupMap[group.name]
-            }
+        val profileId = profile.id ?: return null
+        val groupName = group.name
+        val cacheKey = ProfileGroupCacheKey(profileId, groupName)
+        if (cache?.containsKey(cacheKey) == true) {
+            return cache[cacheKey]
         }
         val result = database.create
                 .select(
@@ -90,9 +97,7 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
                 group,
                 result[RPKIT_PROFILE_GROUP.PRIORITY]
         )
-        val groupMap = cache?.get(profileGroup.profile.id) as? MutableMap<String, RPKProfileGroup> ?: mutableMapOf()
-        groupMap[profileGroup.group.name] = profileGroup
-        cache?.put(profileGroup.profile.id, groupMap)
+        cache?.set(cacheKey, profileGroup)
         return profileGroup
     }
 
@@ -107,7 +112,7 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
             .fetch()
             .mapNotNull { result ->
                 val group = result[RPKIT_PROFILE_GROUP.GROUP_NAME]
-                        .let { Services[RPKGroupService::class]?.getGroup(it) }
+                        .let { Services[RPKGroupService::class.java]?.getGroup(it) }
                         ?: return@mapNotNull null
                 RPKProfileGroup(
                         profile,
@@ -117,14 +122,14 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
             }
 
     fun delete(entity: RPKProfileGroup) {
+        val profileId = entity.profile.id ?: return
+        val groupName = entity.group.name
         database.create
                 .deleteFrom(RPKIT_PROFILE_GROUP)
                 .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(entity.profile.id))
                 .and(RPKIT_PROFILE_GROUP.GROUP_NAME.eq(entity.group.name))
                 .execute()
-        val groupMap = cache?.get(entity.profile.id) as? MutableMap<String, RPKProfileGroup> ?: mutableMapOf()
-        groupMap.remove(entity.group.name)
-        cache?.put(entity.profile.id, groupMap)
+        cache?.set(ProfileGroupCacheKey(profileId, groupName), entity)
     }
 
 }

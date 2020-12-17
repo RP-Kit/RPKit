@@ -46,7 +46,7 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
     }
 
     override fun getProfessions(character: RPKCharacter): List<RPKProfession> {
-        return plugin.database.getTable(RPKCharacterProfessionTable::class)
+        return plugin.database.getTable(RPKCharacterProfessionTable::class.java)
                 .get(character)
                 .map(RPKCharacterProfession::profession)
     }
@@ -56,7 +56,7 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
             val event = RPKBukkitProfessionAddEvent(character, profession)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
-            plugin.database.getTable(RPKCharacterProfessionTable::class)
+            plugin.database.getTable(RPKCharacterProfessionTable::class.java)
                     .insert(RPKCharacterProfession(
                             character = event.character,
                             profession = event.profession
@@ -69,7 +69,7 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
             val event = RPKBukkitProfessionRemoveEvent(character, profession)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
-            val characterProfessionTable = plugin.database.getTable(RPKCharacterProfessionTable::class)
+            val characterProfessionTable = plugin.database.getTable(RPKCharacterProfessionTable::class.java)
             val characterProfession = characterProfessionTable.get(event.character, event.profession)
             if (characterProfession != null) {
                 characterProfessionTable.delete(characterProfession)
@@ -91,7 +91,7 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
     }
 
     override fun getProfessionExperience(character: RPKCharacter, profession: RPKProfession): Int {
-        return plugin.database.getTable(RPKCharacterProfessionExperienceTable::class)[character, profession]?.experience ?: 0
+        return plugin.database.getTable(RPKCharacterProfessionExperienceTable::class.java)[character, profession]?.experience ?: 0
     }
 
     override fun setProfessionExperience(character: RPKCharacter, profession: RPKProfession, experience: Int) {
@@ -107,7 +107,7 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
             setProfessionLevel(event.character, event.profession, event.profession.maxLevel)
             return
         }
-        val characterProfessionExperienceTable = plugin.database.getTable(RPKCharacterProfessionExperienceTable::class)
+        val characterProfessionExperienceTable = plugin.database.getTable(RPKCharacterProfessionExperienceTable::class.java)
         var characterProfessionExperience = characterProfessionExperienceTable[event.character, event.profession]
         if (characterProfessionExperience == null) {
             characterProfessionExperience = RPKCharacterProfessionExperience(
@@ -123,7 +123,7 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
     }
 
     override fun getProfessionChangeCooldown(character: RPKCharacter): Duration {
-        val characterProfessionChangeCooldown = plugin.database.getTable(RPKCharacterProfessionChangeCooldownTable::class)
+        val characterProfessionChangeCooldown = plugin.database.getTable(RPKCharacterProfessionChangeCooldownTable::class.java)
                 .get(character) ?: return Duration.ZERO
         if (characterProfessionChangeCooldown.cooldownEndTime.isBefore(LocalDateTime.now())) return Duration.ZERO
         return Duration.between(
@@ -133,7 +133,7 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
     }
 
     override fun setProfessionChangeCooldown(character: RPKCharacter, cooldown: Duration) {
-        val characterProfessionChangeCooldownTable = plugin.database.getTable(RPKCharacterProfessionChangeCooldownTable::class)
+        val characterProfessionChangeCooldownTable = plugin.database.getTable(RPKCharacterProfessionChangeCooldownTable::class.java)
         var characterProfessionChangeCooldown = characterProfessionChangeCooldownTable.get(character)
         if (characterProfessionChangeCooldown == null) {
             characterProfessionChangeCooldown = RPKCharacterProfessionChangeCooldown(

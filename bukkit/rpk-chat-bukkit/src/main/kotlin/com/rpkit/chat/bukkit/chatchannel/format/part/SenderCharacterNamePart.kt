@@ -50,7 +50,7 @@ class SenderCharacterNamePart(
 ), ConfigurationSerializable {
 
     override fun getText(context: DirectedPreFormatMessageContext) = context.senderMinecraftProfile
-            ?.let { Services[RPKCharacterService::class]?.getActiveCharacter(it)?.name }
+            ?.let { Services[RPKCharacterService::class.java]?.getActiveCharacter(it)?.name }
             ?: ""
 
     override fun serialize() = mutableMapOf(

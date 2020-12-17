@@ -20,24 +20,26 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
+import com.rpkit.players.bukkit.database.create
 import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_MINECRAFT_PROFILE
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.OfflinePlayer
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 import java.util.*
 
 
 class RPKMinecraftProfileTable(private val database: Database, private val plugin: RPKPlayersBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_minecraft_profile.id.enabled")) {
-        database.cacheManager.createCache("rpk-players-bukkit.rpkit_minecraft_profile.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKMinecraftProfile::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_minecraft_profile.id.size"))))
+        database.cacheManager.createCache(
+            "rpk-players-bukkit.rpkit_minecraft_profile.id",
+            Int::class.javaObjectType,
+            RPKMinecraftProfile::class.java,
+            plugin.config.getLong("caching.rpkit_minecraft_profile.id.size")
+        )
     } else {
         null
     }
@@ -61,11 +63,12 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKMinecraftProfile) {
         val profile = entity.profile
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_MINECRAFT_PROFILE)
                 .set(
@@ -77,14 +80,14 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                         }
                 )
                 .set(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID, entity.minecraftUUID.toString())
-                .where(RPKIT_MINECRAFT_PROFILE.ID.eq(entity.id))
+                .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
     }
 
     operator fun get(id: Int): RPKMinecraftProfile? {
         if (cache?.containsKey(id) == true) {
-            return cache.get(id)
+            return cache[id]
         } else {
             val result = database.create
                     .select(
@@ -94,7 +97,7 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                     .from(RPKIT_MINECRAFT_PROFILE)
                     .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id))
                     .fetchOne() ?: return null
-            val profileService = Services[RPKProfileService::class]
+            val profileService = Services[RPKProfileService::class.java]
             val profileId = result.get(RPKIT_MINECRAFT_PROFILE.PROFILE_ID)
             val profile = if (profileId != null && profileService != null) {
                 profileService.getProfile(profileId)
@@ -110,7 +113,7 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                     profile,
                     UUID.fromString(result.get(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID))
             )
-            cache?.put(id, minecraftProfile)
+            cache?.set(id, minecraftProfile)
             return minecraftProfile
         }
     }
@@ -136,10 +139,11 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
     }
 
     fun delete(entity: RPKMinecraftProfile) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_MINECRAFT_PROFILE)
-                .where(RPKIT_MINECRAFT_PROFILE.ID.eq(entity.id))
+                .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 }

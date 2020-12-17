@@ -70,6 +70,8 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
     private lateinit var newCharacterCooldownService: RPKNewCharacterCooldownService
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.characters.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4382)
         saveDefaultConfig()
 
@@ -122,10 +124,10 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
         characterCardFieldService = RPKCharacterCardFieldServiceImpl(this)
         newCharacterCooldownService = RPKNewCharacterCooldownService(this)
 
-        Services[RPKCharacterService::class] = characterService
-        Services[RPKRaceService::class] = raceService
-        Services[RPKCharacterCardFieldService::class] = characterCardFieldService
-        Services[RPKNewCharacterCooldownService::class] = newCharacterCooldownService
+        Services[RPKCharacterService::class.java] = characterService
+        Services[RPKRaceService::class.java] = raceService
+        Services[RPKCharacterCardFieldService::class.java] = characterCardFieldService
+        Services[RPKNewCharacterCooldownService::class.java] = newCharacterCooldownService
 
         characterCardFieldService.characterCardFields.add(NameField())
         characterCardFieldService.characterCardFields.add(ProfileField())

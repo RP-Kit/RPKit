@@ -21,7 +21,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.ChatColor
 import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
@@ -39,7 +39,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
             val sign = event.clickedBlock?.state
             if (sign !is Sign) return
             if (sign.getLine(0).equals(ChatColor.GREEN.toString() + "[exchange]", ignoreCase = true)) { // Exchange signs
-                val currencyService = Services[RPKCurrencyService::class]
+                val currencyService = Services[RPKCurrencyService::class.java]
                 if (currencyService == null) {
                     event.player.sendMessage(plugin.messages["no-currency-service"])
                     return
@@ -51,17 +51,17 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                     event.player.sendMessage(plugin.messages["exchange-invalid-format"])
                     return
                 }
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
                     event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
                     return
                 }
-                val characterService = Services[RPKCharacterService::class]
+                val characterService = Services[RPKCharacterService::class.java]
                 if (characterService == null) {
                     event.player.sendMessage(plugin.messages["no-character-service"])
                     return
                 }
-                val economyService = Services[RPKEconomyService::class]
+                val economyService = Services[RPKEconomyService::class.java]
                 if (economyService == null) {
                     event.player.sendMessage(plugin.messages["no-economy-service"])
                     return
@@ -94,7 +94,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                         Pair("to-currency", if (convertedAmount == 1) toCurrency.nameSingular else toCurrency.namePlural)
                 )])
             } else if (sign.getLine(0).equals(ChatColor.GREEN.toString() + "[dynexchange]", ignoreCase = true)) { // Dynamic exchange signs
-                val currencyService = Services[RPKCurrencyService::class]
+                val currencyService = Services[RPKCurrencyService::class.java]
                 if (currencyService == null) {
                     event.player.sendMessage(plugin.messages["no-currency-service"])
                     return
@@ -104,17 +104,17 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                 val toAmount = sign.getLine(3).split(Regex("\\s+"))[0].toInt()
                 val toCurrency = currencyService.getCurrency(sign.getLine(3).replaceFirst(Regex("\\d+\\s+"), ""))
                 if (fromCurrency == null || toCurrency == null) return
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
                     event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
                     return
                 }
-                val characterService = Services[RPKCharacterService::class]
+                val characterService = Services[RPKCharacterService::class.java]
                 if (characterService == null) {
                     event.player.sendMessage(plugin.messages["no-character-service"])
                     return
                 }
-                val economyService = Services[RPKEconomyService::class]
+                val economyService = Services[RPKEconomyService::class.java]
                 if (economyService == null) {
                     event.player.sendMessage(plugin.messages["no-economy-service"])
                     return
@@ -143,7 +143,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
             if (sign !is Sign) return
             if (!sign.getLine(0).equals(ChatColor.GREEN.toString() + "[dynexchange]", ignoreCase = true)) return
             // Dynamic exchange signs
-            val currencyService = Services[RPKCurrencyService::class]
+            val currencyService = Services[RPKCurrencyService::class.java]
             if (currencyService == null) {
                 event.player.sendMessage(plugin.messages["no-currency-service"])
                 return
@@ -153,17 +153,17 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
             val toAmount = sign.getLine(1).split(Regex("\\s+"))[0].toInt()
             val toCurrency = currencyService.getCurrency(sign.getLine(1).replaceFirst(Regex("\\d+\\s+"), ""))
             if (fromCurrency == null || toCurrency == null) return
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             if (minecraftProfileService == null) {
                 event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
                 return
             }
-            val characterService = Services[RPKCharacterService::class]
+            val characterService = Services[RPKCharacterService::class.java]
             if (characterService == null) {
                 event.player.sendMessage(plugin.messages["no-character-service"])
                 return
             }
-            val economyService = Services[RPKEconomyService::class]
+            val economyService = Services[RPKEconomyService::class.java]
             if (economyService == null) {
                 event.player.sendMessage(plugin.messages["no-economy-service"])
                 return

@@ -19,8 +19,10 @@ package com.rpkit.chat.bukkit.irc.listener
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
+import com.rpkit.chat.bukkit.irc.IRCChannel
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKIRCProfileService
+import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.MessageEvent
 
@@ -35,13 +37,13 @@ class IRCMessageListener(private val plugin: RPKChatBukkit) : ListenerAdapter() 
         // This stops commands from being sent to chat.
         if (event.message.startsWith("!")) return
 
-        val ircProfileService = Services[RPKIRCProfileService::class] ?: return
+        val ircProfileService = Services[RPKIRCProfileService::class.java] ?: return
         // According to PircBotX documentation, user can be null if the hostmask doesn't match a user at creation time.
         val user = event.user ?: return
-        val senderIRCProfile = ircProfileService.getIRCProfile(user) ?: return
+        val senderIRCProfile = ircProfileService.getIRCProfile(IRCNick(user.nick)) ?: return
         val senderProfile = senderIRCProfile.profile
-        val chatChannelService = Services[RPKChatChannelService::class] ?: return
-        val chatChannel = chatChannelService.getChatChannelFromIRCChannel(event.channel.name)
+        val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
+        val chatChannel = chatChannelService.getChatChannelFromIRCChannel(IRCChannel(event.channel.name))
         chatChannel?.sendMessage(
                 senderProfile,
                 null,

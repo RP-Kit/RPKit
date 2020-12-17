@@ -46,6 +46,8 @@ class RPKProfessionsBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.professions.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 5352)
         saveDefaultConfig()
 
@@ -94,8 +96,8 @@ class RPKProfessionsBukkit : RPKBukkitPlugin() {
         database.addTable(RPKCharacterProfessionTable(database, this))
         database.addTable(RPKProfessionHiddenTable(database, this))
 
-        Services[RPKProfessionService::class] = RPKProfessionServiceImpl(this)
-        Services.require(RPKCharacterCardFieldService::class).whenAvailable { service ->
+        Services[RPKProfessionService::class.java] = RPKProfessionServiceImpl(this)
+        Services.require(RPKCharacterCardFieldService::class.java).whenAvailable { service ->
             service.characterCardFields.add(ProfessionField(this))
         }
     }

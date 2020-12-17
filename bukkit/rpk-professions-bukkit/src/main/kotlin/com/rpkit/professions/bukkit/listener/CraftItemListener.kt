@@ -18,7 +18,7 @@ package com.rpkit.professions.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.profession.RPKCraftingAction
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
@@ -40,9 +40,9 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit) : Listener {
         val bukkitPlayer = event.whoClicked
         if (bukkitPlayer is Player) {
             if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-            val characterService = Services[RPKCharacterService::class] ?: return
-            val professionService = Services[RPKProfessionService::class] ?: return
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+            val characterService = Services[RPKCharacterService::class.java] ?: return
+            val professionService = Services[RPKProfessionService::class.java] ?: return
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
             if (minecraftProfile == null) {
                 event.isCancelled = true

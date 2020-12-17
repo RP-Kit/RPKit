@@ -19,7 +19,7 @@ package com.rpkit.characters.bukkit.listener
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.Location
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -34,8 +34,8 @@ class PlayerMoveListener(private val plugin: RPKCharactersBukkit) : Listener {
 
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val characterService = Services[RPKCharacterService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
         val character = characterService.getActiveCharacter(minecraftProfile)
         if (character == null || !character.isDead) return

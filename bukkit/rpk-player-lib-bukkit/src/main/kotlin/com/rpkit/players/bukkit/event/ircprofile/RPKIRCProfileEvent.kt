@@ -17,7 +17,7 @@
 package com.rpkit.players.bukkit.event.ircprofile
 
 import com.rpkit.core.event.RPKEvent
-import com.rpkit.players.bukkit.profile.RPKIRCProfile
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 
 
 interface RPKIRCProfileEvent : RPKEvent {

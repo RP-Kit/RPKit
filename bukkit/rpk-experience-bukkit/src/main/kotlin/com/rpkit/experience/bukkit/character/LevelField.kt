@@ -28,7 +28,7 @@ class LevelField(private val plugin: RPKExperienceBukkit) : CharacterCardField {
     override val name = "level"
 
     override fun get(character: RPKCharacter): String {
-        val experienceService = Services[RPKExperienceService::class]
+        val experienceService = Services[RPKExperienceService::class.java]
         if (experienceService == null) return plugin.messages["no-experience-service"]
         return experienceService.getLevel(character).toString()
     }

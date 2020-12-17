@@ -19,6 +19,7 @@ package com.rpkit.chat.bukkit.irc.listener
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.irc.IRCNick
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.UserListEvent
 
@@ -29,8 +30,8 @@ import org.pircbotx.hooks.events.UserListEvent
 class IRCUserListListener(private val plugin: RPKChatBukkit) : ListenerAdapter() {
 
     override fun onUserList(event: UserListEvent) {
-        val ircService = Services[RPKIRCService::class] ?: return
-        event.users.forEach { user -> ircService.addIRCUser(user) }
+        val ircService = Services[RPKIRCService::class.java] ?: return
+        event.users.forEach { user -> ircService.setOnline(IRCNick(user.nick), true) }
     }
 
 }

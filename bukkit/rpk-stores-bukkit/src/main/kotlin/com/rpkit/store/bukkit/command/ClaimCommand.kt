@@ -17,7 +17,7 @@
 package com.rpkit.store.bukkit.command
 
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.purchase.RPKConsumablePurchase
 import com.rpkit.store.bukkit.purchase.RPKPurchaseService
@@ -42,7 +42,7 @@ class ClaimCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -57,7 +57,7 @@ class ClaimCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["claim-purchase-id-invalid-integer"])
             return true
         }
-        val purchaseService = Services[RPKPurchaseService::class]
+        val purchaseService = Services[RPKPurchaseService::class.java]
         if (purchaseService == null) {
             sender.sendMessage(plugin.messages["no-purchase-service"])
             return true

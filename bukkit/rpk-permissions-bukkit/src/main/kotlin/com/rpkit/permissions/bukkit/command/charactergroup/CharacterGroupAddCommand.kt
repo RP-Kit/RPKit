@@ -21,7 +21,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.addGroup
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -41,12 +41,12 @@ class CharacterGroupAddCommand(private val plugin: RPKPermissionsBukkit) : Comma
             sender.sendMessage(plugin.messages["character-group-add-usage"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val groupService = Services[RPKGroupService::class]
+        val groupService = Services[RPKGroupService::class.java]
         if (groupService == null) {
             sender.sendMessage(plugin.messages["no-group-service"])
             return true
@@ -61,7 +61,7 @@ class CharacterGroupAddCommand(private val plugin: RPKPermissionsBukkit) : Comma
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true

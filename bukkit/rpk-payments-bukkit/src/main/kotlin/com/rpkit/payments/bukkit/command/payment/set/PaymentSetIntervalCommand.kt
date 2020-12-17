@@ -21,7 +21,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -66,12 +66,12 @@ class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit) : Command
             sender.sendMessage(plugin.messages["payment-set-interval-usage"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
@@ -82,7 +82,7 @@ class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit) : Command
             return true
         }
         val character = characterService.getActiveCharacter(minecraftProfile)
-        val paymentGroupService = Services[RPKPaymentGroupService::class]
+        val paymentGroupService = Services[RPKPaymentGroupService::class.java]
         if (paymentGroupService == null) {
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
@@ -105,7 +105,7 @@ class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit) : Command
     private inner class IntervalPrompt : NumericPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            if (Services[RPKPaymentGroupService::class] == null) return plugin.messages["no-payment-group-service"]
+            if (Services[RPKPaymentGroupService::class.java] == null) return plugin.messages["no-payment-group-service"]
             return plugin.messages["payment-set-interval-prompt"]
         }
 
@@ -122,7 +122,7 @@ class PaymentSetIntervalCommand(private val plugin: RPKPaymentsBukkit) : Command
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
-            val paymentGroupService = Services[RPKPaymentGroupService::class] ?: return END_OF_CONVERSATION
+            val paymentGroupService = Services[RPKPaymentGroupService::class.java] ?: return END_OF_CONVERSATION
             val paymentGroup = context.getSessionData("payment_group") as RPKPaymentGroup
             paymentGroup.interval = Duration.of(input.toLong(), SECONDS)
             paymentGroupService.updatePaymentGroup(paymentGroup)

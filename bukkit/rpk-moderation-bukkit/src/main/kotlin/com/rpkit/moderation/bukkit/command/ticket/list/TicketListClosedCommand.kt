@@ -32,7 +32,7 @@ class TicketListClosedCommand(private val plugin: RPKModerationBukkit) : Command
             sender.sendMessage(plugin.messages["no-permission-ticket-list-closed"])
             return true
         }
-        val ticketService = Services[RPKTicketService::class]
+        val ticketService = Services[RPKTicketService::class.java]
         if (ticketService == null) {
             sender.sendMessage(plugin.messages["no-ticket-service"])
             return true

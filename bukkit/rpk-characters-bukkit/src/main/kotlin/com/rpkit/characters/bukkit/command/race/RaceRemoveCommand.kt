@@ -57,7 +57,7 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit) : CommandExecut
             conversationFactory.buildConversation(sender).begin()
             return true
         }
-        val raceService = Services[RPKRaceService::class]
+        val raceService = Services[RPKRaceService::class.java]
         if (raceService == null) {
             sender.sendMessage(plugin.messages["no-race-service"])
             return true
@@ -81,11 +81,11 @@ class RaceRemoveCommand(private val plugin: RPKCharactersBukkit) : CommandExecut
     private inner class RacePrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return Services[RPKRaceService::class]?.getRace(input) != null
+            return Services[RPKRaceService::class.java]?.getRace(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val raceService = Services[RPKRaceService::class] ?: return RaceSetPrompt()
+            val raceService = Services[RPKRaceService::class.java] ?: return RaceSetPrompt()
             context.setSessionData("raceService", raceService)
             val race = raceService.getRace(input) ?: return RaceSetPrompt()
             context.setSessionData("race", race)

@@ -32,16 +32,16 @@ import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileTable
 import com.rpkit.players.bukkit.database.table.RPKProfileTable
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
 import com.rpkit.players.bukkit.listener.PlayerLoginListener
-import com.rpkit.players.bukkit.profile.RPKDiscordProfileService
 import com.rpkit.players.bukkit.profile.RPKDiscordProfileServiceImpl
-import com.rpkit.players.bukkit.profile.RPKGitHubProfileService
 import com.rpkit.players.bukkit.profile.RPKGitHubProfileServiceImpl
-import com.rpkit.players.bukkit.profile.RPKIRCProfileService
 import com.rpkit.players.bukkit.profile.RPKIRCProfileServiceImpl
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileServiceImpl
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.RPKProfileServiceImpl
+import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
+import com.rpkit.players.bukkit.profile.github.RPKGitHubProfileService
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -54,15 +54,17 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.players.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4409)
 
         saveDefaultConfig()
 
-        Services[RPKDiscordProfileService::class] = RPKDiscordProfileServiceImpl(this)
-        Services[RPKGitHubProfileService::class] = RPKGitHubProfileServiceImpl(this)
-        Services[RPKIRCProfileService::class] = RPKIRCProfileServiceImpl(this)
-        Services[RPKMinecraftProfileService::class] = RPKMinecraftProfileServiceImpl(this)
-        Services[RPKProfileService::class] = RPKProfileServiceImpl(this)
+        Services[RPKDiscordProfileService::class.java] = RPKDiscordProfileServiceImpl(this)
+        Services[RPKGitHubProfileService::class.java] = RPKGitHubProfileServiceImpl(this)
+        Services[RPKIRCProfileService::class.java] = RPKIRCProfileServiceImpl(this)
+        Services[RPKMinecraftProfileService::class.java] = RPKMinecraftProfileServiceImpl(this)
+        Services[RPKProfileService::class.java] = RPKProfileServiceImpl(this)
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

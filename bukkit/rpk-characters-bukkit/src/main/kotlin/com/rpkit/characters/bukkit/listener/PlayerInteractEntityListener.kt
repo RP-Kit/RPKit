@@ -19,7 +19,7 @@ package com.rpkit.characters.bukkit.listener
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -42,12 +42,12 @@ class PlayerInteractEntityListener(private val plugin: RPKCharactersBukkit) : Li
             return
         }
         val bukkitPlayer = event.rightClicked as Player
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             event.player.sendMessage(plugin.messages["no-character-service"])
             return

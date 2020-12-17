@@ -17,7 +17,7 @@
 package com.rpkit.selection.bukkit.listener
 
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.selection.bukkit.RPKSelectionBukkit
 import com.rpkit.selection.bukkit.selection.RPKSelectionService
 import org.bukkit.event.EventHandler
@@ -34,12 +34,12 @@ class PlayerInteractListener(private val plugin: RPKSelectionBukkit) : Listener 
         val bukkitPlayer = event.player
         if (bukkitPlayer.inventory.itemInMainHand.isSimilar(plugin.config.getItemStack("wand-item"))) {
             event.isCancelled = true
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             if (minecraftProfileService == null) {
                 bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile-service"])
                 return
             }
-            val selectionService = Services[RPKSelectionService::class]
+            val selectionService = Services[RPKSelectionService::class.java]
             if (selectionService == null) {
                 bukkitPlayer.sendMessage(plugin.messages["no-selection-service"])
                 return

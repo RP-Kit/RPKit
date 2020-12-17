@@ -30,21 +30,21 @@ class RPKBukkitCharacterDeleteListener(private val plugin: RPKProfessionsBukkit)
 
     @EventHandler
     fun onCharacterDelete(event: RPKBukkitCharacterDeleteEvent) {
-        val characterProfessionChangeCooldownTable = plugin.database.getTable(RPKCharacterProfessionChangeCooldownTable::class)
+        val characterProfessionChangeCooldownTable = plugin.database.getTable(RPKCharacterProfessionChangeCooldownTable::class.java)
         val characterProfessionChangeCooldown = characterProfessionChangeCooldownTable.get(event.character)
         if (characterProfessionChangeCooldown != null) {
             characterProfessionChangeCooldownTable.delete(characterProfessionChangeCooldown)
         }
 
-        val characterProfessionExperienceTable = plugin.database.getTable(RPKCharacterProfessionExperienceTable::class)
+        val characterProfessionExperienceTable = plugin.database.getTable(RPKCharacterProfessionExperienceTable::class.java)
         characterProfessionExperienceTable.delete(event.character)
 
-        val characterProfessionTable = plugin.database.getTable(RPKCharacterProfessionTable::class)
+        val characterProfessionTable = plugin.database.getTable(RPKCharacterProfessionTable::class.java)
         characterProfessionTable[event.character].forEach { characterProfession ->
             characterProfessionTable.delete(characterProfession)
         }
 
-        val professionHiddenTable = plugin.database.getTable(RPKProfessionHiddenTable::class)
+        val professionHiddenTable = plugin.database.getTable(RPKProfessionHiddenTable::class.java)
         val professionHidden = professionHiddenTable[event.character]
         if (professionHidden != null) {
             professionHiddenTable.delete(professionHidden)

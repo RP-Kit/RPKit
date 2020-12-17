@@ -78,6 +78,8 @@ class RPKEssentialsBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.essentials.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4392)
         ConfigurationSerialization.registerClass(RPKKitImpl::class.java)
         saveDefaultConfig()
@@ -126,11 +128,11 @@ class RPKEssentialsBukkit : RPKBukkitPlugin() {
         database.addTable(RPKPreviousLocationTable(database, this))
         database.addTable(RPKTrackingDisabledTable(database, this))
 
-        Services[RPKDailyQuoteService::class] = RPKDailyQuoteServiceImpl(this)
-        Services[RPKKitService::class] = RPKKitServiceImpl(this)
-        Services[RPKLocationHistoryService::class] = RPKLocationHistoryServiceImpl(this)
-        Services[RPKLogMessageService::class] = RPKLogMessageService(this)
-        Services[RPKTrackingService::class] = RPKTrackingServiceImpl(this)
+        Services[RPKDailyQuoteService::class.java] = RPKDailyQuoteServiceImpl(this)
+        Services[RPKKitService::class.java] = RPKKitServiceImpl(this)
+        Services[RPKLocationHistoryService::class.java] = RPKLocationHistoryServiceImpl(this)
+        Services[RPKLogMessageService::class.java] = RPKLogMessageService(this)
+        Services[RPKTrackingService::class.java] = RPKTrackingServiceImpl(this)
 
         TimeSlowRunnable(this).runTaskTimer(this, 100L, 100L)
     }

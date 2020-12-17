@@ -18,8 +18,10 @@ package com.rpkit.chat.bukkit.irc.listener
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
+import com.rpkit.chat.bukkit.irc.IRCChannel
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.irc.IRCNick
 import org.pircbotx.PircBotX
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.JoinEvent
@@ -31,12 +33,12 @@ import org.pircbotx.hooks.events.JoinEvent
 class IRCChannelJoinListener : ListenerAdapter() {
 
     override fun onJoin(event: JoinEvent) {
-        val ircService = Services[RPKIRCService::class] ?: return
+        val ircService = Services[RPKIRCService::class.java] ?: return
         val user = event.user ?: return
-        ircService.addIRCUser(user)
+        ircService.setOnline(IRCNick(user.nick), true)
         val verified = user.isVerified
-        val chatChannelService = Services[RPKChatChannelService::class] ?: return
-        val chatChannel = chatChannelService.getChatChannelFromIRCChannel(event.channel.name) ?: return
+        val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
+        val chatChannel = chatChannelService.getChatChannelFromIRCChannel(IRCChannel(event.channel.name)) ?: return
         if (chatChannel.undirectedPipeline
                         .mapNotNull { component -> component as? IRCComponent }
                         .firstOrNull()

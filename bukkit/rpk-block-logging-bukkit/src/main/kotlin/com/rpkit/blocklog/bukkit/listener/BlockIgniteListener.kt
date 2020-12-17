@@ -21,7 +21,7 @@ import com.rpkit.blocklog.bukkit.block.RPKBlockChangeImpl
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority.MONITOR
@@ -34,9 +34,9 @@ class BlockIgniteListener(private val plugin: RPKBlockLoggingBukkit) : Listener 
 
     @EventHandler(priority = MONITOR)
     fun onBlockIgnite(event: BlockIgniteEvent) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
-        val characterService = Services[RPKCharacterService::class]
-        val blockHistoryService = Services[RPKBlockHistoryService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        val characterService = Services[RPKCharacterService::class.java]
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java]
         if (blockHistoryService == null) {
             plugin.logger.severe("Failed to retrieve block history service, did the plugin load correctly?")
             return

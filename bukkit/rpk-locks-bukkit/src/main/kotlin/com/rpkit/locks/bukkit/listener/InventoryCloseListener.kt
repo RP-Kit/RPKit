@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.keyring.RPKKeyringService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -32,9 +32,9 @@ class InventoryCloseListener(private val plugin: RPKLocksBukkit) : Listener {
     @EventHandler
     fun onInventoryClose(event: InventoryCloseEvent) {
         if (!event.view.title.equals("Keyring", ignoreCase = true)) return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val characterService = Services[RPKCharacterService::class] ?: return
-        val keyringService = Services[RPKKeyringService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val keyringService = Services[RPKKeyringService::class.java] ?: return
         val bukkitPlayer = event.player
         if (bukkitPlayer !is Player) return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return

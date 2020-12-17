@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.event.chatchannel
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 interface RPKChatChannelMuteEvent : RPKChatChannelEvent, RPKMinecraftProfileEvent {

@@ -19,77 +19,87 @@ package com.rpkit.locks.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.locks.bukkit.RPKLocksBukkit
+import com.rpkit.locks.bukkit.database.create
 import com.rpkit.locks.bukkit.database.jooq.Tables.RPKIT_LOCKED_BLOCK
 import com.rpkit.locks.bukkit.lock.RPKLockedBlock
 import org.bukkit.block.Block
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKLockedBlockTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
 
+    private data class BlockCacheKey(
+         val worldName: String,
+         val x: Int,
+         val y: Int,
+         val z: Int
+    )
+
     private val cache = if (plugin.config.getBoolean("caching.rpkit_locked_block.block.enabled")) {
         database.cacheManager.createCache("rpk-locks-bukkit.rpkit_locked_block.block",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.javaObjectType, RPKLockedBlock::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_locked_block.block.size"))))
+            BlockCacheKey::class.javaObjectType,
+            RPKLockedBlock::class.java,
+            plugin.config.getLong("caching.rpkit_locked_block.block.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKLockedBlock) {
         val block = entity.block
+        val cacheKey = BlockCacheKey(block.world.name, block.x, block.y, block.z)
         database.create
-                .insertInto(
-                        RPKIT_LOCKED_BLOCK,
-                        RPKIT_LOCKED_BLOCK.WORLD,
-                        RPKIT_LOCKED_BLOCK.X,
-                        RPKIT_LOCKED_BLOCK.Y,
-                        RPKIT_LOCKED_BLOCK.Z
-                )
-                .values(
-                        block.world.name,
-                        block.x,
-                        block.y,
-                        block.z
-                )
-                .execute()
-        cache?.put(block.toCacheKey(), entity)
+            .insertInto(
+                RPKIT_LOCKED_BLOCK,
+                RPKIT_LOCKED_BLOCK.WORLD,
+                RPKIT_LOCKED_BLOCK.X,
+                RPKIT_LOCKED_BLOCK.Y,
+                RPKIT_LOCKED_BLOCK.Z
+            )
+            .values(
+                block.world.name,
+                block.x,
+                block.y,
+                block.z
+            )
+            .execute()
+        cache?.set(cacheKey, entity)
     }
 
     operator fun get(block: Block): RPKLockedBlock? {
-        if (cache?.containsKey(block.toCacheKey()) == true) {
-            return cache[block.toCacheKey()]
+        val cacheKey = BlockCacheKey(block.world.name, block.x, block.y, block.z)
+        if (cache?.containsKey(cacheKey) == true) {
+            return cache[cacheKey]
         } else {
             database.create
-                    .select(
-                            RPKIT_LOCKED_BLOCK.WORLD,
-                            RPKIT_LOCKED_BLOCK.X,
-                            RPKIT_LOCKED_BLOCK.Y,
-                            RPKIT_LOCKED_BLOCK.Z
-                    )
-                    .from(RPKIT_LOCKED_BLOCK)
-                    .where(RPKIT_LOCKED_BLOCK.WORLD.eq(block.world.name))
-                    .and(RPKIT_LOCKED_BLOCK.X.eq(block.x))
-                    .and(RPKIT_LOCKED_BLOCK.Y.eq(block.y))
-                    .and(RPKIT_LOCKED_BLOCK.Z.eq(block.z))
-                    .fetchOne() ?: return null
+                .select(
+                    RPKIT_LOCKED_BLOCK.WORLD,
+                    RPKIT_LOCKED_BLOCK.X,
+                    RPKIT_LOCKED_BLOCK.Y,
+                    RPKIT_LOCKED_BLOCK.Z
+                )
+                .from(RPKIT_LOCKED_BLOCK)
+                .where(RPKIT_LOCKED_BLOCK.WORLD.eq(block.world.name))
+                .and(RPKIT_LOCKED_BLOCK.X.eq(block.x))
+                .and(RPKIT_LOCKED_BLOCK.Y.eq(block.y))
+                .and(RPKIT_LOCKED_BLOCK.Z.eq(block.z))
+                .fetchOne() ?: return null
             val lockedBlock = RPKLockedBlock(block)
-            cache?.put(block.toCacheKey(), lockedBlock)
+            cache?.set(cacheKey, lockedBlock)
             return lockedBlock
         }
     }
 
     fun delete(entity: RPKLockedBlock) {
         val block = entity.block
+        val cacheKey = BlockCacheKey(block.world.name, block.x, block.y, block.z)
         database.create
-                .deleteFrom(RPKIT_LOCKED_BLOCK)
-                .where(RPKIT_LOCKED_BLOCK.WORLD.eq(block.world.name))
-                .and(RPKIT_LOCKED_BLOCK.X.eq(block.x))
-                .and(RPKIT_LOCKED_BLOCK.Y.eq(block.y))
-                .and(RPKIT_LOCKED_BLOCK.Z.eq(block.z))
-                .execute()
-        cache?.remove(block.toCacheKey())
+            .deleteFrom(RPKIT_LOCKED_BLOCK)
+            .where(RPKIT_LOCKED_BLOCK.WORLD.eq(block.world.name))
+            .and(RPKIT_LOCKED_BLOCK.X.eq(block.x))
+            .and(RPKIT_LOCKED_BLOCK.Y.eq(block.y))
+            .and(RPKIT_LOCKED_BLOCK.Z.eq(block.z))
+            .execute()
+        cache?.remove(cacheKey)
     }
 
-    private fun Block.toCacheKey() = "${world.name},$x,$y,$z"
 }

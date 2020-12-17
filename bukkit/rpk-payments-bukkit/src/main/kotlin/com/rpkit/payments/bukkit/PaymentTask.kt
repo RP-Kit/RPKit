@@ -30,9 +30,9 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz")
 
     override fun run() {
-        val paymentGroupService = Services[RPKPaymentGroupService::class]
-        val bankService = Services[RPKBankService::class]
-        val paymentNotificationService = Services[RPKPaymentNotificationService::class]
+        val paymentGroupService = Services[RPKPaymentGroupService::class.java]
+        val bankService = Services[RPKBankService::class.java]
+        val paymentNotificationService = Services[RPKPaymentNotificationService::class.java]
         if (paymentGroupService == null) return
         if (bankService == null) return
         if (paymentNotificationService == null) return

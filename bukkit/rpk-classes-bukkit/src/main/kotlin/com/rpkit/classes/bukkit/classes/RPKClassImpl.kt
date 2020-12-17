@@ -39,7 +39,7 @@ class RPKClassImpl(
     val prerequisites: Map<RPKClass, Int>
         get() = prerequisitesByName
                 .map { entry ->
-                    Services[RPKClassService::class]?.getClass(entry.key) to entry.value
+                    Services[RPKClassService::class.java]?.getClass(entry.key) to entry.value
                 }
                 .mapNotNull { (`class`, level) -> if (`class` == null) null else `class` to level }
                 .toMap()
@@ -47,7 +47,7 @@ class RPKClassImpl(
     val baseSkillPoints: Map<RPKSkillType, Int>
         get() = baseSkillPointsByName
                 .map { entry ->
-                    Services[RPKSkillTypeService::class]?.getSkillType(entry.key) to entry.value
+                    Services[RPKSkillTypeService::class.java]?.getSkillType(entry.key) to entry.value
                 }
                 .mapNotNull { (skillType, points) -> if (skillType == null) null else skillType to points}
                 .toMap()
@@ -55,13 +55,13 @@ class RPKClassImpl(
     val levelSkillPoints: Map<RPKSkillType, Int>
         get() = levelSkillPointsByName
                 .map { entry ->
-                    Services[RPKSkillTypeService::class]?.getSkillType(entry.key) to entry.value
+                    Services[RPKSkillTypeService::class.java]?.getSkillType(entry.key) to entry.value
                 }
                 .mapNotNull { (skillType, points) -> if (skillType == null) null else skillType to points }
                 .toMap()
 
     override fun hasPrerequisites(character: RPKCharacter): Boolean {
-        val classService = Services[RPKClassService::class] ?: return false
+        val classService = Services[RPKClassService::class.java] ?: return false
         for ((`class`, level) in prerequisites) {
             if (classService.getLevel(character, `class`) < level) {
                 return false

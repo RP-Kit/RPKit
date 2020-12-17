@@ -21,7 +21,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyLibBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import net.milkbowl.vault.economy.AbstractEconomy
 import net.milkbowl.vault.economy.Economy
 import net.milkbowl.vault.economy.EconomyResponse
@@ -37,10 +37,10 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
     }
 
     override fun getBalance(playerName: String): Double {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return 0.0
-        val characterService = Services[RPKCharacterService::class] ?: return 0.0
-        val economyService = Services[RPKEconomyService::class] ?: return 0.0
-        val currencyService = Services[RPKCurrencyService::class] ?: return 0.0
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return 0.0
+        val characterService = Services[RPKCharacterService::class.java] ?: return 0.0
+        val economyService = Services[RPKEconomyService::class.java] ?: return 0.0
+        val currencyService = Services[RPKCurrencyService::class.java] ?: return 0.0
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         return if (minecraftProfile != null) {
@@ -89,28 +89,28 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
     }
 
     override fun depositPlayer(playerName: String, amount: Double): EconomyResponse {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 ?: return EconomyResponse(
                         0.0,
                         0.0,
                         FAILURE,
                         "There is no Minecraft profile service available."
                 )
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
                 ?: return EconomyResponse(
                         0.0,
                         0.0,
                         FAILURE,
                         "There is no character service available."
                 )
-        val economyService = Services[RPKEconomyService::class]
+        val economyService = Services[RPKEconomyService::class.java]
                 ?: return EconomyResponse(
                         0.0,
                         0.0,
                         FAILURE,
                         "There is no economy service available."
                 )
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
                 ?: return EconomyResponse(
                         0.0,
                         0.0,
@@ -151,8 +151,8 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
     }
 
     override fun hasAccount(playerName: String): Boolean {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return false
-        val characterService = Services[RPKCharacterService::class] ?: return false
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return false
+        val characterService = Services[RPKCharacterService::class.java] ?: return false
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer) ?: return false
         val character = characterService.getActiveCharacter(minecraftProfile)
@@ -176,28 +176,28 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
     }
 
     override fun withdrawPlayer(playerName: String, amount: Double): EconomyResponse {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 ?: return EconomyResponse(
                         0.0,
                         0.0,
                         FAILURE,
                         "There is no Minecraft profile service available."
                 )
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
                 ?: return EconomyResponse(
                         0.0,
                         0.0,
                         FAILURE,
                         "There is no character service available."
                 )
-        val economyService = Services[RPKEconomyService::class]
+        val economyService = Services[RPKEconomyService::class.java]
                 ?: return EconomyResponse(
                         0.0,
                         0.0,
                         FAILURE,
                         "There is no economy service"
                 )
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
                 ?: return EconomyResponse(
                         0.0,
                         0.0,
@@ -234,7 +234,7 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
     }
 
     override fun currencyNameSingular(): String {
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
         return currencyService?.defaultCurrency?.nameSingular ?: ""
     }
 
@@ -243,7 +243,7 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
     }
 
     override fun currencyNamePlural(): String {
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
         return currencyService?.defaultCurrency?.namePlural ?: ""
     }
 
@@ -260,7 +260,7 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
     }
 
     override fun format(amount: Double): String {
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
         val currency = currencyService?.defaultCurrency
         return if (currency != null) {
             "${amount.toInt()} ${(if (amount.toInt() == 1) currency.nameSingular else currency.namePlural)}"

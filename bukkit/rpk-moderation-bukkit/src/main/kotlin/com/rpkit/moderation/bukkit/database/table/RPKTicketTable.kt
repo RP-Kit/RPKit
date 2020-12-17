@@ -20,21 +20,23 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
+import com.rpkit.moderation.bukkit.database.create
 import com.rpkit.moderation.bukkit.database.jooq.Tables.RPKIT_TICKET
 import com.rpkit.moderation.bukkit.ticket.RPKTicket
 import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.bukkit.Location
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKTicketTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_ticket.id.enabled")) {
-        database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_ticket.id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKTicket::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_ticket.id.size"))))
+        database.cacheManager.createCache(
+            "rpk-moderation-bukkit.rpkit_ticket.id",
+            Int::class.javaObjectType,
+            RPKTicket::class.java,
+            plugin.config.getLong("caching.rpkit_ticket.id.size")
+        )
     } else {
         null
     }
@@ -73,10 +75,11 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKTicket) {
+        val ticketId = entity.id ?: return
         database.create
                 .update(RPKIT_TICKET)
                 .set(RPKIT_TICKET.REASON, entity.reason)
@@ -91,9 +94,9 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .set(RPKIT_TICKET.OPEN_DATE, entity.openDate)
                 .set(RPKIT_TICKET.CLOSE_DATE, entity.closeDate)
                 .set(RPKIT_TICKET.CLOSED, entity.isClosed)
-                .where(RPKIT_TICKET.ID.eq(entity.id))
+                .where(RPKIT_TICKET.ID.eq(ticketId))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(ticketId, entity)
     }
 
     operator fun get(id: Int): RPKTicket? {
@@ -118,7 +121,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                     .from(RPKIT_TICKET)
                     .where(RPKIT_TICKET.ID.eq(id))
                     .fetchOne() ?: return null
-            val profileService = Services[RPKProfileService::class]
+            val profileService = Services[RPKProfileService::class.java]
             val issuerId = result[RPKIT_TICKET.ISSUER_ID]
             val issuer = if (issuerId == null) null else profileService?.getProfile(issuerId)
             val resolverId = result[RPKIT_TICKET.RESOLVER_ID]
@@ -152,7 +155,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                         result[RPKIT_TICKET.CLOSE_DATE],
                         result[RPKIT_TICKET.CLOSED]
                 )
-                cache?.put(id, ticket)
+                cache?.set(id, ticket)
                 return ticket
             } else {
                 database.create
@@ -166,11 +169,12 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
     }
 
     fun delete(entity: RPKTicket) {
+        val ticketId = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_TICKET)
-                .where(RPKIT_TICKET.ID.eq(entity.id))
+                .where(RPKIT_TICKET.ID.eq(ticketId))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(ticketId)
     }
 
     fun getOpenTickets(): List<RPKTicket> {

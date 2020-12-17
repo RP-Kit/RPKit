@@ -16,7 +16,7 @@
 
 package com.rpkit.locks.bukkit.lock
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 class RPKPlayerGettingKey(

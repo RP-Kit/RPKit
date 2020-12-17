@@ -20,7 +20,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.dailyquote.bukkit.dailyquote.RPKDailyQuoteService
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -34,8 +34,8 @@ class PlayerJoinListener(private val plugin: RPKEssentialsBukkit) : Listener {
     }
 
     private fun sendJoinMessage(event: PlayerJoinEvent) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
-        val logMessageService = Services[RPKLogMessageService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        val logMessageService = Services[RPKLogMessageService::class.java]
         if (logMessageService != null && minecraftProfileService != null) {
             val joinMessage = event.joinMessage
             if (joinMessage != null) {
@@ -50,7 +50,7 @@ class PlayerJoinListener(private val plugin: RPKEssentialsBukkit) : Listener {
     }
 
     private fun sendDailyQuote(event: PlayerJoinEvent) {
-        val dailyQuoteService = Services[RPKDailyQuoteService::class]
+        val dailyQuoteService = Services[RPKDailyQuoteService::class.java]
         if (dailyQuoteService != null) {
             event.player.sendMessage(dailyQuoteService.getDailyQuote())
         }

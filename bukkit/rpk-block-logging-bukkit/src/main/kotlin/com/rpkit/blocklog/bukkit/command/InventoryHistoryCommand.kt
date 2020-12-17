@@ -39,7 +39,7 @@ class InventoryHistoryCommand(private val plugin: RPKBlockLoggingBukkit) : Comma
             return true
         }
         val targetBlock = sender.getTargetBlock(null, 8)
-        val blockHistoryService = Services[RPKBlockHistoryService::class]
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java]
         if (blockHistoryService == null) {
             sender.sendMessage(plugin.messages["no-block-history-service"])
             return true

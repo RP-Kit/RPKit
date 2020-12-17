@@ -22,7 +22,7 @@ import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -63,7 +63,7 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
         if (currencyService == null) {
             sender.sendMessage(plugin.messages["no-currency-service"])
             return true
@@ -87,17 +87,17 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
     }
 
     private fun showWallet(bukkitPlayer: Player, currency: RPKCurrency) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             bukkitPlayer.sendMessage(plugin.messages["no-character-service"])
             return
         }
-        val economyService = Services[RPKEconomyService::class]
+        val economyService = Services[RPKEconomyService::class.java]
         if (economyService == null) {
             bukkitPlayer.sendMessage(plugin.messages["no-economy-service"])
             return
@@ -140,7 +140,7 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
 
     private inner class CurrencyPrompt : ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val currencyService = Services[RPKCurrencyService::class] ?: return false
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return false
             context.setSessionData("currencyService", currencyService)
             return currencyService.getCurrency(input) != null
         }
@@ -152,7 +152,7 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val currencyService = Services[RPKCurrencyService::class] ?: return plugin.messages["no-currency-service"]
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return plugin.messages["no-currency-service"]
             return plugin.messages["money-subtract-currency-prompt"] + "\n" +
                     currencyService.currencies
                             .joinToString("\n") { currency ->

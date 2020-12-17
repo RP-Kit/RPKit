@@ -39,8 +39,8 @@ class FireballSkill(private val plugin: RPKFireballSkillBukkit) : RPKSkill {
     }
 
     override fun canUse(character: RPKCharacter): Boolean {
-        val skillTypeService = Services[RPKSkillTypeService::class] ?: return false
-        val skillPointService = Services[RPKSkillPointService::class] ?: return false
+        val skillTypeService = Services[RPKSkillTypeService::class.java] ?: return false
+        val skillPointService = Services[RPKSkillPointService::class.java] ?: return false
         return plugin.config.getConfigurationSection("requirements")
                 ?.getKeys(false)
                 ?.mapNotNull { skillTypeName ->

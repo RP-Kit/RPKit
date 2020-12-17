@@ -20,9 +20,10 @@ import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKIRCProfileImpl
-import com.rpkit.players.bukkit.profile.RPKIRCProfileService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -47,18 +48,17 @@ class AccountLinkIRCCommand(private val plugin: RPKPlayersBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["account-link-irc-usage"])
             return true
         }
-        val nick = args[0]
-        val ircService = Services[RPKIRCService::class]
+        val nick = IRCNick(args[0])
+        val ircService = Services[RPKIRCService::class.java]
         if (ircService == null) {
             sender.sendMessage(plugin.messages["no-irc-service"])
             return true
         }
-        val ircUser = ircService.getIRCUser(nick)
-        if (ircUser == null) {
+        if (!ircService.isOnline(nick)) {
             sender.sendMessage(plugin.messages["account-link-irc-invalid-nick"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -73,19 +73,19 @@ class AccountLinkIRCCommand(private val plugin: RPKPlayersBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["account-link-irc-invalid-profile"])
             return true
         }
-        val ircProfileService = Services[RPKIRCProfileService::class]
+        val ircProfileService = Services[RPKIRCProfileService::class.java]
         if (ircProfileService == null) {
             sender.sendMessage(plugin.messages["no-irc-profile-service"])
             return true
         }
-        var ircProfile = ircProfileService.getIRCProfile(ircUser)
+        var ircProfile = ircProfileService.getIRCProfile(nick)
         if (ircProfile != null) {
             sender.sendMessage(plugin.messages["account-link-irc-invalid-already-linked"])
             return true
         }
         ircProfile = RPKIRCProfileImpl(
                 profile = profile,
-                nick = ircUser.nick
+                nick = nick
         )
         ircProfileService.addIRCProfile(ircProfile)
         sender.sendMessage(plugin.messages["account-link-irc-valid"])

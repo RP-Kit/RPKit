@@ -35,7 +35,7 @@ class CreatureSpawnListener(private val plugin: RPKMonstersBukkit) : Listener {
         if (plugin.config.getBoolean("monsters.${event.entityType}.ignored", plugin.config.getBoolean("monsters.default.ignored"))) {
             return
         }
-        val monsterSpawnAreaService = Services[RPKMonsterSpawnAreaService::class] ?: return
+        val monsterSpawnAreaService = Services[RPKMonsterSpawnAreaService::class.java] ?: return
         val spawnArea = monsterSpawnAreaService.getSpawnArea(event.location)
         if (spawnArea == null) {
             event.isCancelled = true
@@ -45,8 +45,8 @@ class CreatureSpawnListener(private val plugin: RPKMonstersBukkit) : Listener {
             event.isCancelled = true
             return
         }
-        val monsterLevelService = Services[RPKMonsterLevelService::class] ?: return
-        val monsterStatService = Services[RPKMonsterStatServiceImpl::class] ?: return
+        val monsterLevelService = Services[RPKMonsterLevelService::class.java] ?: return
+        val monsterStatService = Services[RPKMonsterStatServiceImpl::class.java] ?: return
         val level = monsterLevelService.getMonsterLevel(monster)
         val health = monsterStatService.calculateMonsterMaxHealth(event.entityType, level)
         val maxHealthInstance = event.entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)

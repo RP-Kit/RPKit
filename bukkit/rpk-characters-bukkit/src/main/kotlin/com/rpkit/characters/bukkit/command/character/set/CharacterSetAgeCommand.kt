@@ -20,8 +20,8 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -60,12 +60,12 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             sender.sendMessage(plugin.messages["no-permission-character-set-age"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
@@ -107,9 +107,9 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
         }
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return false
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return false
             context.setSessionData("minecraftProfileService", minecraftProfileService)
-            val characterService = Services[RPKCharacterService::class] ?: return false
+            val characterService = Services[RPKCharacterService::class.java] ?: return false
             context.setSessionData("characterService", characterService)
             val conversable = context.forWhom
             if (conversable !is Player) return false

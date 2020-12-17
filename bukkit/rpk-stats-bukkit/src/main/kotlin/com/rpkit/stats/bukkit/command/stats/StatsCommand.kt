@@ -18,7 +18,7 @@ package com.rpkit.stats.bukkit.command.stats
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.stats.bukkit.RPKStatsBukkit
 import com.rpkit.stats.bukkit.stat.RPKStatService
 import com.rpkit.stats.bukkit.stat.RPKStatVariableService
@@ -42,12 +42,12 @@ class StatsCommand(private val plugin: RPKStatsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
@@ -62,12 +62,12 @@ class StatsCommand(private val plugin: RPKStatsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
-        val statsService = Services[RPKStatService::class]
+        val statsService = Services[RPKStatService::class.java]
         if (statsService == null) {
             sender.sendMessage(plugin.messages["no-stats-service"])
             return true
         }
-        val statVariableService = Services[RPKStatVariableService::class]
+        val statVariableService = Services[RPKStatVariableService::class.java]
         if (statVariableService == null) {
             sender.sendMessage(plugin.messages["no-stat-variable-service"])
             return true

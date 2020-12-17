@@ -28,7 +28,7 @@ class ExperienceField(private val plugin: RPKExperienceBukkit) : CharacterCardFi
     override val name = "experience"
 
     override fun get(character: RPKCharacter): String {
-        val experienceService = Services[RPKExperienceService::class] ?: return ""
+        val experienceService = Services[RPKExperienceService::class.java] ?: return ""
         return "${(experienceService.getExperience(character) - experienceService.getExperienceNeededForLevel(experienceService.getLevel(character)))}/${experienceService.getExperienceNeededForLevel(experienceService.getLevel(character) + 1) - experienceService.getExperienceNeededForLevel(experienceService.getLevel(character))}"
     }
 

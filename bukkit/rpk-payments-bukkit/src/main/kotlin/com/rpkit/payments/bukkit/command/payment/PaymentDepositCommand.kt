@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -45,22 +45,22 @@ class PaymentDepositCommand(private val plugin: RPKPaymentsBukkit) : CommandExec
             sender.sendMessage(plugin.messages["payment-deposit-usage"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val paymentGroupService = Services[RPKPaymentGroupService::class]
+        val paymentGroupService = Services[RPKPaymentGroupService::class.java]
         if (paymentGroupService == null) {
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
         }
-        val bankService = Services[RPKBankService::class]
+        val bankService = Services[RPKBankService::class.java]
         if (bankService == null) {
             sender.sendMessage(plugin.messages["no-bank-service"])
             return true

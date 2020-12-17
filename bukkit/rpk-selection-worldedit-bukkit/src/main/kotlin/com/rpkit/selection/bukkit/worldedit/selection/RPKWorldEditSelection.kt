@@ -16,7 +16,7 @@
 
 package com.rpkit.selection.bukkit.worldedit.selection
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.selection.bukkit.selection.RPKSelection
 import com.sk89q.worldedit.IncompleteRegionException
 import com.sk89q.worldedit.LocalSession

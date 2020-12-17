@@ -16,6 +16,9 @@
 
 package com.rpkit.players.bukkit.profile
 
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileLinkRequest
+
 
 class RPKMinecraftProfileLinkRequestImpl(
         override val profile: RPKProfile,

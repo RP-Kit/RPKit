@@ -21,7 +21,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.drink.bukkit.drink.RPKDrinkService
 import com.rpkit.drink.bukkit.event.drink.RPKBukkitDrinkEvent
 import com.rpkit.drinks.bukkit.RPKDrinksBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerItemConsumeEvent
@@ -31,11 +31,11 @@ class PlayerItemConsumeListener(private val plugin: RPKDrinksBukkit) : Listener 
 
     @EventHandler
     fun onPlayerItemConsume(event: PlayerItemConsumeEvent) {
-        val drinkService = Services[RPKDrinkService::class] ?: return
+        val drinkService = Services[RPKDrinkService::class.java] ?: return
         val drink = drinkService.getDrink(event.item) ?: return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        val characterService = Services[RPKCharacterService::class] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
         val character = characterService.getActiveCharacter(minecraftProfile) ?: return
         val drinkEvent = RPKBukkitDrinkEvent(character, drink)
         plugin.server.pluginManager.callEvent(drinkEvent)

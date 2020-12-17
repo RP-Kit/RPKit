@@ -17,15 +17,14 @@
 package com.rpkit.chat.bukkit.database.table
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.database.create
 import com.rpkit.chat.bukkit.database.jooq.Tables.RPKIT_SNOOPER
 import com.rpkit.chat.bukkit.snooper.RPKSnooper
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 
 /**
  * Represents the snooper table.
@@ -36,31 +35,36 @@ class RPKSnooperTable(
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_snooper.minecraft_profile_id.enabled")) {
-        database.cacheManager.createCache("rpk-chat-bukkit.rpkit_snooper.minecraft_profile_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKSnooper::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_snooper.minecraft_profile_id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-chat-bukkit.rpkit_snooper.minecraft_profile_id",
+            Int::class.javaObjectType,
+            RPKSnooper::class.java,
+            plugin.config.getLong("caching.rpkit_snooper.minecraft_profile_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKSnooper) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .insertInto(
                         RPKIT_SNOOPER,
                         RPKIT_SNOOPER.MINECRAFT_PROFILE_ID
                 )
-                .values(entity.minecraftProfile.id)
+                .values(minecraftProfileId)
                 .execute()
-        cache?.put(entity.minecraftProfile.id, entity)
+        cache?.set(minecraftProfileId, entity)
     }
 
     fun update(entity: RPKSnooper) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .update(RPKIT_SNOOPER)
-                .set(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
-                .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
+                .set(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID, minecraftProfileId)
+                .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
                 .execute()
-        cache?.put(entity.minecraftProfile.id, entity)
+        cache?.set(minecraftProfileId, entity)
     }
 
     /**
@@ -71,18 +75,19 @@ class RPKSnooperTable(
      * @return The snooper instance, or null if none exists
      */
     fun get(minecraftProfile: RPKMinecraftProfile): RPKSnooper? {
-        if (cache?.containsKey(minecraftProfile.id) == true) {
-            return cache.get(minecraftProfile.id)
+        val minecraftProfileId = minecraftProfile.id ?: return null
+        if (cache?.containsKey(minecraftProfileId) == true) {
+            return cache.get(minecraftProfileId)
         } else {
             database.create
                     .select(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)
                     .from(RPKIT_SNOOPER)
-                    .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                    .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
                     .fetchOne() ?: return null
             val snooper = RPKSnooper(
                     minecraftProfile
             )
-            cache?.put(minecraftProfile.id, snooper)
+            cache?.set(minecraftProfileId, snooper)
             return snooper
         }
     }
@@ -97,7 +102,7 @@ class RPKSnooperTable(
                 .select(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)
                 .from(RPKIT_SNOOPER)
                 .fetch()
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return emptyList()
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(result.get(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID))
                     ?: return@mapNotNull null
@@ -106,11 +111,12 @@ class RPKSnooperTable(
     }
 
     fun delete(entity: RPKSnooper) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_SNOOPER)
-                .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
+                .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
                 .execute()
-        cache?.remove(entity.minecraftProfile.id)
+        cache?.remove(minecraftProfileId)
     }
 
 }

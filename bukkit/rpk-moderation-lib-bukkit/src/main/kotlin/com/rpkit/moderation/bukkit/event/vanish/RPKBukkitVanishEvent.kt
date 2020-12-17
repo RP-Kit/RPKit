@@ -17,7 +17,7 @@
 package com.rpkit.moderation.bukkit.event.vanish
 
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 

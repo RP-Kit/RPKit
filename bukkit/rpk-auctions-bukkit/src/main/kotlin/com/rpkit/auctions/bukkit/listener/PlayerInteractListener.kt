@@ -24,8 +24,8 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material.AIR
 import org.bukkit.block.Sign
@@ -47,22 +47,22 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit) : Listener {
             event.player.sendMessage(plugin.messages["no-permission-bid"])
             return
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             event.player.sendMessage(plugin.messages["no-character-service"])
             return
         }
-        val economyService = Services[RPKEconomyService::class]
+        val economyService = Services[RPKEconomyService::class.java]
         if (economyService == null) {
             event.player.sendMessage(plugin.messages["no-economy-service"])
             return
         }
-        val auctionService = Services[RPKAuctionService::class]
+        val auctionService = Services[RPKAuctionService::class.java]
         if (auctionService == null) {
             event.player.sendMessage(plugin.messages["no-auction-service"])
             return

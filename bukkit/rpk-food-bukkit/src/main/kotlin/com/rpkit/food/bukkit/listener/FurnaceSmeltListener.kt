@@ -31,7 +31,7 @@ class FurnaceSmeltListener(private val plugin: RPKFoodBukkit) : Listener {
     @EventHandler
     fun onFurnaceSmelt(event: FurnaceSmeltEvent) {
         val item = event.result
-        val expiryService = Services[RPKExpiryServiceImpl::class]
+        val expiryService = Services[RPKExpiryServiceImpl::class.java]
         expiryService?.setExpiry(item)
         event.result = item
     }

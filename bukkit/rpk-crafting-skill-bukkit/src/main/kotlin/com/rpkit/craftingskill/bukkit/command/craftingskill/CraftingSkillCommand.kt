@@ -21,7 +21,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -66,7 +66,7 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : Command
             sender.sendMessage(plugin.messages["crafting-skill-invalid-material"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -76,7 +76,7 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : Command
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
@@ -86,7 +86,7 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : Command
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
-        val craftingSkillService = Services[RPKCraftingSkillService::class]
+        val craftingSkillService = Services[RPKCraftingSkillService::class.java]
         if (craftingSkillService == null) {
             sender.sendMessage(plugin.messages["no-crafting-skill-service"])
             return true

@@ -20,20 +20,24 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.featureflags.bukkit.RPKFeatureFlagsBukkit
+import com.rpkit.featureflags.bukkit.database.create
 import com.rpkit.featureflags.bukkit.database.jooq.Tables.RPKIT_PROFILE_FEATURE_FLAG
 import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlag
 import com.rpkit.featureflags.bukkit.featureflag.RPKProfileFeatureFlag
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKProfileFeatureFlagTable(private val database: Database, private val plugin: RPKFeatureFlagsBukkit) : Table {
 
-    private val cache = database.cacheManager.createCache("rpk-feature-flags-bukkit.rpkit_profile_feature_flag.id",
-            CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, RPKProfileFeatureFlag::class.java,
-                    ResourcePoolsBuilder.heap(plugin.server.maxPlayers * 50L)))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_profile_feature_flag.id.enabled")) {
+        database.cacheManager.createCache(
+            "rpk-feature-flags-bukkit.rpkit_profile_feature_flag.id",
+            String::class.java,
+            RPKProfileFeatureFlag::class.java,
+            plugin.config.getLong("caching.rpkit_profile_feature_flag.id.size")
+        )
+    } else null
 
     fun insert(entity: RPKProfileFeatureFlag) {
         database.create
@@ -62,29 +66,28 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
     }
 
     fun get(profile: RPKProfile, featureFlag: RPKFeatureFlag): RPKProfileFeatureFlag? {
-        if (cache.containsKey(featureFlag.name)) {
+        if (cache?.containsKey(featureFlag.name) == true) {
             return cache[featureFlag.name]
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID,
-                            RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME,
-                            RPKIT_PROFILE_FEATURE_FLAG.ENABLED
-                    )
-                    .from(RPKIT_PROFILE_FEATURE_FLAG)
-                    .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profile.id))
-                    .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(featureFlag.name))
-                    .fetchOne() ?: return null
-            Services[RPKProfileService::class]
-                    ?: return null
-            val profileFeatureFlag = RPKProfileFeatureFlag(
-                    profile,
-                    featureFlag,
-                    result.get(RPKIT_PROFILE_FEATURE_FLAG.ENABLED)
-            )
-            cache.put(featureFlag.name, profileFeatureFlag)
-            return profileFeatureFlag
         }
+        val result = database.create
+            .select(
+                RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID,
+                RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME,
+                RPKIT_PROFILE_FEATURE_FLAG.ENABLED
+            )
+            .from(RPKIT_PROFILE_FEATURE_FLAG)
+            .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profile.id))
+            .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(featureFlag.name))
+            .fetchOne() ?: return null
+        Services[RPKProfileService::class.java]
+            ?: return null
+        val profileFeatureFlag = RPKProfileFeatureFlag(
+            profile,
+            featureFlag,
+            result.get(RPKIT_PROFILE_FEATURE_FLAG.ENABLED)
+        )
+        cache?.set(featureFlag.name, profileFeatureFlag)
+        return profileFeatureFlag
     }
 
     fun delete(entity: RPKProfileFeatureFlag) {
@@ -93,7 +96,7 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
                 .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(entity.profile.id))
                 .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(entity.featureFlag.name))
                 .execute()
-        cache.remove(entity.featureFlag.name)
+        cache?.remove(entity.featureFlag.name)
     }
 
 }

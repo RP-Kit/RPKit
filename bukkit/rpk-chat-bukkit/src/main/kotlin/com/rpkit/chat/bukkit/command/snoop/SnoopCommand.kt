@@ -19,7 +19,7 @@ package com.rpkit.chat.bukkit.command.snoop
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.snooper.RPKSnooperService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -31,12 +31,12 @@ import org.bukkit.entity.Player
  */
 class SnoopCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        val snooperService = Services[RPKSnooperService::class]
+        val snooperService = Services[RPKSnooperService::class.java]
         if (snooperService == null) {
             sender.sendMessage(plugin.messages["no-snooper-service"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true

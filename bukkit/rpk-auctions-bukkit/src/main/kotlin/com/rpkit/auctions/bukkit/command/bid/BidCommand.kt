@@ -24,7 +24,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -53,22 +53,22 @@ class BidCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
             val id = args[0].toInt()
             try {
                 val bidAmount = args[1].toInt()
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
                     sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
                     return true
                 }
-                val characterService = Services[RPKCharacterService::class]
+                val characterService = Services[RPKCharacterService::class.java]
                 if (characterService == null) {
                     sender.sendMessage(plugin.messages["no-character-service"])
                     return true
                 }
-                val economyService = Services[RPKEconomyService::class]
+                val economyService = Services[RPKEconomyService::class.java]
                 if (economyService == null) {
                     sender.sendMessage(plugin.messages["no-economy-service"])
                     return true
                 }
-                val auctionService = Services[RPKAuctionService::class]
+                val auctionService = Services[RPKAuctionService::class.java]
                 if (auctionService == null) {
                     sender.sendMessage(plugin.messages["no-auction-service"])
                     return true

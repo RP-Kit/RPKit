@@ -32,7 +32,7 @@ class EntityDeathListener : Listener {
     @EventHandler
     fun onEntityDeath(event: EntityDeathEvent) {
         if (event.entity is Player) return
-        val expiryService = Services[RPKExpiryServiceImpl::class]
+        val expiryService = Services[RPKExpiryServiceImpl::class.java]
         val newDrops = mutableListOf<ItemStack>()
         for (drop in event.drops) {
             if (drop.type.isEdible) {

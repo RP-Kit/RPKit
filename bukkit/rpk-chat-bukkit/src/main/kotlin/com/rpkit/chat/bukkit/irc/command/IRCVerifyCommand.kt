@@ -19,6 +19,7 @@ package com.rpkit.chat.bukkit.irc.command
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.irc.IRCNick
 import org.pircbotx.Channel
 import org.pircbotx.User
 
@@ -29,7 +30,7 @@ import org.pircbotx.User
 class IRCVerifyCommand(private val plugin: RPKChatBukkit) : IRCCommand("verify") {
 
     override fun execute(channel: Channel, sender: User, cmd: IRCCommand, label: String, args: Array<String>) {
-        val ircService = Services[RPKIRCService::class]
+        val ircService = Services[RPKIRCService::class.java]
         if (ircService == null) {
             sender.send().message(plugin.messages["irc-no-irc-service"])
             return
@@ -38,7 +39,10 @@ class IRCVerifyCommand(private val plugin: RPKChatBukkit) : IRCCommand("verify")
             sender.send().message(plugin.messages["irc-verify-invalid-verification-code-not-specified"])
             return
         }
-        ircService.ircBot.sendIRC().message("NickServ", "VERIFY REGISTER " + ircService.ircBot.nick + " " + args[0])
+        ircService.sendMessage(
+                IRCNick("NickServ"),
+                "VERIFY REGISTER " + ircService.nick.value + " " + args[0]
+        )
         sender.send().message(plugin.messages["irc-verify-valid"])
     }
 

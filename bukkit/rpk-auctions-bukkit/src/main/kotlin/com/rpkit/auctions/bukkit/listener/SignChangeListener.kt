@@ -40,7 +40,7 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit) : Listener {
                 return
             }
             try {
-                val auctionService = Services[RPKAuctionService::class]
+                val auctionService = Services[RPKAuctionService::class.java]
                 if (auctionService == null) {
                     event.player.sendMessage(plugin.messages["no-auction-service"])
                     return

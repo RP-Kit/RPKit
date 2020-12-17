@@ -19,6 +19,6 @@ package com.rpkit.chat.bukkit.chatchannel.matchpattern
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 
 class RPKChatChannelMatchPatternImpl(
-        override val regex: Regex,
+        override val regex: String,
         override val groups: Map<Int, RPKChatChannel>
 ) : RPKChatChannelMatchPattern

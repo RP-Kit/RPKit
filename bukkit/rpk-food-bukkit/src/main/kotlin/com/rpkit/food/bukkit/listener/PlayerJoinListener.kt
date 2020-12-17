@@ -26,7 +26,7 @@ class PlayerJoinListener : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        val expiryService = Services[RPKExpiryService::class] ?: return
+        val expiryService = Services[RPKExpiryService::class.java] ?: return
         event.player.inventory.contents
                 .filterNotNull()
                 .filter { it.type.isEdible }

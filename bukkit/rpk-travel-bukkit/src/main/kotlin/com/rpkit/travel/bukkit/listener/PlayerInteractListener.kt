@@ -33,7 +33,7 @@ class PlayerInteractListener(private val plugin: RPKTravelBukkit) : Listener {
         val clickedBlock = event.clickedBlock ?: return
         val sign = clickedBlock.state as? Sign ?: return
         if (!sign.getLine(0).equals("$GREEN[warp]", ignoreCase = true)) return
-        val warpService = Services[RPKWarpService::class]
+        val warpService = Services[RPKWarpService::class.java]
         if (warpService == null) {
             event.player.sendMessage(plugin.messages["no-warp-service"])
             return

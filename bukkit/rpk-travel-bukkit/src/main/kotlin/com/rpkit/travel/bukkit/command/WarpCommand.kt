@@ -17,7 +17,7 @@
 package com.rpkit.travel.bukkit.command
 
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.travel.bukkit.RPKTravelBukkit
 import com.rpkit.warp.bukkit.event.warp.RPKBukkitWarpUseEvent
 import com.rpkit.warp.bukkit.warp.RPKWarp
@@ -39,7 +39,7 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val warpService = Services[RPKWarpService::class]
+        val warpService = Services[RPKWarpService::class.java]
         if (warpService == null) {
             sender.sendMessage(plugin.messages["no-warp-service"])
             return true
@@ -50,7 +50,7 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
                 sender.sendMessage(plugin.messages["warp-invalid-warp"])
                 return true
             }
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             if (minecraftProfileService == null) {
                 sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
                 return true

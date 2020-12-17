@@ -42,6 +42,8 @@ class RPKSkillsBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.skills.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4417)
         saveDefaultConfig()
 
@@ -89,8 +91,8 @@ class RPKSkillsBukkit : RPKBukkitPlugin() {
         database.addTable(RPKSkillCooldownTable(database, this))
         database.addTable(RPKSkillBindingTable(database, this))
 
-        Services[RPKSkillTypeService::class] = RPKSkillTypeServiceImpl(this)
-        Services[RPKSkillService::class] = RPKSkillServiceImpl(this)
+        Services[RPKSkillTypeService::class.java] = RPKSkillTypeServiceImpl(this)
+        Services[RPKSkillService::class.java] = RPKSkillServiceImpl(this)
     }
 
     override fun registerCommands() {

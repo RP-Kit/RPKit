@@ -17,7 +17,7 @@
 package com.rpkit.chat.bukkit.mute
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 /**
  * Represents a chat channel mute.

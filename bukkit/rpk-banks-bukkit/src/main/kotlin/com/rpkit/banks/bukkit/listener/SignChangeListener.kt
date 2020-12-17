@@ -47,7 +47,7 @@ class SignChangeListener(private val plugin: RPKBanksBukkit) : Listener {
             } else {
                 event.setLine(2, "1")
             }
-            val currencyService = Services[RPKCurrencyService::class]
+            val currencyService = Services[RPKCurrencyService::class.java]
             if (currencyService == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-currency-service"])

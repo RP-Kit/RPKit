@@ -34,7 +34,7 @@ class RaceListCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor
             sender.sendMessage(plugin.messages["no-permission-race-list"])
             return true
         }
-        val raceService = Services[RPKRaceService::class]
+        val raceService = Services[RPKRaceService::class.java]
         if (raceService == null) {
             sender.sendMessage(plugin.messages["no-race-service"])
             return true

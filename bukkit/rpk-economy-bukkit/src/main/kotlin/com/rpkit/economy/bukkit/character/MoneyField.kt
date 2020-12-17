@@ -35,8 +35,8 @@ class MoneyField(val plugin: RPKEconomyBukkit) : HideableCharacterCardField {
         return if (isHidden(character)) {
             "[HIDDEN]"
         } else {
-            val economyService = Services[RPKEconomyService::class] ?: return plugin.messages["no-economy-service"]
-            val currencyService = Services[RPKCurrencyService::class] ?: return plugin.messages["no-currency-service"]
+            val economyService = Services[RPKEconomyService::class.java] ?: return plugin.messages["no-economy-service"]
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return plugin.messages["no-currency-service"]
             currencyService.currencies
                     .joinToString(", ") { currency ->
                         val balance = economyService.getBalance(character, currency)
@@ -46,11 +46,11 @@ class MoneyField(val plugin: RPKEconomyBukkit) : HideableCharacterCardField {
     }
 
     override fun isHidden(character: RPKCharacter): Boolean {
-        return plugin.database.getTable(RPKMoneyHiddenTable::class).get(character) != null
+        return plugin.database.getTable(RPKMoneyHiddenTable::class.java).get(character) != null
     }
 
     override fun setHidden(character: RPKCharacter, hidden: Boolean) {
-        val moneyHiddenTable = plugin.database.getTable(RPKMoneyHiddenTable::class)
+        val moneyHiddenTable = plugin.database.getTable(RPKMoneyHiddenTable::class.java)
         if (hidden) {
             if (moneyHiddenTable.get(character) == null) {
                 moneyHiddenTable.insert(RPKMoneyHidden(character = character))

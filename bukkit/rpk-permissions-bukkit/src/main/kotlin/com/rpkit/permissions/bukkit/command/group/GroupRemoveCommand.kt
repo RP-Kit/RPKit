@@ -20,7 +20,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.removeGroup
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -41,12 +41,12 @@ class GroupRemoveCommand(private val plugin: RPKPermissionsBukkit) : CommandExec
             sender.sendMessage(plugin.messages["group-remove-usage"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val groupService = Services[RPKGroupService::class]
+        val groupService = Services[RPKGroupService::class.java]
         if (groupService == null) {
             sender.sendMessage(plugin.messages["no-group-service"])
             return true

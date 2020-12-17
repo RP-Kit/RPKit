@@ -17,13 +17,12 @@
 package com.rpkit.characters.bukkit.database.table
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
+import com.rpkit.characters.bukkit.database.create
 import com.rpkit.characters.bukkit.database.jooq.Tables.RPKIT_RACE
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceImpl
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 /**
  * Represents the race table.
@@ -31,17 +30,23 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 class RPKRaceTable(private val database: Database, private val plugin: RPKCharactersBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_race.id.enabled")) {
-        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_race.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKRace::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_race.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-characters-bukkit.rpkit_race.id",
+            Int::class.javaObjectType,
+            RPKRace::class.java,
+            plugin.config.getLong("caching.rpkit_race.id.size")
+        )
     } else {
         null
     }
 
     private val nameCache = if (plugin.config.getBoolean("caching.rpkit_race.name.enabled")) {
-        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_race.name",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_race.name.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-characters-bukkit.rpkit_race.name",
+            String::class.java,
+            Int::class.javaObjectType,
+            plugin.config.getLong("caching.rpkit_race.name.size")
+        )
     } else {
         null
     }
@@ -57,18 +62,19 @@ class RPKRaceTable(private val database: Database, private val plugin: RPKCharac
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        cache?.put(id, entity)
-        nameCache?.put(entity.name, id)
+        cache?.set(id, entity)
+        nameCache?.set(entity.name, id)
     }
 
     fun update(entity: RPKRace) {
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_RACE)
                 .set(RPKIT_RACE.NAME, entity.name)
-                .where(RPKIT_RACE.ID.eq(entity.id))
+                .where(RPKIT_RACE.ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
-        nameCache?.put(entity.name, entity.id)
+        cache?.set(id, entity)
+        nameCache?.set(entity.name, id)
     }
 
     operator fun get(id: Int): RPKRace? {
@@ -88,8 +94,8 @@ class RPKRaceTable(private val database: Database, private val plugin: RPKCharac
                     id,
                     result.get(RPKIT_RACE.NAME)
             )
-            cache?.put(id, race)
-            nameCache?.put(race.name, id)
+            cache?.set(id, race)
+            nameCache?.set(race.name, id)
             return race
         }
     }
@@ -119,22 +125,24 @@ class RPKRaceTable(private val database: Database, private val plugin: RPKCharac
                     .from(RPKIT_RACE)
                     .where(RPKIT_RACE.NAME.eq(name))
                     .fetchOne() ?: return null
+            val id = result[RPKIT_RACE.ID]
             val race = RPKRaceImpl(
-                    result.get(RPKIT_RACE.ID),
+                    id,
                     name
             )
-            cache?.put(race.id, race)
-            nameCache?.put(name, race.id)
+            cache?.set(id, race)
+            nameCache?.set(name, id)
             return race
         }
     }
 
     fun delete(entity: RPKRace) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_RACE)
-                .where(RPKIT_RACE.ID.eq(entity.id))
+                .where(RPKIT_RACE.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
         nameCache?.remove(entity.name)
     }
 

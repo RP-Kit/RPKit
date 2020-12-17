@@ -20,10 +20,9 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
+import com.rpkit.professions.bukkit.database.create
 import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN
 import com.rpkit.professions.bukkit.profession.RPKCharacterProfessionChangeCooldown
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 class RPKCharacterProfessionChangeCooldownTable(
         private val database: Database,
@@ -31,14 +30,18 @@ class RPKCharacterProfessionChangeCooldownTable(
 ) : Table {
 
     private val characterCache = if (plugin.config.getBoolean("caching.rpkit_character_profession_change_cooldown.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-professions-bukkit.rpkit_character_profession_change_cooldown.character_id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacterProfessionChangeCooldown::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character_profession_change_cooldown.character_id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-professions-bukkit.rpkit_character_profession_change_cooldown.character_id",
+            Int::class.javaObjectType,
+            RPKCharacterProfessionChangeCooldown::class.java,
+            plugin.config.getLong("caching.rpkit_character_profession_change_cooldown.character_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKCharacterProfessionChangeCooldown) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN,
@@ -46,45 +49,48 @@ class RPKCharacterProfessionChangeCooldownTable(
                         RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.COOLDOWN_END_TIME
                 )
                 .values(
-                        entity.character.id,
+                    characterId,
                         entity.cooldownEndTime
                 )
                 .execute()
-        characterCache?.put(entity.character.id, entity)
+        characterCache?.set(characterId, entity)
     }
 
     fun update(entity: RPKCharacterProfessionChangeCooldown) {
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN)
                 .set(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.COOLDOWN_END_TIME, entity.cooldownEndTime)
-                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(characterId))
                 .execute()
-        characterCache?.put(entity.character.id, entity)
+        characterCache?.set(characterId, entity)
     }
 
     fun get(character: RPKCharacter): RPKCharacterProfessionChangeCooldown? {
-        if (characterCache?.containsKey(character.id) == true) {
-            return characterCache[character.id]
+        val characterId = character.id ?: return null
+        if (characterCache?.containsKey(characterId) == true) {
+            return characterCache[characterId]
         }
         val result = database.create
                 .select(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.COOLDOWN_END_TIME)
                 .from(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN)
-                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(character.id))
+                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(characterId))
                 .fetchOne() ?: return null
         val characterProfessionChangeCooldown = RPKCharacterProfessionChangeCooldown(
                 character,
                 result[RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.COOLDOWN_END_TIME]
         )
-        characterCache?.put(character.id, characterProfessionChangeCooldown)
+        characterCache?.set(characterId, characterProfessionChangeCooldown)
         return characterProfessionChangeCooldown
     }
 
     fun delete(entity: RPKCharacterProfessionChangeCooldown) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN)
-                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(characterId))
                 .execute()
-        characterCache?.remove(entity.character.id)
+        characterCache?.remove(characterId)
     }
 
 }

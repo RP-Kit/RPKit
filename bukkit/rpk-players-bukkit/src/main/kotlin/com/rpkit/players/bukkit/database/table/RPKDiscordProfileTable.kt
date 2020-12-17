@@ -21,15 +21,15 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
+import com.rpkit.players.bukkit.database.create
 import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_DISCORD_PROFILE
-import com.rpkit.players.bukkit.profile.RPKDiscordProfile
 import com.rpkit.players.bukkit.profile.RPKDiscordProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
-import net.dv8tion.jda.api.entities.User
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
+import com.rpkit.players.bukkit.profile.discord.DiscordUserId
+import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfile
+import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileId
 
 class RPKDiscordProfileTable(
         private val database: Database,
@@ -37,9 +37,12 @@ class RPKDiscordProfileTable(
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_discord_profile.id.enabled")) {
-        database.cacheManager.createCache("rpk-players-bukkit.rpkit_discord_profile.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKDiscordProfile::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_discord_profile.id.size"))))
+        database.cacheManager.createCache(
+            "rpk-players-bukkit.rpkit_discord_profile.id",
+            Int::class.javaObjectType,
+            RPKDiscordProfile::class.java,
+            plugin.config.getLong("caching.rpkit_discord_profile.id.size")
+        )
     } else {
         null
     }
@@ -58,15 +61,16 @@ class RPKDiscordProfileTable(
                         } else {
                             null
                         },
-                        entity.discordId
+                        entity.discordId.value
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
+        entity.id = RPKDiscordProfileId(id)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKDiscordProfile) {
+        val id = entity.id ?: return
         val profile = entity.profile
         database.create
                 .update(RPKIT_DISCORD_PROFILE)
@@ -78,15 +82,15 @@ class RPKDiscordProfileTable(
                             null
                         }
                 )
-                .set(RPKIT_DISCORD_PROFILE.DISCORD_ID, entity.discordId)
-                .where(RPKIT_DISCORD_PROFILE.ID.eq(entity.id))
+                .set(RPKIT_DISCORD_PROFILE.DISCORD_ID, entity.discordId.value)
+                .where(RPKIT_DISCORD_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKDiscordProfile? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKDiscordProfileId): RPKDiscordProfile? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         }
         val result = database.create
                 .select(
@@ -94,33 +98,33 @@ class RPKDiscordProfileTable(
                         RPKIT_DISCORD_PROFILE.DISCORD_ID
                 )
                 .from(RPKIT_DISCORD_PROFILE)
-                .where(RPKIT_DISCORD_PROFILE.ID.eq(id))
+                .where(RPKIT_DISCORD_PROFILE.ID.eq(id.value))
                 .fetchOne() ?: return null
         val profileId = result[RPKIT_DISCORD_PROFILE.PROFILE_ID]
-        val profileService = Services[RPKProfileService::class] ?: return null
-        val discordService = Services[RPKDiscordService::class] ?: return null
+        val profileService = Services[RPKProfileService::class.java] ?: return null
+        val discordService = Services[RPKDiscordService::class.java] ?: return null
         val profile = if (profileId != null) {
             profileService.getProfile(profileId)
         } else {
             null
-        } ?: RPKThinProfileImpl(discordService.getUser(result[RPKIT_DISCORD_PROFILE.DISCORD_ID])?.name
+        } ?: RPKThinProfileImpl(discordService.getUserName(DiscordUserId(result[RPKIT_DISCORD_PROFILE.DISCORD_ID]))
                 ?: "Unknown Discord user")
         val discordProfile = RPKDiscordProfileImpl(
                 id,
                 profile,
-                result[RPKIT_DISCORD_PROFILE.DISCORD_ID]
+                DiscordUserId(result[RPKIT_DISCORD_PROFILE.DISCORD_ID])
         )
-        cache?.put(id, discordProfile)
+        cache?.set(id.value, discordProfile)
         return discordProfile
     }
 
-    fun get(user: User): RPKDiscordProfile? {
+    fun get(userId: DiscordUserId): RPKDiscordProfile? {
         val result = database.create
                 .select(RPKIT_DISCORD_PROFILE.ID)
                 .from(RPKIT_DISCORD_PROFILE)
-                .where(RPKIT_DISCORD_PROFILE.DISCORD_ID.eq(user.idLong))
+                .where(RPKIT_DISCORD_PROFILE.DISCORD_ID.eq(userId.value))
                 .fetchOne() ?: return null
-        return get(result[RPKIT_DISCORD_PROFILE.ID])
+        return get(RPKDiscordProfileId(result[RPKIT_DISCORD_PROFILE.ID]))
     }
 
     fun get(profile: RPKProfile): List<RPKDiscordProfile> {
@@ -130,16 +134,17 @@ class RPKDiscordProfileTable(
                 .where(RPKIT_DISCORD_PROFILE.PROFILE_ID.eq(profile.id))
                 .fetch()
         return results.mapNotNull { result ->
-            get(result[RPKIT_DISCORD_PROFILE.ID])
+            get(RPKDiscordProfileId(result[RPKIT_DISCORD_PROFILE.ID]))
         }
     }
 
     fun delete(entity: RPKDiscordProfile) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_DISCORD_PROFILE)
-                .where(RPKIT_DISCORD_PROFILE.ID.eq(entity.id))
+                .where(RPKIT_DISCORD_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id.value)
     }
 
 

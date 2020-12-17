@@ -22,7 +22,7 @@ import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.ClickEvent
@@ -46,7 +46,7 @@ class RPKCharacterImpl(
         override var gender: String? = plugin.config.getString("characters.defaults.gender"),
         override var age: Int = plugin.config.getInt("characters.defaults.age"),
         override var race: RPKRace? = if (plugin.config.getString("characters.defaults.race") != null)
-            Services[RPKRaceService::class]?.getRace(plugin.config.getString("characters.defaults.race")
+            Services[RPKRaceService::class.java]?.getRace(plugin.config.getString("characters.defaults.race")
                 ?: "") else null,
         description: String = plugin.config.getString("characters.defaults.description") ?: "",
         dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
@@ -90,7 +90,7 @@ class RPKCharacterImpl(
     override var isDead = dead
 
     override fun showCharacterCard(minecraftProfile: RPKMinecraftProfile) {
-        val characterCardFieldService = Services[RPKCharacterCardFieldService::class]
+        val characterCardFieldService = Services[RPKCharacterCardFieldService::class.java]
         if (characterCardFieldService == null) {
             minecraftProfile.sendMessage(plugin.messages["no-character-card-field-service"])
             return

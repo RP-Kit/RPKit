@@ -30,7 +30,7 @@ import org.bstats.bukkit.Metrics
 class RPKCoreBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
-        System.getProperties().setProperty("org.jooq.no-logo", "true");
+        System.getProperties().setProperty("org.jooq.no-logo", "true")
         Metrics(this, 4371)
         Services.delegate = BukkitServicesDelegate()
         saveDefaultConfig()

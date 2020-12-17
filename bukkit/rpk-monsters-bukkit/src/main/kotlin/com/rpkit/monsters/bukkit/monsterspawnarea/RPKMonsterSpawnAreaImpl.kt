@@ -31,17 +31,17 @@ class RPKMonsterSpawnAreaImpl(
 ) : RPKMonsterSpawnArea {
 
     override val allowedMonsters: Set<EntityType>
-        get() = plugin.database.getTable(RPKMonsterSpawnAreaMonsterTable::class).get(this)
+        get() = plugin.database.getTable(RPKMonsterSpawnAreaMonsterTable::class.java).get(this)
                 .mapTo(mutableSetOf(), RPKMonsterSpawnAreaMonster::entityType)
 
     val minLevels: MutableMap<EntityType, Int>
-        get() = plugin.database.getTable(RPKMonsterSpawnAreaMonsterTable::class).get(this)
+        get() = plugin.database.getTable(RPKMonsterSpawnAreaMonsterTable::class.java).get(this)
                 .map { monsterSpawnAreaMonster -> Pair(monsterSpawnAreaMonster.entityType, monsterSpawnAreaMonster.minLevel) }
                 .toMap()
                 .toMutableMap()
 
     val maxLevels: MutableMap<EntityType, Int>
-        get() = plugin.database.getTable(RPKMonsterSpawnAreaMonsterTable::class).get(this)
+        get() = plugin.database.getTable(RPKMonsterSpawnAreaMonsterTable::class.java).get(this)
                 .map { monsterSpawnAreaMonster -> Pair(monsterSpawnAreaMonster.entityType, monsterSpawnAreaMonster.maxLevel) }
                 .toMap()
                 .toMutableMap()
@@ -57,8 +57,8 @@ class RPKMonsterSpawnAreaImpl(
     }
 
     override fun addMonster(entityType: EntityType, minLevel: Int, maxLevel: Int) {
-        if (id == 0) plugin.database.getTable(RPKMonsterSpawnAreaTable::class).insert(this)
-        plugin.database.getTable(RPKMonsterSpawnAreaMonsterTable::class).insert(RPKMonsterSpawnAreaMonster(
+        if (id == 0) plugin.database.getTable(RPKMonsterSpawnAreaTable::class.java).insert(this)
+        plugin.database.getTable(RPKMonsterSpawnAreaMonsterTable::class.java).insert(RPKMonsterSpawnAreaMonster(
                 monsterSpawnArea = this,
                 entityType = entityType,
                 minLevel = minLevel,
@@ -68,7 +68,7 @@ class RPKMonsterSpawnAreaImpl(
 
     override fun removeMonster(entityType: EntityType) {
         if (id == 0) return
-        val monsterSpawnAreaMonsterTable = plugin.database.getTable(RPKMonsterSpawnAreaMonsterTable::class)
+        val monsterSpawnAreaMonsterTable = plugin.database.getTable(RPKMonsterSpawnAreaMonsterTable::class.java)
         monsterSpawnAreaMonsterTable.get(this)
                 .filter { monster -> monster.entityType == entityType }
                 .forEach { monsterSpawnAreaMonsterTable.delete(it) }

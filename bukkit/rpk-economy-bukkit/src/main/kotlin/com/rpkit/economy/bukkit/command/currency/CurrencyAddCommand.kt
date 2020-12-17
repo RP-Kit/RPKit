@@ -63,12 +63,12 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val currencyService = Services[RPKCurrencyService::class] ?: return false
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return false
             return currencyService.getCurrency(input) == null
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            if (Services[RPKCurrencyService::class] == null) return plugin.messages["no-currency-service"]
+            if (Services[RPKCurrencyService::class.java] == null) return plugin.messages["no-currency-service"]
             return plugin.messages["currency-set-name-invalid-name"]
         }
 
@@ -238,7 +238,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
 
     private inner class CurrencyAddedPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt? {
-            val currencyService = Services[RPKCurrencyService::class] ?: return END_OF_CONVERSATION
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return END_OF_CONVERSATION
             currencyService.addCurrency(
                     RPKCurrencyImpl(
                             name = context.getSessionData("name") as String,

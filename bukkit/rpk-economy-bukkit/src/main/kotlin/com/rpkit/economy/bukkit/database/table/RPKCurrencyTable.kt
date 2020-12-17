@@ -21,10 +21,9 @@ import com.rpkit.core.database.Table
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyImpl
+import com.rpkit.economy.bukkit.database.create
 import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_CURRENCY
 import org.bukkit.Material
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 /**
  * Represents the currency table.
@@ -35,17 +34,23 @@ class RPKCurrencyTable(
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_currency.id.enabled")) {
-        database.cacheManager.createCache("rpk-economy-bukkit.rpkit_currency.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCurrency::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_currency.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-economy-bukkit.rpkit_currency.id",
+            Int::class.javaObjectType,
+            RPKCurrency::class.java,
+            plugin.config.getLong("caching.rpkit_currency.id.size")
+        )
     } else {
         null
     }
 
     private val nameCache = if (plugin.config.getBoolean("caching.rpkit_currency.name.enabled")) {
-        database.cacheManager.createCache("rpk-economy-bukkit.rpkit_currency.name",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, Int::class.javaObjectType,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_currency.name.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-economy-bukkit.rpkit_currency.name",
+            String::class.java,
+            Int::class.javaObjectType,
+            plugin.config.getLong("caching.rpkit_currency.name.size")
+        )
     } else {
         null
     }
@@ -72,11 +77,12 @@ class RPKCurrencyTable(
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache?.put(id, entity)
-        nameCache?.put(entity.name, id)
+        cache?.set(id, entity)
+        nameCache?.set(entity.name, id)
     }
 
     fun update(entity: RPKCurrency) {
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_CURRENCY)
                 .set(RPKIT_CURRENCY.NAME, entity.name)
@@ -85,15 +91,15 @@ class RPKCurrencyTable(
                 .set(RPKIT_CURRENCY.RATE, entity.rate)
                 .set(RPKIT_CURRENCY.DEFAULT_AMOUNT, entity.defaultAmount)
                 .set(RPKIT_CURRENCY.MATERIAL, entity.material.toString())
-                .where(RPKIT_CURRENCY.ID.eq(entity.id))
+                .where(RPKIT_CURRENCY.ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
-        nameCache?.put(entity.name, entity.id)
+        cache?.set(id, entity)
+        nameCache?.set(entity.name, id)
     }
 
     operator fun get(id: Int): RPKCurrency? {
         if (cache?.containsKey(id) == true) {
-            return cache.get(id)
+            return cache[id]
         } else {
             val result = database.create
                     .select(
@@ -118,8 +124,8 @@ class RPKCurrencyTable(
                             ?: Material.getMaterial(result.get(RPKIT_CURRENCY.MATERIAL), true)
                             ?: Material.AIR
             )
-            cache?.put(id, currency)
-            nameCache?.put(currency.name, id)
+            cache?.set(id, currency)
+            nameCache?.set(currency.name, id)
             return currency
         }
     }
@@ -133,7 +139,7 @@ class RPKCurrencyTable(
      */
     operator fun get(name: String): RPKCurrency? {
         if (nameCache?.containsKey(name) == true) {
-            return get(nameCache.get(name) as Int)
+            return get(nameCache[name] as Int)
         } else {
             val result = database.create
                     .select(RPKIT_CURRENCY.ID)
@@ -160,11 +166,12 @@ class RPKCurrencyTable(
     }
 
     fun delete(entity: RPKCurrency) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_CURRENCY)
-                .where(RPKIT_CURRENCY.ID.eq(entity.id))
+                .where(RPKIT_CURRENCY.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 
 }

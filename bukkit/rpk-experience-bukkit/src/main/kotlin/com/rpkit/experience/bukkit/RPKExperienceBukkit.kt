@@ -41,6 +41,8 @@ class RPKExperienceBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.experience.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4393)
         saveDefaultConfig()
 
@@ -86,9 +88,9 @@ class RPKExperienceBukkit : RPKBukkitPlugin() {
         )
         database.addTable(RPKExperienceTable(database, this))
 
-        Services[RPKExperienceService::class] = RPKExperienceServiceImpl(this)
+        Services[RPKExperienceService::class.java] = RPKExperienceServiceImpl(this)
 
-        Services.require(RPKCharacterCardFieldService::class).whenAvailable { service ->
+        Services.require(RPKCharacterCardFieldService::class.java).whenAvailable { service ->
             service.characterCardFields.add(ExperienceField(this))
             service.characterCardFields.add(LevelField(this))
         }

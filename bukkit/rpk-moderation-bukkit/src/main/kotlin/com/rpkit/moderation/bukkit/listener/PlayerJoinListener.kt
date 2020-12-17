@@ -19,7 +19,7 @@ package com.rpkit.moderation.bukkit.listener
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.vanish.RPKVanishService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -29,8 +29,8 @@ class PlayerJoinListener(private val plugin: RPKModerationBukkit) : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val vanishService = Services[RPKVanishService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val vanishService = Services[RPKVanishService::class.java] ?: return
         val observer = minecraftProfileService.getMinecraftProfile(event.player) ?: return
         plugin.server.onlinePlayers
                 .filter { player -> event.player != player }

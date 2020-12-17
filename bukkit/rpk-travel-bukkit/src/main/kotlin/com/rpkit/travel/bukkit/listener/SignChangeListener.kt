@@ -34,7 +34,7 @@ class SignChangeListener(private val plugin: RPKTravelBukkit) : Listener {
             event.player.sendMessage(plugin.messages["no-permission-warp-sign-create"])
             return
         }
-        val warpService = Services[RPKWarpService::class]
+        val warpService = Services[RPKWarpService::class.java]
         if (warpService == null) {
             event.player.sendMessage(plugin.messages["no-warp-service"])
             return

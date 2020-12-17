@@ -18,7 +18,7 @@ package com.rpkit.permissions.bukkit.listener
 
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.group.assignPermissions
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority.LOWEST
 import org.bukkit.event.Listener
@@ -32,7 +32,7 @@ class PlayerJoinListener : Listener {
     @EventHandler(priority = LOWEST)
     fun onPlayerJoin(event: PlayerJoinEvent) {
         if (event.player.isBanned) return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
         minecraftProfile.assignPermissions()
     }

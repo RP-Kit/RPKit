@@ -41,7 +41,7 @@ class SignChangeListener(private val plugin: RPKEconomyBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["exchange-sign-invalid-format-from"])
                 return
             }
-            val currencyService = Services[RPKCurrencyService::class]
+            val currencyService = Services[RPKCurrencyService::class.java]
             if (currencyService == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-currency-service"])
@@ -74,7 +74,7 @@ class SignChangeListener(private val plugin: RPKEconomyBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["dynexchange-sign-invalid-format-from"])
                 return
             }
-            val currencyService = Services[RPKCurrencyService::class]
+            val currencyService = Services[RPKCurrencyService::class.java]
             if (currencyService == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-currency-service"])

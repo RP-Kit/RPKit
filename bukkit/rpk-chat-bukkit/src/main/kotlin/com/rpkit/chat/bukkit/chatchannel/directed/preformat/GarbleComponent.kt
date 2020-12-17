@@ -39,7 +39,7 @@ class GarbleComponent(var clearRadius: Double) : DirectedPreFormatPipelineCompon
         val senderMinecraftProfile = context.senderMinecraftProfile
                 ?: return context // Prevent garble if the message wasn't sent from Minecraft
         val receiverMinecraftProfile = context.receiverMinecraftProfile
-        val snooperService = Services[RPKSnooperService::class]
+        val snooperService = Services[RPKSnooperService::class.java]
         if (snooperService != null) {
             if (snooperService.isSnooping(receiverMinecraftProfile)) return context // Prevent garble if the receiver is snooping
         }

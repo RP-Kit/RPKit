@@ -20,10 +20,9 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.shops.bukkit.RPKShopsBukkit
+import com.rpkit.shops.bukkit.database.create
 import com.rpkit.shops.bukkit.database.jooq.Tables.RPKIT_SHOP_COUNT
 import com.rpkit.shops.bukkit.shopcount.RPKShopCount
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 /**
  * Represents the shop count table.
@@ -31,14 +30,18 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 class RPKShopCountTable(private val database: Database, private val plugin: RPKShopsBukkit) : Table {
 
     private val characterCache = if (plugin.config.getBoolean("caching.rpkit_shop_count.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-shops-bukkit.rpkit_shop_count.character_id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKShopCount::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_shop_count.character_id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-shops-bukkit.rpkit_shop_count.character_id",
+            Int::class.javaObjectType,
+            RPKShopCount::class.java,
+            plugin.config.getLong("caching.rpkit_shop_count.character_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKShopCount) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_SHOP_COUNT,
@@ -46,20 +49,21 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
                         RPKIT_SHOP_COUNT.COUNT
                 )
                 .values(
-                        entity.character.id,
+                    characterId,
                         entity.count
                 )
                 .execute()
-        characterCache?.put(entity.character.id, entity)
+        characterCache?.set(characterId, entity)
     }
 
     fun update(entity: RPKShopCount) {
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_SHOP_COUNT)
                 .set(RPKIT_SHOP_COUNT.COUNT, entity.count)
-                .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId))
                 .execute()
-        characterCache?.put(entity.character.id, entity)
+        characterCache?.set(characterId, entity)
     }
 
     /**
@@ -70,8 +74,9 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
      * @return The shop count for the character, or null if there is no shop count for the given character
      */
     operator fun get(character: RPKCharacter): RPKShopCount? {
-        if (characterCache?.containsKey(character.id) == true) {
-            return characterCache.get(character.id)
+        val characterId = character.id ?: return null
+        if (characterCache?.containsKey(characterId) == true) {
+            return characterCache[characterId]
         } else {
             val result = database.create
                     .select(
@@ -79,22 +84,23 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
                             RPKIT_SHOP_COUNT.COUNT
                     )
                     .from(RPKIT_SHOP_COUNT)
-                    .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(character.id))
+                    .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId))
                     .fetchOne() ?: return null
             val shopCount = RPKShopCount(
                     character,
                     result.get(RPKIT_SHOP_COUNT.COUNT)
             )
-            characterCache?.put(shopCount.character.id, shopCount)
+            characterCache?.set(characterId, shopCount)
             return shopCount
         }
     }
 
     fun delete(entity: RPKShopCount) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_SHOP_COUNT)
                 .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        characterCache?.remove(entity.character.id)
+        characterCache?.remove(characterId)
     }
 }

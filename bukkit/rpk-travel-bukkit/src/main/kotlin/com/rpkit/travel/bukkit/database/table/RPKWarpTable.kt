@@ -19,20 +19,22 @@ package com.rpkit.travel.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.travel.bukkit.RPKTravelBukkit
+import com.rpkit.travel.bukkit.database.create
 import com.rpkit.travel.bukkit.database.jooq.Tables.RPKIT_WARP
 import com.rpkit.travel.bukkit.warp.RPKWarpImpl
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import org.bukkit.Location
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKWarpTable(private val database: Database, private val plugin: RPKTravelBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_warp.name.enabled")) {
-        database.cacheManager.createCache("rpk-travel-bukkit.rpkit_warp.name",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String::class.java, RPKWarp::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_warp.name.size"))))
+        database.cacheManager.createCache(
+            "rpk-travel-bukkit.rpkit_warp.name",
+            String::class.java,
+            RPKWarp::class.java,
+            plugin.config.getLong("caching.rpkit_warp.name.size")
+        )
     } else {
         null
     }
@@ -59,7 +61,7 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                         entity.location.pitch.toDouble()
                 )
                 .execute()
-        cache?.put(entity.name, entity)
+        cache?.set(entity.name, entity)
     }
 
     fun update(entity: RPKWarp) {
@@ -74,7 +76,7 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                 .set(RPKIT_WARP.PITCH, entity.location.pitch.toDouble())
                 .where(RPKIT_WARP.NAME.eq(entity.name))
                 .execute()
-        cache?.put(entity.name, entity)
+        cache?.set(entity.name, entity)
     }
 
     operator fun get(name: String): RPKWarp? {
@@ -105,7 +107,7 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                             result.get(RPKIT_WARP.PITCH).toFloat()
                     )
             )
-            cache?.put(name, warp)
+            cache?.set(name, warp)
             return warp
         }
     }

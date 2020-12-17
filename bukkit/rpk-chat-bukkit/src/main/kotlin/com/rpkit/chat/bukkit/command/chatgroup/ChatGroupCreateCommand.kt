@@ -20,7 +20,7 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupImpl
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -45,7 +45,7 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val chatGroupService = Services[RPKChatGroupService::class]
+        val chatGroupService = Services[RPKChatGroupService::class.java]
         if (chatGroupService == null) {
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
@@ -58,7 +58,7 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["chat-group-create-invalid-reserved"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true

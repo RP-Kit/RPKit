@@ -33,18 +33,18 @@ class ProfessionField(val plugin: RPKProfessionsBukkit) : HideableCharacterCardF
         return if (isHidden(character)) {
             "[HIDDEN]"
         } else {
-            val professionService = Services[RPKProfessionService::class]
+            val professionService = Services[RPKProfessionService::class.java]
             if (professionService == null) return plugin.messages["no-profession-service"]
             professionService.getProfessions(character).map(RPKProfession::name).joinToString(", ")
         }
     }
 
     override fun isHidden(character: RPKCharacter): Boolean {
-        return plugin.database.getTable(RPKProfessionHiddenTable::class).get(character) != null
+        return plugin.database.getTable(RPKProfessionHiddenTable::class.java).get(character) != null
     }
 
     override fun setHidden(character: RPKCharacter, hidden: Boolean) {
-        val professionHiddenTable = plugin.database.getTable(RPKProfessionHiddenTable::class)
+        val professionHiddenTable = plugin.database.getTable(RPKProfessionHiddenTable::class.java)
         if (hidden) {
             if (professionHiddenTable.get(character) == null) {
                 professionHiddenTable.insert(RPKProfessionHidden(character = character))

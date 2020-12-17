@@ -20,10 +20,9 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
 import com.rpkit.chat.bukkit.prefix.RPKPrefixService
-import com.rpkit.core.bukkit.util.closestChatColor
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
-import org.bukkit.ChatColor
+import net.md_5.bungee.api.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 
@@ -31,8 +30,8 @@ import org.bukkit.configuration.serialization.SerializableAs
 class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
-        val characterService = Services[RPKCharacterService::class]
-        val prefixService = Services[RPKPrefixService::class]
+        val characterService = Services[RPKCharacterService::class.java]
+        val prefixService = Services[RPKPrefixService::class.java]
         val senderMinecraftProfile = context.senderMinecraftProfile
         val senderProfile = context.senderProfile
         val senderCharacter = if (senderMinecraftProfile != null)
@@ -65,7 +64,7 @@ class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineCo
             formattedMessage = formattedMessage.replace("\$channel", chatChannel.name)
         }
         if (formattedMessage.contains("\$color") || formattedMessage.contains("\$colour")) {
-            val chatColorString = chatChannel.color.closestChatColor().toString()
+            val chatColorString = ChatColor.of(chatChannel.color).toString()
             formattedMessage = formattedMessage.replace("\$color", chatColorString).replace("\$colour", chatColorString)
         }
         context.message = formattedMessage

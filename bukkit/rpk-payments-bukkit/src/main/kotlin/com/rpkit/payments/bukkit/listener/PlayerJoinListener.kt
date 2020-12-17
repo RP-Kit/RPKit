@@ -19,7 +19,7 @@ package com.rpkit.payments.bukkit.listener
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -31,9 +31,9 @@ class PlayerJoinListener : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val characterService = Services[RPKCharacterService::class] ?: return
-        val paymentNotificationService = Services[RPKPaymentNotificationService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val paymentNotificationService = Services[RPKPaymentNotificationService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
         val character = characterService.getActiveCharacter(minecraftProfile) ?: return
         paymentNotificationService.getPaymentNotificationsFor(character).forEach { notification ->

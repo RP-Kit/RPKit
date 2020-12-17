@@ -18,7 +18,7 @@ package com.rpkit.unconsciousness.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import org.bukkit.event.EventHandler
@@ -35,9 +35,9 @@ class PlayerRespawnListener(private val plugin: RPKUnconsciousnessBukkit) : List
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerRespawn(event: PlayerRespawnEvent) {
         val bukkitPlayer = event.player
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val characterService = Services[RPKCharacterService::class] ?: return
-        val unconsciousnessService = Services[RPKUnconsciousnessService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
         val character = characterService.getActiveCharacter(minecraftProfile) ?: return
         if (!unconsciousnessService.isUnconscious(character)) return

@@ -30,14 +30,14 @@ import org.pircbotx.hooks.events.ConnectEvent
 class IRCConnectListener : ListenerAdapter() {
 
     override fun onConnect(event: ConnectEvent?) {
-        val ircService = Services[RPKIRCService::class] ?: return
-        val chatChannelService = Services[RPKChatChannelService::class] ?: return
+        val ircService = Services[RPKIRCService::class.java] ?: return
+        val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
         for (channel in chatChannelService.chatChannels) {
             val ircChannel = channel.undirectedPipeline
                     .mapNotNull { component -> component as? IRCComponent }
                     .firstOrNull()?.ircChannel
             if (ircChannel != null) {
-                ircService.ircBot.sendIRC().joinChannel(ircChannel)
+                ircService.joinChannel(ircChannel)
             }
         }
     }

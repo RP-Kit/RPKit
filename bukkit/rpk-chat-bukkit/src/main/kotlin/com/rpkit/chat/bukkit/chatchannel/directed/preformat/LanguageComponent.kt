@@ -29,7 +29,7 @@ import org.bukkit.configuration.serialization.SerializableAs
 class LanguageComponent : DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
-        val characterService = Services[RPKCharacterService::class] ?: return context
+        val characterService = Services[RPKCharacterService::class.java] ?: return context
         val senderMinecraftProfile = context.senderMinecraftProfile ?: return context
         val receiverMinecraftProfile = context.receiverMinecraftProfile
         var message = context.message
@@ -38,13 +38,13 @@ class LanguageComponent : DirectedPreFormatPipelineComponent, ConfigurationSeria
         val receiverRace = receiverCharacter.race
         if (!message.startsWith("[") || !message.contains("]")) return context
         val languageName = Regex("\\[([^]]+)]").find(message)?.groupValues?.get(1) ?: return context
-        val languageService = Services[RPKLanguageService::class] ?: return context
+        val languageService = Services[RPKLanguageService::class.java] ?: return context
         val language = languageService.getLanguage(languageName) ?: return context
         message = message.replaceFirst(
                 "[$languageName] ",
                 ""
         )
-        val characterLanguageService = Services[RPKCharacterLanguageService::class] ?: return context
+        val characterLanguageService = Services[RPKCharacterLanguageService::class.java] ?: return context
         val senderUnderstanding = characterLanguageService.getCharacterLanguageUnderstanding(senderCharacter, language)
         val receiverUnderstanding = characterLanguageService.getCharacterLanguageUnderstanding(receiverCharacter, language)
         context.message = "[${language.name}] ${language.apply(message, senderUnderstanding, receiverUnderstanding)}"

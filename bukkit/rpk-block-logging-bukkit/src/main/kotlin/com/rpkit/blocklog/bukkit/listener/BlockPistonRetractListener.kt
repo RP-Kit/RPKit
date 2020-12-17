@@ -30,7 +30,7 @@ class BlockPistonRetractListener : Listener {
 
     @EventHandler(priority = MONITOR)
     fun onBlockPistonRetract(event: BlockPistonRetractEvent) {
-        val blockHistoryService = Services[RPKBlockHistoryService::class] ?: return
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
         val blockHistory = blockHistoryService.getBlockHistory(event.block)
         val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,

@@ -16,8 +16,11 @@
 
 package com.rpkit.players.bukkit.profile
 
+import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
+
 class RPKIRCProfileImpl(
         override var id: Int? = null,
         override val profile: RPKThinProfile,
-        override val nick: String
+        override val nick: IRCNick
 ) : RPKIRCProfile

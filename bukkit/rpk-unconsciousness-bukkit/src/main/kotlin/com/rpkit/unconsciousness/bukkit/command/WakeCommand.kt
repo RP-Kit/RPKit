@@ -18,7 +18,7 @@ package com.rpkit.unconsciousness.bukkit.command
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import org.bukkit.command.Command
@@ -38,17 +38,17 @@ class WakeCommand(private val plugin: RPKUnconsciousnessBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["wake-no-target"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val unconsciousnessService = Services[RPKUnconsciousnessService::class]
+        val unconsciousnessService = Services[RPKUnconsciousnessService::class.java]
         if (unconsciousnessService == null) {
             sender.sendMessage(plugin.messages["no-unconsciousness-service"])
             return true

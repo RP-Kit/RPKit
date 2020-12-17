@@ -20,24 +20,33 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.skills.bukkit.RPKSkillsBukkit
+import com.rpkit.skills.bukkit.database.create
 import com.rpkit.skills.bukkit.database.jooq.Tables.RPKIT_SKILL_COOLDOWN
 import com.rpkit.skills.bukkit.skills.RPKSkill
 import com.rpkit.skills.bukkit.skills.RPKSkillCooldown
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKSkillCooldownTable(private val database: Database, private val plugin: RPKSkillsBukkit) : Table {
 
+    private data class CharacterSkillCacheKey(
+        val characterId: Int,
+        val skillName: String
+    )
+
     private val cache = if (plugin.config.getBoolean("caching.rpkit_skill_cooldown.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-skills-bukkit.rpkit_skill_cooldown.character_id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, MutableMap::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_skill_cooldown.character_id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-skills-bukkit.rpkit_skill_cooldown.character_id",
+            CharacterSkillCacheKey::class.java,
+            RPKSkillCooldown::class.java,
+            plugin.config.getLong("caching.rpkit_skill_cooldown.character_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKSkillCooldown) {
+        val characterId = entity.character.id ?: return
+        val skillName = entity.skill.name
         database.create
                 .insertInto(
                         RPKIT_SKILL_COOLDOWN,
@@ -51,35 +60,27 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
                         entity.cooldownTimestamp
                 )
                 .execute()
-        if (cache != null) {
-            val skillCooldowns = cache[entity.character.id] as? MutableMap<String, RPKSkillCooldown> ?: mutableMapOf()
-            skillCooldowns[entity.skill.name] = entity
-            cache.put(entity.character.id, skillCooldowns)
-        }
+        cache?.set(CharacterSkillCacheKey(characterId, skillName), entity)
     }
 
     fun update(entity: RPKSkillCooldown) {
+        val characterId = entity.character.id ?: return
+        val skillName = entity.skill.name
         database.create
                 .update(RPKIT_SKILL_COOLDOWN)
-                .set(RPKIT_SKILL_COOLDOWN.CHARACTER_ID, entity.character.id)
-                .set(RPKIT_SKILL_COOLDOWN.SKILL_NAME, entity.skill.name)
                 .set(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP, entity.cooldownTimestamp)
-                .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(entity.character.id))
-                .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(entity.skill.name))
+                .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId))
+                .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(skillName))
                 .execute()
-        if (cache != null) {
-            val skillCooldowns = cache[entity.character.id] as? MutableMap<String, RPKSkillCooldown> ?: mutableMapOf()
-            skillCooldowns[entity.skill.name] = entity
-            cache.put(entity.character.id, skillCooldowns)
-        }
+        cache?.set(CharacterSkillCacheKey(characterId, skillName), entity)
     }
 
     operator fun get(character: RPKCharacter, skill: RPKSkill): RPKSkillCooldown? {
-        if (cache?.containsKey(character.id) == true) {
-            val skillCooldowns = cache[character.id]
-            if (skillCooldowns.containsKey(skill.name)) {
-                return skillCooldowns[skill.name] as RPKSkillCooldown
-            }
+        val characterId = character.id ?: return null
+        val skillName = skill.name
+        val cacheKey = CharacterSkillCacheKey(characterId, skillName)
+        if (cache?.containsKey(cacheKey) == true) {
+            return cache[cacheKey]
         }
         val result = database.create
                 .select(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP)
@@ -92,25 +93,19 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
                 skill,
                 result.get(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP)
         )
-        if (cache != null) {
-            val skillCooldowns = cache[character.id] as? MutableMap<String, RPKSkillCooldown> ?: mutableMapOf()
-            skillCooldowns[skill.name] = skillCooldown
-            cache.put(character.id, skillCooldowns)
-        }
+        cache?.set(cacheKey, skillCooldown)
         return skillCooldown
     }
 
     fun delete(entity: RPKSkillCooldown) {
+        val characterId = entity.character.id ?: return
+        val skillName = entity.skill.name
         database.create
                 .deleteFrom(RPKIT_SKILL_COOLDOWN)
                 .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(entity.character.id))
                 .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(entity.skill.name))
                 .execute()
-        if (cache != null) {
-            val skillCooldowns = cache[entity.character.id] as? MutableMap<String, RPKSkillCooldown> ?: mutableMapOf()
-            skillCooldowns.remove(entity.skill.name)
-            cache.put(entity.character.id, skillCooldowns)
-        }
+        cache?.remove(CharacterSkillCacheKey(characterId, skillName))
     }
 
 }

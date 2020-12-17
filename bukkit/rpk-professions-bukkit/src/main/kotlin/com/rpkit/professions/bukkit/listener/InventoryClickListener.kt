@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.util.addLore
 import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.profession.RPKCraftingAction
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
@@ -42,9 +42,9 @@ class InventoryClickListener(private val plugin: RPKProfessionsBukkit) : Listene
     fun onInventoryClick(event: InventoryClickEvent) {
         if (event.clickedInventory !is FurnaceInventory) return
         if (event.slotType != InventoryType.SlotType.RESULT) return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val characterService = Services[RPKCharacterService::class] ?: return
-        val professionService = Services[RPKProfessionService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val professionService = Services[RPKProfessionService::class.java] ?: return
         val bukkitPlayer = event.whoClicked as? Player ?: return
         if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return

@@ -32,7 +32,7 @@ class SnoopComponent : DirectedPostFormatPipelineComponent, ConfigurationSeriali
 
     override fun process(context: DirectedPostFormatMessageContext): DirectedPostFormatMessageContext {
         if (!context.isCancelled) return context
-        val snooperService = Services[RPKSnooperService::class] ?: return context
+        val snooperService = Services[RPKSnooperService::class.java] ?: return context
         if (snooperService.snoopers.contains(context.receiverMinecraftProfile)) {
             context.receiverMinecraftProfile.sendMessage(*context.message)
         }

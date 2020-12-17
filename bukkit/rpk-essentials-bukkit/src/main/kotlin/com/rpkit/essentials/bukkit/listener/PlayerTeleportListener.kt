@@ -18,7 +18,7 @@ package com.rpkit.essentials.bukkit.listener
 
 import com.rpkit.core.service.Services
 import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerTeleportEvent
@@ -28,8 +28,8 @@ class PlayerTeleportListener : Listener {
 
     @EventHandler
     fun onPlayerTeleport(event: PlayerTeleportEvent) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val locationHistoryService = Services[RPKLocationHistoryService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val locationHistoryService = Services[RPKLocationHistoryService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         if (minecraftProfile != null) {
             locationHistoryService.setPreviousLocation(minecraftProfile, event.from)

@@ -19,7 +19,7 @@ package com.rpkit.characters.bukkit.command.character.set
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -58,12 +58,12 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
             sender.sendMessage(plugin.messages["no-permission-character-set-description"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
@@ -111,8 +111,8 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
             }
             val conversable = context.forWhom
             if (conversable !is Player) return DescriptionSetPrompt()
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return DescriptionSetPrompt()
-            val characterService = Services[RPKCharacterService::class] ?: return DescriptionSetPrompt()
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return DescriptionSetPrompt()
+            val characterService = Services[RPKCharacterService::class.java] ?: return DescriptionSetPrompt()
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable)
             if (minecraftProfile == null) return DescriptionSetPrompt()
             val character = characterService.getActiveCharacter(minecraftProfile)
@@ -129,12 +129,12 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
                     conversable.sendMessage(plugin.messages["no-minecraft-profile-service"])
                     return END_OF_CONVERSATION
                 }
-                val characterService = Services[RPKCharacterService::class]
+                val characterService = Services[RPKCharacterService::class.java]
                 if (characterService == null) {
                     conversable.sendMessage(plugin.messages["no-character-service"])
                     return END_OF_CONVERSATION

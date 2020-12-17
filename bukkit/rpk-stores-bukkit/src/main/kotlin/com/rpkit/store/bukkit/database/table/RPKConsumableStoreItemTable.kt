@@ -19,26 +19,28 @@ package com.rpkit.store.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.store.bukkit.RPKStoresBukkit
+import com.rpkit.store.bukkit.database.create
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_CONSUMABLE_STORE_ITEM
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_STORE_ITEM
 import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItemImpl
-import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_CONSUMABLE_STORE_ITEM
-import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_STORE_ITEM
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKConsumableStoreItemTable(private val database: Database, private val plugin: RPKStoresBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_consumable_store_item.id.enabled")) {
-        database.cacheManager.createCache("rpkit-stores-bukkit.rpkit_consumable_store_item.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKConsumableStoreItem::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_consumable_store_item.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpkit-stores-bukkit.rpkit_consumable_store_item.id",
+            Int::class.javaObjectType,
+            RPKConsumableStoreItem::class.java,
+            plugin.config.getLong("caching.rpkit_consumable_store_item.id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKConsumableStoreItem) {
-        val id = database.getTable(RPKStoreItemTable::class).insert(entity)
+        val id = database.getTable(RPKStoreItemTable::class.java).insert(entity)
         database.create
                 .insertInto(
                         RPKIT_CONSUMABLE_STORE_ITEM,
@@ -51,17 +53,18 @@ class RPKConsumableStoreItemTable(private val database: Database, private val pl
                 )
                 .execute()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKConsumableStoreItem) {
-        database.getTable(RPKStoreItemTable::class).update(entity)
+        val id = entity.id ?: return
+        database.getTable(RPKStoreItemTable::class.java).update(entity)
         database.create
                 .update(RPKIT_CONSUMABLE_STORE_ITEM)
                 .set(RPKIT_CONSUMABLE_STORE_ITEM.USES, entity.uses)
-                .where(RPKIT_CONSUMABLE_STORE_ITEM.STORE_ITEM_ID.eq(entity.id))
+                .where(RPKIT_CONSUMABLE_STORE_ITEM.STORE_ITEM_ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
     }
 
     operator fun get(id: Int): RPKConsumableStoreItem? {
@@ -91,17 +94,18 @@ class RPKConsumableStoreItemTable(private val database: Database, private val pl
                     result[RPKIT_STORE_ITEM.DESCRIPTION],
                     result[RPKIT_STORE_ITEM.COST]
             )
-            cache?.put(id, storeItem)
+            cache?.set(id, storeItem)
             return storeItem
         }
     }
 
     fun delete(entity: RPKConsumableStoreItem) {
-        database.getTable(RPKStoreItemTable::class).delete(entity)
+        database.getTable(RPKStoreItemTable::class.java).delete(entity)
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_CONSUMABLE_STORE_ITEM)
-                .where(RPKIT_CONSUMABLE_STORE_ITEM.ID.eq(entity.id))
+                .where(RPKIT_CONSUMABLE_STORE_ITEM.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 }

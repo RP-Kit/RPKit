@@ -23,7 +23,7 @@ import com.rpkit.chat.bukkit.database.table.RPKChatGroupMemberTable
 import com.rpkit.chat.bukkit.event.chatgroup.*
 import com.rpkit.chat.bukkit.prefix.RPKPrefixService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.ChatColor
 
@@ -37,17 +37,17 @@ class RPKChatGroupImpl(
 ) : RPKChatGroup {
 
     override val members: List<RPKMinecraftProfile>
-        get() = plugin.database.getTable(RPKChatGroupMemberTable::class).get(this).map(RPKChatGroupMember::minecraftProfile)
+        get() = plugin.database.getTable(RPKChatGroupMemberTable::class.java).get(this).map(RPKChatGroupMember::minecraftProfile)
 
     override val invited: List<RPKMinecraftProfile>
-        get() = plugin.database.getTable(RPKChatGroupInviteTable::class).get(this).map(RPKChatGroupInvite::minecraftProfile)
+        get() = plugin.database.getTable(RPKChatGroupInviteTable::class.java).get(this).map(RPKChatGroupInvite::minecraftProfile)
 
     override fun addMember(minecraftProfile: RPKMinecraftProfile) {
         if (!members.any { memberMinecraftProfile -> memberMinecraftProfile.id == minecraftProfile.id }) {
             val event = RPKBukkitChatGroupJoinEvent(minecraftProfile, this)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
-            plugin.database.getTable(RPKChatGroupMemberTable::class).insert(
+            plugin.database.getTable(RPKChatGroupMemberTable::class.java).insert(
                     RPKChatGroupMember(
                             chatGroup = event.chatGroup,
                             minecraftProfile = event.minecraftProfile
@@ -63,7 +63,7 @@ class RPKChatGroupImpl(
         )
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        val chatGroupMemberTable = plugin.database.getTable(RPKChatGroupMemberTable::class)
+        val chatGroupMemberTable = plugin.database.getTable(RPKChatGroupMemberTable::class.java)
         chatGroupMemberTable.get(event.minecraftProfile)
                 .filter { member -> member.chatGroup == event.chatGroup }
                 .forEach { member -> chatGroupMemberTable.delete(member) }
@@ -75,7 +75,7 @@ class RPKChatGroupImpl(
             val event = RPKBukkitChatGroupInviteEvent(minecraftProfile, this)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
-            plugin.database.getTable(RPKChatGroupInviteTable::class).insert(
+            plugin.database.getTable(RPKChatGroupInviteTable::class.java).insert(
                     RPKChatGroupInvite(
                             chatGroup = event.chatGroup,
                             minecraftProfile = event.minecraftProfile
@@ -88,7 +88,7 @@ class RPKChatGroupImpl(
         val event = RPKBukkitChatGroupUninviteEvent(minecraftProfile, this)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        val chatGroupInviteTable = plugin.database.getTable(RPKChatGroupInviteTable::class)
+        val chatGroupInviteTable = plugin.database.getTable(RPKChatGroupInviteTable::class.java)
         chatGroupInviteTable.get(event.minecraftProfile)
                 .filter { invite -> invite.chatGroup == event.chatGroup }
                 .forEach { invite -> chatGroupInviteTable.delete(invite) }
@@ -98,9 +98,9 @@ class RPKChatGroupImpl(
         val event = RPKBukkitChatGroupMessageEvent(sender, this, message)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        val prefixService = Services[RPKPrefixService::class]
-        val characterService = Services[RPKCharacterService::class]
-        val chatGroupService = Services[RPKChatGroupService::class]
+        val prefixService = Services[RPKPrefixService::class.java]
+        val characterService = Services[RPKCharacterService::class.java]
+        val chatGroupService = Services[RPKChatGroupService::class.java]
         val senderCharacter = characterService?.getActiveCharacter(sender)
         members.forEach { receiver ->
             val receiverCharacter = characterService?.getActiveCharacter(receiver)

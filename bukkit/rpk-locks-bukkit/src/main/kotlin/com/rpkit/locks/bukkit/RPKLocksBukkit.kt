@@ -50,6 +50,8 @@ class RPKLocksBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.locks.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4402)
         saveDefaultConfig()
 
@@ -99,8 +101,8 @@ class RPKLocksBukkit : RPKBukkitPlugin() {
         database.addTable(RPKPlayerUnclaimingTable(database, this))
 
         val lockService = RPKLockServiceImpl(this)
-        Services[RPKLockService::class] = lockService
-        Services[RPKKeyringService::class] = RPKKeyringServiceImpl(this)
+        Services[RPKLockService::class.java] = lockService
+        Services[RPKKeyringService::class.java] = RPKKeyringServiceImpl(this)
         val lockRecipe = ShapedRecipe(NamespacedKey(this, "lock"), lockService.lockItem)
         lockRecipe.shape("I", "B").setIngredient('I', IRON_INGOT).setIngredient('B', IRON_BLOCK)
         server.addRecipe(lockRecipe)

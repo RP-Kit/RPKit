@@ -16,7 +16,7 @@
 
 package com.rpkit.store.bukkit.resolver
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.store.bukkit.purchase.RPKPurchase
 
 

@@ -17,7 +17,7 @@
 package com.rpkit.players.bukkit.event.ircprofile
 
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
-import com.rpkit.players.bukkit.profile.RPKIRCProfile
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 

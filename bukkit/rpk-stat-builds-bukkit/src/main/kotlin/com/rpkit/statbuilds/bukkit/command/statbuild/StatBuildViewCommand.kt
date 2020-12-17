@@ -18,7 +18,7 @@ package com.rpkit.statbuilds.bukkit.command.statbuild
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
 import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildService
@@ -37,7 +37,7 @@ class StatBuildViewCommand(private val plugin: RPKStatBuildsBukkit) : CommandExe
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -47,7 +47,7 @@ class StatBuildViewCommand(private val plugin: RPKStatBuildsBukkit) : CommandExe
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
@@ -58,12 +58,12 @@ class StatBuildViewCommand(private val plugin: RPKStatBuildsBukkit) : CommandExe
             return true
         }
         sender.sendMessage(plugin.messages["stat-build-view-title"])
-        val statAttributeService = Services[RPKStatAttributeService::class]
+        val statAttributeService = Services[RPKStatAttributeService::class.java]
         if (statAttributeService == null) {
             sender.sendMessage(plugin.messages["no-stat-attribute-service"])
             return true
         }
-        val statBuildService = Services[RPKStatBuildService::class]
+        val statBuildService = Services[RPKStatBuildService::class.java]
         if (statBuildService == null) {
             sender.sendMessage(plugin.messages["no-stat-build-service"])
             return true

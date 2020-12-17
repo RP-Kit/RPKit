@@ -17,7 +17,7 @@
 package com.rpkit.characters.bukkit.event.character
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 interface RPKCharacterSwitchEvent : RPKCharacterEvent {

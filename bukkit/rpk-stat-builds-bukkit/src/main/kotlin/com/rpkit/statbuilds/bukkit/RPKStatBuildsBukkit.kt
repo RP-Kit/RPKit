@@ -43,6 +43,8 @@ class RPKStatBuildsBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.statbuilds.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 6663)
         saveDefaultConfig()
 
@@ -89,17 +91,17 @@ class RPKStatBuildsBukkit : RPKBukkitPlugin() {
         database.addTable(RPKCharacterStatPointsTable(database, this))
 
         val statAttributeService = RPKStatAttributeServiceImpl(this)
-        Services[RPKStatAttributeService::class] = statAttributeService
+        Services[RPKStatAttributeService::class.java] = statAttributeService
         val statBuildService = RPKStatBuildServiceImpl(this)
-        Services[RPKStatBuildService::class] = statBuildService
-        Services[RPKSkillPointService::class] = RPKSkillPointServiceImpl(this)
+        Services[RPKStatBuildService::class.java] = statBuildService
+        Services[RPKSkillPointService::class.java] = RPKSkillPointServiceImpl(this)
 
-        Services.require(RPKStatVariableService::class).whenAvailable { statVariableService ->
+        Services.require(RPKStatVariableService::class.java).whenAvailable { statVariableService ->
             statAttributeService.statAttributes.forEach { statAttribute ->
                 statVariableService.addStatVariable(object : RPKStatVariable {
                     override val name = statAttribute.name
                     override fun get(character: RPKCharacter) =
-                            statBuildService.getStatPoints(character, statAttribute)
+                            statBuildService.getStatPoints(character, statAttribute).toDouble()
                 })
             }
         }

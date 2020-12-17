@@ -45,7 +45,7 @@ class RollbackCommand(private val plugin: RPKBlockLoggingBukkit) : CommandExecut
             sender.sendMessage(plugin.messages["rollback-usage"])
             return true
         }
-        val blockHistoryService = Services[RPKBlockHistoryService::class]
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java]
         if (blockHistoryService == null) {
             sender.sendMessage(plugin.messages["no-block-history-service"])
             return true

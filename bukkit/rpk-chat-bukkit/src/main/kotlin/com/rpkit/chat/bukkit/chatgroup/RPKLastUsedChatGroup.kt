@@ -16,7 +16,7 @@
 
 package com.rpkit.chat.bukkit.chatgroup
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 /**
  * Represents the last used chat group of a player.

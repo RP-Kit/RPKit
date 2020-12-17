@@ -17,12 +17,13 @@
 package com.rpkit.monsters.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
-import com.rpkit.core.expression.function.addRPKitFunctions
 import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
+import com.rpkit.monsters.bukkit.jep.CeilFunction
+import com.rpkit.monsters.bukkit.jep.FloorFunction
 import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelService
 import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatServiceImpl
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.stats.bukkit.stat.RPKStatService
 import com.rpkit.stats.bukkit.stat.RPKStatVariableService
 import org.bukkit.entity.Arrow
@@ -88,7 +89,7 @@ class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit) : List
         }
         if (defender != null) {
             if (defender !is Player) {
-                val monsterStatService = Services[RPKMonsterStatServiceImpl::class] ?: return
+                val monsterStatService = Services[RPKMonsterStatServiceImpl::class.java] ?: return
                 monsterStatService.setMonsterNameplate(defender, health = defender.health - event.finalDamage)
             }
         }
@@ -96,17 +97,18 @@ class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit) : List
 
     private fun getPlayerStat(player: Player, type: String, stat: String): Double {
         val expression = plugin.config.getString("stats.$type.$stat")
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return 0.0
-        val characterService = Services[RPKCharacterService::class] ?: return 0.0
-        val statService = Services[RPKStatService::class] ?: return 0.0
-        val statVariableService = Services[RPKStatVariableService::class] ?: return 0.0
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return 0.0
+        val characterService = Services[RPKCharacterService::class.java] ?: return 0.0
+        val statService = Services[RPKStatService::class.java] ?: return 0.0
+        val statVariableService = Services[RPKStatVariableService::class.java] ?: return 0.0
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(player) ?: return 0.0
         val character = characterService.getActiveCharacter(minecraftProfile) ?: return 0.0
         val statVariables = statVariableService.statVariables
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
-        parser.addRPKitFunctions()
+        parser.addFunction("ceil", CeilFunction())
+        parser.addFunction("floor", FloorFunction())
         statService.stats.forEach {
             parser.addVariable(it.name, it.get(character, statVariables).toDouble())
         }
@@ -117,13 +119,14 @@ class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit) : List
     private fun getEntityStat(entity: LivingEntity, type: String, stat: String): Double {
         val expression = plugin.config.getString("monsters.${entity.type}.stats.$type.$stat")
                 ?: plugin.config.getString("monsters.default.stats.$type.$stat")
-        val monsterLevelService = Services[RPKMonsterLevelService::class] ?: return 0.0
+        val monsterLevelService = Services[RPKMonsterLevelService::class.java] ?: return 0.0
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
-        parser.addRPKitFunctions()
+        parser.addFunction("ceil", CeilFunction())
+        parser.addFunction("floor", FloorFunction())
         parser.addVariable("level", monsterLevelService.getMonsterLevel(entity).toDouble())
-        parser.addVariableAsObject("monster", entity)
+        parser.addVariable("monsterType", entity.type.toString())
         parser.parseExpression(expression)
         return parser.value
     }
@@ -133,7 +136,8 @@ class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit) : List
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
-        parser.addRPKitFunctions()
+        parser.addFunction("ceil", CeilFunction())
+        parser.addFunction("floor", FloorFunction())
         parser.addVariable("damage", originalDamage)
         parser.addVariable("attack", attack)
         parser.addVariable("defence", defence)
