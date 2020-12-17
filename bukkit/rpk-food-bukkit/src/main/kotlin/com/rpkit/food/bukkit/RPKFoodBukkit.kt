@@ -32,7 +32,7 @@ class RPKFoodBukkit : RPKBukkitPlugin() {
         Metrics(this, 4397)
         saveDefaultConfig()
 
-        Services[RPKExpiryService::class] = RPKExpiryServiceImpl(this)
+        Services[RPKExpiryService::class.java] = RPKExpiryServiceImpl(this)
     }
 
     override fun registerListeners() {

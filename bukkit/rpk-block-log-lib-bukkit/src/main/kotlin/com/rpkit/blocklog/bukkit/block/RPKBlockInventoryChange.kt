@@ -17,7 +17,7 @@
 package com.rpkit.blocklog.bukkit.block
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.inventory.ItemStack
 import java.time.LocalDateTime

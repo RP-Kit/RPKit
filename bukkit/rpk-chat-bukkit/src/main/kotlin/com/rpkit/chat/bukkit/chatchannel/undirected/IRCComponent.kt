@@ -19,6 +19,7 @@ package com.rpkit.chat.bukkit.chatchannel.undirected
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
+import com.rpkit.chat.bukkit.irc.IRCChannel
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
 import org.bukkit.Bukkit
@@ -33,15 +34,15 @@ import org.bukkit.configuration.serialization.SerializableAs
 @SerializableAs("IRCComponent")
 class IRCComponent(
         private val plugin: RPKChatBukkit,
-        val ircChannel: String,
+        val ircChannel: IRCChannel,
         val isIRCWhitelisted: Boolean
 ) : UndirectedPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         if (!context.isCancelled) {
-            val ircService = Services[RPKIRCService::class] ?: return context
-            if (ircService.ircBot.isConnected) {
-                ircService.ircBot.sendIRC().message(ircChannel, ChatColor.stripColor(context.message))
+            val ircService = Services[RPKIRCService::class.java] ?: return context
+            if (ircService.isConnected) {
+                ircService.sendMessage(ircChannel, ChatColor.stripColor(context.message)!!)
             }
         }
         return context
@@ -49,8 +50,8 @@ class IRCComponent(
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-                Pair("irc-channel", ircChannel),
-                Pair("irc-whitelisted", isIRCWhitelisted)
+                "irc-channel" to ircChannel.name,
+                "irc-whitelisted" to isIRCWhitelisted
         )
     }
 
@@ -59,7 +60,7 @@ class IRCComponent(
         fun deserialize(serialized: MutableMap<String, Any>): IRCComponent {
             return IRCComponent(
                     Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
-                    serialized["irc-channel"] as String,
+                    IRCChannel(serialized["irc-channel"] as String),
                     serialized["irc-whitelisted"] as Boolean
             )
         }

@@ -32,7 +32,7 @@ class PrepareItemCraftListener : Listener {
         val item = event.inventory.result
         if (item != null) {
             if (item.type.isEdible) {
-                val expiryService = Services[RPKExpiryServiceImpl::class] ?: return
+                val expiryService = Services[RPKExpiryServiceImpl::class.java] ?: return
                 expiryService.setExpiry(item)
                 event.inventory.result = item
             }

@@ -22,7 +22,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.keyring.RPKKeyringService
 import com.rpkit.locks.bukkit.lock.RPKLockService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -34,12 +34,12 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val clickedBlock = event.clickedBlock ?: return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             event.isCancelled = true
             return
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             event.isCancelled = true
             return
@@ -54,7 +54,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
             event.isCancelled = true
             return
         }
-        val lockService = Services[RPKLockService::class]
+        val lockService = Services[RPKLockService::class.java]
         if (lockService == null) {
             event.isCancelled = true
             return
@@ -126,8 +126,8 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
     }
 
     private fun hasKey(character: RPKCharacter, block: Block): Boolean {
-        val lockService = Services[RPKLockService::class] ?: return false
-        val keyringService = Services[RPKKeyringService::class] ?: return false
+        val lockService = Services[RPKLockService::class.java] ?: return false
+        val keyringService = Services[RPKKeyringService::class.java] ?: return false
         val minecraftProfile = character.minecraftProfile
         if (minecraftProfile != null) {
             val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
@@ -145,8 +145,8 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
     }
 
     private fun removeKey(character: RPKCharacter, block: Block) {
-        val lockService = Services[RPKLockService::class] ?: return
-        val keyringService = Services[RPKKeyringService::class] ?: return
+        val lockService = Services[RPKLockService::class.java] ?: return
+        val keyringService = Services[RPKKeyringService::class.java] ?: return
         val keyring = keyringService.getKeyring(character)
         val iterator = keyring.iterator()
         while (iterator.hasNext()) {

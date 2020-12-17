@@ -50,7 +50,11 @@ class BukkitMessages(private val plugin: RPKBukkitPlugin) : Messages {
             if (!plugin.dataFolder.exists()) {
                 plugin.dataFolder.mkdirs()
             }
-            messagesConfigFile.createNewFile()
+            if (plugin.getResource("messages.yml") != null) {
+                plugin.saveResource("messages.yml", false)
+            } else {
+                messagesConfigFile.createNewFile()
+            }
         }
     }
 

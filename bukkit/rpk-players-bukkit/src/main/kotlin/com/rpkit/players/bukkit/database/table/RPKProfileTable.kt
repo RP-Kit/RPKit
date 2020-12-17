@@ -19,20 +19,22 @@ package com.rpkit.players.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.RPKPlayersBukkit
+import com.rpkit.players.bukkit.database.create
 import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_PROFILE
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileImpl
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.jooq.impl.DSL.max
 
 
 class RPKProfileTable(private val database: Database, private val plugin: RPKPlayersBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_profile.id.enabled")) {
-        database.cacheManager.createCache("rpk-players-bukkit.rpkit_profile.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKProfile::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_profile.id.size"))))
+        database.cacheManager.createCache(
+            "rpk-players-bukkit.rpkit_profile.id",
+            Int::class.javaObjectType,
+            RPKProfile::class.java,
+            plugin.config.getLong("caching.rpkit_profile.id.size")
+        )
     } else {
         null
     }
@@ -55,24 +57,25 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKProfile) {
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_PROFILE)
                 .set(RPKIT_PROFILE.NAME, entity.name)
                 .set(RPKIT_PROFILE.DISCRIMINATOR, entity.discriminator)
                 .set(RPKIT_PROFILE.PASSWORD_HASH, entity.passwordHash)
                 .set(RPKIT_PROFILE.PASSWORD_SALT, entity.passwordSalt)
-                .where(RPKIT_PROFILE.ID.eq(entity.id))
+                .where(RPKIT_PROFILE.ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
     }
 
     operator fun get(id: Int): RPKProfile? {
         if (cache?.containsKey(id) == true) {
-            return cache.get(id)
+            return cache[id]
         } else {
             val result = database.create
                     .select(
@@ -91,7 +94,7 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                     result.get(RPKIT_PROFILE.PASSWORD_HASH),
                     result.get(RPKIT_PROFILE.PASSWORD_SALT)
             )
-            cache?.put(id, profile)
+            cache?.set(id, profile)
             return profile
         }
     }
@@ -107,11 +110,12 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
     }
 
     fun delete(entity: RPKProfile) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_PROFILE)
-                .where(RPKIT_PROFILE.ID.eq(entity.id))
+                .where(RPKIT_PROFILE.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 
     fun generateDiscriminatorFor(name: String): Int {

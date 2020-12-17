@@ -37,6 +37,8 @@ class RPKSelectionBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.selection.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4411)
         saveDefaultConfig()
 
@@ -82,7 +84,7 @@ class RPKSelectionBukkit : RPKBukkitPlugin() {
         )
         database.addTable(RPKSelectionTable(database, this))
 
-        Services[RPKSelectionService::class] = RPKSelectionServiceImpl(this)
+        Services[RPKSelectionService::class.java] = RPKSelectionServiceImpl(this)
     }
 
     override fun registerListeners() {

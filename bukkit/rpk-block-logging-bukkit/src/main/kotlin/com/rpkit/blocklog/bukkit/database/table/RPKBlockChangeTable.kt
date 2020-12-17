@@ -21,23 +21,25 @@ import com.rpkit.blocklog.bukkit.block.RPKBlockChange
 import com.rpkit.blocklog.bukkit.block.RPKBlockChangeImpl
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistory
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
+import com.rpkit.blocklog.bukkit.database.create
 import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_CHANGE
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.Material
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 class RPKBlockChangeTable(private val database: Database, private val plugin: RPKBlockLoggingBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_block_change.id.enabled")) {
-        database.cacheManager.createCache("rpk-block-logging-bukkit.rpkit_block_change.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBlockChange::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_block_change.id.size"))))
+        database.cacheManager.createCache(
+            "rpk-block-logging-bukkit.rpkit_block_change.id",
+            Int::class.javaObjectType,
+            RPKBlockChange::class.java,
+            plugin.config.getLong("caching.rpkit_block_change.id.size")
+        )
     } else {
         null
     }
@@ -68,10 +70,11 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKBlockChange) {
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_BLOCK_CHANGE)
                 .set(RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID, entity.blockHistory.id)
@@ -82,9 +85,9 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
                 .set(RPKIT_BLOCK_CHANGE.FROM, entity.from.toString())
                 .set(RPKIT_BLOCK_CHANGE.TO, entity.to.toString())
                 .set(RPKIT_BLOCK_CHANGE.REASON, entity.reason)
-                .where(RPKIT_BLOCK_CHANGE.ID.eq(entity.id))
+                .where(RPKIT_BLOCK_CHANGE.ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
     }
 
     operator fun get(id: Int): RPKBlockChange? {
@@ -105,7 +108,7 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
                     .from(RPKIT_BLOCK_CHANGE)
                     .where(RPKIT_BLOCK_CHANGE.ID.eq(id))
                     .fetchOne() ?: return null
-            val blockHistoryService = Services[RPKBlockHistoryService::class] ?: return null
+            val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return null
             val blockHistoryId = result.get(RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID)
             val blockHistory = blockHistoryService.getBlockHistory(blockHistoryId)
             if (blockHistory == null) {
@@ -116,13 +119,13 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
                 cache?.remove(id)
                 return null
             }
-            val profileService = Services[RPKProfileService::class] ?: return null
+            val profileService = Services[RPKProfileService::class.java] ?: return null
             val profileId = result.get(RPKIT_BLOCK_CHANGE.PROFILE_ID)
             val profile = if (profileId == null) null else profileService.getProfile(profileId)
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return null
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return null
             val minecraftProfileId = result.get(RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID)
             val minecraftProfile = if (minecraftProfileId == null) null else minecraftProfileService.getMinecraftProfile(minecraftProfileId)
-            val characterService = Services[RPKCharacterService::class] ?: return null
+            val characterService = Services[RPKCharacterService::class.java] ?: return null
             val characterId = result.get(RPKIT_BLOCK_CHANGE.CHARACTER_ID)
             val character = if (characterId == null) null else characterService.getCharacter(characterId)
             val fromMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM))
@@ -148,7 +151,7 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
                     toMaterial,
                     result.get(RPKIT_BLOCK_CHANGE.REASON)
             )
-            cache?.put(id, blockChange)
+            cache?.set(id, blockChange)
             return blockChange
         }
     }
@@ -165,10 +168,11 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
     }
 
     fun delete(entity: RPKBlockChange) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_BLOCK_CHANGE)
-                .where(RPKIT_BLOCK_CHANGE.ID.eq(entity.id))
+                .where(RPKIT_BLOCK_CHANGE.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 }

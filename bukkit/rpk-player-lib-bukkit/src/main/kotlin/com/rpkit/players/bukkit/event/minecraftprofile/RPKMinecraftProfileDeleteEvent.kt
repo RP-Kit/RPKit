@@ -16,7 +16,7 @@
 
 package com.rpkit.players.bukkit.event.minecraftprofile
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 interface RPKMinecraftProfileDeleteEvent : RPKMinecraftProfileEvent {

@@ -16,7 +16,7 @@
 
 package com.rpkit.essentials.bukkit.locationhistory
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Location
 
 

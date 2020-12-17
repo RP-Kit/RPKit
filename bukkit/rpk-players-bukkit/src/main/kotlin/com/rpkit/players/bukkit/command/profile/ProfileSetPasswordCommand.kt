@@ -18,7 +18,7 @@ package com.rpkit.players.bukkit.command.profile
 
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.bukkit.command.Command
@@ -36,7 +36,7 @@ class ProfileSetPasswordCommand(private val plugin: RPKPlayersBukkit) : CommandE
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -52,7 +52,7 @@ class ProfileSetPasswordCommand(private val plugin: RPKPlayersBukkit) : CommandE
             return true
         }
         val password = args.joinToString(" ")
-        val profileService = Services[RPKProfileService::class]
+        val profileService = Services[RPKProfileService::class.java]
         if (profileService == null) {
             sender.sendMessage(plugin.messages["no-profile-service"])
             return true

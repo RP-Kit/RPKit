@@ -18,7 +18,7 @@ package com.rpkit.professions.bukkit.command.profession.experience
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
 import org.bukkit.command.Command
@@ -60,7 +60,7 @@ class ProfessionExperienceRemoveCommand(val plugin: RPKProfessionsBukkit) : Comm
                 return true
             }
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -74,7 +74,7 @@ class ProfessionExperienceRemoveCommand(val plugin: RPKProfessionsBukkit) : Comm
             }
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
@@ -88,7 +88,7 @@ class ProfessionExperienceRemoveCommand(val plugin: RPKProfessionsBukkit) : Comm
             }
             return true
         }
-        val professionService = Services[RPKProfessionService::class]
+        val professionService = Services[RPKProfessionService::class.java]
         if (professionService == null) {
             sender.sendMessage(plugin.messages["no-profession-service"])
             return true

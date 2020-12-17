@@ -16,6 +16,7 @@
 
 package com.rpkit.players.bukkit.profile
 
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import net.md_5.bungee.api.chat.BaseComponent
 import org.bukkit.Bukkit
 import java.util.*

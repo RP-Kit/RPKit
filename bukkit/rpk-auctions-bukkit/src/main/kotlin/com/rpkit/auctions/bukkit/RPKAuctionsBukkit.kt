@@ -44,6 +44,8 @@ class RPKAuctionsBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.auctions.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4376)
         saveDefaultConfig()
 
@@ -90,8 +92,8 @@ class RPKAuctionsBukkit : RPKBukkitPlugin() {
         database.addTable(RPKAuctionTable(database, this))
         database.addTable(RPKBidTable(database, this))
 
-        Services[RPKAuctionService::class] = RPKAuctionServiceImpl(this)
-        Services[RPKBidService::class] = RPKBidServiceImpl(this)
+        Services[RPKAuctionService::class.java] = RPKAuctionServiceImpl(this)
+        Services[RPKBidService::class.java] = RPKBidServiceImpl(this)
     }
 
     override fun registerCommands() {

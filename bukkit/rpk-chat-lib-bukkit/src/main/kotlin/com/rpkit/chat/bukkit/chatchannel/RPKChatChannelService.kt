@@ -17,8 +17,10 @@
 package com.rpkit.chat.bukkit.chatchannel
 
 import com.rpkit.chat.bukkit.chatchannel.matchpattern.RPKChatChannelMatchPattern
+import com.rpkit.chat.bukkit.discord.DiscordChannel
+import com.rpkit.chat.bukkit.irc.IRCChannel
 import com.rpkit.core.service.Service
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 /**
  * Provides chat channel related operations.
@@ -85,7 +87,7 @@ interface RPKChatChannelService : Service {
      * @param ircChannel The IRC channel
      * @return The chat channel, or null if no chat channel uses the given IRC channel.
      */
-    fun getChatChannelFromIRCChannel(ircChannel: String): RPKChatChannel?
+    fun getChatChannelFromIRCChannel(ircChannel: IRCChannel): RPKChatChannel?
 
     /**
      * Gets a chat channel from the Discord channel it is linked to.
@@ -94,7 +96,7 @@ interface RPKChatChannelService : Service {
      * @param discordChannel The Discord channel
      * @return The chat channel, or null if no chat channel uses the given Discord channel.
      */
-    fun getChatChannelFromDiscordChannel(discordChannel: String): RPKChatChannel?
+    fun getChatChannelFromDiscordChannel(discordChannel: DiscordChannel): RPKChatChannel?
 
     val matchPatterns: List<RPKChatChannelMatchPattern>
 }

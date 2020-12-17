@@ -29,7 +29,7 @@ class InventoryClickListener(private val plugin: RPKEconomyBukkit) : Listener {
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
         if (event.view.title.toLowerCase().contains("wallet")) {
-            val currencyService = Services[RPKCurrencyService::class] ?: return
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return
             val currency = currencyService.getCurrency(
                     event.view.title.substringAfterLast("[").substringBeforeLast("]")
             ) ?: return

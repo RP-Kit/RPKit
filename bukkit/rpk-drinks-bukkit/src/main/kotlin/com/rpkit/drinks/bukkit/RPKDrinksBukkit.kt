@@ -27,7 +27,7 @@ import com.rpkit.drink.bukkit.drink.RPKDrinkService
 import com.rpkit.drinks.bukkit.database.table.RPKDrunkennessTable
 import com.rpkit.drinks.bukkit.drink.RPKDrinkServiceImpl
 import com.rpkit.drinks.bukkit.listener.PlayerItemConsumeListener
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.potion.PotionEffect
@@ -41,6 +41,8 @@ class RPKDrinksBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.drinks.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4389)
         saveDefaultConfig()
 
@@ -89,11 +91,11 @@ class RPKDrinksBukkit : RPKBukkitPlugin() {
         val drinkService = RPKDrinkServiceImpl(this)
         drinkService.drinks.forEach { server.addRecipe(it.recipe) }
 
-        Services[RPKDrinkService::class] = drinkService
+        Services[RPKDrinkService::class.java] = drinkService
         object : BukkitRunnable() {
             override fun run() {
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class]
-                val characterService = Services[RPKCharacterService::class]
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+                val characterService = Services[RPKCharacterService::class.java]
                 server.onlinePlayers.forEach { bukkitPlayer ->
                     val minecraftProfile = minecraftProfileService?.getMinecraftProfile(bukkitPlayer) ?: return@forEach
                     val character = characterService?.getActiveCharacter(minecraftProfile) ?: return@forEach

@@ -39,6 +39,8 @@ class RPKBanksBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.banks.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4378)
         saveDefaultConfig()
 
@@ -84,7 +86,7 @@ class RPKBanksBukkit : RPKBukkitPlugin() {
         )
         database.addTable(RPKBankTable(database, this))
 
-        Services[RPKBankService::class] = RPKBankServiceImpl(this)
+        Services[RPKBankService::class.java] = RPKBankServiceImpl(this)
     }
 
     override fun registerListeners() {

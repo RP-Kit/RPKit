@@ -21,6 +21,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
+import com.rpkit.professions.bukkit.database.create
 import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_CHARACTER_PROFESSION
 import com.rpkit.professions.bukkit.profession.RPKCharacterProfession
 import com.rpkit.professions.bukkit.profession.RPKProfession
@@ -60,7 +61,7 @@ class RPKCharacterProfessionTable(
                 .from(RPKIT_CHARACTER_PROFESSION)
                 .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(character.id))
                 .fetch() ?: return emptyList()
-        val professionService = Services[RPKProfessionService::class] ?: return emptyList()
+        val professionService = Services[RPKProfessionService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
             val profession = professionService.getProfession(result[RPKIT_CHARACTER_PROFESSION.PROFESSION])
             if (profession == null) {

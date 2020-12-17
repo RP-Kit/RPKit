@@ -20,11 +20,10 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
+import com.rpkit.professions.bukkit.database.create
 import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_CHARACTER_PROFESSION_EXPERIENCE
 import com.rpkit.professions.bukkit.profession.RPKCharacterProfessionExperience
 import com.rpkit.professions.bukkit.profession.RPKProfession
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKCharacterProfessionExperienceTable(
@@ -32,19 +31,25 @@ class RPKCharacterProfessionExperienceTable(
         val plugin: RPKProfessionsBukkit
 ) : Table {
 
+    private data class CharacterProfessionCacheKey(
+        val characterId: Int,
+        val professionName: String
+    )
+
     private val cache = if (plugin.config.getBoolean("caching.rpkit_character_profession_experience.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-professions-bukkit.rpkit_character_profession_experience.character_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableMap::class.java,
-                        ResourcePoolsBuilder.heap(
-                                plugin.config.getLong("caching.rpkit_character_profession_experience.character_id.size")
-                        )
-                ).build()
+        database.cacheManager.createCache(
+            "rpk-professions-bukkit.rpkit_character_profession_experience.character_id",
+            CharacterProfessionCacheKey::class.java,
+            RPKCharacterProfessionExperience::class.java,
+            plugin.config.getLong("caching.rpkit_character_profession_experience.character_id.size")
         )
     } else {
         null
     }
 
     fun insert(entity: RPKCharacterProfessionExperience) {
+        val characterId = entity.character.id ?: return
+        val professionName = entity.profession.name
         database.create
                 .insertInto(
                         RPKIT_CHARACTER_PROFESSION_EXPERIENCE,
@@ -53,20 +58,17 @@ class RPKCharacterProfessionExperienceTable(
                         RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE
                 )
                 .values(
-                        entity.character.id,
-                        entity.profession.name,
+                        characterId,
+                        professionName,
                         entity.experience
                 )
                 .execute()
-        if (cache != null) {
-            val professionExperienceMap = cache[entity.character.id] as? MutableMap<String, RPKCharacterProfessionExperience>
-                    ?: mutableMapOf()
-            professionExperienceMap[entity.profession.name] = entity
-            cache.put(entity.character.id, professionExperienceMap)
-        }
+        cache?.set(CharacterProfessionCacheKey(characterId, professionName), entity)
     }
 
     fun update(entity: RPKCharacterProfessionExperience) {
+        val characterId = entity.character.id ?: return
+        val professionName = entity.profession.name
         database.create
                 .update(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
                 .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID, entity.character.id)
@@ -74,47 +76,36 @@ class RPKCharacterProfessionExperienceTable(
                 .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE, entity.experience)
                 .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        if (cache != null) {
-            val professionExperienceMap = cache[entity.character.id] as? MutableMap<String, RPKCharacterProfessionExperience>
-                    ?: mutableMapOf()
-            professionExperienceMap[entity.profession.name] = entity
-            cache.put(entity.character.id, professionExperienceMap)
-        }
+        cache?.set(CharacterProfessionCacheKey(characterId, professionName), entity)
     }
 
     operator fun get(character: RPKCharacter, profession: RPKProfession): RPKCharacterProfessionExperience? {
+        val characterId = character.id ?: return null
+        val professionName = profession.name
         val result = database.create
                 .select(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE)
                 .from(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(character.id))
-                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(profession.name))
+                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId))
+                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName))
                 .fetchOne() ?: return null
         val characterProfessionExperience = RPKCharacterProfessionExperience(
                 character,
                 profession,
                 result[RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE]
         )
-        if (cache != null) {
-            val professionExperienceMap = cache[character.id] as? MutableMap<String, RPKCharacterProfessionExperience>
-                    ?: mutableMapOf()
-            professionExperienceMap[profession.name] = characterProfessionExperience
-            cache.put(character.id, professionExperienceMap)
-        }
+        cache?.set(CharacterProfessionCacheKey(characterId, professionName), characterProfessionExperience)
         return characterProfessionExperience
     }
 
     fun delete(entity: RPKCharacterProfessionExperience) {
+        val characterId = entity.character.id ?: return
+        val professionName = entity.profession.name
         database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
                 .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(entity.character.id))
                 .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(entity.profession.name))
                 .execute()
-        if (cache != null) {
-            val professionExperienceMap = cache[entity.character.id] as? MutableMap<String, RPKCharacterProfessionExperience>
-                    ?: mutableMapOf()
-            professionExperienceMap.remove(entity.profession.name)
-            cache.put(entity.character.id, professionExperienceMap)
-        }
+        cache?.remove(CharacterProfessionCacheKey(characterId, professionName))
     }
 
     fun delete(character: RPKCharacter) {
@@ -122,7 +113,9 @@ class RPKCharacterProfessionExperienceTable(
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
                 .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(character.id))
                 .execute()
-        cache?.remove(character.id)
+        cache?.keys()
+            ?.filter { it.characterId == character.id }
+            ?.forEach { cache.remove(it) }
     }
 
 }

@@ -58,7 +58,7 @@ class CurrencyRemoveCommand(private val plugin: RPKEconomyBukkit) : CommandExecu
             conversationFactory.buildConversation(sender).begin()
             return true
         }
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
         if (currencyService == null) {
             sender.sendMessage(plugin.messages["no-currency-service"])
             return true
@@ -81,7 +81,7 @@ class CurrencyRemoveCommand(private val plugin: RPKEconomyBukkit) : CommandExecu
     private inner class CurrencyPrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val currencyService = Services[RPKCurrencyService::class] ?: return false
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return false
             val currency = currencyService.getCurrency(input) ?: return false
             context.setSessionData("currencyService", currencyService)
             context.setSessionData("currency", currency)
@@ -96,7 +96,7 @@ class CurrencyRemoveCommand(private val plugin: RPKEconomyBukkit) : CommandExecu
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            if (Services[RPKCurrencyService::class] == null) return plugin.messages["no-currency-service"]
+            if (Services[RPKCurrencyService::class.java] == null) return plugin.messages["no-currency-service"]
             return plugin.messages["currency-remove-invalid-currency"]
         }
 

@@ -50,7 +50,7 @@ class RPKProfessionImpl(
             RPKCraftingAction.SMELT -> "smelting"
             RPKCraftingAction.MINE -> "mining"
         }
-        val itemQualityService = Services[RPKItemQualityService::class] ?: return null
+        val itemQualityService = Services[RPKItemQualityService::class.java] ?: return null
         val itemQualityName = plugin.config.getString("professions.$name.$actionConfigSectionName.$level.$material.quality")
                 ?: when {
                     level > 1 -> return getQualityFor(action, material, level - 1)

@@ -36,7 +36,7 @@ class EntityDamageListener(private val plugin: RPKMonstersBukkit) : Listener {
         }
         val entity = event.entity
         if (entity !is LivingEntity || entity is Player) return
-        val monsterStatService = Services[RPKMonsterStatServiceImpl::class] ?: return
+        val monsterStatService = Services[RPKMonsterStatServiceImpl::class.java] ?: return
         monsterStatService.setMonsterNameplate(entity, health = entity.health - event.finalDamage)
     }
 

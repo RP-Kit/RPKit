@@ -22,28 +22,30 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.store.bukkit.RPKStoresBukkit
+import com.rpkit.store.bukkit.database.create
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_CONSUMABLE_PURCHASE
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_PURCHASE
 import com.rpkit.store.bukkit.purchase.RPKConsumablePurchase
 import com.rpkit.store.bukkit.purchase.RPKConsumablePurchaseImpl
 import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
-import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_CONSUMABLE_PURCHASE
-import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_PURCHASE
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKConsumablePurchaseTable(private val database: Database, private val plugin: RPKStoresBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_consumable_purchase.id.enabled")) {
-        database.cacheManager.createCache("rpkit-stores-bukkit.rpkit_consumable_purchase.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKConsumablePurchase::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_consumable_purchase.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpkit-stores-bukkit.rpkit_consumable_purchase.id",
+            Int::class.javaObjectType,
+            RPKConsumablePurchase::class.java,
+            plugin.config.getLong("caching.rpkit_consumable_purchase.id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKConsumablePurchase) {
-        val id = database.getTable(RPKPurchaseTable::class).insert(entity)
+        val id = database.getTable(RPKPurchaseTable::class.java).insert(entity)
         database.create
                 .insertInto(
                         RPKIT_CONSUMABLE_PURCHASE,
@@ -56,17 +58,18 @@ class RPKConsumablePurchaseTable(private val database: Database, private val plu
                 )
                 .execute()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKConsumablePurchase) {
-        database.getTable(RPKPurchaseTable::class).update(entity)
+        val id = entity.id ?: return
+        database.getTable(RPKPurchaseTable::class.java).update(entity)
         database.create
                 .update(RPKIT_CONSUMABLE_PURCHASE)
                 .set(RPKIT_CONSUMABLE_PURCHASE.REMAINING_USES, entity.remainingUses)
-                .where(RPKIT_CONSUMABLE_PURCHASE.PURCHASE_ID.eq(entity.id))
+                .where(RPKIT_CONSUMABLE_PURCHASE.PURCHASE_ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
     }
 
     operator fun get(id: Int): RPKConsumablePurchase? {
@@ -88,7 +91,7 @@ class RPKConsumablePurchaseTable(private val database: Database, private val plu
                 .where(RPKIT_PURCHASE.ID.eq(id))
                 .and(RPKIT_CONSUMABLE_PURCHASE.PURCHASE_ID.eq(RPKIT_PURCHASE.ID))
                 .fetchOne() ?: return null
-        val storeItemService = Services[RPKStoreItemService::class] ?: return null
+        val storeItemService = Services[RPKStoreItemService::class.java] ?: return null
         val storeItem = storeItemService.getStoreItem(result[RPKIT_PURCHASE.STORE_ITEM_ID]) as? RPKConsumableStoreItem
         if (storeItem == null) {
             database.create
@@ -102,7 +105,7 @@ class RPKConsumablePurchaseTable(private val database: Database, private val plu
             cache?.remove(id)
             return null
         }
-        val profileService = Services[RPKProfileService::class] ?: return null
+        val profileService = Services[RPKProfileService::class.java] ?: return null
         val profile = profileService.getProfile(result[RPKIT_PURCHASE.PROFILE_ID])
         if (profile == null) {
             database.create
@@ -123,7 +126,7 @@ class RPKConsumablePurchaseTable(private val database: Database, private val plu
                 profile,
                 result[RPKIT_PURCHASE.PURCHASE_DATE]
         )
-        cache?.put(id, consumablePurchase)
+        cache?.set(id, consumablePurchase)
         return consumablePurchase
     }
 
@@ -141,11 +144,12 @@ class RPKConsumablePurchaseTable(private val database: Database, private val plu
     }
 
     fun delete(entity: RPKConsumablePurchase) {
-        database.getTable(RPKPurchaseTable::class).delete(entity)
+        val id = entity.id ?: return
+        database.getTable(RPKPurchaseTable::class.java).delete(entity)
         database.create
                 .deleteFrom(RPKIT_CONSUMABLE_PURCHASE)
-                .where(RPKIT_CONSUMABLE_PURCHASE.PURCHASE_ID.eq(entity.id))
+                .where(RPKIT_CONSUMABLE_PURCHASE.PURCHASE_ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 }

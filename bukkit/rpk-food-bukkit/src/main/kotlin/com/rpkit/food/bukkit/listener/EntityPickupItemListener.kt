@@ -31,7 +31,7 @@ class EntityPickupItemListener : Listener {
     fun onPlayerPickupItem(event: EntityPickupItemEvent) {
         val itemStack = event.item.itemStack
         if (itemStack.type.isEdible) {
-            val expiryService = Services[RPKExpiryServiceImpl::class] ?: return
+            val expiryService = Services[RPKExpiryServiceImpl::class.java] ?: return
             if (expiryService.getExpiry(itemStack) == null) {
                 expiryService.setExpiry(itemStack)
             }

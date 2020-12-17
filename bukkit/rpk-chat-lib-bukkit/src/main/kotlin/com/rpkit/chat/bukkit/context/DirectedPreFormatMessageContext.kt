@@ -17,7 +17,7 @@
 package com.rpkit.chat.bukkit.context
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 
 /**

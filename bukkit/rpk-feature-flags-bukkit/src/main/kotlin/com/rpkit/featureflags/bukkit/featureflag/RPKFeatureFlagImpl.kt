@@ -28,12 +28,12 @@ class RPKFeatureFlagImpl(
 ) : RPKFeatureFlag {
 
     override fun isEnabledFor(profile: RPKProfile): Boolean {
-        return plugin.database.getTable(RPKProfileFeatureFlagTable::class).get(profile, this)?.isEnabled
+        return plugin.database.getTable(RPKProfileFeatureFlagTable::class.java).get(profile, this)?.isEnabled
                 ?: isEnabledByDefault
     }
 
     override fun setEnabledFor(profile: RPKProfile, enabled: Boolean) {
-        val profileFeatureFlagTable = plugin.database.getTable(RPKProfileFeatureFlagTable::class)
+        val profileFeatureFlagTable = plugin.database.getTable(RPKProfileFeatureFlagTable::class.java)
         if (isEnabledFor(profile) != enabled) {
             var playerFeatureFlag = profileFeatureFlagTable.get(profile, this)
             if (playerFeatureFlag == null) {

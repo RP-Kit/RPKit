@@ -16,7 +16,7 @@
 
 package com.rpkit.selection.bukkit.selection
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.World
 import org.bukkit.block.Block
 import kotlin.math.max

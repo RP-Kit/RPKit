@@ -36,7 +36,7 @@ class KitCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val kitService = Services[RPKKitService::class]
+        val kitService = Services[RPKKitService::class.java]
         if (kitService == null) {
             sender.sendMessage(plugin.messages["no-kit-service"])
             return true

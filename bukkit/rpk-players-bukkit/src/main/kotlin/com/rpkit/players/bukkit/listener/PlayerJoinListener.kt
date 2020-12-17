@@ -18,7 +18,7 @@ package com.rpkit.players.bukkit.listener
 
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import net.md_5.bungee.api.ChatColor.GREEN
 import net.md_5.bungee.api.ChatColor.RED
 import net.md_5.bungee.api.chat.ClickEvent
@@ -36,7 +36,7 @@ class PlayerJoinListener(private val plugin: RPKPlayersBukkit) : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
         val minecraftProfileLinkRequests = minecraftProfileService.getMinecraftProfileLinkRequests(minecraftProfile)
         if (minecraftProfileLinkRequests.isEmpty()) return

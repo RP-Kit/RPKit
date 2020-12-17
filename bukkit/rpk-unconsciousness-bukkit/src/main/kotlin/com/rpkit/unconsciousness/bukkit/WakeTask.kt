@@ -18,16 +18,16 @@ package com.rpkit.unconsciousness.bukkit
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import org.bukkit.potion.PotionEffectType.BLINDNESS
 import org.bukkit.scheduler.BukkitRunnable
 
 class WakeTask(private val plugin: RPKUnconsciousnessBukkit) : BukkitRunnable() {
     override fun run() {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
-        val characterService = Services[RPKCharacterService::class]
-        val unconsciousnessService = Services[RPKUnconsciousnessService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        val characterService = Services[RPKCharacterService::class.java]
+        val unconsciousnessService = Services[RPKUnconsciousnessService::class.java]
         plugin.server.onlinePlayers.forEach { bukkitPlayer ->
             val minecraftProfile = minecraftProfileService?.getMinecraftProfile(bukkitPlayer)
             if (minecraftProfile != null) {

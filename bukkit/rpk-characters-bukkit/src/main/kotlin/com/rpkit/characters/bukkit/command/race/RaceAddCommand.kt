@@ -58,7 +58,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor 
             conversationFactory.buildConversation(sender).begin()
             return true
         }
-        val raceService = Services[RPKRaceService::class]
+        val raceService = Services[RPKRaceService::class.java]
         if (raceService == null) {
             sender.sendMessage(plugin.messages["no-race-service"])
             return true
@@ -84,12 +84,12 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor 
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val raceService = Services[RPKRaceService::class] ?: return false
+            val raceService = Services[RPKRaceService::class.java] ?: return false
             return raceService.getRace(input) == null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val raceService = Services[RPKRaceService::class] ?: return RaceAddedPrompt()
+            val raceService = Services[RPKRaceService::class.java] ?: return RaceAddedPrompt()
             raceService.addRace(RPKRaceImpl(name = input))
             return RaceAddedPrompt()
         }
@@ -107,7 +107,7 @@ class RaceAddCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            if (Services[RPKRaceService::class] == null) return plugin.messages["no-race-service"]
+            if (Services[RPKRaceService::class.java] == null) return plugin.messages["no-race-service"]
             return plugin.messages["race-add-valid"]
         }
 

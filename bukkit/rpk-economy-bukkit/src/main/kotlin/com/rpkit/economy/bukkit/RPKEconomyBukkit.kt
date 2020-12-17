@@ -54,6 +54,8 @@ class RPKEconomyBukkit : RPKBukkitPlugin() {
     private lateinit var economyService: RPKEconomyService
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.economy.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4390)
         saveDefaultConfig()
 
@@ -103,10 +105,10 @@ class RPKEconomyBukkit : RPKBukkitPlugin() {
 
         currencyService = RPKCurrencyServiceImpl(this)
         economyService = RPKEconomyServiceImpl(this)
-        Services[RPKCurrencyService::class] = currencyService
-        Services[RPKEconomyService::class] = economyService
+        Services[RPKCurrencyService::class.java] = currencyService
+        Services[RPKEconomyService::class.java] = economyService
 
-        Services.require(RPKCharacterCardFieldService::class).whenAvailable { service ->
+        Services.require(RPKCharacterCardFieldService::class.java).whenAvailable { service ->
             service.characterCardFields.add(MoneyField(this))
         }
     }

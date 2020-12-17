@@ -19,7 +19,7 @@ package com.rpkit.essentials.bukkit.listener
 import com.rpkit.core.service.Services
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
@@ -29,8 +29,8 @@ class PlayerQuitListener(private val plugin: RPKEssentialsBukkit) : Listener {
 
     @EventHandler
     fun onPlayerQuit(event: PlayerQuitEvent) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val logMessageService = Services[RPKLogMessageService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val logMessageService = Services[RPKLogMessageService::class.java] ?: return
         val quitMessage = event.quitMessage
         if (quitMessage != null) {
             plugin.server.onlinePlayers

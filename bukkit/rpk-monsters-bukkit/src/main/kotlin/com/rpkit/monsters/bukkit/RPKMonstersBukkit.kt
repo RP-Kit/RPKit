@@ -47,6 +47,8 @@ class RPKMonstersBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.monsters.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 6661)
         saveDefaultConfig()
 
@@ -93,10 +95,10 @@ class RPKMonstersBukkit : RPKBukkitPlugin() {
         database.addTable(RPKMonsterSpawnAreaMonsterTable(database, this))
         database.addTable(RPKMonsterSpawnAreaTable(database, this))
 
-        Services[RPKMonsterExperienceService::class] = RPKMonsterExperienceServiceImpl(this)
-        Services[RPKMonsterLevelService::class] = RPKMonsterLevelServiceImpl(this)
-        Services[RPKMonsterSpawnAreaService::class] = RPKMonsterSpawnAreaServiceImpl(this)
-        Services[RPKMonsterStatService::class] = RPKMonsterStatServiceImpl(this)
+        Services[RPKMonsterExperienceService::class.java] = RPKMonsterExperienceServiceImpl(this)
+        Services[RPKMonsterLevelService::class.java] = RPKMonsterLevelServiceImpl(this)
+        Services[RPKMonsterSpawnAreaService::class.java] = RPKMonsterSpawnAreaServiceImpl(this)
+        Services[RPKMonsterStatService::class.java] = RPKMonsterStatServiceImpl(this)
     }
 
     override fun registerCommands() {

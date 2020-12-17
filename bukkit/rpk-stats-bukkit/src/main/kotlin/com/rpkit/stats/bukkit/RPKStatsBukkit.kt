@@ -35,26 +35,28 @@ import org.bukkit.attribute.Attribute
 class RPKStatsBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.stats.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4419)
         saveDefaultConfig()
         val statVariableService = RPKStatVariableServiceImpl(this)
         val statService = RPKStatServiceImpl(this)
-        Services[RPKStatVariableService::class] = statVariableService
-        Services[RPKStatService::class] = statService
+        Services[RPKStatVariableService::class.java] = statVariableService
+        Services[RPKStatService::class.java] = statService
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "minecraftLevel"
-            override fun get(character: RPKCharacter): Int {
+            override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 if (minecraftProfile != null) {
-                    return server.getPlayer(minecraftProfile.minecraftUUID)?.level ?: 0
+                    return server.getPlayer(minecraftProfile.minecraftUUID)?.level?.toDouble() ?: 0.0
                 }
-                return 0
+                return 0.0
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterAge"
-            override fun get(character: RPKCharacter): Int {
-                return character.age
+            override fun get(character: RPKCharacter): Double {
+                return character.age.toDouble()
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
@@ -62,7 +64,7 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
             override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
-                    if (Services[RPKCharacterService::class]?.getActiveCharacter(minecraftProfile) == character) {
+                    if (Services[RPKCharacterService::class.java]?.getActiveCharacter(minecraftProfile) == character) {
                         val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
                         bukkitPlayer?.health ?: character.health
                     } else {
@@ -78,7 +80,7 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
             override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
-                    if (Services[RPKCharacterService::class]?.getActiveCharacter(minecraftProfile) == character) {
+                    if (Services[RPKCharacterService::class.java]?.getActiveCharacter(minecraftProfile) == character) {
                         val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
                         if (bukkitPlayer != null) {
                             bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: character.maxHealth
@@ -95,36 +97,36 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterMana"
-            override fun get(character: RPKCharacter): Int {
-                return character.mana
+            override fun get(character: RPKCharacter): Double {
+                return character.mana.toDouble()
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterMaxMana"
-            override fun get(character: RPKCharacter): Int {
-                return character.maxMana
+            override fun get(character: RPKCharacter): Double {
+                return character.maxMana.toDouble()
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterFoodLevel"
-            override fun get(character: RPKCharacter): Int {
+            override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
-                    if (Services[RPKCharacterService::class]?.getActiveCharacter(minecraftProfile) == character) {
+                    if (Services[RPKCharacterService::class.java]?.getActiveCharacter(minecraftProfile) == character) {
                         val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
-                        bukkitPlayer?.foodLevel ?: character.foodLevel
+                        bukkitPlayer?.foodLevel?.toDouble() ?: character.foodLevel.toDouble()
                     } else {
-                        character.foodLevel
+                        character.foodLevel.toDouble()
                     }
                 } else {
-                    character.foodLevel
+                    character.foodLevel.toDouble()
                 }
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = "characterThirstLevel"
-            override fun get(character: RPKCharacter): Int {
-                return character.thirstLevel
+            override fun get(character: RPKCharacter): Double {
+                return character.thirstLevel.toDouble()
             }
         })
     }

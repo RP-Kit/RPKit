@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.chatchannel.context
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.chat.bukkit.context.DirectedPostFormatMessageContext
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import net.md_5.bungee.api.chat.BaseComponent
 

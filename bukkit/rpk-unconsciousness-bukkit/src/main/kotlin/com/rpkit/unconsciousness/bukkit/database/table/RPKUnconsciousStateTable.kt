@@ -20,23 +20,26 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
+import com.rpkit.unconsciousness.bukkit.database.create
 import com.rpkit.unconsciousness.bukkit.database.jooq.Tables.RPKIT_UNCONSCIOUS_STATE
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousState
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKUnconsciousStateTable(private val database: Database, private val plugin: RPKUnconsciousnessBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_unconscious_state.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-unconsciousness-bukkit.rpkit_unconscious_state.character_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType,
-                        RPKUnconsciousState::class.java, ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_unconscious_state.character_id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-unconsciousness-bukkit.rpkit_unconscious_state.character_id",
+            Int::class.javaObjectType,
+            RPKUnconsciousState::class.java,
+            plugin.config.getLong("caching.rpkit_unconscious_state.character_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKUnconsciousState) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_UNCONSCIOUS_STATE,
@@ -44,25 +47,27 @@ class RPKUnconsciousStateTable(private val database: Database, private val plugi
                         RPKIT_UNCONSCIOUS_STATE.DEATH_TIME
                 )
                 .values(
-                        entity.character.id,
-                        entity.deathTime
+                    characterId,
+                    entity.deathTime
                 )
                 .execute()
-        cache?.put(entity.character.id, entity)
+        cache?.set(characterId, entity)
     }
 
     fun update(entity: RPKUnconsciousState) {
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_UNCONSCIOUS_STATE)
-                .set(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID, characterId)
                 .set(RPKIT_UNCONSCIOUS_STATE.DEATH_TIME, entity.deathTime)
                 .execute()
-        cache?.put(entity.character.id, entity)
+        cache?.set(characterId, entity)
     }
 
     operator fun get(character: RPKCharacter): RPKUnconsciousState? {
-        if (cache?.containsKey(character.id) == true) {
-            return cache.get(character.id)
+        val characterId = character.id ?: return null
+        if (cache?.containsKey(characterId) == true) {
+            return cache[characterId]
         } else {
             val result = database.create
                     .select(
@@ -70,24 +75,25 @@ class RPKUnconsciousStateTable(private val database: Database, private val plugi
                             RPKIT_UNCONSCIOUS_STATE.DEATH_TIME
                     )
                     .from(RPKIT_UNCONSCIOUS_STATE)
-                    .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(character.id))
+                    .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(characterId))
                     .fetchOne() ?: return null
             val deathTime = result[RPKIT_UNCONSCIOUS_STATE.DEATH_TIME]
             val unconsciousState = RPKUnconsciousState(
                     character,
                     deathTime
             )
-            cache?.put(character.id, unconsciousState)
+            cache?.set(characterId, unconsciousState)
             return unconsciousState
         }
     }
 
     fun delete(entity: RPKUnconsciousState) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_UNCONSCIOUS_STATE)
-                .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(characterId))
                 .execute()
-        cache?.remove(entity.character.id)
+        cache?.remove(characterId)
     }
 
 }

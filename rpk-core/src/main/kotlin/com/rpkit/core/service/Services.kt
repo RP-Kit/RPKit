@@ -23,20 +23,20 @@ object Services {
     lateinit var delegate: ServicesDelegate
 
     operator fun <T: Service> get(type: Class<T>) = delegate[type.kotlin]
-    operator fun <T: Service> get(type: KClass<T>) = delegate[type]
+    internal operator fun <T: Service> get(type: KClass<T>) = delegate[type]
 
     operator fun <T: Service> set(type: Class<T>, service: T) {
         set(type.kotlin, service)
     }
 
-    operator fun <T: Service> set(type: KClass<T>, service: T) {
+    internal operator fun <T: Service> set(type: KClass<T>, service: T) {
         delegate[type] = service
         val iterator = serviceReadyFunctions.iterator()
         while (iterator.hasNext()) {
             val requirement = iterator.next()
             if (requirement.type == type) {
                 val serviceRequirement = requirement as ServiceReadyFunction<T>
-                serviceRequirement(service)
+                serviceRequirement.action(service)
                 iterator.remove()
             }
         }
@@ -44,7 +44,7 @@ object Services {
 
     private val serviceReadyFunctions = mutableListOf<ServiceReadyFunction<out Service>>()
 
-    fun <T: Service> require(type: KClass<T>) = ServiceRequirement(type)
+    private fun <T: Service> require(type: KClass<T>) = ServiceRequirement(type)
     fun <T: Service> require(type: Class<T>) = require(type.kotlin)
     internal fun addServiceReadyFunction(function: ServiceReadyFunction<out Service>) {
         serviceReadyFunctions.add(function)

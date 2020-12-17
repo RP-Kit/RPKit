@@ -20,7 +20,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
 import com.rpkit.moderation.bukkit.ticket.RPKTicketService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -44,7 +44,7 @@ class TicketCreateCommand(private val plugin: RPKModerationBukkit) : CommandExec
             return true
         }
         val reason = args.joinToString(" ")
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -59,7 +59,7 @@ class TicketCreateCommand(private val plugin: RPKModerationBukkit) : CommandExec
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        val ticketService = Services[RPKTicketService::class]
+        val ticketService = Services[RPKTicketService::class.java]
         if (ticketService == null) {
             sender.sendMessage(plugin.messages["no-ticket-service"])
             return true

@@ -19,67 +19,73 @@ package com.rpkit.essentials.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
+import com.rpkit.essentials.bukkit.database.create
 import com.rpkit.essentials.bukkit.database.jooq.Tables.RPKIT_LOG_MESSAGES_ENABLED
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessagesEnabled
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 class RPKLogMessagesEnabledTable(private val database: Database, plugin: RPKEssentialsBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_log_messages_enabled.minecraft_profile_id.enabled")) {
-        database.cacheManager.createCache("rpk-essentials-bukkit.rpkit_log_messages_enabled.minecraft_profile_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKLogMessagesEnabled::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_log_messages_enabled.minecraft_profile_id.size"))))
+        database.cacheManager.createCache(
+            "rpk-essentials-bukkit.rpkit_log_messages_enabled.minecraft_profile_id",
+            Int::class.javaObjectType,
+            RPKLogMessagesEnabled::class.java,
+            plugin.config.getLong("caching.rpkit_log_messages_enabled.minecraft_profile_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKLogMessagesEnabled) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .insertInto(
                         RPKIT_LOG_MESSAGES_ENABLED,
                         RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID
                 )
                 .values(
-                        entity.minecraftProfile.id
+                        minecraftProfileId
                 )
                 .execute()
-        cache?.put(entity.minecraftProfile.id, entity)
+        cache?.set(minecraftProfileId, entity)
     }
 
     fun update(entity: RPKLogMessagesEnabled) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .update(RPKIT_LOG_MESSAGES_ENABLED)
-                .set(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID, entity.minecraftProfile.id)
-                .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
+                .set(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID, minecraftProfileId)
+                .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
                 .execute()
-        cache?.put(entity.minecraftProfile.id, entity)
+        cache?.set(minecraftProfileId, entity)
     }
 
     operator fun get(minecraftProfile: RPKMinecraftProfile): RPKLogMessagesEnabled? {
-        if (cache?.containsKey(minecraftProfile.id) == true) {
-            return cache[minecraftProfile.id]
+        val minecraftProfileId = minecraftProfile.id ?: return null
+        if (cache?.containsKey(minecraftProfileId) == true) {
+            return cache[minecraftProfileId]
         }
         database.create
                 .select(
                         RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID
                 )
                 .from(RPKIT_LOG_MESSAGES_ENABLED)
-                .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
                 .fetchOne() ?: return null
         val logMessagesEnabled = RPKLogMessagesEnabled(minecraftProfile)
-        cache?.put(minecraftProfile.id, logMessagesEnabled)
+        cache?.set(minecraftProfileId, logMessagesEnabled)
         return logMessagesEnabled
     }
 
     fun delete(entity: RPKLogMessagesEnabled) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_LOG_MESSAGES_ENABLED)
-                .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
+                .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
                 .execute()
-        cache?.remove(entity.minecraftProfile.id)
+        cache?.remove(minecraftProfileId)
     }
 
 }

@@ -32,9 +32,9 @@ class RPKBlockHistoryImpl(
 ) : RPKBlockHistory {
 
     override val changes: List<RPKBlockChange>
-        get() = plugin.database.getTable(RPKBlockChangeTable::class).get(this)
+        get() = plugin.database.getTable(RPKBlockChangeTable::class.java).get(this)
 
     override val inventoryChanges: List<RPKBlockInventoryChange>
-        get() = plugin.database.getTable(RPKBlockInventoryChangeTable::class).get(this)
+        get() = plugin.database.getTable(RPKBlockInventoryChangeTable::class.java).get(this)
 
 }

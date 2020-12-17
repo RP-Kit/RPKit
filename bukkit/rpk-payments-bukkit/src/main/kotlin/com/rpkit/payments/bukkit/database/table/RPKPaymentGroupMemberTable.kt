@@ -20,6 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
+import com.rpkit.payments.bukkit.database.create
 import com.rpkit.payments.bukkit.database.jooq.Tables.RPKIT_PAYMENT_GROUP_MEMBER
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.member.RPKPaymentGroupMember
@@ -51,7 +52,7 @@ class RPKPaymentGroupMemberTable(
                 .from(RPKIT_PAYMENT_GROUP_MEMBER)
                 .where(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID.eq(paymentGroup.id))
                 .fetch()
-        val characterService = Services[RPKCharacterService::class] ?: return emptyList()
+        val characterService = Services[RPKCharacterService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
             val character = characterService.getCharacter(result[RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID]) ?: return@mapNotNull null
             return@mapNotNull RPKPaymentGroupMember(

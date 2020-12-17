@@ -19,39 +19,43 @@ package com.rpkit.locks.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.locks.bukkit.RPKLocksBukkit
+import com.rpkit.locks.bukkit.database.create
 import com.rpkit.locks.bukkit.database.jooq.Tables.RPKIT_PLAYER_UNCLAIMING
 import com.rpkit.locks.bukkit.lock.RPKPlayerUnclaiming
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 class RPKPlayerUnclaimingTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_player_unclaiming.minecraft_profile_id.enabled")) {
-        database.cacheManager.createCache("rpk-locks-bukkit.rpkit_player_unclaiming.minecraft_profile_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPlayerUnclaiming::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_player_unclaiming.minecraft_profile_id.size"))))
+        database.cacheManager.createCache(
+            "rpk-locks-bukkit.rpkit_player_unclaiming.minecraft_profile_id",
+            Int::class.javaObjectType,
+            RPKPlayerUnclaiming::class.java,
+            plugin.config.getLong("caching.rpkit_player_unclaiming.minecraft_profile_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKPlayerUnclaiming) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .insertInto(
                         RPKIT_PLAYER_UNCLAIMING,
                         RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID
                 )
                 .values(
-                        entity.minecraftProfile.id
+                        minecraftProfileId
                 )
                 .execute()
-        cache?.put(entity.minecraftProfile.id, entity)
+        cache?.set(minecraftProfileId, entity)
     }
 
     operator fun get(minecraftProfile: RPKMinecraftProfile): RPKPlayerUnclaiming? {
-        if (cache?.containsKey(minecraftProfile.id) == true) {
-            return cache[minecraftProfile.id]
+        val minecraftProfileId = minecraftProfile.id ?: return null
+        if (cache?.containsKey(minecraftProfileId) == true) {
+            return cache[minecraftProfileId]
         } else {
             database.create
                     .select(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID)
@@ -59,17 +63,18 @@ class RPKPlayerUnclaimingTable(private val database: Database, private val plugi
                     .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
                     .fetchOne() ?: return null
             val playerUnclaiming = RPKPlayerUnclaiming(minecraftProfile)
-            cache?.put(minecraftProfile.id, playerUnclaiming)
+            cache?.set(minecraftProfileId, playerUnclaiming)
             return playerUnclaiming
         }
     }
 
     fun delete(entity: RPKPlayerUnclaiming) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_PLAYER_UNCLAIMING)
                 .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
                 .execute()
-        cache?.remove(entity.minecraftProfile.id)
+        cache?.remove(minecraftProfileId)
     }
 
 }

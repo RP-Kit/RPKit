@@ -19,7 +19,7 @@ package com.rpkit.chat.bukkit.vault
 import com.rpkit.chat.bukkit.RPKChatLibBukkit
 import com.rpkit.chat.bukkit.prefix.RPKPrefixService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.permission.Permission
@@ -30,7 +30,7 @@ import net.milkbowl.vault.permission.Permission
 class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.server.servicesManager.getRegistration(Permission::class.java)?.provider) {
 
     override fun getGroupPrefix(world: String, group: String): String {
-        val prefixService = Services[RPKPrefixService::class]
+        val prefixService = Services[RPKPrefixService::class.java]
         return prefixService?.getPrefix(group)?.prefix ?: ""
     }
 
@@ -59,8 +59,8 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
     }
 
     override fun getPlayerPrefix(world: String, playerName: String): String {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
-        val prefixService = Services[RPKPrefixService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        val prefixService = Services[RPKPrefixService::class.java]
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
         val minecraftProfile = minecraftProfileService?.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
@@ -73,7 +73,7 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
     }
 
     override fun setGroupPrefix(world: String, group: String, prefix: String) {
-        val prefixService = Services[RPKPrefixService::class]
+        val prefixService = Services[RPKPrefixService::class.java]
         prefixService?.getPrefix(group)?.prefix = prefix
     }
 

@@ -94,6 +94,8 @@ class RPKChatBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.chat.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4383)
         // Directed pre-format pipeline components
         ConfigurationSerialization.registerClass(DrunkenSlurComponent::class.java, "DrunkenSlurComponent")
@@ -184,21 +186,21 @@ class RPKChatBukkit : RPKBukkitPlugin() {
         database.addTable(RPKSnooperTable(database, this))
 
         if (config.getBoolean("irc.enabled")) {
-            Services[RPKIRCService::class] = RPKIRCServiceImpl(this)
+            Services[RPKIRCService::class.java] = RPKIRCServiceImpl(this)
         }
 
         if (config.getBoolean("discord.enabled")) {
-            Services[RPKDiscordService::class] = RPKDiscordServiceImpl(this)
+            Services[RPKDiscordService::class.java] = RPKDiscordServiceImpl(this)
         }
 
         val prefixService = RPKPrefixServiceImpl(this)
-        Services[RPKPrefixService::class] = prefixService
+        Services[RPKPrefixService::class.java] = prefixService
         val chatChannelService = RPKChatChannelServiceImpl(this)
-        Services[RPKChatChannelService::class] = chatChannelService
-        Services[RPKChatChannelMuteService::class] = RPKChatChannelMuteService(this)
-        Services[RPKChatChannelSpeakerService::class] = RPKChatChannelSpeakerService(this)
-        Services[RPKChatGroupService::class] = RPKChatGroupServiceImpl(this)
-        Services[RPKSnooperService::class] = RPKSnooperServiceImpl(this)
+        Services[RPKChatChannelService::class.java] = chatChannelService
+        Services[RPKChatChannelMuteService::class.java] = RPKChatChannelMuteService(this)
+        Services[RPKChatChannelSpeakerService::class.java] = RPKChatChannelSpeakerService(this)
+        Services[RPKChatGroupService::class.java] = RPKChatGroupServiceImpl(this)
+        Services[RPKSnooperService::class.java] = RPKSnooperServiceImpl(this)
 
         registerChatChannelPermissions(chatChannelService)
         registerPrefixPermissions(prefixService)
@@ -206,9 +208,7 @@ class RPKChatBukkit : RPKBukkitPlugin() {
 
     override fun onDisable() {
         if (config.getBoolean("irc.enabled")) {
-            val ircBot = Services[RPKIRCService::class]?.ircBot
-            ircBot?.stopBotReconnect()
-            ircBot?.sendIRC()?.quitServer(messages["irc-quit"])
+            Services[RPKIRCService::class.java]?.disconnect()
         }
     }
 

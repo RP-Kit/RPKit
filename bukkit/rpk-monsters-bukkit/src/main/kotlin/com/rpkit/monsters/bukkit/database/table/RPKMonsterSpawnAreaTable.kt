@@ -19,20 +19,22 @@ package com.rpkit.monsters.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
+import com.rpkit.monsters.bukkit.database.create
 import com.rpkit.monsters.bukkit.database.jooq.Tables.RPKIT_MONSTER_SPAWN_AREA
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnArea
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaImpl
 import org.bukkit.Location
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKMonsterSpawnAreaTable(private val database: Database, private val plugin: RPKMonstersBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_monster_spawn_area.id.enabled")) {
-        database.cacheManager.createCache("rpk-monsters-bukkit.rpkit_monster_spawn_area.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKMonsterSpawnArea::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_monster_spawn_area.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-monsters-bukkit.rpkit_monster_spawn_area.id",
+            Int::class.javaObjectType,
+            RPKMonsterSpawnArea::class.java,
+            plugin.config.getLong("caching.rpkit_monster_spawn_area.id.size")
+        )
     } else {
         null
     }
@@ -64,13 +66,14 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
         if (!allSpawnAreas.contains(entity)) {
             allSpawnAreas.add(entity)
         }
     }
 
     fun update(entity: RPKMonsterSpawnArea) {
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_MONSTER_SPAWN_AREA)
                 .set(RPKIT_MONSTER_SPAWN_AREA.WORLD, entity.minPoint.world?.name)
@@ -80,9 +83,9 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
                 .set(RPKIT_MONSTER_SPAWN_AREA.MAX_X, entity.maxPoint.blockX)
                 .set(RPKIT_MONSTER_SPAWN_AREA.MAX_Y, entity.maxPoint.blockY)
                 .set(RPKIT_MONSTER_SPAWN_AREA.MAX_Z, entity.maxPoint.blockZ)
-                .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(entity.id))
+                .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
         if (!allSpawnAreas.contains(entity)) {
             allSpawnAreas.add(entity)
         }
@@ -121,7 +124,7 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
                         result[RPKIT_MONSTER_SPAWN_AREA.MAX_Z].toDouble()
                 )
         )
-        cache?.put(monsterSpawnArea.id, monsterSpawnArea)
+        cache?.set(id, monsterSpawnArea)
         if (!allSpawnAreas.contains(monsterSpawnArea)) {
             allSpawnAreas.add(monsterSpawnArea)
         }
@@ -145,7 +148,7 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
                 .deleteFrom(RPKIT_MONSTER_SPAWN_AREA)
                 .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(entity.id))
                 .execute()
-        database.getTable(RPKMonsterSpawnAreaMonsterTable::class).delete(entity)
+        database.getTable(RPKMonsterSpawnAreaMonsterTable::class.java).delete(entity)
         allSpawnAreas.remove(entity)
     }
 }

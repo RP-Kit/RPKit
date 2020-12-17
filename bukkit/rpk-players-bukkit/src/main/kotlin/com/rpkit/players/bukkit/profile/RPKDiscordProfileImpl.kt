@@ -16,17 +16,12 @@
 
 package com.rpkit.players.bukkit.profile
 
-import net.dv8tion.jda.api.JDA
-import net.dv8tion.jda.api.entities.User
+import com.rpkit.players.bukkit.profile.discord.DiscordUserId
+import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfile
+import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileId
 
 class RPKDiscordProfileImpl(
-        override var id: Int? = null,
+        override var id: RPKDiscordProfileId? = null,
         override var profile: RPKThinProfile,
-        override val discordId: Long
-) : RPKDiscordProfile {
-
-    override fun getDiscordUser(jda: JDA): User? {
-        return jda.getUserById(discordId)
-    }
-
-}
+        override val discordId: DiscordUserId
+) : RPKDiscordProfile

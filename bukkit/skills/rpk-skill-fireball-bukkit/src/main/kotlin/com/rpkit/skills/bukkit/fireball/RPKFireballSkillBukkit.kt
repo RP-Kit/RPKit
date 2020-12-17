@@ -25,7 +25,7 @@ class RPKFireballSkillBukkit : RPKBukkitPlugin(), Listener {
 
     override fun onEnable() {
         saveDefaultConfig()
-        Services.require(RPKSkillService::class).whenAvailable { skillService ->
+        Services.require(RPKSkillService::class.java).whenAvailable { skillService ->
             skillService.addSkill(FireballSkill(this))
         }
     }

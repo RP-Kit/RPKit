@@ -18,7 +18,7 @@ package com.rpkit.players.bukkit.listener
 
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileImpl
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfileService
@@ -32,7 +32,7 @@ class PlayerLoginListener : Listener {
 
     @EventHandler
     fun onPlayerLogin(event: PlayerLoginEvent) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         var minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         if (minecraftProfile == null) { // Player hasn't logged in while profile generation is active
             minecraftProfile = RPKMinecraftProfileImpl(
@@ -43,7 +43,7 @@ class PlayerLoginListener : Listener {
         } else if (minecraftProfileService.getMinecraftProfileLinkRequests(minecraftProfile).isNotEmpty()) { // Minecraft profile has a link request, so skip and let them know on join.
             return
         }
-        val profileService = Services[RPKProfileService::class] ?: return
+        val profileService = Services[RPKProfileService::class.java] ?: return
         var profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
             profile = RPKProfileImpl(

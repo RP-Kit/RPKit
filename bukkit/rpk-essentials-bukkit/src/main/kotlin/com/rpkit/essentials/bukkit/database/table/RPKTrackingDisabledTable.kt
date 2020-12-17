@@ -20,56 +20,61 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
+import com.rpkit.essentials.bukkit.database.create
 import com.rpkit.essentials.bukkit.database.jooq.Tables.RPKIT_TRACKING_DISABLED
 import com.rpkit.essentials.bukkit.tracking.RPKTrackingDisabled
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKTrackingDisabledTable(private val database: Database, private val plugin: RPKEssentialsBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_tracking_enabled.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-essentials-bukkit.rpkit_tracking_enabled.character_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKTrackingDisabled::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_tracking_enabled.character_id.size"))))
+        database.cacheManager.createCache(
+            "rpk-essentials-bukkit.rpkit_tracking_enabled.character_id",
+            Int::class.javaObjectType,
+            RPKTrackingDisabled::class.java,
+            plugin.config.getLong("caching.rpkit_tracking_enabled.character_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKTrackingDisabled) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_TRACKING_DISABLED,
                         RPKIT_TRACKING_DISABLED.CHARACTER_ID
                 )
                 .values(
-                        entity.character.id
+                    characterId
                 )
                 .execute()
-        cache?.put(entity.character.id, entity)
+        cache?.set(characterId, entity)
     }
 
     operator fun get(character: RPKCharacter): RPKTrackingDisabled? {
-        if (cache?.containsKey(character.id) == true) {
-            return cache[character.id]
+        val characterId = character.id ?: return null
+        if (cache?.containsKey(characterId) == true) {
+            return cache[characterId]
         }
         database.create
                 .select(
                         RPKIT_TRACKING_DISABLED.CHARACTER_ID
                 )
                 .from(RPKIT_TRACKING_DISABLED)
-                .where(RPKIT_TRACKING_DISABLED.CHARACTER_ID.eq(character.id))
+                .where(RPKIT_TRACKING_DISABLED.CHARACTER_ID.eq(characterId))
                 .fetchOne() ?: return null
         val trackingEnabled = RPKTrackingDisabled(character)
-        cache?.put(character.id, trackingEnabled)
+        cache?.set(characterId, trackingEnabled)
         return trackingEnabled
     }
 
     fun delete(entity: RPKTrackingDisabled) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_TRACKING_DISABLED)
-                .where(RPKIT_TRACKING_DISABLED.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_TRACKING_DISABLED.CHARACTER_ID.eq(characterId))
                 .execute()
-        cache?.remove(entity.character.id)
+        cache?.remove(characterId)
     }
 }

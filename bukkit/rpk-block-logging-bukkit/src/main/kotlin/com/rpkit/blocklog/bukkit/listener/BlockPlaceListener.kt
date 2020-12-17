@@ -21,7 +21,7 @@ import com.rpkit.blocklog.bukkit.block.RPKBlockChangeImpl
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority.MONITOR
@@ -34,9 +34,9 @@ class BlockPlaceListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
 
     @EventHandler(priority = MONITOR)
     fun onBlockPlace(event: BlockPlaceEvent) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val characterService = Services[RPKCharacterService::class] ?: return
-        val blockHistoryService = Services[RPKBlockHistoryService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         val profile = minecraftProfile?.profile as? RPKProfile
         val character = if (minecraftProfile == null) null else characterService.getActiveCharacter(minecraftProfile)

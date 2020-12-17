@@ -31,7 +31,7 @@ class GroupListCommand(private val plugin: RPKPermissionsBukkit) : CommandExecut
             return true
         }
         sender.sendMessage(plugin.messages["group-list-title"])
-        val groupService = Services[RPKGroupService::class]
+        val groupService = Services[RPKGroupService::class.java]
         if (groupService == null) {
             sender.sendMessage(plugin.messages["no-group-service"])
             return true

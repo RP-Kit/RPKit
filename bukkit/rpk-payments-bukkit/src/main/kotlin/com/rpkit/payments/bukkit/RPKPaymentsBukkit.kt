@@ -45,6 +45,8 @@ class RPKPaymentsBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.payments.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4406)
         saveDefaultConfig()
 
@@ -94,8 +96,8 @@ class RPKPaymentsBukkit : RPKBukkitPlugin() {
         database.addTable(RPKPaymentGroupOwnerTable(database))
         database.addTable(RPKPaymentNotificationTable(database, this))
 
-        Services[RPKPaymentGroupService::class] = RPKPaymentGroupServiceImpl(this)
-        Services[RPKPaymentNotificationService::class] = RPKPaymentNotificationServiceImpl(this)
+        Services[RPKPaymentGroupService::class.java] = RPKPaymentGroupServiceImpl(this)
+        Services[RPKPaymentNotificationService::class.java] = RPKPaymentNotificationServiceImpl(this)
 
         // Keep payments accurate to 1 minute (60 seconds * 20 ticks)
         PaymentTask(this)

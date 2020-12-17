@@ -22,14 +22,13 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.store.bukkit.RPKStoresBukkit
+import com.rpkit.store.bukkit.database.create
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_PERMANENT_PURCHASE
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_PURCHASE
 import com.rpkit.store.bukkit.purchase.RPKPermanentPurchase
 import com.rpkit.store.bukkit.purchase.RPKPermanentPurchaseImpl
 import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
-import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_PERMANENT_PURCHASE
-import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_PURCHASE
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKPermanentPurchaseTable(
@@ -38,15 +37,18 @@ class RPKPermanentPurchaseTable(
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_permanent_purchase.id.enabled")) {
-        database.cacheManager.createCache("rpkit-stores-bukkit.rpkit_permanent_purchase.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPermanentPurchase::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_permanent_purchase.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpkit-stores-bukkit.rpkit_permanent_purchase.id",
+            Int::class.javaObjectType,
+            RPKPermanentPurchase::class.java,
+            plugin.config.getLong("caching.rpkit_permanent_purchase.id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKPermanentPurchase) {
-        val id = database.getTable(RPKPurchaseTable::class).insert(entity)
+        val id = database.getTable(RPKPurchaseTable::class.java).insert(entity)
         database.create
                 .insertInto(
                         RPKIT_PERMANENT_PURCHASE,
@@ -57,12 +59,13 @@ class RPKPermanentPurchaseTable(
                 )
                 .execute()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKPermanentPurchase) {
-        database.getTable(RPKPurchaseTable::class).update(entity)
-        cache?.put(entity.id, entity)
+        val id = entity.id ?: return
+        database.getTable(RPKPurchaseTable::class.java).update(entity)
+        cache?.set(id, entity)
     }
 
     operator fun get(id: Int): RPKPermanentPurchase? {
@@ -80,7 +83,7 @@ class RPKPermanentPurchaseTable(
                 .where(RPKIT_PURCHASE.ID.eq(id))
                 .and(RPKIT_PERMANENT_PURCHASE.PURCHASE_ID.eq(RPKIT_PURCHASE.ID))
                 .fetchOne() ?: return null
-        val storeItemService = Services[RPKStoreItemService::class] ?: return null
+        val storeItemService = Services[RPKStoreItemService::class.java] ?: return null
         val storeItem = storeItemService.getStoreItem(result[RPKIT_PURCHASE.STORE_ITEM_ID]) as? RPKPermanentStoreItem
         if (storeItem == null) {
             database.create
@@ -94,7 +97,7 @@ class RPKPermanentPurchaseTable(
             cache?.remove(id)
             return null
         }
-        val profileService = Services[RPKProfileService::class] ?: return null
+        val profileService = Services[RPKProfileService::class.java] ?: return null
         val profile = profileService.getProfile(result[RPKIT_PURCHASE.PROFILE_ID])
         if (profile == null) {
             database.create
@@ -114,7 +117,7 @@ class RPKPermanentPurchaseTable(
                 profile,
                 result[RPKIT_PURCHASE.PURCHASE_DATE]
         )
-        cache?.put(id, permanentPurchase)
+        cache?.set(id, permanentPurchase)
         return permanentPurchase
     }
 
@@ -132,11 +135,12 @@ class RPKPermanentPurchaseTable(
     }
 
     fun delete(entity: RPKPermanentPurchase) {
-        database.getTable(RPKPurchaseTable::class).delete(entity)
+        val id = entity.id ?: return
+        database.getTable(RPKPurchaseTable::class.java).delete(entity)
         database.create
                 .deleteFrom(RPKIT_PERMANENT_PURCHASE)
-                .where(RPKIT_PERMANENT_PURCHASE.PURCHASE_ID.eq(entity.id))
+                .where(RPKIT_PERMANENT_PURCHASE.PURCHASE_ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 }

@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -59,12 +59,12 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             sender.sendMessage(plugin.messages["no-permission-character-set-race"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
@@ -88,7 +88,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             raceBuilder.append(args[i]).append(" ")
         }
         raceBuilder.append(args[args.size - 1])
-        val raceService = Services[RPKRaceService::class]
+        val raceService = Services[RPKRaceService::class.java]
         if (raceService == null) {
             sender.sendMessage(plugin.messages["no-race-service"])
             return true
@@ -108,15 +108,15 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
     private inner class RacePrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return Services[RPKRaceService::class]?.getRace(input) != null
+            return Services[RPKRaceService::class.java]?.getRace(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
             if (conversable !is Player) return RaceSetPrompt()
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return RaceSetPrompt()
-            val characterService = Services[RPKCharacterService::class] ?: return RaceSetPrompt()
-            val raceService = Services[RPKRaceService::class] ?: return RaceSetPrompt()
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return RaceSetPrompt()
+            val characterService = Services[RPKCharacterService::class.java] ?: return RaceSetPrompt()
+            val raceService = Services[RPKRaceService::class.java] ?: return RaceSetPrompt()
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return RaceSetPrompt()
             val character = characterService.getActiveCharacter(minecraftProfile) ?: return RaceSetPrompt()
             character.race = raceService.getRace(input)!!
@@ -129,7 +129,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val raceService = Services[RPKRaceService::class] ?: return plugin.messages["no-race-service"]
+            val raceService = Services[RPKRaceService::class.java] ?: return plugin.messages["no-race-service"]
             val raceListBuilder = StringBuilder()
             for (race in raceService.races) {
                 raceListBuilder.append(plugin.messages["race-list-item", mapOf(
@@ -146,17 +146,17 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val conversable = context.forWhom
             if (conversable is Player) {
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
                     conversable.sendMessage(plugin.messages["no-minecraft-profile-service"])
                     return END_OF_CONVERSATION
                 }
-                val characterService = Services[RPKCharacterService::class]
+                val characterService = Services[RPKCharacterService::class.java]
                 if (characterService == null) {
                     conversable.sendMessage(plugin.messages["no-character-service"])
                     return END_OF_CONVERSATION
                 }
-                val raceService = Services[RPKRaceService::class]
+                val raceService = Services[RPKRaceService::class.java]
                 if (raceService == null) {
                     conversable.sendMessage(plugin.messages["no-race-service"])
                     return END_OF_CONVERSATION

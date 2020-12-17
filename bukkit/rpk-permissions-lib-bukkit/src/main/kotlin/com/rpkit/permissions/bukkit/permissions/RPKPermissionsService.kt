@@ -19,7 +19,7 @@ package com.rpkit.permissions.bukkit.permissions
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import com.rpkit.permissions.bukkit.group.RPKGroup
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 interface RPKPermissionsService : Service {

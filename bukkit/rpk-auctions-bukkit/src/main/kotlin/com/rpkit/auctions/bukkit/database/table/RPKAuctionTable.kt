@@ -19,6 +19,7 @@ package com.rpkit.auctions.bukkit.database.table
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
 import com.rpkit.auctions.bukkit.auction.RPKAuction
 import com.rpkit.auctions.bukkit.auction.RPKAuctionImpl
+import com.rpkit.auctions.bukkit.database.create
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_AUCTION
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_BID
 import com.rpkit.characters.bukkit.character.RPKCharacterService
@@ -29,8 +30,6 @@ import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.Location
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 /**
  * Represents the auction table.
@@ -41,9 +40,12 @@ class RPKAuctionTable(
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_auction.id.enabled")) {
-        database.cacheManager.createCache("rpk-auctions-bukkit.rpkit_auction.id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKAuction::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_auction.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-auctions-bukkit.rpkit_auction.id",
+            Int::class.java,
+            RPKAuction::class.java,
+            plugin.config.getLong("caching.rpkit_auction.id.size")
+        )
     } else {
         null
     }
@@ -90,10 +92,11 @@ class RPKAuctionTable(
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKAuction) {
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_AUCTION)
                 .set(RPKIT_AUCTION.ITEM, entity.item.toByteArray())
@@ -112,14 +115,14 @@ class RPKAuctionTable(
                 .set(RPKIT_AUCTION.NO_SELL_PRICE, entity.noSellPrice)
                 .set(RPKIT_AUCTION.MINIMUM_BID_INCREMENT, entity.minimumBidIncrement)
                 .set(RPKIT_AUCTION.BIDDING_OPEN, entity.isBiddingOpen)
-                .where(RPKIT_AUCTION.ID.eq(entity.id))
+                .where(RPKIT_AUCTION.ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
     }
 
     operator fun get(id: Int): RPKAuction? {
         if (cache?.containsKey(id) == true) {
-            return cache.get(id)
+            return cache[id]
         } else {
             val result = database.create
                     .select(
@@ -143,10 +146,10 @@ class RPKAuctionTable(
                     .from(RPKIT_AUCTION)
                     .where(RPKIT_AUCTION.ID.eq(id))
                     .fetchOne() ?: return null
-            val currencyService = Services[RPKCurrencyService::class] ?: return null
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return null
             val currencyId = result.get(RPKIT_AUCTION.CURRENCY_ID)
             val currency = currencyService.getCurrency(currencyId)
-            val characterService = Services[RPKCharacterService::class] ?: return null
+            val characterService = Services[RPKCharacterService::class.java] ?: return null
             val characterId = result.get(RPKIT_AUCTION.CHARACTER_ID)
             val character = characterService.getCharacter(characterId)
             if (currency != null && character != null) {
@@ -172,10 +175,10 @@ class RPKAuctionTable(
                         result.get(RPKIT_AUCTION.MINIMUM_BID_INCREMENT),
                         result.get(RPKIT_AUCTION.BIDDING_OPEN)
                 )
-                cache?.put(id, auction)
+                cache?.set(id, auction)
                 return auction
             } else {
-                val bidTable = database.getTable(RPKBidTable::class)
+                val bidTable = database.getTable(RPKBidTable::class.java)
                 database.create
                         .select(RPKIT_BID.ID)
                         .from(RPKIT_BID)
@@ -209,14 +212,15 @@ class RPKAuctionTable(
     }
 
     fun delete(entity: RPKAuction) {
+        val id = entity.id ?: return
         for (bid in entity.bids) {
-            database.getTable(RPKBidTable::class).delete(bid)
+            database.getTable(RPKBidTable::class.java).delete(bid)
         }
         database.create
                 .deleteFrom(RPKIT_AUCTION)
-                .where(RPKIT_AUCTION.ID.eq(entity.id))
+                .where(RPKIT_AUCTION.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 
 }

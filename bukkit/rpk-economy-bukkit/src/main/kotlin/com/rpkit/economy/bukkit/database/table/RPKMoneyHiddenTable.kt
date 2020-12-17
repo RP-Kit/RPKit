@@ -21,9 +21,8 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.character.RPKMoneyHidden
+import com.rpkit.economy.bukkit.database.create
 import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_MONEY_HIDDEN
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 /**
  * Represents the money hidden table.
@@ -34,30 +33,28 @@ class RPKMoneyHiddenTable(
 ) : Table {
 
     private val characterCache = if (plugin.config.getBoolean("caching.rpkit_money_hidden.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-economy-bukkit.rpkit_money_hidden.character_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(
-                        Int::class.javaObjectType,
-                        RPKMoneyHidden::class.java,
-                        ResourcePoolsBuilder.heap(
-                                plugin.config.getLong("caching.rpkit_money_hidden.character_id.size")
-                        )
-                ).build()
+        database.cacheManager.createCache(
+            "rpk-economy-bukkit.rpkit_money_hidden.character_id",
+            Int::class.javaObjectType,
+            RPKMoneyHidden::class.java,
+            plugin.config.getLong("caching.rpkit_money_hidden.character_id.size")
         )
     } else {
         null
     }
 
     fun insert(entity: RPKMoneyHidden) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_MONEY_HIDDEN,
                         RPKIT_MONEY_HIDDEN.CHARACTER_ID
                 )
                 .values(
-                        entity.character.id
+                    characterId
                 )
                 .execute()
-        characterCache?.put(entity.character.id, entity)
+        characterCache?.set(characterId, entity)
     }
 
     /**
@@ -68,26 +65,28 @@ class RPKMoneyHiddenTable(
      * @return The money hidden instance, or null if there is no money hidden instance for the character
      */
     operator fun get(character: RPKCharacter): RPKMoneyHidden? {
-        if (characterCache?.containsKey(character.id) == true) {
-            return characterCache[character.id]
+        val characterId = character.id ?: return null
+        if (characterCache?.containsKey(characterId) == true) {
+            return characterCache[characterId]
         } else {
             database.create
                     .select(RPKIT_MONEY_HIDDEN.CHARACTER_ID)
                     .from(RPKIT_MONEY_HIDDEN)
-                    .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(character.id))
+                    .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId))
                     .fetchOne() ?: return null
             val moneyHidden = RPKMoneyHidden(character)
-            characterCache?.put(character.id, moneyHidden)
+            characterCache?.set(characterId, moneyHidden)
             return moneyHidden
         }
     }
 
     fun delete(entity: RPKMoneyHidden) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_MONEY_HIDDEN)
-                .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId))
                 .execute()
-        characterCache?.remove(entity.character.id)
+        characterCache?.remove(characterId)
     }
 
 }

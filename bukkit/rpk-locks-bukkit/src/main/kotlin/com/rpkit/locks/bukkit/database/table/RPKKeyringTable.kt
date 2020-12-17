@@ -22,23 +22,26 @@ import com.rpkit.core.bukkit.util.toItemStackArray
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.locks.bukkit.RPKLocksBukkit
+import com.rpkit.locks.bukkit.database.create
 import com.rpkit.locks.bukkit.database.jooq.Tables.RPKIT_KEYRING
 import com.rpkit.locks.bukkit.keyring.RPKKeyring
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKKeyringTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_keyring.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-locks-bukkit.rpkit_keyring.character_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKKeyring::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_keyring.character_id.size"))))
+        database.cacheManager.createCache(
+            "rpk-locks-bukkit.rpkit_keyring.character_id",
+            Int::class.javaObjectType,
+            RPKKeyring::class.java,
+            plugin.config.getLong("caching.rpkit_keyring.character_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKKeyring) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_KEYRING,
@@ -50,21 +53,23 @@ class RPKKeyringTable(private val database: Database, private val plugin: RPKLoc
                         entity.items.toTypedArray().toByteArray()
                 )
                 .execute()
-        cache?.put(entity.character.id, entity)
+        cache?.set(characterId, entity)
     }
 
     fun update(entity: RPKKeyring) {
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_KEYRING)
                 .set(RPKIT_KEYRING.ITEMS, entity.items.toTypedArray().toByteArray())
                 .where(RPKIT_KEYRING.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        cache?.put(entity.character.id, entity)
+        cache?.set(characterId, entity)
     }
 
     operator fun get(character: RPKCharacter): RPKKeyring? {
-        if (cache?.containsKey(character.id) == true) {
-            return cache[character.id]
+        val characterId = character.id ?: return null
+        if (cache?.containsKey(characterId) == true) {
+            return cache[characterId]
         } else {
             val result = database.create
                     .select(
@@ -78,16 +83,17 @@ class RPKKeyringTable(private val database: Database, private val plugin: RPKLoc
                     character,
                     result.get(RPKIT_KEYRING.ITEMS).toItemStackArray().toMutableList()
             )
-            cache?.put(character.id, keyring)
+            cache?.set(characterId, keyring)
             return keyring
         }
     }
 
     fun delete(entity: RPKKeyring) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_KEYRING)
                 .where(RPKIT_KEYRING.CHARACTER_ID.eq(entity.character.id))
                 .execute()
-        cache?.remove(entity.character.id)
+        cache?.remove(characterId)
     }
 }

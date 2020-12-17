@@ -19,6 +19,7 @@ package com.rpkit.players.bukkit.command.account
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.*
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -41,7 +42,7 @@ class AccountLinkMinecraftCommand(private val plugin: RPKPlayersBukkit) : Comman
         }
         val minecraftUsername = args[0]
         val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftUsername)
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true

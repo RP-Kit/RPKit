@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.keyring.RPKKeyringService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -37,17 +37,17 @@ class KeyringCommand(private val plugin: RPKLocksBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val keyringService = Services[RPKKeyringService::class]
+        val keyringService = Services[RPKKeyringService::class.java]
         if (keyringService == null) {
             sender.sendMessage(plugin.messages["no-keyring-service"])
             return true

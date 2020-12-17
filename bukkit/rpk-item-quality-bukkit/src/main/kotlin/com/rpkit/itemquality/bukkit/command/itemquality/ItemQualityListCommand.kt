@@ -31,7 +31,7 @@ class ItemQualityListCommand(private val plugin: RPKItemQualityBukkit) : Command
             return true
         }
         sender.sendMessage(plugin.messages["itemquality-list-title"])
-        val itemQualityService = Services[RPKItemQualityService::class]
+        val itemQualityService = Services[RPKItemQualityService::class.java]
         if (itemQualityService == null) {
             sender.sendMessage(plugin.messages["no-item-quality-service"])
             return true

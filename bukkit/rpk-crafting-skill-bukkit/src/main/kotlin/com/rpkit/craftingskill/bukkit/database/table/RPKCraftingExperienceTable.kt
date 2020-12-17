@@ -22,6 +22,7 @@ import com.rpkit.core.database.Table
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingExperienceValue
+import com.rpkit.craftingskill.bukkit.database.create
 import com.rpkit.craftingskill.bukkit.database.jooq.Tables.RPKIT_CRAFTING_EXPERIENCE
 import org.bukkit.Material
 

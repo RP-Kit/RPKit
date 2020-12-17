@@ -18,7 +18,7 @@ package com.rpkit.skills.bukkit.command
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.skills.bukkit.RPKSkillsBukkit
 import com.rpkit.skills.bukkit.skills.RPKSkillService
 import org.bukkit.command.Command
@@ -37,7 +37,7 @@ class UnbindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor 
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -47,7 +47,7 @@ class UnbindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor 
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
@@ -57,7 +57,7 @@ class UnbindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor 
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
-        val skillService = Services[RPKSkillService::class]
+        val skillService = Services[RPKSkillService::class.java]
         if (skillService == null) {
             sender.sendMessage(plugin.messages["no-skill-service"])
             return true

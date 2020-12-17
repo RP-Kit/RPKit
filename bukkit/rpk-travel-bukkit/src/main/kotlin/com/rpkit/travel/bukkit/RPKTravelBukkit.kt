@@ -40,6 +40,8 @@ class RPKTravelBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.travel.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4424)
         saveDefaultConfig()
 
@@ -85,7 +87,7 @@ class RPKTravelBukkit : RPKBukkitPlugin() {
         )
         database.addTable(RPKWarpTable(database, this))
 
-        Services[RPKWarpService::class] = RPKWarpServiceImpl(this)
+        Services[RPKWarpService::class.java] = RPKWarpServiceImpl(this)
     }
 
     override fun registerListeners() {

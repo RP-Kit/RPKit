@@ -20,7 +20,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaImpl
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.selection.bukkit.selection.RPKSelectionService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -39,7 +39,7 @@ class MonsterSpawnAreaCreateCommand(private val plugin: RPKMonstersBukkit) : Com
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -49,13 +49,13 @@ class MonsterSpawnAreaCreateCommand(private val plugin: RPKMonstersBukkit) : Com
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
         }
-        val selectionService = Services[RPKSelectionService::class]
+        val selectionService = Services[RPKSelectionService::class.java]
         if (selectionService == null) {
             sender.sendMessage(plugin.messages["no-selection-service"])
             return true
         }
         val selection = selectionService.getSelection(minecraftProfile)
-        val monsterSpawnAreaService = Services[RPKMonsterSpawnAreaService::class]
+        val monsterSpawnAreaService = Services[RPKMonsterSpawnAreaService::class.java]
         if (monsterSpawnAreaService == null) {
             sender.sendMessage(plugin.messages["no-monster-spawn-area-service"])
             return true

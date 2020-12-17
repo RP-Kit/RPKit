@@ -20,23 +20,26 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.drinks.bukkit.RPKDrinksBukkit
+import com.rpkit.drinks.bukkit.database.create
 import com.rpkit.drinks.bukkit.database.jooq.Tables.RPKIT_DRUNKENNESS
 import com.rpkit.drinks.bukkit.drink.RPKDrunkenness
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKDrunkennessTable(private val database: Database, private val plugin: RPKDrinksBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_drunkenness.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-drinks-bukkit.rpkit_drunkenness.character_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKDrunkenness::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_drunkenness.character_id.size"))))
+        database.cacheManager.createCache(
+            "rpk-drinks-bukkit.rpkit_drunkenness.character_id",
+            Int::class.javaObjectType,
+            RPKDrunkenness::class.java,
+            plugin.config.getLong("caching.rpkit_drunkenness.character_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKDrunkenness) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_DRUNKENNESS,
@@ -44,25 +47,27 @@ class RPKDrunkennessTable(private val database: Database, private val plugin: RP
                         RPKIT_DRUNKENNESS.DRUNKENNESS
                 )
                 .values(
-                        entity.character.id,
+                        characterId,
                         entity.drunkenness
                 )
                 .execute()
-        cache?.put(entity.character.id, entity)
+        cache?.set(characterId, entity)
     }
 
     fun update(entity: RPKDrunkenness) {
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_DRUNKENNESS)
                 .set(RPKIT_DRUNKENNESS.DRUNKENNESS, entity.drunkenness)
-                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId))
                 .execute()
-        cache?.put(entity.character.id, entity)
+        cache?.set(characterId, entity)
     }
 
     operator fun get(character: RPKCharacter): RPKDrunkenness? {
-        if (cache?.containsKey(character.id) == true) {
-            return cache[character.id]
+        val characterId = character.id ?: return null
+        if (cache?.containsKey(characterId) == true) {
+            return cache[characterId]
         } else {
             val result = database.create
                     .select(
@@ -70,23 +75,24 @@ class RPKDrunkennessTable(private val database: Database, private val plugin: RP
                             RPKIT_DRUNKENNESS.DRUNKENNESS
                     )
                     .from(RPKIT_DRUNKENNESS)
-                    .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(character.id))
+                    .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId))
                     .fetchOne() ?: return null
             val drunkenness = RPKDrunkenness(
                     character,
                     result.get(RPKIT_DRUNKENNESS.DRUNKENNESS)
             )
-            cache?.put(character.id, drunkenness)
+            cache?.set(characterId, drunkenness)
             return drunkenness
         }
     }
 
     fun delete(entity: RPKDrunkenness) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_DRUNKENNESS)
-                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId))
                 .execute()
-        cache?.remove(entity.character.id)
+        cache?.remove(characterId)
     }
 
 }

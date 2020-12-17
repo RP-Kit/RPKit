@@ -22,8 +22,8 @@ import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -65,22 +65,22 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-permission-money-pay"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val economyService = Services[RPKEconomyService::class]
+        val economyService = Services[RPKEconomyService::class.java]
         if (economyService == null) {
             sender.sendMessage(plugin.messages["no-economy-service"])
             return true
         }
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
         if (currencyService == null) {
             sender.sendMessage(plugin.messages["no-currency-service"])
             return true
@@ -171,14 +171,14 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
     private inner class PlayerPrompt : PlayerNamePrompt(plugin) {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Player): Prompt {
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return END_OF_CONVERSATION
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return END_OF_CONVERSATION
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(input)
             context.setSessionData("minecraft_profile", minecraftProfile)
             return PlayerSetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            if (Services[RPKMinecraftProfileService::class] == null) return plugin.messages["no-minecraft-profile-service"]
+            if (Services[RPKMinecraftProfileService::class.java] == null) return plugin.messages["no-minecraft-profile-service"]
             return plugin.messages["money-pay-player-prompt"]
         }
 
@@ -201,17 +201,17 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
 
     private inner class CurrencyPrompt : ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return Services[RPKCurrencyService::class]?.getCurrency(input) != null
+            return Services[RPKCurrencyService::class.java]?.getCurrency(input) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("currency", Services[RPKCurrencyService::class]?.getCurrency(input))
+            context.setSessionData("currency", Services[RPKCurrencyService::class.java]?.getCurrency(input))
             return CurrencySetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["money-pay-currency-prompt"] + "\n" +
-                    Services[RPKCurrencyService::class]?.currencies
+                    Services[RPKCurrencyService::class.java]?.currencies
                             ?.joinToString("\n") { currency ->
                                 plugin.messages["money-pay-currency-prompt-list-item", mapOf(
                                         "currency" to currency.name
@@ -220,7 +220,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            if (Services[RPKCurrencyService::class] == null) return plugin.messages["no-currency-service"]
+            if (Services[RPKCurrencyService::class.java] == null) return plugin.messages["no-currency-service"]
             return plugin.messages["money-pay-currency-invalid-currency"]
         }
     }
@@ -278,10 +278,10 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                     ?: return plugin.messages["no-minecraft-profile-service"]
-            val characterService = Services[RPKCharacterService::class] ?: return plugin.messages["no-character-service"]
-            val economyService = Services[RPKEconomyService::class] ?: return plugin.messages["no-economy-service"]
+            val characterService = Services[RPKCharacterService::class.java] ?: return plugin.messages["no-character-service"]
+            val economyService = Services[RPKEconomyService::class.java] ?: return plugin.messages["no-economy-service"]
             val fromBukkitPlayer = context.forWhom as Player
             val fromMinecraftProfile = minecraftProfileService.getMinecraftProfile(fromBukkitPlayer)
                     ?: return plugin.messages["no-minecraft-profile"]

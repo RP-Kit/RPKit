@@ -16,11 +16,13 @@
 
 package com.rpkit.players.bukkit.command.account
 
+import com.rpkit.chat.bukkit.discord.DiscordReaction
 import com.rpkit.chat.bukkit.discord.RPKDiscordService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -37,22 +39,22 @@ class AccountLinkDiscordCommand(private val plugin: RPKPlayersBukkit) : CommandE
             return true
         }
         val discordUserName = args[0]
-        val discordService = Services[RPKDiscordService::class]
+        val discordService = Services[RPKDiscordService::class.java]
         if (discordService == null) {
             sender.sendMessage(plugin.messages["no-discord-service"])
             return true
         }
-        val discordUser = try {
-            discordService.getUser(discordUserName)
+        val discordId = try {
+            discordService.getUserId(discordUserName)
         } catch (exception: IllegalArgumentException) {
             sender.sendMessage(plugin.messages["account-link-discord-invalid-user-tag"])
             return true
         }
-        if (discordUser == null) {
+        if (discordId == null) {
             sender.sendMessage(plugin.messages["account-link-discord-invalid-user"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -67,13 +69,19 @@ class AccountLinkDiscordCommand(private val plugin: RPKPlayersBukkit) : CommandE
             sender.sendMessage(plugin.messages["no-profile-self"])
             return true
         }
-        discordUser.openPrivateChannel().queue { privateChannel ->
-            privateChannel.sendMessage("There was a request to link this account to profile ${profile.name}. " +
-                    "Press tick to accept this request.")
-                    .queue { message ->
-                        message.addReaction("\u2705").queue()
-                        discordService.setMessageAsProfileLinkRequest(message, profile)
-                    }
+        val discordProfileService = Services[RPKDiscordProfileService::class.java]
+        if (discordProfileService == null) {
+            sender.sendMessage(plugin.messages["no-discord-profile-service"])
+            return true
+        }
+        val discordProfile = discordProfileService.getDiscordProfile(discordId)
+        discordService.sendMessage(
+                discordProfile,
+                "There was a request to link this account to profile ${profile.name}. " +
+                        "Press tick to accept this request."
+        ) { message ->
+            message.addReaction(DiscordReaction.unicode("\u2705"))
+            discordService.setMessageAsProfileLinkRequest(message, profile)
         }
         return true
     }

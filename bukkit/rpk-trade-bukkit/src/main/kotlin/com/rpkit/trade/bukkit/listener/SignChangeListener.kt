@@ -49,7 +49,7 @@ class SignChangeListener(private val plugin: RPKTradeBukkit) : Listener {
             event.player.sendMessage(plugin.messages["trader-sign-invalid-price"])
             return
         }
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
         if (currencyService == null) {
             event.block.breakNaturally()
             event.player.sendMessage(plugin.messages["no-currency-service"])

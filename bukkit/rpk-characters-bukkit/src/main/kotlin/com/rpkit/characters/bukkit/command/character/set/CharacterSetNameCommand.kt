@@ -19,7 +19,7 @@ package com.rpkit.characters.bukkit.command.character.set
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -58,12 +58,12 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit) : Command
             sender.sendMessage(plugin.messages["no-permission-character-set-name"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
@@ -103,8 +103,8 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit) : Command
         override fun acceptInput(context: ConversationContext, input: String?): Prompt {
             val conversable = context.forWhom
             if (conversable !is Player) return NameSetPrompt()
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return NameSetPrompt()
-            val characterService = Services[RPKCharacterService::class] ?: return NameSetPrompt()
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return NameSetPrompt()
+            val characterService = Services[RPKCharacterService::class.java] ?: return NameSetPrompt()
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return NameSetPrompt()
             val character = characterService.getActiveCharacter(minecraftProfile) ?: return NameSetPrompt()
             if (input == null) return NameSetPrompt()
@@ -120,12 +120,12 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit) : Command
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val conversable = context.forWhom
             if (conversable !is Player) return END_OF_CONVERSATION
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             if (minecraftProfileService == null) {
                 conversable.sendMessage(plugin.messages["no-minecraft-profile-service"])
                 return END_OF_CONVERSATION
             }
-            val characterService = Services[RPKCharacterService::class]
+            val characterService = Services[RPKCharacterService::class.java]
             if (characterService == null) {
                 conversable.sendMessage(plugin.messages["no-character-service"])
                 return END_OF_CONVERSATION

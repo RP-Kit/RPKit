@@ -17,14 +17,15 @@
 package com.rpkit.monsters.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
-import com.rpkit.core.expression.function.addRPKitFunctions
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
+import com.rpkit.monsters.bukkit.jep.CeilFunction
+import com.rpkit.monsters.bukkit.jep.FloorFunction
 import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -48,11 +49,11 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
         if (lastDamageEvent !is EntityDamageByEntityEvent) return
         val damager = lastDamageEvent.damager
         if (damager !is Player) return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(damager) ?: return
-        val characterService = Services[RPKCharacterService::class] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
         val character = characterService.getActiveCharacter(minecraftProfile) ?: return
-        val experienceService = Services[RPKExperienceService::class] ?: return
+        val experienceService = Services[RPKExperienceService::class.java] ?: return
         val experience = getExperience(event.entity)
         experienceService.setExperience(character, experienceService.getExperience(character) + experience)
         damager.sendMessage(plugin.messages["experience-gained", mapOf(
@@ -60,7 +61,7 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
                 "experience" to (experienceService.getExperience(character) - experienceService.getExperienceNeededForLevel(experienceService.getLevel(character))).toString(),
                 "required-experience" to experienceService.getExperienceNeededForLevel(experienceService.getLevel(character) + 1).toString()
         )])
-        val currencyService = Services[RPKCurrencyService::class] ?: return
+        val currencyService = Services[RPKCurrencyService::class.java] ?: return
         val moneyConfigSection = plugin.config.getConfigurationSection("monsters.${event.entityType}.money")
                 ?: plugin.config.getConfigurationSection("monsters.default.money")
         moneyConfigSection?.getKeys(false)
@@ -84,8 +85,9 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
-        parser.addRPKitFunctions()
-        parser.addVariable("level", Services[RPKMonsterLevelService::class]?.getMonsterLevel(entity)?.toDouble() ?: 1.0)
+        parser.addFunction("ceil", CeilFunction())
+        parser.addFunction("floor", FloorFunction())
+        parser.addVariable("level", Services[RPKMonsterLevelService::class.java]?.getMonsterLevel(entity)?.toDouble() ?: 1.0)
         parser.parseExpression(expression)
         return parser.value.roundToInt()
     }
@@ -95,8 +97,9 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
         val parser = JEP()
         parser.addStandardConstants()
         parser.addStandardFunctions()
-        parser.addRPKitFunctions()
-        parser.addVariable("level", Services[RPKMonsterLevelService::class]?.getMonsterLevel(entity)?.toDouble() ?: 1.0)
+        parser.addFunction("ceil", CeilFunction())
+        parser.addFunction("floor", FloorFunction())
+        parser.addVariable("level", Services[RPKMonsterLevelService::class.java]?.getMonsterLevel(entity)?.toDouble() ?: 1.0)
         parser.parseExpression(expression)
         return parser.value.roundToInt()
     }

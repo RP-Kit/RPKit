@@ -23,7 +23,7 @@ import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroup
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.groups
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Bukkit
 import org.bukkit.permissions.PermissionAttachment
@@ -54,7 +54,7 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
 
     override fun hasPermission(profile: RPKProfile, node: String): Boolean {
         var hasPermission = plugin.server.pluginManager.getPermission(node)?.default?.getValue(false) ?: false
-        val groupService = Services[RPKGroupService::class] ?: return hasPermission
+        val groupService = Services[RPKGroupService::class.java] ?: return hasPermission
         val groups = groupService.getGroups(profile)
         if (groups.isEmpty()) {
             hasPermission = hasPermission(defaultGroup, node, hasPermission)
@@ -99,7 +99,7 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
             if (profile is RPKProfile) {
                 groups.addAll(profile.groups)
             }
-            val characterService = Services[RPKCharacterService::class] ?: return
+            val characterService = Services[RPKCharacterService::class.java] ?: return
             val character = characterService.getActiveCharacter(minecraftProfile)
             if (character != null) {
                 groups.addAll(character.groups)

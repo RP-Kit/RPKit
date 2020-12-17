@@ -17,7 +17,7 @@
 package com.rpkit.players.bukkit.event.githubprofile
 
 import com.rpkit.core.event.RPKEvent
-import com.rpkit.players.bukkit.profile.RPKGitHubProfile
+import com.rpkit.players.bukkit.profile.github.RPKGitHubProfile
 
 
 interface RPKGitHubProfileEvent : RPKEvent {

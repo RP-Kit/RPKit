@@ -34,7 +34,7 @@ class CurrencyListCommand(private val plugin: RPKEconomyBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-permission-currency-list"])
             return true
         }
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
         if (currencyService == null) {
             sender.sendMessage(plugin.messages["no-currency-service"])
             return true

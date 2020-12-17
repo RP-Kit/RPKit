@@ -19,12 +19,13 @@ package com.rpkit.chat.bukkit.database.table
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroup
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupInvite
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
+import com.rpkit.chat.bukkit.database.create
 import com.rpkit.chat.bukkit.database.jooq.Tables.RPKIT_CHAT_GROUP_INVITE
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 
 /**
  * Represents chat group invite table.
@@ -57,7 +58,7 @@ class RPKChatGroupInviteTable(private val database: Database) : Table {
             .where(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID.eq(chatGroup.id))
             .fetch()
             .mapNotNull { result ->
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return@mapNotNull null
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@mapNotNull null
                 val minecraftProfile = minecraftProfileService
                         .getMinecraftProfile(result[RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID])
                         ?: return@mapNotNull null
@@ -79,7 +80,7 @@ class RPKChatGroupInviteTable(private val database: Database) : Table {
             .where(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
             .fetch()
             .mapNotNull { result ->
-                val chatGroupService = Services[RPKChatGroupService::class] ?: return@mapNotNull null
+                val chatGroupService = Services[RPKChatGroupService::class.java] ?: return@mapNotNull null
                 val chatGroup = chatGroupService
                         .getChatGroup(result[RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID])
                         ?: return@mapNotNull null

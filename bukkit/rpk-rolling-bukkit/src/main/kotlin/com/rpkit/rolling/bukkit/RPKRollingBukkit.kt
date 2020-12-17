@@ -23,6 +23,8 @@ import org.bstats.bukkit.Metrics
 class RPKRollingBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.rolling.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4410)
         saveDefaultConfig()
     }

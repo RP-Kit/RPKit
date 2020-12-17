@@ -31,7 +31,7 @@ class BlockFromToListener(private val plugin: RPKBlockLoggingBukkit) : Listener 
 
     @EventHandler(priority = MONITOR)
     fun onBlockFromTo(event: BlockFromToEvent) {
-        val blockHistoryService = Services[RPKBlockHistoryService::class]
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java]
         if (blockHistoryService == null) {
             plugin.logger.severe("Failed to retrieve block history service, did the plugin load correctly?")
             return

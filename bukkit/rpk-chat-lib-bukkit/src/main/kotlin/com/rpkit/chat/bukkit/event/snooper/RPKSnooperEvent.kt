@@ -17,7 +17,7 @@
 package com.rpkit.chat.bukkit.event.snooper
 
 import com.rpkit.core.event.RPKEvent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 interface RPKSnooperEvent : RPKEvent {

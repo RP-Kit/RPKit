@@ -32,10 +32,7 @@ class RPKStatImpl(
         parser.addStandardConstants()
         parser.addStandardFunctions()
         for (variable in variables) {
-            val value = variable.get(character)
-            if (value != null) {
-                parser.addVariableAsObject(variable.name, value)
-            }
+            parser.addVariable(variable.name, variable.get(character))
         }
         parser.parseExpression(formula)
         return parser.value.roundToInt()

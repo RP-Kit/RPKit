@@ -17,7 +17,7 @@
 package com.rpkit.warp.bukkit.event.warp
 
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList

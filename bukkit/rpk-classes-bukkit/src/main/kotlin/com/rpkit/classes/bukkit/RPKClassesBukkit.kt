@@ -44,6 +44,8 @@ class RPKClassesBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.classes.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4386)
         saveDefaultConfig()
 
@@ -90,11 +92,11 @@ class RPKClassesBukkit : RPKBukkitPlugin() {
         database.addTable(RPKCharacterClassTable(database, this))
         database.addTable(RPKClassExperienceTable(database, this))
 
-        Services[RPKClassService::class] = RPKClassServiceImpl(this)
-        Services[RPKSkillPointService::class] = RPKSkillPointServiceImpl(this)
+        Services[RPKClassService::class.java] = RPKClassServiceImpl(this)
+        Services[RPKSkillPointService::class.java] = RPKSkillPointServiceImpl(this)
 
-        Services.require(RPKStatVariableService::class).whenAvailable { statVariableService ->
-            Services.require(RPKClassService::class).whenAvailable { classService ->
+        Services.require(RPKStatVariableService::class.java).whenAvailable { statVariableService ->
+            Services.require(RPKClassService::class.java).whenAvailable { classService ->
                 config.getConfigurationSection("classes")
                         ?.getKeys(false)
                         ?.flatMap { className ->
@@ -105,17 +107,17 @@ class RPKClassesBukkit : RPKBukkitPlugin() {
                             statVariableService.addStatVariable(object : RPKStatVariable {
                                 override val name = statVariableName
 
-                                override fun get(character: RPKCharacter): Int {
+                                override fun get(character: RPKCharacter): Double {
                                     val `class` = classService.getClass(character)
-                                    return `class`?.getStatVariableValue(this, classService.getLevel(character, `class`))
-                                            ?: 0
+                                    return `class`?.getStatVariableValue(this, classService.getLevel(character, `class`))?.toDouble()
+                                            ?: 0.0
                                 }
                             })
                         }
             }
         }
 
-        Services.require(RPKCharacterCardFieldService::class).whenAvailable { service ->
+        Services.require(RPKCharacterCardFieldService::class.java).whenAvailable { service ->
             service.characterCardFields.add(ClassField())
         }
     }

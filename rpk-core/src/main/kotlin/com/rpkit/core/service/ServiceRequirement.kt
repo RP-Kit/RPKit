@@ -20,20 +20,20 @@ import kotlin.reflect.KClass
 
 class ServiceRequirement<T: Service>(val type: KClass<T>) {
 
-    fun whenAvailable(function: (T) -> Unit): ServiceRequirement<T> {
+    fun whenAvailable(action: ServiceRequirementAction<T>): ServiceRequirement<T> {
         val service = Services[type]
         if (service != null) {
-            function(service)
+            action(service)
         } else {
-            Services.addServiceReadyFunction(ServiceReadyFunction(type, function))
+            Services.addServiceReadyFunction(ServiceReadyFunction(type, action))
         }
         return this
     }
 
-    fun ifAvailable(function: (T) -> Unit): ServiceRequirement<T> {
+    fun ifAvailable(action: ServiceRequirementAction<T>): ServiceRequirement<T> {
         val service = Services[type]
         if (service != null) {
-            function(service)
+            action(service)
         }
         return this
     }

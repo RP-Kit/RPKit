@@ -22,7 +22,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.GameMode
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -39,17 +39,17 @@ class BlockBreakListener(private val plugin: RPKCraftingSkillBukkit) : Listener 
     fun onBlockBreak(event: BlockBreakEvent) {
         val bukkitPlayer = event.player
         if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             event.isDropItems = false
             return
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             event.isDropItems = false
             return
         }
-        val craftingSkillService = Services[RPKCraftingSkillService::class]
+        val craftingSkillService = Services[RPKCraftingSkillService::class.java]
         if (craftingSkillService == null) {
             event.isDropItems = false
             return

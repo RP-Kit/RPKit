@@ -41,6 +41,8 @@ class RPKCraftingSkillBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.craftingskill.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 5350)
         saveDefaultConfig()
 
@@ -86,7 +88,7 @@ class RPKCraftingSkillBukkit : RPKBukkitPlugin() {
         )
         database.addTable(RPKCraftingExperienceTable(database, this))
 
-        Services[RPKCraftingSkillService::class] = RPKCraftingSkillServiceImpl(this)
+        Services[RPKCraftingSkillService::class.java] = RPKCraftingSkillServiceImpl(this)
     }
 
     override fun registerListeners() {

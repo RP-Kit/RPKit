@@ -20,10 +20,9 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.store.bukkit.RPKStoresBukkit
+import com.rpkit.store.bukkit.database.create
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_STORE_ITEM
 import com.rpkit.store.bukkit.storeitem.RPKStoreItem
-import com.rpkit.stores.bukkit.database.jooq.Tables.RPKIT_STORE_ITEM
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKStoreItemTable(
@@ -32,9 +31,12 @@ class RPKStoreItemTable(
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_store_item.id.enabled")) {
-        database.cacheManager.createCache("rpkit-stores-bukkit.rpkit_store_item.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKStoreItem::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_store_item.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpkit-stores-bukkit.rpkit_store_item.id",
+            Int::class.javaObjectType,
+            RPKStoreItem::class.java,
+            plugin.config.getLong("caching.rpkit_store_item.id.size")
+        )
     } else {
         null
     }
@@ -57,41 +59,42 @@ class RPKStoreItemTable(
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
         return id
     }
 
     fun update(entity: RPKStoreItem) {
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_STORE_ITEM)
                 .set(RPKIT_STORE_ITEM.PLUGIN, entity.plugin)
                 .set(RPKIT_STORE_ITEM.IDENTIFIER, entity.identifier)
                 .set(RPKIT_STORE_ITEM.DESCRIPTION, entity.description)
                 .set(RPKIT_STORE_ITEM.COST, entity.cost)
-                .where(RPKIT_STORE_ITEM.ID.eq(entity.id))
+                .where(RPKIT_STORE_ITEM.ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
     }
 
     operator fun get(id: Int): RPKStoreItem? {
         if (cache?.containsKey(id) == true) return cache[id]
-        var storeItem: RPKStoreItem? = database.getTable(RPKConsumableStoreItemTable::class)[id]
+        var storeItem: RPKStoreItem? = database.getTable(RPKConsumableStoreItemTable::class.java)[id]
         if (storeItem != null) {
-            cache?.put(id, storeItem)
+            cache?.set(id, storeItem)
             return storeItem
         } else {
             cache?.remove(id)
         }
-        storeItem = database.getTable(RPKPermanentStoreItemTable::class)[id]
+        storeItem = database.getTable(RPKPermanentStoreItemTable::class.java)[id]
         if (storeItem != null) {
-            cache?.put(id, storeItem)
+            cache?.set(id, storeItem)
             return storeItem
         } else {
             cache?.remove(id)
         }
-        storeItem = database.getTable(RPKTimedStoreItemTable::class)[id]
+        storeItem = database.getTable(RPKTimedStoreItemTable::class.java)[id]
         if (storeItem != null) {
-            cache?.put(id, storeItem)
+            cache?.set(id, storeItem)
             return storeItem
         } else {
             cache?.remove(id)
@@ -118,10 +121,11 @@ class RPKStoreItemTable(
     }
 
     fun delete(entity: RPKStoreItem) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_STORE_ITEM)
-                .where(RPKIT_STORE_ITEM.ID.eq(entity.id))
+                .where(RPKIT_STORE_ITEM.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 }

@@ -24,18 +24,20 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.RPKSkillsBukkit
+import com.rpkit.skills.bukkit.database.create
 import com.rpkit.skills.bukkit.database.jooq.Tables.RPKIT_SKILL_BINDING
 import com.rpkit.skills.bukkit.skills.RPKSkillBinding
 import com.rpkit.skills.bukkit.skills.RPKSkillService
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 class RPKSkillBindingTable(private val database: Database, private val plugin: RPKSkillsBukkit): Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_skill_binding.id.enabled")) {
-        database.cacheManager.createCache("rpk-skills-bukkit.rpkit_skill_binding.id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKSkillBinding::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_skill_binding.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-skills-bukkit.rpkit_skill_binding.id",
+            Int::class.javaObjectType,
+            RPKSkillBinding::class.java,
+            plugin.config.getLong("caching.rpkit_skill_binding.id.size")
+        )
     } else {
         null
     }
@@ -78,10 +80,10 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                 .from(RPKIT_SKILL_BINDING)
                 .where(RPKIT_SKILL_BINDING.ID.eq(id))
                 .fetchOne() ?: return null
-        val characterService = Services[RPKCharacterService::class] ?: return null
+        val characterService = Services[RPKCharacterService::class.java] ?: return null
         val characterId = result[RPKIT_SKILL_BINDING.CHARACTER_ID]
         val character = characterService.getCharacter(characterId)
-        val skillService = Services[RPKSkillService::class] ?: return null
+        val skillService = Services[RPKSkillService::class.java] ?: return null
         val skillName = result[RPKIT_SKILL_BINDING.SKILL_NAME]
         val skill = skillService.getSkill(skillName)
         if (character != null && skill != null) {
@@ -91,7 +93,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                     result[RPKIT_SKILL_BINDING.ITEM].toItemStack(),
                     skill
             )
-            cache?.put(id, skillBinding)
+            cache?.set(id, skillBinding)
             return skillBinding
         } else {
             database.create
@@ -114,7 +116,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                 .from(RPKIT_SKILL_BINDING)
                 .where(RPKIT_SKILL_BINDING.CHARACTER_ID.eq(character.id))
                 .fetch() ?: return emptyList()
-        val skillService = Services[RPKSkillService::class] ?: return emptyList()
+        val skillService = Services[RPKSkillService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
             val skillName = result[RPKIT_SKILL_BINDING.SKILL_NAME]
             val skill = skillService.getSkill(skillName)
@@ -126,7 +128,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                         result[RPKIT_SKILL_BINDING.ITEM].toItemStack(),
                         skill
                 )
-                cache?.put(id, skillBinding)
+                cache?.set(id, skillBinding)
                 skillBinding
             } else {
                 null

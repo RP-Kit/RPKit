@@ -32,7 +32,7 @@ class InventoryClickListener(private val plugin: RPKLocksBukkit) : Listener {
         if (!event.view.title.equals("Keyring", ignoreCase = true)) return
         val currentItem = event.currentItem ?: return
         event.isCancelled = true
-        val lockService = Services[RPKLockService::class]
+        val lockService = Services[RPKLockService::class.java]
         if (lockService == null) {
             event.whoClicked.sendMessage(plugin.messages["no-lock-service"])
             return

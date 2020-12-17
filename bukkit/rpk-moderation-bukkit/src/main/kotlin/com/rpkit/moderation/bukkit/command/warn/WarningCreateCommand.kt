@@ -20,7 +20,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.warning.RPKWarningImpl
 import com.rpkit.moderation.bukkit.warning.RPKWarningService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -49,7 +49,7 @@ class WarningCreateCommand(private val plugin: RPKModerationBukkit) : CommandExe
             sender.sendMessage(plugin.messages["warning-create-invalid-target"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -75,7 +75,7 @@ class WarningCreateCommand(private val plugin: RPKModerationBukkit) : CommandExe
             return true
         }
         val warningReason = args.drop(1).joinToString(" ")
-        val warningService = Services[RPKWarningService::class]
+        val warningService = Services[RPKWarningService::class.java]
         if (warningService == null) {
             sender.sendMessage(plugin.messages["no-warning-service"])
             return true

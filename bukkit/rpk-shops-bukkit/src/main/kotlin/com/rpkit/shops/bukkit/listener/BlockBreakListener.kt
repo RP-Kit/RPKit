@@ -18,7 +18,7 @@ package com.rpkit.shops.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.shops.bukkit.RPKShopsBukkit
 import com.rpkit.shops.bukkit.shopcount.RPKShopCountService
 import org.bukkit.ChatColor.GREEN
@@ -46,17 +46,17 @@ class BlockBreakListener(val plugin: RPKShopsBukkit) : Listener {
         }
         if (sign != null) {
             if (sign.getLine(0) == "$GREEN[shop]") {
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
                     event.isCancelled = true
                     return
                 }
-                val characterService = Services[RPKCharacterService::class]
+                val characterService = Services[RPKCharacterService::class.java]
                 if (characterService == null) {
                     event.isCancelled = true
                     return
                 }
-                val shopCountService = Services[RPKShopCountService::class]
+                val shopCountService = Services[RPKShopCountService::class.java]
                 if (shopCountService == null) {
                     event.isCancelled = true
                     return
@@ -83,12 +83,12 @@ class BlockBreakListener(val plugin: RPKShopsBukkit) : Listener {
                 val shopCount = shopCountService.getShopCount(character)
                 shopCountService.setShopCount(character, shopCount - 1)
             } else if (sign.getLine(0) == "$GREEN[rent]") {
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
                     event.isCancelled = true
                     return
                 }
-                val characterService = Services[RPKCharacterService::class]
+                val characterService = Services[RPKCharacterService::class.java]
                 if (characterService == null) {
                     event.isCancelled = true
                     return

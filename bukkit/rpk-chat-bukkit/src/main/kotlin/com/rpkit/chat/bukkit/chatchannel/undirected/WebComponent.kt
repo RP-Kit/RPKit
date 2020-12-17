@@ -24,7 +24,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable
 class WebComponent : UndirectedPipelineComponent, ConfigurationSerializable {
     override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         if (context.isCancelled) return context
-//        Services[RPKChatWebSocketService::class].sockets
+//        Services[RPKChatWebSocketService::class.java].sockets
 //                .filter { socket -> socket.value.session?.isOpen == true }
 //                .forEach { socket ->
 //                    socket.value.session?.remote

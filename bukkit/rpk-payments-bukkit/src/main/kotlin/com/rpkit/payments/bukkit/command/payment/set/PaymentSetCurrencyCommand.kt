@@ -22,7 +22,7 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -66,12 +66,12 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit) : Command
             sender.sendMessage(plugin.messages["payment-set-currency-usage"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
@@ -82,7 +82,7 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit) : Command
             return true
         }
         val character = characterService.getActiveCharacter(minecraftProfile)
-        val paymentGroupService = Services[RPKPaymentGroupService::class]
+        val paymentGroupService = Services[RPKPaymentGroupService::class.java]
         if (paymentGroupService == null) {
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
@@ -105,7 +105,7 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit) : Command
     private inner class CurrencyPrompt : ValidatingPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            val currencyService = Services[RPKCurrencyService::class] ?: return plugin.messages["no-currency-service"]
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return plugin.messages["no-currency-service"]
             return plugin.messages["payment-set-currency-prompt"] + "\n" +
                     plugin.messages["currency-list-title"] + "\n" +
                     currencyService
@@ -114,18 +114,18 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit) : Command
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            if (Services[RPKPaymentGroupService::class] == null) return false
-            return Services[RPKCurrencyService::class]?.getCurrency(input) != null
+            if (Services[RPKPaymentGroupService::class.java] == null) return false
+            return Services[RPKCurrencyService::class.java]?.getCurrency(input) != null
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            if (Services[RPKCurrencyService::class] == null) return plugin.messages["no-currency-service"]
+            if (Services[RPKCurrencyService::class.java] == null) return plugin.messages["no-currency-service"]
             return plugin.messages["payment-set-currency-invalid-currency"]
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val paymentGroupService = Services[RPKPaymentGroupService::class] ?: return END_OF_CONVERSATION
-            val currencyService = Services[RPKCurrencyService::class] ?: return END_OF_CONVERSATION
+            val paymentGroupService = Services[RPKPaymentGroupService::class.java] ?: return END_OF_CONVERSATION
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return END_OF_CONVERSATION
             val paymentGroup = context.getSessionData("payment_group") as RPKPaymentGroup
             paymentGroup.currency = currencyService.getCurrency(input)
             paymentGroupService.updatePaymentGroup(paymentGroup)

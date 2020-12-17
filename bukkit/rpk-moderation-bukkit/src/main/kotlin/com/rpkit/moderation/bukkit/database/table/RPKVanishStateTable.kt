@@ -19,37 +19,41 @@ package com.rpkit.moderation.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
+import com.rpkit.moderation.bukkit.database.create
 import com.rpkit.moderation.bukkit.database.jooq.Tables.RPKIT_VANISHED
 import com.rpkit.moderation.bukkit.vanish.RPKVanishState
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 class RPKVanishStateTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_vanished.id.enabled")) {
-        database.cacheManager.createCache("rpk-moderation-bukkit.rpkit_vanished.id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKVanishState::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_vanished.id.size"))))
+        database.cacheManager.createCache(
+            "rpk-moderation-bukkit.rpkit_vanished.id",
+            Int::class.javaObjectType,
+            RPKVanishState::class.java,
+            plugin.config.getLong("caching.rpkit_vanished.id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKVanishState) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .insertInto(
                         RPKIT_VANISHED,
                         RPKIT_VANISHED.MINECRAFT_PROFILE_ID
                 )
-                .values(entity.minecraftProfile.id)
+                .values(minecraftProfileId)
                 .execute()
-        cache?.put(entity.minecraftProfile.id, entity)
+        cache?.set(minecraftProfileId, entity)
     }
 
     operator fun get(minecraftProfile: RPKMinecraftProfile): RPKVanishState? {
-        if (cache?.containsKey(minecraftProfile.id) == true) {
-            return cache[minecraftProfile.id]
+        val minecraftProfileId = minecraftProfile.id ?: return null
+        if (cache?.containsKey(minecraftProfileId) == true) {
+            return cache[minecraftProfileId]
         } else {
             database.create
                     .select(RPKIT_VANISHED.MINECRAFT_PROFILE_ID)
@@ -59,17 +63,18 @@ class RPKVanishStateTable(private val database: Database, private val plugin: RP
             val vanishState = RPKVanishState(
                     minecraftProfile
             )
-            cache?.put(minecraftProfile.id, vanishState)
+            cache?.set(minecraftProfileId, vanishState)
             return vanishState
         }
     }
 
     fun delete(entity: RPKVanishState) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_VANISHED)
-                .where(RPKIT_VANISHED.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
+                .where(RPKIT_VANISHED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
                 .execute()
-        cache?.remove(entity.minecraftProfile.id)
+        cache?.remove(minecraftProfileId)
     }
 
 }

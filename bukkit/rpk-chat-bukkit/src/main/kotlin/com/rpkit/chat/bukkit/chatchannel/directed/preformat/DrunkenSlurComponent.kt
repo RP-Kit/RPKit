@@ -29,8 +29,8 @@ class DrunkenSlurComponent(val drunkenness: Int) : DirectedPreFormatPipelineComp
 
     override fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
         val minecraftProfile = context.senderMinecraftProfile ?: return context
-        val characterService = Services[RPKCharacterService::class] ?: return context
-        val drinkService = Services[RPKDrinkService::class] ?: return context
+        val characterService = Services[RPKCharacterService::class.java] ?: return context
+        val drinkService = Services[RPKDrinkService::class.java] ?: return context
         val character = characterService.getActiveCharacter(minecraftProfile) ?: return context
         if (drinkService.getDrunkenness(character) >= drunkenness) {
             context.message = context.message.replace(Regex("s([^h])"), "sh$1")

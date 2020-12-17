@@ -24,7 +24,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
@@ -45,27 +45,27 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
         val sign = clickedBlock.state as Sign
         if (!sign.getLine(0).equals("$GREEN[bank]", ignoreCase = true)) return
         event.isCancelled = true
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             event.player.sendMessage(plugin.messages["no-character-service"])
             return
         }
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
         if (currencyService == null) {
             event.player.sendMessage(plugin.messages["no-currency-service"])
             return
         }
-        val economyService = Services[RPKEconomyService::class]
+        val economyService = Services[RPKEconomyService::class.java]
         if (economyService == null) {
             event.player.sendMessage(plugin.messages["no-economy-service"])
             return
         }
-        val bankService = Services[RPKBankService::class]
+        val bankService = Services[RPKBankService::class.java]
         if (bankService == null) {
             event.player.sendMessage(plugin.messages["no-bank-service"])
             return

@@ -16,7 +16,7 @@
 
 package com.rpkit.essentials.bukkit.logmessage
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 class RPKLogMessagesEnabled(val minecraftProfile: RPKMinecraftProfile)

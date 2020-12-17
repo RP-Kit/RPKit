@@ -31,7 +31,7 @@ class ProfessionListCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor 
             return true
         }
         sender.sendMessage(plugin.messages["profession-list-title"])
-        val professionService = Services[RPKProfessionService::class]
+        val professionService = Services[RPKProfessionService::class.java]
         if (professionService == null) {
             sender.sendMessage(plugin.messages["no-profession-service"])
             return true

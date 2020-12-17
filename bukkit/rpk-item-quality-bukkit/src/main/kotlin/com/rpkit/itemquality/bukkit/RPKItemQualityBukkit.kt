@@ -31,7 +31,7 @@ class RPKItemQualityBukkit : RPKBukkitPlugin() {
         Metrics(this, 6658)
         saveDefaultConfig()
 
-        Services[RPKItemQualityService::class] = RPKItemQualityServiceImpl(this)
+        Services[RPKItemQualityService::class.java] = RPKItemQualityServiceImpl(this)
     }
 
     override fun registerListeners() {

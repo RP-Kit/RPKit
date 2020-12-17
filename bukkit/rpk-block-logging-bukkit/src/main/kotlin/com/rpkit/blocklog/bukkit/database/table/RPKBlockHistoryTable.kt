@@ -19,20 +19,22 @@ package com.rpkit.blocklog.bukkit.database.table
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistory
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryImpl
+import com.rpkit.blocklog.bukkit.database.create
 import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_HISTORY
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import org.bukkit.block.Block
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKBlockHistoryTable(private val database: Database, private val plugin: RPKBlockLoggingBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_block_history.id.enabled")) {
-        database.cacheManager.createCache("rpk-block-logging-bukkit.rpkit_block_history.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKBlockHistory::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_block_history.id.size"))))
+        database.cacheManager.createCache(
+            "rpk-block-logging-bukkit.rpkit_block_history.id",
+            Int::class.javaObjectType,
+            RPKBlockHistory::class.java,
+            plugin.config.getLong("caching.rpkit_block_history.id.size")
+        )
     } else {
         null
     }
@@ -55,19 +57,20 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                 .execute()
         val id = database.create.lastID().toInt()
         entity.id = id
-        cache?.put(id, entity)
+        cache?.set(id, entity)
     }
 
     fun update(entity: RPKBlockHistory) {
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_BLOCK_HISTORY)
                 .set(RPKIT_BLOCK_HISTORY.WORLD, entity.world.name)
                 .set(RPKIT_BLOCK_HISTORY.X, entity.x)
                 .set(RPKIT_BLOCK_HISTORY.Y, entity.y)
                 .set(RPKIT_BLOCK_HISTORY.Z, entity.z)
-                .where(RPKIT_BLOCK_HISTORY.ID.eq(entity.id))
+                .where(RPKIT_BLOCK_HISTORY.ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
     }
 
     operator fun get(id: Int): RPKBlockHistory? {
@@ -101,7 +104,7 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                     result.get(RPKIT_BLOCK_HISTORY.Y),
                     result.get(RPKIT_BLOCK_HISTORY.Z)
             )
-            cache?.put(id, blockHistory)
+            cache?.set(id, blockHistory)
             return blockHistory
         }
     }
@@ -124,11 +127,12 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
     }
 
     fun delete(entity: RPKBlockHistory) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_BLOCK_HISTORY)
-                .where(RPKIT_BLOCK_HISTORY.ID.eq(entity.id))
+                .where(RPKIT_BLOCK_HISTORY.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 
 }

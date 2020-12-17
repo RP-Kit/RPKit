@@ -18,7 +18,7 @@ package com.rpkit.unconsciousness.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import org.bukkit.entity.Creature
@@ -35,9 +35,9 @@ class EntityDamageByEntityListener(private val plugin: RPKUnconsciousnessBukkit)
     fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
         val damager = event.damager
         if (damager is Player) {
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-            val characterService = Services[RPKCharacterService::class] ?: return
-            val unconsciousnessService = Services[RPKUnconsciousnessService::class] ?: return
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+            val characterService = Services[RPKCharacterService::class.java] ?: return
+            val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(damager) ?: return
             val character = characterService.getActiveCharacter(minecraftProfile) ?: return
             if (!unconsciousnessService.isUnconscious(character)) return
@@ -45,9 +45,9 @@ class EntityDamageByEntityListener(private val plugin: RPKUnconsciousnessBukkit)
         } else if (damager is Projectile) {
             val shooter = damager.shooter
             if (shooter !is Player) return
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-            val characterService = Services[RPKCharacterService::class] ?: return
-            val unconsciousnessService = Services[RPKUnconsciousnessService::class] ?: return
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+            val characterService = Services[RPKCharacterService::class.java] ?: return
+            val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(shooter) ?: return
             val character = characterService.getActiveCharacter(minecraftProfile) ?: return
             if (!unconsciousnessService.isUnconscious(character)) return

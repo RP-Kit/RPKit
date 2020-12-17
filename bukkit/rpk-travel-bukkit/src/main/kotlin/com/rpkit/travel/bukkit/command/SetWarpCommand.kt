@@ -40,7 +40,7 @@ class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["set-warp-usage"])
             return true
         }
-        val warpService = Services[RPKWarpService::class]
+        val warpService = Services[RPKWarpService::class.java]
         if (warpService == null) {
             sender.sendMessage(plugin.messages["no-warp-service"])
             return true

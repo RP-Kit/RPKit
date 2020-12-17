@@ -18,7 +18,7 @@ package com.rpkit.characters.bukkit.character
 
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack

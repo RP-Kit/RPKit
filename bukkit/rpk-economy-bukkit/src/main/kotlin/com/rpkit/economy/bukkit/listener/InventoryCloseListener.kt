@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -36,10 +36,10 @@ class InventoryCloseListener : Listener {
         if (!event.view.title.toLowerCase().contains("wallet")) return
         val bukkitPlayer = event.player
         if (bukkitPlayer !is Player) return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val characterService = Services[RPKCharacterService::class] ?: return
-        val currencyService = Services[RPKCurrencyService::class] ?: return
-        val economyService = Services[RPKEconomyService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val currencyService = Services[RPKCurrencyService::class.java] ?: return
+        val economyService = Services[RPKEconomyService::class.java] ?: return
         val currency = currencyService.getCurrency(event.view.title.substringAfterLast("[").substringBeforeLast("]"))
                 ?: return
         val amount = event.inventory.contents

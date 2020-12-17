@@ -20,9 +20,9 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKThinProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -37,8 +37,8 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
     @EventHandler
     fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
         event.isCancelled = true
-        val chatChannelService = Services[RPKChatChannelService::class] ?: return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
+        val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
@@ -47,7 +47,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
             var readMessageIndex = 0
             chatChannelService.matchPatterns
                     .map { matchPattern ->
-                        val matches = matchPattern.regex.findAll(message).toList()
+                        val matches = matchPattern.regex.let(::Regex).findAll(message).toList()
                         matches to matchPattern
                     }
                     .flatMap { (matches, matchPattern) -> matches.associateWith { matchPattern }.toList() }

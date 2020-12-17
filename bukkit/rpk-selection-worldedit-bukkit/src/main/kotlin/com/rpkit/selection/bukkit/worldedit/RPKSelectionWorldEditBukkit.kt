@@ -27,7 +27,7 @@ class RPKSelectionWorldEditBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4413)
-        Services[RPKSelectionService::class] = RPKWorldEditSelectionService(this)
+        Services[RPKSelectionService::class.java] = RPKWorldEditSelectionService(this)
     }
 
 }

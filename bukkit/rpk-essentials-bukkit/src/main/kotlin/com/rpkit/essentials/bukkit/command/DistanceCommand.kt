@@ -20,7 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.core.util.MathUtils.fastSqrt
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.tracking.bukkit.tracking.RPKTrackingService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -51,17 +51,17 @@ class DistanceCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
             sender.sendMessage(plugin.messages["distance-invalid-world"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val trackingService = Services[RPKTrackingService::class]
+        val trackingService = Services[RPKTrackingService::class.java]
         if (trackingService == null) {
             sender.sendMessage(plugin.messages["no-tracking-service"])
             return true

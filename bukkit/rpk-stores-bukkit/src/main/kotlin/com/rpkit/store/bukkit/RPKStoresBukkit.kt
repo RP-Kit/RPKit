@@ -47,6 +47,8 @@ class RPKStoresBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.store.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4421)
         saveDefaultConfig()
 
@@ -82,8 +84,8 @@ class RPKStoresBukkit : RPKBukkitPlugin() {
                 ),
                 DatabaseMigrationProperties(
                         when (databaseSqlDialect) {
-                            "MYSQL" -> "com/rpkit/stores/migrations/mysql"
-                            "SQLITE" -> "com/rpkit/stores/migrations/sqlite"
+                            "MYSQL" -> "com/rpkit/store/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/store/migrations/sqlite"
                             else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
                         },
                         "flyway_schema_history_stores"
@@ -99,8 +101,8 @@ class RPKStoresBukkit : RPKBukkitPlugin() {
         database.addTable(RPKPermanentStoreItemTable(database, this))
         database.addTable(RPKTimedStoreItemTable(database, this))
 
-        Services[RPKPurchaseService::class] = RPKPurchaseServiceImpl(this)
-        Services[RPKStoreItemService::class] = RPKStoreItemServiceImpl(this)
+        Services[RPKPurchaseService::class.java] = RPKPurchaseServiceImpl(this)
+        Services[RPKStoreItemService::class.java] = RPKStoreItemServiceImpl(this)
     }
 
     override fun registerCommands() {

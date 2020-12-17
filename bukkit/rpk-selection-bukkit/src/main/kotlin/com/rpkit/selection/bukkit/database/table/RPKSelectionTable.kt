@@ -18,26 +18,29 @@ package com.rpkit.selection.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.selection.bukkit.RPKSelectionBukkit
+import com.rpkit.selection.bukkit.database.create
 import com.rpkit.selection.bukkit.database.jooq.Tables.RPKIT_SELECTION_
 import com.rpkit.selection.bukkit.selection.RPKSelection
 import com.rpkit.selection.bukkit.selection.RPKSelectionImpl
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 
 class RPKSelectionTable(private val database: Database, private val plugin: RPKSelectionBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_selection.minecraft_profile_id.enabled")) {
-        database.cacheManager.createCache("rpk-selection-bukkit.rpkit_selection.minecraft_profile_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKSelection::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_selection.minecraft_profile_id.size"))))
+        database.cacheManager.createCache(
+            "rpk-selection-bukkit.rpkit_selection.minecraft_profile_id",
+            Int::class.javaObjectType,
+            RPKSelection::class.java,
+            plugin.config.getLong("caching.rpkit_selection.minecraft_profile_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKSelection) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create.insertInto(
                 RPKIT_SELECTION_,
                 RPKIT_SELECTION_.MINECRAFT_PROFILE_ID,
@@ -50,7 +53,7 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                 RPKIT_SELECTION_.Z_2
         )
                 .values(
-                        entity.minecraftProfile.id,
+                        minecraftProfileId,
                         entity.world.name,
                         entity.minimumPoint.x,
                         entity.minimumPoint.y,
@@ -60,10 +63,11 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                         entity.maximumPoint.z
                 )
                 .execute()
-        cache?.put(entity.minecraftProfile.id, entity)
+        cache?.set(minecraftProfileId, entity)
     }
 
     fun update(entity: RPKSelection) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .update(RPKIT_SELECTION_)
                 .set(RPKIT_SELECTION_.WORLD, entity.world.name)
@@ -75,12 +79,13 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                 .set(RPKIT_SELECTION_.Z_2, entity.maximumPoint.z)
                 .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
                 .execute()
-        cache?.put(entity.minecraftProfile.id, entity)
+        cache?.set(minecraftProfileId, entity)
     }
 
     operator fun get(minecraftProfile: RPKMinecraftProfile): RPKSelection? {
-        if (cache?.containsKey(minecraftProfile.id) == true) {
-            return cache[minecraftProfile.id]
+        val minecraftProfileId = minecraftProfile.id ?: return null
+        if (cache?.containsKey(minecraftProfileId) == true) {
+            return cache[minecraftProfileId]
         } else {
             val result = database.create.select(
                     RPKIT_SELECTION_.MINECRAFT_PROFILE_ID,
@@ -101,7 +106,7 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                         .deleteFrom(RPKIT_SELECTION_)
                         .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
                         .execute()
-                cache?.remove(minecraftProfile.id)
+                cache?.remove(minecraftProfileId)
                 return null
             }
             val block1 = world.getBlockAt(
@@ -120,17 +125,18 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                     block1,
                     block2
             )
-            cache?.put(minecraftProfile.id, selection)
+            cache?.set(minecraftProfileId, selection)
             return selection
         }
     }
 
     fun delete(entity: RPKSelection) {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_SELECTION_)
-                .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
+                .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
                 .execute()
-        cache?.remove(entity.minecraftProfile.id)
+        cache?.remove(minecraftProfileId)
     }
 
 }

@@ -19,11 +19,12 @@ package com.rpkit.players.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.database.create
 import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_MINECRAFT_PROFILE_LINK_REQUEST
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileLinkRequest
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileLinkRequestImpl
 import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileLinkRequest
 
 class RPKMinecraftProfileLinkRequestTable(
         private val database: Database
@@ -52,7 +53,7 @@ class RPKMinecraftProfileLinkRequestTable(
                 .from(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST)
                 .where(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
                 .fetch()
-        val profileService = Services[RPKProfileService::class] ?: return emptyList()
+        val profileService = Services[RPKProfileService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
             val profile = profileService.getProfile(result[RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.PROFILE_ID])
                     ?: return@mapNotNull null

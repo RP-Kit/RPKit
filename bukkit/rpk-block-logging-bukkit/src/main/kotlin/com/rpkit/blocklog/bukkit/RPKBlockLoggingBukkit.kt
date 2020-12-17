@@ -54,6 +54,8 @@ class RPKBlockLoggingBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.blocklog.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4380)
         saveDefaultConfig()
 
@@ -101,7 +103,7 @@ class RPKBlockLoggingBukkit : RPKBukkitPlugin() {
         database.addTable(RPKBlockHistoryTable(database, this))
         database.addTable(RPKBlockInventoryChangeTable(database, this))
 
-        Services[RPKBlockHistoryService::class] = RPKBlockHistoryServiceImpl(this)
+        Services[RPKBlockHistoryService::class.java] = RPKBlockHistoryServiceImpl(this)
     }
 
     override fun registerCommands() {

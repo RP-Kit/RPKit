@@ -31,7 +31,7 @@ class ClassListCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-permission-class-list"])
             return true
         }
-        val classService = Services[RPKClassService::class]
+        val classService = Services[RPKClassService::class.java]
         if (classService == null) {
             sender.sendMessage(plugin.messages["no-class-service"])
             return true

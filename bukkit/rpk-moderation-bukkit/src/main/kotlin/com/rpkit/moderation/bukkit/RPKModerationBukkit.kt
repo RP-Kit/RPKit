@@ -50,13 +50,15 @@ class RPKModerationBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.moderation.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4403)
 
         saveDefaultConfig()
 
-        Services[RPKTicketService::class] = RPKTicketServiceImpl(this)
-        Services[RPKVanishService::class] = RPKVanishServiceImpl(this)
-        Services[RPKWarningService::class] = RPKWarningServiceImpl(this)
+        Services[RPKTicketService::class.java] = RPKTicketServiceImpl(this)
+        Services[RPKVanishService::class.java] = RPKVanishServiceImpl(this)
+        Services[RPKWarningService::class.java] = RPKWarningServiceImpl(this)
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

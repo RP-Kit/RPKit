@@ -32,7 +32,7 @@ class BlockPistonExtendListener(private val plugin: RPKBlockLoggingBukkit) : Lis
 
     @EventHandler(priority = MONITOR)
     fun onBlockPistonExtend(event: BlockPistonExtendEvent) {
-        val blockHistoryService = Services[RPKBlockHistoryService::class] ?: return
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
         var block = event.block
         var count = 0
         while (block.type != Material.AIR && count < 12) {

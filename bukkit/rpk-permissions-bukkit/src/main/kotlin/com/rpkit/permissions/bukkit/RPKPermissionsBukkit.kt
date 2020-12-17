@@ -47,6 +47,8 @@ class RPKPermissionsBukkit : RPKBukkitPlugin() {
     lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.permissions.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4407)
         ConfigurationSerialization.registerClass(RPKGroupImpl::class.java, "RPKGroupImpl")
         saveDefaultConfig()
@@ -95,8 +97,8 @@ class RPKPermissionsBukkit : RPKBukkitPlugin() {
         database.addTable(RPKProfileGroupTable(database, this))
         database.addTable(RPKCharacterGroupTable(database, this))
 
-        Services[RPKGroupService::class] = RPKGroupServiceImpl(this)
-        Services[RPKPermissionsService::class] = RPKPermissionsServiceImpl(this)
+        Services[RPKGroupService::class.java] = RPKGroupServiceImpl(this)
+        Services[RPKPermissionsService::class.java] = RPKPermissionsServiceImpl(this)
     }
 
     override fun registerCommands() {

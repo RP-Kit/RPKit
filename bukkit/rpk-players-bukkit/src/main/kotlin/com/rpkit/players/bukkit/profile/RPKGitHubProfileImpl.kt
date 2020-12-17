@@ -16,6 +16,7 @@
 
 package com.rpkit.players.bukkit.profile
 
+import com.rpkit.players.bukkit.profile.github.RPKGitHubProfile
 import org.kohsuke.github.GitHub
 import java.io.IOException
 

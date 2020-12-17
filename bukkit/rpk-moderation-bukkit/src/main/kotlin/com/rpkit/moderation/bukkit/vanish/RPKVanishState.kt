@@ -16,7 +16,7 @@
 
 package com.rpkit.moderation.bukkit.vanish
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 class RPKVanishState(

@@ -17,7 +17,7 @@
 package com.rpkit.warp.bukkit.event.warp
 
 import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 interface RPKWarpUseEvent : RPKWarpEvent, RPKMinecraftProfileEvent {

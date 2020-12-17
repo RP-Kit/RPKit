@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.shops.bukkit.RPKShopsBukkit
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.block.Block
@@ -48,31 +48,31 @@ class InventoryClickListener(val plugin: RPKShopsBukkit) : Listener {
         val sign = chest.block.getRelative(UP).state
         if (sign !is Sign) return
         if (sign.getLine(0) != "$GREEN[shop]") return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             event.whoClicked.sendMessage(plugin.messages["no-minecraft-profile-service"])
             event.isCancelled = true
             return
         }
-        val characterService = Services[RPKCharacterService::class]
+        val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             event.whoClicked.sendMessage(plugin.messages["no-character-service"])
             event.isCancelled = true
             return
         }
-        val economyService = Services[RPKEconomyService::class]
+        val economyService = Services[RPKEconomyService::class.java]
         if (economyService == null) {
             event.whoClicked.sendMessage(plugin.messages["no-economy-service"])
             event.isCancelled = true
             return
         }
-        val bankService = Services[RPKBankService::class]
+        val bankService = Services[RPKBankService::class.java]
         if (bankService == null) {
             event.whoClicked.sendMessage(plugin.messages["no-bank-service"])
             event.isCancelled = true
             return
         }
-        val currencyService = Services[RPKCurrencyService::class]
+        val currencyService = Services[RPKCurrencyService::class.java]
         if (currencyService == null) {
             event.whoClicked.sendMessage(plugin.messages["no-currency-service"])
             event.isCancelled = true

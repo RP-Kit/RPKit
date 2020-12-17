@@ -17,7 +17,7 @@
 package com.rpkit.moderation.bukkit.event.vanish
 
 import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
 interface RPKVanishEvent : RPKMinecraftProfileEvent {

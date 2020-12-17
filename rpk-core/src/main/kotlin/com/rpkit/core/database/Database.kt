@@ -16,15 +16,13 @@
 
 package com.rpkit.core.database
 
+import com.rpkit.core.caching.RPKCacheManager
+import com.rpkit.core.caching.RPKCacheManagerImpl
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import org.ehcache.CacheManager
-import org.ehcache.config.builders.CacheManagerBuilder
 import org.flywaydb.core.Flyway
-import org.jooq.DSLContext
-import org.jooq.SQLDialect
-import org.jooq.conf.Settings
-import org.jooq.impl.DSL
+import java.util.logging.Logger
+import javax.sql.DataSource
 import kotlin.reflect.KClass
 
 /**
@@ -40,22 +38,9 @@ class Database(
         val classLoader: ClassLoader
 ) {
 
-    private val dataSource: HikariDataSource
+    val dataSource: DataSource
     private val tables: MutableMap<KClass<out Table>, Table> = mutableMapOf()
-    private val settings = Settings().withRenderSchema(false)
-    val cacheManager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true)
-
-    /**
-     * DSL context for performing jOOQ queries. This is currently the preferred method of performing queries, introduced
-     * in v1.3.0. It allows queries to be database-agnostic, so plugins will work with SQLite backends, and require no
-     * porting work should support for other database backends be added in the future.
-     */
-    val create: DSLContext
-        get() = DSL.using(
-                dataSource,
-                SQLDialect.valueOf(connectionProperties.sqlDialect),
-                settings
-        )
+    val cacheManager: RPKCacheManager
 
     init {
         val hikariConfig = HikariConfig()
@@ -77,6 +62,7 @@ class Database(
                 .load()
         flyway.migrate()
         Thread.currentThread().contextClassLoader = oldClassLoader
+        cacheManager = RPKCacheManagerImpl()
     }
 
     /**
@@ -107,7 +93,7 @@ class Database(
      * @return The table
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T: Table> getTable(type: KClass<T>): T {
+    private fun <T: Table> getTable(type: KClass<T>): T {
         return tables[type] as T
     }
 

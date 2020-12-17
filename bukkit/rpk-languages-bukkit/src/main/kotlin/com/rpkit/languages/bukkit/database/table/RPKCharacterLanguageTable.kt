@@ -22,26 +22,35 @@ import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.languages.bukkit.RPKLanguagesBukkit
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguage
+import com.rpkit.languages.bukkit.database.create
 import com.rpkit.languages.bukkit.database.jooq.Tables.RPKIT_CHARACTER_LANGUAGE
 import com.rpkit.languages.bukkit.language.RPKLanguage
 import com.rpkit.languages.bukkit.language.RPKLanguageService
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
 
 class RPKCharacterLanguageTable(
         private val database: Database,
         private val plugin: RPKLanguagesBukkit
 ) : Table {
 
+    private data class CharacterLanguageCacheKey(
+        val characterId: Int,
+        val languageName: String
+    )
+
     private val cache = if (plugin.config.getBoolean("caching.rpkit_character_language.character_id.enabled")) {
-        database.cacheManager.createCache("rpk-languages-bukkit.rpkit_character_language.character_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, MutableMap::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character_language.character_id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-languages-bukkit.rpkit_character_language.character_id",
+            CharacterLanguageCacheKey::class.java,
+            RPKCharacterLanguage::class.java,
+            plugin.config.getLong("caching.rpkit_character_language.character_id.size")
+        )
     } else {
         null
     }
 
     fun insert(entity: RPKCharacterLanguage) {
+        val characterId = entity.character.id ?: return
+        val languageName = entity.language.name
         database.create
                 .insertInto(
                         RPKIT_CHARACTER_LANGUAGE,
@@ -55,30 +64,29 @@ class RPKCharacterLanguageTable(
                         entity.understanding.toDouble()
                 )
                 .execute()
-        val languageMap = cache?.get(entity.character.id) as? MutableMap<String, RPKCharacterLanguage> ?: mutableMapOf<String, RPKCharacterLanguage>()
-        languageMap[entity.language.name] = entity
-        cache?.put(entity.character.id, languageMap)
+        cache?.set(CharacterLanguageCacheKey(characterId, languageName), entity)
     }
 
     fun update(entity: RPKCharacterLanguage) {
+        val characterId = entity.character.id ?: return
+        val languageName = entity.language.name
         database.create
                 .update(RPKIT_CHARACTER_LANGUAGE)
                 .set(RPKIT_CHARACTER_LANGUAGE.UNDERSTANDING, entity.understanding.toDouble())
                 .where(
-                        RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(entity.character.id)
-                                .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(entity.language.name))
+                        RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId)
+                                .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(languageName))
                 )
                 .execute()
-        val languageMap = cache?.get(entity.character.id) as? MutableMap<String, RPKCharacterLanguage> ?: mutableMapOf()
-        languageMap[entity.language.name] = entity
-        cache?.put(entity.character.id, languageMap)
+        cache?.set(CharacterLanguageCacheKey(characterId, languageName), entity)
     }
 
     operator fun get(character: RPKCharacter, language: RPKLanguage): RPKCharacterLanguage? {
-        if (cache?.containsKey(character.id) == true) {
-            val languageMap = cache[character.id]
-            val characterLanguage = languageMap[language.name] as? RPKCharacterLanguage
-            if (characterLanguage != null) return characterLanguage
+        val characterId = character.id ?: return null
+        val languageName = language.name
+        val cacheKey = CharacterLanguageCacheKey(characterId, languageName)
+        if (cache?.containsKey(cacheKey) == true) {
+            return cache[cacheKey]
         }
         val result = database.create
                 .select(
@@ -95,9 +103,7 @@ class RPKCharacterLanguageTable(
                 language,
                 result[RPKIT_CHARACTER_LANGUAGE.UNDERSTANDING].toFloat()
         )
-        val languageMap = cache?.get(character.id) as? MutableMap<String, RPKCharacterLanguage> ?: mutableMapOf()
-        languageMap[language.name] = characterLanguage
-        cache?.put(character.id, languageMap)
+        cache?.set(cacheKey, characterLanguage)
         return characterLanguage
     }
 
@@ -107,7 +113,7 @@ class RPKCharacterLanguageTable(
                 .from(RPKIT_CHARACTER_LANGUAGE)
                 .where(RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(character.id))
                 .fetch()
-        val languageService = Services[RPKLanguageService::class] ?: return emptyList()
+        val languageService = Services[RPKLanguageService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
             val language = languageService.getLanguage(result[RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME]) ?: return@mapNotNull null
             return@mapNotNull get(character, language)
@@ -115,12 +121,14 @@ class RPKCharacterLanguageTable(
     }
 
     fun delete(entity: RPKCharacterLanguage) {
+        val characterId = entity.character.id ?: return
+        val languageName = entity.language.name
         database.create
                 .deleteFrom(RPKIT_CHARACTER_LANGUAGE)
-                .where(RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(entity.character.id))
-                .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(entity.language.name))
+                .where(RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId))
+                .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(languageName))
                 .execute()
-        cache?.get(entity.character.id)?.remove(entity.language.name)
+        cache?.remove(CharacterLanguageCacheKey(characterId, languageName))
     }
 
 }

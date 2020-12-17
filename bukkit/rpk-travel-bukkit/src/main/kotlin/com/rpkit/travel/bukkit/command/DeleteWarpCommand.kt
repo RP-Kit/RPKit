@@ -30,7 +30,7 @@ class DeleteWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
         if (sender.hasPermission("rpkit.travel.command.deletewarp")) {
             if (sender is Player) {
                 if (args.isNotEmpty()) {
-                    val warpService = Services[RPKWarpService::class]
+                    val warpService = Services[RPKWarpService::class.java]
                     if (warpService == null) {
                         sender.sendMessage(plugin.messages["no-warp-service"])
                         return true

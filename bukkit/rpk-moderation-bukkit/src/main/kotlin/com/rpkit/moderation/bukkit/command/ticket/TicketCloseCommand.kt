@@ -19,7 +19,7 @@ package com.rpkit.moderation.bukkit.command.ticket
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.ticket.RPKTicketService
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -38,7 +38,7 @@ class TicketCloseCommand(private val plugin: RPKModerationBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class]
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
@@ -53,7 +53,7 @@ class TicketCloseCommand(private val plugin: RPKModerationBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        val ticketService = Services[RPKTicketService::class]
+        val ticketService = Services[RPKTicketService::class.java]
         if (ticketService == null) {
             sender.sendMessage(plugin.messages["no-ticket-service"])
             return true

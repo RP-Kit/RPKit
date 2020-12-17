@@ -51,7 +51,7 @@ class ReceiverPrefixPart(
 ), ConfigurationSerializable {
 
     override fun getText(context: DirectedPreFormatMessageContext) = (context.senderProfile as? RPKProfile)
-            ?.let { Services[RPKPrefixService::class]?.getPrefix(it) }
+            ?.let { Services[RPKPrefixService::class.java]?.getPrefix(it) }
             ?: ""
 
     override fun serialize() = mutableMapOf(

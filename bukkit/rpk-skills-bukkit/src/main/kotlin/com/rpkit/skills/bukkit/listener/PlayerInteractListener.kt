@@ -18,7 +18,7 @@ package com.rpkit.skills.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.skills.bukkit.RPKSkillsBukkit
 import com.rpkit.skills.bukkit.skills.RPKSkillService
 import com.rpkit.skills.bukkit.skills.canUse
@@ -33,9 +33,9 @@ class PlayerInteractListener(private val plugin: RPKSkillsBukkit) : Listener {
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         if (!event.player.hasPermission("rpkit.skills.command.skill")) return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class] ?: return
-        val characterService = Services[RPKCharacterService::class] ?: return
-        val skillService = Services[RPKSkillService::class] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val skillService = Services[RPKSkillService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
         val character = characterService.getActiveCharacter(minecraftProfile) ?: return
         val item = event.item ?: return
