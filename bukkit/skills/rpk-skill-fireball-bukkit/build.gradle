@@ -56,9 +56,9 @@ shadowJar {
         include(dependency("org.jetbrains.kotlin:kotlin-reflect"))
     }
 
-    relocate "kotlin", "com.rpkit.warp.bukkit.shadow.lib.kotlin"
-    relocate "org.jetbrains", "com.rpkit.warp.bukkit.shadow.lib.org.jetbrains"
-    relocate "org.intellij", "com.rpkit.warp.bukkit.shadow.lib.org.intellij"
+    relocate "kotlin", "com.rpkit.skills.bukkit.fireball.shadow.lib.kotlin"
+    relocate "org.jetbrains", "com.rpkit.skills.bukkit.fireball.shadow.lib.org.jetbrains"
+    relocate "org.intellij", "com.rpkit.skills.bukkit.fireball.shadow.lib.org.intellij"
 }
 
 artifacts {
