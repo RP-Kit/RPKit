@@ -65,11 +65,11 @@ class PrepareItemCraftListener(private val plugin: RPKProfessionsBukkit) : Liste
         val professionLevels = professions
                 .associateWith { profession -> professionService.getProfessionLevel(character, profession) }
         val amount = professionLevels.entries
-                .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.CRAFT, material, level) }
-                .max() ?: plugin.config.getDouble("default.crafting.$material.amount", 1.0)
+            .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.CRAFT, material, level) }
+            .maxOrNull() ?: plugin.config.getDouble("default.crafting.$material.amount", 1.0)
         val potentialQualities = professionLevels.entries
                 .mapNotNull { (profession, level) -> profession.getQualityFor(RPKCraftingAction.CRAFT, material, level) }
-        val quality = potentialQualities.maxBy(RPKItemQuality::durabilityModifier)
+        val quality = potentialQualities.maxByOrNull(RPKItemQuality::durabilityModifier)
         val item = event.inventory.result ?: return
         if (quality != null) {
             item.addLore(quality.lore)

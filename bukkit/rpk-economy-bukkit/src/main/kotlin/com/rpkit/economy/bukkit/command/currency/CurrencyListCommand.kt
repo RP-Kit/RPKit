@@ -42,7 +42,7 @@ class CurrencyListCommand(private val plugin: RPKEconomyBukkit) : CommandExecuto
         sender.sendMessage(plugin.messages["currency-list-title"])
         for (currency in currencyService.currencies) {
             sender.sendMessage(plugin.messages["currency-list-item", mapOf(
-                    Pair("currency", currency.name)
+                "currency" to currency.name
             )])
         }
         return true

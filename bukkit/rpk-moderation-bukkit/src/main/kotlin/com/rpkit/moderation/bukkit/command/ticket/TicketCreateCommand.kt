@@ -20,8 +20,8 @@ import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
 import com.rpkit.moderation.bukkit.ticket.RPKTicketService
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -71,8 +71,8 @@ class TicketCreateCommand(private val plugin: RPKModerationBukkit) : CommandExec
         )
         ticketService.addTicket(ticket)
         sender.sendMessage(plugin.messages["ticket-create-valid", mapOf(
-                Pair("id", ticket.id.toString()),
-                Pair("reason", reason)
+            "id" to ticket.id.toString(),
+            "reason" to reason
         )])
         return true
     }

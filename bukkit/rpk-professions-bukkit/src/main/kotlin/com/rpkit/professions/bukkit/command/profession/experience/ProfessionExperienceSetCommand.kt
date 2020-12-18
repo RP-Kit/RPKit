@@ -113,7 +113,7 @@ class ProfessionExperienceSetCommand(val plugin: RPKProfessionsBukkit) : Command
                 "player" to minecraftProfile.minecraftUsername,
                 "character" to if (!character.isNameHidden) character.name else "[HIDDEN]",
                 "profession" to profession.name,
-                "total-experience" to professionService.getProfessionExperience(character, profession).toString()
+                "total_experience" to professionService.getProfessionExperience(character, profession).toString()
         )])
         return true
     }

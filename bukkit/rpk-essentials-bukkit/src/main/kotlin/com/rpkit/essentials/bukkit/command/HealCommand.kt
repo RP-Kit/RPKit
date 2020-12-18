@@ -40,7 +40,7 @@ class HealCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 player.health = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: 0.0
                 player.sendMessage(plugin.messages["heal-notification"])
                 sender.sendMessage(plugin.messages["heal-valid", mapOf(
-                        Pair("player", player.name)
+                    "player" to player.name
                 )])
             } else {
                 sender.sendMessage(plugin.messages["heal-usage-console"])

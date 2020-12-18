@@ -121,9 +121,11 @@ class RPKDrinksBukkit : RPKBukkitPlugin() {
                 }
             }
         }.runTaskTimer(this, 1200, 1200)
+
+        registerListeners()
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
                 PlayerItemConsumeListener(this)
         )

@@ -96,14 +96,14 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
                                 )
                                 event.player.sendMessage(
                                         plugin.messages["bank-withdraw-valid", mapOf(
-                                                "amount" to bankWithdrawEvent.amount.toString(),
-                                                "currency" to if (bankWithdrawEvent.amount == 1) {
-                                                    bankWithdrawEvent.currency.nameSingular
-                                                } else {
-                                                    bankWithdrawEvent.currency.namePlural
-                                                },
-                                                "wallet-balance" to economyService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).toString(),
-                                                "bank-balance" to bankService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).toString()
+                                            "amount" to bankWithdrawEvent.amount.toString(),
+                                            "currency" to if (bankWithdrawEvent.amount == 1) {
+                                                bankWithdrawEvent.currency.nameSingular
+                                            } else {
+                                                bankWithdrawEvent.currency.namePlural
+                                            },
+                                            "wallet_balance" to economyService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).toString(),
+                                            "bank_balance" to bankService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).toString()
                                         )]
                                 )
                             }
@@ -128,13 +128,13 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
                                     economyService.getBalance(character, currency) - bankDepositEvent.amount
                             )
                             event.player.sendMessage(plugin.messages["bank-deposit-valid", mapOf(
-                                    Pair("amount", bankDepositEvent.amount.toString()),
-                                    Pair("currency", if (bankDepositEvent.amount == 1)
-                                        bankDepositEvent.currency.nameSingular
-                                    else
-                                        bankDepositEvent.currency.namePlural),
-                                    Pair("wallet-balance", economyService.getBalance(bankDepositEvent.character, bankDepositEvent.currency).toString()),
-                                    Pair("bank-balance", bankService.getBalance(bankDepositEvent.character, bankDepositEvent.currency).toString())
+                                "amount" to bankDepositEvent.amount.toString(),
+                                "currency" to if (bankDepositEvent.amount == 1)
+                                    bankDepositEvent.currency.nameSingular
+                                else
+                                    bankDepositEvent.currency.namePlural,
+                                "wallet_balance" to economyService.getBalance(bankDepositEvent.character, bankDepositEvent.currency).toString(),
+                                "bank_balance" to bankService.getBalance(bankDepositEvent.character, bankDepositEvent.currency).toString()
                             )])
                         }
                     }

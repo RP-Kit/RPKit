@@ -1,0 +1,7 @@
+not-from-console: '&cYou must be a player to perform that action.'
+wand-valid: '&fHere''s a wand.'
+wand-primary: '&fFirst location set to &7${world}&f, &7${x}&f, &7${y}&f, &7${z}'
+wand-secondary: '&fSecond location set to &7${world}&f, &7${x}&f, &7${y}&f, &7${z}'
+no-permission-wand: '&cYou do not have permission to obtain a selection wand.'
+no-minecraft-profile-service: '&cThere is no Minecraft profile service available.'
+no-selection-service: '&cThere is no selection service available.'

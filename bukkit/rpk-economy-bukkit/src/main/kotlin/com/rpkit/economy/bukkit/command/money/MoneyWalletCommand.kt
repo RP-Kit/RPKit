@@ -157,7 +157,7 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
                     currencyService.currencies
                             .joinToString("\n") { currency ->
                                 plugin.messages["money-subtract-currency-prompt-list-item", mapOf(
-                                        Pair("currency", currency.name)
+                                    "currency" to currency.name
                                 )]
                             }
         }

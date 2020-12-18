@@ -24,6 +24,7 @@ import com.rpkit.classes.bukkit.classes.RPKClassServiceImpl
 import com.rpkit.classes.bukkit.command.`class`.ClassCommand
 import com.rpkit.classes.bukkit.database.table.RPKCharacterClassTable
 import com.rpkit.classes.bukkit.database.table.RPKClassExperienceTable
+import com.rpkit.classes.bukkit.messages.ClassesMessages
 import com.rpkit.classes.bukkit.skillpoint.RPKSkillPointServiceImpl
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
@@ -42,12 +43,16 @@ import java.io.File
 class RPKClassesBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: ClassesMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.classes.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 4386)
         saveDefaultConfig()
+
+        messages = ClassesMessages(this)
+        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
@@ -120,28 +125,12 @@ class RPKClassesBukkit : RPKBukkitPlugin() {
         Services.require(RPKCharacterCardFieldService::class.java).whenAvailable { service ->
             service.characterCardFields.add(ClassField())
         }
+
+        registerCommands()
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("class")?.setExecutor(ClassCommand(this))
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("class-usage", "&cUsage: /class [set|list]")
-        messages.setDefault("no-permission-class-set", "&cYou do not have permission to set your class.")
-        messages.setDefault("class-set-usage", "&cUsage: /class set [class]")
-        messages.setDefault("not-from-console", "&cYou must be a player to perform this command.")
-        messages.setDefault("no-character", "&cYou require a character to perform that command.")
-        messages.setDefault("class-set-invalid-class", "&cThat class is invalid.")
-        messages.setDefault("class-set-invalid-prerequisites", "&cYou do not have the prerequisites for that class.")
-        messages.setDefault("class-set-valid", "&aClass set to \$class.")
-        messages.setDefault("no-permission-class-list", "&cYou do not have permission to list classes.")
-        messages.setDefault("class-list-title", "&fClasses:")
-        messages.setDefault("class-list-item", "&f- &7\$class")
-        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
-        messages.setDefault("no-character-service", "&cThere is no character service available.")
-        messages.setDefault("no-class-service", "&cThere is no class service available.")
     }
 
 }

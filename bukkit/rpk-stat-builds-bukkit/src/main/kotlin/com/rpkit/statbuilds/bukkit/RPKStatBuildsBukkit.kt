@@ -27,6 +27,7 @@ import com.rpkit.skills.bukkit.skills.RPKSkillPointService
 import com.rpkit.statbuilds.bukkit.command.statattribute.StatAttributeCommand
 import com.rpkit.statbuilds.bukkit.command.statbuild.StatBuildCommand
 import com.rpkit.statbuilds.bukkit.database.table.RPKCharacterStatPointsTable
+import com.rpkit.statbuilds.bukkit.messages.StatBuildsMessages
 import com.rpkit.statbuilds.bukkit.skillpoint.RPKSkillPointServiceImpl
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeServiceImpl
@@ -41,12 +42,16 @@ import java.io.File
 class RPKStatBuildsBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: StatBuildsMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.statbuilds.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 6663)
         saveDefaultConfig()
+
+        messages = StatBuildsMessages(this)
+        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
@@ -106,37 +111,12 @@ class RPKStatBuildsBukkit : RPKBukkitPlugin() {
             }
         }
 
+        registerCommands()
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("statbuild")?.setExecutor(StatBuildCommand(this))
         getCommand("statattribute")?.setExecutor(StatAttributeCommand(this))
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("no-permission-stat-build-assign-point", "&cYou do not have permission to assign stat points.")
-        messages.setDefault("not-from-console", "&cYou must be a player to perform that command.")
-        messages.setDefault("stat-build-assign-point-usage", "&cUsage: /statbuild assignpoint [stat] (points)")
-        messages.setDefault("stat-build-assign-point-invalid-stat-attribute", "&cInvalid stat attribute. Use /statattribute list to list stat attributes.")
-        messages.setDefault("stat-build-assign-point-invalid-points-integer", "&cThe amount of points to assign must be an integer.")
-        messages.setDefault("stat-build-assign-point-invalid-points-not-enough", "&cYou do not have enough points to assign.")
-        messages.setDefault("stat-build-assign-point-invalid-points-too-many-in-stat", "&cYou may not assign any more stat points to that stat right now.")
-        messages.setDefault("no-minecraft-profile-self", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("no-character-self", "&cYou do not currently have an active character. Please create one with /character new, or switch to an old one using /character switch.")
-        messages.setDefault("stat-build-assign-point-valid", "&a\$points point(s) assigned to \$stat-attribute (total \$total-points, max \$max-points)")
-        messages.setDefault("stat-build-usage", "&cUsage: /statbuild [view|assignpoint]")
-        messages.setDefault("no-permission-stat-build-view", "&cYou do not have permission to view your stat build.")
-        messages.setDefault("stat-build-view-title", "&fStat build:")
-        messages.setDefault("stat-build-view-points-assignment-count", "&fTotal stat points: &7\$total&f, Unassigned: &7\$unassigned&f, Assigned: &7\$assigned")
-        messages.setDefault("stat-build-view-item", "&f\$stat-attribute &e\$points&7/&f\$max-points")
-        messages.setDefault("stat-attribute-usage", "&cUsage: /statattribute [list]")
-        messages.setDefault("no-permission-stat-attribute-list", "&cYou do not have permission to list stat attributes.")
-        messages.setDefault("stat-attribute-list-title", "&fStat attributes:")
-        messages.setDefault("stat-attribute-list-item", "&7 - &f\$stat-attribute")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
-        messages.setDefault("no-character-service", "&cThere is no character service available.")
-        messages.setDefault("no-stat-attribute-service", "&cThere is no stat attribute service available.")
-        messages.setDefault("no-stat-build-service", "&cThere is no stat build service available.")
     }
 
 }

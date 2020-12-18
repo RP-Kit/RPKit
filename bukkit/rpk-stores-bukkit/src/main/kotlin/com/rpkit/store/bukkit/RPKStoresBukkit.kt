@@ -33,6 +33,7 @@ import com.rpkit.store.bukkit.database.table.RPKPurchaseTable
 import com.rpkit.store.bukkit.database.table.RPKStoreItemTable
 import com.rpkit.store.bukkit.database.table.RPKTimedPurchaseTable
 import com.rpkit.store.bukkit.database.table.RPKTimedStoreItemTable
+import com.rpkit.store.bukkit.messages.StoresMessages
 import com.rpkit.store.bukkit.purchase.RPKPurchaseService
 import com.rpkit.store.bukkit.purchase.RPKPurchaseServiceImpl
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
@@ -45,12 +46,16 @@ import java.io.File
 class RPKStoresBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: StoresMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.store.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 4421)
         saveDefaultConfig()
+
+        messages = StoresMessages(this)
+        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
@@ -103,40 +108,14 @@ class RPKStoresBukkit : RPKBukkitPlugin() {
 
         Services[RPKPurchaseService::class.java] = RPKPurchaseServiceImpl(this)
         Services[RPKStoreItemService::class.java] = RPKStoreItemServiceImpl(this)
+
+        registerCommands()
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("purchase")?.setExecutor(PurchaseCommand(this))
         getCommand("purchases")?.setExecutor(PurchasesCommand(this))
         getCommand("claim")?.setExecutor(ClaimCommand(this))
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("no-permission-claim", "&cYou do not have permission to claim purchases.")
-        messages.setDefault("claim-usage", "&cUsage: /claim [purchase id]")
-        messages.setDefault("not-from-console", "&cYou may not use this command from console.")
-        messages.setDefault("no-minecraft-profile-self", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("no-profile-self", "&cA profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("claim-purchase-id-invalid-integer", "&cYou must specify a valid purchase ID.")
-        messages.setDefault("claim-purchase-id-invalid-purchase", "&cYou must specify a valid purchase ID.")
-        messages.setDefault("claim-purchase-id-invalid-consumable", "&cThat purchase is not consumable.")
-        messages.setDefault("claim-purchase-id-invalid-profile", "&cThat purchase is not yours to claim.")
-        messages.setDefault("claim-plugin-not-installed", "&cThe plugin that purchase is associated with is not currently installed. Please contact a member of staff for support.")
-        messages.setDefault("claim-plugin-cannot-claim", "&cThe plugin that purchase is associated with does not support claiming purchases. Please contact a member of staff for support.")
-        messages.setDefault("claim-successful", "&aSuccessfully claimed your purchase.")
-        messages.setDefault("only-from-console", "&cYou may only use this command from console.")
-        messages.setDefault("purchase-usage", "&cUsage: /purchase [uuid] [store item id]")
-        messages.setDefault("no-minecraft-profile-other", "&c\$name/\$uuid does not have a Minecraft profile.")
-        messages.setDefault("no-profile-other", "&c\$name/\$uuid does not have a profile")
-        messages.setDefault("purchase-store-item-id-invalid-integer", "&cYou must specify a valid store item ID.")
-        messages.setDefault("purchase-store-item-id-invalid-item", "&cYou must specify a valid store item ID.")
-        messages.setDefault("purchase-successful", "&aPurchase successful.")
-        messages.setDefault("no-permission-purchases", "&cYou do not have permission to view your purchases.")
-        messages.setDefault("purchases-title", "&fPurchases:")
-        messages.setDefault("purchases-item", "&7\$purchase_id - \$store_item_plugin:\$store_item_identifier \$store_item_description - \$purchase_date")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
-        messages.setDefault("no-purchase-service", "&cThere is no purchase service available.")
-        messages.setDefault("no-store-item-service", "&cThere is no store item service available.")
     }
 
 }

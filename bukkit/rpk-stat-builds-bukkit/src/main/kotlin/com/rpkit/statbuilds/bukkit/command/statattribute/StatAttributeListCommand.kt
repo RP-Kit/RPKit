@@ -33,7 +33,7 @@ class StatAttributeListCommand(private val plugin: RPKStatBuildsBukkit) : Comman
                 ?.getKeys(false)
                 ?.forEach { statAttributeName ->
                     sender.sendMessage(plugin.messages["stat-attribute-list-item", mapOf(
-                            "stat-attribute" to statAttributeName
+                            "stat_attribute" to statAttributeName
                     )])
                 }
         return true

@@ -32,6 +32,7 @@ import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileTable
 import com.rpkit.players.bukkit.database.table.RPKProfileTable
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
 import com.rpkit.players.bukkit.listener.PlayerLoginListener
+import com.rpkit.players.bukkit.messages.PlayersMessages
 import com.rpkit.players.bukkit.profile.RPKDiscordProfileServiceImpl
 import com.rpkit.players.bukkit.profile.RPKGitHubProfileServiceImpl
 import com.rpkit.players.bukkit.profile.RPKIRCProfileServiceImpl
@@ -52,6 +53,7 @@ import java.io.File
 class RPKPlayersBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: PlayersMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.players.bukkit.shadow.impl.org.jooq.no-logo", "true")
@@ -59,6 +61,9 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
         Metrics(this, 4409)
 
         saveDefaultConfig()
+
+        messages = PlayersMessages(this)
+        messages.saveDefaultMessagesConfig()
 
         Services[RPKDiscordProfileService::class.java] = RPKDiscordProfileServiceImpl(this)
         Services[RPKGitHubProfileService::class.java] = RPKGitHubProfileServiceImpl(this)
@@ -112,76 +117,18 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
         database.addTable(RPKMinecraftProfileTable(database, this))
         database.addTable(RPKMinecraftProfileLinkRequestTable(database))
         database.addTable(RPKProfileTable(database, this))
+
+        registerCommands()
+        registerListeners()
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("account")?.setExecutor(AccountCommand(this))
         getCommand("profile")?.setExecutor(ProfileCommand(this))
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(PlayerJoinListener(this), PlayerLoginListener())
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("account-usage", "&cUsage: /account [link|confirmlink|denylink]")
-        messages.setDefault("account-link-usage", "&cUsage: /account link [irc|minecraft|discord]")
-        messages.setDefault("account-link-discord-invalid-user-tag", "&cThat is not a valid discord tag.")
-        messages.setDefault("account-link-discord-invalid-user", "&cThat is not a valid discord user.")
-        messages.setDefault("account-link-irc-usage", "&cUsage: /account link irc [nick]")
-        messages.setDefault("account-link-irc-invalid-already-linked", "&cThat IRC user is already linked to a Minecraft user.")
-        messages.setDefault("account-link-irc-invalid-nick", "&cThere is no IRC user by that name online.")
-        messages.setDefault("account-link-irc-invalid-no-irc-service", "&cThere is no IRC service registered, so IRC accounts cannot be linked.")
-        messages.setDefault("account-link-irc-invalid-no-player-service", "&cThere is no player service registered, so IRC accounts cannot be linked.")
-        messages.setDefault("account-link-irc-valid", "&aAccount linked.")
-        messages.setDefault("account-link-minecraft-usage", "&cUsage: /account link minecraft [name] [token]")
-        messages.setDefault("account-link-minecraft-invalid-player", "&cThere is no player by that name.")
-        messages.setDefault("account-link-minecraft-invalid-minecraft-profile", "&cThat account has no Minecraft profile. Please get them to relog, or contact the server owner if this error persists.")
-        messages.setDefault("account-link-minecraft-invalid-token", "&cThat token is invalid. Please use the token exactly as provided on your other account.")
-        messages.setDefault("account-link-minecraft-valid", "&aAccount link request placed. Please log in to your other account and accept the request.")
-        messages.setDefault("account-confirm-link-usage", "&cUsage: /account confirmlink [type] [id]")
-        messages.setDefault("account-confirm-link-invalid-id", "&cInvalid ID.")
-        messages.setDefault("account-confirm-link-invalid-already-linked", "&cYour Minecraft profile is already linked to a profile. You may not link to more than one profile.")
-        messages.setDefault("account-confirm-link-invalid-request", "&cThat profile has not requested to link this Minecraft profile.")
-        messages.setDefault("account-confirm-link-valid", "&aAccount linked.")
-        messages.setDefault("account-confirm-link-invalid-type", "&cInvalid account type.")
-        messages.setDefault("account-deny-link-usage", "&cUsage: /account denylink [type] [id]")
-        messages.setDefault("account-deny-link-invalid-id", "&cInvalid ID.")
-        messages.setDefault("account-deny-link-invalid-request", "&cThat profile has not requested to link this Minecraft profile.")
-        messages.setDefault("account-deny-link-valid", "&aLink request denied.")
-        messages.setDefault("account-deny-link-profile-created", "&aThere are no outstanding link requests for this account, so a new profile has been created for it.")
-        messages.setDefault("account-deny-link-invalid-type", "&cInvalid account type.")
-        messages.setDefault("profile-view-invalid-target", "&cThere is no player by that name online.")
-        messages.setDefault("profile-view-valid", listOf(
-                "&7=== &f\$name#\$discriminator &7===",
-                "&7Name: &f\$name",
-                "&7Discriminator: &f\$discriminator"
-        ))
-        messages.setDefault("profile-set-name-usage", "&cUsage: /profile set name [name]")
-        messages.setDefault("profile-set-name-invalid-name", "&cName must be between 3 and 16 characters and contain alphanumerics and underscores only.")
-        messages.setDefault("profile-set-name-valid", "&aProfile name set to \$name.")
-        messages.setDefault("profile-set-password-usage", "&cUsage: /profile set password [password]")
-        messages.setDefault("profile-set-password-valid", "&aProfile password set.")
-        messages.setDefault("profile-set-usage", "&cUsage: /profile set [name|password]")
-        messages.setDefault("profile-usage", "&cUsage: /profile [view|set]")
-        messages.setDefault("no-profile-self", "&cA profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("no-profile-other", "&cA profile has not been created for that player, or was unable to be retrieved. Please try relogging, and contact a server owner if this error persists.")
-        messages.setDefault("no-minecraft-profile-self", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("no-minecraft-profile-other", "&cThat person does not currently have a Minecraft profile. Please get them to try relogging, or contact the server owner if this error persists.")
-        messages.setDefault("profile-link-request", "&fWould you like to link this Minecraft account to \$profile?")
-        messages.setDefault("yes", "Yes")
-        messages.setDefault("no", "No")
-        messages.setDefault("no-permission-account-link", "&cYou do not have permission to link accounts.")
-        messages.setDefault("no-permission-account-link-discord", "&cYou do not have permission to link Discord accounts.")
-        messages.setDefault("no-permission-account-link-irc", "&cYou do not have permission to link IRC accounts.")
-        messages.setDefault("no-permission-account-link-minecraft", "&cYou do not have permission to link Minecraft accounts.")
-        messages.setDefault("no-permission-profile-create", "&cYou do not have permission to create profiles.")
-        messages.setDefault("no-permission-profile-login", "&cYou do not have permission to login to profiles.")
-        messages.setDefault("no-permission-profile-view-self", "&cYou do not have permission to view your profile.")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
-        messages.setDefault("no-irc-profile-service", "&cThere is not IRC profile service available.")
-        messages.setDefault("no-profile-service", "&cThere is no profile service available.")
-        messages.setDefault("no-discord-service", "&cThere is no Discord service available.")
     }
 
 }

@@ -37,6 +37,7 @@ import com.rpkit.locks.bukkit.listener.InventoryCloseListener
 import com.rpkit.locks.bukkit.listener.PlayerInteractListener
 import com.rpkit.locks.bukkit.lock.RPKLockService
 import com.rpkit.locks.bukkit.lock.RPKLockServiceImpl
+import com.rpkit.locks.bukkit.messages.LocksMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.Material.IRON_BLOCK
 import org.bukkit.Material.IRON_INGOT
@@ -48,12 +49,16 @@ import java.io.File
 class RPKLocksBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: LocksMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.locks.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 4402)
         saveDefaultConfig()
+
+        messages = LocksMessages(this)
+        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
@@ -106,46 +111,24 @@ class RPKLocksBukkit : RPKBukkitPlugin() {
         val lockRecipe = ShapedRecipe(NamespacedKey(this, "lock"), lockService.lockItem)
         lockRecipe.shape("I", "B").setIngredient('I', IRON_INGOT).setIngredient('B', IRON_BLOCK)
         server.addRecipe(lockRecipe)
+
+        registerCommands()
+        registerListeners()
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("getkey")?.setExecutor(GetKeyCommand(this))
         getCommand("keyring")?.setExecutor(KeyringCommand(this))
         getCommand("unlock")?.setExecutor(UnlockCommand(this))
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
                 CraftItemListener(this),
                 InventoryClickListener(this),
                 InventoryCloseListener(this),
                 PlayerInteractListener(this)
         )
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("block-locked", "&cThe \$block appears to be locked. You would need the key to get in.")
-        messages.setDefault("crafting-no-keys", "&cYou may not use keys as a substitute for iron ingots.")
-        messages.setDefault("keyring-invalid-item", "&cYou may not place non-key items on your keyring.")
-        messages.setDefault("lock-successful", "&aBlock locked. You've been given the key. Please take good care of it.")
-        messages.setDefault("lock-invalid-already-locked", "&cThat block is already locked.")
-        messages.setDefault("unlock-successful", "&aBlock unlocked.")
-        messages.setDefault("unlock-invalid-no-key", "&cYou must have the key to that block in order to unlock it.")
-        messages.setDefault("unlock-invalid-not-locked", "&cThat block is not locked.")
-        messages.setDefault("get-key-invalid-not-locked", "&cThat block is not locked.")
-        messages.setDefault("get-key-successful", "&aHere is the key.")
-        messages.setDefault("get-key-valid", "&aPlease interact with the block you would like the key for.")
-        messages.setDefault("unlock-valid", "&aPlease interact with the block you would like to unlock.")
-        messages.setDefault("not-from-console", "&cYou must be a player to perform this command.")
-        messages.setDefault("no-character", "&cYou must have a character to perform this action.")
-        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("no-permission-get-key", "&cYou do not have permission to get keys.")
-        messages.setDefault("no-permission-keyring", "&cYou do not have permission to view your keyring.")
-        messages.setDefault("no-permission-unlock", "&cYou do not have permission to remove locks.")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
-        messages.setDefault("no-character-service", "&cThere is no character service available.")
-        messages.setDefault("no-lock-service", "&cThere is no lock service available.")
-        messages.setDefault("no-keyring-service", "&cThere is no keyring service available.")
     }
 
 }

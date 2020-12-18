@@ -34,6 +34,7 @@ import com.rpkit.unconsciousness.bukkit.listener.PlayerInteractListener
 import com.rpkit.unconsciousness.bukkit.listener.PlayerJoinListener
 import com.rpkit.unconsciousness.bukkit.listener.PlayerMoveListener
 import com.rpkit.unconsciousness.bukkit.listener.PlayerRespawnListener
+import com.rpkit.unconsciousness.bukkit.messages.UnconsciousnessMessages
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessServiceImpl
 import org.bstats.bukkit.Metrics
@@ -44,12 +45,16 @@ import java.io.File
 class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: UnconsciousnessMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.unconsciousness.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 4425)
         saveDefaultConfig()
+
+        messages = UnconsciousnessMessages(this)
+        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
@@ -99,13 +104,16 @@ class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
         server.worlds.forEach { world ->
             world.setGameRule(KEEP_INVENTORY, true)
         }
+
+        registerCommands()
+        registerListeners()
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("wake")?.setExecutor(WakeCommand(this))
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
                 PlayerDeathListener(),
                 PlayerRespawnListener(this),
@@ -118,16 +126,6 @@ class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
                 PlayerInteractListener(),
                 EntityDamageByEntityListener(this)
         )
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("unconscious-command-blocked", "&cYou are not permitted to use that command while unconscious.")
-        messages.setDefault("wake-success", "&aWoke \$character.")
-        messages.setDefault("wake-already-awake", "&c\$character is already awake.")
-        messages.setDefault("no-permission-wake", "&cYou do not have permission to wake people up.")
-        messages.setDefault("no-character-other", "&c\$player does not have an active character.")
-        messages.setDefault("no-minecraft-profile-other", "&c\$player does not have a Minecraft profile.")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
     }
 
 }

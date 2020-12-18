@@ -72,7 +72,7 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit) : CommandExecuto
         chatGroupService.addChatGroup(chatGroup)
         chatGroup.addMember(senderMinecraftProfile)
         sender.sendMessage(plugin.messages["chat-group-create-valid", mapOf(
-                Pair("group", chatGroup.name)
+            "group" to chatGroup.name
         )])
         return true
     }

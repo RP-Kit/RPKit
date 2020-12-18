@@ -16,5 +16,4 @@
 
 package com.rpkit.core.plugin
 
-interface RPKPlugin {
-}
+interface RPKPlugin

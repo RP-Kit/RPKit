@@ -67,8 +67,8 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
                 .forEach {
                     sender.sendMessage(
                             plugin.messages["payment-list-item", mapOf(
-                                    Pair("name", it.name),
-                                    Pair("rank", "Owner")
+                                "name" to it.name,
+                                "rank" to "Owner"
                             )]
                     )
                 }
@@ -76,8 +76,8 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
                 .forEach {
                     sender.sendMessage(
                             plugin.messages[".payment-list-item", mapOf(
-                                    Pair("name", it.name),
-                                    Pair("rank", "Member")
+                                "name" to it.name,
+                                "rank" to "Member"
                             )]
                     )
                 }

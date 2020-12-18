@@ -114,10 +114,10 @@ class ProfessionUnsetCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor
             val professionChangeCooldown = professionService.getProfessionChangeCooldown(character)
             if (!professionChangeCooldown.isZero) {
                 sender.sendMessage(plugin.messages["profession-unset-invalid-on-cooldown", mapOf(
-                        "cooldown-days" to professionChangeCooldown.toDays().toString(),
-                        "cooldown-hours" to (professionChangeCooldown.toHours() % 24).toString(),
-                        "cooldown-minutes" to (professionChangeCooldown.toMinutes() % 60).toString(),
-                        "cooldown-seconds" to (professionChangeCooldown.seconds % 60).toString()
+                        "cooldown_days" to professionChangeCooldown.toDays().toString(),
+                        "cooldown_hours" to (professionChangeCooldown.toHours() % 24).toString(),
+                        "cooldown_minutes" to (professionChangeCooldown.toMinutes() % 60).toString(),
+                        "cooldown_seconds" to (professionChangeCooldown.seconds % 60).toString()
                 )])
                 return true
             }

@@ -52,13 +52,13 @@ class HistoryCommand(private val plugin: RPKBlockLoggingBukkit) : CommandExecuto
         }
         for (change in changes.sortedBy(RPKBlockChange::time).take(100)) {
             sender.sendMessage(plugin.messages["history-change", mapOf(
-                    Pair("time", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time)),
-                    Pair("profile", change.profile?.name ?: "None"),
-                    Pair("minecraft-profile", change.minecraftProfile?.minecraftUsername ?: "None"),
-                    Pair("character", change.character?.name ?: "None"),
-                    Pair("from", change.from.toString().toLowerCase().replace('_', ' ')),
-                    Pair("to", change.to.toString().toLowerCase().replace('_', ' ')),
-                    Pair("reason", change.reason)
+                "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time),
+                "profile" to (change.profile?.name ?: "None"),
+                "minecraft_profile" to (change.minecraftProfile?.minecraftUsername ?: "None"),
+                "character" to (change.character?.name ?: "None"),
+                "from" to change.from.toString().toLowerCase().replace('_', ' '),
+                "to" to change.to.toString().toLowerCase().replace('_', ' '),
+                "reason" to change.reason
             )])
         }
         return true

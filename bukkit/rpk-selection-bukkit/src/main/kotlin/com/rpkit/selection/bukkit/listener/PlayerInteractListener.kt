@@ -52,7 +52,7 @@ class PlayerInteractListener(private val plugin: RPKSelectionBukkit) : Listener 
                     selection.world = clickedBlock.world
                     selection.point1 = clickedBlock
                     selectionService.updateSelection(selection)
-                    event.player.sendMessage(plugin.messages["wand-primary", mapOf(
+                    event.player.sendMessage(plugin.messages["wand_primary", mapOf(
                             Pair("world", clickedBlock.world.name),
                             Pair("x", clickedBlock.x.toString()),
                             Pair("y", clickedBlock.y.toString()),
@@ -64,7 +64,7 @@ class PlayerInteractListener(private val plugin: RPKSelectionBukkit) : Listener 
                         selection.world = clickedBlock.world
                         selection.point2 = clickedBlock
                         selectionService.updateSelection(selection)
-                        event.player.sendMessage(plugin.messages["wand-secondary", mapOf(
+                        event.player.sendMessage(plugin.messages["wand_secondary", mapOf(
                                 Pair("world", clickedBlock.world.name),
                                 Pair("x", clickedBlock.x.toString()),
                                 Pair("y", clickedBlock.y.toString()),

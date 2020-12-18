@@ -19,7 +19,9 @@ package com.rpkit.craftingskill.bukkit.craftingskill
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
-import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.*
+import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.CRAFT
+import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.MINE
+import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.SMELT
 import com.rpkit.craftingskill.bukkit.database.table.RPKCraftingExperienceTable
 import com.rpkit.craftingskill.bukkit.event.craftingskill.RPKBukkitCraftingSkillExperienceChangeEvent
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
@@ -42,10 +44,10 @@ class RPKCraftingSkillServiceImpl(override val plugin: RPKCraftingSkillBukkit) :
             MINE -> "mining"
         }
         val maxExperience = plugin.config.getConfigurationSection("$actionConfigSectionName.$material")
-                ?.getKeys(false)
-                ?.map(String::toInt)
-                ?.max()
-                ?: 0
+            ?.getKeys(false)
+            ?.map(String::toInt)
+            ?.maxOrNull()
+            ?: 0
         if (maxExperience == 0) return
         val craftingExperienceTable = plugin.database.getTable(RPKCraftingExperienceTable::class.java)
         val event = RPKBukkitCraftingSkillExperienceChangeEvent(

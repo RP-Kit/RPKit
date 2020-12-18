@@ -21,6 +21,7 @@ import com.rpkit.banks.bukkit.bank.RPKBankServiceImpl
 import com.rpkit.banks.bukkit.database.table.RPKBankTable
 import com.rpkit.banks.bukkit.listener.PlayerInteractListener
 import com.rpkit.banks.bukkit.listener.SignChangeListener
+import com.rpkit.banks.bukkit.messages.BanksMessages
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
@@ -37,6 +38,7 @@ import java.io.File
 class RPKBanksBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: BanksMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.banks.bukkit.shadow.impl.org.jooq.no-logo", "true")
@@ -87,27 +89,12 @@ class RPKBanksBukkit : RPKBukkitPlugin() {
         database.addTable(RPKBankTable(database, this))
 
         Services[RPKBankService::class.java] = RPKBankServiceImpl(this)
+
+        registerListeners()
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(SignChangeListener(this), PlayerInteractListener(this))
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("bank-sign-invalid-operation", "&cThat's not a valid operation. Please use withdraw, deposit, or balance. (Line 2)")
-        messages.setDefault("bank-sign-invalid-currency", "&cThat's not a valid currency. Please use a valid currency. (Line 4)")
-        messages.setDefault("bank-withdraw-invalid-wallet-full", "&cYou cannot withdraw that amount, it would not fit in your wallet.")
-        messages.setDefault("bank-withdraw-invalid-not-enough-money", "&cYou cannot withdraw that amount, your bank balance is not high enough.")
-        messages.setDefault("bank-withdraw-valid", "&aWithdrew \$amount \$currency. Wallet balance: \$wallet-balance. Bank balance: \$bank-balance.")
-        messages.setDefault("bank-deposit-invalid-not-enough-money", "&cYou cannot deposit that amount, your wallet balance is not high enough.")
-        messages.setDefault("bank-deposit-valid", "&aDeposited \$amount \$currency. Wallet balance: \$wallet-balance. Bank balance: \$bank-balance.")
-        messages.setDefault("bank-balance-valid", "&aBalance: \$amount \$currency")
-        messages.setDefault("no-permission-bank-create", "&cYou do not have permission to create banks.")
-        messages.setDefault("no-currency-service", "&cThere is no currency service available.")
-        messages.setDefault("no-bank-service", "&cThere is no bank service available.")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
-        messages.setDefault("no-character-service", "&cThere is no character service available.")
-        messages.setDefault("no-economy-service", "&cThere is no economy service available.")
     }
 
 }

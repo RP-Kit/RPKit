@@ -16,7 +16,6 @@
 
 package com.rpkit.core.bukkit.plugin
 
-import com.rpkit.core.message.Messages
 import com.rpkit.core.plugin.RPKPlugin
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
@@ -28,24 +27,10 @@ import org.bukkit.plugin.java.JavaPlugin
  */
 abstract class RPKBukkitPlugin : JavaPlugin(), RPKPlugin {
 
-    lateinit var messages: Messages
-
-    open fun registerCommands() {
-
-    }
-
-    open fun registerListeners() {
-
-    }
-
     fun registerListeners(vararg listeners: Listener) {
         for (listener in listeners) {
             server.pluginManager.registerEvents(listener, this)
         }
-    }
-
-    open fun setDefaultMessages() {
-
     }
 
 }

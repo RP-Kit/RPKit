@@ -86,16 +86,16 @@ class BlockBreakListener(private val plugin: RPKCraftingSkillBukkit) : Listener 
                 itemsToDrop.add(item)
             }
             val maxExperience = plugin.config.getConfigurationSection("mining.$material")
-                    ?.getKeys(false)
-                    ?.map(String::toInt)
-                    ?.max()
-                    ?: 0
+                ?.getKeys(false)
+                ?.map(String::toInt)
+                ?.maxOrNull()
+                ?: 0
             if (maxExperience != 0 && craftingSkill < maxExperience) {
                 val totalExperience = min(craftingSkill + item.amount, maxExperience)
                 craftingSkillService.setCraftingExperience(character, RPKCraftingAction.MINE, material, totalExperience)
                 event.player.sendMessage(plugin.messages["mine-experience", mapOf(
-                        Pair("total-experience", totalExperience.toString()),
-                        Pair("received-experience", item.amount.toString())
+                    "total_experience" to totalExperience.toString(),
+                    "received_experience" to item.amount.toString()
                 )])
             }
         }

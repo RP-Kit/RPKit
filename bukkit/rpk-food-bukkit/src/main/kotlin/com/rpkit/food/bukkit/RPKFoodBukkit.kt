@@ -20,7 +20,14 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.food.bukkit.expiry.RPKExpiryService
 import com.rpkit.food.bukkit.expiry.RPKExpiryServiceImpl
-import com.rpkit.food.bukkit.listener.*
+import com.rpkit.food.bukkit.listener.EntityDeathListener
+import com.rpkit.food.bukkit.listener.EntityPickupItemListener
+import com.rpkit.food.bukkit.listener.FurnaceSmeltListener
+import com.rpkit.food.bukkit.listener.InventoryOpenListener
+import com.rpkit.food.bukkit.listener.PlayerFishListener
+import com.rpkit.food.bukkit.listener.PlayerItemConsumeListener
+import com.rpkit.food.bukkit.listener.PlayerJoinListener
+import com.rpkit.food.bukkit.listener.PrepareItemCraftListener
 import org.bstats.bukkit.Metrics
 
 /**
@@ -33,9 +40,11 @@ class RPKFoodBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         Services[RPKExpiryService::class.java] = RPKExpiryServiceImpl(this)
+
+        registerListeners()
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
                 EntityDeathListener(),
                 FurnaceSmeltListener(this),

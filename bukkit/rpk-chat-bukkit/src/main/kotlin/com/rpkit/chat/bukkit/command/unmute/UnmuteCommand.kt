@@ -62,13 +62,13 @@ class UnmuteCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
         }
         if (!sender.hasPermission("rpkit.chat.command.unmute.${chatChannel.name}")) {
             sender.sendMessage(plugin.messages["no-permission-unmute", mapOf(
-                    Pair("channel", chatChannel.name)
+                "channel" to chatChannel.name
             )])
             return true
         }
         chatChannel.addListener(minecraftProfile)
         sender.sendMessage(plugin.messages["unmute-valid", mapOf(
-                Pair("channel", chatChannel.name)
+            "channel" to chatChannel.name
         )])
         return true
     }

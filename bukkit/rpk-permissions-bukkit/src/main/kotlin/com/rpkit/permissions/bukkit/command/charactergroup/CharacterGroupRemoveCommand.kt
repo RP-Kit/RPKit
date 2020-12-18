@@ -78,8 +78,8 @@ class CharacterGroupRemoveCommand(private val plugin: RPKPermissionsBukkit) : Co
         }
         character.removeGroup(group)
         sender.sendMessage(plugin.messages["character-group-remove-valid", mapOf(
-                Pair("group", group.name),
-                Pair("character", character.name)
+            "group" to group.name,
+            "character" to character.name
         )])
         return true
     }

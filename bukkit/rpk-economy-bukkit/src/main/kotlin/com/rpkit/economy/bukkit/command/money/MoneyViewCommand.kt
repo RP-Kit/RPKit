@@ -22,8 +22,8 @@ import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -98,8 +98,8 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
         sender.sendMessage(currencyService.currencies
                 .map { currency ->
                     plugin.messages["money-view-valid-list-item", mapOf(
-                            Pair("currency", currency.name),
-                            Pair("balance", economyService.getBalance(character, currency).toString())
+                        "currency" to currency.name,
+                        "balance" to economyService.getBalance(character, currency).toString()
                     )]
                 }
                 .toTypedArray()

@@ -44,61 +44,61 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit) : Listener {
         val sign = event.clickedBlock?.state as? Sign ?: return
         if (sign.getLine(0) != "$GREEN[auction]") return
         if (!event.player.hasPermission("rpkit.auctions.sign.auction.bid")) {
-            event.player.sendMessage(plugin.messages["no-permission-bid"])
+            event.player.sendMessage(plugin.messages.noPermissionBid)
             return
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            event.player.sendMessage(plugin.messages.noMinecraftProfileService)
             return
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
-            event.player.sendMessage(plugin.messages["no-character-service"])
+            event.player.sendMessage(plugin.messages.noCharacterService)
             return
         }
         val economyService = Services[RPKEconomyService::class.java]
         if (economyService == null) {
-            event.player.sendMessage(plugin.messages["no-economy-service"])
+            event.player.sendMessage(plugin.messages.noEconomyService)
             return
         }
         val auctionService = Services[RPKAuctionService::class.java]
         if (auctionService == null) {
-            event.player.sendMessage(plugin.messages["no-auction-service"])
+            event.player.sendMessage(plugin.messages.noAuctionService)
             return
         }
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         if (minecraftProfile == null) {
-            event.player.sendMessage(plugin.messages["no-minecraft-profile"])
+            event.player.sendMessage(plugin.messages.noMinecraftProfile)
             return
         }
         val character = characterService.getActiveCharacter(minecraftProfile)
         val auction = auctionService.getAuction(sign.getLine(1).toInt())
         if (auction == null) {
-            event.player.sendMessage(plugin.messages["bid-invalid-auction-not-existent"])
+            event.player.sendMessage(plugin.messages.bidInvalidAuctionNotExistent)
             return
         }
         if (System.currentTimeMillis() >= auction.endTime) {
             auction.closeBidding()
         }
         if (!auction.isBiddingOpen) {
-            event.player.sendMessage(plugin.messages["bid-invalid-auction-not-open"])
+            event.player.sendMessage(plugin.messages.bidInvalidAuctionNotOpen)
             return
         }
-        val bidAmount = (auction.bids.maxBy(RPKBid::amount)?.amount
+        val bidAmount = (auction.bids.maxByOrNull(RPKBid::amount)?.amount
                 ?: auction.startPrice) + auction.minimumBidIncrement
         if (character == null) {
-            event.player.sendMessage(plugin.messages["no-character"])
+            event.player.sendMessage(plugin.messages.noCharacter)
             return
         }
         if (bidAmount >= economyService.getBalance(character, auction.currency)) {
-            event.player.sendMessage(plugin.messages["bid-invalid-not-enough-money"])
+            event.player.sendMessage(plugin.messages.bidInvalidNotEnoughMoney)
             return
         }
         val radius = plugin.config.getInt("auctions.radius")
         val auctionLocation = auction.location
         if (radius >= 0 && auctionLocation != null && event.player.location.distanceSquared(auctionLocation) > radius * radius) {
-            event.player.sendMessage(plugin.messages["bid-invalid-too-far-away"])
+            event.player.sendMessage(plugin.messages.bidInvalidTooFarAway)
             return
         }
         val bid = RPKBidImpl(
@@ -107,18 +107,19 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit) : Listener {
                 amount = bidAmount
         )
         if (!auction.addBid(bid)) {
-            event.player.sendMessage(plugin.messages["bid-create-failed"])
+            event.player.sendMessage(plugin.messages.bidCreateFailed)
             return
         }
         if (!auctionService.updateAuction(auction)) {
-            event.player.sendMessage(plugin.messages["auction-update-failed"])
+            event.player.sendMessage(plugin.messages.auctionUpdateFailed)
             return
         }
-        event.player.sendMessage(plugin.messages["bid-valid", mapOf(
-                Pair("amount", bid.amount.toString()),
-                Pair("currency", if (bid.amount == 1) auction.currency.nameSingular else auction.currency.namePlural),
-                Pair("item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else "")
-        )])
+        event.player.sendMessage(plugin.messages.bidValid.withParameters(
+            currencyAmount = bid.amount,
+            currency = auction.currency,
+            itemAmount = auction.item.amount,
+            itemType = auction.item.type
+        ))
         auction.bids
                 .asSequence()
                 .map(RPKBid::character)
@@ -130,13 +131,14 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit) : Listener {
                 .filter(RPKMinecraftProfile::isOnline)
                 .toList()
                 .forEach { bidderMinecraftProfile ->
-                    bidderMinecraftProfile.sendMessage(plugin.messages["bid-created", mapOf(
-                            Pair("auction_id", bid.auction.id.toString()),
-                            Pair("character", bid.character.name),
-                            Pair("amount", bid.amount.toString()),
-                            Pair("currency", if (bid.amount == 1) auction.currency.nameSingular else auction.currency.namePlural),
-                            Pair("item", auction.item.amount.toString() + " " + auction.item.type.toString().toLowerCase().replace("_", " ") + if (auction.item.amount != 1) "s" else "")
-                    )])
+                    bidderMinecraftProfile.sendMessage(plugin.messages.bidCreated.withParameters(
+                        auction = bid.auction,
+                        character = bid.character,
+                        currencyAmount = bid.amount,
+                        currency = auction.currency,
+                        itemType = auction.item.type,
+                        itemAmount = auction.item.amount
+                    ))
                 }
         sign.setLine(3, (bid.amount + auction.minimumBidIncrement).toString())
         sign.update()

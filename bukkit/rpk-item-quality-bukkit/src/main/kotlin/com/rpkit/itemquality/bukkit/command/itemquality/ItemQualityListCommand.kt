@@ -38,7 +38,7 @@ class ItemQualityListCommand(private val plugin: RPKItemQualityBukkit) : Command
         }
         itemQualityService.itemQualities.forEach { quality ->
             sender.sendMessage(plugin.messages["itemquality-list-item", mapOf(
-                    Pair("quality", quality.name)
+                "quality" to quality.name
             )])
         }
         return true

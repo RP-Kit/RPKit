@@ -86,9 +86,11 @@ class RPKLanguagesBukkit : RPKBukkitPlugin() {
 
         Services[RPKLanguageService::class.java] = RPKLanguageServiceImpl(this)
         Services[RPKCharacterLanguageService::class.java] = RPKCharacterLanguageServiceImpl(this)
+
+        registerListeners()
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(RPKBukkitCharacterDeleteListener(this))
     }
 

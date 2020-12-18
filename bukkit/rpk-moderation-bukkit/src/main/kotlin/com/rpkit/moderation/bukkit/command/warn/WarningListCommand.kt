@@ -19,8 +19,8 @@ package com.rpkit.moderation.bukkit.command.warn
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.warning.RPKWarningService
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -72,11 +72,11 @@ class WarningListCommand(private val plugin: RPKModerationBukkit) : CommandExecu
         sender.sendMessage(plugin.messages["warning-list-title"])
         for ((index, warning) in warnings.withIndex()) {
             sender.sendMessage(plugin.messages["warning-list-item", mapOf(
-                    Pair("issuer", warning.issuer.name),
-                    Pair("profile", warning.profile.name),
-                    Pair("index", (index + 1).toString()),
-                    Pair("reason", warning.reason),
-                    Pair("time", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time))
+                "issuer" to warning.issuer.name,
+                "profile" to warning.profile.name,
+                "index" to (index + 1).toString(),
+                "reason" to warning.reason,
+                "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time)
             )])
         }
         return true

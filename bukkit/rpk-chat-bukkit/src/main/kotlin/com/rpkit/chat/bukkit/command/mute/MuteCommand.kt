@@ -62,13 +62,13 @@ class MuteCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
         }
         if (!sender.hasPermission("rpkit.chat.command.mute.${chatChannel.name}")) {
             sender.sendMessage(plugin.messages["no-permission-mute", mapOf(
-                    Pair("channel", chatChannel.name)
+                "channel" to chatChannel.name
             )])
             return true
         }
         chatChannel.removeListener(minecraftProfile)
         sender.sendMessage(plugin.messages["mute-valid", mapOf(
-                Pair("channel", chatChannel.name)
+            "channel" to chatChannel.name
         )])
         return true
     }

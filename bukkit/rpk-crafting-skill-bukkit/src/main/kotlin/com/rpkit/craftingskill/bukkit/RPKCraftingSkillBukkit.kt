@@ -31,6 +31,7 @@ import com.rpkit.craftingskill.bukkit.listener.CraftItemListener
 import com.rpkit.craftingskill.bukkit.listener.InventoryClickListener
 import com.rpkit.craftingskill.bukkit.listener.PrepareItemCraftListener
 import com.rpkit.craftingskill.bukkit.listener.RPKBukkitCharacterDeleteListener
+import com.rpkit.craftingskill.bukkit.messages.CraftingSkillMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -39,12 +40,16 @@ import java.io.File
 class RPKCraftingSkillBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: CraftingSkillMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.craftingskill.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 5350)
         saveDefaultConfig()
+
+        messages = CraftingSkillMessages(this)
+        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
@@ -89,9 +94,12 @@ class RPKCraftingSkillBukkit : RPKBukkitPlugin() {
         database.addTable(RPKCraftingExperienceTable(database, this))
 
         Services[RPKCraftingSkillService::class.java] = RPKCraftingSkillServiceImpl(this)
+
+        registerListeners()
+        registerCommands()
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
                 RPKBukkitCharacterDeleteListener(this),
                 BlockBreakListener(this),
@@ -101,26 +109,8 @@ class RPKCraftingSkillBukkit : RPKBukkitPlugin() {
         )
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("craftingskill")?.setExecutor(CraftingSkillCommand(this))
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("no-character", "&cYou need to have a character to perform this action.")
-        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("not-from-console", "&cYou may not use this command from console.")
-        messages.setDefault("craft-experience", "&aCrafting experience gained: &e\$received-experience &7(Total: \$total-experience)")
-        messages.setDefault("mine-experience", "&aMining experience gained: &e\$received-experience &7(Total: \$total-experience)")
-        messages.setDefault("smelt-experience", "&aSmelting experience gained: &e\$received-experience &7(Total: \$total-experience)")
-        messages.setDefault("no-permission-crafting-skill", "&cYou do not have permission to view your crafting skill.")
-        messages.setDefault("crafting-skill-usage", "&cUsage: /craftingskill [craft|smelt|mine] [material]")
-        messages.setDefault("crafting-skill-actions-title", "&7Actions:")
-        messages.setDefault("crafting-skill-actions-item", "&7 - &f\$action")
-        messages.setDefault("crafting-skill-invalid-material", "&cInvalid material")
-        messages.setDefault("crafting-skill-valid", "&aCrafting skill for &7\$action &a- &7\$material &a- &e\$total-experience/\$max-experience")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
-        messages.setDefault("no-character-service", "&cThere is no character service available.")
-        messages.setDefault("no-crafting-skill-service", "&cThere is no crafting skill service available.")
     }
 
 }

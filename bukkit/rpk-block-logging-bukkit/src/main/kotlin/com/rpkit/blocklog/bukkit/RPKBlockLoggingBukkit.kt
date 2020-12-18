@@ -38,6 +38,7 @@ import com.rpkit.blocklog.bukkit.listener.EntityChangeBlockListener
 import com.rpkit.blocklog.bukkit.listener.EntityExplodeListener
 import com.rpkit.blocklog.bukkit.listener.InventoryClickListener
 import com.rpkit.blocklog.bukkit.listener.InventoryDragListener
+import com.rpkit.blocklog.bukkit.messages.BlockLoggingMessages
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
@@ -52,12 +53,16 @@ import java.io.File
 class RPKBlockLoggingBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: BlockLoggingMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.blocklog.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 4380)
         saveDefaultConfig()
+
+        messages = BlockLoggingMessages(this)
+        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
@@ -104,15 +109,18 @@ class RPKBlockLoggingBukkit : RPKBukkitPlugin() {
         database.addTable(RPKBlockInventoryChangeTable(database, this))
 
         Services[RPKBlockHistoryService::class.java] = RPKBlockHistoryServiceImpl(this)
+
+        registerCommands()
+        registerListeners()
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("history")?.setExecutor(HistoryCommand(this))
         getCommand("inventoryhistory")?.setExecutor(InventoryHistoryCommand(this))
         getCommand("rollback")?.setExecutor(RollbackCommand(this))
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
                 BlockBreakListener(this),
                 BlockBurnListener(this),
@@ -129,24 +137,6 @@ class RPKBlockLoggingBukkit : RPKBukkitPlugin() {
                 InventoryClickListener(this),
                 InventoryDragListener(this)
         )
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("not-from-console", "&cYou may not use this command from console.")
-        messages.setDefault("no-permission-history", "&cYou do not have permission to view the history of blocks.")
-        messages.setDefault("history-no-target-block", "&cYou must be looking at a block to view the history of.")
-        messages.setDefault("history-no-changes", "&cThat block has no recorded changes.")
-        messages.setDefault("history-change", "&f\$time - \$profile/\$minecraft-profile/\$character - \$from to \$to - \$reason")
-        messages.setDefault("no-permission-inventory-history", "&cYou do not have permission to view the inventory history of blocks.")
-        messages.setDefault("inventory-history-no-target-block", "&cYou must be looking at a block to view the history of its inventory.")
-        messages.setDefault("inventory-history-no-changes", "&cThat block has no recorded inventory changes.")
-        messages.setDefault("inventory-history-change", "&f\$time - \$profile/\$minecraft-profile/\$character - \$from to \$to - \$reason")
-        messages.setDefault("no-permission-rollback", "&cYou do not have permission to rollback changes.")
-        messages.setDefault("rollback-usage", "&cUsage: /rollback [radius] [minutes]")
-        messages.setDefault("rollback-invalid-radius", "&cRadius must be a positive integer.")
-        messages.setDefault("rollback-invalid-time", "&cTime must be a positive integer.")
-        messages.setDefault("rollback-valid", "&aBlocks rolled back.")
-        messages.setDefault("no-block-history-service", "&cThere is no block history service available.")
     }
 
 }

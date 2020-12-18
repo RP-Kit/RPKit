@@ -59,7 +59,7 @@ class ItemQualitySetCommand(private val plugin: RPKItemQualityBukkit) : CommandE
         itemQualityService.setItemQuality(item, itemQuality)
         sender.inventory.setItemInMainHand(item)
         sender.sendMessage(plugin.messages["itemquality-set-valid", mapOf(
-                Pair("quality", itemQuality.name)
+            "quality" to itemQuality.name
         )])
         return true
     }

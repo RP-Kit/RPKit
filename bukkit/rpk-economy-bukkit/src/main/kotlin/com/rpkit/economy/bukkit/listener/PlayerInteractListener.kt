@@ -88,10 +88,10 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                 economyService.setBalance(character, fromCurrency, economyService.getBalance(character, fromCurrency) - amount)
                 economyService.setBalance(character, toCurrency, economyService.getBalance(character, toCurrency) + convertedAmount)
                 event.player.sendMessage(plugin.messages["exchange-valid", mapOf(
-                        Pair("from-amount", amount.toString()),
-                        Pair("to-amount", convertedAmount.toString()),
-                        Pair("from-currency", if (amount == 1) fromCurrency.nameSingular else fromCurrency.namePlural),
-                        Pair("to-currency", if (convertedAmount == 1) toCurrency.nameSingular else toCurrency.namePlural)
+                    "from_amount" to amount.toString(),
+                    "to_amount" to convertedAmount.toString(),
+                    "from_currency" to if (amount == 1) fromCurrency.nameSingular else fromCurrency.namePlural,
+                    "to_currency" to if (convertedAmount == 1) toCurrency.nameSingular else toCurrency.namePlural
                 )])
             } else if (sign.getLine(0).equals(ChatColor.GREEN.toString() + "[dynexchange]", ignoreCase = true)) { // Dynamic exchange signs
                 val currencyService = Services[RPKCurrencyService::class.java]
@@ -132,10 +132,10 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                 sign.setLine(3, "$newToAmount ${toCurrency.name}")
                 sign.update()
                 event.player.sendMessage(plugin.messages["exchange-valid", mapOf(
-                        Pair("from-amount", fromAmount.toString()),
-                        Pair("to-amount", toAmount.toString()),
-                        Pair("from-currency", if (fromAmount == 1) fromCurrency.nameSingular else fromCurrency.namePlural),
-                        Pair("to-currency", if (toAmount == 1) toCurrency.nameSingular else toCurrency.namePlural)
+                    "from_amount" to fromAmount.toString(),
+                    "to_amount" to toAmount.toString(),
+                    "from_currency" to if (fromAmount == 1) fromCurrency.nameSingular else fromCurrency.namePlural,
+                    "to_currency" to if (toAmount == 1) toCurrency.nameSingular else toCurrency.namePlural
                 )])
             }
         } else if (event.action == LEFT_CLICK_BLOCK) {
@@ -181,10 +181,10 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
             sign.setLine(3, "$newToAmount ${toCurrency.name}")
             sign.update()
             event.player.sendMessage(plugin.messages["exchange-valid", mapOf(
-                    Pair("from-amount", fromAmount.toString()),
-                    Pair("to-amount", toAmount.toString()),
-                    Pair("from-currency", if (fromAmount == 1) fromCurrency.nameSingular else fromCurrency.namePlural),
-                    Pair("to-currency", if (toAmount == 1) toCurrency.nameSingular else toCurrency.namePlural)
+                "from_amount" to fromAmount.toString(),
+                "to_amount" to toAmount.toString(),
+                "from_currency" to if (fromAmount == 1) fromCurrency.nameSingular else fromCurrency.namePlural,
+                "to_currency" to if (toAmount == 1) toCurrency.nameSingular else toCurrency.namePlural
             )])
         }
     }

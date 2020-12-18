@@ -120,16 +120,16 @@ class CraftItemListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
             }
         }
         val maxExperience = plugin.config.getConfigurationSection("crafting.$itemType")
-                ?.getKeys(false)
-                ?.map(String::toInt)
-                ?.max()
-                ?: 0
+            ?.getKeys(false)
+            ?.map(String::toInt)
+            ?.maxOrNull()
+            ?: 0
         if (maxExperience != 0 && craftingExperience < maxExperience) {
             val totalExperience = min(craftingExperience + amountCrafted, maxExperience)
             craftingSkillService.setCraftingExperience(character, CRAFT, itemType, totalExperience)
             event.whoClicked.sendMessage(plugin.messages["craft-experience", mapOf(
-                    Pair("total-experience", totalExperience.toString()),
-                    Pair("received-experience", amountCrafted.toString())
+                "total_experience" to totalExperience.toString(),
+                "received_experience" to amountCrafted.toString()
             )])
         }
     }

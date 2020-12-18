@@ -43,14 +43,14 @@ class TicketListClosedCommand(private val plugin: RPKModerationBukkit) : Command
         closedTickets.forEach { ticket ->
             val closeDate = ticket.closeDate
             sender.sendMessage(plugin.messages["ticket-list-item", mapOf(
-                    Pair("id", ticket.id.toString()),
-                    Pair("reason", ticket.reason),
-                    Pair("location", "${ticket.location?.world} ${ticket.location?.blockX}, ${ticket.location?.blockY}, ${ticket.location?.blockZ}"),
-                    Pair("issuer", ticket.issuer.name),
-                    Pair("resolver", ticket.resolver?.name ?: "none"),
-                    Pair("open-date", dateTimeFormatter.format(ticket.openDate)),
-                    Pair("close-date", if (closeDate == null) "none" else dateTimeFormatter.format(ticket.closeDate)),
-                    Pair("closed", ticket.isClosed.toString())
+                "id" to ticket.id.toString(),
+                "reason" to ticket.reason,
+                "location" to "${ticket.location?.world} ${ticket.location?.blockX}, ${ticket.location?.blockY}, ${ticket.location?.blockZ}",
+                "issuer" to ticket.issuer.name,
+                "resolver" to (ticket.resolver?.name ?: "none"),
+                "open_date" to dateTimeFormatter.format(ticket.openDate),
+                "close_date" to if (closeDate == null) "none" else dateTimeFormatter.format(ticket.closeDate),
+                "closed" to ticket.isClosed.toString()
             )])
         }
         return true
