@@ -75,8 +75,8 @@ class StatsCommand(private val plugin: RPKStatsBukkit) : CommandExecutor {
         sender.sendMessage(plugin.messages["stats-list-title"])
         statsService.stats.forEach { stat ->
             sender.sendMessage(plugin.messages["stats-list-item", mapOf(
-                    Pair("stat", stat.name),
-                    Pair("value", stat.get(character, statVariableService.statVariables).toString())
+                "stat" to stat.name,
+                "value" to stat.get(character, statVariableService.statVariables).toString()
             )])
         }
         return true

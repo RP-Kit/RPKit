@@ -120,7 +120,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
             if (hasKey(character, block)) return
             event.isCancelled = true
             event.player.sendMessage(plugin.messages["block-locked", mapOf(
-                    Pair("block", block.type.toString().toLowerCase().replace('_', ' '))
+                "block" to block.type.toString().toLowerCase().replace('_', ' ')
             )])
         }
     }

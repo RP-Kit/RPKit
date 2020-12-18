@@ -46,8 +46,8 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
                 .filter(RPKMinecraftProfile::isOnline)
                 .forEach { minecraftProfile ->
                     minecraftProfile.sendMessage(plugin.messages["command-snoop", mapOf(
-                            Pair("sender-player", event.player.name),
-                            Pair("command", event.message)
+                        "sender_player" to event.player.name,
+                        "command" to event.message
                     )])
                 }
     }

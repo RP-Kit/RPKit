@@ -21,6 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.stats.bukkit.command.stats.StatsCommand
+import com.rpkit.stats.bukkit.messages.StatsMessages
 import com.rpkit.stats.bukkit.stat.RPKStatService
 import com.rpkit.stats.bukkit.stat.RPKStatServiceImpl
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
@@ -34,11 +35,17 @@ import org.bukkit.attribute.Attribute
  */
 class RPKStatsBukkit : RPKBukkitPlugin() {
 
+    lateinit var messages: StatsMessages
+
     override fun onEnable() {
         System.setProperty("com.rpkit.stats.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 4419)
         saveDefaultConfig()
+
+        messages = StatsMessages(this)
+        messages.saveDefaultMessagesConfig()
+
         val statVariableService = RPKStatVariableServiceImpl(this)
         val statService = RPKStatServiceImpl(this)
         Services[RPKStatVariableService::class.java] = statVariableService
@@ -129,23 +136,12 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
                 return character.thirstLevel.toDouble()
             }
         })
+
+        registerCommands()
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("stats")?.setExecutor(StatsCommand(this))
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("stats-list-title", "&fStats:")
-        messages.setDefault("stats-list-item", "&7\$stat: &f\$value")
-        messages.setDefault("no-character", "&cYou must have an active character in order to perform this command.")
-        messages.setDefault("not-from-console", "&cYou must be a player to perform this command.")
-        messages.setDefault("no-permission-stats", "&cYou do not have permission to view your stats.")
-        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
-        messages.setDefault("no-character-service", "&cThere is no character service available.")
-        messages.setDefault("no-stats-service", "&cThere is no stats service available.")
-        messages.setDefault("no-stat-variable-service", "&cThere is no stat variable service available.")
     }
 
 }

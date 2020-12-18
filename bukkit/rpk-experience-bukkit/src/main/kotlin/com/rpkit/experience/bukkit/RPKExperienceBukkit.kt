@@ -31,6 +31,7 @@ import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import com.rpkit.experience.bukkit.experience.RPKExperienceServiceImpl
 import com.rpkit.experience.bukkit.listener.PlayerExpChangeListener
 import com.rpkit.experience.bukkit.listener.PlayerJoinListener
+import com.rpkit.experience.bukkit.messages.ExperienceMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -39,12 +40,16 @@ import java.io.File
 class RPKExperienceBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: ExperienceMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.experience.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 4393)
         saveDefaultConfig()
+
+        messages = ExperienceMessages(this)
+        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
@@ -94,39 +99,17 @@ class RPKExperienceBukkit : RPKBukkitPlugin() {
             service.characterCardFields.add(ExperienceField(this))
             service.characterCardFields.add(LevelField(this))
         }
+
+        registerListeners()
+        registerCommands()
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(PlayerExpChangeListener(), PlayerJoinListener())
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("experience")?.setExecutor(ExperienceCommand(this))
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("experience-usage", "&cUsage: /experience [add|set]")
-        messages.setDefault("experience-set-usage", "&cUsage: /experience set [player] [value]")
-        messages.setDefault("experience-set-experience-invalid-number", "&cYou must specify a number for the amount of experience to set.")
-        messages.setDefault("experience-set-player-invalid-player", "&cNo player by that name is online.")
-        messages.setDefault("experience-set-valid", "&aExperience set.")
-        messages.setDefault("experience-setlevel-usage", "&cUsage: /experience setlevel [player] [value]")
-        messages.setDefault("experience-setlevel-level-invalid-number", "&cYou must specify a number for the level to set.")
-        messages.setDefault("experience-setlevel-player-invalid-player", "&cNo player by that name is online.")
-        messages.setDefault("experience-setlevel-valid", "&aLevel set.")
-        messages.setDefault("experience-add-usage", "&cUsage: /experience add [player] [value]")
-        messages.setDefault("experience-add-experience-invalid-number", "&cYou must specify a number for the amount of experience to add.")
-        messages.setDefault("experience-add-experience-invalid-negative", "&cYou may not add negative experience.")
-        messages.setDefault("experience-add-player-invalid-player", "&cNo player by that name is online.")
-        messages.setDefault("experience-add-valid", "&aExperience added.")
-        messages.setDefault("no-character-other", "&cThat player does not currently have a character.")
-        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("no-permission-experience-set", "&cYou do not have permission to set experience.")
-        messages.setDefault("no-permission-experience-setlevel", "&cYou do not have permission to set level.")
-        messages.setDefault("no-permission-experience-add", "&cYou do not have permission to add experience.")
-        messages.setDefault("no-experience-service", "&cThere is no experience service available.")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
-        messages.setDefault("no-character-service", "&cThere is no character service available.")
     }
 
 }

@@ -19,8 +19,8 @@ package com.rpkit.characters.bukkit.command.character.list
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -64,7 +64,7 @@ class CharacterListCommand(private val plugin: RPKCharactersBukkit) : CommandExe
         sender.sendMessage(plugin.messages["character-list-title"])
         for (character in characterService.getCharacters(profile)) {
             sender.sendMessage(plugin.messages["character-list-item", mapOf(
-                    Pair("character", character.name)
+                "character" to character.name
             )])
         }
         return true

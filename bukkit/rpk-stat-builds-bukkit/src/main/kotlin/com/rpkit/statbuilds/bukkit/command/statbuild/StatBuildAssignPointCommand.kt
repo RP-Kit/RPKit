@@ -94,10 +94,10 @@ class StatBuildAssignPointCommand(private val plugin: RPKStatBuildsBukkit) : Com
         statBuildService.setStatPoints(character, statAttribute, statBuildService.getStatPoints(character, statAttribute) + points)
         sender.sendMessage(plugin.messages["stat-build-assign-point-valid", mapOf(
                 "character" to character.name,
-                "stat-attribute" to statAttribute.name,
+                "stat_attribute" to statAttribute.name,
                 "points" to points.toString(),
-                "total-points" to statBuildService.getStatPoints(character, statAttribute).toString(),
-                "max-points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
+                "total_points" to statBuildService.getStatPoints(character, statAttribute).toString(),
+                "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
         )])
         return true
     }

@@ -75,7 +75,7 @@ class ChatGroupLeaveCommand(private val plugin: RPKChatBukkit) : CommandExecutor
             chatGroupService.removeChatGroup(chatGroup)
         }
         sender.sendMessage(plugin.messages["chat-group-leave-valid", mapOf(
-                Pair("group", chatGroup.name)
+            "group" to chatGroup.name
         )])
         return true
     }

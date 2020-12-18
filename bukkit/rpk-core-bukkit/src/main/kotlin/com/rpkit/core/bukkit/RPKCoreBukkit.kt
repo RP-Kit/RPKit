@@ -16,8 +16,6 @@
 
 package com.rpkit.core.bukkit
 
-import com.rpkit.core.bukkit.listener.PluginEnableListener
-import com.rpkit.core.bukkit.message.BukkitMessages
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.bukkit.service.BukkitServicesDelegate
 import com.rpkit.core.service.Services
@@ -34,24 +32,6 @@ class RPKCoreBukkit : RPKBukkitPlugin() {
         Metrics(this, 4371)
         Services.delegate = BukkitServicesDelegate()
         saveDefaultConfig()
-        registerCommands()
-        registerListeners()
-    }
-
-    override fun registerListeners() {
-        registerListeners(PluginEnableListener(this))
-    }
-
-    /**
-     * Initializes an RPK plugin.
-     *
-     * @param rpkitBukkitPlugin The plugin to initialize
-     */
-    fun initializePlugin(rpkitBukkitPlugin: RPKBukkitPlugin) {
-        rpkitBukkitPlugin.messages = BukkitMessages(rpkitBukkitPlugin)
-        rpkitBukkitPlugin.setDefaultMessages()
-        rpkitBukkitPlugin.registerCommands()
-        rpkitBukkitPlugin.registerListeners()
     }
 
 }

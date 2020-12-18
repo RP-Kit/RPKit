@@ -78,7 +78,7 @@ class ClassSetCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
         }
         classService.setClass(character, `class`)
         sender.sendMessage(plugin.messages["class-set-valid", mapOf(
-                Pair("class", `class`.name)
+            "class" to `class`.name
         )])
         return true
     }

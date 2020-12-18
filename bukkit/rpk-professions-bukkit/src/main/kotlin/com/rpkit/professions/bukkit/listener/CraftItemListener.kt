@@ -61,8 +61,8 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit) : Listener {
                     .associateWith { profession -> professionService.getProfessionLevel(character, profession) }
             var amountCrafted = getAmountCrafted(event)
             val amount = professionLevels.entries
-                    .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.CRAFT, itemType, level) }
-                    .max() ?: plugin.config.getDouble("default.crafting.$itemType.amount", 1.0)
+                .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.CRAFT, itemType, level) }
+                .maxOrNull() ?: plugin.config.getDouble("default.crafting.$itemType.amount", 1.0)
             if (amount > 1) {
                 amountCrafted *= amount.roundToInt()
             } else if (amount < 1) {
@@ -130,11 +130,11 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit) : Listener {
                     event.whoClicked.sendMessage(plugin.messages["craft-experience", mapOf(
                             "profession" to profession.name,
                             "level" to level.toString(),
-                            "received-experience" to receivedExperience.toString(),
+                            "received_experience" to receivedExperience.toString(),
                             "experience" to (experience - profession.getExperienceNeededForLevel(level)).toString(),
-                            "next-level-experience" to (profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)).toString(),
-                            "total-experience" to experience.toString(),
-                            "total-next-level-experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
+                            "next_level_experience" to (profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)).toString(),
+                            "total_experience" to experience.toString(),
+                            "total_next_level_experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
                             "material" to itemType.toString().toLowerCase().replace('_', ' ')
                     )])
                 }

@@ -20,8 +20,8 @@ import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.removeGroup
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -73,8 +73,8 @@ class GroupRemoveCommand(private val plugin: RPKPermissionsBukkit) : CommandExec
         }
         profile.removeGroup(group)
         sender.sendMessage(plugin.messages["group-remove-valid", mapOf(
-                Pair("group", group.name),
-                Pair("player", minecraftProfile.minecraftUsername)
+            "group" to group.name,
+            "player" to minecraftProfile.minecraftUsername
         )])
         return true
     }

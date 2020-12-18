@@ -23,9 +23,9 @@ import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -238,7 +238,7 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
                             .getCharacters(context.getSessionData("profile") as RPKProfile)
                             .joinToString("\n") { character ->
                                 plugin.messages["money-set-character-prompt-list-item", mapOf(
-                                        Pair("character", character.name)
+                                    "character" to character.name
                                 )]
                             }
         }

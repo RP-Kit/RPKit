@@ -17,30 +17,28 @@
 package com.rpkit.rolling.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.rolling.bukkit.messages.RollingMessages
 import org.bstats.bukkit.Metrics
 
 
 class RPKRollingBukkit : RPKBukkitPlugin() {
+
+    lateinit var messages: RollingMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.rolling.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 4410)
         saveDefaultConfig()
+
+        messages = RollingMessages(this)
+        messages.saveDefaultMessagesConfig()
+
+        registerCommands()
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("roll")?.setExecutor(RollCommand(this))
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("roll", "&f\$character/\$player rolled &7\$roll &ffrom &7\$dice")
-        messages.setDefault("roll-invalid-parse", "&cFailed to parse your roll.")
-        messages.setDefault("roll-usage", "&cUsage: /roll [roll]")
-        messages.setDefault("not-from-console", "&cYou must be a player to perform that command.")
-        messages.setDefault("no-character", "&cYou must have a character to perform that command.")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
-        messages.setDefault("no-character-service", "&cThere is no character service available.")
     }
 
 }

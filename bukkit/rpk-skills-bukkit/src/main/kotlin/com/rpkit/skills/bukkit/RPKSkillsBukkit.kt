@@ -28,6 +28,7 @@ import com.rpkit.skills.bukkit.command.UnbindSkillCommand
 import com.rpkit.skills.bukkit.database.table.RPKSkillBindingTable
 import com.rpkit.skills.bukkit.database.table.RPKSkillCooldownTable
 import com.rpkit.skills.bukkit.listener.PlayerInteractListener
+import com.rpkit.skills.bukkit.messages.SkillsMessages
 import com.rpkit.skills.bukkit.skills.RPKSkillService
 import com.rpkit.skills.bukkit.skills.RPKSkillServiceImpl
 import com.rpkit.skills.bukkit.skills.RPKSkillTypeService
@@ -40,12 +41,16 @@ import java.io.File
 class RPKSkillsBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: SkillsMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.skills.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 4417)
         saveDefaultConfig()
+
+        messages = SkillsMessages(this)
+        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
@@ -93,44 +98,21 @@ class RPKSkillsBukkit : RPKBukkitPlugin() {
 
         Services[RPKSkillTypeService::class.java] = RPKSkillTypeServiceImpl(this)
         Services[RPKSkillService::class.java] = RPKSkillServiceImpl(this)
+
+        registerCommands()
+        registerListeners()
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("skill")?.setExecutor(SkillCommand(this))
         getCommand("bindskill")?.setExecutor(BindSkillCommand(this))
         getCommand("unbindskill")?.setExecutor(UnbindSkillCommand(this))
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
                 PlayerInteractListener(this)
         )
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("skill-valid", "&aUsed \$skill.")
-        messages.setDefault("skill-invalid-on-cooldown", "&c\$skill is on cooldown for \$cooldown seconds.")
-        messages.setDefault("skill-invalid-not-enough-mana", "&c\$skill requires \$mana-cost mana, you have \$mana/\$max-mana")
-        messages.setDefault("skill-invalid-unmet-prerequisites", "&cYou do not meet the prerequisites for \$skill.")
-        messages.setDefault("skill-invalid-skill", "&cThere is no skill by that name.")
-        messages.setDefault("skill-list-title", "&fSkills: ")
-        messages.setDefault("skill-list-item", "&f- &7\$skill")
-        messages.setDefault("bind-skill-usage", "&cUsage: /bindskill [skill]")
-        messages.setDefault("bind-skill-invalid-skill", "&cInvalid skill.")
-        messages.setDefault("bind-skill-invalid-binding-already-exists", "&cA binding already exists for that item.")
-        messages.setDefault("bind-skill-valid", "&aBound \$skill to \$item.")
-        messages.setDefault("unbind-skill-invalid-no-binding", "&cNo skill was bound to that item.")
-        messages.setDefault("unbind-skill-valid", "&aUnbound \$skill from \$item.")
-        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("no-character", "&cYou need a character to perform that command.")
-        messages.setDefault("not-from-console", "&cYou must be a player to perform that command.")
-        messages.setDefault("no-permission-skill", "&cYou do not have permission to use skills.")
-        messages.setDefault("no-permission-bind-skill", "&cYou do not have permission to bind skills.")
-        messages.setDefault("no-permission-unbind-skill", "&cYou do not have permission to unbind skills.")
-        messages.setDefault("no-skill-service", "&cThere is no skill service available.")
-        messages.setDefault("no-minecraft-profile-service", "&cThere is no Minecraft profile service available.")
-        messages.setDefault("no-character-service", "&cThere is no character service available.")
-        messages.setDefault("no-skill-service", "&cThere is no skill service available.")
     }
 
 }

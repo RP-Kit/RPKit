@@ -19,12 +19,17 @@ package com.rpkit.characters.bukkit.command.character.delete
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.BooleanPrompt
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.ValidatingPrompt
 import org.bukkit.entity.Player
 
 /**
@@ -218,7 +223,8 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit) : CommandE
             for (character in characterService.getCharacters(profile)) {
                 characterListBuilder.append("\n").append(
                         plugin.messages["character-list-item", mapOf(
-                                Pair("character", character.name))]
+                            "character" to character.name
+                        )]
                 )
             }
             return plugin.messages["character-delete-prompt"] + characterListBuilder.toString()

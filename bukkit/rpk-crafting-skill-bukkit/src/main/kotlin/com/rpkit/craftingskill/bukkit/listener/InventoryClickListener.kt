@@ -69,16 +69,16 @@ class InventoryClickListener(private val plugin: RPKCraftingSkillBukkit) : Liste
         }
         event.currentItem = item
         val maxExperience = plugin.config.getConfigurationSection("smelting.$material")
-                ?.getKeys(false)
-                ?.map(String::toInt)
-                ?.max()
-                ?: 0
+            ?.getKeys(false)
+            ?.map(String::toInt)
+            ?.maxOrNull()
+            ?: 0
         if (maxExperience != 0 && craftingSkill < maxExperience) {
             val totalExperience = min(craftingSkill + item.amount, maxExperience)
             craftingSkillService.setCraftingExperience(character, RPKCraftingAction.SMELT, item.type, totalExperience)
             event.whoClicked.sendMessage(plugin.messages["smelt-experience", mapOf(
-                    Pair("total-experience", totalExperience.toString()),
-                    Pair("received-experience", item.amount.toString())
+                "total_experience" to totalExperience.toString(),
+                "received_experience" to item.amount.toString()
             )])
         }
     }

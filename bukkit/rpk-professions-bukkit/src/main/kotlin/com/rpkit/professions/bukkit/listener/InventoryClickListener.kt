@@ -57,10 +57,10 @@ class InventoryClickListener(private val plugin: RPKProfessionsBukkit) : Listene
                 .associateWith { profession -> professionService.getProfessionLevel(character, profession) }
         val potentialQualities = professionLevels.entries
                 .mapNotNull { (profession, level) -> profession.getQualityFor(RPKCraftingAction.SMELT, material, level) }
-        val quality = potentialQualities.maxBy(RPKItemQuality::durabilityModifier)
+        val quality = potentialQualities.maxByOrNull(RPKItemQuality::durabilityModifier)
         val amount = professionLevels.entries
-                .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.SMELT, material, level) }
-                .max() ?: plugin.config.getDouble("default.smelting.$material.amount", 1.0) * item.amount
+            .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.SMELT, material, level) }
+            .maxOrNull() ?: plugin.config.getDouble("default.smelting.$material.amount", 1.0) * item.amount
         if (quality != null) {
             item.addLore(quality.lore)
         }
@@ -85,11 +85,11 @@ class InventoryClickListener(private val plugin: RPKProfessionsBukkit) : Listene
                 event.whoClicked.sendMessage(plugin.messages["smelt-experience", mapOf(
                         "profession" to profession.name,
                         "level" to level.toString(),
-                        "received-experience" to receivedExperience.toString(),
+                        "received_experience" to receivedExperience.toString(),
                         "experience" to (experience - profession.getExperienceNeededForLevel(level)).toString(),
-                        "next-level-experience" to (profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)).toString(),
-                        "total-experience" to experience.toString(),
-                        "total-next-level-experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
+                        "next_level_experience" to (profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)).toString(),
+                        "total_experience" to experience.toString(),
+                        "total_next_level_experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
                         "material" to material.toString().toLowerCase().replace('_', ' ')
                 )])
             }

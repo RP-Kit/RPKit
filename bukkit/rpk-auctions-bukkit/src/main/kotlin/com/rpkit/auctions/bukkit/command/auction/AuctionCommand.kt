@@ -36,10 +36,10 @@ class AuctionCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
             if (args[0].equals("create", ignoreCase = true) || args[0].equals("new", ignoreCase = true)) {
                 return auctionCreateCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.messages["auction-usage"])
+                sender.sendMessage(plugin.messages.auctionUsage)
             }
         } else {
-            sender.sendMessage(plugin.messages["auction-usage"])
+            sender.sendMessage(plugin.messages.auctionUsage)
         }
         return true
     }

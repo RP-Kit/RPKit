@@ -62,13 +62,13 @@ class ChatChannelCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
         }
         if (!sender.hasPermission("rpkit.chat.command.chatchannel.${chatChannel.name}")) {
             sender.sendMessage(plugin.messages["no-permission-chatchannel", mapOf(
-                    Pair("channel", chatChannel.name)
+                "channel" to chatChannel.name
             )])
             return true
         }
         chatChannel.addSpeaker(minecraftProfile)
         sender.sendMessage(plugin.messages["chatchannel-valid", mapOf(
-                Pair("channel", chatChannel.name)
+            "channel" to chatChannel.name
         )])
         return true
     }

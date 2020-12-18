@@ -42,7 +42,7 @@ class RaceListCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor
         sender.sendMessage(plugin.messages["race-list-title"])
         for (race in raceService.races) {
             sender.sendMessage(plugin.messages["race-list-item", mapOf(
-                    Pair("race", race.name)
+                "race" to race.name
             )])
         }
         return true

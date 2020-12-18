@@ -1,0 +1,7 @@
+unconscious-command-blocked: '&cYou are not permitted to use that command while unconscious.'
+wake-success: '&aWoke ${character}.'
+wake-already-awake: '&c${character} is already awake.'
+no-permission-wake: '&cYou do not have permission to wake people up.'
+no-character-other: '&c${player} does not have an active character.'
+no-minecraft-profile-other: '&c${player} does not have a Minecraft profile.'
+no-minecraft-profile-service: '&cThere is no Minecraft profile service available.'

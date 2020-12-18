@@ -17,8 +17,8 @@
 package com.rpkit.store.bukkit.command
 
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.purchase.RPKConsumablePurchaseImpl
 import com.rpkit.store.bukkit.purchase.RPKPermanentPurchaseImpl
@@ -60,17 +60,17 @@ class PurchaseCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-other", mapOf(
-                    Pair("name", bukkitOfflinePlayer.name ?: ""),
-                    Pair("uuid", bukkitOfflinePlayer.uniqueId.toString())
+                "name" to (bukkitOfflinePlayer.name ?: ""),
+                "uuid" to bukkitOfflinePlayer.uniqueId.toString()
             )])
             return true
         }
         val profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
             sender.sendMessage(plugin.messages["no-profile-other", mapOf(
-                    Pair("name", minecraftProfile.minecraftUsername),
-                    Pair("uuid", minecraftProfile.minecraftUUID.toString()),
-                    Pair("minecraft-profile-id", minecraftProfile.id.toString())
+                "name" to minecraftProfile.minecraftUsername,
+                "uuid" to minecraftProfile.minecraftUUID.toString(),
+                "minecraft_profile_id" to minecraftProfile.id.toString()
             )])
             return true
         }
@@ -119,15 +119,15 @@ class PurchaseCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
         }
         purchaseService.addPurchase(purchase)
         sender.sendMessage(plugin.messages["purchase-successful", mapOf(
-                Pair("player-name", bukkitOfflinePlayer.name ?: ""),
-                Pair("player-uuid", bukkitOfflinePlayer.uniqueId.toString()),
-                Pair("profile-id", profile.id.toString()),
-                Pair("profile-name", profile.name),
-                Pair("store-item-identifier", storeItem.identifier), // order is important
-                Pair("store-item-id", storeItemId.toString()),
-                Pair("store-item-description", storeItem.description),
-                Pair("store-item-plugin", storeItem.plugin),
-                Pair("store-item-cost", String.format("%.02f", storeItem.cost / 100.0) + plugin.config.getString("payments.currency"))
+            "player_name" to (bukkitOfflinePlayer.name ?: ""),
+            "player_uuid" to bukkitOfflinePlayer.uniqueId.toString(),
+            "profile_id" to profile.id.toString(),
+            "profile_name" to profile.name,
+            "store_item_identifier" to storeItem.identifier, // order is important
+            "store_item_id" to storeItemId.toString(),
+            "store_item_description" to storeItem.description,
+            "store_item_plugin" to storeItem.plugin,
+            "store_item_cost" to String.format("%.02f", storeItem.cost / 100.0) + plugin.config.getString("payments.currency")
         )])
         return true
     }

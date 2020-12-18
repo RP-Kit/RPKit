@@ -20,8 +20,8 @@ import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.warning.RPKWarningImpl
 import com.rpkit.moderation.bukkit.warning.RPKWarningService
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -83,18 +83,18 @@ class WarningCreateCommand(private val plugin: RPKModerationBukkit) : CommandExe
         val warning = RPKWarningImpl(warningReason, targetProfile, issuerProfile)
         warningService.addWarning(warning)
         sender.sendMessage(plugin.messages["warning-create-valid", mapOf(
-                Pair("reason", warningReason),
-                Pair("issuer", issuerProfile.name),
-                Pair("profile", targetProfile.name),
-                Pair("time", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time)),
-                Pair("index", warningService.getWarnings(targetProfile).size.toString())
+            "reason" to warningReason,
+            "issuer" to issuerProfile.name,
+            "profile" to targetProfile.name,
+            "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time),
+            "index" to warningService.getWarnings(targetProfile).size.toString()
         )])
         targetPlayer.sendMessage(plugin.messages["warning-received", mapOf(
-                Pair("reason", warningReason),
-                Pair("issuer", issuerProfile.name),
-                Pair("profile", targetProfile.name),
-                Pair("time", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time)),
-                Pair("index", warningService.getWarnings(targetProfile).size.toString())
+            "reason" to warningReason,
+            "issuer" to issuerProfile.name,
+            "profile" to targetProfile.name,
+            "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time),
+            "index" to warningService.getWarnings(targetProfile).size.toString()
         )])
         return true
     }

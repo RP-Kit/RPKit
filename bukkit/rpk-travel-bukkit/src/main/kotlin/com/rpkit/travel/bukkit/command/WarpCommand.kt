@@ -91,7 +91,7 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             }
             for (message in warpMessages) {
                 sender.sendMessage(plugin.messages["warp-list-item", mapOf(
-                        Pair("warps", message)
+                    "warps" to message
                 )])
             }
         }

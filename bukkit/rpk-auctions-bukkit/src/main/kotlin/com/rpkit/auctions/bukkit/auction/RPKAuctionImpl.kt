@@ -53,7 +53,7 @@ class RPKAuctionImpl(
 
     override fun addBid(bid: RPKBid): Boolean {
         if (!isBiddingOpen) return false
-        val highestCurrentBid = bids.maxBy(RPKBid::amount)
+        val highestCurrentBid = bids.maxByOrNull(RPKBid::amount)
         if ((highestCurrentBid == null && bid.amount >= startPrice + minimumBidIncrement) || (highestCurrentBid != null && bid.amount >= highestCurrentBid.amount + minimumBidIncrement)) {
             val bidService = Services[RPKBidService::class.java] ?: return false
             if (!bidService.addBid(bid)) {
@@ -86,7 +86,7 @@ class RPKAuctionImpl(
             val event = RPKBukkitAuctionBiddingCloseEvent(this)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
-            val highestBid = bids.maxBy(RPKBid::amount)
+            val highestBid = bids.maxByOrNull(RPKBid::amount)
             if (highestBid != null) {
                 if (highestBid.amount > noSellPrice ?: 0) {
                     val character = highestBid.character
@@ -101,12 +101,11 @@ class RPKAuctionImpl(
                                 val characterService = Services[RPKCharacterService::class.java]
                                 if (characterService != null) {
                                     if (characterService.getActiveCharacter(minecraftProfile) == character) {
-                                        bukkitPlayer.player?.sendMessage(plugin.messages["auction-item-received", mapOf(
-                                                Pair("amount", item.amount.toString()),
-                                                Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
-                                                Pair("character", this.character.name),
-                                                Pair("auction_id", id.toString())
-                                        )])
+                                        bukkitPlayer.player?.sendMessage(plugin.messages.auctionItemReceived.withParameters(
+                                            amount = item.amount,
+                                            itemType = item.type,
+                                            auctionId = id ?: -1
+                                        ))
                                     }
                                 }
                             }
@@ -129,12 +128,11 @@ class RPKAuctionImpl(
             val characterService = Services[RPKCharacterService::class.java]
             if (characterService != null) {
                 if (characterService.getActiveCharacter(minecraftProfile) == character) {
-                    minecraftProfile.sendMessage(plugin.messages["auction-item-received", mapOf(
-                            Pair("amount", item.amount.toString()),
-                            Pair("item", item.type.toString().toLowerCase().replace("_", "") + if (item.amount != 1) "s" else ""),
-                            Pair("character", this.character.name),
-                            Pair("auction_id", id.toString())
-                    )])
+                    minecraftProfile.sendMessage(plugin.messages.auctionItemReceived.withParameters(
+                        amount = item.amount,
+                        itemType = item.type,
+                        auctionId = id ?: -1
+                    ))
                 }
             }
         }
@@ -163,19 +161,13 @@ class RPKAuctionImpl(
                 val inventoryContentsMutable = character.inventoryContents.toMutableList()
                 inventoryContentsMutable.add(item)
                 character.inventoryContents = inventoryContentsMutable.toTypedArray()
-                val characterService = Services[RPKCharacterService::class.java]
-                if (characterService != null) {
-                    characterService.updateCharacter(character)
-                }
+                Services[RPKCharacterService::class.java]?.updateCharacter(character)
             }
         } else {
             val inventoryContentsMutable = character.inventoryContents.toMutableList()
             inventoryContentsMutable.add(item)
             character.inventoryContents = inventoryContentsMutable.toTypedArray()
-            val characterService = Services[RPKCharacterService::class.java]
-            if (characterService != null) {
-                characterService.updateCharacter(character)
-            }
+            Services[RPKCharacterService::class.java]?.updateCharacter(character)
         }
     }
 

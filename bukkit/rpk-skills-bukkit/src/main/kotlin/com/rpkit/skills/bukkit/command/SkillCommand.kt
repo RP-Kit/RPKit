@@ -86,25 +86,25 @@ class SkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor {
                         character.mana -= skill.manaCost
                         characterService.updateCharacter(character)
                         sender.sendMessage(plugin.messages["skill-valid", mapOf(
-                                Pair("skill", skill.name)
+                            "skill" to skill.name
                         )])
                     } else {
                         sender.sendMessage(plugin.messages["skill-invalid-on-cooldown", mapOf(
-                                Pair("skill", skill.name),
-                                Pair("cooldown", skillService.getSkillCooldown(character, skill).toString())
+                            "skill" to skill.name,
+                            "cooldown" to skillService.getSkillCooldown(character, skill).toString()
                         )])
                     }
                 } else {
                     sender.sendMessage(plugin.messages["skill-invalid-not-enough-mana", mapOf(
-                            Pair("skill", skill.name),
-                            Pair("mana-cost", skill.manaCost.toString()),
-                            Pair("mana", character.mana.toString()),
-                            Pair("max-mana", character.maxMana.toString())
+                        "skill" to skill.name,
+                        "mana_cost" to skill.manaCost.toString(),
+                        "mana" to character.mana.toString(),
+                        "max_mana" to character.maxMana.toString()
                     )])
                 }
             } else {
                 sender.sendMessage(plugin.messages["skill-invalid-unmet-prerequisites", mapOf(
-                        Pair("skill", skill.name)
+                    "skill" to skill.name
                 )])
             }
         } else {

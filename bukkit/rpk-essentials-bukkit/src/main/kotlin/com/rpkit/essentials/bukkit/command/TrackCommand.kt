@@ -74,7 +74,7 @@ class TrackCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
         if (!trackingService.isTrackable(character)) {
             sender.sendMessage(plugin.messages["track-invalid-untrackable"])
             bukkitPlayer.sendMessage(plugin.messages["track-untrackable-notification", mapOf(
-                    Pair("player", sender.name)
+                "player" to sender.name
             )])
             return true
         }

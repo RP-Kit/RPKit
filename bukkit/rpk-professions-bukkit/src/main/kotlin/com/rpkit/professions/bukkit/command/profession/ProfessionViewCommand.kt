@@ -109,10 +109,10 @@ class ProfessionViewCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor 
             sender.sendMessage(plugin.messages["profession-view-valid-item", mapOf(
                     "profession" to profession.name,
                     "level" to level.toString(),
-                    "total-experience" to professionService.getProfessionExperience(character, profession).toString(),
-                    "total-next-level-experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
+                    "total_experience" to professionService.getProfessionExperience(character, profession).toString(),
+                    "total_next_level_experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
                     "experience" to experienceSinceLastLevel.toString(),
-                    "next-level-experience" to experienceNeededForNextLevel.toString()
+                    "next_level_experience" to experienceNeededForNextLevel.toString()
             )])
         }
         return true

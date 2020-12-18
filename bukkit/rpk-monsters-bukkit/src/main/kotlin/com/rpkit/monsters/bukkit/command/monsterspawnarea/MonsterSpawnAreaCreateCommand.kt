@@ -67,12 +67,12 @@ class MonsterSpawnAreaCreateCommand(private val plugin: RPKMonstersBukkit) : Com
         ))
         sender.sendMessage(plugin.messages["monster-spawn-area-create-valid", mapOf(
                 "world" to selection.minimumPoint.world.name,
-                "min-x" to selection.minimumPoint.x.toString(),
-                "min-y" to selection.minimumPoint.y.toString(),
-                "min-z" to selection.minimumPoint.z.toString(),
-                "max-x" to selection.maximumPoint.x.toString(),
-                "max-y" to selection.maximumPoint.y.toString(),
-                "max-z" to selection.maximumPoint.z.toString()
+                "min_x" to selection.minimumPoint.x.toString(),
+                "min_y" to selection.minimumPoint.y.toString(),
+                "min_z" to selection.minimumPoint.z.toString(),
+                "max_x" to selection.maximumPoint.x.toString(),
+                "max_y" to selection.maximumPoint.y.toString(),
+                "max_z" to selection.maximumPoint.z.toString()
         )])
         return true
     }

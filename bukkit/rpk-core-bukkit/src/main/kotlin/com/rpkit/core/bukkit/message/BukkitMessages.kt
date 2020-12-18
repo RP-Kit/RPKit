@@ -18,6 +18,7 @@ package com.rpkit.core.bukkit.message
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.message.Messages
+import com.rpkit.core.message.ParameterizedMessage
 import org.bukkit.ChatColor
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
@@ -26,14 +27,13 @@ import java.io.IOException
 import java.util.logging.Level.SEVERE
 
 
-class BukkitMessages(private val plugin: RPKBukkitPlugin) : Messages {
+open class BukkitMessages(private val plugin: RPKBukkitPlugin) : Messages {
 
     private val messagesConfigFile = File(plugin.dataFolder, "messages.yml")
-    val messagesConfig: FileConfiguration
+    private val messagesConfig: FileConfiguration
 
     init {
-        val finalMessagesConfig = YamlConfiguration.loadConfiguration(messagesConfigFile)
-        messagesConfig = finalMessagesConfig
+        messagesConfig = YamlConfiguration.loadConfiguration(messagesConfigFile)
         saveDefaultMessagesConfig()
     }
 
@@ -72,6 +72,11 @@ class BukkitMessages(private val plugin: RPKBukkitPlugin) : Messages {
         return ChatColor.translateAlternateColorCodes('&', message)
     }
 
+    override fun getParameterized(key: String): ParameterizedMessage {
+        val message = messagesConfig.getString(key) ?: return ParameterizedMessage(key)
+        return ParameterizedMessage(ChatColor.translateAlternateColorCodes('&', message))
+    }
+
     override fun getList(key: String, vars: Map<String, String>): List<String> {
         return messagesConfig.getStringList(key).map { message ->
             var updatedMessage = message
@@ -84,6 +89,11 @@ class BukkitMessages(private val plugin: RPKBukkitPlugin) : Messages {
 
     override fun getList(key: String): List<String> {
         return messagesConfig.getStringList(key).map { ChatColor.translateAlternateColorCodes('&', it) }
+    }
+
+    override fun getParameterizedList(key: String): List<ParameterizedMessage> {
+        return messagesConfig.getStringList(key)
+            .map { ParameterizedMessage(ChatColor.translateAlternateColorCodes('&', it)) }
     }
 
     override fun set(key: String, value: String) {

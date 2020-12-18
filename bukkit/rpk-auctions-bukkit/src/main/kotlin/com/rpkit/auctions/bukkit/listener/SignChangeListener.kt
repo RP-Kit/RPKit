@@ -36,25 +36,25 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit) : Listener {
             event.setLine(0, "$GREEN[auction]")
             if (!event.player.hasPermission("rpkit.auctions.sign.auction")) {
                 event.block.breakNaturally()
-                event.player.sendMessage(plugin.messages["no-permission-auction-sign-create"])
+                event.player.sendMessage(plugin.messages.noPermissionAuctionSignCreate)
                 return
             }
             try {
                 val auctionService = Services[RPKAuctionService::class.java]
                 if (auctionService == null) {
-                    event.player.sendMessage(plugin.messages["no-auction-service"])
+                    event.player.sendMessage(plugin.messages.noAuctionService)
                     return
                 }
                 val auctionId = event.getLine(1)?.toInt()
                 if (auctionId == null) {
                     event.block.breakNaturally()
-                    event.player.sendMessage(plugin.messages["auction-sign-invalid-id-not-a-number"])
+                    event.player.sendMessage(plugin.messages.auctionSignInvalidIdNotANumber)
                     return
                 }
                 val auction = auctionService.getAuction(auctionId)
                 if (auction == null) {
                     event.block.breakNaturally()
-                    event.player.sendMessage(plugin.messages["auction-sign-invalid-auction-does-not-exist"])
+                    event.player.sendMessage(plugin.messages.auctionSignInvalidAuctionDoesNotExist)
                     return
                 } else {
                     event.setLine(2, auction.item.amount.toString() + " x " + auction.item.type.toString().toLowerCase().replace('_', ' '))
@@ -65,7 +65,7 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit) : Listener {
                 }
             } catch (exception: NumberFormatException) {
                 event.block.breakNaturally()
-                event.player.sendMessage(plugin.messages["auction-sign-invalid-id-not-a-number"])
+                event.player.sendMessage(plugin.messages.auctionSignInvalidIdNotANumber)
                 return
             }
         }

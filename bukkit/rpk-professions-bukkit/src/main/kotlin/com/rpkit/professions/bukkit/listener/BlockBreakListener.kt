@@ -71,11 +71,11 @@ class BlockBreakListener(private val plugin: RPKProfessionsBukkit) : Listener {
         for (item in event.block.getDrops(event.player.inventory.itemInMainHand)) {
             val material = item.type
             val amount = professionLevels.entries
-                    .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.MINE, material, level) }
-                    .max() ?: plugin.config.getDouble("default.mining.$material.amount", 1.0)
+                .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.MINE, material, level) }
+                .maxOrNull() ?: plugin.config.getDouble("default.mining.$material.amount", 1.0)
             val potentialQualities = professionLevels.entries
                     .mapNotNull { (profession, level) -> profession.getQualityFor(RPKCraftingAction.MINE, material, level) }
-            val quality = potentialQualities.maxBy(RPKItemQuality::durabilityModifier)
+            val quality = potentialQualities.maxByOrNull(RPKItemQuality::durabilityModifier)
             if (quality != null) {
                 item.addLore(quality.lore)
             }
@@ -100,11 +100,11 @@ class BlockBreakListener(private val plugin: RPKProfessionsBukkit) : Listener {
                     event.player.sendMessage(plugin.messages["mine-experience", mapOf(
                             "profession" to profession.name,
                             "level" to level.toString(),
-                            "received-experience" to receivedExperience.toString(),
+                            "received_experience" to receivedExperience.toString(),
                             "experience" to (experience - profession.getExperienceNeededForLevel(level)).toString(),
-                            "next-level-experience" to (profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)).toString(),
-                            "total-experience" to experience.toString(),
-                            "total-next-level-experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
+                            "next_level_experience" to (profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)).toString(),
+                            "total_experience" to experience.toString(),
+                            "total_next_level_experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
                             "material" to material.toString().toLowerCase().replace('_', ' ')
                     )])
                 }

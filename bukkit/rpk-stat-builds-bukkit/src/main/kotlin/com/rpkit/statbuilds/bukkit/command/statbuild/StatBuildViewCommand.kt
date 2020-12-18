@@ -75,9 +75,9 @@ class StatBuildViewCommand(private val plugin: RPKStatBuildsBukkit) : CommandExe
         )])
         statAttributeService.statAttributes.forEach { statAttribute ->
             sender.sendMessage(plugin.messages["stat-build-view-item", mapOf(
-                    "stat-attribute" to statAttribute.name,
+                    "stat_attribute" to statAttribute.name,
                     "points" to statBuildService.getStatPoints(character, statAttribute).toString(),
-                    "max-points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
+                    "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
             )])
         }
         return true

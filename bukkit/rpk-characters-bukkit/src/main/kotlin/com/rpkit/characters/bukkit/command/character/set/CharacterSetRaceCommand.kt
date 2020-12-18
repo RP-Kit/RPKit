@@ -24,7 +24,11 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.ValidatingPrompt
 import org.bukkit.entity.Player
 
 /**
@@ -133,7 +137,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             val raceListBuilder = StringBuilder()
             for (race in raceService.races) {
                 raceListBuilder.append(plugin.messages["race-list-item", mapOf(
-                        Pair("race", race.name)
+                    "race" to race.name
                 )]).append('\n')
             }
             return plugin.messages["character-set-race-prompt"] + "\n" + raceListBuilder.toString()

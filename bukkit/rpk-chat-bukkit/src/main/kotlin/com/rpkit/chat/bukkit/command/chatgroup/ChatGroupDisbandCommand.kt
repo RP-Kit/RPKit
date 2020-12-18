@@ -71,7 +71,7 @@ class ChatGroupDisbandCommand(private val plugin: RPKChatBukkit) : CommandExecut
         } else {
             for (minecraftProfile in chatGroup.members) {
                 minecraftProfile.sendMessage(plugin.messages["chat-group-disband-valid", mapOf(
-                        Pair("group", chatGroup.name)
+                    "group" to chatGroup.name
                 )])
             }
             chatGroupService.removeChatGroup(chatGroup)

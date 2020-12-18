@@ -42,23 +42,23 @@ class PlayerInteractListener(private val plugin: RPKSkillsBukkit) : Listener {
         val skill = skillService.getSkillBinding(character, item) ?: return
         if (!character.canUse(skill)) {
             event.player.sendMessage(plugin.messages["skill-invalid-unmet-prerequisites", mapOf(
-                    Pair("skill", skill.name)
+                "skill" to skill.name
             )])
             return
         }
         if (character.mana < skill.manaCost) {
             event.player.sendMessage(plugin.messages["skill-invalid-not-enough-mana", mapOf(
-                    Pair("skill", skill.name),
-                    Pair("mana-cost", skill.manaCost.toString()),
-                    Pair("mana", character.mana.toString()),
-                    Pair("max-mana", character.maxMana.toString())
+                "skill" to skill.name,
+                "mana_cost" to skill.manaCost.toString(),
+                "mana" to character.mana.toString(),
+                "max_mana" to character.maxMana.toString()
             )])
             return
         }
         if (skillService.getSkillCooldown(character, skill) > 0) {
             event.player.sendMessage(plugin.messages["skill-invalid-on-cooldown", mapOf(
-                    Pair("skill", skill.name),
-                    Pair("cooldown", skillService.getSkillCooldown(character, skill).toString())
+                "skill" to skill.name,
+                "cooldown" to skillService.getSkillCooldown(character, skill).toString()
             )])
             return
         }
@@ -67,7 +67,7 @@ class PlayerInteractListener(private val plugin: RPKSkillsBukkit) : Listener {
         character.mana -= skill.manaCost
         characterService.updateCharacter(character)
         event.player.sendMessage(plugin.messages["skill-valid", mapOf(
-                Pair("skill", skill.name)
+            "skill" to skill.name
         )])
     }
 
