@@ -30,11 +30,19 @@ class RPKMinecraftProfileImpl(
     override val isOnline: Boolean
         get() = Bukkit.getOfflinePlayer(minecraftUUID).isOnline
 
-    override val minecraftUsername: String
+    override val name: String
         get() = Bukkit.getOfflinePlayer(minecraftUUID).name ?: ""
 
     override fun sendMessage(message: String) {
         Bukkit.getPlayer(minecraftUUID)?.sendMessage(message)
+    }
+
+    override fun sendMessage(messages: Array<String>) {
+        Bukkit.getPlayer(minecraftUUID)?.sendMessage(messages)
+    }
+
+    override fun hasPermission(permission: String): Boolean {
+        return Bukkit.getPlayer(minecraftUUID)?.hasPermission(permission) == true
     }
 
     override fun sendMessage(vararg components: BaseComponent) {

@@ -17,6 +17,7 @@
 package com.rpkit.players.bukkit.listener
 
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKMinecraftProfileImpl
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -28,22 +29,29 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerLoginEvent
 
 
-class PlayerLoginListener : Listener {
+class PlayerLoginListener(private val plugin: RPKPlayersBukkit) : Listener {
 
     @EventHandler
     fun onPlayerLogin(event: PlayerLoginEvent) {
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val profileService = Services[RPKProfileService::class.java]
+        if (profileService == null) {
+            plugin.logger.warning("Profile service not found so could not create profiles for ${event.player.name}. Did the plugin enable correctly?")
+            return
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            plugin.logger.warning("Minecraft profile service not found so could not create profiles for ${event.player.name}. Did the plugin enable correctly?")
+            return
+        }
         var minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         if (minecraftProfile == null) { // Player hasn't logged in while profile generation is active
-            minecraftProfile = RPKMinecraftProfileImpl(
-                    profile = RPKThinProfileImpl(event.player.name),
-                    minecraftUUID = event.player.uniqueId
+            minecraftProfile = minecraftProfileService.createMinecraftProfile(
+                event.player.name,
+                profileService.createThinProfile(event.player.name)
             )
-            minecraftProfileService.addMinecraftProfile(minecraftProfile)
         } else if (minecraftProfileService.getMinecraftProfileLinkRequests(minecraftProfile).isNotEmpty()) { // Minecraft profile has a link request, so skip and let them know on join.
             return
         }
-        val profileService = Services[RPKProfileService::class.java] ?: return
         var profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
             profile = RPKProfileImpl(

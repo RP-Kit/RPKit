@@ -62,7 +62,6 @@ class RPKEconomyBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = EconomyMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

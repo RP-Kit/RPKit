@@ -16,50 +16,44 @@
 
 package com.rpkit.players.bukkit.command.profile
 
+import com.rpkit.core.command.RPKCommandExecutor
+import com.rpkit.core.command.sender.RPKCommandSender
+import com.rpkit.core.command.result.CommandResult
+import com.rpkit.core.command.result.CommandSuccess
+import com.rpkit.core.command.result.IncorrectUsageFailure
+import com.rpkit.core.command.result.MissingServiceFailure
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
+import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
-class ProfileSetPasswordCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+class ProfileSetPasswordCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
         if (args.isEmpty()) {
-            sender.sendMessage(plugin.messages["profile-set-password-usage"])
-            return true
+            sender.sendMessage(plugin.messages.profileSetPasswordUsage)
+            return IncorrectUsageFailure()
         }
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
-            return true
+        if (sender !is RPKMinecraftProfile) {
+            sender.sendMessage(plugin.messages.notFromConsole)
+            return NotAPlayerFailure()
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
-        if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
-            return true
-        }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
-            return true
-        }
-        val profile = minecraftProfile.profile
+        val profile = sender.profile
         if (profile !is RPKProfile) {
-            sender.sendMessage(plugin.messages["no-profile-self"])
-            return true
+            sender.sendMessage(plugin.messages.noProfileSelf)
+            return NoProfileSelfFailure()
         }
         val password = args.joinToString(" ")
         val profileService = Services[RPKProfileService::class.java]
         if (profileService == null) {
-            sender.sendMessage(plugin.messages["no-profile-service"])
-            return true
+            sender.sendMessage(plugin.messages.noProfileService)
+            return MissingServiceFailure(RPKProfileService::class.java)
         }
         profile.setPassword(password.toCharArray())
         profileService.updateProfile(profile)
-        sender.sendMessage(plugin.messages["profile-set-password-valid"])
-        return true
+        sender.sendMessage(plugin.messages.profileSetPasswordValid)
+        return CommandSuccess
     }
 }

@@ -57,7 +57,6 @@ class RPKPermissionsBukkit : RPKBukkitPlugin() {
         config.options().pathSeparator('/')
 
         messages = PermissionsMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

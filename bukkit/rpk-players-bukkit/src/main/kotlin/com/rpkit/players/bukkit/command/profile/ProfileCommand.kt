@@ -16,29 +16,36 @@
 
 package com.rpkit.players.bukkit.command.profile
 
+import com.rpkit.core.command.RPKCommandExecutor
+import com.rpkit.core.command.result.CommandResult
+import com.rpkit.core.command.result.IncorrectUsageFailure
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
 
 
-class ProfileCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
+class ProfileCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
 
     private val profileViewCommand = ProfileViewCommand(plugin)
     private val profileSetCommand = ProfileSetCommand(plugin)
+    private val profileLinkCommand = ProfileLinkCommand(plugin)
+    private val profileConfirmLinkCommand = ProfileConfirmLinkCommand(plugin)
+    private val profileDenyLinkCommand = ProfileDenyLinkCommand(plugin)
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
         if (args.isEmpty()) {
-            sender.sendMessage(plugin.messages["profile-usage"])
-            return true
+            sender.sendMessage(plugin.messages.profileUsage)
+            return IncorrectUsageFailure()
         }
         val newArgs = args.drop(1).toTypedArray()
         return when (args[0].toLowerCase()) {
-            "view" -> profileViewCommand.onCommand(sender, command, label, newArgs)
-            "set" -> profileSetCommand.onCommand(sender, command, label, newArgs)
+            "view" -> profileViewCommand.onCommand(sender, newArgs)
+            "set" -> profileSetCommand.onCommand(sender, newArgs)
+            "link" -> profileLinkCommand.onCommand(sender, newArgs)
+            "confirmlink" -> profileConfirmLinkCommand.onCommand(sender, newArgs)
+            "denylink" -> profileDenyLinkCommand.onCommand(sender, newArgs)
             else -> {
-                sender.sendMessage(plugin.messages["profile-usage"])
-                true
+                sender.sendMessage(plugin.messages.profileUsage)
+                IncorrectUsageFailure()
             }
         }
     }

@@ -16,28 +16,29 @@
 
 package com.rpkit.players.bukkit.command.profile
 
+import com.rpkit.core.command.RPKCommandExecutor
+import com.rpkit.core.command.result.CommandResult
+import com.rpkit.core.command.result.IncorrectUsageFailure
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
 
-class ProfileSetCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
+class ProfileSetCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
 
     private val profileSetNameCommand = ProfileSetNameCommand(plugin)
     private val profileSetPasswordCommand = ProfileSetPasswordCommand(plugin)
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
         if (args.isEmpty()) {
-            sender.sendMessage(plugin.messages["profile-set-usage"])
-            return true
+            sender.sendMessage(plugin.messages.profileSetUsage)
+            return IncorrectUsageFailure()
         }
         val newArgs = args.drop(1).toTypedArray()
         return when (args[0].toLowerCase()) {
-            "name" -> profileSetNameCommand.onCommand(sender, command, label, newArgs)
-            "password" -> profileSetPasswordCommand.onCommand(sender, command, label, newArgs)
+            "name" -> profileSetNameCommand.onCommand(sender, newArgs)
+            "password" -> profileSetPasswordCommand.onCommand(sender, newArgs)
             else -> {
-                sender.sendMessage(plugin.messages["profile-set-usage"])
-                true
+                sender.sendMessage(plugin.messages.profileSetUsage)
+                IncorrectUsageFailure()
             }
         }
     }

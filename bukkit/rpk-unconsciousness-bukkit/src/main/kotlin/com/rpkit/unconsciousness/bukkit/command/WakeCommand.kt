@@ -63,7 +63,7 @@ class WakeCommand(private val plugin: RPKUnconsciousnessBukkit) : CommandExecuto
         val character = characterService.getActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character-other", mapOf(
-                    "player" to minecraftProfile.minecraftUsername
+                    "player" to minecraftProfile.name
             )])
             return true
         }

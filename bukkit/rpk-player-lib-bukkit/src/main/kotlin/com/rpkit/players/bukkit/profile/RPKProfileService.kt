@@ -25,6 +25,8 @@ interface RPKProfileService : Service {
     fun addProfile(profile: RPKProfile)
     fun updateProfile(profile: RPKProfile)
     fun removeProfile(profile: RPKProfile)
+    fun createProfile(name: String, discriminator: Int = generateDiscriminatorFor(name), password: String? = null): RPKProfile
+    fun createThinProfile(name: String): RPKThinProfile
     fun generateDiscriminatorFor(name: String): Int
 
 }

@@ -16,21 +16,23 @@
 
 package com.rpkit.players.bukkit.profile.minecraft
 
+import com.rpkit.core.bukkit.command.sender.RPKBukkitCommandSender
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import net.md_5.bungee.api.chat.BaseComponent
 import java.util.*
 
 
-interface RPKMinecraftProfile {
+interface RPKMinecraftProfile : RPKBukkitCommandSender {
 
     var id: Int?
     var profile: RPKThinProfile
     val minecraftUUID: UUID
-    val minecraftUsername: String
+    override val name: String
     val isOnline: Boolean
 
-    fun sendMessage(message: String)
-
-    fun sendMessage(vararg components: BaseComponent)
+    override fun sendMessage(message: String)
+    override fun sendMessage(messages: Array<String>)
+    override fun sendMessage(vararg components: BaseComponent)
+    override fun hasPermission(permission: String): Boolean
 
 }

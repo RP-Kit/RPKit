@@ -114,8 +114,8 @@ class RPKCharacterImpl(
                 } else {
                     var fieldFound = false
                     characterCardFieldService.characterCardFields
-                            .filter { field -> line.length >= i + "\$${field.name}".length }
-                            .filter { field -> line.substring(i, i + "\$${field.name}".length) == "\$${field.name}" }
+                            .filter { field -> line.length >= i + "\${${field.name}}".length }
+                            .filter { field -> line.substring(i, i + "\${${field.name}}".length) == "\${${field.name}}" }
                             .forEach { field ->
                                 val textComponent = TextComponent(field.get(this))
                                 if (chatColor != null) {
@@ -129,14 +129,14 @@ class RPKCharacterImpl(
                                     textComponent.isItalic = chatFormat == ChatColor.ITALIC
                                 }
                                 messageComponents.add(textComponent)
-                                i += "\$${field.name}".length - 1
+                                i += "\${${field.name}}".length - 1
                                 fieldFound = true
                             }
                     if (!fieldFound) {
                         var editFound = false
                         characterCardFieldService.characterCardFields
-                                .filter { field -> line.length >= i + "\$edit(${field.name})".length }
-                                .filter { field -> line.substring(i, i + "\$edit(${field.name})".length) == "\$edit(${field.name})" }
+                                .filter { field -> line.length >= i + "\${edit(${field.name})}".length }
+                                .filter { field -> line.substring(i, i + "\${edit(${field.name})}".length) == "\${edit(${field.name})}" }
                                 .forEach { field ->
                                     if (minecraftProfile == this.minecraftProfile) {
                                         val editComponent = TextComponent("Edit")
@@ -154,14 +154,14 @@ class RPKCharacterImpl(
                                         }
                                         messageComponents.add(editComponent)
                                     }
-                                    i += "\$edit(${field.name})".length - 1
+                                    i += "\${edit(${field.name})}".length - 1
                                     editFound = true
                                 }
                         if (!editFound) {
                             var hideFound = false
                             characterCardFieldService.characterCardFields
-                                    .filter { field -> line.length >= i + "\$hide(${field.name})".length }
-                                    .filter { field -> line.substring(i, i + "\$hide(${field.name})".length) == "\$hide(${field.name})" }
+                                    .filter { field -> line.length >= i + "\${hide(${field.name})}".length }
+                                    .filter { field -> line.substring(i, i + "\${hide(${field.name})}".length) == "\${hide(${field.name})}" }
                                     .filterIsInstance<HideableCharacterCardField>()
                                     .forEach { field ->
                                         if (minecraftProfile == this.minecraftProfile) {
@@ -187,7 +187,7 @@ class RPKCharacterImpl(
                                                 messageComponents.last().isItalic = chatFormat == ChatColor.ITALIC
                                             }
                                         }
-                                        i += "\$hide(${field.name})".length - 1
+                                        i += "\${hide(${field.name})}".length - 1
                                         hideFound = true
                                     }
                             if (!hideFound) {

@@ -26,12 +26,18 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileLinkRequest
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.OfflinePlayer
+import java.util.*
 
 
 class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKMinecraftProfileService {
 
     override fun getMinecraftProfile(id: Int): RPKMinecraftProfile? {
         return plugin.database.getTable(RPKMinecraftProfileTable::class.java)[id]
+    }
+
+    override fun getMinecraftProfile(name: String): RPKMinecraftProfile? {
+        val bukkitPlayer = plugin.server.getOfflinePlayer(name)
+        return getMinecraftProfile(bukkitPlayer)
     }
 
     override fun getMinecraftProfile(player: OfflinePlayer): RPKMinecraftProfile? {
@@ -42,11 +48,35 @@ class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RP
         return plugin.database.getTable(RPKMinecraftProfileTable::class.java).get(profile)
     }
 
-    override fun addMinecraftProfile(profile: RPKMinecraftProfile) {
+    private fun addMinecraftProfile(profile: RPKMinecraftProfile) {
         val event = RPKBukkitMinecraftProfileCreateEvent(profile)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKMinecraftProfileTable::class.java).insert(event.minecraftProfile)
+    }
+
+    override fun createMinecraftProfile(minecraftUsername: String, profile: RPKThinProfile?): RPKMinecraftProfile {
+        val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftUsername)
+        val minecraftProfile = RPKMinecraftProfileImpl(
+            profile = profile ?: RPKThinProfileImpl(
+                bukkitPlayer.name ?: "Unknown Minecraft user"
+            ),
+            minecraftUUID = bukkitPlayer.uniqueId
+        )
+        addMinecraftProfile(minecraftProfile)
+        return minecraftProfile
+    }
+
+    override fun createMinecraftProfile(minecraftUUID: UUID, profile: RPKThinProfile?): RPKMinecraftProfile {
+        val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftUUID)
+        val minecraftProfile = RPKMinecraftProfileImpl(
+            profile = profile ?: RPKThinProfileImpl(
+                bukkitPlayer.name ?: "Unknown Minecraft user"
+            ),
+            minecraftUUID = minecraftUUID
+        )
+        addMinecraftProfile(minecraftProfile)
+        return minecraftProfile
     }
 
     override fun updateMinecraftProfile(profile: RPKMinecraftProfile) {
@@ -67,8 +97,17 @@ class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RP
         return plugin.database.getTable(RPKMinecraftProfileLinkRequestTable::class.java).get(minecraftProfile)
     }
 
-    override fun addMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest) {
+    private fun addMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest) {
         plugin.database.getTable(RPKMinecraftProfileLinkRequestTable::class.java).insert(minecraftProfileLinkRequest)
+    }
+
+    override fun createMinecraftProfileLinkRequest(
+        profile: RPKProfile,
+        minecraftProfile: RPKMinecraftProfile
+    ): RPKMinecraftProfileLinkRequest {
+        val linkRequest = RPKMinecraftProfileLinkRequestImpl(profile, minecraftProfile)
+        addMinecraftProfileLinkRequest(linkRequest)
+        return linkRequest
     }
 
     override fun removeMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest) {

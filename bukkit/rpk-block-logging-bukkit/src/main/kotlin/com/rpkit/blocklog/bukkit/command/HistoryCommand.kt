@@ -54,7 +54,7 @@ class HistoryCommand(private val plugin: RPKBlockLoggingBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["history-change", mapOf(
                 "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time),
                 "profile" to (change.profile?.name ?: "None"),
-                "minecraft_profile" to (change.minecraftProfile?.minecraftUsername ?: "None"),
+                "minecraft_profile" to (change.minecraftProfile?.name ?: "None"),
                 "character" to (change.character?.name ?: "None"),
                 "from" to change.from.toString().toLowerCase().replace('_', ' '),
                 "to" to change.to.toString().toLowerCase().replace('_', ' '),

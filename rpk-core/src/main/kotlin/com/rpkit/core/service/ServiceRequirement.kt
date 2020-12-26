@@ -16,9 +16,7 @@
 
 package com.rpkit.core.service
 
-import kotlin.reflect.KClass
-
-class ServiceRequirement<T: Service>(val type: KClass<T>) {
+class ServiceRequirement<T: Service>(val type: Class<T>) {
 
     fun whenAvailable(action: ServiceRequirementAction<T>): ServiceRequirement<T> {
         val service = Services[type]

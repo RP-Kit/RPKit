@@ -48,7 +48,6 @@ class RPKTravelBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = TravelMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

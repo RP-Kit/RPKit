@@ -45,7 +45,7 @@ class RPKWarningServiceImpl(override val plugin: RPKModerationBukkit) : RPKWarni
         // After adding warnings we want to execute any commands for that amount of warnings
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         for (minecraftProfile in minecraftProfileService.getMinecraftProfiles(event.warning.profile)) {
-            val command = plugin.config.getString("warnings.${warningTable.get(event.warning.profile).size}")?.replace("\$player", minecraftProfile.minecraftUsername)
+            val command = plugin.config.getString("warnings.${warningTable.get(event.warning.profile).size}")?.replace("\$player", minecraftProfile.name)
             if (command != null) {
                 plugin.server.dispatchCommand(plugin.server.consoleSender, command)
             }

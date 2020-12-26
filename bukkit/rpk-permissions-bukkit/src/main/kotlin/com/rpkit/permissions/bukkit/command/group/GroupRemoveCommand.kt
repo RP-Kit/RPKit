@@ -74,7 +74,7 @@ class GroupRemoveCommand(private val plugin: RPKPermissionsBukkit) : CommandExec
         profile.removeGroup(group)
         sender.sendMessage(plugin.messages["group-remove-valid", mapOf(
             "group" to group.name,
-            "player" to minecraftProfile.minecraftUsername
+            "player" to minecraftProfile.name
         )])
         return true
     }

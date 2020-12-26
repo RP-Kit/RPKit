@@ -58,7 +58,6 @@ class RPKLocksBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = LocksMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

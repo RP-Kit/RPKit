@@ -87,7 +87,6 @@ class RPKEssentialsBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = EssentialsMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

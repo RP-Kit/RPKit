@@ -94,7 +94,7 @@ class TrackCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             }
         sender.compassTarget = bukkitPlayer.location
         sender.sendMessage(plugin.messages["track-valid", mapOf(
-                "player" to minecraftProfile.minecraftUsername,
+                "player" to minecraftProfile.name,
                 "character" to if (character.isNameHidden) "[HIDDEN]" else character.name
         )])
         return true

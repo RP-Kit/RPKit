@@ -58,7 +58,7 @@ CREATE TABLE `rpkit_profile`
     `id`            int         NOT NULL AUTO_INCREMENT,
     `name`          varchar(16) NOT NULL,
     `discriminator` int         NOT NULL,
-    `password_hash` blob,
-    `password_salt` blob,
+    `password_hash` blob        NULL,
+    `password_salt` blob        NULL,
     PRIMARY KEY (`id`)
 );

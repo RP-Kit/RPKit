@@ -54,6 +54,16 @@ class RPKProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKProfileS
         plugin.database.getTable(RPKProfileTable::class.java).delete(event.profile)
     }
 
+    override fun createProfile(name: String, discriminator: Int, password: String?): RPKProfile {
+        val profile = RPKProfileImpl(name, discriminator, password)
+        addProfile(profile)
+        return profile
+    }
+
+    override fun createThinProfile(name: String): RPKThinProfile {
+        return RPKThinProfileImpl(name)
+    }
+
     override fun generateDiscriminatorFor(name: String): Int {
         return plugin.database.getTable(RPKProfileTable::class.java).generateDiscriminatorFor(name)
     }

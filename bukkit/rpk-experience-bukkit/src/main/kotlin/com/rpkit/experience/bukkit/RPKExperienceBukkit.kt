@@ -49,7 +49,6 @@ class RPKExperienceBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = ExperienceMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

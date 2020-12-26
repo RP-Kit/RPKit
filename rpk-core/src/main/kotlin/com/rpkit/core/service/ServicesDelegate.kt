@@ -16,8 +16,6 @@
 
 package com.rpkit.core.service
 
-import kotlin.reflect.KClass
-
 /**
  * Implemented by platforms to provide services.
  */
@@ -28,7 +26,7 @@ interface ServicesDelegate {
      * @param type The type of the service
      * @return The service
      */
-    operator fun <T: Service> get(type: KClass<T>): T?
-    operator fun <T: Service> set(type: KClass<T>, service: T)
+    operator fun <T: Service> get(type: Class<T>): T?
+    operator fun <T: Service> set(type: Class<T>, service: T)
 
 }

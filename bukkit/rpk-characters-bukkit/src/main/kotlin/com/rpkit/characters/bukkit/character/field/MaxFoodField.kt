@@ -23,7 +23,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
  */
 class MaxFoodField : CharacterCardField {
 
-    override val name = "max-food"
+    override val name = "max_food"
     override fun get(character: RPKCharacter): String {
         return 20.toString()
     }

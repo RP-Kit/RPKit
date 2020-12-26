@@ -47,23 +47,23 @@ payment-list-title: '&fPayment groups:'
 payment-list-item: '&f- &7${name} &f(&7${rank}&f)'
 payment-info-owner:
 - '&7${name} (&a&l${edit}(name)&7)'
-- '&7Owners: &f${owners}',
-- '&7Members: &f${members}',
-- '&7Invites: &f${invites}',
-- '&7Amount: &f${amount} &7(&a&l${edit}(amount)&7)',
-- '&7Currency: &f${currency} &7(&a&l${edit}(currency)&7)',
-- '&7Interval: &f${interval} &7(&a&l${edit}(interval)&7)',
-- '&7Last payment time: &f${last}-payment-time',
+- '&7Owners: &f${owners}'
+- '&7Members: &f${members}'
+- '&7Invites: &f${invites}'
+- '&7Amount: &f${amount} &7(&a&l${edit}(amount)&7)'
+- '&7Currency: &f${currency} &7(&a&l${edit}(currency)&7)'
+- '&7Interval: &f${interval} &7(&a&l${edit}(interval)&7)'
+- '&7Last payment time: &f${last}-payment-time'
 - '&7Balance: &f${balance}'
 payment-info-not-owner:
-- '&7$name',
-- '&7Owners: &f${owners}',
-- '&7Members: &f${members}',
-- '&7Invites: &f${invites}',
-- '&7Amount: &f${amount}',
-- '&7Currency: &f${currency}',
-- '&7Interval: &f${interval}',
-- '&7Last payment time: &f${last}-payment-time',
+- '&7$name'
+- '&7Owners: &f${owners}'
+- '&7Members: &f${members}'
+- '&7Invites: &f${invites}'
+- '&7Amount: &f${amount}'
+- '&7Currency: &f${currency}'
+- '&7Interval: &f${interval}'
+- '&7Last payment time: &f${last}-payment-time'
 - '&7Balance: &f${balance}'
 payment-info-invalid-group: '&cThere is no payment group by that name.'
 payment-info-usage: '&cUsage: /payment info [group]'

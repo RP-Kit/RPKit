@@ -54,7 +54,7 @@ class InventoryHistoryCommand(private val plugin: RPKBlockLoggingBukkit) : Comma
             sender.sendMessage(plugin.messages["inventory-history-change", mapOf(
                 "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time),
                 "profile" to (change.profile?.name ?: "None"),
-                "minecraft_profile" to (change.minecraftProfile?.minecraftUsername ?: "None"),
+                "minecraft_profile" to (change.minecraftProfile?.name ?: "None"),
                 "character" to (change.character?.name ?: "None"),
                 "from" to change.from.contentToString(),
                 "to" to change.to.contentToString(),

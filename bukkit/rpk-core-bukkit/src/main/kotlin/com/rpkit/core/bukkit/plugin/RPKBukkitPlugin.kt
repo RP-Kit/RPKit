@@ -16,6 +16,8 @@
 
 package com.rpkit.core.bukkit.plugin
 
+import com.rpkit.core.bukkit.command.RPKBukkitCommand
+import com.rpkit.core.command.RPKCommand
 import com.rpkit.core.plugin.RPKPlugin
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
@@ -26,6 +28,13 @@ import org.bukkit.plugin.java.JavaPlugin
  * servlets.
  */
 abstract class RPKBukkitPlugin : JavaPlugin(), RPKPlugin {
+
+    override fun getRPKCommand(name: String): RPKCommand {
+        val bukkitCommand = getCommand(name)
+        val rpkCommand = RPKBukkitCommand()
+        bukkitCommand?.setExecutor(rpkCommand)
+        return rpkCommand
+    }
 
     fun registerListeners(vararg listeners: Listener) {
         for (listener in listeners) {

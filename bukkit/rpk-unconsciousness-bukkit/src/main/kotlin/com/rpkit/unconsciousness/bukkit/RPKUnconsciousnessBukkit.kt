@@ -54,7 +54,6 @@ class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = UnconsciousnessMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

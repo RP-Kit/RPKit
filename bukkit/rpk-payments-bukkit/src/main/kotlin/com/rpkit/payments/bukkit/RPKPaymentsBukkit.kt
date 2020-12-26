@@ -53,7 +53,6 @@ class RPKPaymentsBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = PaymentsMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
