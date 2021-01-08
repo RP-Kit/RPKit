@@ -17,6 +17,7 @@
 package com.rpkit.players.bukkit
 
 import com.rpkit.core.bukkit.command.sender.resolver.RPKBukkitCommandSenderResolutionService
+import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
@@ -127,7 +128,7 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
     }
 
     private fun registerCommands() {
-        getRPKCommand("profile").executor = ProfileCommand(this)
+        getCommand("profile")?.setExecutor(ProfileCommand(this).toBukkit())
     }
 
     private fun registerListeners() {
