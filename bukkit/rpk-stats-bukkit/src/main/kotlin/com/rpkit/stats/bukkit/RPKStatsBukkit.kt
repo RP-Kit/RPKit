@@ -44,7 +44,6 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = StatsMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val statVariableService = RPKStatVariableServiceImpl(this)
         val statService = RPKStatServiceImpl(this)

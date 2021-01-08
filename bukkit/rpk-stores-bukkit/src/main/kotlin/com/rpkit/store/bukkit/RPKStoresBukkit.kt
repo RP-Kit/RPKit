@@ -55,7 +55,6 @@ class RPKStoresBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = StoresMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

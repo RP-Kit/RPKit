@@ -21,6 +21,7 @@ import com.rpkit.auctions.bukkit.auction.RPKAuction
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.bukkit.message.BukkitMessages
 import com.rpkit.core.message.ParameterizedMessage
+import com.rpkit.core.message.to
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import org.bukkit.Material
 

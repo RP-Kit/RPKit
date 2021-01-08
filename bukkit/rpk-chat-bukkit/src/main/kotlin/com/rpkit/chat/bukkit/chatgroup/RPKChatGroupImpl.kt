@@ -118,7 +118,7 @@ class RPKChatGroupImpl(
                 }
             }
             if (formattedMessage.contains("\$sender-player")) {
-                formattedMessage = formattedMessage.replace("\$sender-player", sender.minecraftUsername)
+                formattedMessage = formattedMessage.replace("\$sender-player", sender.name)
             }
             if (formattedMessage.contains("\$sender-character")) {
                 if (senderCharacter != null) {
@@ -126,7 +126,7 @@ class RPKChatGroupImpl(
                 }
             }
             if (formattedMessage.contains("\$receiver-player")) {
-                formattedMessage = formattedMessage.replace("\$receiver-player", receiver.minecraftUsername)
+                formattedMessage = formattedMessage.replace("\$receiver-player", receiver.name)
             }
             if (formattedMessage.contains("\$receiver-character")) {
                 if (receiverCharacter != null) {
@@ -135,7 +135,7 @@ class RPKChatGroupImpl(
             }
             if (formattedMessage.contains("\$group")) {
                 formattedMessage = if (name.startsWith("_pm_")) {
-                    formattedMessage.replace("\$group", sender.minecraftUsername + " -> " + members.first { member -> member.id != sender.id }.minecraftUsername)
+                    formattedMessage.replace("\$group", sender.name + " -> " + members.first { member -> member.id != sender.id }.name)
                 } else {
                     formattedMessage.replace("\$group", name)
                 }

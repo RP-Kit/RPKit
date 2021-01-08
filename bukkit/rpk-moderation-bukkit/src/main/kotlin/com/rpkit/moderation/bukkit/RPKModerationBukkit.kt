@@ -59,7 +59,6 @@ class RPKModerationBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = ModerationMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         Services[RPKTicketService::class.java] = RPKTicketServiceImpl(this)
         Services[RPKVanishService::class.java] = RPKVanishServiceImpl(this)

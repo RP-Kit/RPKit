@@ -53,6 +53,7 @@ CREATE TABLE `rpkit_profile`
 (
     `id`            integer primary key         NOT NULL,
     `name`          varchar(16) NOT NULL,
-    `password_hash` blob,
-    `password_salt` blob
+    `discriminator` int         NOT NULL,
+    `password_hash` blob        NULL,
+    `password_salt` blob        NULL
 );

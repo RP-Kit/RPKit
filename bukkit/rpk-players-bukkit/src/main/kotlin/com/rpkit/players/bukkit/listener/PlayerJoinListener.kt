@@ -41,14 +41,14 @@ class PlayerJoinListener(private val plugin: RPKPlayersBukkit) : Listener {
         val minecraftProfileLinkRequests = minecraftProfileService.getMinecraftProfileLinkRequests(minecraftProfile)
         if (minecraftProfileLinkRequests.isEmpty()) return
         minecraftProfileLinkRequests.forEach {
-            val messageComponent = TextComponent.fromLegacyText(plugin.messages["profile-link-request", mapOf(
-                    "profile" to it.profile.name
-            )])
-            val yesComponent = TextComponent(plugin.messages["yes"])
+            val messageComponent = TextComponent.fromLegacyText(
+                plugin.messages.profileLinkRequest.withParameters(profile = it.profile)
+            )
+            val yesComponent = TextComponent(plugin.messages.yes)
             yesComponent.color = GREEN
             yesComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/account confirmlink minecraft ${it.profile.id}")
             yesComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to link account to ${it.profile.name}"))
-            val noComponent = TextComponent(plugin.messages["no"])
+            val noComponent = TextComponent(plugin.messages.no)
             noComponent.color = RED
             noComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/account denylink minecraft ${it.profile.id}")
             noComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to cancel linking to ${it.profile.name}"))

@@ -68,7 +68,7 @@ class PurchaseCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
         val profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
             sender.sendMessage(plugin.messages["no-profile-other", mapOf(
-                "name" to minecraftProfile.minecraftUsername,
+                "name" to minecraftProfile.name,
                 "uuid" to minecraftProfile.minecraftUUID.toString(),
                 "minecraft_profile_id" to minecraftProfile.id.toString()
             )])

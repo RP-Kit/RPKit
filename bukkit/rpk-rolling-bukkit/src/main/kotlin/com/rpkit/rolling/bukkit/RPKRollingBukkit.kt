@@ -32,7 +32,6 @@ class RPKRollingBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = RollingMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         registerCommands()
     }

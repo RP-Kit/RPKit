@@ -35,7 +35,6 @@ class RPKTradeBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = TradeMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         registerListeners()
     }

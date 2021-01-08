@@ -19,32 +19,28 @@ package com.rpkit.stats.bukkit.stat.test
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.stats.bukkit.stat.RPKStatImpl
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
-import io.kotlintest.shouldBe
-import io.kotlintest.specs.WordSpec
+import io.kotest.core.spec.style.WordSpec
+import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 
 
-class RPKStatImplTests : WordSpec() {
+class RPKStatImplTests : WordSpec({
+    val character = mockk<RPKCharacter>()
+    val statVariables = listOf(object : RPKStatVariable {
+        override val name: String = "level"
 
-    init {
-        val character = mockk<RPKCharacter>()
-        val statVariables = listOf(object : RPKStatVariable {
-            override val name: String = "level"
+        override fun get(character: RPKCharacter): Double {
+            return 5.toDouble()
+        }
 
-            override fun get(character: RPKCharacter): Double {
-                return 5.toDouble()
-            }
-
-        })
-        val stat = RPKStatImpl(
-                "test",
-                "level*3"
-        )
-        "RPKStatImpl.get" should {
-            "successfully parse its script and return the correct value" {
-                stat.get(character, statVariables) shouldBe 15
-            }
+    })
+    val stat = RPKStatImpl(
+        "test",
+        "level*3"
+    )
+    "RPKStatImpl.get" should {
+        "successfully parse its script and return the correct value" {
+            stat.get(character, statVariables) shouldBe 15
         }
     }
-
-}
+})

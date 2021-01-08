@@ -16,20 +16,13 @@
 
 package com.rpkit.core.service
 
-import kotlin.reflect.KClass
-
 object Services {
 
     lateinit var delegate: ServicesDelegate
 
-    operator fun <T: Service> get(type: Class<T>) = delegate[type.kotlin]
-    internal operator fun <T: Service> get(type: KClass<T>) = delegate[type]
+    operator fun <T: Service> get(type: Class<T>) = delegate[type]
 
     operator fun <T: Service> set(type: Class<T>, service: T) {
-        set(type.kotlin, service)
-    }
-
-    internal operator fun <T: Service> set(type: KClass<T>, service: T) {
         delegate[type] = service
         val iterator = serviceReadyFunctions.iterator()
         while (iterator.hasNext()) {
@@ -44,8 +37,7 @@ object Services {
 
     private val serviceReadyFunctions = mutableListOf<ServiceReadyFunction<out Service>>()
 
-    private fun <T: Service> require(type: KClass<T>) = ServiceRequirement(type)
-    fun <T: Service> require(type: Class<T>) = require(type.kotlin)
+    fun <T: Service> require(type: Class<T>) = ServiceRequirement(type)
     internal fun addServiceReadyFunction(function: ServiceReadyFunction<out Service>) {
         serviceReadyFunctions.add(function)
     }

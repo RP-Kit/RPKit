@@ -23,7 +23,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
  */
 class MaxThirstField : CharacterCardField {
 
-    override val name = "max-thirst"
+    override val name = "max_thirst"
     override fun get(character: RPKCharacter): String {
         return 20.toString()
     }

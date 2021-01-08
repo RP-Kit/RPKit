@@ -18,19 +18,23 @@ package com.rpkit.players.bukkit.profile.minecraft
 
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 import org.bukkit.OfflinePlayer
+import java.util.*
 
 
 interface RPKMinecraftProfileService : Service {
 
     fun getMinecraftProfile(id: Int): RPKMinecraftProfile?
+    fun getMinecraftProfile(name: String): RPKMinecraftProfile?
     fun getMinecraftProfile(player: OfflinePlayer): RPKMinecraftProfile?
     fun getMinecraftProfiles(profile: RPKProfile): List<RPKMinecraftProfile>
-    fun addMinecraftProfile(profile: RPKMinecraftProfile)
+    fun createMinecraftProfile(minecraftUsername: String, profile: RPKThinProfile? = null): RPKMinecraftProfile
+    fun createMinecraftProfile(minecraftUUID: UUID, profile: RPKThinProfile? = null): RPKMinecraftProfile
     fun updateMinecraftProfile(profile: RPKMinecraftProfile)
     fun removeMinecraftProfile(profile: RPKMinecraftProfile)
     fun getMinecraftProfileLinkRequests(minecraftProfile: RPKMinecraftProfile): List<RPKMinecraftProfileLinkRequest>
-    fun addMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest)
     fun removeMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest)
+    fun createMinecraftProfileLinkRequest(profile: RPKProfile, minecraftProfile: RPKMinecraftProfile): RPKMinecraftProfileLinkRequest
 
 }

@@ -16,13 +16,14 @@
 
 package com.rpkit.players.bukkit
 
+import com.rpkit.core.bukkit.command.sender.resolver.RPKBukkitCommandSenderResolutionService
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.command.account.AccountCommand
+import com.rpkit.players.bukkit.command.RPKBukkitMinecraftProfileCommandSenderResolver
 import com.rpkit.players.bukkit.command.profile.ProfileCommand
 import com.rpkit.players.bukkit.database.table.RPKDiscordProfileTable
 import com.rpkit.players.bukkit.database.table.RPKGitHubProfileTable
@@ -63,13 +64,6 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = PlayersMessages(this)
-        messages.saveDefaultMessagesConfig()
-
-        Services[RPKDiscordProfileService::class.java] = RPKDiscordProfileServiceImpl(this)
-        Services[RPKGitHubProfileService::class.java] = RPKGitHubProfileServiceImpl(this)
-        Services[RPKIRCProfileService::class.java] = RPKIRCProfileServiceImpl(this)
-        Services[RPKMinecraftProfileService::class.java] = RPKMinecraftProfileServiceImpl(this)
-        Services[RPKProfileService::class.java] = RPKProfileServiceImpl(this)
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
@@ -118,17 +112,26 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
         database.addTable(RPKMinecraftProfileLinkRequestTable(database))
         database.addTable(RPKProfileTable(database, this))
 
+        Services[RPKDiscordProfileService::class.java] = RPKDiscordProfileServiceImpl(this)
+        Services[RPKGitHubProfileService::class.java] = RPKGitHubProfileServiceImpl(this)
+        Services[RPKIRCProfileService::class.java] = RPKIRCProfileServiceImpl(this)
+        Services[RPKMinecraftProfileService::class.java] = RPKMinecraftProfileServiceImpl(this)
+        Services[RPKProfileService::class.java] = RPKProfileServiceImpl(this)
+
+        Services.require(RPKBukkitCommandSenderResolutionService::class.java).whenAvailable { commandSenderResolutionService ->
+            commandSenderResolutionService.addResolver(RPKBukkitMinecraftProfileCommandSenderResolver())
+        }
+
         registerCommands()
         registerListeners()
     }
 
-    fun registerCommands() {
-        getCommand("account")?.setExecutor(AccountCommand(this))
-        getCommand("profile")?.setExecutor(ProfileCommand(this))
+    private fun registerCommands() {
+        getRPKCommand("profile").executor = ProfileCommand(this)
     }
 
-    fun registerListeners() {
-        registerListeners(PlayerJoinListener(this), PlayerLoginListener())
+    private fun registerListeners() {
+        registerListeners(PlayerJoinListener(this), PlayerLoginListener(this))
     }
 
 }

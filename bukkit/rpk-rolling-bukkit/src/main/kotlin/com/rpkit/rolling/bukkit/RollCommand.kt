@@ -102,7 +102,7 @@ class RollCommand(private val plugin: RPKRollingBukkit) : CommandExecutor {
                 .forEach {
                     it.sendMessage(plugin.messages["roll", mapOf(
                             Pair("character", character.name),
-                            Pair("player", minecraftProfile.minecraftUsername),
+                            Pair("player", minecraftProfile.name),
                             Pair("roll", total.toString()),
                             Pair("dice", parsedRoll)
                     )])

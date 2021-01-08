@@ -16,6 +16,8 @@
 
 package com.rpkit.core.bukkit
 
+import com.rpkit.core.bukkit.command.sender.resolver.RPKBukkitCommandSenderResolutionService
+import com.rpkit.core.bukkit.messages.CoreMessages
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.bukkit.service.BukkitServicesDelegate
 import com.rpkit.core.service.Services
@@ -27,11 +29,16 @@ import org.bstats.bukkit.Metrics
  */
 class RPKCoreBukkit : RPKBukkitPlugin() {
 
+    lateinit var messages: CoreMessages
+
     override fun onEnable() {
-        System.getProperties().setProperty("org.jooq.no-logo", "true")
         Metrics(this, 4371)
         Services.delegate = BukkitServicesDelegate()
         saveDefaultConfig()
+
+        messages = CoreMessages(this)
+
+        Services[RPKBukkitCommandSenderResolutionService::class.java] = RPKBukkitCommandSenderResolutionService(this)
     }
 
 }

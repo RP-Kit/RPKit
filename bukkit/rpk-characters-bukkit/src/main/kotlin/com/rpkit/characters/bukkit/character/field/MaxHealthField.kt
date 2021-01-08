@@ -23,7 +23,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
  */
 class MaxHealthField : CharacterCardField {
 
-    override val name = "max-health"
+    override val name = "max_health"
     override fun get(character: RPKCharacter): String {
         return character.maxHealth.toString()
     }

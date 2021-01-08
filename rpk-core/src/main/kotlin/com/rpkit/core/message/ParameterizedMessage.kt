@@ -26,8 +26,8 @@ class ParameterizedMessage(private val template: String) {
         return message
     }
 
-    fun withParameters(vararg parameters: Pair<String, String>): String {
-        return withParameters(parameters.toMap())
+    fun withParameters(vararg parameters: MessageParameter): String {
+        return withParameters(parameters.map { (key, value) -> Pair(key, value) }.toMap())
     }
 
 }

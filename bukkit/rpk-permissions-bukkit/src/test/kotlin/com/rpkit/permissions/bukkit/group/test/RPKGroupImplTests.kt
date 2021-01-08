@@ -17,37 +17,33 @@
 package com.rpkit.permissions.bukkit.group.test
 
 import com.rpkit.permissions.bukkit.group.RPKGroupImpl
-import io.kotlintest.shouldBe
-import io.kotlintest.specs.WordSpec
+import io.kotest.core.spec.style.WordSpec
+import io.kotest.matchers.shouldBe
 
-class RPKGroupImplTests : WordSpec() {
-
-    init {
-        val inheritedGroup = RPKGroupImpl(
-                name = "test inherited",
-                allow = listOf(
-                        "rpkit.permissions.inherited.test"
-                ),
-                deny = listOf(),
-                inheritance = listOf()
+class RPKGroupImplTests : WordSpec({
+    val inheritedGroup = RPKGroupImpl(
+        name = "test inherited",
+        allow = listOf(
+            "rpkit.permissions.inherited.test"
+        ),
+        deny = listOf(),
+        inheritance = listOf()
+    )
+    val group = RPKGroupImpl(
+        name = "test group",
+        allow = listOf(
+            "rpkit.permissions.test"
+        ),
+        deny = listOf(
+            "rpkit.permissions.denied.test"
+        ),
+        inheritance = listOf(
+            inheritedGroup
         )
-        val group = RPKGroupImpl(
-                name = "test group",
-                allow = listOf(
-                        "rpkit.permissions.test"
-                ),
-                deny = listOf(
-                        "rpkit.permissions.denied.test"
-                ),
-                inheritance = listOf(
-                        inheritedGroup
-                )
-        )
-        "RPKGroupImpl.deserialize" should {
-            "return an equivalent instance to what was serialized" {
-                RPKGroupImpl.deserialize(group.serialize()) shouldBe group
-            }
+    )
+    "RPKGroupImpl.deserialize" should {
+        "return an equivalent instance to what was serialized" {
+            RPKGroupImpl.deserialize(group.serialize()) shouldBe group
         }
     }
-
-}
+})

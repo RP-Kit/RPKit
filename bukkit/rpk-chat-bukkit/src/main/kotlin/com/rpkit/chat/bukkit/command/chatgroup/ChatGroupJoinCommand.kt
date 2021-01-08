@@ -73,7 +73,7 @@ class ChatGroupJoinCommand(private val plugin: RPKChatBukkit) : CommandExecutor 
         chatGroup.members.forEach { member ->
             member.sendMessage(plugin.messages["chat-group-join-received", mapOf(
                     Pair("group", chatGroup.name),
-                    Pair("player", minecraftProfile.minecraftUsername)
+                    Pair("player", minecraftProfile.name)
             )])
         }
         chatGroup.addMember(minecraftProfile)

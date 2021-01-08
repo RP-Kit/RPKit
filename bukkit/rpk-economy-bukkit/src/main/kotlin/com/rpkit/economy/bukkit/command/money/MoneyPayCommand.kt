@@ -154,13 +154,13 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
                     "amount" to amount.toString(),
                     "currency" to if (amount == 1) currency.nameSingular else currency.namePlural,
                     "character" to toCharacter.name,
-                    "player" to toMinecraftProfile.minecraftUsername
+                    "player" to toMinecraftProfile.name
             )])
             toMinecraftProfile.sendMessage(plugin.messages["money-pay-received", mapOf(
                     "amount" to amount.toString(),
                     "currency" to if (amount == 1) currency.nameSingular else currency.namePlural,
                     "character" to fromCharacter.name,
-                    "player" to fromMinecraftProfile.minecraftUsername
+                    "player" to fromMinecraftProfile.name
             )])
         } catch (exception: NumberFormatException) {
             sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-number"])
@@ -313,13 +313,13 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
                     "amount" to amount.toString(),
                     "currency" to if (amount == 1) currency.nameSingular else currency.namePlural,
                     "character" to fromCharacter.name,
-                    "player" to fromMinecraftProfile.minecraftUsername
+                    "player" to fromMinecraftProfile.name
             )])
             return plugin.messages["money-pay-valid", mapOf(
                     "amount" to amount.toString(),
                     "currency" to if (amount == 1) currency.nameSingular else currency.namePlural,
                     "character" to toCharacter.name,
-                    "player" to toMinecraftProfile.minecraftUsername
+                    "player" to toMinecraftProfile.name
             )]
         }
 

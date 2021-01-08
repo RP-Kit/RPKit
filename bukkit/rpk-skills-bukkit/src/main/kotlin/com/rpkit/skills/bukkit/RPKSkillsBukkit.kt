@@ -50,7 +50,6 @@ class RPKSkillsBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = SkillsMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

@@ -16,62 +16,63 @@
 
 package com.rpkit.players.bukkit.command.profile
 
+import com.rpkit.core.command.RPKCommandExecutor
+import com.rpkit.core.command.result.CommandFailure
+import com.rpkit.core.command.result.CommandResult
+import com.rpkit.core.command.result.CommandSuccess
+import com.rpkit.core.command.result.MissingServiceFailure
+import com.rpkit.core.command.result.NoPermissionFailure
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.command.result.NoProfileOtherFailure
+import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
 import com.rpkit.players.bukkit.profile.RPKProfile
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 
-class ProfileViewCommand(private val plugin: RPKPlayersBukkit) : CommandExecutor {
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        var target: Player? = null
-        if (args.isNotEmpty() && sender.hasPermission("rpkit.players.profile.view.other")) {
-            target = plugin.server.getPlayer(args[0])
-        }
-        if (target == null) {
-            if (!sender.hasPermission("rpkit.players.profile.view.self")) {
-                sender.sendMessage(plugin.messages["no-permission-profile-view-self"])
-                return true
-            }
-            if (sender is Player) {
-                target = sender
-            } else {
-                sender.sendMessage(plugin.messages["profile-view-invalid-target"])
-                return true
-            }
-        }
+class ProfileViewCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
+
+    class InvalidTargetFailure : CommandFailure()
+
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
-            return true
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
+            return MissingServiceFailure(RPKMinecraftProfileService::class.java)
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
-        if (minecraftProfile == null) {
-            if (sender == target) {
-                sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
-            } else {
-                sender.sendMessage(plugin.messages["no-minecraft-profile-other"])
+        var target: RPKMinecraftProfile? = null
+        if (args.isNotEmpty() && sender.hasPermission("rpkit.players.command.profile.view.other")) {
+            target = minecraftProfileService.getMinecraftProfile(args[0])
+        }
+        if (target == null) {
+            if (!sender.hasPermission("rpkit.players.command.profile.view.self")) {
+                sender.sendMessage(plugin.messages.noPermissionProfileViewSelf)
+                return NoPermissionFailure("rpkit.players.command.profile.view.self")
             }
-            return true
+            if (sender is RPKMinecraftProfile) {
+                target = sender
+            } else {
+                sender.sendMessage(plugin.messages.profileViewInvalidTarget)
+                return InvalidTargetFailure()
+            }
         }
-        val profile = minecraftProfile.profile
+        val profile = target.profile
         if (profile !is RPKProfile) {
             if (sender == target) {
-                sender.sendMessage(plugin.messages["no-profile-self"])
+                sender.sendMessage(plugin.messages.noProfileSelf)
+                return NoProfileSelfFailure()
             } else {
-                sender.sendMessage(plugin.messages["no-profile-other"])
+                sender.sendMessage(plugin.messages.noProfileOther)
+                return NoProfileOtherFailure()
             }
-            return true
         }
         sender.sendMessage(
-                plugin.messages.getList("profile-view-valid", mapOf(
-                        "name" to profile.name,
-                        "discriminator" to profile.discriminator.toString()
-                )).toTypedArray()
+            plugin.messages.profileViewValid.withParameters(
+                name = profile.name,
+                discriminator = profile.discriminator
+            )
         )
-        return true
+        return CommandSuccess
     }
 }

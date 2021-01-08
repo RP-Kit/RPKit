@@ -35,7 +35,6 @@ class RPKItemQualityBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = ItemQualityMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         Services[RPKItemQualityService::class.java] = RPKItemQualityServiceImpl(this)
 

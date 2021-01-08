@@ -45,7 +45,6 @@ class RPKSelectionBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = SelectionMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

@@ -27,10 +27,10 @@ class RPKProfileImpl : RPKProfile {
     override var id: Int? = null
     override var name: String
     override var discriminator: Int
-    override var passwordHash: ByteArray
-    override var passwordSalt: ByteArray
+    override var passwordHash: ByteArray?
+    override var passwordSalt: ByteArray?
 
-    constructor(id: Int, name: String, discriminator: Int, passwordHash: ByteArray, passwordSalt: ByteArray) {
+    constructor(id: Int, name: String, discriminator: Int, passwordHash: ByteArray? = null, passwordSalt: ByteArray? = null) {
         this.id = id
         this.name = name
         this.discriminator = discriminator
@@ -38,16 +38,21 @@ class RPKProfileImpl : RPKProfile {
         this.passwordSalt = passwordSalt
     }
 
-    constructor(name: String, discriminator: Int, password: String) {
+    constructor(name: String, discriminator: Int, password: String?) {
         this.id = 0
         this.name = name
         this.discriminator = discriminator
-        val random = SecureRandom()
-        passwordSalt = ByteArray(16)
-        random.nextBytes(passwordSalt)
-        val spec = PBEKeySpec(password.toCharArray(), passwordSalt, 65536, 128)
-        val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512")
-        passwordHash = factory.generateSecret(spec).encoded
+        if (password != null) {
+            val random = SecureRandom()
+            passwordSalt = ByteArray(16)
+            random.nextBytes(passwordSalt)
+            val spec = PBEKeySpec(password.toCharArray(), passwordSalt, 65536, 128)
+            val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512")
+            passwordHash = factory.generateSecret(spec).encoded
+        } else {
+            passwordSalt = null
+            passwordHash = null
+        }
     }
 
     override fun setPassword(password: CharArray) {

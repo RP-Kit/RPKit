@@ -51,7 +51,6 @@ class RPKStatBuildsBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = StatBuildsMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

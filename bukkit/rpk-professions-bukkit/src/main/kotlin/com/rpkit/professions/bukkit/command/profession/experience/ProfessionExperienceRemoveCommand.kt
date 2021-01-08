@@ -110,7 +110,7 @@ class ProfessionExperienceRemoveCommand(val plugin: RPKProfessionsBukkit) : Comm
         }
         professionService.setProfessionExperience(character, profession, professionService.getProfessionExperience(character, profession) - exp)
         sender.sendMessage(plugin.messages["profession-experience-remove-valid", mapOf(
-                "player" to minecraftProfile.minecraftUsername,
+                "player" to minecraftProfile.name,
                 "character" to if (!character.isNameHidden) character.name else "[HIDDEN]",
                 "profession" to profession.name,
                 "total_experience" to professionService.getProfessionExperience(character, profession).toString(),

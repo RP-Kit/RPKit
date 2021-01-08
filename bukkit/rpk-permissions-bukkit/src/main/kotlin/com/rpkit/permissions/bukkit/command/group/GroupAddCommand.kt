@@ -80,7 +80,7 @@ class GroupAddCommand(private val plugin: RPKPermissionsBukkit) : CommandExecuto
         profile.addGroup(group)
         sender.sendMessage(plugin.messages["group-add-valid", mapOf(
                 "group" to group.name,
-                "player" to minecraftProfile.minecraftUsername
+                "player" to minecraftProfile.name
         )])
         return true
     }

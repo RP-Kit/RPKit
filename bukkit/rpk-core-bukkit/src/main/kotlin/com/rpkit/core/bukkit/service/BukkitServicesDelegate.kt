@@ -21,17 +21,16 @@ import com.rpkit.core.service.Service
 import com.rpkit.core.service.ServicesDelegate
 import org.bukkit.Bukkit
 import org.bukkit.plugin.ServicePriority.Normal
-import kotlin.reflect.KClass
 
 class BukkitServicesDelegate : ServicesDelegate {
 
-    override fun <T : Service> get(type: KClass<T>) =
-            Bukkit.getServicesManager().getRegistration(type.java)?.provider
+    override fun <T : Service> get(type: Class<T>) =
+            Bukkit.getServicesManager().getRegistration(type)?.provider
 
-    override fun <T : Service> set(type: KClass<T>, service: T) {
+    override fun <T : Service> set(type: Class<T>, service: T) {
         val plugin = service.plugin
         if (plugin is RPKBukkitPlugin) {
-            Bukkit.getServicesManager().register(type.java, service, plugin, Normal)
+            Bukkit.getServicesManager().register(type, service, plugin, Normal)
         }
     }
 

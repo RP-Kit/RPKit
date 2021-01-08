@@ -85,7 +85,7 @@ class ChatGroupInviteCommand(private val plugin: RPKChatBukkit) : CommandExecuto
             "group" to chatGroup.name
         )])
         sender.sendMessage(plugin.messages["chat-group-invite-valid", mapOf(
-            "player" to minecraftProfile.minecraftUsername,
+            "player" to minecraftProfile.name,
             "group" to chatGroup.name
         )])
         return true

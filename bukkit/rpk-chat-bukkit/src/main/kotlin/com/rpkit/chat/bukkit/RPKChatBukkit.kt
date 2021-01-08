@@ -140,7 +140,6 @@ class RPKChatBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = ChatMessages(this)
-        messages.saveDefaultMessagesConfig()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {

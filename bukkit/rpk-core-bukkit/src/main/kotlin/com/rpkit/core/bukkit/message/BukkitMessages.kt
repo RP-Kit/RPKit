@@ -33,8 +33,8 @@ open class BukkitMessages(private val plugin: RPKBukkitPlugin) : Messages {
     private val messagesConfig: FileConfiguration
 
     init {
-        messagesConfig = YamlConfiguration.loadConfiguration(messagesConfigFile)
         saveDefaultMessagesConfig()
+        messagesConfig = YamlConfiguration.loadConfiguration(messagesConfigFile)
     }
 
     fun saveMessagesConfig() {
@@ -62,7 +62,7 @@ open class BukkitMessages(private val plugin: RPKBukkitPlugin) : Messages {
         var message = messagesConfig.getString(key) ?: return key
         message = ChatColor.translateAlternateColorCodes('&', message)
         vars.forEach { pair ->
-            message = message.replace("\$${pair.key}", pair.value)
+            message = message.replace("\${${pair.key}}", pair.value)
         }
         return message
     }

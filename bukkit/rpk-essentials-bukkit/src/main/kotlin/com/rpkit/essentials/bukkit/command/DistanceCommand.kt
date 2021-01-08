@@ -79,7 +79,7 @@ class DistanceCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
         if (!trackingService.isTrackable(character)) {
             sender.sendMessage(plugin.messages["distance-invalid-untrackable"])
             bukkitPlayer.sendMessage(plugin.messages["distance-untrackable-notification", mapOf(
-                    "player" to minecraftProfile.minecraftUsername
+                    "player" to minecraftProfile.name
             )])
             return true
         }
@@ -99,7 +99,7 @@ class DistanceCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
         }
         sender.sendMessage(plugin.messages["distance-valid", mapOf(
                 "character" to character.name,
-                "player" to minecraftProfile.minecraftUsername,
+                "player" to minecraftProfile.name,
                 "distance" to distance.toString()
         )])
         return true
