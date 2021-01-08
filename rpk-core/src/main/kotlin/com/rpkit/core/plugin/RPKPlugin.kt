@@ -16,10 +16,4 @@
 
 package com.rpkit.core.plugin
 
-import com.rpkit.core.command.RPKCommand
-
-interface RPKPlugin {
-
-    fun getRPKCommand(name: String): RPKCommand
-
-}
+interface RPKPlugin

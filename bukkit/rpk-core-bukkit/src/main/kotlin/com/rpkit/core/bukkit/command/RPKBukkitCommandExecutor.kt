@@ -17,7 +17,6 @@
 package com.rpkit.core.bukkit.command
 
 import com.rpkit.core.bukkit.command.sender.resolver.RPKBukkitCommandSenderResolutionService
-import com.rpkit.core.command.RPKCommand
 import com.rpkit.core.command.RPKCommandExecutor
 import com.rpkit.core.service.Services
 import org.bukkit.ChatColor.RED
@@ -25,9 +24,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-class RPKBukkitCommand : RPKCommand, CommandExecutor {
-
-    override lateinit var executor: RPKCommandExecutor
+class RPKBukkitCommandExecutor(private val executor: RPKCommandExecutor) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         val commandSender = Services[RPKBukkitCommandSenderResolutionService::class.java]?.resolve(sender)
@@ -38,4 +35,7 @@ class RPKBukkitCommand : RPKCommand, CommandExecutor {
         executor.onCommand(commandSender, args)
         return true
     }
+
 }
+
+fun RPKCommandExecutor.toBukkit(): RPKBukkitCommandExecutor = RPKBukkitCommandExecutor(this)
