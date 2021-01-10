@@ -15,15 +15,4 @@
 
 package com.rpkit.kit.bukkit.kit
 
-import com.rpkit.core.service.Service
-
-
-interface RPKKitService : Service {
-
-    val kits: List<RPKKit>
-    fun getKit(name: RPKKitName): RPKKit?
-    fun addKit(kit: RPKKit)
-    fun updateKit(kit: RPKKit)
-    fun removeKit(kit: RPKKit)
-
-}
+data class RPKKitName(val value: String)
