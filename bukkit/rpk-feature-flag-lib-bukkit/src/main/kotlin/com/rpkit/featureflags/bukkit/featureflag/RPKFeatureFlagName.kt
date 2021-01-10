@@ -15,15 +15,4 @@
 
 package com.rpkit.featureflags.bukkit.featureflag
 
-import com.rpkit.core.service.Service
-import com.rpkit.players.bukkit.profile.RPKProfile
-
-
-interface RPKFeatureFlagService : Service {
-
-    fun getFeatureFlag(name: RPKFeatureFlagName): RPKFeatureFlag?
-    fun createFeatureFlag(name: RPKFeatureFlagName, isEnabledByDefault: Boolean): RPKFeatureFlag
-    fun removeFeatureFlag(featureFlag: RPKFeatureFlag)
-    fun setFeatureFlag(profile: RPKProfile, featureFlag: RPKFeatureFlag, enabled: Boolean)
-
-}
+data class RPKFeatureFlagName(val value: String)

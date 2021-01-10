@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,18 +25,18 @@ class RPKFeatureFlagServiceImpl(override val plugin: RPKFeatureFlagsBukkit) : RP
 
     private val featureFlags = mutableMapOf<String, RPKFeatureFlag>()
 
-    override fun getFeatureFlag(name: String): RPKFeatureFlag? {
-        return featureFlags[name]
+    override fun getFeatureFlag(name: RPKFeatureFlagName): RPKFeatureFlag? {
+        return featureFlags[name.value]
     }
 
-    override fun createFeatureFlag(name: String, isEnabledByDefault: Boolean): RPKFeatureFlag {
+    override fun createFeatureFlag(name: RPKFeatureFlagName, isEnabledByDefault: Boolean): RPKFeatureFlag {
         val featureFlag = RPKFeatureFlagImpl(plugin, name, isEnabledByDefault)
-        featureFlags[name] = featureFlag
+        featureFlags[name.value] = featureFlag
         return featureFlag
     }
 
     override fun removeFeatureFlag(featureFlag: RPKFeatureFlag) {
-        featureFlags.remove(featureFlag.name)
+        featureFlags.remove(featureFlag.name.value)
     }
 
     override fun setFeatureFlag(profile: RPKProfile, featureFlag: RPKFeatureFlag, enabled: Boolean) {

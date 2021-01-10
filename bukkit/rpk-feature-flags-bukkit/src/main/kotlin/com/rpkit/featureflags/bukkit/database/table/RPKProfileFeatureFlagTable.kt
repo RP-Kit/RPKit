@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +48,7 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
                 )
                 .values(
                         entity.profile.id,
-                        entity.featureFlag.name,
+                        entity.featureFlag.name.value,
                         entity.isEnabled
                 )
                 .execute()
@@ -59,15 +58,15 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
         database.create
                 .update(RPKIT_PROFILE_FEATURE_FLAG)
                 .set(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID, entity.profile.id)
-                .set(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME, entity.featureFlag.name)
+                .set(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME, entity.featureFlag.name.value)
                 .set(RPKIT_PROFILE_FEATURE_FLAG.ENABLED, entity.isEnabled)
                 .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(entity.profile.id))
                 .execute()
     }
 
     fun get(profile: RPKProfile, featureFlag: RPKFeatureFlag): RPKProfileFeatureFlag? {
-        if (cache?.containsKey(featureFlag.name) == true) {
-            return cache[featureFlag.name]
+        if (cache?.containsKey(featureFlag.name.value) == true) {
+            return cache[featureFlag.name.value]
         }
         val result = database.create
             .select(
@@ -77,7 +76,7 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
             )
             .from(RPKIT_PROFILE_FEATURE_FLAG)
             .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profile.id))
-            .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(featureFlag.name))
+            .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(featureFlag.name.value))
             .fetchOne() ?: return null
         Services[RPKProfileService::class.java]
             ?: return null
@@ -86,7 +85,7 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
             featureFlag,
             result.get(RPKIT_PROFILE_FEATURE_FLAG.ENABLED)
         )
-        cache?.set(featureFlag.name, profileFeatureFlag)
+        cache?.set(featureFlag.name.value, profileFeatureFlag)
         return profileFeatureFlag
     }
 
@@ -94,9 +93,9 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
         database.create
                 .deleteFrom(RPKIT_PROFILE_FEATURE_FLAG)
                 .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(entity.profile.id))
-                .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(entity.featureFlag.name))
+                .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(entity.featureFlag.name.value))
                 .execute()
-        cache?.remove(entity.featureFlag.name)
+        cache?.remove(entity.featureFlag.name.value)
     }
 
 }
