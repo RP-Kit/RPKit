@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,9 +30,9 @@ import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelMessageEvent
 import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteService
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
-import com.rpkit.players.bukkit.profile.RPKThinProfile
 import java.awt.Color
 
 /**
@@ -41,7 +40,7 @@ import java.awt.Color
  */
 class RPKChatChannelImpl(
         private val plugin: RPKChatBukkit,
-        override val name: String,
+        override val name: RPKChatChannelName,
         override val color: Color,
         override val radius: Double,
         override val directedPreFormatPipeline: List<DirectedPreFormatPipelineComponent>,
@@ -58,7 +57,7 @@ class RPKChatChannelImpl(
 
     override val listenerMinecraftProfiles: List<RPKMinecraftProfile>
         get() = plugin.server.onlinePlayers
-                .filter { player -> player.hasPermission("rpkit.chat.listen.$name") }
+                .filter { player -> player.hasPermission("rpkit.chat.listen.${name.value}") }
                 .mapNotNull { player -> Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfile(player) }
                 .filter { minecraftProfile -> Services[RPKChatChannelMuteService::class.java]?.hasMinecraftProfileMutedChatChannel(minecraftProfile, this) == false }
 

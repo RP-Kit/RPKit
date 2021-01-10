@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,11 +19,15 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.database.table.RPKChatGroupInviteTable
 import com.rpkit.chat.bukkit.database.table.RPKChatGroupMemberTable
-import com.rpkit.chat.bukkit.event.chatgroup.*
+import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupInviteEvent
+import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupJoinEvent
+import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupLeaveEvent
+import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupMessageEvent
+import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupUninviteEvent
 import com.rpkit.chat.bukkit.prefix.RPKPrefixService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.ChatColor
 
 /**
@@ -32,8 +35,8 @@ import org.bukkit.ChatColor
  */
 class RPKChatGroupImpl(
         private val plugin: RPKChatBukkit,
-        override var id: Int? = null,
-        override var name: String
+        override var id: RPKChatGroupId? = null,
+        override var name: RPKChatGroupName
 ) : RPKChatGroup {
 
     override val members: List<RPKMinecraftProfile>
@@ -134,10 +137,10 @@ class RPKChatGroupImpl(
                 }
             }
             if (formattedMessage.contains("\$group")) {
-                formattedMessage = if (name.startsWith("_pm_")) {
+                formattedMessage = if (name.value.startsWith("_pm_")) {
                     formattedMessage.replace("\$group", sender.name + " -> " + members.first { member -> member.id != sender.id }.name)
                 } else {
-                    formattedMessage.replace("\$group", name)
+                    formattedMessage.replace("\$group", name.value)
                 }
             }
             receiver.sendMessage(formattedMessage)

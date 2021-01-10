@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +28,7 @@ interface RPKChatChannelService : Service {
 
     /**
      * A collection of all chat channels currently managed by this chat channel service.
-     * The collection is immutable, chat channels must be added and removed using [addChatChannel] and
-     * [removeChatChannel].
+     * The collection is immutable.
      */
     val chatChannels: Collection<RPKChatChannel>
 
@@ -41,28 +39,7 @@ interface RPKChatChannelService : Service {
      * @param name The name of the chat channel
      * @return The chat channel, or null if no chat channel is found with the given name
      */
-    fun getChatChannel(name: String): RPKChatChannel?
-
-    /**
-     * Adds a chat channel to be tracked by this chat channel service.
-     *
-     * @param chatChannel The chat channel to add
-     */
-    fun addChatChannel(chatChannel: RPKChatChannel)
-
-    /**
-     * Removes a chat channel from being tracked by this chat channel service.
-     *
-     * @param chatChannel The chat channel to remove
-     */
-    fun removeChatChannel(chatChannel: RPKChatChannel)
-
-    /**
-     * Updates a chat channel's state in data storage.
-     *
-     * @param chatChannel The chat channel to update
-     */
-    fun updateChatChannel(chatChannel: RPKChatChannel, isAsync: Boolean = false)
+    fun getChatChannel(name: RPKChatChannelName): RPKChatChannel?
 
     /**
      * Gets the chat channel a Minecraft profile is currently speaking in.

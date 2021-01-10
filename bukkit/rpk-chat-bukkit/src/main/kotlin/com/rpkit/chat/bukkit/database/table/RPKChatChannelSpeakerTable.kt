@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.chat.bukkit.database.table
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelName
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.chat.bukkit.database.create
 import com.rpkit.chat.bukkit.database.jooq.Tables.RPKIT_CHAT_CHANNEL_SPEAKER
@@ -52,7 +52,7 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
                 )
                 .values(
                     minecraftProfileId,
-                        entity.chatChannel.name
+                    entity.chatChannel.name.value
                 )
                 .execute()
         cache?.set(minecraftProfileId, entity)
@@ -71,7 +71,7 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
                 .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
                 .fetchOne() ?: return null
         val chatChannelService = Services[RPKChatChannelService::class.java] ?: return null
-        val chatChannel = chatChannelService.getChatChannel(result[RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME])
+        val chatChannel = chatChannelService.getChatChannel(RPKChatChannelName(result[RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME]))
                 ?: return null
         val chatChannelSpeaker = RPKChatChannelSpeaker(
                 minecraftProfile,
@@ -85,7 +85,7 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .update(RPKIT_CHAT_CHANNEL_SPEAKER)
-                .set(RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME, entity.chatChannel.name)
+                .set(RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME, entity.chatChannel.name.value)
                 .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
                 .execute()
         cache?.set(minecraftProfileId, entity)

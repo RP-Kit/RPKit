@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +30,7 @@ interface RPKChatGroupService : Service {
      * @param id The ID of the chat group
      * @return The chat group, or null if no chat group is found with the given ID
      */
-    fun getChatGroup(id: Int): RPKChatGroup?
+    fun getChatGroup(id: RPKChatGroupId): RPKChatGroup?
 
     /**
      * Gets a chat group by name.
@@ -40,7 +39,7 @@ interface RPKChatGroupService : Service {
      * @param name The name of the chat group
      * @return The chat group, or null if no chat group is found with the given ID
      */
-    fun getChatGroup(name: String): RPKChatGroup?
+    fun getChatGroup(name: RPKChatGroupName): RPKChatGroup?
 
     /**
      * Adds a chat group to be tracked by this chat group service.

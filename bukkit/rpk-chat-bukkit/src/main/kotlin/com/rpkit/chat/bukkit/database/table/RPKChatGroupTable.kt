@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +17,9 @@ package com.rpkit.chat.bukkit.database.table
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroup
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupId
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupImpl
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupName
 import com.rpkit.chat.bukkit.database.create
 import com.rpkit.chat.bukkit.database.jooq.Tables.RPKIT_CHAT_GROUP
 import com.rpkit.core.database.Database
@@ -57,41 +58,41 @@ class RPKChatGroupTable(private val database: Database, private val plugin: RPKC
                         RPKIT_CHAT_GROUP,
                         RPKIT_CHAT_GROUP.NAME
                 )
-                .values(entity.name)
+                .values(entity.name.value)
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKChatGroupId(id)
         cache?.set(id, entity)
-        nameCache?.set(entity.name, id)
+        nameCache?.set(entity.name.value, id)
     }
 
     fun update(entity: RPKChatGroup) {
         val id = entity.id ?: return
         database.create
                 .update(RPKIT_CHAT_GROUP)
-                .set(RPKIT_CHAT_GROUP.NAME, entity.name)
-                .where(RPKIT_CHAT_GROUP.ID.eq(id))
+                .set(RPKIT_CHAT_GROUP.NAME, entity.name.value)
+                .where(RPKIT_CHAT_GROUP.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
-        nameCache?.set(entity.name, id)
+        cache?.set(id.value, entity)
+        nameCache?.set(entity.name.value, id.value)
     }
 
-    operator fun get(id: Int): RPKChatGroup? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKChatGroupId): RPKChatGroup? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         } else {
             val result = database.create
                     .select(RPKIT_CHAT_GROUP.NAME)
                     .from(RPKIT_CHAT_GROUP)
-                    .where(RPKIT_CHAT_GROUP.ID.eq(id))
+                    .where(RPKIT_CHAT_GROUP.ID.eq(id.value))
                     .fetchOne() ?: return null
             val chatGroup = RPKChatGroupImpl(
                     plugin,
-                    id,
-                    result.get(RPKIT_CHAT_GROUP.NAME)
+                    RPKChatGroupId(id.value),
+                    RPKChatGroupName(result.get(RPKIT_CHAT_GROUP.NAME))
             )
-            cache?.set(id, chatGroup)
-            nameCache?.set(chatGroup.name, id)
+            cache?.set(id.value, chatGroup)
+            nameCache?.set(chatGroup.name.value, id.value)
             return chatGroup
         }
     }
@@ -103,26 +104,26 @@ class RPKChatGroupTable(private val database: Database, private val plugin: RPKC
      * @param name The name
      * @return The chat group, or null if there is no chat group with the given name
      */
-    operator fun get(name: String): RPKChatGroup? {
-        if (nameCache?.containsKey(name) == true) {
-            val chatGroupId = nameCache[name]
+    operator fun get(name: RPKChatGroupName): RPKChatGroup? {
+        if (nameCache?.containsKey(name.value) == true) {
+            val chatGroupId = nameCache[name.value]
             if (chatGroupId != null) {
-                return get(chatGroupId)
+                return get(RPKChatGroupId(chatGroupId))
             }
         }
         val result = database.create
             .select(RPKIT_CHAT_GROUP.ID)
             .from(RPKIT_CHAT_GROUP)
-            .where(RPKIT_CHAT_GROUP.NAME.eq(name))
+            .where(RPKIT_CHAT_GROUP.NAME.eq(name.value))
             .fetchOne() ?: return null
         val id = result.get(RPKIT_CHAT_GROUP.ID)
         val chatGroup = RPKChatGroupImpl(
             plugin,
-            id,
-            name
+            RPKChatGroupId(id),
+            RPKChatGroupName(name.value)
         )
         cache?.set(id, chatGroup)
-        nameCache?.set(name, id)
+        nameCache?.set(name.value, id)
         return chatGroup
     }
 
@@ -130,9 +131,9 @@ class RPKChatGroupTable(private val database: Database, private val plugin: RPKC
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHAT_GROUP)
-                .where(RPKIT_CHAT_GROUP.ID.eq(id))
+                .where(RPKIT_CHAT_GROUP.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
-        nameCache?.remove(entity.name)
+        cache?.remove(id.value)
+        nameCache?.remove(entity.name.value)
     }
 }

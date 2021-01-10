@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.chat.bukkit.listener
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelName
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.chat.bukkit.snooper.RPKSnooperService
 import com.rpkit.core.service.Services
@@ -55,11 +55,11 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
     private fun handleQuickChannelSwitch(event: PlayerCommandPreprocessEvent) {
         val chatChannelName = event.message.split(Regex("\\s+"))[0].drop(1)
         val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
-        val chatChannel = chatChannelService.getChatChannel(chatChannelName) ?: return
-        if (!event.player.hasPermission("rpkit.chat.command.chatchannel.${chatChannel.name}")) {
+        val chatChannel = chatChannelService.getChatChannel(RPKChatChannelName(chatChannelName)) ?: return
+        if (!event.player.hasPermission("rpkit.chat.command.chatchannel.${chatChannel.name.value}")) {
             event.isCancelled = true
             event.player.sendMessage(plugin.messages["no-permission-chatchannel", mapOf(
-                    Pair("channel", chatChannel.name)
+                "channel" to chatChannel.name.value
             )])
             return
         }
@@ -76,7 +76,7 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
         } else if (event.message.startsWith("/$chatChannelName")) {
             chatChannel.addSpeaker(minecraftProfile)
             event.player.sendMessage(plugin.messages["chatchannel-valid", mapOf(
-                    Pair("channel", chatChannel.name)
+                "channel" to chatChannel.name.value
             )])
         }
     }

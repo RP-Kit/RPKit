@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +26,7 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 /**
  * Log component.
@@ -44,7 +43,7 @@ class LogComponent(private val plugin: RPKChatBukkit) : UndirectedPipelineCompon
             if (!datedLogDirectory.mkdirs())
                 throw IOException("Could not create log directory. Does the server have permission to write to the directory?")
         }
-        val log = File(datedLogDirectory, context.chatChannel.name + ".log")
+        val log = File(datedLogDirectory, context.chatChannel.name.value + ".log")
         if (!log.exists()) {
             if (!log.createNewFile())
                 throw IOException("Failed to create log file. Does the server have permission to write to the directory?")

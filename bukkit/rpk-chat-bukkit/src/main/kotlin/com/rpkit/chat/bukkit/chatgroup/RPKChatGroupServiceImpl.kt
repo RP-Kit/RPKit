@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,11 +28,11 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
  */
 class RPKChatGroupServiceImpl(override val plugin: RPKChatBukkit) : RPKChatGroupService {
 
-    override fun getChatGroup(id: Int): RPKChatGroup? {
+    override fun getChatGroup(id: RPKChatGroupId): RPKChatGroup? {
         return plugin.database.getTable(RPKChatGroupTable::class.java)[id]
     }
 
-    override fun getChatGroup(name: String): RPKChatGroup? {
+    override fun getChatGroup(name: RPKChatGroupName): RPKChatGroup? {
         return plugin.database.getTable(RPKChatGroupTable::class.java)[name]
     }
 

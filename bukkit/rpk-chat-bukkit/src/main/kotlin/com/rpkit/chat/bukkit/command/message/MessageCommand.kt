@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.chat.bukkit.command.message
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupImpl
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupName
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -55,7 +55,7 @@ class MessageCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        var chatGroup = chatGroupService.getChatGroup(args[0])
+        var chatGroup = chatGroupService.getChatGroup(RPKChatGroupName(args[0]))
         if (chatGroup != null) {
             if (!sender.hasPermission("rpkit.chat.command.chatgroup.message")) {
                 sender.sendMessage(plugin.messages["no-permission-chat-group-message"])
@@ -91,13 +91,13 @@ class MessageCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
                 sender.sendMessage(plugin.messages["message-invalid-self"])
                 return true
             }
-            val chatGroup1 = chatGroupService.getChatGroup("_pm_" + sender.name + "_" + receiver.name)
-            val chatGroup2 = chatGroupService.getChatGroup("_pm_" + receiver.name + "_" + sender.name)
+            val chatGroup1 = chatGroupService.getChatGroup(RPKChatGroupName("_pm_" + sender.name + "_" + receiver.name))
+            val chatGroup2 = chatGroupService.getChatGroup(RPKChatGroupName("_pm_" + receiver.name + "_" + sender.name))
             when {
                 chatGroup1 != null -> chatGroup = chatGroup1
                 chatGroup2 != null -> chatGroup = chatGroup2
                 else -> {
-                    chatGroup = RPKChatGroupImpl(plugin, name = "_pm_" + sender.getName() + "_" + receiver.name)
+                    chatGroup = RPKChatGroupImpl(plugin, name = RPKChatGroupName("_pm_" + sender.getName() + "_" + receiver.name))
                     chatGroupService.addChatGroup(chatGroup)
                     chatGroup.addMember(senderMinecraftProfile)
                     chatGroup.addMember(receiverMinecraftProfile)

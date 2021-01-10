@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +60,7 @@ class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineCo
             }
         }
         if (formattedMessage.contains("\$channel")) {
-            formattedMessage = formattedMessage.replace("\$channel", chatChannel.name)
+            formattedMessage = formattedMessage.replace("\$channel", chatChannel.name.value)
         }
         if (formattedMessage.contains("\$color") || formattedMessage.contains("\$colour")) {
             val chatColorString = ChatColor.of(chatChannel.color).toString()

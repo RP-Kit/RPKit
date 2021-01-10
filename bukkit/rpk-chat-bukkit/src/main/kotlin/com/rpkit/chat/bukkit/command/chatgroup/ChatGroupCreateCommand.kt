@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupImpl
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupName
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -50,7 +50,7 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
         }
-        if (chatGroupService.getChatGroup(args[0]) != null) {
+        if (chatGroupService.getChatGroup(RPKChatGroupName(args[0])) != null) {
             sender.sendMessage(plugin.messages["chat-group-create-invalid-taken"])
             return true
         }
@@ -63,7 +63,7 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val chatGroup = RPKChatGroupImpl(plugin = plugin, name = args[0])
+        val chatGroup = RPKChatGroupImpl(plugin = plugin, name = RPKChatGroupName(args[0]))
         val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (senderMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
@@ -72,7 +72,7 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit) : CommandExecuto
         chatGroupService.addChatGroup(chatGroup)
         chatGroup.addMember(senderMinecraftProfile)
         sender.sendMessage(plugin.messages["chat-group-create-valid", mapOf(
-            "group" to chatGroup.name
+            "group" to chatGroup.name.value
         )])
         return true
     }

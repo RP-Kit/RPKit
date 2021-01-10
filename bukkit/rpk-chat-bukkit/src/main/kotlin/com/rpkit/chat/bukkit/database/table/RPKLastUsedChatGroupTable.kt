@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.chat.bukkit.database.table
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupId
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.chat.bukkit.chatgroup.RPKLastUsedChatGroup
 import com.rpkit.chat.bukkit.database.create
@@ -44,6 +44,7 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
 
     fun insert(entity: RPKLastUsedChatGroup) {
         val minecraftProfileId = entity.minecraftProfile.id ?: return
+        val chatGroupId = entity.chatGroup.id ?: return
         database.create
                 .insertInto(
                         RPKIT_LAST_USED_CHAT_GROUP,
@@ -52,17 +53,18 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
                 )
                 .values(
                     minecraftProfileId,
-                    entity.chatGroup.id
+                    chatGroupId.value
                 )
                 .execute()
         minecraftProfileCache?.set(minecraftProfileId, entity)
     }
 
     fun update(entity: RPKLastUsedChatGroup) {
+        val chatGroupId = entity.chatGroup.id ?: return
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .update(RPKIT_LAST_USED_CHAT_GROUP)
-                .set(RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID, entity.chatGroup.id)
+                .set(RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID, chatGroupId.value)
                 .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
                 .execute()
         minecraftProfileCache?.set(minecraftProfileId, entity)
@@ -83,7 +85,7 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
             .fetchOne() ?: return null
         val chatGroupService = Services[RPKChatGroupService::class.java] ?: return null
         val chatGroupId = result.get(RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID)
-        val chatGroup = chatGroupService.getChatGroup(chatGroupId)
+        val chatGroup = chatGroupService.getChatGroup(RPKChatGroupId(chatGroupId))
         if (chatGroup != null) {
             val lastUsedChatGroup = RPKLastUsedChatGroup(
                 minecraftProfile,
