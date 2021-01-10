@@ -27,8 +27,7 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import org.bukkit.OfflinePlayer
-import java.util.*
+import java.util.UUID
 
 
 class RPKMinecraftProfileTable(private val database: Database, private val plugin: RPKPlayersBukkit) : Table {
@@ -129,11 +128,11 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
         }.filterNotNull()
     }
 
-    fun get(player: OfflinePlayer): RPKMinecraftProfile? {
+    fun get(minecraftUUID: UUID): RPKMinecraftProfile? {
         val result = database.create
                 .select(RPKIT_MINECRAFT_PROFILE.ID)
                 .from(RPKIT_MINECRAFT_PROFILE)
-                .where(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID.eq(player.uniqueId.toString()))
+                .where(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID.eq(minecraftUUID.toString()))
                 .fetchOne() ?: return null
         return get(result.get(RPKIT_MINECRAFT_PROFILE.ID))
     }

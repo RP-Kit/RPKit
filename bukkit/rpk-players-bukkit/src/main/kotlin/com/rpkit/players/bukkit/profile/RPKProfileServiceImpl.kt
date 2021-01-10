@@ -34,21 +34,21 @@ class RPKProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKProfileS
     }
 
     override fun addProfile(profile: RPKProfile) {
-        val event = RPKBukkitProfileCreateEvent(profile)
+        val event = RPKBukkitProfileCreateEvent(profile, !plugin.server.isPrimaryThread)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKProfileTable::class.java).insert(event.profile)
     }
 
     override fun updateProfile(profile: RPKProfile) {
-        val event = RPKBukkitProfileUpdateEvent(profile)
+        val event = RPKBukkitProfileUpdateEvent(profile, !plugin.server.isPrimaryThread)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKProfileTable::class.java).update(event.profile)
     }
 
     override fun removeProfile(profile: RPKProfile) {
-        val event = RPKBukkitProfileDeleteEvent(profile)
+        val event = RPKBukkitProfileDeleteEvent(profile, !plugin.server.isPrimaryThread)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKProfileTable::class.java).delete(event.profile)

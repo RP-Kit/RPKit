@@ -26,8 +26,9 @@ import org.bukkit.event.HandlerList
 class RPKBukkitCharacterSwitchEvent(
         override val minecraftProfile: RPKMinecraftProfile,
         override val fromCharacter: RPKCharacter?,
-        override var character: RPKCharacter?
-) : RPKBukkitEvent(), RPKCharacterSwitchEvent, Cancellable {
+        override var character: RPKCharacter?,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKCharacterSwitchEvent, Cancellable {
 
     companion object {
         @JvmStatic

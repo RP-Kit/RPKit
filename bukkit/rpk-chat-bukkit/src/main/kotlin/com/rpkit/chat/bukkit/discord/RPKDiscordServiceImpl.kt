@@ -29,14 +29,14 @@ class RPKDiscordServiceImpl(override val plugin: RPKChatBukkit) : RPKDiscordServ
     val discordServer = if (serverName != null) DiscordServer(plugin, serverName) else null
     private val profileLinkMessages = mutableMapOf<Long, Int>()
 
-    override fun sendMessage(channel: DiscordChannel, message: String, callback: ((DiscordMessage) -> Unit)?) {
+    override fun sendMessage(channel: DiscordChannel, message: String, callback: DiscordMessageCallback?) {
         discordServer?.sendMessage(channel, message)
     }
 
     override fun sendMessage(
             profile: RPKDiscordProfile,
             message: String,
-            callback: ((DiscordMessage) -> Unit)?
+            callback: DiscordMessageCallback?
     ) {
         discordServer?.getUser(profile.discordId)?.openPrivateChannel()?.queue { channel ->
             channel.sendMessage(message).queue {

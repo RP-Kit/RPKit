@@ -19,12 +19,13 @@ package com.rpkit.players.bukkit.command.profile
 import com.rpkit.chat.bukkit.discord.DiscordReaction
 import com.rpkit.chat.bukkit.discord.RPKDiscordService
 import com.rpkit.core.command.RPKCommandExecutor
-import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.command.result.CommandFailure
 import com.rpkit.core.command.result.CommandResult
 import com.rpkit.core.command.result.CommandSuccess
+import com.rpkit.core.command.result.IncorrectUsageFailure
 import com.rpkit.core.command.result.MissingServiceFailure
 import com.rpkit.core.command.result.NoPermissionFailure
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
@@ -46,6 +47,10 @@ class ProfileLinkDiscordCommand(private val plugin: RPKPlayersBukkit) : RPKComma
         if (!sender.hasPermission("rpkit.players.command.profile.link.discord")) {
             sender.sendMessage(plugin.messages.noPermissionProfileLinkDiscord)
             return NoPermissionFailure("rpkit.players.command.profile.link.discord")
+        }
+        if (args.isEmpty()) {
+            sender.sendMessage(plugin.messages.profileLinkDiscordUsage)
+            return IncorrectUsageFailure()
         }
         val discordUserName = args[0]
         val discordService = Services[RPKDiscordService::class.java]

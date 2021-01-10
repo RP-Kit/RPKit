@@ -23,6 +23,7 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 interface RPKGitHubProfileService : Service {
 
     fun getGitHubProfile(id: Int): RPKGitHubProfile?
+    fun getGitHubProfile(name: String): RPKGitHubProfile?
     fun getGitHubProfiles(profile: RPKProfile): List<RPKGitHubProfile>
     fun addGitHubProfile(profile: RPKGitHubProfile)
     fun updateGitHubProfile(profile: RPKGitHubProfile)

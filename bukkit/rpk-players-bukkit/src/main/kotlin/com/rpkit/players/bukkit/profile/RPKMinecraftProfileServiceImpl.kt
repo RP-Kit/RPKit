@@ -26,7 +26,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileLinkRequest
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.OfflinePlayer
-import java.util.*
+import java.util.UUID
 
 
 class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKMinecraftProfileService {
@@ -41,7 +41,11 @@ class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RP
     }
 
     override fun getMinecraftProfile(player: OfflinePlayer): RPKMinecraftProfile? {
-        return plugin.database.getTable(RPKMinecraftProfileTable::class.java).get(player)
+        return getMinecraftProfile(player.uniqueId)
+    }
+
+    override fun getMinecraftProfile(minecraftUUID: UUID): RPKMinecraftProfile? {
+        return plugin.database.getTable(RPKMinecraftProfileTable::class.java).get(minecraftUUID)
     }
 
     override fun getMinecraftProfiles(profile: RPKProfile): List<RPKMinecraftProfile> {
@@ -49,7 +53,7 @@ class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RP
     }
 
     private fun addMinecraftProfile(profile: RPKMinecraftProfile) {
-        val event = RPKBukkitMinecraftProfileCreateEvent(profile)
+        val event = RPKBukkitMinecraftProfileCreateEvent(profile, !plugin.server.isPrimaryThread)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKMinecraftProfileTable::class.java).insert(event.minecraftProfile)
@@ -80,14 +84,14 @@ class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RP
     }
 
     override fun updateMinecraftProfile(profile: RPKMinecraftProfile) {
-        val event = RPKBukkitMinecraftProfileUpdateEvent(profile)
+        val event = RPKBukkitMinecraftProfileUpdateEvent(profile, !plugin.server.isPrimaryThread)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKMinecraftProfileTable::class.java).update(event.minecraftProfile)
     }
 
     override fun removeMinecraftProfile(profile: RPKMinecraftProfile) {
-        val event = RPKBukkitMinecraftProfileDeleteEvent(profile)
+        val event = RPKBukkitMinecraftProfileDeleteEvent(profile, !plugin.server.isPrimaryThread)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKMinecraftProfileTable::class.java).delete(event.minecraftProfile)

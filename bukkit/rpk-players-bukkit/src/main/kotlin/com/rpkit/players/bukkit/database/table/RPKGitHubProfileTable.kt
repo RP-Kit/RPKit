@@ -41,6 +41,17 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
         null
     }
 
+    private val nameCache = if (plugin.config.getBoolean("caching.rpkit_github_profile.name.enabled")) {
+        database.cacheManager.createCache(
+            "rpk-players-bukkit.rpkit_github_profile.name",
+            String::class.java,
+            RPKGitHubProfile::class.java,
+            plugin.config.getLong("caching.rpkit_github_profile.name.size")
+        )
+    } else {
+        null
+    }
+
     fun insert(entity: RPKGitHubProfile) {
         database.create
                 .insertInto(
@@ -58,6 +69,7 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
         val id = database.create.lastID().toInt()
         entity.id = id
         cache?.set(id, entity)
+        nameCache?.set(entity.name, entity)
     }
 
     fun update(entity: RPKGitHubProfile) {
@@ -70,6 +82,7 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
                 .where(RPKIT_GITHUB_PROFILE.ID.eq(id))
                 .execute()
         cache?.set(id, entity)
+        nameCache?.set(entity.name, entity)
     }
 
     operator fun get(id: Int): RPKGitHubProfile? {
@@ -96,12 +109,51 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
                     result.get(RPKIT_GITHUB_PROFILE.OAUTH_TOKEN)
             )
             cache?.set(id, githubProfile)
+            nameCache?.set(githubProfile.name, githubProfile)
             return githubProfile
         } else {
             database.create
                     .deleteFrom(RPKIT_GITHUB_PROFILE)
                     .where(RPKIT_GITHUB_PROFILE.ID.eq(id))
                     .execute()
+            return null
+        }
+    }
+
+    operator fun get(name: String): RPKGitHubProfile? {
+        if (nameCache?.containsKey(name) == true) {
+            return nameCache[name]
+        }
+        val result = database.create
+            .select(
+                RPKIT_GITHUB_PROFILE.ID,
+                RPKIT_GITHUB_PROFILE.PROFILE_ID,
+                RPKIT_GITHUB_PROFILE.OAUTH_TOKEN
+            )
+            .from(RPKIT_GITHUB_PROFILE)
+            .where(RPKIT_GITHUB_PROFILE.NAME.eq(name))
+            .fetchOne() ?: return null
+        val id = result[RPKIT_GITHUB_PROFILE.ID]
+        val profileService = Services[RPKProfileService::class.java] ?: return null
+        val profileId = result.get(RPKIT_GITHUB_PROFILE.PROFILE_ID)
+        val profile = profileService.getProfile(profileId)
+        if (profile != null) {
+            val githubProfile = RPKGitHubProfileImpl(
+                id,
+                profile,
+                name,
+                result[RPKIT_GITHUB_PROFILE.OAUTH_TOKEN]
+            )
+            cache?.set(id, githubProfile)
+            nameCache?.set(name, githubProfile)
+            return githubProfile
+        } else {
+            database.create
+                .deleteFrom(RPKIT_GITHUB_PROFILE)
+                .where(RPKIT_GITHUB_PROFILE.ID.eq(id))
+                .execute()
+            cache?.remove(id)
+            nameCache?.remove(name)
             return null
         }
     }
@@ -124,6 +176,7 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
                 .where(RPKIT_GITHUB_PROFILE.ID.eq(id))
                 .execute()
         cache?.remove(id)
+        nameCache?.remove(entity.name)
     }
 
 }

@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitIRCProfileDeleteEvent(
-        override val ircProfile: RPKIRCProfile
-) : RPKBukkitEvent(), RPKIRCProfileDeleteEvent, Cancellable {
+        override val ircProfile: RPKIRCProfile,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKIRCProfileDeleteEvent, Cancellable {
 
     companion object {
         @JvmStatic

@@ -48,6 +48,7 @@ import com.rpkit.characters.bukkit.messages.CharactersMessages
 import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownService
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.characters.bukkit.race.RPKRaceServiceImpl
+import com.rpkit.characters.bukkit.web.CharactersWebAPI
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
@@ -55,8 +56,14 @@ import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
+import java.io.IOException
+import java.io.InputStreamReader
+import java.util.logging.Level
+import kotlin.concurrent.thread
+import kotlin.text.Charsets.UTF_8
 
 /**
  * RPK characters plugin default implementation.
@@ -151,6 +158,11 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
 
         registerCommands()
         registerListeners()
+
+        saveDefaultWebConfig()
+        if (getWebConfig().getBoolean("enabled")) {
+            thread { CharactersWebAPI(this).start() }
+        }
     }
 
     fun registerCommands() {
@@ -162,6 +174,43 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
         registerListeners(PlayerJoinListener(this), PlayerInteractEntityListener(this), PlayerMoveListener(this))
         if (config.getBoolean("characters.kill-character-on-death")) {
             registerListeners(PlayerDeathListener(this))
+        }
+    }
+
+    private var webConfig: FileConfiguration? = null
+    private val webConfigFile = File(dataFolder, "web.yml")
+
+    fun getWebConfig(): FileConfiguration {
+        return webConfig ?: reloadWebConfig()
+    }
+
+    fun reloadWebConfig(): FileConfiguration = YamlConfiguration.loadConfiguration(webConfigFile)
+        .also { config ->
+            val defConfigStream = getResource("web.yml")
+            if (defConfigStream != null) {
+                config.setDefaults(
+                    YamlConfiguration.loadConfiguration(
+                        InputStreamReader(
+                            defConfigStream,
+                            UTF_8
+                        )
+                    )
+                )
+            }
+            webConfig = config
+        }
+
+    fun saveWebConfig() {
+        try {
+            getWebConfig().save(webConfigFile)
+        } catch (exception: IOException) {
+            logger.log(Level.SEVERE, "Could not save config to $webConfigFile", exception)
+        }
+    }
+
+    fun saveDefaultWebConfig() {
+        if (!webConfigFile.exists()) {
+            saveResource("web.yml", false)
         }
     }
 }

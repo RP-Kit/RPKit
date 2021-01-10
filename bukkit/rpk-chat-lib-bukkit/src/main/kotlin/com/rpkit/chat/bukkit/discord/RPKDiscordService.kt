@@ -23,8 +23,8 @@ import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfile
 
 interface RPKDiscordService : Service {
 
-    fun sendMessage(channel: DiscordChannel, message: String, callback: ((DiscordMessage) -> Unit)? = null)
-    fun sendMessage(profile: RPKDiscordProfile, message: String, callback: ((DiscordMessage) -> Unit)? = null)
+    fun sendMessage(channel: DiscordChannel, message: String, callback: DiscordMessageCallback? = null)
+    fun sendMessage(profile: RPKDiscordProfile, message: String, callback: DiscordMessageCallback? = null)
     fun getUserName(discordId: DiscordUserId): String?
     fun getUserId(discordUserName: String): DiscordUserId?
     fun setMessageAsProfileLinkRequest(messageId: Long, profile: RPKProfile)

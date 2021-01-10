@@ -20,7 +20,7 @@ import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import org.bukkit.OfflinePlayer
-import java.util.*
+import java.util.UUID
 
 
 interface RPKMinecraftProfileService : Service {
@@ -28,6 +28,7 @@ interface RPKMinecraftProfileService : Service {
     fun getMinecraftProfile(id: Int): RPKMinecraftProfile?
     fun getMinecraftProfile(name: String): RPKMinecraftProfile?
     fun getMinecraftProfile(player: OfflinePlayer): RPKMinecraftProfile?
+    fun getMinecraftProfile(minecraftUUID: UUID): RPKMinecraftProfile?
     fun getMinecraftProfiles(profile: RPKProfile): List<RPKMinecraftProfile>
     fun createMinecraftProfile(minecraftUsername: String, profile: RPKThinProfile? = null): RPKMinecraftProfile
     fun createMinecraftProfile(minecraftUUID: UUID, profile: RPKThinProfile? = null): RPKMinecraftProfile

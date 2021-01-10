@@ -23,7 +23,7 @@ class DiscordMessageImpl(val message: Message) : DiscordMessage {
 
     override fun addReaction(reaction: DiscordReaction) {
         when (reaction) {
-            is DiscordUnicodeReaction -> message.addReaction(reaction.unicode)
+            is DiscordUnicodeReaction -> message.addReaction(reaction.unicode).queue()
         }
     }
 

@@ -45,9 +45,16 @@ import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
 import com.rpkit.players.bukkit.profile.github.RPKGitHubProfileService
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.web.PlayersWebAPI
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
+import java.io.IOException
+import java.io.InputStreamReader
+import java.util.logging.Level
+import kotlin.concurrent.thread
+import kotlin.text.Charsets.UTF_8
 
 /**
  * RPK players plugin default implementation.
@@ -125,6 +132,11 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
 
         registerCommands()
         registerListeners()
+
+        saveDefaultWebConfig()
+        if (getWebConfig().getBoolean("enabled")) {
+            thread { PlayersWebAPI(this).start() }
+        }
     }
 
     private fun registerCommands() {
@@ -133,6 +145,43 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
 
     private fun registerListeners() {
         registerListeners(PlayerJoinListener(this), PlayerLoginListener(this))
+    }
+
+    private var webConfig: FileConfiguration? = null
+    private val webConfigFile = File(dataFolder, "web.yml")
+
+    fun getWebConfig(): FileConfiguration {
+        return webConfig ?: reloadWebConfig()
+    }
+
+    fun reloadWebConfig(): FileConfiguration = YamlConfiguration.loadConfiguration(webConfigFile)
+        .also { config ->
+            val defConfigStream = getResource("web.yml")
+            if (defConfigStream != null) {
+                config.setDefaults(
+                    YamlConfiguration.loadConfiguration(
+                        InputStreamReader(
+                            defConfigStream,
+                            UTF_8
+                        )
+                    )
+                )
+            }
+            webConfig = config
+        }
+
+    fun saveWebConfig() {
+        try {
+            getWebConfig().save(webConfigFile)
+        } catch (exception: IOException) {
+            logger.log(Level.SEVERE, "Could not save config to $webConfigFile", exception)
+        }
+    }
+
+    fun saveDefaultWebConfig() {
+        if (!webConfigFile.exists()) {
+            saveResource("web.yml", false)
+        }
     }
 
 }

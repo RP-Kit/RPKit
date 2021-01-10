@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitCharacterUpdateEvent(
-        override val character: RPKCharacter
-) : RPKBukkitEvent(), RPKCharacterUpdateEvent, Cancellable {
+        override val character: RPKCharacter,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKCharacterUpdateEvent, Cancellable {
 
     companion object {
         @JvmStatic

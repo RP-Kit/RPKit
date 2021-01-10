@@ -7,6 +7,9 @@ caching:
     id:
       enabled: true
       size: 20
+    name:
+      enabled: true
+      size: 20
   rpkit_irc_profile:
     id:
       enabled: true
