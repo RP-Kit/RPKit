@@ -15,18 +15,4 @@
 
 package com.rpkit.itemquality.bukkit.itemquality
 
-import org.bukkit.Material
-import org.bukkit.inventory.ItemStack
-
-
-class RPKItemQualityImpl(
-        override val name: RPKItemQualityName,
-        override val lore: List<String>,
-        override val durabilityModifier: Double,
-        override val applicableItems: List<Material>
-) : RPKItemQuality {
-
-    override fun isApplicableFor(item: ItemStack): Boolean {
-        return applicableItems.contains(item.type)
-    }
-}
+data class RPKItemQualityName(val value: String)

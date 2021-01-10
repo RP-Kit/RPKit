@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.professions.bukkit.profession
 
 import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityName
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import org.bukkit.Material
@@ -57,7 +57,7 @@ class RPKProfessionImpl(
                     else -> plugin.config.getString("default.$actionConfigSectionName.$material.quality")
                 }
                 ?: return null
-        return itemQualityService.getItemQuality(itemQualityName)
+        return itemQualityService.getItemQuality(RPKItemQualityName(itemQualityName))
     }
 
     override fun getExperienceNeededForLevel(level: Int): Int {

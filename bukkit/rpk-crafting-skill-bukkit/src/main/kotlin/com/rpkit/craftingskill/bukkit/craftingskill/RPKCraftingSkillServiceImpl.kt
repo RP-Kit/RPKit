@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +24,7 @@ import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.SMELT
 import com.rpkit.craftingskill.bukkit.database.table.RPKCraftingExperienceTable
 import com.rpkit.craftingskill.bukkit.event.craftingskill.RPKBukkitCraftingSkillExperienceChangeEvent
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityName
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import org.bukkit.Material
 import java.lang.Math.min
@@ -91,7 +91,7 @@ class RPKCraftingSkillServiceImpl(override val plugin: RPKCraftingSkillBukkit) :
                 ?.dropWhile { requiredExperience -> requiredExperience > experience }
                 ?.mapNotNull { requiredExperience -> plugin.config.getString("$actionConfigSectionName.$material.$requiredExperience.quality") }
                 ?.firstOrNull() ?: return null
-        return itemQualityService.getItemQuality(itemQualityName)
+        return itemQualityService.getItemQuality(RPKItemQualityName(itemQualityName))
     }
 
     override fun getAmountFor(action: RPKCraftingAction, material: Material, experience: Int): Double {

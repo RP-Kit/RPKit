@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +37,7 @@ class RPKItemQualityServiceImpl(override val plugin: RPKItemQualityBukkit) : RPK
                 val applicableItems = section.getStringList("applicable-items")
                         .mapNotNull { materialName -> Material.matchMaterial(materialName) }
                 return@map RPKItemQualityImpl(
-                        name,
+                        RPKItemQualityName(name),
                         lore,
                         durabilityModifier,
                         applicableItems
@@ -46,8 +45,8 @@ class RPKItemQualityServiceImpl(override val plugin: RPKItemQualityBukkit) : RPK
             }
             ?: emptyList()
 
-    override fun getItemQuality(name: String): RPKItemQuality? {
-        return itemQualities.firstOrNull { quality -> quality.name == name }
+    override fun getItemQuality(name: RPKItemQualityName): RPKItemQuality? {
+        return itemQualities.firstOrNull { quality -> quality.name.value == name.value }
     }
 
     override fun getItemQuality(item: ItemStack): RPKItemQuality? {
