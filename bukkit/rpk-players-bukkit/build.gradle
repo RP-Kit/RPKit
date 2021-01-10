@@ -92,7 +92,7 @@ shadowJar {
         include(dependency("org.eclipse.jetty.websocket:websocket-core-common"))
         include(dependency("org.http4k:http4k-format-gson"))
         include(dependency("org.http4k:http4k-format-core"))
-        include(dependency("org.google.gson:gson"))
+        include(dependency("com.google.code.gson:gson"))
     }
 
     relocate "kotlin", "com.rpkit.players.bukkit.shadow.impl.kotlin"
@@ -108,6 +108,7 @@ shadowJar {
     relocate "javax.servlet", "com.rpkit.players.bukkit.shadow.impl.javax.servlet"
     relocate "org.eclipse", "com.rpkit.players.bukkit.shadow.impl.org.eclipse"
     relocate "org.slf4j", "com.rpkit.players.bukkit.shadow.impl.org.slf4j"
+    relocate "com.google", "com.rpkit.players.bukkit.shadow.impl.com.google"
 
 }
 

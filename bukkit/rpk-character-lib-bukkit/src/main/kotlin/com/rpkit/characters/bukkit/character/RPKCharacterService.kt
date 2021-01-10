@@ -16,9 +16,12 @@
 
 package com.rpkit.characters.bukkit.character
 
+import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.core.service.Service
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import org.bukkit.Location
+import org.bukkit.inventory.ItemStack
 
 /**
  * Provides character-related operations.
@@ -74,6 +77,63 @@ interface RPKCharacterService : Service {
      * @param character The character to add
      */
     fun addCharacter(character: RPKCharacter)
+
+    /**
+     * Creates a new character. Any parameters not specified are defaulted.
+     *
+     * @param profile The profile
+     * @param name The name
+     * @param gender The gender
+     * @param age The age
+     * @param race The race
+     * @param description The description
+     * @param isDead Whether the character is dead
+     * @param location The location
+     * @param inventoryContents The inventory contents
+     * @param helmet The helmet
+     * @param chestplate The chestplate
+     * @param leggings The leggings
+     * @param boots The boots
+     * @param health The health
+     * @param maxHealth The max health
+     * @param mana The mana
+     * @param maxMana The max mana
+     * @param foodLevel The food level
+     * @param thirstLevel The thirst level
+     * @param isProfileHidden Whether the profile is hidden
+     * @param isNameHidden Whether the name is hidden
+     * @param isGenderHidden Whether the gender is hidden
+     * @param isAgeHidden Whether the age is hidden
+     * @param isRaceHidden Whether the race is hidden
+     * @param isDescriptionHidden Whether the description is hidden
+     */
+    fun createCharacter(
+        profile: RPKProfile? = null,
+        name: String? = null,
+        gender: String? = null,
+        age: Int? = null,
+        race: RPKRace? = null,
+        description: String? = null,
+        isDead: Boolean? = null,
+        location: Location? = null,
+        inventoryContents: Array<ItemStack>? = null,
+        helmet: ItemStack? = null,
+        chestplate: ItemStack? = null,
+        leggings: ItemStack? = null,
+        boots: ItemStack? = null,
+        health: Double? = null,
+        maxHealth: Double? = null,
+        mana: Int? = null,
+        maxMana: Int? = null,
+        foodLevel: Int? = null,
+        thirstLevel: Int? = null,
+        isProfileHidden: Boolean? = null,
+        isNameHidden: Boolean? = null,
+        isGenderHidden: Boolean? = null,
+        isAgeHidden: Boolean? = null,
+        isRaceHidden: Boolean? = null,
+        isDescriptionHidden: Boolean? = null
+    ): RPKCharacter
 
     /**
      * Removes a character from being tracked by this character service.

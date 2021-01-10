@@ -16,7 +16,6 @@
 
 package com.rpkit.players.bukkit
 
-import com.google.common.base.Charsets
 import com.rpkit.core.bukkit.command.sender.resolver.RPKBukkitCommandSenderResolutionService
 import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
@@ -55,6 +54,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.util.logging.Level
 import kotlin.concurrent.thread
+import kotlin.text.Charsets.UTF_8
 
 /**
  * RPK players plugin default implementation.
@@ -132,6 +132,7 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
 
         registerCommands()
         registerListeners()
+
         saveDefaultWebConfig()
         if (getWebConfig().getBoolean("enabled")) {
             thread { PlayersWebAPI(this).start() }
@@ -161,7 +162,7 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
                     YamlConfiguration.loadConfiguration(
                         InputStreamReader(
                             defConfigStream,
-                            Charsets.UTF_8
+                            UTF_8
                         )
                     )
                 )
