@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,11 +48,11 @@ class RPKCharacterProfessionChangeCooldownTable(
                         RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.COOLDOWN_END_TIME
                 )
                 .values(
-                    characterId,
-                        entity.cooldownEndTime
+                    characterId.value,
+                    entity.cooldownEndTime
                 )
                 .execute()
-        characterCache?.set(characterId, entity)
+        characterCache?.set(characterId.value, entity)
     }
 
     fun update(entity: RPKCharacterProfessionChangeCooldown) {
@@ -61,26 +60,26 @@ class RPKCharacterProfessionChangeCooldownTable(
         database.create
                 .update(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN)
                 .set(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.COOLDOWN_END_TIME, entity.cooldownEndTime)
-                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        characterCache?.set(characterId, entity)
+        characterCache?.set(characterId.value, entity)
     }
 
     fun get(character: RPKCharacter): RPKCharacterProfessionChangeCooldown? {
         val characterId = character.id ?: return null
-        if (characterCache?.containsKey(characterId) == true) {
-            return characterCache[characterId]
+        if (characterCache?.containsKey(characterId.value) == true) {
+            return characterCache[characterId.value]
         }
         val result = database.create
                 .select(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.COOLDOWN_END_TIME)
                 .from(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN)
-                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(characterId.value))
                 .fetchOne() ?: return null
         val characterProfessionChangeCooldown = RPKCharacterProfessionChangeCooldown(
                 character,
                 result[RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.COOLDOWN_END_TIME]
         )
-        characterCache?.set(characterId, characterProfessionChangeCooldown)
+        characterCache?.set(characterId.value, characterProfessionChangeCooldown)
         return characterProfessionChangeCooldown
     }
 
@@ -88,9 +87,9 @@ class RPKCharacterProfessionChangeCooldownTable(
         val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN)
-                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        characterCache?.remove(characterId)
+        characterCache?.remove(characterId.value)
     }
 
 }

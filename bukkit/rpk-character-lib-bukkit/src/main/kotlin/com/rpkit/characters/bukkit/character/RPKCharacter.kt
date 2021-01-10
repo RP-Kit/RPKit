@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +17,8 @@ package com.rpkit.characters.bukkit.character
 
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceService
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 
@@ -34,7 +33,7 @@ interface RPKCharacter {
      * The ID of the character. Guaranteed to be unique.
      * If set to null it is a new character that has not yet been inserted into the database.
      */
-    var id: Int?
+    var id: RPKCharacterId?
 
     /**
      * The profile.

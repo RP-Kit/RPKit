@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +23,7 @@ interface RPKRace {
     /**
      * The ID of the race. Guaranteed to be unique. If set to null, the race has not yet been inserted into the database.
      */
-    var id: Int?
+    var id: RPKRaceId?
 
     /**
      * The name of the race.

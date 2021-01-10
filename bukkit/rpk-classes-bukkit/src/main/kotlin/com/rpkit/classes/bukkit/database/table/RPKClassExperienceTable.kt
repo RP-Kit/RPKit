@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,12 +53,12 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
                         RPKIT_CLASS_EXPERIENCE.EXPERIENCE
                 )
                 .values(
-                        entity.character.id,
+                        characterId.value,
                         entity.`class`.name,
                         entity.experience
                 )
                 .execute()
-        cache?.set(CharacterClassCacheKey(characterId, className), entity)
+        cache?.set(CharacterClassCacheKey(characterId.value, className), entity)
     }
 
     fun update(entity: RPKClassExperience) {
@@ -68,16 +67,16 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
         database.create
                 .update(RPKIT_CLASS_EXPERIENCE)
                 .set(RPKIT_CLASS_EXPERIENCE.EXPERIENCE, entity.experience)
-                .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(entity.`class`.name))
                 .execute()
-        cache?.set(CharacterClassCacheKey(characterId, className), entity)
+        cache?.set(CharacterClassCacheKey(characterId.value, className), entity)
     }
 
     operator fun get(character: RPKCharacter, `class`: RPKClass): RPKClassExperience? {
         val characterId = character.id ?: return null
         val className = `class`.name
-        val cacheKey = CharacterClassCacheKey(characterId, className)
+        val cacheKey = CharacterClassCacheKey(characterId.value, className)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
@@ -88,7 +87,7 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
                         RPKIT_CLASS_EXPERIENCE.EXPERIENCE
                 )
                 .from(RPKIT_CLASS_EXPERIENCE)
-                .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(character.id))
+                .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(`class`.name))
                 .fetchOne() ?: return null
         val classExperience = RPKClassExperience(
@@ -105,10 +104,10 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
         val className = entity.`class`.name
         database.create
                 .deleteFrom(RPKIT_CLASS_EXPERIENCE)
-                .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(className))
                 .execute()
-        cache?.remove(CharacterClassCacheKey(characterId, className))
+        cache?.remove(CharacterClassCacheKey(characterId.value, className))
     }
 
 }

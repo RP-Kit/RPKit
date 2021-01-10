@@ -16,11 +16,11 @@
 package com.rpkit.auctions.bukkit.database.table
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
-import com.rpkit.auctions.bukkit.auction.RPKAuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuction
+import com.rpkit.auctions.bukkit.auction.RPKAuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuctionService
-import com.rpkit.auctions.bukkit.bid.RPKBidId
 import com.rpkit.auctions.bukkit.bid.RPKBid
+import com.rpkit.auctions.bukkit.bid.RPKBidId
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
 import com.rpkit.auctions.bukkit.database.create
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_BID
@@ -49,6 +49,8 @@ class RPKBidTable(
     }
 
     fun insert(entity: RPKBid) {
+        val auctionId = entity.auction.id ?: return
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_BID,
@@ -57,8 +59,8 @@ class RPKBidTable(
                         RPKIT_BID.AMOUNT
                 )
                 .values(
-                        entity.auction.id?.value,
-                        entity.character.id,
+                        auctionId.value,
+                        characterId.value,
                         entity.amount
                 )
                 .execute()
@@ -69,10 +71,12 @@ class RPKBidTable(
 
     fun update(entity: RPKBid) {
         val id = entity.id ?: return
+        val auctionId = entity.auction.id ?: return
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_BID)
-                .set(RPKIT_BID.AUCTION_ID, entity.auction.id?.value)
-                .set(RPKIT_BID.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_BID.AUCTION_ID, auctionId.value)
+                .set(RPKIT_BID.CHARACTER_ID, characterId.value)
                 .set(RPKIT_BID.AMOUNT, entity.amount)
                 .where(RPKIT_BID.ID.eq(id.value))
                 .execute()

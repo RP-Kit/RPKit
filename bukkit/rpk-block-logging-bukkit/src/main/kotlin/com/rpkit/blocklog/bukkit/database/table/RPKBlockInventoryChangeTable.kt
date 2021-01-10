@@ -65,7 +65,7 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                         entity.time,
                         entity.profile?.id,
                         entity.minecraftProfile?.id,
-                        entity.character?.id,
+                        entity.character?.id?.value,
                         entity.from.toByteArray(),
                         entity.to.toByteArray(),
                         entity.reason
@@ -84,7 +84,7 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.TIME, entity.time)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID, entity.profile?.id)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id)
-                .set(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID, entity.character?.id)
+                .set(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID, entity.character?.id?.value)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.FROM, entity.from.toByteArray())
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.TO, entity.to.toByteArray())
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.REASON, entity.reason)

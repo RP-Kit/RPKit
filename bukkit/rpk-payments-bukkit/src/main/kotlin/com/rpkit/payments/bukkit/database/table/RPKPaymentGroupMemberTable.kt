@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +32,7 @@ class RPKPaymentGroupMemberTable(
 ) : Table {
 
     fun insert(entity: RPKPaymentGroupMember) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_PAYMENT_GROUP_MEMBER,
@@ -41,7 +41,7 @@ class RPKPaymentGroupMemberTable(
                 )
                 .values(
                         entity.paymentGroup.id,
-                        entity.character.id
+                        characterId.value
                 )
                 .execute()
     }
@@ -63,10 +63,11 @@ class RPKPaymentGroupMemberTable(
     }
 
     fun delete(entity: RPKPaymentGroupMember) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_PAYMENT_GROUP_MEMBER)
                 .where(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID.eq(entity.paymentGroup.id))
-                .and(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID.eq(entity.character.id))
+                .and(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID.eq(characterId.value))
                 .execute()
     }
 

@@ -16,8 +16,8 @@
 package com.rpkit.auctions.bukkit.database.table
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
-import com.rpkit.auctions.bukkit.auction.RPKAuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuction
+import com.rpkit.auctions.bukkit.auction.RPKAuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuctionImpl
 import com.rpkit.auctions.bukkit.bid.RPKBidId
 import com.rpkit.auctions.bukkit.database.create
@@ -52,6 +52,7 @@ class RPKAuctionTable(
     }
 
     fun insert(entity: RPKAuction) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_AUCTION,
@@ -81,7 +82,7 @@ class RPKAuctionTable(
                         entity.location?.z,
                         entity.location?.yaw?.toDouble(),
                         entity.location?.pitch?.toDouble(),
-                        entity.character.id,
+                        characterId.value,
                         entity.duration,
                         entity.endTime,
                         entity.startPrice,
@@ -98,6 +99,7 @@ class RPKAuctionTable(
 
     fun update(entity: RPKAuction) {
         val id = entity.id ?: return
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_AUCTION)
                 .set(RPKIT_AUCTION.ITEM, entity.item.toByteArray())
@@ -108,7 +110,7 @@ class RPKAuctionTable(
                 .set(RPKIT_AUCTION.Z, entity.location?.z)
                 .set(RPKIT_AUCTION.YAW, entity.location?.yaw?.toDouble())
                 .set(RPKIT_AUCTION.PITCH, entity.location?.pitch?.toDouble())
-                .set(RPKIT_AUCTION.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_AUCTION.CHARACTER_ID, characterId.value)
                 .set(RPKIT_AUCTION.DURATION, entity.duration)
                 .set(RPKIT_AUCTION.END_TIME, entity.endTime)
                 .set(RPKIT_AUCTION.START_PRICE, entity.startPrice)

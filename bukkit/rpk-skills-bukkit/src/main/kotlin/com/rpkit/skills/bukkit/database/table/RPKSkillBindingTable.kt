@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +42,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
     }
 
     fun insert(entity: RPKSkillBinding) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_SKILL_BINDING,
@@ -51,7 +51,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                         RPKIT_SKILL_BINDING.SKILL_NAME
                 )
                 .values(
-                        entity.character.id,
+                        characterId.value,
                         entity.item.toByteArray(),
                         entity.skill.name
                 )
@@ -59,8 +59,9 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
     }
 
     fun update(entity: RPKSkillBinding) {
+        val characterId = entity.character.id ?: return
         database.create.update(RPKIT_SKILL_BINDING)
-                .set(RPKIT_SKILL_BINDING.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_SKILL_BINDING.CHARACTER_ID, characterId.value)
                 .set(RPKIT_SKILL_BINDING.ITEM, entity.item.toByteArray())
                 .set(RPKIT_SKILL_BINDING.SKILL_NAME, entity.skill.name)
                 .where(RPKIT_SKILL_BINDING.ID.eq(entity.id))
@@ -106,6 +107,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
     }
 
     fun get(character: RPKCharacter): List<RPKSkillBinding> {
+        val characterId = character.id ?: return emptyList()
         val results = database.create
                 .select(
                         RPKIT_SKILL_BINDING.ID,
@@ -114,7 +116,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                         RPKIT_SKILL_BINDING.SKILL_NAME
                 )
                 .from(RPKIT_SKILL_BINDING)
-                .where(RPKIT_SKILL_BINDING.CHARACTER_ID.eq(character.id))
+                .where(RPKIT_SKILL_BINDING.CHARACTER_ID.eq(characterId.value))
                 .fetch() ?: return emptyList()
         val skillService = Services[RPKSkillService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
@@ -137,9 +139,10 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
     }
 
     fun delete(entity: RPKSkillBinding) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_SKILL_BINDING)
-                .where(RPKIT_SKILL_BINDING.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_SKILL_BINDING.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_SKILL_BINDING.ITEM.eq(entity.item.toByteArray()))
                 .execute()
     }

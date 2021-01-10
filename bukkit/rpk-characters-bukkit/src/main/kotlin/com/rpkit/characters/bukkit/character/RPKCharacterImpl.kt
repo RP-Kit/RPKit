@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +38,7 @@ import org.bukkit.inventory.ItemStack
  */
 class RPKCharacterImpl(
         val plugin: RPKCharactersBukkit,
-        override var id: Int? = null,
+        override var id: RPKCharacterId? = null,
         override var profile: RPKProfile? = null,
         override var minecraftProfile: RPKMinecraftProfile? = null,
         name: String = plugin.config.getString("characters.defaults.name") ?: "",
@@ -224,7 +223,7 @@ class RPKCharacterImpl(
     }
 
     override fun hashCode(): Int {
-        return id ?: 0
+        return id?.value ?: 0
     }
 
 

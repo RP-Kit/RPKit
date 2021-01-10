@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.characters.bukkit.database.table
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterImpl
 import com.rpkit.characters.bukkit.database.create
 import com.rpkit.characters.bukkit.database.jooq.Tables.RPKIT_CHARACTER
@@ -121,7 +121,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKCharacterId(id)
         cache?.set(id, entity)
     }
 
@@ -134,7 +134,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .set(RPKIT_CHARACTER.NAME, entity.name)
                 .set(RPKIT_CHARACTER.GENDER, entity.gender)
                 .set(RPKIT_CHARACTER.AGE, entity.age)
-                .set(RPKIT_CHARACTER.RACE_ID, entity.race?.id)
+                .set(RPKIT_CHARACTER.RACE_ID, entity.race?.id?.value)
                 .set(RPKIT_CHARACTER.DESCRIPTION, entity.description)
                 .set(RPKIT_CHARACTER.DEAD, entity.isDead)
                 .set(RPKIT_CHARACTER.WORLD, entity.location.world?.name)
@@ -160,9 +160,9 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .set(RPKIT_CHARACTER.AGE_HIDDEN, entity.isAgeHidden)
                 .set(RPKIT_CHARACTER.RACE_HIDDEN, entity.isRaceHidden)
                 .set(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, entity.isDescriptionHidden)
-                .where(RPKIT_CHARACTER.ID.eq(id))
+                .where(RPKIT_CHARACTER.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
     operator fun get(id: Int): RPKCharacter? {
@@ -219,7 +219,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
             val race = if (raceId == null) null else raceService?.getRace(raceId)
             val character = RPKCharacterImpl(
                     plugin = plugin,
-                    id = result[RPKIT_CHARACTER.ID],
+                    id = RPKCharacterId(result[RPKIT_CHARACTER.ID]),
                     profile = profile,
                     minecraftProfile = minecraftProfile,
                     name = result[RPKIT_CHARACTER.NAME],
@@ -292,9 +292,9 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHARACTER)
-                .where(RPKIT_CHARACTER.ID.eq(id))
+                .where(RPKIT_CHARACTER.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 
 }

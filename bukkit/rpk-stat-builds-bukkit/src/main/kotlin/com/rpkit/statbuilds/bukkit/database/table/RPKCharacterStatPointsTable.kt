@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +43,7 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
     }
 
     fun insert(entity: RPKCharacterStatPoints) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_CHARACTER_STAT_POINTS,
@@ -52,7 +52,7 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
                         RPKIT_CHARACTER_STAT_POINTS.POINTS
                 )
                 .values(
-                        entity.character.id,
+                        characterId.value,
                         entity.statAttribute.name,
                         entity.points
                 )
@@ -65,20 +65,20 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
         database.create
                 .update(RPKIT_CHARACTER_STAT_POINTS)
                 .set(RPKIT_CHARACTER_STAT_POINTS.POINTS, entity.points)
-                .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(statAttributeName))
                 .execute()
-        cache?.set(CharacterStatAttributeCacheKey(characterId, statAttributeName), entity)
+        cache?.set(CharacterStatAttributeCacheKey(characterId.value, statAttributeName), entity)
     }
 
     operator fun get(character: RPKCharacter, statAttribute: RPKStatAttribute): RPKCharacterStatPoints? {
         val characterId = character.id ?: return null
-        val cacheKey = CharacterStatAttributeCacheKey(characterId, statAttribute.name)
+        val cacheKey = CharacterStatAttributeCacheKey(characterId.value, statAttribute.name)
         if (cache?.containsKey(cacheKey) == true) return cache[cacheKey]
         val result = database.create
             .select(RPKIT_CHARACTER_STAT_POINTS.POINTS)
             .from(RPKIT_CHARACTER_STAT_POINTS)
-            .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId))
+            .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
             .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(statAttribute.name))
             .fetchOne() ?: return null
         val characterStatPoints = RPKCharacterStatPoints(
@@ -94,10 +94,10 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
         val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHARACTER_STAT_POINTS)
-                .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(entity.statAttribute.name))
                 .execute()
-        cache?.remove(CharacterStatAttributeCacheKey(characterId, entity.statAttribute.name))
+        cache?.remove(CharacterStatAttributeCacheKey(characterId.value, entity.statAttribute.name))
     }
 
 }

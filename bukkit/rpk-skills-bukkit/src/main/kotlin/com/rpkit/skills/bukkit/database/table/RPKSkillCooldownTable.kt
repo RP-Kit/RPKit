@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,12 +54,12 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
                         RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP
                 )
                 .values(
-                        entity.character.id,
+                        characterId.value,
                         entity.skill.name,
                         entity.cooldownTimestamp
                 )
                 .execute()
-        cache?.set(CharacterSkillCacheKey(characterId, skillName), entity)
+        cache?.set(CharacterSkillCacheKey(characterId.value, skillName), entity)
     }
 
     fun update(entity: RPKSkillCooldown) {
@@ -69,23 +68,23 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
         database.create
                 .update(RPKIT_SKILL_COOLDOWN)
                 .set(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP, entity.cooldownTimestamp)
-                .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(skillName))
                 .execute()
-        cache?.set(CharacterSkillCacheKey(characterId, skillName), entity)
+        cache?.set(CharacterSkillCacheKey(characterId.value, skillName), entity)
     }
 
     operator fun get(character: RPKCharacter, skill: RPKSkill): RPKSkillCooldown? {
         val characterId = character.id ?: return null
         val skillName = skill.name
-        val cacheKey = CharacterSkillCacheKey(characterId, skillName)
+        val cacheKey = CharacterSkillCacheKey(characterId.value, skillName)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
         val result = database.create
                 .select(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP)
                 .from(RPKIT_SKILL_COOLDOWN)
-                .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(character.id))
+                .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(skill.name))
                 .fetchOne() ?: return null
         val skillCooldown = RPKSkillCooldown(
@@ -102,10 +101,10 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
         val skillName = entity.skill.name
         database.create
                 .deleteFrom(RPKIT_SKILL_COOLDOWN)
-                .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(entity.skill.name))
                 .execute()
-        cache?.remove(CharacterSkillCacheKey(characterId, skillName))
+        cache?.remove(CharacterSkillCacheKey(characterId.value, skillName))
     }
 
 }

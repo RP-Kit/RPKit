@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +33,7 @@ class RPKCharacterProfessionTable(
 ) : Table {
 
     fun insert(entity: RPKCharacterProfession) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_CHARACTER_PROFESSION,
@@ -41,25 +41,27 @@ class RPKCharacterProfessionTable(
                         RPKIT_CHARACTER_PROFESSION.PROFESSION
                 )
                 .values(
-                        entity.character.id,
+                        characterId.value,
                         entity.profession.name
                 )
                 .execute()
     }
 
     fun update(entity: RPKCharacterProfession) {
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_CHARACTER_PROFESSION)
                 .set(RPKIT_CHARACTER_PROFESSION.PROFESSION, entity.profession.name)
-                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(characterId.value))
                 .execute()
     }
 
     operator fun get(character: RPKCharacter): List<RPKCharacterProfession> {
+        val characterId = character.id ?: return emptyList()
         val results = database.create
                 .select(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID)
                 .from(RPKIT_CHARACTER_PROFESSION)
-                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(character.id))
+                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(characterId.value))
                 .fetch() ?: return emptyList()
         val professionService = Services[RPKProfessionService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
@@ -79,22 +81,24 @@ class RPKCharacterProfessionTable(
     }
 
     fun get(character: RPKCharacter, profession: RPKProfession): RPKCharacterProfession? {
+        val characterId = character.id ?: return null
         database.create
                 .select(
                         RPKIT_CHARACTER_PROFESSION.CHARACTER_ID,
                         RPKIT_CHARACTER_PROFESSION.PROFESSION
                 )
                 .from(RPKIT_CHARACTER_PROFESSION)
-                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(character.id))
+                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_PROFESSION.PROFESSION.eq(profession.name))
                 .fetchOne() ?: return null
         return RPKCharacterProfession(character, profession)
     }
 
     fun delete(entity: RPKCharacterProfession) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION)
-                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_PROFESSION.PROFESSION.eq(entity.profession.name))
                 .execute()
     }

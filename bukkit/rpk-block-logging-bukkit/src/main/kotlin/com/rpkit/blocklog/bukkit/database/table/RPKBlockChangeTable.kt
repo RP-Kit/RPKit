@@ -63,7 +63,7 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
                         entity.time,
                         entity.profile?.id,
                         entity.minecraftProfile?.id,
-                        entity.character?.id,
+                        entity.character?.id?.value,
                         entity.from.toString(),
                         entity.to.toString(),
                         entity.reason
@@ -82,7 +82,7 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
                 .set(RPKIT_BLOCK_CHANGE.TIME, entity.time)
                 .set(RPKIT_BLOCK_CHANGE.PROFILE_ID, entity.profile?.id)
                 .set(RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id)
-                .set(RPKIT_BLOCK_CHANGE.CHARACTER_ID, entity.character?.id)
+                .set(RPKIT_BLOCK_CHANGE.CHARACTER_ID, entity.character?.id?.value)
                 .set(RPKIT_BLOCK_CHANGE.FROM, entity.from.toString())
                 .set(RPKIT_BLOCK_CHANGE.TO, entity.to.toString())
                 .set(RPKIT_BLOCK_CHANGE.REASON, entity.reason)

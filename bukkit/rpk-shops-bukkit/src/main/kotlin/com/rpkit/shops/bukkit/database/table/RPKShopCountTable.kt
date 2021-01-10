@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,11 +48,11 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
                         RPKIT_SHOP_COUNT.COUNT
                 )
                 .values(
-                    characterId,
-                        entity.count
+                    characterId.value,
+                    entity.count
                 )
                 .execute()
-        characterCache?.set(characterId, entity)
+        characterCache?.set(characterId.value, entity)
     }
 
     fun update(entity: RPKShopCount) {
@@ -61,9 +60,9 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
         database.create
                 .update(RPKIT_SHOP_COUNT)
                 .set(RPKIT_SHOP_COUNT.COUNT, entity.count)
-                .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        characterCache?.set(characterId, entity)
+        characterCache?.set(characterId.value, entity)
     }
 
     /**
@@ -75,8 +74,8 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
      */
     operator fun get(character: RPKCharacter): RPKShopCount? {
         val characterId = character.id ?: return null
-        if (characterCache?.containsKey(characterId) == true) {
-            return characterCache[characterId]
+        if (characterCache?.containsKey(characterId.value) == true) {
+            return characterCache[characterId.value]
         } else {
             val result = database.create
                     .select(
@@ -84,13 +83,13 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
                             RPKIT_SHOP_COUNT.COUNT
                     )
                     .from(RPKIT_SHOP_COUNT)
-                    .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId))
+                    .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId.value))
                     .fetchOne() ?: return null
             val shopCount = RPKShopCount(
                     character,
                     result.get(RPKIT_SHOP_COUNT.COUNT)
             )
-            characterCache?.set(characterId, shopCount)
+            characterCache?.set(characterId.value, shopCount)
             return shopCount
         }
     }
@@ -99,8 +98,8 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
         val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_SHOP_COUNT)
-                .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        characterCache?.remove(characterId)
+        characterCache?.remove(characterId.value)
     }
 }

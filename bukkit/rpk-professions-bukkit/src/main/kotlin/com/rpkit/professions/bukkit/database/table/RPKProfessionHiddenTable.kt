@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,34 +48,24 @@ class RPKProfessionHiddenTable(
                         RPKIT_PROFESSION_HIDDEN.CHARACTER_ID
                 )
                 .values(
-                    characterId
+                    characterId.value
                 )
                 .execute()
-        characterCache?.set(characterId, entity)
-    }
-
-    fun update(entity: RPKProfessionHidden) {
-        val characterId = entity.character.id ?: return
-        database.create
-                .update(RPKIT_PROFESSION_HIDDEN)
-                .set(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID, characterId)
-                .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(characterId))
-                .execute()
-        characterCache?.set(characterId, entity)
+        characterCache?.set(characterId.value, entity)
     }
 
     operator fun get(character: RPKCharacter): RPKProfessionHidden? {
         val characterId = character.id ?: return null
-        if (characterCache?.containsKey(characterId) == true) {
-            return characterCache[characterId]
+        if (characterCache?.containsKey(characterId.value) == true) {
+            return characterCache[characterId.value]
         }
         database.create
                 .select(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID)
                 .from(RPKIT_PROFESSION_HIDDEN)
-                .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(characterId.value))
                 .fetchOne() ?: return null
         val professionHidden = RPKProfessionHidden(character)
-        characterCache?.set(characterId, professionHidden)
+        characterCache?.set(characterId.value, professionHidden)
         return professionHidden
     }
 
@@ -84,8 +73,8 @@ class RPKProfessionHiddenTable(
         val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_PROFESSION_HIDDEN)
-                .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        characterCache?.remove(characterId)
+        characterCache?.remove(characterId.value)
     }
 }
