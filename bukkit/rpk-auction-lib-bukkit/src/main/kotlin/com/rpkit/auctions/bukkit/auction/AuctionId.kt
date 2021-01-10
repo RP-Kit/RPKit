@@ -13,17 +13,6 @@
  * limitations under the License.
  */
 
-package com.rpkit.auctions.bukkit.bid
+package com.rpkit.auctions.bukkit.auction
 
-import com.rpkit.auctions.bukkit.auction.RPKAuction
-import com.rpkit.characters.bukkit.character.RPKCharacter
-
-/**
- * Bid implementation.
- */
-class RPKBidImpl(
-        override var id: BidId? = null,
-        override val auction: RPKAuction,
-        override val character: RPKCharacter,
-        override val amount: Int
-) : RPKBid
+data class AuctionId(val value: Int)

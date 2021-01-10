@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +16,10 @@
 package com.rpkit.auctions.bukkit.database.table
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
+import com.rpkit.auctions.bukkit.auction.AuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuction
 import com.rpkit.auctions.bukkit.auction.RPKAuctionImpl
+import com.rpkit.auctions.bukkit.bid.BidId
 import com.rpkit.auctions.bukkit.database.create
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_AUCTION
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_BID
@@ -91,7 +92,7 @@ class RPKAuctionTable(
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = AuctionId(id)
         cache?.set(id, entity)
     }
 
@@ -115,14 +116,14 @@ class RPKAuctionTable(
                 .set(RPKIT_AUCTION.NO_SELL_PRICE, entity.noSellPrice)
                 .set(RPKIT_AUCTION.MINIMUM_BID_INCREMENT, entity.minimumBidIncrement)
                 .set(RPKIT_AUCTION.BIDDING_OPEN, entity.isBiddingOpen)
-                .where(RPKIT_AUCTION.ID.eq(id))
+                .where(RPKIT_AUCTION.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKAuction? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: AuctionId): RPKAuction? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         } else {
             val result = database.create
                     .select(
@@ -144,7 +145,7 @@ class RPKAuctionTable(
                             RPKIT_AUCTION.BIDDING_OPEN
                     )
                     .from(RPKIT_AUCTION)
-                    .where(RPKIT_AUCTION.ID.eq(id))
+                    .where(RPKIT_AUCTION.ID.eq(id.value))
                     .fetchOne() ?: return null
             val currencyService = Services[RPKCurrencyService::class.java] ?: return null
             val currencyId = result.get(RPKIT_AUCTION.CURRENCY_ID)
@@ -175,21 +176,21 @@ class RPKAuctionTable(
                         result.get(RPKIT_AUCTION.MINIMUM_BID_INCREMENT),
                         result.get(RPKIT_AUCTION.BIDDING_OPEN)
                 )
-                cache?.set(id, auction)
+                cache?.set(id.value, auction)
                 return auction
             } else {
                 val bidTable = database.getTable(RPKBidTable::class.java)
                 database.create
                         .select(RPKIT_BID.ID)
                         .from(RPKIT_BID)
-                        .where(RPKIT_BID.AUCTION_ID.eq(id))
+                        .where(RPKIT_BID.AUCTION_ID.eq(id.value))
                         .fetch()
                         .map { it[RPKIT_BID.ID] }
-                        .mapNotNull { bidId -> bidTable[bidId] }
+                        .mapNotNull { bidId -> bidTable[BidId(bidId)] }
                         .forEach { bid -> bidTable.delete(bid) }
                 database.create
                         .deleteFrom(RPKIT_AUCTION)
-                        .where(RPKIT_AUCTION.ID.eq(id))
+                        .where(RPKIT_AUCTION.ID.eq(id.value))
                         .execute()
                 return null
             }
@@ -207,7 +208,7 @@ class RPKAuctionTable(
                 .from(RPKIT_AUCTION)
                 .fetch()
         return results.map { result ->
-            get(result.get(RPKIT_AUCTION.ID))
+            get(AuctionId(result[RPKIT_AUCTION.ID]))
         }.filterNotNull()
     }
 
@@ -218,9 +219,9 @@ class RPKAuctionTable(
         }
         database.create
                 .deleteFrom(RPKIT_AUCTION)
-                .where(RPKIT_AUCTION.ID.eq(id))
+                .where(RPKIT_AUCTION.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 
 }

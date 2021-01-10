@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.auctions.bukkit.command.bid
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
+import com.rpkit.auctions.bukkit.auction.AuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
@@ -83,7 +83,7 @@ class BidCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
                     sender.sendMessage(plugin.messages.noCharacter)
                     return true
                 }
-                val auction = auctionService.getAuction(id)
+                val auction = auctionService.getAuction(AuctionId(id))
                 if (auction == null) {
                     sender.sendMessage(plugin.messages.bidInvalidAuctionNotExistent)
                     return true

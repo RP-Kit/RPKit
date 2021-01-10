@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.auctions.bukkit.listener
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
+import com.rpkit.auctions.bukkit.auction.AuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.core.service.Services
@@ -51,16 +51,14 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit) : Listener {
                     event.player.sendMessage(plugin.messages.auctionSignInvalidIdNotANumber)
                     return
                 }
-                val auction = auctionService.getAuction(auctionId)
+                val auction = auctionService.getAuction(AuctionId(auctionId))
                 if (auction == null) {
                     event.block.breakNaturally()
                     event.player.sendMessage(plugin.messages.auctionSignInvalidAuctionDoesNotExist)
                     return
                 } else {
                     event.setLine(2, auction.item.amount.toString() + " x " + auction.item.type.toString().toLowerCase().replace('_', ' '))
-                    event.setLine(3, ((auction.bids
-                            .sortedByDescending(RPKBid::amount)
-                            .firstOrNull()
+                    event.setLine(3, ((auction.bids.maxByOrNull(RPKBid::amount)
                             ?.amount ?: auction.startPrice) + auction.minimumBidIncrement).toString())
                 }
             } catch (exception: NumberFormatException) {
