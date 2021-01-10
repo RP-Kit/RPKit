@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +19,7 @@ import com.rpkit.banks.bukkit.bank.RPKBankService
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
@@ -75,7 +75,7 @@ class PaymentWithdrawCommand(private val plugin: RPKPaymentsBukkit) : CommandExe
             sender.sendMessage(plugin.messages["payment-withdraw-invalid-character"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(args.dropLast(1).joinToString(" "))
+        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.dropLast(1).joinToString(" ")))
         if (paymentGroup == null) {
             sender.sendMessage(plugin.messages[".payment-withdraw-invalid-group"])
             return true

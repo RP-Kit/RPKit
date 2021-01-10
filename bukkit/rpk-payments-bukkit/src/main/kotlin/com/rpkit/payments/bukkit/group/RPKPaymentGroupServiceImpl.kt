@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,11 +29,11 @@ class RPKPaymentGroupServiceImpl(override val plugin: RPKPaymentsBukkit) : RPKPa
     override val paymentGroups: List<RPKPaymentGroup>
         get() = plugin.database.getTable(RPKPaymentGroupTable::class.java).getAll()
 
-    override fun getPaymentGroup(id: Int): RPKPaymentGroup? {
+    override fun getPaymentGroup(id: RPKPaymentGroupId): RPKPaymentGroup? {
         return plugin.database.getTable(RPKPaymentGroupTable::class.java)[id]
     }
 
-    override fun getPaymentGroup(name: String): RPKPaymentGroup? {
+    override fun getPaymentGroup(name: RPKPaymentGroupName): RPKPaymentGroup? {
         return plugin.database.getTable(RPKPaymentGroupTable::class.java).get(name)
     }
 

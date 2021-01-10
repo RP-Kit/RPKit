@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +19,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
@@ -86,7 +86,7 @@ class PaymentSetAmountCommand(private val plugin: RPKPaymentsBukkit) : CommandEx
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(args.joinToString(" "))
+        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" ")))
         if (paymentGroup == null) {
             sender.sendMessage(plugin.messages["payment-set-amount-invalid-group"])
             return true

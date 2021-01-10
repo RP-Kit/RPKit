@@ -32,6 +32,7 @@ class RPKPaymentGroupMemberTable(
 ) : Table {
 
     fun insert(entity: RPKPaymentGroupMember) {
+        val paymentGroupId = entity.paymentGroup.id ?: return
         val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
@@ -40,17 +41,18 @@ class RPKPaymentGroupMemberTable(
                         RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID
                 )
                 .values(
-                        entity.paymentGroup.id,
+                        paymentGroupId.value,
                         characterId.value
                 )
                 .execute()
     }
 
     operator fun get(paymentGroup: RPKPaymentGroup): List<RPKPaymentGroupMember> {
+        val paymentGroupId = paymentGroup.id ?: return emptyList()
         val results = database.create
                 .select(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID)
                 .from(RPKIT_PAYMENT_GROUP_MEMBER)
-                .where(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID.eq(paymentGroup.id))
+                .where(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID.eq(paymentGroupId.value))
                 .fetch()
         val characterService = Services[RPKCharacterService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
@@ -63,10 +65,11 @@ class RPKPaymentGroupMemberTable(
     }
 
     fun delete(entity: RPKPaymentGroupMember) {
+        val paymentGroupId = entity.paymentGroup.id ?: return
         val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_PAYMENT_GROUP_MEMBER)
-                .where(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID.eq(entity.paymentGroup.id))
+                .where(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID.eq(paymentGroupId.value))
                 .and(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID.eq(characterId.value))
                 .execute()
     }

@@ -19,6 +19,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import net.md_5.bungee.api.chat.BaseComponent
@@ -73,7 +74,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
             return true
         }
         val character = characterService.getActiveCharacter(minecraftProfile)
-        val paymentGroup = paymentGroupService.getPaymentGroup(args.joinToString(" "))
+        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" ")))
         if (paymentGroup == null) {
             sender.sendMessage(plugin.messages["payment-info-invalid-group"])
             return true
@@ -97,7 +98,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
                         var fieldFound = false
                         if (line.length >= i + "\$name".length) {
                             if (line.substring(i, i + "\$name".length) == "\$name") {
-                                val textComponent = TextComponent(paymentGroup.name)
+                                val textComponent = TextComponent(paymentGroup.name.value)
                                 if (chatColor != null) {
                                     textComponent.color = chatColor.asBungee()
                                 }
@@ -439,7 +440,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
                         var fieldFound = false
                         if (line.length >= i + "\$name".length) {
                             if (line.substring(i, i + "\$name".length) == "\$name") {
-                                val textComponent = TextComponent(paymentGroup.name)
+                                val textComponent = TextComponent(paymentGroup.name.value)
                                 if (chatColor != null) {
                                     textComponent.color = chatColor.asBungee()
                                 }

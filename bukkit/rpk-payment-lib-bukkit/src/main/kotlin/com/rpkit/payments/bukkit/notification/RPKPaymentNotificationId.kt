@@ -15,18 +15,4 @@
 
 package com.rpkit.payments.bukkit.notification
 
-import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.payments.bukkit.group.RPKPaymentGroup
-import java.time.LocalDateTime
-
-/**
- * Payment notification implementation.
- */
-class RPKPaymentNotificationImpl(
-        override var id: RPKPaymentNotificationId? = null,
-        override val group: RPKPaymentGroup,
-        override val to: RPKCharacter,
-        override val character: RPKCharacter,
-        override val date: LocalDateTime,
-        override val text: String
-) : RPKPaymentNotification
+data class RPKPaymentNotificationId(val value: Int)

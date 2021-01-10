@@ -21,6 +21,7 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupImpl
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
@@ -62,7 +63,7 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
         else
             currencyService.getCurrency(RPKCurrencyName(currencyName))
         val name = args.joinToString(" ")
-        if (paymentGroupService.getPaymentGroup(name) != null) {
+        if (paymentGroupService.getPaymentGroup(RPKPaymentGroupName(name)) != null) {
             sender.sendMessage(plugin.messages["payment-create-invalid-name-already-exists"])
             return true
         }
@@ -92,7 +93,7 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
         }
         val paymentGroup = RPKPaymentGroupImpl(
                 plugin,
-                name = name,
+                name = RPKPaymentGroupName(name),
                 amount = plugin.config.getInt("payment-groups.defaults.amount"),
                 currency = currency,
                 interval = Duration.of(plugin.config.getLong("payment-groups.defaults.interval"), MILLIS),

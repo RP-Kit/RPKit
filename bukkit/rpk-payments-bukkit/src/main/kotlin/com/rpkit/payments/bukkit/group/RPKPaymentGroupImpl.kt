@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +38,8 @@ import java.time.LocalDateTime
  */
 class RPKPaymentGroupImpl(
         val plugin: RPKPaymentsBukkit,
-        override var id: Int? = null,
-        override var name: String,
+        override var id: RPKPaymentGroupId? = null,
+        override var name: RPKPaymentGroupName,
         override var amount: Int,
         override var currency: RPKCurrency?,
         override var interval: Duration,

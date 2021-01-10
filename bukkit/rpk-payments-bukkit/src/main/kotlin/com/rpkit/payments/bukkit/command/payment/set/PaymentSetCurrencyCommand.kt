@@ -21,6 +21,7 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
@@ -87,7 +88,7 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit) : Command
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(args.joinToString(" "))
+        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" ")))
         if (paymentGroup == null) {
             sender.sendMessage(plugin.messages["payment-set-currency-invalid-group"])
             return true
