@@ -15,17 +15,4 @@
 
 package com.rpkit.blocklog.bukkit.block
 
-import org.bukkit.World
-
-
-interface RPKBlockHistory {
-
-    var id: RPKBlockHistoryId?
-    val world: World
-    val x: Int
-    val y: Int
-    val z: Int
-    val changes: List<RPKBlockChange>
-    val inventoryChanges: List<RPKBlockInventoryChange>
-
-}
+data class RPKBlockInventoryChangeId(val value: Int)

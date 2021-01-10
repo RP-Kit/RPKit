@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +16,14 @@
 package com.rpkit.blocklog.bukkit.block
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.inventory.ItemStack
 import java.time.LocalDateTime
 
 
 class RPKBlockInventoryChangeImpl(
-        override var id: Int? = null,
+        override var id: RPKBlockInventoryChangeId? = null,
         override val blockHistory: RPKBlockHistory,
         override val time: LocalDateTime,
         override val profile: RPKProfile?,

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.blocklog.bukkit.database.table
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistory
+import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryId
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryImpl
 import com.rpkit.blocklog.bukkit.database.create
 import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_HISTORY
@@ -56,7 +56,7 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKBlockHistoryId(id)
         cache?.set(id, entity)
     }
 
@@ -68,14 +68,14 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                 .set(RPKIT_BLOCK_HISTORY.X, entity.x)
                 .set(RPKIT_BLOCK_HISTORY.Y, entity.y)
                 .set(RPKIT_BLOCK_HISTORY.Z, entity.z)
-                .where(RPKIT_BLOCK_HISTORY.ID.eq(id))
+                .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKBlockHistory? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKBlockHistoryId): RPKBlockHistory? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         } else {
             val result = database.create
                     .select(
@@ -85,15 +85,15 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                             RPKIT_BLOCK_HISTORY.Z
                     )
                     .from(RPKIT_BLOCK_HISTORY)
-                    .where(RPKIT_BLOCK_HISTORY.ID.eq(id))
+                    .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
                     .fetchOne()
             val world = plugin.server.getWorld(result.get(RPKIT_BLOCK_HISTORY.WORLD))
             if (world == null) {
                 database.create
                         .deleteFrom(RPKIT_BLOCK_HISTORY)
-                        .where(RPKIT_BLOCK_HISTORY.ID.eq(id))
+                        .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
                         .execute()
-                cache?.remove(id)
+                cache?.remove(id.value)
                 return null
             }
             val blockHistory = RPKBlockHistoryImpl(
@@ -104,7 +104,7 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                     result.get(RPKIT_BLOCK_HISTORY.Y),
                     result.get(RPKIT_BLOCK_HISTORY.Z)
             )
-            cache?.set(id, blockHistory)
+            cache?.set(id.value, blockHistory)
             return blockHistory
         }
     }
@@ -122,7 +122,7 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
         return if (id == null) {
             null
         } else {
-            get(id)
+            get(RPKBlockHistoryId(id))
         }
     }
 
@@ -130,9 +130,9 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_BLOCK_HISTORY)
-                .where(RPKIT_BLOCK_HISTORY.ID.eq(id))
+                .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 
 }

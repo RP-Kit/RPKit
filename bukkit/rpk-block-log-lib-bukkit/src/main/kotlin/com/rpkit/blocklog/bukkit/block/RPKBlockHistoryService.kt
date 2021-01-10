@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,15 +24,15 @@ import java.time.LocalDateTime
 
 interface RPKBlockHistoryService : Service {
 
-    fun getBlockHistory(id: Int): RPKBlockHistory?
+    fun getBlockHistory(id: RPKBlockHistoryId): RPKBlockHistory?
     fun addBlockHistory(blockHistory: RPKBlockHistory)
     fun updateBlockHistory(blockHistory: RPKBlockHistory)
     fun removeBlockHistory(blockHistory: RPKBlockHistory)
-    fun getBlockChange(id: Int): RPKBlockChange?
+    fun getBlockChange(id: RPKBlockChangeId): RPKBlockChange?
     fun addBlockChange(blockChange: RPKBlockChange)
     fun updateBlockChange(blockChange: RPKBlockChange)
     fun removeBlockChange(blockChange: RPKBlockChange)
-    fun getBlockInventoryChange(id: Int): RPKBlockInventoryChange?
+    fun getBlockInventoryChange(id: RPKBlockInventoryChangeId): RPKBlockInventoryChange?
     fun addBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange)
     fun updateBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange)
     fun removeBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange)

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +17,10 @@ package com.rpkit.blocklog.bukkit.database.table
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistory
+import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryId
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChange
+import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChangeId
 import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChangeImpl
 import com.rpkit.blocklog.bukkit.database.create
 import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_INVENTORY_CHANGE
@@ -60,7 +61,7 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                         RPKIT_BLOCK_INVENTORY_CHANGE.REASON
                 )
                 .values(
-                        entity.blockHistory.id,
+                        entity.blockHistory.id?.value,
                         entity.time,
                         entity.profile?.id,
                         entity.minecraftProfile?.id,
@@ -71,7 +72,7 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKBlockInventoryChangeId(id)
         cache?.set(id, entity)
     }
 
@@ -79,7 +80,7 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
         val id = entity.id ?: return
         database.create
                 .update(RPKIT_BLOCK_INVENTORY_CHANGE)
-                .set(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID, entity.blockHistory.id)
+                .set(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID, entity.blockHistory.id?.value)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.TIME, entity.time)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID, entity.profile?.id)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id)
@@ -87,14 +88,14 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.FROM, entity.from.toByteArray())
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.TO, entity.to.toByteArray())
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.REASON, entity.reason)
-                .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id))
+                .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKBlockInventoryChange? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKBlockInventoryChangeId): RPKBlockInventoryChange? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         }
         val result = database.create
                 .select(
@@ -108,17 +109,17 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                         RPKIT_BLOCK_INVENTORY_CHANGE.REASON
                 )
                 .from(RPKIT_BLOCK_INVENTORY_CHANGE)
-                .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id))
+                .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id.value))
                 .fetchOne() ?: return null
         val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return null
         val blockHistoryId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID)
-        val blockHistory = blockHistoryService.getBlockHistory(blockHistoryId)
+        val blockHistory = blockHistoryService.getBlockHistory(RPKBlockHistoryId(blockHistoryId))
         if (blockHistory == null) {
             database.create
                     .deleteFrom(RPKIT_BLOCK_INVENTORY_CHANGE)
-                    .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id))
+                    .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id.value))
                     .execute()
-            cache?.remove(id)
+            cache?.remove(id.value)
             return null
         }
         val profileService = Services[RPKProfileService::class.java] ?: return null
@@ -141,7 +142,7 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                 result.get(RPKIT_BLOCK_INVENTORY_CHANGE.TO).toItemStackArray(),
                 result.get(RPKIT_BLOCK_INVENTORY_CHANGE.REASON)
         )
-        cache?.set(id, blockInventoryChange)
+        cache?.set(id.value, blockInventoryChange)
         return blockInventoryChange
     }
 
@@ -149,10 +150,10 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
         val results = database.create
                 .select(RPKIT_BLOCK_INVENTORY_CHANGE.ID)
                 .from(RPKIT_BLOCK_INVENTORY_CHANGE)
-                .where(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID.eq(blockHistory.id))
+                .where(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID.eq(blockHistory.id?.value))
                 .fetch()
         return results
-                .map { result -> get(result[RPKIT_BLOCK_INVENTORY_CHANGE.ID]) }
+                .map { result -> get(RPKBlockInventoryChangeId(result[RPKIT_BLOCK_INVENTORY_CHANGE.ID])) }
                 .filterNotNull()
     }
 
@@ -160,8 +161,8 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_BLOCK_INVENTORY_CHANGE)
-                .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id))
+                .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 }
