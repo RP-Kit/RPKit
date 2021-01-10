@@ -13,20 +13,6 @@
  * limitations under the License.
  */
 
-package com.rpkit.classes.bukkit.character
+package com.rpkit.classes.bukkit.classes
 
-import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.field.CharacterCardField
-import com.rpkit.classes.bukkit.classes.RPKClassService
-import com.rpkit.core.service.Services
-
-
-class ClassField : CharacterCardField {
-
-    override val name = "class"
-
-    override fun get(character: RPKCharacter): String {
-        return Services[RPKClassService::class.java]?.getClass(character)?.name?.value ?: "unset"
-    }
-
-}
+data class RPKClassName(val value: String)

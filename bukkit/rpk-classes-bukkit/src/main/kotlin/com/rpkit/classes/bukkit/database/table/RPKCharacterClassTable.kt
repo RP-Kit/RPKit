@@ -18,6 +18,7 @@ package com.rpkit.classes.bukkit.database.table
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.classes.bukkit.RPKClassesBukkit
 import com.rpkit.classes.bukkit.classes.RPKCharacterClass
+import com.rpkit.classes.bukkit.classes.RPKClassName
 import com.rpkit.classes.bukkit.classes.RPKClassService
 import com.rpkit.classes.bukkit.database.create
 import com.rpkit.classes.bukkit.database.jooq.Tables.RPKIT_CHARACTER_CLASS
@@ -49,7 +50,7 @@ class RPKCharacterClassTable(private val database: Database, private val plugin:
                 )
                 .values(
                     characterId.value,
-                    entity.`class`.name
+                    entity.`class`.name.value
                 )
                 .execute()
         cache?.set(characterId.value, entity)
@@ -59,7 +60,7 @@ class RPKCharacterClassTable(private val database: Database, private val plugin:
         val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_CHARACTER_CLASS)
-                .set(RPKIT_CHARACTER_CLASS.CLASS_NAME, entity.`class`.name)
+                .set(RPKIT_CHARACTER_CLASS.CLASS_NAME, entity.`class`.name.value)
                 .where(RPKIT_CHARACTER_CLASS.CHARACTER_ID.eq(characterId.value))
                 .execute()
         cache?.set(characterId.value, entity)
@@ -80,7 +81,7 @@ class RPKCharacterClassTable(private val database: Database, private val plugin:
                     .fetchOne() ?: return null
             val classService = Services[RPKClassService::class.java] ?: return null
             val className = result.get(RPKIT_CHARACTER_CLASS.CLASS_NAME)
-            val `class` = classService.getClass(className)
+            val `class` = classService.getClass(RPKClassName(className))
             return if (`class` != null) {
                 val characterClass = RPKCharacterClass(
                         character,

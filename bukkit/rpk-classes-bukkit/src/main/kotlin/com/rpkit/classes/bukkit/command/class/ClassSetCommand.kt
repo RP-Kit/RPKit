@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.classes.bukkit.command.`class`
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.classes.bukkit.RPKClassesBukkit
+import com.rpkit.classes.bukkit.classes.RPKClassName
 import com.rpkit.classes.bukkit.classes.RPKClassService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -67,7 +67,7 @@ class ClassSetCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
             return true
         }
         val className = args[0]
-        val `class` = classService.getClass(className)
+        val `class` = classService.getClass(RPKClassName(className))
         if (`class` == null) {
             sender.sendMessage(plugin.messages["class-set-invalid-class"])
             return true
@@ -78,7 +78,7 @@ class ClassSetCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
         }
         classService.setClass(character, `class`)
         sender.sendMessage(plugin.messages["class-set-valid", mapOf(
-            "class" to `class`.name
+            "class" to `class`.name.value
         )])
         return true
     }

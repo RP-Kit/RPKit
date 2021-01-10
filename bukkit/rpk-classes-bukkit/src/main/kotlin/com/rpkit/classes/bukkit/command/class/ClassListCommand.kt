@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +37,7 @@ class ClassListCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
         }
         sender.sendMessage(plugin.messages["class-list-title"])
         for (`class` in classService.classes) {
-            sender.sendMessage(plugin.messages["class-list-item", mapOf(Pair("class", `class`.name))])
+            sender.sendMessage(plugin.messages["class-list-item", mapOf(Pair("class", `class`.name.value))])
         }
         return true
     }

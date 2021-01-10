@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +16,6 @@
 package com.rpkit.classes.bukkit.classes
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.classes.bukkit.RPKClassesBukkit
 import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkillType
 import com.rpkit.skills.bukkit.skills.RPKSkillTypeService
@@ -27,8 +25,7 @@ import kotlin.math.roundToInt
 
 
 class RPKClassImpl(
-        private val plugin: RPKClassesBukkit,
-        override val name: String,
+        override val name: RPKClassName,
         override val maxLevel: Int,
         private val prerequisitesByName: Map<String, Int>,
         private val baseSkillPointsByName: Map<String, Int>,
@@ -39,7 +36,7 @@ class RPKClassImpl(
     val prerequisites: Map<RPKClass, Int>
         get() = prerequisitesByName
                 .map { entry ->
-                    Services[RPKClassService::class.java]?.getClass(entry.key) to entry.value
+                    Services[RPKClassService::class.java]?.getClass(RPKClassName(entry.key)) to entry.value
                 }
                 .mapNotNull { (`class`, level) -> if (`class` == null) null else `class` to level }
                 .toMap()

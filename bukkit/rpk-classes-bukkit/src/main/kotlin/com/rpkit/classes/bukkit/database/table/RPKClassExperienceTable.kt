@@ -54,11 +54,11 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
                 )
                 .values(
                         characterId.value,
-                        entity.`class`.name,
+                        entity.`class`.name.value,
                         entity.experience
                 )
                 .execute()
-        cache?.set(CharacterClassCacheKey(characterId.value, className), entity)
+        cache?.set(CharacterClassCacheKey(characterId.value, className.value), entity)
     }
 
     fun update(entity: RPKClassExperience) {
@@ -68,15 +68,15 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
                 .update(RPKIT_CLASS_EXPERIENCE)
                 .set(RPKIT_CLASS_EXPERIENCE.EXPERIENCE, entity.experience)
                 .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(entity.`class`.name))
+                .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(entity.`class`.name.value))
                 .execute()
-        cache?.set(CharacterClassCacheKey(characterId.value, className), entity)
+        cache?.set(CharacterClassCacheKey(characterId.value, className.value), entity)
     }
 
     operator fun get(character: RPKCharacter, `class`: RPKClass): RPKClassExperience? {
         val characterId = character.id ?: return null
         val className = `class`.name
-        val cacheKey = CharacterClassCacheKey(characterId.value, className)
+        val cacheKey = CharacterClassCacheKey(characterId.value, className.value)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
@@ -88,7 +88,7 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
                 )
                 .from(RPKIT_CLASS_EXPERIENCE)
                 .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(`class`.name))
+                .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(`class`.name.value))
                 .fetchOne() ?: return null
         val classExperience = RPKClassExperience(
                 character,
@@ -105,9 +105,9 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
         database.create
                 .deleteFrom(RPKIT_CLASS_EXPERIENCE)
                 .where(RPKIT_CLASS_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(className))
+                .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(className.value))
                 .execute()
-        cache?.remove(CharacterClassCacheKey(characterId.value, className))
+        cache?.remove(CharacterClassCacheKey(characterId.value, className.value))
     }
 
 }
