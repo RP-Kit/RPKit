@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +22,7 @@ import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.database.create
 import com.rpkit.moderation.bukkit.database.jooq.Tables.RPKIT_WARNING
 import com.rpkit.moderation.bukkit.warning.RPKWarning
+import com.rpkit.moderation.bukkit.warning.RPKWarningId
 import com.rpkit.moderation.bukkit.warning.RPKWarningImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
@@ -58,7 +58,7 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKWarningId(id)
         cache?.set(id, entity)
     }
 
@@ -70,12 +70,12 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                 .set(RPKIT_WARNING.PROFILE_ID, entity.profile.id)
                 .set(RPKIT_WARNING.ISSUER_ID, entity.issuer.id)
                 .set(RPKIT_WARNING.TIME, entity.time)
-                .where(RPKIT_WARNING.ID.eq(id))
+                .where(RPKIT_WARNING.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKWarning? {
+    operator fun get(id: RPKWarningId): RPKWarning? {
         val result = database.create
                 .select(
                         RPKIT_WARNING.REASON,
@@ -84,7 +84,7 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                         RPKIT_WARNING.TIME
                 )
                 .from(RPKIT_WARNING)
-                .where(RPKIT_WARNING.ID.eq(id))
+                .where(RPKIT_WARNING.ID.eq(id.value))
                 .fetchOne() ?: return null
         val profileService = Services[RPKProfileService::class.java] ?: return null
         val profile = profileService.getProfile(result[RPKIT_WARNING.PROFILE_ID])
@@ -97,14 +97,14 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                     issuer,
                     result[RPKIT_WARNING.TIME]
             )
-            cache?.set(id, warning)
+            cache?.set(id.value, warning)
             return warning
         } else {
             database.create
                     .deleteFrom(RPKIT_WARNING)
-                    .where(RPKIT_WARNING.ID.eq(id))
+                    .where(RPKIT_WARNING.ID.eq(id.value))
                     .execute()
-            cache?.remove(id)
+            cache?.remove(id.value)
             return null
         }
     }
@@ -115,15 +115,15 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                 .from(RPKIT_WARNING)
                 .where(RPKIT_WARNING.PROFILE_ID.eq(profile.id))
                 .fetch()
-        return results.map { get(it[RPKIT_WARNING.ID]) }.filterNotNull()
+        return results.map { get(RPKWarningId(it[RPKIT_WARNING.ID])) }.filterNotNull()
     }
 
     fun delete(entity: RPKWarning) {
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_WARNING)
-                .where(RPKIT_WARNING.ID.eq(id))
+                .where(RPKIT_WARNING.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 }

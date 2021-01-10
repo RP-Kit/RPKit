@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +20,11 @@ import java.time.LocalDateTime
 
 
 class RPKWarningImpl(
-        override var id: Int? = null,
+        override var id: RPKWarningId? = null,
         override val reason: String,
         override val profile: RPKProfile,
         override val issuer: RPKProfile,
         override val time: LocalDateTime
 ) : RPKWarning {
-    constructor(reason: String, player: RPKProfile, issuer: RPKProfile) : this(0, reason, player, issuer, LocalDateTime.now())
+    constructor(reason: String, player: RPKProfile, issuer: RPKProfile) : this(null, reason, player, issuer, LocalDateTime.now())
 }

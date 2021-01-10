@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +22,7 @@ import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.database.create
 import com.rpkit.moderation.bukkit.database.jooq.Tables.RPKIT_TICKET
 import com.rpkit.moderation.bukkit.ticket.RPKTicket
+import com.rpkit.moderation.bukkit.ticket.RPKTicketId
 import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.bukkit.Location
@@ -74,7 +74,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKTicketId(id)
         cache?.set(id, entity)
     }
 
@@ -94,14 +94,14 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .set(RPKIT_TICKET.OPEN_DATE, entity.openDate)
                 .set(RPKIT_TICKET.CLOSE_DATE, entity.closeDate)
                 .set(RPKIT_TICKET.CLOSED, entity.isClosed)
-                .where(RPKIT_TICKET.ID.eq(ticketId))
+                .where(RPKIT_TICKET.ID.eq(ticketId.value))
                 .execute()
-        cache?.set(ticketId, entity)
+        cache?.set(ticketId.value, entity)
     }
 
-    operator fun get(id: Int): RPKTicket? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKTicketId): RPKTicket? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         } else {
             val result = database.create
                     .select(
@@ -119,7 +119,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                             RPKIT_TICKET.CLOSED
                     )
                     .from(RPKIT_TICKET)
-                    .where(RPKIT_TICKET.ID.eq(id))
+                    .where(RPKIT_TICKET.ID.eq(id.value))
                     .fetchOne() ?: return null
             val profileService = Services[RPKProfileService::class.java]
             val issuerId = result[RPKIT_TICKET.ISSUER_ID]
@@ -135,7 +135,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
             val pitch = result[RPKIT_TICKET.PITCH]
             if (issuer != null) {
                 val ticket = RPKTicketImpl(
-                        id,
+                        RPKTicketId(id.value),
                         result[RPKIT_TICKET.REASON],
                         issuer,
                         resolver,
@@ -155,14 +155,14 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                         result[RPKIT_TICKET.CLOSE_DATE],
                         result[RPKIT_TICKET.CLOSED]
                 )
-                cache?.set(id, ticket)
+                cache?.set(id.value, ticket)
                 return ticket
             } else {
                 database.create
                         .deleteFrom(RPKIT_TICKET)
-                        .where(RPKIT_TICKET.ID.eq(id))
+                        .where(RPKIT_TICKET.ID.eq(id.value))
                         .execute()
-                cache?.remove(id)
+                cache?.remove(id.value)
                 return null
             }
         }
@@ -172,9 +172,9 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
         val ticketId = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_TICKET)
-                .where(RPKIT_TICKET.ID.eq(ticketId))
+                .where(RPKIT_TICKET.ID.eq(ticketId.value))
                 .execute()
-        cache?.remove(ticketId)
+        cache?.remove(ticketId.value)
     }
 
     fun getOpenTickets(): List<RPKTicket> {
@@ -183,7 +183,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .from(RPKIT_TICKET)
                 .where(RPKIT_TICKET.CLOSED.eq(false))
                 .fetch()
-        return results.map { get(it[RPKIT_TICKET.ID]) }.filterNotNull()
+        return results.map { get(RPKTicketId(it[RPKIT_TICKET.ID])) }.filterNotNull()
     }
 
     fun getClosedTickets(): List<RPKTicket> {
@@ -192,7 +192,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .from(RPKIT_TICKET)
                 .where(RPKIT_TICKET.CLOSED.eq(true))
                 .fetch()
-        return results.map { get(it[RPKIT_TICKET.ID]) }.filterNotNull()
+        return results.map { get(RPKTicketId(it[RPKIT_TICKET.ID])) }.filterNotNull()
     }
 
 }

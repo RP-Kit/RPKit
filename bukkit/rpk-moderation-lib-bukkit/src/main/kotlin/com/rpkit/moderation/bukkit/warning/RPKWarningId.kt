@@ -13,24 +13,6 @@
  * limitations under the License.
  */
 
-package com.rpkit.moderation.bukkit.ticket
+package com.rpkit.moderation.bukkit.warning
 
-import com.rpkit.players.bukkit.profile.RPKProfile
-import org.bukkit.Location
-import java.time.LocalDateTime
-
-
-interface RPKTicket {
-
-    var id: RPKTicketId?
-    val reason: String
-    val issuer: RPKProfile
-    var resolver: RPKProfile?
-    val location: Location?
-    val openDate: LocalDateTime
-    var closeDate: LocalDateTime?
-    var isClosed: Boolean
-
-    fun close(resolver: RPKProfile)
-
-}
+data class RPKWarningId(val value: Int)
