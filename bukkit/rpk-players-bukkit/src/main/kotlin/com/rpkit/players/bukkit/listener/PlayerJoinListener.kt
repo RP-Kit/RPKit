@@ -46,11 +46,11 @@ class PlayerJoinListener(private val plugin: RPKPlayersBukkit) : Listener {
             )
             val yesComponent = TextComponent(plugin.messages.yes)
             yesComponent.color = GREEN
-            yesComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/account confirmlink minecraft ${it.profile.id}")
+            yesComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/profile confirmlink minecraft ${it.profile.id}")
             yesComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to link account to ${it.profile.name}"))
             val noComponent = TextComponent(plugin.messages.no)
             noComponent.color = RED
-            noComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/account denylink minecraft ${it.profile.id}")
+            noComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/profile denylink minecraft ${it.profile.id}")
             noComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to cancel linking to ${it.profile.name}"))
             event.player.spigot().sendMessage(*messageComponent)
             event.player.spigot().sendMessage(yesComponent)

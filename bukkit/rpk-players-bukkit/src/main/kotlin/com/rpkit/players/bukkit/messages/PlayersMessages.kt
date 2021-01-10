@@ -43,6 +43,7 @@ class PlayersMessages(plugin: RPKPlayersBukkit) : BukkitMessages(plugin) {
     }
 
     val profileLinkUsage = get("profile-link-usage")
+    val profileLinkDiscordUsage = get("profile-link-discord-usage")
     val profileLinkDiscordInvalidUserTag = get("profile-link-discord-invalid-user-tag")
     val profileLinkDiscordInvalidUser = get("profile-link-discord-invalid-user")
     val profileLinkDiscordValid = get("profile-link-discord-valid")

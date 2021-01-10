@@ -41,21 +41,21 @@ class RPKIRCProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKIRCPr
     }
 
     override fun addIRCProfile(profile: RPKIRCProfile) {
-        val event = RPKBukkitIRCProfileCreateEvent(profile)
+        val event = RPKBukkitIRCProfileCreateEvent(profile, !plugin.server.isPrimaryThread)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKIRCProfileTable::class.java).insert(event.ircProfile)
     }
 
     override fun updateIRCProfile(profile: RPKIRCProfile) {
-        val event = RPKBukkitIRCProfileUpdateEvent(profile)
+        val event = RPKBukkitIRCProfileUpdateEvent(profile, !plugin.server.isPrimaryThread)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKIRCProfileTable::class.java).update(event.ircProfile)
     }
 
     override fun removeIRCProfile(profile: RPKIRCProfile) {
-        val event = RPKBukkitIRCProfileDeleteEvent(profile)
+        val event = RPKBukkitIRCProfileDeleteEvent(profile, !plugin.server.isPrimaryThread)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKIRCProfileTable::class.java).delete(event.ircProfile)

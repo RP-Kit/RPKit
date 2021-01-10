@@ -33,6 +33,11 @@ dependencies {
     implementation group: "org.bstats", name: "bstats-bukkit", version: "1.7"
     implementation group: "org.jooq", name: "jooq", version: "3.13.2"
     implementation group: "org.kohsuke", name: "github-api", version: "1.112"
+    implementation group: "org.slf4j", name: "slf4j-jdk14", version: "1.7.30"
+    implementation platform("org.http4k:http4k-bom:3.285.2")
+    implementation group: "org.http4k", name: "http4k-core"
+    implementation group: "org.http4k", name: "http4k-server-jetty"
+    implementation group: "org.http4k", name: "http4k-format-gson"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
@@ -71,6 +76,23 @@ shadowJar {
         include(dependency("javax.xml.bind:jaxb-api"))
         include(dependency("javax.activation:javax.activation-api"))
         include(dependency("org.kohsuke:github-api"))
+        include(dependency("org.http4k:http4k-core"))
+        include(dependency("org.http4k:http4k-server-jetty"))
+        include(dependency("org.eclipse.jetty:jetty-server"))
+        include(dependency("org.eclipse.jetty.toolchain:jetty-servlet-api"))
+        include(dependency("org.eclipse.jetty:jetty-http"))
+        include(dependency("org.eclipse.jetty:jetty-util"))
+        include(dependency("org.slf4j:slf4j-api"))
+        include(dependency("org.slf4j:slf4j-jdk14"))
+        include(dependency("org.eclipse.jetty:jetty-io"))
+        include(dependency("org.eclipse.jetty:jetty-servlet"))
+        include(dependency("org.eclipse.jetty:jetty-security"))
+        include(dependency("javax.servlet:javax.servlet-api"))
+        include(dependency("org.eclipse.jetty.websocket:websocket-core-server"))
+        include(dependency("org.eclipse.jetty.websocket:websocket-core-common"))
+        include(dependency("org.http4k:http4k-format-gson"))
+        include(dependency("org.http4k:http4k-format-core"))
+        include(dependency("org.google.gson:gson"))
     }
 
     relocate "kotlin", "com.rpkit.players.bukkit.shadow.impl.kotlin"
@@ -82,6 +104,11 @@ shadowJar {
     relocate "javax.xml.bind", "com.rpkit.players.bukkit.shadow.impl.javax.xml.bind"
     relocate "javax.activation", "com.rpkit.players.bukkit.shadow.impl.javax.activation"
     relocate "org.kohsuke", "com.rpkit.players.bukkit.shadow.impl.org.kohsuke"
+    relocate "org.http4k", "com.rpkit.players.bukkit.shadow.impl.org.http4k"
+    relocate "javax.servlet", "com.rpkit.players.bukkit.shadow.impl.javax.servlet"
+    relocate "org.eclipse", "com.rpkit.players.bukkit.shadow.impl.org.eclipse"
+    relocate "org.slf4j", "com.rpkit.players.bukkit.shadow.impl.org.slf4j"
+
 }
 
 artifacts {

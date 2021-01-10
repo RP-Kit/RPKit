@@ -31,6 +31,10 @@ class RPKGitHubProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKGi
         return plugin.database.getTable(RPKGitHubProfileTable::class.java)[id]
     }
 
+    override fun getGitHubProfile(name: String): RPKGitHubProfile? {
+        return plugin.database.getTable(RPKGitHubProfileTable::class.java)[name]
+    }
+
     override fun getGitHubProfiles(profile: RPKProfile): List<RPKGitHubProfile> {
         return plugin.database.getTable(RPKGitHubProfileTable::class.java).get(profile)
     }

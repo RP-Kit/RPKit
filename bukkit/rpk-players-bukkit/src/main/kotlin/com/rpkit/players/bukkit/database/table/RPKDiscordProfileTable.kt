@@ -129,7 +129,7 @@ class RPKDiscordProfileTable(
 
     fun get(profile: RPKProfile): List<RPKDiscordProfile> {
         val results = database.create
-                .select(RPKIT_DISCORD_PROFILE.PROFILE_ID)
+                .select(RPKIT_DISCORD_PROFILE.ID)
                 .from(RPKIT_DISCORD_PROFILE)
                 .where(RPKIT_DISCORD_PROFILE.PROFILE_ID.eq(profile.id))
                 .fetch()

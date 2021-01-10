@@ -27,7 +27,13 @@ import com.rpkit.core.message.ParameterizedMessage
 import com.rpkit.core.service.Services
 import com.rpkit.core.service.ServicesDelegate
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.command.profile.*
+import com.rpkit.players.bukkit.command.profile.ProfileCommand
+import com.rpkit.players.bukkit.command.profile.ProfileConfirmLinkCommand
+import com.rpkit.players.bukkit.command.profile.ProfileDenyLinkCommand
+import com.rpkit.players.bukkit.command.profile.ProfileLinkDiscordCommand
+import com.rpkit.players.bukkit.command.profile.ProfileLinkIRCCommand
+import com.rpkit.players.bukkit.command.profile.ProfileSetNameCommand
+import com.rpkit.players.bukkit.command.profile.ProfileViewCommand
 import com.rpkit.players.bukkit.command.result.InvalidTargetMinecraftProfileFailure
 import com.rpkit.players.bukkit.command.result.NoProfileOtherFailure
 import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
@@ -784,6 +790,20 @@ class ProfileCommandTests : WordSpec({
             val profileCommand = ProfileCommand(plugin)
             profileCommand.onCommand(sender, arrayOf("link", "discord", "abcd#1234")) should beInstanceOf<NoPermissionFailure>()
             verify(exactly = 1) { sender.sendMessage(noPermissionMessage) }
+        }
+        "return incorrect usage failure when link discord is used without specifying a Discord tag" {
+            val usageMessage = "profile link discord usage"
+            val messages = mockk<PlayersMessages>()
+            every { messages.profileLinkDiscordUsage } returns usageMessage
+            val plugin = mockk<RPKPlayersBukkit>()
+            every { plugin.messages } returns messages
+            val sender = mockk<RPKMinecraftProfile>()
+            every { sender.sendMessage(any<String>()) } just runs
+            every { sender.hasPermission("rpkit.players.command.profile.link") } returns true
+            every { sender.hasPermission("rpkit.players.command.profile.link.discord") } returns true
+            val profileCommand = ProfileCommand(plugin)
+            profileCommand.onCommand(sender, arrayOf("link", "discord")) should beInstanceOf<IncorrectUsageFailure>()
+            verify(exactly = 1) { sender.sendMessage(usageMessage) }
         }
         "return missing service failure when link discord is used with no Discord service present" {
             val noDiscordServiceMessage = "no discord service"

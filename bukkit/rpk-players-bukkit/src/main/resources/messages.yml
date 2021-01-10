@@ -1,4 +1,5 @@
 profile-link-usage: '&cUsage: /profile link [irc|minecraft|discord]'
+profile-link-discord-usage: '&cUsage: /profile link discord [tag]'
 profile-link-discord-invalid-user-tag: '&cThat is not a valid discord tag.'
 profile-link-discord-invalid-user: '&cThat is not a valid discord user.'
 profile-link-discord-valid: '&aA confirmation has been sent to you on Discord.'
