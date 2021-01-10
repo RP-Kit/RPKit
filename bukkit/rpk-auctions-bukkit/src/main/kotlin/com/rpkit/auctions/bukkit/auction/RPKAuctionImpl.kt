@@ -32,19 +32,19 @@ import org.bukkit.inventory.ItemStack
  * Auction implementation.
  */
 class RPKAuctionImpl(
-        private val plugin: RPKAuctionsBukkit,
-        override var id: AuctionId? = null,
-        override val item: ItemStack,
-        override val currency: RPKCurrency,
-        override val location: Location?,
-        override val character: RPKCharacter,
-        override val duration: Long,
-        override val endTime: Long,
-        override val startPrice: Int,
-        override val buyOutPrice: Int?,
-        override val noSellPrice: Int?,
-        override val minimumBidIncrement: Int,
-        override var isBiddingOpen: Boolean = false
+    private val plugin: RPKAuctionsBukkit,
+    override var id: RPKAuctionId? = null,
+    override val item: ItemStack,
+    override val currency: RPKCurrency,
+    override val location: Location?,
+    override val character: RPKCharacter,
+    override val duration: Long,
+    override val endTime: Long,
+    override val startPrice: Int,
+    override val buyOutPrice: Int?,
+    override val noSellPrice: Int?,
+    override val minimumBidIncrement: Int,
+    override var isBiddingOpen: Boolean = false
 ) : RPKAuction {
 
     override val bids: List<RPKBid>

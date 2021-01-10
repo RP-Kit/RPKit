@@ -16,7 +16,7 @@
 package com.rpkit.auctions.bukkit.listener
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
-import com.rpkit.auctions.bukkit.auction.AuctionId
+import com.rpkit.auctions.bukkit.auction.RPKAuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.core.service.Services
@@ -51,7 +51,7 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit) : Listener {
                     event.player.sendMessage(plugin.messages.auctionSignInvalidIdNotANumber)
                     return
                 }
-                val auction = auctionService.getAuction(AuctionId(auctionId))
+                val auction = auctionService.getAuction(RPKAuctionId(auctionId))
                 if (auction == null) {
                     event.block.breakNaturally()
                     event.player.sendMessage(plugin.messages.auctionSignInvalidAuctionDoesNotExist)

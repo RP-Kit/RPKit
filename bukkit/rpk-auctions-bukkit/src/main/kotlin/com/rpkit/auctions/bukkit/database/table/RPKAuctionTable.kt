@@ -16,10 +16,10 @@
 package com.rpkit.auctions.bukkit.database.table
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
-import com.rpkit.auctions.bukkit.auction.AuctionId
+import com.rpkit.auctions.bukkit.auction.RPKAuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuction
 import com.rpkit.auctions.bukkit.auction.RPKAuctionImpl
-import com.rpkit.auctions.bukkit.bid.BidId
+import com.rpkit.auctions.bukkit.bid.RPKBidId
 import com.rpkit.auctions.bukkit.database.create
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_AUCTION
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_BID
@@ -92,7 +92,7 @@ class RPKAuctionTable(
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = AuctionId(id)
+        entity.id = RPKAuctionId(id)
         cache?.set(id, entity)
     }
 
@@ -121,7 +121,7 @@ class RPKAuctionTable(
         cache?.set(id.value, entity)
     }
 
-    operator fun get(id: AuctionId): RPKAuction? {
+    operator fun get(id: RPKAuctionId): RPKAuction? {
         if (cache?.containsKey(id.value) == true) {
             return cache[id.value]
         } else {
@@ -186,7 +186,7 @@ class RPKAuctionTable(
                         .where(RPKIT_BID.AUCTION_ID.eq(id.value))
                         .fetch()
                         .map { it[RPKIT_BID.ID] }
-                        .mapNotNull { bidId -> bidTable[BidId(bidId)] }
+                        .mapNotNull { bidId -> bidTable[RPKBidId(bidId)] }
                         .forEach { bid -> bidTable.delete(bid) }
                 database.create
                         .deleteFrom(RPKIT_AUCTION)
@@ -208,7 +208,7 @@ class RPKAuctionTable(
                 .from(RPKIT_AUCTION)
                 .fetch()
         return results.map { result ->
-            get(AuctionId(result[RPKIT_AUCTION.ID]))
+            get(RPKAuctionId(result[RPKIT_AUCTION.ID]))
         }.filterNotNull()
     }
 

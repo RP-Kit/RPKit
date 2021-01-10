@@ -16,7 +16,7 @@
 package com.rpkit.auctions.bukkit.listener
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
-import com.rpkit.auctions.bukkit.auction.AuctionId
+import com.rpkit.auctions.bukkit.auction.RPKAuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
@@ -73,7 +73,7 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit) : Listener {
             return
         }
         val character = characterService.getActiveCharacter(minecraftProfile)
-        val auction = auctionService.getAuction(AuctionId(sign.getLine(1).toInt()))
+        val auction = auctionService.getAuction(RPKAuctionId(sign.getLine(1).toInt()))
         if (auction == null) {
             event.player.sendMessage(plugin.messages.bidInvalidAuctionNotExistent)
             return

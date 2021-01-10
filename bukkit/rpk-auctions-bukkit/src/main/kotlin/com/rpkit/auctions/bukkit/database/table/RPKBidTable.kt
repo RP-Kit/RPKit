@@ -16,10 +16,10 @@
 package com.rpkit.auctions.bukkit.database.table
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
-import com.rpkit.auctions.bukkit.auction.AuctionId
+import com.rpkit.auctions.bukkit.auction.RPKAuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuction
 import com.rpkit.auctions.bukkit.auction.RPKAuctionService
-import com.rpkit.auctions.bukkit.bid.BidId
+import com.rpkit.auctions.bukkit.bid.RPKBidId
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
 import com.rpkit.auctions.bukkit.database.create
@@ -63,7 +63,7 @@ class RPKBidTable(
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = BidId(id)
+        entity.id = RPKBidId(id)
         cache?.set(id, entity)
     }
 
@@ -79,7 +79,7 @@ class RPKBidTable(
         cache?.set(id.value, entity)
     }
 
-    operator fun get(id: BidId): RPKBid? {
+    operator fun get(id: RPKBidId): RPKBid? {
         if (cache?.containsKey(id.value) == true) {
             return cache[id.value]
         }
@@ -94,7 +94,7 @@ class RPKBidTable(
             .fetchOne() ?: return null
         val auctionService = Services[RPKAuctionService::class.java] ?: return null
         val auctionId = result.get(RPKIT_BID.AUCTION_ID)
-        val auction = auctionService.getAuction(AuctionId(auctionId))
+        val auction = auctionService.getAuction(RPKAuctionId(auctionId))
         val characterService = Services[RPKCharacterService::class.java] ?: return null
         val characterId = result.get(RPKIT_BID.CHARACTER_ID)
         val character = characterService.getCharacter(characterId)
@@ -128,7 +128,7 @@ class RPKBidTable(
                 .where(RPKIT_BID.AUCTION_ID.eq(auction.id?.value))
                 .fetch()
         return results.map { result ->
-            get(BidId(result.get(RPKIT_BID.ID)))
+            get(RPKBidId(result.get(RPKIT_BID.ID)))
         }.filterNotNull()
     }
 

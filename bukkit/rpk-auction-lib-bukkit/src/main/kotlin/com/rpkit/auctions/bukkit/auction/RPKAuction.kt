@@ -29,7 +29,7 @@ interface RPKAuction {
     /**
      * The auction ID. Guaranteed to be unique.
      */
-    var id: AuctionId?
+    var id: RPKAuctionId?
 
     /**
      * The item being auctioned.

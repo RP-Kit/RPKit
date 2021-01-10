@@ -16,7 +16,7 @@
 package com.rpkit.auctions.bukkit.command.bid
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
-import com.rpkit.auctions.bukkit.auction.AuctionId
+import com.rpkit.auctions.bukkit.auction.RPKAuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
@@ -83,7 +83,7 @@ class BidCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
                     sender.sendMessage(plugin.messages.noCharacter)
                     return true
                 }
-                val auction = auctionService.getAuction(AuctionId(id))
+                val auction = auctionService.getAuction(RPKAuctionId(id))
                 if (auction == null) {
                     sender.sendMessage(plugin.messages.bidInvalidAuctionNotExistent)
                     return true

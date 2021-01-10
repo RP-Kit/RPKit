@@ -22,8 +22,8 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
  * Bid implementation.
  */
 class RPKBidImpl(
-        override var id: BidId? = null,
-        override val auction: RPKAuction,
-        override val character: RPKCharacter,
-        override val amount: Int
+    override var id: RPKBidId? = null,
+    override val auction: RPKAuction,
+    override val character: RPKCharacter,
+    override val amount: Int
 ) : RPKBid

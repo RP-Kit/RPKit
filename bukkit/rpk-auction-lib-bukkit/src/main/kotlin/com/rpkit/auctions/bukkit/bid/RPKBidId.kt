@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-package com.rpkit.auctions.bukkit.auction
+package com.rpkit.auctions.bukkit.bid
 
-data class AuctionId(val value: Int)
+data class RPKBidId(val value: Int)

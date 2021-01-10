@@ -26,7 +26,7 @@ import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionUpdateEvent
  */
 class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuctionService {
 
-    override fun getAuction(id: AuctionId): RPKAuction? {
+    override fun getAuction(id: RPKAuctionId): RPKAuction? {
         return plugin.database.getTable(RPKAuctionTable::class.java)[id]
     }
 

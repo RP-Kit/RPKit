@@ -26,7 +26,7 @@ interface RPKBid {
     /**
      * The bid ID. Guaranteed to be unique.
      */
-    var id: BidId?
+    var id: RPKBidId?
 
     /**
      * The auction that this bid is for.

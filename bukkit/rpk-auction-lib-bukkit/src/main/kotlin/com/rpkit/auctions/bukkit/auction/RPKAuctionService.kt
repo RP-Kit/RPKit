@@ -53,7 +53,7 @@ interface RPKAuctionService : Service {
      * @param id The ID of the auction
      * @return The auction, or null if no auction is found with the given ID
      */
-    fun getAuction(id: AuctionId): RPKAuction?
+    fun getAuction(id: RPKAuctionId): RPKAuction?
 
     /**
      * Gets a list of all auctions tracked by this auction service.
