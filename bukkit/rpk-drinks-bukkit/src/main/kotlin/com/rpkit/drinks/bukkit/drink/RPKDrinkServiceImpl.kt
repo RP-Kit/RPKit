@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.drinks.bukkit.drink
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.drink.bukkit.drink.RPKDrink
+import com.rpkit.drink.bukkit.drink.RPKDrinkName
 import com.rpkit.drink.bukkit.drink.RPKDrinkService
 import com.rpkit.drink.bukkit.event.drink.RPKBukkitDrunkennessChangeEvent
 import com.rpkit.drinks.bukkit.RPKDrinksBukkit
@@ -45,7 +45,7 @@ class RPKDrinkServiceImpl(override val plugin: RPKDrinksBukkit) : RPKDrinkServic
                             )
                         }
                 RPKDrinkImpl(
-                        name,
+                        RPKDrinkName(name),
                         drinkItem,
                         recipe,
                         plugin.config.getInt("drinks.$name.drunkenness")
@@ -72,8 +72,8 @@ class RPKDrinkServiceImpl(override val plugin: RPKDrinksBukkit) : RPKDrinkServic
         }
     }
 
-    override fun getDrink(name: String): RPKDrink? {
-        return drinks.firstOrNull { it.name == name }
+    override fun getDrink(name: RPKDrinkName): RPKDrink? {
+        return drinks.firstOrNull { it.name.value == name.value }
     }
 
     override fun getDrink(item: ItemStack): RPKDrink? {

@@ -13,17 +13,6 @@
  * limitations under the License.
  */
 
-package com.rpkit.drinks.bukkit.drink
+package com.rpkit.drink.bukkit.drink
 
-import com.rpkit.drink.bukkit.drink.RPKDrink
-import com.rpkit.drink.bukkit.drink.RPKDrinkName
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.ShapelessRecipe
-
-
-class RPKDrinkImpl(
-        override val name: RPKDrinkName,
-        override val item: ItemStack,
-        override val recipe: ShapelessRecipe,
-        override val drunkenness: Int
-) : RPKDrink
+data class RPKDrinkName(val value: String)
