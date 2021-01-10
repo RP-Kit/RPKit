@@ -15,17 +15,4 @@
 
 package com.rpkit.economy.bukkit.currency
 
-import org.bukkit.Material
-
-/**
- * Currency implementation.
- */
-class RPKCurrencyImpl(
-        override var id: RPKCurrencyId? = null,
-        override var name: RPKCurrencyName,
-        override var nameSingular: String,
-        override var namePlural: String,
-        override var rate: Double,
-        override var defaultAmount: Int,
-        override var material: Material
-) : RPKCurrency
+data class RPKCurrencyName(val value: String)

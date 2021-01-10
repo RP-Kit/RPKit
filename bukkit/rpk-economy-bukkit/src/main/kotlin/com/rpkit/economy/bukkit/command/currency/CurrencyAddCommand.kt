@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,12 +18,20 @@ package com.rpkit.economy.bukkit.command.currency
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyImpl
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.Conversable
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.NumericPrompt
+import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.StringPrompt
+import org.bukkit.conversations.ValidatingPrompt
 import org.bukkit.entity.Player
 
 /**
@@ -64,7 +71,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             val currencyService = Services[RPKCurrencyService::class.java] ?: return false
-            return currencyService.getCurrency(input) == null
+            return currencyService.getCurrency(RPKCurrencyName(input)) == null
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
@@ -241,7 +248,7 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
             val currencyService = Services[RPKCurrencyService::class.java] ?: return END_OF_CONVERSATION
             currencyService.addCurrency(
                     RPKCurrencyImpl(
-                            name = context.getSessionData("name") as String,
+                            name = RPKCurrencyName(context.getSessionData("name") as String),
                             nameSingular = context.getSessionData("name_singular") as String,
                             namePlural = context.getSessionData("name_plural") as String,
                             rate = context.getSessionData("rate") as Double,

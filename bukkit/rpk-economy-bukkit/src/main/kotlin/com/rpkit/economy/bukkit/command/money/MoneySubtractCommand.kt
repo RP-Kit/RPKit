@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -120,7 +120,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit) : CommandExecutor {
             conversationFactory.buildConversation(sender).begin()
             return true
         }
-        val currency = currencyService.getCurrency(args[2])
+        val currency = currencyService.getCurrency(RPKCurrencyName(args[2]))
         if (currency == null) {
             sender.sendMessage(plugin.messages["money-subtract-currency-invalid-currency"])
             return true
@@ -250,12 +250,12 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit) : CommandExecutor {
     private inner class CurrencyPrompt : ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             val currencyService = context.getSessionData("currencyService") as RPKCurrencyService
-            return currencyService.getCurrency(input) != null
+            return currencyService.getCurrency(RPKCurrencyName(input)) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val currencyService = context.getSessionData("currencyService") as RPKCurrencyService
-            context.setSessionData("currency", currencyService.getCurrency(input))
+            context.setSessionData("currency", currencyService.getCurrency(RPKCurrencyName(input)))
             return CurrencySetPrompt()
         }
 
@@ -265,7 +265,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit) : CommandExecutor {
                     currencyService.currencies
                             .joinToString("\n") { currency ->
                                 plugin.messages["money-subtract-currency-prompt-list-item", mapOf(
-                                    "currency" to currency.name
+                                    "currency" to currency.name.value
                                 )]
                             }
         }

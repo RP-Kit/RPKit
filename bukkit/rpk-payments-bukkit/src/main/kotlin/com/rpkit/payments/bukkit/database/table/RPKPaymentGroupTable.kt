@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +18,7 @@ package com.rpkit.payments.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyId
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.database.create
@@ -61,7 +61,7 @@ class RPKPaymentGroupTable(
                 .values(
                         entity.name,
                         entity.amount,
-                        entity.currency?.id,
+                        entity.currency?.id?.value,
                         entity.interval.toMillis(),
                         entity.lastPaymentTime,
                         entity.balance
@@ -78,7 +78,7 @@ class RPKPaymentGroupTable(
                 .update(RPKIT_PAYMENT_GROUP)
                 .set(RPKIT_PAYMENT_GROUP.NAME, entity.name)
                 .set(RPKIT_PAYMENT_GROUP.AMOUNT, entity.amount)
-                .set(RPKIT_PAYMENT_GROUP.CURRENCY_ID, entity.currency?.id)
+                .set(RPKIT_PAYMENT_GROUP.CURRENCY_ID, entity.currency?.id?.value)
                 .set(RPKIT_PAYMENT_GROUP.INTERVAL, entity.interval.toMillis())
                 .set(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME, entity.lastPaymentTime)
                 .set(RPKIT_PAYMENT_GROUP.BALANCE, entity.balance)
@@ -105,7 +105,7 @@ class RPKPaymentGroupTable(
                     .fetchOne()
             val currencyService = Services[RPKCurrencyService::class.java] ?: return null
             val currencyId = result.get(RPKIT_PAYMENT_GROUP.CURRENCY_ID)
-            val currency = if (currencyId == null) null else currencyService.getCurrency(currencyId)
+            val currency = if (currencyId == null) null else currencyService.getCurrency(RPKCurrencyId(currencyId))
             val paymentGroup = RPKPaymentGroupImpl(
                     plugin,
                     id,

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,12 +28,12 @@ interface RPKCurrency {
      * Guaranteed to be unique.
      * Null if not yet inserted into the database.
      */
-    var id: Int?
+    var id: RPKCurrencyId?
 
     /**
      * The name of the currency.
      */
-    var name: String
+    var name: RPKCurrencyName
 
     /**
      * The singular form of the name of the currency.

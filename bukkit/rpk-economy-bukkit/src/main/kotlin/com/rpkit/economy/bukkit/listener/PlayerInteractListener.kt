@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +18,7 @@ package com.rpkit.economy.bukkit.listener
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -45,8 +45,8 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                     return
                 }
                 val amount = sign.getLine(1).split(Regex("\\s+"))[0].toInt()
-                val fromCurrency = currencyService.getCurrency(sign.getLine(1).replaceFirst(Regex("\\d+\\s+"), ""))
-                val toCurrency = currencyService.getCurrency(sign.getLine(3))
+                val fromCurrency = currencyService.getCurrency(RPKCurrencyName(sign.getLine(1).replaceFirst(Regex("\\d+\\s+"), "")))
+                val toCurrency = currencyService.getCurrency(RPKCurrencyName(sign.getLine(3)))
                 if (fromCurrency == null || toCurrency == null) {
                     event.player.sendMessage(plugin.messages["exchange-invalid-format"])
                     return
@@ -100,9 +100,9 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                     return
                 }
                 val fromAmount = sign.getLine(1).split(Regex("\\s+"))[0].toInt()
-                val fromCurrency = currencyService.getCurrency(sign.getLine(1).replaceFirst(Regex("\\d+\\s+"), ""))
+                val fromCurrency = currencyService.getCurrency(RPKCurrencyName(sign.getLine(1).replaceFirst(Regex("\\d+\\s+"), "")))
                 val toAmount = sign.getLine(3).split(Regex("\\s+"))[0].toInt()
-                val toCurrency = currencyService.getCurrency(sign.getLine(3).replaceFirst(Regex("\\d+\\s+"), ""))
+                val toCurrency = currencyService.getCurrency(RPKCurrencyName(sign.getLine(3).replaceFirst(Regex("\\d+\\s+"), "")))
                 if (fromCurrency == null || toCurrency == null) return
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
@@ -149,9 +149,9 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                 return
             }
             val fromAmount = sign.getLine(3).split(Regex("\\s+"))[0].toInt()
-            val fromCurrency = currencyService.getCurrency(sign.getLine(3).replaceFirst(Regex("\\d+\\s+"), ""))
+            val fromCurrency = currencyService.getCurrency(RPKCurrencyName(sign.getLine(3).replaceFirst(Regex("\\d+\\s+"), "")))
             val toAmount = sign.getLine(1).split(Regex("\\s+"))[0].toInt()
-            val toCurrency = currencyService.getCurrency(sign.getLine(1).replaceFirst(Regex("\\d+\\s+"), ""))
+            val toCurrency = currencyService.getCurrency(RPKCurrencyName(sign.getLine(1).replaceFirst(Regex("\\d+\\s+"), "")))
             if (fromCurrency == null || toCurrency == null) return
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             if (minecraftProfileService == null) {

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +18,7 @@ package com.rpkit.shops.bukkit.listener
 import com.rpkit.banks.bukkit.bank.RPKBankService
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -27,7 +27,6 @@ import org.bukkit.ChatColor.GREEN
 import org.bukkit.Material
 import org.bukkit.Material.AIR
 import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockFace.DOWN
 import org.bukkit.block.BlockFace.UP
 import org.bukkit.block.Chest
@@ -82,7 +81,7 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
                     currencyBuilder.append(state.getLine(2).split(Regex("\\s+"))[i]).append(' ')
                 }
                 currencyBuilder.deleteCharAt(currencyBuilder.lastIndex)
-                val currency = currencyService.getCurrency(currencyBuilder.toString())
+                val currency = currencyService.getCurrency(RPKCurrencyName(currencyBuilder.toString()))
                 if (currency == null) {
                     event.player.sendMessage(plugin.messages["shop-currency-invalid"])
                     return
@@ -181,15 +180,15 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
             val character = characterService.getActiveCharacter(minecraftProfile)
             val rentCharacter = characterService.getCharacter(state.getLine(1).toInt())
             val cost = state.getLine(2).split(Regex("\\s+"))[0].toInt()
-            val currency = currencyService.getCurrency(state.getLine(2)
+            val currency = currencyService.getCurrency(RPKCurrencyName(state.getLine(2)
                     .split(Regex("\\s+"))
                     .drop(1)
-                    .joinToString(" "))
+                    .joinToString(" ")))
             if (character == null) {
                 event.player.sendMessage(plugin.messages["no-character"])
                 return
             }
-            val shopSign = block.getRelative(BlockFace.DOWN).state as? Sign
+            val shopSign = block.getRelative(DOWN).state as? Sign
             if (shopSign == null) {
                 event.player.sendMessage(plugin.messages["rent-no-shop"])
                 return

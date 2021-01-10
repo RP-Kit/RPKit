@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.shops.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.shops.bukkit.RPKShopsBukkit
@@ -98,8 +98,10 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
                 return
             }
             if (!(event.getLine(2)?.matches(Regex("for\\s+\\d+\\s+.+")) == true
-                            && currencyService.getCurrency(event.getLine(2)
-                            ?.replace(Regex("for\\s+\\d+\\s+"), "") ?: "") != null)) {
+                            && currencyService.getCurrency(
+                    RPKCurrencyName(event.getLine(2)
+                            ?.replace(Regex("for\\s+\\d+\\s+"), "") ?: "")
+                ) != null)) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["shop-line-2-invalid"])
                 return
@@ -179,7 +181,7 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
                     ?.drop(1)
                     ?.joinToString(" ")
                     ?: ""
-            if (currencyService.getCurrency(currencyName) == null) {
+            if (currencyService.getCurrency(RPKCurrencyName(currencyName)) == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["rent-line-2-invalid"])
                 return

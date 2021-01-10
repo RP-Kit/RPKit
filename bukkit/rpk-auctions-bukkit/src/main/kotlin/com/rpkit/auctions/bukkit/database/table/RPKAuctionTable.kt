@@ -29,6 +29,7 @@ import com.rpkit.core.bukkit.util.toItemStack
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyId
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.Location
 
@@ -52,6 +53,7 @@ class RPKAuctionTable(
     }
 
     fun insert(entity: RPKAuction) {
+        val currencyId = entity.currency.id ?: return
         val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
@@ -75,7 +77,7 @@ class RPKAuctionTable(
                 )
                 .values(
                         entity.item.toByteArray(),
-                        entity.currency.id,
+                        currencyId.value,
                         entity.location?.world?.name,
                         entity.location?.x,
                         entity.location?.y,
@@ -99,11 +101,12 @@ class RPKAuctionTable(
 
     fun update(entity: RPKAuction) {
         val id = entity.id ?: return
+        val currencyId = entity.currency.id ?: return
         val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_AUCTION)
                 .set(RPKIT_AUCTION.ITEM, entity.item.toByteArray())
-                .set(RPKIT_AUCTION.CURRENCY_ID, entity.currency.id)
+                .set(RPKIT_AUCTION.CURRENCY_ID, currencyId.value)
                 .set(RPKIT_AUCTION.WORLD, entity.location?.world?.name)
                 .set(RPKIT_AUCTION.X, entity.location?.x)
                 .set(RPKIT_AUCTION.Y, entity.location?.y)
@@ -151,7 +154,7 @@ class RPKAuctionTable(
                     .fetchOne() ?: return null
             val currencyService = Services[RPKCurrencyService::class.java] ?: return null
             val currencyId = result.get(RPKIT_AUCTION.CURRENCY_ID)
-            val currency = currencyService.getCurrency(currencyId)
+            val currency = currencyService.getCurrency(RPKCurrencyId(currencyId))
             val characterService = Services[RPKCharacterService::class.java] ?: return null
             val characterId = result.get(RPKIT_AUCTION.CHARACTER_ID)
             val character = characterService.getCharacter(characterId)

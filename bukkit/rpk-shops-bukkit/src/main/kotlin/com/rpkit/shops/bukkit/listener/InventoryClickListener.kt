@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +18,7 @@ package com.rpkit.shops.bukkit.listener
 import com.rpkit.banks.bukkit.bank.RPKBankService
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -106,7 +106,7 @@ class InventoryClickListener(val plugin: RPKShopsBukkit) : Listener {
             val amount = sign.getLine(1).split(Regex("\\s+"))[1].toInt()
             val price = sign.getLine(2).split(Regex("\\s+"))[1].toInt()
             val currencyWords = sign.getLine(2).split(Regex("\\s+"))
-            val currency = currencyService.getCurrency(currencyWords.subList(2, currencyWords.size).joinToString(" "))
+            val currency = currencyService.getCurrency(RPKCurrencyName(currencyWords.subList(2, currencyWords.size).joinToString(" ")))
                     ?: return
             val item = event.currentItem ?: return
             val amtItem = ItemStack(item)

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.payments.bukkit.command.payment
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupImpl
@@ -60,7 +60,7 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
         val currency = if (currencyName == null)
             currencyService.defaultCurrency
         else
-            currencyService.getCurrency(currencyName)
+            currencyService.getCurrency(RPKCurrencyName(currencyName))
         val name = args.joinToString(" ")
         if (paymentGroupService.getPaymentGroup(name) != null) {
             sender.sendMessage(plugin.messages["payment-create-invalid-name-already-exists"])

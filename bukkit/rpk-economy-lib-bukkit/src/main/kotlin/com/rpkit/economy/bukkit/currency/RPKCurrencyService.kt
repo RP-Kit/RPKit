@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +42,7 @@ interface RPKCurrencyService : Service {
      * @param id The ID of the currency
      * @return The currency, or null if there is no currency with the given ID
      */
-    fun getCurrency(id: Int): RPKCurrency?
+    fun getCurrency(id: RPKCurrencyId): RPKCurrency?
 
     /**
      * Gets a currency by name.
@@ -52,7 +51,7 @@ interface RPKCurrencyService : Service {
      * @param name The name of the currency
      * @return The currency, or null if there is no currency with the given name
      */
-    fun getCurrency(name: String): RPKCurrency?
+    fun getCurrency(name: RPKCurrencyName): RPKCurrency?
 
     /**
      * Adds a currency.

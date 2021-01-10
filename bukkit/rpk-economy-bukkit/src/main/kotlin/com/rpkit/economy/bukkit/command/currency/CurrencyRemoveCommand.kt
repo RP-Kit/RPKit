@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +18,17 @@ package com.rpkit.economy.bukkit.command.currency
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.Conversable
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.ValidatingPrompt
 import org.bukkit.entity.Player
 
 /**
@@ -68,7 +73,7 @@ class CurrencyRemoveCommand(private val plugin: RPKEconomyBukkit) : CommandExecu
             currencyBuilder.append(args[i]).append(' ')
         }
         currencyBuilder.append(args[args.size - 1])
-        val currency = currencyService.getCurrency(currencyBuilder.toString())
+        val currency = currencyService.getCurrency(RPKCurrencyName(currencyBuilder.toString()))
         if (currency == null) {
             sender.sendMessage(plugin.messages["currency-remove-invalid-currency"])
             return true
@@ -82,7 +87,7 @@ class CurrencyRemoveCommand(private val plugin: RPKEconomyBukkit) : CommandExecu
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             val currencyService = Services[RPKCurrencyService::class.java] ?: return false
-            val currency = currencyService.getCurrency(input) ?: return false
+            val currency = currencyService.getCurrency(RPKCurrencyName(input)) ?: return false
             context.setSessionData("currencyService", currencyService)
             context.setSessionData("currency", currency)
             return true

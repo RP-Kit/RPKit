@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,12 +26,12 @@ import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyUpdateEvent
  */
 class RPKCurrencyServiceImpl(override val plugin: RPKEconomyBukkit) : RPKCurrencyService {
 
-    override fun getCurrency(id: Int): RPKCurrency? {
-        return plugin.database.getTable(RPKCurrencyTable::class.java)[id]
+    override fun getCurrency(id: RPKCurrencyId): RPKCurrency? {
+        return plugin.database.getTable(RPKCurrencyTable::class.java)[id.value]
     }
 
-    override fun getCurrency(name: String): RPKCurrency? {
-        return plugin.database.getTable(RPKCurrencyTable::class.java).get(name)
+    override fun getCurrency(name: RPKCurrencyName): RPKCurrency? {
+        return plugin.database.getTable(RPKCurrencyTable::class.java)[name.value]
     }
 
     override val currencies: Collection<RPKCurrency>
@@ -63,7 +62,7 @@ class RPKCurrencyServiceImpl(override val plugin: RPKEconomyBukkit) : RPKCurrenc
         get() {
             val currencyName = plugin.config.getString("currency.default")
             return if (currencyName != null)
-                getCurrency(currencyName)
+                getCurrency(RPKCurrencyName(currencyName))
             else
                 null
         }

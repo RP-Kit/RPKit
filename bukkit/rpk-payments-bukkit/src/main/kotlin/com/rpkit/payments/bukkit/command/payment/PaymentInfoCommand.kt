@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -228,7 +227,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
                                 if (line.substring(i, i + "\$currency".length) == "\$currency") {
                                     val currency = paymentGroup.currency
                                     if (currency != null) {
-                                        messageComponents.add(TextComponent(currency.name))
+                                        messageComponents.add(TextComponent(currency.name.value))
                                     } else {
                                         messageComponents.add(TextComponent("unset"))
                                     }
@@ -558,7 +557,7 @@ class PaymentInfoCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
                                 if (line.substring(i, i + "\$currency".length) == "\$currency") {
                                     val currency = paymentGroup.currency
                                     if (currency != null) {
-                                        messageComponents.add(TextComponent(currency.name))
+                                        messageComponents.add(TextComponent(currency.name.value))
                                     } else {
                                         messageComponents.add(TextComponent("unset"))
                                     }
