@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +19,7 @@ import com.rpkit.characters.bukkit.race.RPKRace
 import kotlin.random.Random
 
 class RPKLanguageImpl(
-        override val name: String,
+        override val name: RPKLanguageName,
         private val baseUnderstanding: Map<String, Float>,
         private val minimumUnderstandingIncrement: Map<String, Float>,
         private val maximumUnderstandingIncrement: Map<String, Float>,

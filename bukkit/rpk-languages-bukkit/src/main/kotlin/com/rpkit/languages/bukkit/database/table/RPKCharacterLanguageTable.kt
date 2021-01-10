@@ -24,6 +24,7 @@ import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguage
 import com.rpkit.languages.bukkit.database.create
 import com.rpkit.languages.bukkit.database.jooq.Tables.RPKIT_CHARACTER_LANGUAGE
 import com.rpkit.languages.bukkit.language.RPKLanguage
+import com.rpkit.languages.bukkit.language.RPKLanguageName
 import com.rpkit.languages.bukkit.language.RPKLanguageService
 
 class RPKCharacterLanguageTable(
@@ -59,11 +60,11 @@ class RPKCharacterLanguageTable(
                 )
                 .values(
                         characterId.value,
-                        entity.language.name,
+                        entity.language.name.value,
                         entity.understanding.toDouble()
                 )
                 .execute()
-        cache?.set(CharacterLanguageCacheKey(characterId.value, languageName), entity)
+        cache?.set(CharacterLanguageCacheKey(characterId.value, languageName.value), entity)
     }
 
     fun update(entity: RPKCharacterLanguage) {
@@ -74,16 +75,16 @@ class RPKCharacterLanguageTable(
                 .set(RPKIT_CHARACTER_LANGUAGE.UNDERSTANDING, entity.understanding.toDouble())
                 .where(
                         RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId.value)
-                                .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(languageName))
+                                .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(languageName.value))
                 )
                 .execute()
-        cache?.set(CharacterLanguageCacheKey(characterId.value, languageName), entity)
+        cache?.set(CharacterLanguageCacheKey(characterId.value, languageName.value), entity)
     }
 
     operator fun get(character: RPKCharacter, language: RPKLanguage): RPKCharacterLanguage? {
         val characterId = character.id ?: return null
         val languageName = language.name
-        val cacheKey = CharacterLanguageCacheKey(characterId.value, languageName)
+        val cacheKey = CharacterLanguageCacheKey(characterId.value, languageName.value)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
@@ -95,7 +96,7 @@ class RPKCharacterLanguageTable(
                 )
                 .from(RPKIT_CHARACTER_LANGUAGE)
                 .where(RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(language.name))
+                .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(language.name.value))
                 .fetchOne() ?: return null
         val characterLanguage = RPKCharacterLanguage(
                 character,
@@ -115,7 +116,7 @@ class RPKCharacterLanguageTable(
                 .fetch()
         val languageService = Services[RPKLanguageService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
-            val language = languageService.getLanguage(result[RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME]) ?: return@mapNotNull null
+            val language = languageService.getLanguage(RPKLanguageName(result[RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME])) ?: return@mapNotNull null
             return@mapNotNull get(character, language)
         }
     }
@@ -126,9 +127,9 @@ class RPKCharacterLanguageTable(
         database.create
                 .deleteFrom(RPKIT_CHARACTER_LANGUAGE)
                 .where(RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(languageName))
+                .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(languageName.value))
                 .execute()
-        cache?.remove(CharacterLanguageCacheKey(characterId.value, languageName))
+        cache?.remove(CharacterLanguageCacheKey(characterId.value, languageName.value))
     }
 
 }
