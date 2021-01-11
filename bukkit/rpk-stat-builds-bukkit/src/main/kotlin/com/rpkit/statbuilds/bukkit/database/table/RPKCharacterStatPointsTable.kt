@@ -53,7 +53,7 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
                 )
                 .values(
                         characterId.value,
-                        entity.statAttribute.name,
+                        entity.statAttribute.name.value,
                         entity.points
                 )
                 .execute()
@@ -66,20 +66,20 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
                 .update(RPKIT_CHARACTER_STAT_POINTS)
                 .set(RPKIT_CHARACTER_STAT_POINTS.POINTS, entity.points)
                 .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(statAttributeName))
+                .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(statAttributeName.value))
                 .execute()
-        cache?.set(CharacterStatAttributeCacheKey(characterId.value, statAttributeName), entity)
+        cache?.set(CharacterStatAttributeCacheKey(characterId.value, statAttributeName.value), entity)
     }
 
     operator fun get(character: RPKCharacter, statAttribute: RPKStatAttribute): RPKCharacterStatPoints? {
         val characterId = character.id ?: return null
-        val cacheKey = CharacterStatAttributeCacheKey(characterId.value, statAttribute.name)
+        val cacheKey = CharacterStatAttributeCacheKey(characterId.value, statAttribute.name.value)
         if (cache?.containsKey(cacheKey) == true) return cache[cacheKey]
         val result = database.create
             .select(RPKIT_CHARACTER_STAT_POINTS.POINTS)
             .from(RPKIT_CHARACTER_STAT_POINTS)
             .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
-            .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(statAttribute.name))
+            .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(statAttribute.name.value))
             .fetchOne() ?: return null
         val characterStatPoints = RPKCharacterStatPoints(
             character,
@@ -95,9 +95,9 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
         database.create
                 .deleteFrom(RPKIT_CHARACTER_STAT_POINTS)
                 .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(entity.statAttribute.name))
+                .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(entity.statAttribute.name.value))
                 .execute()
-        cache?.remove(CharacterStatAttributeCacheKey(characterId.value, entity.statAttribute.name))
+        cache?.remove(CharacterStatAttributeCacheKey(characterId.value, entity.statAttribute.name.value))
     }
 
 }

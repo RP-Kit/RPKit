@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +74,7 @@ class StatBuildViewCommand(private val plugin: RPKStatBuildsBukkit) : CommandExe
         )])
         statAttributeService.statAttributes.forEach { statAttribute ->
             sender.sendMessage(plugin.messages["stat-build-view-item", mapOf(
-                    "stat_attribute" to statAttribute.name,
+                    "stat_attribute" to statAttribute.name.value,
                     "points" to statBuildService.getStatPoints(character, statAttribute).toString(),
                     "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
             )])

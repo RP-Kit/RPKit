@@ -15,18 +15,4 @@
 
 package com.rpkit.statbuilds.bukkit.statattribute
 
-import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
-
-class RPKStatAttributeServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKStatAttributeService {
-
-    private val statAttributeMap: Map<String, RPKStatAttribute> = plugin.config.getConfigurationSection("stat-attributes")
-        ?.getKeys(false)
-        ?.map(::RPKStatAttributeName)
-        ?.map(::RPKStatAttributeImpl)
-        ?.associateBy { attribute -> attribute.name.value }
-        ?: emptyMap()
-
-    override val statAttributes = statAttributeMap.values.toList()
-
-    override fun getStatAttribute(name: RPKStatAttributeName) = statAttributeMap[name.value]
-}
+data class RPKStatAttributeName(val value: String)

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +37,7 @@ class RPKSkillPointServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKSk
         statAttributeService
                 .statAttributes
                 .forEach { statAttribute ->
-                    parser.addVariable(statAttribute.name, statBuildService.getStatPoints(character, statAttribute).toDouble())
+                    parser.addVariable(statAttribute.name.value, statBuildService.getStatPoints(character, statAttribute).toDouble())
                 }
         val experienceService = Services[RPKExperienceService::class.java] ?: return 0
         parser.addVariable("level", experienceService.getLevel(character).toDouble())
