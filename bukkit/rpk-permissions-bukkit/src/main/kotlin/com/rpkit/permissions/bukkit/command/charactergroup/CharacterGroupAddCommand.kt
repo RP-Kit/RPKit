@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +18,7 @@ package com.rpkit.permissions.bukkit.command.charactergroup
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
+import com.rpkit.permissions.bukkit.group.RPKGroupName
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.addGroup
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -71,20 +71,20 @@ class CharacterGroupAddCommand(private val plugin: RPKPermissionsBukkit) : Comma
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
-        val group = groupService.getGroup(args[1])
+        val group = groupService.getGroup(RPKGroupName(args[1]))
         if (group == null) {
             sender.sendMessage(plugin.messages["character-group-add-invalid-group"])
             return true
         }
-        if (!sender.hasPermission("rpkit.permissions.command.group.add.${group.name}")) {
+        if (!sender.hasPermission("rpkit.permissions.command.group.add.${group.name.value}")) {
             sender.sendMessage(plugin.messages["no-permission-group-add-group", mapOf(
-                    "group" to group.name
+                    "group" to group.name.value
             )])
             return true
         }
         character.addGroup(group)
         sender.sendMessage(plugin.messages["character-group-add-valid", mapOf(
-                "group" to group.name,
+                "group" to group.name.value,
                 "character" to character.name
         )])
         return true

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +36,7 @@ class GroupListCommand(private val plugin: RPKPermissionsBukkit) : CommandExecut
             return true
         }
         groupService.groups.forEach { group ->
-            sender.sendMessage(plugin.messages["group-list-item", mapOf(Pair("group", group.name))])
+            sender.sendMessage(plugin.messages["group-list-item", mapOf("group" to group.name.value)])
         }
         return true
     }

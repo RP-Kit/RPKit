@@ -15,29 +15,4 @@
 
 package com.rpkit.permissions.bukkit.group
 
-/**
- * Represents a group.
- */
-interface RPKGroup {
-
-    /**
-     * The name of the group.
-     */
-    val name: RPKGroupName
-
-    /**
-     * A list of permissions allowed by the group.
-     */
-    val allow: List<String>
-
-    /**
-     * A list of permissions denied by the group.
-     */
-    val deny: List<String>
-
-    /**
-     * A list of groups permissions are inherited from.
-     */
-    val inheritance: List<RPKGroup>
-
-}
+data class RPKGroupName(val value: String)
