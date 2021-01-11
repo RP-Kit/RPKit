@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +21,7 @@ import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrency
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
@@ -96,11 +96,11 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
     private inner class CurrencyPrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return Services[RPKCurrencyService::class.java]?.getCurrency(input) != null
+            return Services[RPKCurrencyService::class.java]?.getCurrency(RPKCurrencyName(input)) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("currency", Services[RPKCurrencyService::class.java]?.getCurrency(input))
+            context.setSessionData("currency", Services[RPKCurrencyService::class.java]?.getCurrency(RPKCurrencyName(input)))
             return CurrencySetPrompt()
         }
 

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +21,10 @@ import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.create
 import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_PROFILE
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
+import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileImpl
+import com.rpkit.players.bukkit.profile.RPKProfileName
 import org.jooq.impl.DSL.max
 
 
@@ -49,14 +51,14 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                         RPKIT_PROFILE.PASSWORD_SALT
                 )
                 .values(
-                        entity.name,
-                        entity.discriminator,
+                        entity.name.value,
+                        entity.discriminator.value,
                         entity.passwordHash,
                         entity.passwordSalt
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKProfileId(id)
         cache?.set(id, entity)
     }
 
@@ -64,18 +66,18 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
         val id = entity.id ?: return
         database.create
                 .update(RPKIT_PROFILE)
-                .set(RPKIT_PROFILE.NAME, entity.name)
-                .set(RPKIT_PROFILE.DISCRIMINATOR, entity.discriminator)
+                .set(RPKIT_PROFILE.NAME, entity.name.value)
+                .set(RPKIT_PROFILE.DISCRIMINATOR, entity.discriminator.value)
                 .set(RPKIT_PROFILE.PASSWORD_HASH, entity.passwordHash)
                 .set(RPKIT_PROFILE.PASSWORD_SALT, entity.passwordSalt)
-                .where(RPKIT_PROFILE.ID.eq(id))
+                .where(RPKIT_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKProfile? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKProfileId): RPKProfile? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         } else {
             val result = database.create
                     .select(
@@ -85,46 +87,46 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                             RPKIT_PROFILE.PASSWORD_SALT
                     )
                     .from(RPKIT_PROFILE)
-                    .where(RPKIT_PROFILE.ID.eq(id))
+                    .where(RPKIT_PROFILE.ID.eq(id.value))
                     .fetchOne() ?: return null
             val profile = RPKProfileImpl(
                     id,
-                    result.get(RPKIT_PROFILE.NAME),
-                    result.get(RPKIT_PROFILE.DISCRIMINATOR),
+                    RPKProfileName(result.get(RPKIT_PROFILE.NAME)),
+                    RPKProfileDiscriminator(result.get(RPKIT_PROFILE.DISCRIMINATOR)),
                     result.get(RPKIT_PROFILE.PASSWORD_HASH),
                     result.get(RPKIT_PROFILE.PASSWORD_SALT)
             )
-            cache?.set(id, profile)
+            cache?.set(id.value, profile)
             return profile
         }
     }
 
-    fun get(name: String, discriminator: Int): RPKProfile? {
+    fun get(name: RPKProfileName, discriminator: RPKProfileDiscriminator): RPKProfile? {
         val result = database.create
                 .select(RPKIT_PROFILE.ID)
                 .from(RPKIT_PROFILE)
-                .where(RPKIT_PROFILE.NAME.eq(name))
-                .and(RPKIT_PROFILE.DISCRIMINATOR.eq(discriminator))
+                .where(RPKIT_PROFILE.NAME.eq(name.value))
+                .and(RPKIT_PROFILE.DISCRIMINATOR.eq(discriminator.value))
                 .fetchOne() ?: return null
-        return get(result.get(RPKIT_PROFILE.ID))
+        return get(RPKProfileId(result.get(RPKIT_PROFILE.ID)))
     }
 
     fun delete(entity: RPKProfile) {
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_PROFILE)
-                .where(RPKIT_PROFILE.ID.eq(id))
+                .where(RPKIT_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 
-    fun generateDiscriminatorFor(name: String): Int {
+    fun generateDiscriminatorFor(name: RPKProfileName): RPKProfileDiscriminator {
         val result = database.create
                 .select(max(RPKIT_PROFILE.DISCRIMINATOR))
                 .from(RPKIT_PROFILE)
-                .where(RPKIT_PROFILE.NAME.eq(name))
+                .where(RPKIT_PROFILE.NAME.eq(name.value))
                 .fetchOne()
-        return result?.get(0, Int::class.javaObjectType)?.plus(1) ?: 1
+        return RPKProfileDiscriminator(result?.get(0, Int::class.javaObjectType)?.plus(1) ?: 1)
     }
 
 }

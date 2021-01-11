@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.moderation.bukkit.command.ticket
 
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
+import com.rpkit.moderation.bukkit.ticket.RPKTicketId
 import com.rpkit.moderation.bukkit.ticket.RPKTicketService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -46,7 +46,7 @@ class TicketTeleportCommand(private val plugin: RPKModerationBukkit) : CommandEx
             return true
         }
         try {
-            val ticket = ticketService.getTicket(args[0].toInt())
+            val ticket = ticketService.getTicket(RPKTicketId(args[0].toInt()))
             if (ticket == null) {
                 sender.sendMessage(plugin.messages["ticket-teleport-invalid-ticket"])
                 return true

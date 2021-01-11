@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,12 +61,12 @@ class RPKWalletTable(
                         RPKIT_WALLET.BALANCE
                 )
                 .values(
-                    characterId,
-                    currencyId,
+                    characterId.value,
+                    currencyId.value,
                     entity.balance
                 )
                 .execute()
-        cache?.set(CharacterCurrencyCacheKey(characterId, currencyId), entity)
+        cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyId.value), entity)
     }
 
     fun update(entity: RPKWallet) {
@@ -76,24 +75,24 @@ class RPKWalletTable(
         database.create
                 .update(RPKIT_WALLET)
                 .set(RPKIT_WALLET.BALANCE, entity.balance)
-                .where(RPKIT_WALLET.CHARACTER_ID.eq(entity.character.id))
-                .and(RPKIT_WALLET.CURRENCY_ID.eq(entity.currency.id))
+                .where(RPKIT_WALLET.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_WALLET.CURRENCY_ID.eq(currencyId.value))
                 .execute()
-        cache?.set(CharacterCurrencyCacheKey(characterId, currencyId), entity)
+        cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyId.value), entity)
     }
 
     fun get(character: RPKCharacter, currency: RPKCurrency): RPKWallet? {
         val characterId = character.id ?: return null
         val currencyId = currency.id ?: return null
-        val cacheKey = CharacterCurrencyCacheKey(characterId, currencyId)
+        val cacheKey = CharacterCurrencyCacheKey(characterId.value, currencyId.value)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
         val result = database.create
                 .select(RPKIT_WALLET.BALANCE)
                 .from(RPKIT_WALLET)
-                .where(RPKIT_WALLET.CHARACTER_ID.eq(character.id))
-                .and(RPKIT_WALLET.CURRENCY_ID.eq(currency.id))
+                .where(RPKIT_WALLET.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_WALLET.CURRENCY_ID.eq(currencyId.value))
                 .fetchOne() ?: return null
         val wallet = RPKWallet(
                 character,
@@ -112,7 +111,7 @@ class RPKWalletTable(
                         RPKIT_WALLET.BALANCE
                 )
                 .from(RPKIT_WALLET)
-                .where(RPKIT_WALLET.CURRENCY_ID.eq(currencyId))
+                .where(RPKIT_WALLET.CURRENCY_ID.eq(currencyId.value))
                 .orderBy(RPKIT_WALLET.BALANCE.desc())
                 .limit(amount)
                 .fetch()
@@ -126,7 +125,7 @@ class RPKWalletTable(
                             currency,
                             result[RPKIT_WALLET.BALANCE]
                     )
-                    cache?.set(CharacterCurrencyCacheKey(characterId, currencyId), wallet)
+                    cache?.set(CharacterCurrencyCacheKey(characterId, currencyId.value), wallet)
                     return@mapNotNull wallet
                 }
     }
@@ -136,10 +135,10 @@ class RPKWalletTable(
         val currencyId = entity.currency.id ?: return
         database.create
                 .deleteFrom(RPKIT_WALLET)
-                .where(RPKIT_WALLET.CHARACTER_ID.eq(entity.character.id))
-                .and(RPKIT_WALLET.CURRENCY_ID.eq(entity.currency.id))
+                .where(RPKIT_WALLET.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_WALLET.CURRENCY_ID.eq(currencyId.value))
                 .execute()
-        cache?.remove(CharacterCurrencyCacheKey(characterId, currencyId))
+        cache?.remove(CharacterCurrencyCacheKey(characterId.value, currencyId.value))
     }
 
 }

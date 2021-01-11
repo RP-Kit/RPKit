@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,24 +13,23 @@
  * limitations under the License.
  */
 
-package com.rpkit.players.bukkit.profile
+package com.rpkit.players.bukkit.profile.github
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.table.RPKGitHubProfileTable
 import com.rpkit.players.bukkit.event.githubprofile.RPKBukkitGitHubProfileCreateEvent
 import com.rpkit.players.bukkit.event.githubprofile.RPKBukkitGitHubProfileDeleteEvent
 import com.rpkit.players.bukkit.event.githubprofile.RPKBukkitGitHubProfileUpdateEvent
-import com.rpkit.players.bukkit.profile.github.RPKGitHubProfile
-import com.rpkit.players.bukkit.profile.github.RPKGitHubProfileService
+import com.rpkit.players.bukkit.profile.RPKProfile
 
 
 class RPKGitHubProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKGitHubProfileService {
 
-    override fun getGitHubProfile(id: Int): RPKGitHubProfile? {
+    override fun getGitHubProfile(id: RPKGitHubProfileId): RPKGitHubProfile? {
         return plugin.database.getTable(RPKGitHubProfileTable::class.java)[id]
     }
 
-    override fun getGitHubProfile(name: String): RPKGitHubProfile? {
+    override fun getGitHubProfile(name: RPKGitHubUsername): RPKGitHubProfile? {
         return plugin.database.getTable(RPKGitHubProfileTable::class.java)[name]
     }
 

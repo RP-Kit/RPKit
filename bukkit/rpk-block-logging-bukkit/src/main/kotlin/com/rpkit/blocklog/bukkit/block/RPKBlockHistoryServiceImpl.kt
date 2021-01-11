@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +28,7 @@ import java.time.LocalDateTime
 
 class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : RPKBlockHistoryService {
 
-    override fun getBlockHistory(id: Int): RPKBlockHistory? {
+    override fun getBlockHistory(id: RPKBlockHistoryId): RPKBlockHistory? {
         return plugin.database.getTable(RPKBlockHistoryTable::class.java)[id]
     }
 
@@ -45,7 +44,7 @@ class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : R
         plugin.database.getTable(RPKBlockHistoryTable::class.java).delete(blockHistory)
     }
 
-    override fun getBlockChange(id: Int): RPKBlockChange? {
+    override fun getBlockChange(id: RPKBlockChangeId): RPKBlockChange? {
         return plugin.database.getTable(RPKBlockChangeTable::class.java)[id]
     }
 
@@ -61,7 +60,7 @@ class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : R
         plugin.database.getTable(RPKBlockChangeTable::class.java).delete(blockChange)
     }
 
-    override fun getBlockInventoryChange(id: Int): RPKBlockInventoryChange? {
+    override fun getBlockInventoryChange(id: RPKBlockInventoryChangeId): RPKBlockInventoryChange? {
         return plugin.database.getTable(RPKBlockInventoryChangeTable::class.java)[id]
     }
 

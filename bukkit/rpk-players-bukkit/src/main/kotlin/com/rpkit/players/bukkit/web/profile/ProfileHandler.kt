@@ -1,6 +1,23 @@
+/*
+ * Copyright 2021 Ren Binden
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.players.bukkit.web.profile
 
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
+import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.web.ErrorResponse
 import com.rpkit.players.bukkit.web.authenticatedProfile
@@ -27,7 +44,7 @@ class ProfileHandler {
         val profileService = Services[RPKProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Profile service not found"))
-        val profile = profileService.getProfile(name, discriminator)
+        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
         return Response(OK)
@@ -41,14 +58,14 @@ class ProfileHandler {
         val profileService = Services[RPKProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Profile service not found"))
-        val profile = profileService.getProfile(name, discriminator)
+        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
         if (profile != request.authenticatedProfile) {
             return Response(FORBIDDEN)
                 .with(ErrorResponse.lens of ErrorResponse("You may not update other people's profiles."))
         }
-        val newName = profilePutRequest.name
+        val newName = RPKProfileName(profilePutRequest.name)
         profile.name = newName
         profile.discriminator = profileService.generateDiscriminatorFor(newName)
         profile.setPassword(profilePutRequest.password.toCharArray())
@@ -63,14 +80,14 @@ class ProfileHandler {
         val profileService = Services[RPKProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Profile service not found"))
-        val profile = profileService.getProfile(name, discriminator)
+        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
         if (profile != request.authenticatedProfile) {
             return Response(FORBIDDEN)
                 .with(ErrorResponse.lens of ErrorResponse("You may not update other people's profiles."))
         }
-        val newName = profilePatchRequest.name
+        val newName = profilePatchRequest.name?.let(::RPKProfileName)
         if (newName != null) {
             profile.name = newName
             profile.discriminator = profileService.generateDiscriminatorFor(newName)
@@ -88,7 +105,7 @@ class ProfileHandler {
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Profile service not found"))
         val profilePostRequest = ProfilePostRequest.lens(request)
-        val profile = profileService.createProfile(profilePostRequest.name)
+        val profile = profileService.createProfile(RPKProfileName(profilePostRequest.name))
         if (profilePostRequest.password != null) {
             profile.setPassword(profilePostRequest.password.toCharArray())
             profileService.updateProfile(profile)
@@ -103,7 +120,7 @@ class ProfileHandler {
         val profileService = Services[RPKProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Profile service not found"))
-        val profile = profileService.getProfile(name, discriminator)
+        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
         if (profile != request.authenticatedProfile) {

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +20,7 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineCompo
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import com.rpkit.core.service.Services
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageService
+import com.rpkit.languages.bukkit.language.RPKLanguageName
 import com.rpkit.languages.bukkit.language.RPKLanguageService
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
@@ -39,7 +39,7 @@ class LanguageComponent : DirectedPreFormatPipelineComponent, ConfigurationSeria
         if (!message.startsWith("[") || !message.contains("]")) return context
         val languageName = Regex("\\[([^]]+)]").find(message)?.groupValues?.get(1) ?: return context
         val languageService = Services[RPKLanguageService::class.java] ?: return context
-        val language = languageService.getLanguage(languageName) ?: return context
+        val language = languageService.getLanguage(RPKLanguageName(languageName)) ?: return context
         message = message.replaceFirst(
                 "[$languageName] ",
                 ""

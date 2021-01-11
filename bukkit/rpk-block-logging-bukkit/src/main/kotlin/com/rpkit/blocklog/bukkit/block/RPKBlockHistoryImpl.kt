@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +23,7 @@ import org.bukkit.World
 
 class RPKBlockHistoryImpl(
         private val plugin: RPKBlockLoggingBukkit,
-        override var id: Int? = null,
+        override var id: RPKBlockHistoryId? = null,
         override val world: World,
         override val x: Int,
         override val y: Int,

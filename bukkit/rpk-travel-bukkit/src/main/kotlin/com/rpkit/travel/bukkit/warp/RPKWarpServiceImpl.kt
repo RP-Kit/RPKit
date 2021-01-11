@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +21,7 @@ import com.rpkit.warp.bukkit.event.warp.RPKBukkitWarpCreateEvent
 import com.rpkit.warp.bukkit.event.warp.RPKBukkitWarpDeleteEvent
 import com.rpkit.warp.bukkit.event.warp.RPKBukkitWarpUpdateEvent
 import com.rpkit.warp.bukkit.warp.RPKWarp
+import com.rpkit.warp.bukkit.warp.RPKWarpName
 import com.rpkit.warp.bukkit.warp.RPKWarpService
 
 
@@ -29,8 +29,8 @@ class RPKWarpServiceImpl(override val plugin: RPKTravelBukkit) : RPKWarpService 
     override val warps: List<RPKWarp>
         get() = plugin.database.getTable(RPKWarpTable::class.java).getAll()
 
-    override fun getWarp(name: String): RPKWarp? {
-        return plugin.database.getTable(RPKWarpTable::class.java)[name]
+    override fun getWarp(name: RPKWarpName): RPKWarp? {
+        return plugin.database.getTable(RPKWarpTable::class.java)[name.value]
     }
 
     override fun addWarp(warp: RPKWarp) {

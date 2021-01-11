@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +66,7 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
                 .forEach {
                     sender.sendMessage(
                             plugin.messages["payment-list-item", mapOf(
-                                "name" to it.name,
+                                "name" to it.name.value,
                                 "rank" to "Owner"
                             )]
                     )
@@ -76,7 +75,7 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
                 .forEach {
                     sender.sendMessage(
                             plugin.messages[".payment-list-item", mapOf(
-                                "name" to it.name,
+                                "name" to it.name.value,
                                 "rank" to "Member"
                             )]
                     )
@@ -85,8 +84,8 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
                 .forEach {
                     sender.sendMessage(
                             plugin.messages["payment-list-item", mapOf(
-                                    Pair("name", it.name),
-                                    Pair("rank", "Invited")
+                                "name" to it.name.value,
+                                "rank" to "Invited"
                             )]
                     )
                 }

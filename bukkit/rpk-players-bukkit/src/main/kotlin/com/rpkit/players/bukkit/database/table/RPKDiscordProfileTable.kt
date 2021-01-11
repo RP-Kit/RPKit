@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,13 +22,15 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.create
 import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_DISCORD_PROFILE
-import com.rpkit.players.bukkit.profile.RPKDiscordProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileId
+import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
 import com.rpkit.players.bukkit.profile.discord.DiscordUserId
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfile
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileId
+import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileImpl
 
 class RPKDiscordProfileTable(
         private val database: Database,
@@ -57,7 +58,7 @@ class RPKDiscordProfileTable(
                 )
                 .values(
                         if (profile is RPKProfile) {
-                            profile.id
+                            profile.id?.value
                         } else {
                             null
                         },
@@ -77,7 +78,7 @@ class RPKDiscordProfileTable(
                 .set(
                         RPKIT_DISCORD_PROFILE.PROFILE_ID,
                         if (profile is RPKProfile) {
-                            profile.id
+                            profile.id?.value
                         } else {
                             null
                         }
@@ -104,11 +105,13 @@ class RPKDiscordProfileTable(
         val profileService = Services[RPKProfileService::class.java] ?: return null
         val discordService = Services[RPKDiscordService::class.java] ?: return null
         val profile = if (profileId != null) {
-            profileService.getProfile(profileId)
+            profileService.getProfile(RPKProfileId(profileId))
         } else {
             null
-        } ?: RPKThinProfileImpl(discordService.getUserName(DiscordUserId(result[RPKIT_DISCORD_PROFILE.DISCORD_ID]))
+        } ?: RPKThinProfileImpl(
+            RPKProfileName(discordService.getUserName(DiscordUserId(result[RPKIT_DISCORD_PROFILE.DISCORD_ID]))
                 ?: "Unknown Discord user")
+        )
         val discordProfile = RPKDiscordProfileImpl(
                 id,
                 profile,
@@ -128,10 +131,11 @@ class RPKDiscordProfileTable(
     }
 
     fun get(profile: RPKProfile): List<RPKDiscordProfile> {
+        val profileId = profile.id ?: return emptyList()
         val results = database.create
                 .select(RPKIT_DISCORD_PROFILE.ID)
                 .from(RPKIT_DISCORD_PROFILE)
-                .where(RPKIT_DISCORD_PROFILE.PROFILE_ID.eq(profile.id))
+                .where(RPKIT_DISCORD_PROFILE.PROFILE_ID.eq(profileId.value))
                 .fetch()
         return results.mapNotNull { result ->
             get(RPKDiscordProfileId(result[RPKIT_DISCORD_PROFILE.ID]))

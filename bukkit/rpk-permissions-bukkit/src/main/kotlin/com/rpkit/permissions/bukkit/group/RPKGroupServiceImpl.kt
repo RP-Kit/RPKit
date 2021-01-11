@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,20 +39,20 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
     init {
         groups.forEach { group ->
             plugin.server.pluginManager.addPermission(Permission(
-                    "rpkit.permissions.command.group.add.${group.name}",
-                    "Allows adding the ${group.name} group to players",
+                    "rpkit.permissions.command.group.add.${group.name.value}",
+                    "Allows adding the ${group.name.value} group to players",
                     PermissionDefault.OP
             ))
             plugin.server.pluginManager.addPermission(Permission(
-                    "rpkit.permissions.command.group.remove.${group.name}",
-                    "Allows removing the ${group.name} group from players",
+                    "rpkit.permissions.command.group.remove.${group.name.value}",
+                    "Allows removing the ${group.name.value} group from players",
                     PermissionDefault.OP
             ))
         }
     }
 
-    override fun getGroup(name: String): RPKGroup? {
-        return groups.firstOrNull { group -> group.name == name }
+    override fun getGroup(name: RPKGroupName): RPKGroup? {
+        return groups.firstOrNull { group -> group.name.value == name.value }
     }
 
     override fun addGroup(profile: RPKProfile, group: RPKGroup, priority: Int) {

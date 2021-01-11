@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,20 +16,20 @@
 package com.rpkit.players.bukkit.profile
 
 import java.security.SecureRandom
-import java.util.*
+import java.util.Arrays
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
 
 class RPKProfileImpl : RPKProfile {
 
-    override var id: Int? = null
-    override var name: String
-    override var discriminator: Int
+    override var id: RPKProfileId? = null
+    override var name: RPKProfileName
+    override var discriminator: RPKProfileDiscriminator
     override var passwordHash: ByteArray?
     override var passwordSalt: ByteArray?
 
-    constructor(id: Int, name: String, discriminator: Int, passwordHash: ByteArray? = null, passwordSalt: ByteArray? = null) {
+    constructor(id: RPKProfileId, name: RPKProfileName, discriminator: RPKProfileDiscriminator, passwordHash: ByteArray? = null, passwordSalt: ByteArray? = null) {
         this.id = id
         this.name = name
         this.discriminator = discriminator
@@ -38,8 +37,8 @@ class RPKProfileImpl : RPKProfile {
         this.passwordSalt = passwordSalt
     }
 
-    constructor(name: String, discriminator: Int, password: String?) {
-        this.id = 0
+    constructor(name: RPKProfileName, discriminator: RPKProfileDiscriminator, password: String?) {
+        this.id = null
         this.name = name
         this.discriminator = discriminator
         if (password != null) {
@@ -65,6 +64,7 @@ class RPKProfileImpl : RPKProfile {
     }
 
     override fun checkPassword(password: CharArray): Boolean {
+        if (passwordHash == null || passwordSalt == null) return false
         val spec = PBEKeySpec(password, passwordSalt, 65536, 128)
         val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512")
         return Arrays.equals(passwordHash, factory.generateSecret(spec).encoded)

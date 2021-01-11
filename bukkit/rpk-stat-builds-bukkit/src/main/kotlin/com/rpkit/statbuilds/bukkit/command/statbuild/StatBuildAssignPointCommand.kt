@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +19,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
+import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeName
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
 import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildService
 import org.bukkit.command.Command
@@ -48,7 +48,7 @@ class StatBuildAssignPointCommand(private val plugin: RPKStatBuildsBukkit) : Com
             sender.sendMessage(plugin.messages["no-stat-attribute-service"])
             return true
         }
-        val statAttribute = statAttributeService.getStatAttribute(statAttributeName)
+        val statAttribute = statAttributeService.getStatAttribute(RPKStatAttributeName(statAttributeName))
         if (statAttribute == null) {
             sender.sendMessage(plugin.messages["stat-build-assign-point-invalid-stat-attribute"])
             return true
@@ -94,7 +94,7 @@ class StatBuildAssignPointCommand(private val plugin: RPKStatBuildsBukkit) : Com
         statBuildService.setStatPoints(character, statAttribute, statBuildService.getStatPoints(character, statAttribute) + points)
         sender.sendMessage(plugin.messages["stat-build-assign-point-valid", mapOf(
                 "character" to character.name,
-                "stat_attribute" to statAttribute.name,
+                "stat_attribute" to statAttribute.name.value,
                 "points" to points.toString(),
                 "total_points" to statBuildService.getStatPoints(character, statAttribute).toString(),
                 "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()

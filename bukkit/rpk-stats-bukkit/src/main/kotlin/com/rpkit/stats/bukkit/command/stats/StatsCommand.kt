@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +74,7 @@ class StatsCommand(private val plugin: RPKStatsBukkit) : CommandExecutor {
         sender.sendMessage(plugin.messages["stats-list-title"])
         statsService.stats.forEach { stat ->
             sender.sendMessage(plugin.messages["stats-list-item", mapOf(
-                "stat" to stat.name,
+                "stat" to stat.name.value,
                 "value" to stat.get(character, statVariableService.statVariables).toString()
             )])
         }

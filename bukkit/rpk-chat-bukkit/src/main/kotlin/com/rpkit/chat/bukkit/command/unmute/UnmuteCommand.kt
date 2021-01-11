@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.chat.bukkit.command.unmute
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelName
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -55,20 +55,20 @@ class UnmuteCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val chatChannel = chatChannelService.getChatChannel(args[0])
+        val chatChannel = chatChannelService.getChatChannel(RPKChatChannelName(args[0]))
         if (chatChannel == null) {
             sender.sendMessage(plugin.messages["unmute-invalid-chatchannel"])
             return true
         }
-        if (!sender.hasPermission("rpkit.chat.command.unmute.${chatChannel.name}")) {
+        if (!sender.hasPermission("rpkit.chat.command.unmute.${chatChannel.name.value}")) {
             sender.sendMessage(plugin.messages["no-permission-unmute", mapOf(
-                "channel" to chatChannel.name
+                "channel" to chatChannel.name.value
             )])
             return true
         }
         chatChannel.addListener(minecraftProfile)
         sender.sendMessage(plugin.messages["unmute-valid", mapOf(
-            "channel" to chatChannel.name
+            "channel" to chatChannel.name.value
         )])
         return true
     }

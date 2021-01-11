@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +27,7 @@ import org.bukkit.Material
 class AuctionsMessages(plugin: RPKAuctionsBukkit) : BukkitMessages(plugin) {
 
     class AuctionSetCurrencyPromptListItemMessage(private val message: ParameterizedMessage) {
-        fun withParameters(currency: RPKCurrency) = message.withParameters("currency" to currency.name)
+        fun withParameters(currency: RPKCurrency) = message.withParameters("currency" to currency.name.value)
     }
 
     class AuctionCreateIdMessage(private val message: ParameterizedMessage) {
@@ -61,7 +60,7 @@ class AuctionsMessages(plugin: RPKAuctionsBukkit) : BukkitMessages(plugin) {
         fun withParameters(currencyAmount: Int, currency: RPKCurrency, itemAmount: Int, itemType: Material) =
             message.withParameters(
                 "currency_amount" to currencyAmount.toString(),
-                "currency" to currency.name,
+                "currency" to currency.name.value,
                 "item_amount" to itemAmount.toString(),
                 "item_type" to itemType.toString()
             )
@@ -78,7 +77,7 @@ class AuctionsMessages(plugin: RPKAuctionsBukkit) : BukkitMessages(plugin) {
         ) = message.withParameters(
             "character" to character.name,
             "currency_amount" to currencyAmount.toString(),
-            "currency" to currency.name,
+            "currency" to currency.name.value,
             "auction_id" to auction.id.toString(),
             "item_amount" to itemAmount.toString(),
             "item_type" to itemType.toString().toLowerCase().replace('_', ' ')

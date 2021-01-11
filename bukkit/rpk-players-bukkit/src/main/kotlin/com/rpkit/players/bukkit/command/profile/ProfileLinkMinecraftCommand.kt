@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,21 +16,21 @@
 package com.rpkit.players.bukkit.command.profile
 
 import com.rpkit.core.command.RPKCommandExecutor
-import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.command.result.CommandResult
 import com.rpkit.core.command.result.CommandSuccess
 import com.rpkit.core.command.result.IncorrectUsageFailure
 import com.rpkit.core.command.result.MissingServiceFailure
 import com.rpkit.core.command.result.NoPermissionFailure
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.command.result.InvalidTargetMinecraftProfileFailure
 import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
 import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileLinkRequestImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftUsername
 
 
 class ProfileLinkMinecraftCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
@@ -45,7 +44,7 @@ class ProfileLinkMinecraftCommand(private val plugin: RPKPlayersBukkit) : RPKCom
             sender.sendMessage(plugin.messages.profileLinkMinecraftUsage)
             return IncorrectUsageFailure()
         }
-        val minecraftUsername = args[0]
+        val minecraftUsername = RPKMinecraftUsername(args[0])
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfileService)

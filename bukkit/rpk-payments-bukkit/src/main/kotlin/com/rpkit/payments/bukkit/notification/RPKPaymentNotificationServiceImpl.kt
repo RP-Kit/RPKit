@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +28,7 @@ class RPKPaymentNotificationServiceImpl(override val plugin: RPKPaymentsBukkit) 
     override val notifications: List<RPKPaymentNotification>
         get() = plugin.database.getTable(RPKPaymentNotificationTable::class.java).getAll()
 
-    override fun getPaymentNotification(id: Int): RPKPaymentNotification? {
+    override fun getPaymentNotification(id: RPKPaymentNotificationId): RPKPaymentNotification? {
         return plugin.database.getTable(RPKPaymentNotificationTable::class.java)[id]
     }
 

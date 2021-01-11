@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +23,7 @@ class RPKLanguageServiceImpl(override val plugin: RPKLanguagesBukkit) : RPKLangu
             ?.getKeys(false)
             ?.map { languageName ->
                 RPKLanguageImpl(
-                        languageName,
+                        RPKLanguageName(languageName),
                         plugin.config.getConfigurationSection("languages.$languageName.default-race-understanding")
                                 ?.getKeys(false)
                                 ?.map { race -> Pair(race, plugin.config.getDouble("languages.$languageName.default-race-understanding.$race").toFloat()) }
@@ -51,8 +50,8 @@ class RPKLanguageServiceImpl(override val plugin: RPKLanguagesBukkit) : RPKLangu
             }
             ?: emptyList()
 
-    override fun getLanguage(name: String): RPKLanguage? {
-        return languages.firstOrNull { it.name == name }
+    override fun getLanguage(name: RPKLanguageName): RPKLanguage? {
+        return languages.firstOrNull { it.name.value == name.value }
     }
 
 }

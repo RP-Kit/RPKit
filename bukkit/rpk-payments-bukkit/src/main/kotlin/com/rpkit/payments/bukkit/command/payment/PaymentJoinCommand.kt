@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +18,7 @@ package com.rpkit.payments.bukkit.command.payment
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationService
@@ -54,7 +54,7 @@ class PaymentJoinCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(args.joinToString(" "))
+        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" ")))
         if (paymentGroup == null) {
             sender.sendMessage(plugin.messages["payment-join-invalid-group"])
             return true
@@ -94,7 +94,7 @@ class PaymentJoinCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
         val now = LocalDateTime.now()
         val ownerNotificationMessage = plugin.messages["payment-notification-member-join", mapOf(
                 "member" to character.name,
-                "group" to paymentGroup.name,
+                "group" to paymentGroup.name.value,
                 "date" to dateFormat.format(now)
         )]
         paymentGroup.owners.forEach { owner ->

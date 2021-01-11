@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,15 +41,15 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
         val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_EXPERIENCE_)
-                .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.remove(characterId)
+        cache?.remove(characterId.value)
     }
 
     operator fun get(character: RPKCharacter): RPKExperienceValue? {
         val characterId = character.id ?: return null
-        if (cache?.containsKey(characterId) == true) {
-            return cache[characterId]
+        if (cache?.containsKey(characterId.value) == true) {
+            return cache[characterId.value]
         } else {
             val result = database.create
                     .select(
@@ -58,13 +57,13 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
                             RPKIT_EXPERIENCE_.VALUE
                     )
                     .from(RPKIT_EXPERIENCE_)
-                    .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId))
+                    .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId.value))
                     .fetchOne() ?: return null
             val experienceValue = RPKExperienceValue(
                     character,
                     result.get(RPKIT_EXPERIENCE_.VALUE)
             )
-            cache?.set(characterId, experienceValue)
+            cache?.set(characterId.value, experienceValue)
             return experienceValue
         }
     }
@@ -78,11 +77,11 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
                         RPKIT_EXPERIENCE_.VALUE
                 )
                 .values(
-                        entity.character.id,
+                        characterId.value,
                         entity.value
                 )
                 .execute()
-        cache?.set(characterId, entity)
+        cache?.set(characterId.value, entity)
     }
 
     fun update(entity: RPKExperienceValue) {
@@ -90,9 +89,9 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
         database.create
                 .update(RPKIT_EXPERIENCE_)
                 .set(RPKIT_EXPERIENCE_.VALUE, entity.value)
-                .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.set(characterId, entity)
+        cache?.set(characterId.value, entity)
     }
 
 }

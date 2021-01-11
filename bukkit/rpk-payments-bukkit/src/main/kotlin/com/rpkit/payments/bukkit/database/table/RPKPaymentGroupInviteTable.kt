@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +32,8 @@ class RPKPaymentGroupInviteTable(
 ) : Table {
 
     fun insert(entity: RPKPaymentGroupInvite) {
+        val paymentGroupId = entity.paymentGroup.id ?: return
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_PAYMENT_GROUP_INVITE,
@@ -40,17 +41,18 @@ class RPKPaymentGroupInviteTable(
                         RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID
                 )
                 .values(
-                        entity.paymentGroup.id,
-                        entity.character.id
+                        paymentGroupId.value,
+                        characterId.value
                 )
                 .execute()
     }
 
     operator fun get(paymentGroup: RPKPaymentGroup): List<RPKPaymentGroupInvite> {
+        val paymentGroupId = paymentGroup.id ?: return emptyList()
         val results = database.create
                 .select(RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID)
                 .from(RPKIT_PAYMENT_GROUP_INVITE)
-                .where(RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID.eq(paymentGroup.id))
+                .where(RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID.eq(paymentGroupId.value))
                 .fetch()
         val characterService = Services[RPKCharacterService::class.java] ?: return emptyList()
         return results
@@ -61,10 +63,12 @@ class RPKPaymentGroupInviteTable(
     }
 
     fun delete(entity: RPKPaymentGroupInvite) {
+        val paymentGroupId = entity.paymentGroup.id ?: return
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_PAYMENT_GROUP_INVITE)
-                .where(RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID.eq(entity.paymentGroup.id))
-                .and(RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID.eq(paymentGroupId.value))
+                .and(RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID.eq(characterId.value))
                 .execute()
     }
 

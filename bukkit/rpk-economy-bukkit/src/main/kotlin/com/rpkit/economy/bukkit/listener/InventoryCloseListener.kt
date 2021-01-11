@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.economy.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -40,7 +40,7 @@ class InventoryCloseListener : Listener {
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val currencyService = Services[RPKCurrencyService::class.java] ?: return
         val economyService = Services[RPKEconomyService::class.java] ?: return
-        val currency = currencyService.getCurrency(event.view.title.substringAfterLast("[").substringBeforeLast("]"))
+        val currency = currencyService.getCurrency(RPKCurrencyName(event.view.title.substringAfterLast("[").substringBeforeLast("]")))
                 ?: return
         val amount = event.inventory.contents
                 .filter { item ->

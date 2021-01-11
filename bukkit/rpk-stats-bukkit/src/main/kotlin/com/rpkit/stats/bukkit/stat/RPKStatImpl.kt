@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +23,7 @@ import kotlin.math.roundToInt
  * Stat implementation.
  */
 class RPKStatImpl(
-        override val name: String,
+        override val name: RPKStatName,
         override val formula: String
 ) : RPKStat {
     override fun get(character: RPKCharacter, variables: List<RPKStatVariable>): Int {
@@ -32,7 +31,7 @@ class RPKStatImpl(
         parser.addStandardConstants()
         parser.addStandardFunctions()
         for (variable in variables) {
-            parser.addVariable(variable.name, variable.get(character))
+            parser.addVariable(variable.name.value, variable.get(character))
         }
         parser.parseExpression(formula)
         return parser.value.roundToInt()

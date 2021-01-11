@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,9 +28,9 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
 import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
-import com.rpkit.players.bukkit.profile.RPKIRCProfileImpl
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
@@ -58,7 +57,7 @@ class ProfileLinkIRCCommand(private val plugin: RPKPlayersBukkit) : RPKCommandEx
             sender.sendMessage(plugin.messages.profileLinkIrcUsage)
             return IncorrectUsageFailure()
         }
-        val nick = IRCNick(args[0])
+        val nick = RPKIRCNick(args[0])
         val ircService = Services[RPKIRCService::class.java]
         if (ircService == null) {
             sender.sendMessage(plugin.messages.noIrcService)

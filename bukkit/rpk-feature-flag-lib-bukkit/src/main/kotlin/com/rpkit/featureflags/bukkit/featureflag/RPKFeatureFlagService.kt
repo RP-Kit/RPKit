@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +21,8 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 
 interface RPKFeatureFlagService : Service {
 
-    fun getFeatureFlag(name: String): RPKFeatureFlag?
-    fun createFeatureFlag(name: String, isEnabledByDefault: Boolean): RPKFeatureFlag
+    fun getFeatureFlag(name: RPKFeatureFlagName): RPKFeatureFlag?
+    fun createFeatureFlag(name: RPKFeatureFlagName, isEnabledByDefault: Boolean): RPKFeatureFlag
     fun removeFeatureFlag(featureFlag: RPKFeatureFlag)
     fun setFeatureFlag(profile: RPKProfile, featureFlag: RPKFeatureFlag, enabled: Boolean)
 

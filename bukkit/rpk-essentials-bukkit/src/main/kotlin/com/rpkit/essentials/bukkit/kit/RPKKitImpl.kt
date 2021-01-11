@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +16,14 @@
 package com.rpkit.essentials.bukkit.kit
 
 import com.rpkit.kit.bukkit.kit.RPKKit
+import com.rpkit.kit.bukkit.kit.RPKKitName
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.ItemStack
 
 
 class RPKKitImpl(
-        override val name: String,
-        override val items: List<ItemStack>
+    override val name: RPKKitName,
+    override val items: List<ItemStack>
 ) : RPKKit, ConfigurationSerializable {
     override fun serialize(): Map<String, Any> {
         return mapOf(
@@ -36,7 +36,7 @@ class RPKKitImpl(
         @JvmStatic
         fun deserialize(serialized: Map<String, Any>): RPKKitImpl {
             return RPKKitImpl(
-                    serialized["name"] as String,
+                    RPKKitName(serialized["name"] as String),
                     serialized["items"] as List<ItemStack>
             )
         }

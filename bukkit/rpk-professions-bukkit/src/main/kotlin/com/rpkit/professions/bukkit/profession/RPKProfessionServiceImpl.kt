@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,15 +33,15 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
             ?.getKeys(false)
             ?.map { professionName ->
                 RPKProfessionImpl(
-                        professionName,
+                        RPKProfessionName(professionName),
                         plugin.config.getInt("professions.$professionName.levels.max-level"),
                         plugin
                 )
             }
             ?: emptyList()
 
-    override fun getProfession(name: String): RPKProfession? {
-        return professions.firstOrNull { profession -> profession.name == name }
+    override fun getProfession(name: RPKProfessionName): RPKProfession? {
+        return professions.firstOrNull { profession -> profession.name.value == name.value }
     }
 
     override fun getProfessions(character: RPKCharacter): List<RPKProfession> {

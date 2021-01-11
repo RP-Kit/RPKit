@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,14 +18,15 @@ package com.rpkit.players.bukkit.profile.minecraft
 import com.rpkit.core.bukkit.command.sender.RPKBukkitCommandSender
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import net.md_5.bungee.api.chat.BaseComponent
-import java.util.*
+import java.util.UUID
 
 
 interface RPKMinecraftProfile : RPKBukkitCommandSender {
 
-    var id: Int?
+    var id: RPKMinecraftProfileId?
     var profile: RPKThinProfile
     val minecraftUUID: UUID
+    val minecraftUsername: RPKMinecraftUsername
     override val name: String
     val isOnline: Boolean
 

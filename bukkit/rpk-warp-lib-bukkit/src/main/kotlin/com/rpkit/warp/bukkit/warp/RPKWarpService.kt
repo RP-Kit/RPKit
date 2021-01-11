@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +21,7 @@ import com.rpkit.core.service.Service
 interface RPKWarpService : Service {
 
     val warps: List<RPKWarp>
-    fun getWarp(name: String): RPKWarp?
+    fun getWarp(name: RPKWarpName): RPKWarp?
     fun addWarp(warp: RPKWarp)
     fun updateWarp(warp: RPKWarp)
     fun removeWarp(warp: RPKWarp)

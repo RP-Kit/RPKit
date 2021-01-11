@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,40 +41,30 @@ class RPKLogMessagesEnabledTable(private val database: Database, plugin: RPKEsse
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .insertInto(
-                        RPKIT_LOG_MESSAGES_ENABLED,
-                        RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID
+                    RPKIT_LOG_MESSAGES_ENABLED,
+                    RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID
                 )
                 .values(
-                        minecraftProfileId
+                    minecraftProfileId.value
                 )
                 .execute()
-        cache?.set(minecraftProfileId, entity)
-    }
-
-    fun update(entity: RPKLogMessagesEnabled) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
-                .update(RPKIT_LOG_MESSAGES_ENABLED)
-                .set(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID, minecraftProfileId)
-                .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
-                .execute()
-        cache?.set(minecraftProfileId, entity)
+        cache?.set(minecraftProfileId.value, entity)
     }
 
     operator fun get(minecraftProfile: RPKMinecraftProfile): RPKLogMessagesEnabled? {
         val minecraftProfileId = minecraftProfile.id ?: return null
-        if (cache?.containsKey(minecraftProfileId) == true) {
-            return cache[minecraftProfileId]
+        if (cache?.containsKey(minecraftProfileId.value) == true) {
+            return cache[minecraftProfileId.value]
         }
         database.create
                 .select(
                         RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID
                 )
                 .from(RPKIT_LOG_MESSAGES_ENABLED)
-                .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .fetchOne() ?: return null
         val logMessagesEnabled = RPKLogMessagesEnabled(minecraftProfile)
-        cache?.set(minecraftProfileId, logMessagesEnabled)
+        cache?.set(minecraftProfileId.value, logMessagesEnabled)
         return logMessagesEnabled
     }
 
@@ -83,9 +72,9 @@ class RPKLogMessagesEnabledTable(private val database: Database, plugin: RPKEsse
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_LOG_MESSAGES_ENABLED)
-                .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.remove(minecraftProfileId)
+        cache?.remove(minecraftProfileId.value)
     }
 
 }

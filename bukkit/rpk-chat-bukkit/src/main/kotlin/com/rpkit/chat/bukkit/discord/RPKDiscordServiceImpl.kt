@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +18,7 @@ package com.rpkit.chat.bukkit.discord
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.discord.DiscordUserId
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfile
@@ -55,7 +55,7 @@ class RPKDiscordServiceImpl(override val plugin: RPKChatBukkit) : RPKDiscordServ
 
     override fun setMessageAsProfileLinkRequest(messageId: Long, profile: RPKProfile) {
         val profileId = profile.id ?: return
-        profileLinkMessages[messageId] = profileId
+        profileLinkMessages[messageId] = profileId.value
     }
 
     override fun setMessageAsProfileLinkRequest(message: DiscordMessage, profile: RPKProfile) {
@@ -65,7 +65,7 @@ class RPKDiscordServiceImpl(override val plugin: RPKChatBukkit) : RPKDiscordServ
     override fun getMessageProfileLink(messageId: Long): RPKProfile? {
         val profileService = Services[RPKProfileService::class.java] ?: return null
         val profileId = profileLinkMessages[messageId] ?: return null
-        return profileService.getProfile(profileId)
+        return profileService.getProfile(RPKProfileId(profileId))
     }
 
     override fun getMessageProfileLink(message: DiscordMessage): RPKProfile? {

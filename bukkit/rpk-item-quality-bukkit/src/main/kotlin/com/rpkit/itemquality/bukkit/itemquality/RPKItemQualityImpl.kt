@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +20,7 @@ import org.bukkit.inventory.ItemStack
 
 
 class RPKItemQualityImpl(
-        override val name: String,
+        override val name: RPKItemQualityName,
         override val lore: List<String>,
         override val durabilityModifier: Double,
         override val applicableItems: List<Material>

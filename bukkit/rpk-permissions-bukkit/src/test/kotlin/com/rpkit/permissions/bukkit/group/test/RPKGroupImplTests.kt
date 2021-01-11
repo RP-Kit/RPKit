@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +16,13 @@
 package com.rpkit.permissions.bukkit.group.test
 
 import com.rpkit.permissions.bukkit.group.RPKGroupImpl
+import com.rpkit.permissions.bukkit.group.RPKGroupName
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.shouldBe
 
 class RPKGroupImplTests : WordSpec({
     val inheritedGroup = RPKGroupImpl(
-        name = "test inherited",
+        name = RPKGroupName("test inherited"),
         allow = listOf(
             "rpkit.permissions.inherited.test"
         ),
@@ -30,7 +30,7 @@ class RPKGroupImplTests : WordSpec({
         inheritance = listOf()
     )
     val group = RPKGroupImpl(
-        name = "test group",
+        name = RPKGroupName("test group"),
         allow = listOf(
             "rpkit.permissions.test"
         ),

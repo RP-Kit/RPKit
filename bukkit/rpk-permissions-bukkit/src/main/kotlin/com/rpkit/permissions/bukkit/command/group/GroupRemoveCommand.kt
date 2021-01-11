@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.permissions.bukkit.command.group
 
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
+import com.rpkit.permissions.bukkit.group.RPKGroupName
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.removeGroup
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -66,14 +66,14 @@ class GroupRemoveCommand(private val plugin: RPKPermissionsBukkit) : CommandExec
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        val group = groupService.getGroup(args[1])
+        val group = groupService.getGroup(RPKGroupName(args[1]))
         if (group == null) {
             sender.sendMessage(plugin.messages["group-remove-invalid-group"])
             return true
         }
         profile.removeGroup(group)
         sender.sendMessage(plugin.messages["group-remove-valid", mapOf(
-            "group" to group.name,
+            "group" to group.name.value,
             "player" to minecraftProfile.name
         )])
         return true

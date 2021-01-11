@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +17,7 @@ package com.rpkit.chat.bukkit.irc.listener
 
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.QuitEvent
 
@@ -27,7 +26,7 @@ class IRCChannelQuitListener : ListenerAdapter() {
     override fun onQuit(event: QuitEvent) {
         val ircService = Services[RPKIRCService::class.java] ?: return
         val user = event.user ?: return
-        ircService.setOnline(IRCNick(user.nick), false)
+        ircService.setOnline(RPKIRCNick(user.nick), false)
     }
 
 }

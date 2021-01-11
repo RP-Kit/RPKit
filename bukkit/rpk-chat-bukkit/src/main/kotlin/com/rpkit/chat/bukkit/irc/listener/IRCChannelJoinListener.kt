@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +20,7 @@ import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
 import com.rpkit.chat.bukkit.irc.IRCChannel
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import org.pircbotx.PircBotX
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.JoinEvent
@@ -35,7 +34,7 @@ class IRCChannelJoinListener : ListenerAdapter() {
     override fun onJoin(event: JoinEvent) {
         val ircService = Services[RPKIRCService::class.java] ?: return
         val user = event.user ?: return
-        ircService.setOnline(IRCNick(user.nick), true)
+        ircService.setOnline(RPKIRCNick(user.nick), true)
         val verified = user.isVerified
         val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
         val chatChannel = chatChannelService.getChatChannelFromIRCChannel(IRCChannel(event.channel.name)) ?: return

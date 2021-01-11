@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,8 +44,8 @@ class TicketListOpenCommand(private val plugin: RPKModerationBukkit) : CommandEx
                 "id" to ticket.id.toString(),
                 "reason" to ticket.reason,
                 "location" to "${ticket.location?.world} ${ticket.location?.blockX}, ${ticket.location?.blockY}, ${ticket.location?.blockZ}",
-                "issuer" to ticket.issuer.name,
-                "resolver" to (ticket.resolver?.name ?: "none"),
+                "issuer" to ticket.issuer.name.value,
+                "resolver" to (ticket.resolver?.name?.value ?: "none"),
                 "open_date" to dateTimeFormatter.format(ticket.openDate),
                 "close_date" to if (closeDate == null) "none" else dateTimeFormatter.format(ticket.closeDate),
                 "closed" to ticket.isClosed.toString()

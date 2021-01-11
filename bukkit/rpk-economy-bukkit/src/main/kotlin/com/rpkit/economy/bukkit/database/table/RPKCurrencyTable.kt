@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +19,9 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
+import com.rpkit.economy.bukkit.currency.RPKCurrencyId
 import com.rpkit.economy.bukkit.currency.RPKCurrencyImpl
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.database.create
 import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_CURRENCY
 import org.bukkit.Material
@@ -67,7 +68,7 @@ class RPKCurrencyTable(
                         RPKIT_CURRENCY.MATERIAL
                 )
                 .values(
-                        entity.name,
+                        entity.name.value,
                         entity.nameSingular,
                         entity.namePlural,
                         entity.rate,
@@ -76,25 +77,25 @@ class RPKCurrencyTable(
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKCurrencyId(id)
         cache?.set(id, entity)
-        nameCache?.set(entity.name, id)
+        nameCache?.set(entity.name.value, id)
     }
 
     fun update(entity: RPKCurrency) {
         val id = entity.id ?: return
         database.create
                 .update(RPKIT_CURRENCY)
-                .set(RPKIT_CURRENCY.NAME, entity.name)
+                .set(RPKIT_CURRENCY.NAME, entity.name.value)
                 .set(RPKIT_CURRENCY.NAME_SINGULAR, entity.nameSingular)
                 .set(RPKIT_CURRENCY.NAME_PLURAL, entity.namePlural)
                 .set(RPKIT_CURRENCY.RATE, entity.rate)
                 .set(RPKIT_CURRENCY.DEFAULT_AMOUNT, entity.defaultAmount)
                 .set(RPKIT_CURRENCY.MATERIAL, entity.material.toString())
-                .where(RPKIT_CURRENCY.ID.eq(id))
+                .where(RPKIT_CURRENCY.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
-        nameCache?.set(entity.name, id)
+        cache?.set(id.value, entity)
+        nameCache?.set(entity.name.value, id.value)
     }
 
     operator fun get(id: Int): RPKCurrency? {
@@ -114,8 +115,8 @@ class RPKCurrencyTable(
                     .where(RPKIT_CURRENCY.ID.eq(id))
                     .fetchOne() ?: return null
             val currency = RPKCurrencyImpl(
-                    id,
-                    result.get(RPKIT_CURRENCY.NAME),
+                    RPKCurrencyId(id),
+                    RPKCurrencyName(result.get(RPKIT_CURRENCY.NAME)),
                     result.get(RPKIT_CURRENCY.NAME_SINGULAR),
                     result.get(RPKIT_CURRENCY.NAME_PLURAL),
                     result.get(RPKIT_CURRENCY.RATE),
@@ -125,7 +126,7 @@ class RPKCurrencyTable(
                             ?: Material.AIR
             )
             cache?.set(id, currency)
-            nameCache?.set(currency.name, id)
+            nameCache?.set(currency.name.value, id)
             return currency
         }
     }
@@ -169,9 +170,9 @@ class RPKCurrencyTable(
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_CURRENCY)
-                .where(RPKIT_CURRENCY.ID.eq(id))
+                .where(RPKIT_CURRENCY.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 
 }

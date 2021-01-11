@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +17,10 @@ package com.rpkit.players.bukkit.listener
 
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileImpl
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileImpl
+import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKProfileService
-import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerLoginEvent
@@ -46,18 +43,18 @@ class PlayerLoginListener(private val plugin: RPKPlayersBukkit) : Listener {
         var minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         if (minecraftProfile == null) { // Player hasn't logged in while profile generation is active
             minecraftProfile = minecraftProfileService.createMinecraftProfile(
-                event.player.name,
-                profileService.createThinProfile(event.player.name)
+                event.player.uniqueId,
+                profileService.createThinProfile(RPKProfileName(event.player.name))
             )
         } else if (minecraftProfileService.getMinecraftProfileLinkRequests(minecraftProfile).isNotEmpty()) { // Minecraft profile has a link request, so skip and let them know on join.
             return
         }
         var profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
-            profile = RPKProfileImpl(
-                    event.player.name,
-                    profileService.generateDiscriminatorFor(event.player.name),
-                    ""
+            val profileName = RPKProfileName(event.player.name)
+            profile = profileService.createProfile(
+                profileName,
+                profileService.generateDiscriminatorFor(profileName)
             )
             profileService.addProfile(profile)
             minecraftProfile.profile = profile

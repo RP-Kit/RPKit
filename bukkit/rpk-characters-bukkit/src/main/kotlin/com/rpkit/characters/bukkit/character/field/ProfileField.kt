@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +24,7 @@ class ProfileField : HideableCharacterCardField {
     override fun get(character: RPKCharacter): String {
         if (isHidden(character)) return "[HIDDEN]"
         val profile = character.profile ?: return "unset"
-        return profile.name
+        return profile.name.value
     }
 
     override fun isHidden(character: RPKCharacter): Boolean {

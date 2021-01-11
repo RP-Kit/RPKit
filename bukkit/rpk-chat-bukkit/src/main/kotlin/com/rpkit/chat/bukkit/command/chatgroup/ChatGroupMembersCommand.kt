@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupName
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.core.service.Services
 import org.bukkit.command.Command
@@ -43,7 +43,7 @@ class ChatGroupMembersCommand(private val plugin: RPKChatBukkit) : CommandExecut
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
         }
-        val chatGroup = chatGroupService.getChatGroup(args[0])
+        val chatGroup = chatGroupService.getChatGroup(RPKChatGroupName(args[0]))
         if (chatGroup == null) {
             sender.sendMessage(plugin.messages["chat-group-members-invalid-chat-group"])
             return true

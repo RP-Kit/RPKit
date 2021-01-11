@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +22,7 @@ import com.rpkit.core.service.Service
 interface RPKClassService : Service {
 
     val classes: List<RPKClass>
-    fun getClass(name: String): RPKClass?
+    fun getClass(name: RPKClassName): RPKClass?
     fun getClass(character: RPKCharacter): RPKClass?
     fun setClass(character: RPKCharacter, `class`: RPKClass)
     fun getLevel(character: RPKCharacter, `class`: RPKClass): Int

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,12 +18,15 @@ package com.rpkit.payments.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyId
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.database.create
 import com.rpkit.payments.bukkit.database.jooq.Tables.RPKIT_PAYMENT_GROUP
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupId
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupImpl
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
 import java.time.Duration
 import java.time.temporal.ChronoUnit.MILLIS
 
@@ -59,16 +61,16 @@ class RPKPaymentGroupTable(
                         RPKIT_PAYMENT_GROUP.BALANCE
                 )
                 .values(
-                        entity.name,
+                        entity.name.value,
                         entity.amount,
-                        entity.currency?.id,
+                        entity.currency?.id?.value,
                         entity.interval.toMillis(),
                         entity.lastPaymentTime,
                         entity.balance
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKPaymentGroupId(id)
         cache?.set(id, entity)
     }
 
@@ -76,20 +78,20 @@ class RPKPaymentGroupTable(
         val id = entity.id ?: return
         database.create
                 .update(RPKIT_PAYMENT_GROUP)
-                .set(RPKIT_PAYMENT_GROUP.NAME, entity.name)
+                .set(RPKIT_PAYMENT_GROUP.NAME, entity.name.value)
                 .set(RPKIT_PAYMENT_GROUP.AMOUNT, entity.amount)
-                .set(RPKIT_PAYMENT_GROUP.CURRENCY_ID, entity.currency?.id)
+                .set(RPKIT_PAYMENT_GROUP.CURRENCY_ID, entity.currency?.id?.value)
                 .set(RPKIT_PAYMENT_GROUP.INTERVAL, entity.interval.toMillis())
                 .set(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME, entity.lastPaymentTime)
                 .set(RPKIT_PAYMENT_GROUP.BALANCE, entity.balance)
-                .where(RPKIT_PAYMENT_GROUP.ID.eq(id))
+                .where(RPKIT_PAYMENT_GROUP.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKPaymentGroup? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKPaymentGroupId): RPKPaymentGroup? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         } else {
             val result = database.create
                     .select(
@@ -101,33 +103,33 @@ class RPKPaymentGroupTable(
                             RPKIT_PAYMENT_GROUP.BALANCE
                     )
                     .from(RPKIT_PAYMENT_GROUP)
-                    .where(RPKIT_PAYMENT_GROUP.ID.eq(id))
+                    .where(RPKIT_PAYMENT_GROUP.ID.eq(id.value))
                     .fetchOne()
             val currencyService = Services[RPKCurrencyService::class.java] ?: return null
             val currencyId = result.get(RPKIT_PAYMENT_GROUP.CURRENCY_ID)
-            val currency = if (currencyId == null) null else currencyService.getCurrency(currencyId)
+            val currency = if (currencyId == null) null else currencyService.getCurrency(RPKCurrencyId(currencyId))
             val paymentGroup = RPKPaymentGroupImpl(
                     plugin,
                     id,
-                    result.get(RPKIT_PAYMENT_GROUP.NAME),
+                    RPKPaymentGroupName(result.get(RPKIT_PAYMENT_GROUP.NAME)),
                     result.get(RPKIT_PAYMENT_GROUP.AMOUNT),
                     currency,
                     Duration.of(result.get(RPKIT_PAYMENT_GROUP.INTERVAL), MILLIS),
                     result.get(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME),
                     result.get(RPKIT_PAYMENT_GROUP.BALANCE)
             )
-            cache?.set(id, paymentGroup)
+            cache?.set(id.value, paymentGroup)
             return paymentGroup
         }
     }
 
-    fun get(name: String): RPKPaymentGroup? {
+    fun get(name: RPKPaymentGroupName): RPKPaymentGroup? {
         val result = database.create
                 .select(RPKIT_PAYMENT_GROUP.ID)
                 .from(RPKIT_PAYMENT_GROUP)
-                .where(RPKIT_PAYMENT_GROUP.NAME.eq(name))
+                .where(RPKIT_PAYMENT_GROUP.NAME.eq(name.value))
                 .fetchOne() ?: return null
-        return get(result.get(RPKIT_PAYMENT_GROUP.ID))
+        return get(RPKPaymentGroupId(result.get(RPKIT_PAYMENT_GROUP.ID)))
     }
 
     fun getAll(): List<RPKPaymentGroup> {
@@ -135,7 +137,7 @@ class RPKPaymentGroupTable(
                 .select(RPKIT_PAYMENT_GROUP.ID)
                 .from(RPKIT_PAYMENT_GROUP)
                 .fetch()
-        return results.map { result -> get(result.get(RPKIT_PAYMENT_GROUP.ID)) }
+        return results.map { result -> get(RPKPaymentGroupId(result.get(RPKIT_PAYMENT_GROUP.ID))) }
                 .filterNotNull()
     }
 
@@ -143,9 +145,9 @@ class RPKPaymentGroupTable(
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_PAYMENT_GROUP)
-                .where(RPKIT_PAYMENT_GROUP.ID.eq(id))
+                .where(RPKIT_PAYMENT_GROUP.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 
 }

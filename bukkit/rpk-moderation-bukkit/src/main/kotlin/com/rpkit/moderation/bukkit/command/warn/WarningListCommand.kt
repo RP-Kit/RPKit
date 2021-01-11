@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,8 +71,8 @@ class WarningListCommand(private val plugin: RPKModerationBukkit) : CommandExecu
         sender.sendMessage(plugin.messages["warning-list-title"])
         for ((index, warning) in warnings.withIndex()) {
             sender.sendMessage(plugin.messages["warning-list-item", mapOf(
-                "issuer" to warning.issuer.name,
-                "profile" to warning.profile.name,
+                "issuer" to warning.issuer.name.value,
+                "profile" to warning.profile.name.value,
                 "index" to (index + 1).toString(),
                 "reason" to warning.reason,
                 "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time)

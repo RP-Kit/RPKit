@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +21,8 @@ import org.bukkit.Material
  * Currency implementation.
  */
 class RPKCurrencyImpl(
-        override var id: Int? = null,
-        override var name: String,
+        override var id: RPKCurrencyId? = null,
+        override var name: RPKCurrencyName,
         override var nameSingular: String,
         override var namePlural: String,
         override var rate: Double,

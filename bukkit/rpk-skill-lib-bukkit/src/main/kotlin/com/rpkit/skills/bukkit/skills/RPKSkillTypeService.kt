@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +21,7 @@ import com.rpkit.core.service.Service
 interface RPKSkillTypeService : Service {
 
     fun getSkillTypes(): List<RPKSkillType>
-    fun getSkillType(name: String): RPKSkillType?
+    fun getSkillType(name: RPKSkillTypeName): RPKSkillType?
     fun addSkillType(skillType: RPKSkillType)
     fun removeSkillType(skillType: RPKSkillType)
 

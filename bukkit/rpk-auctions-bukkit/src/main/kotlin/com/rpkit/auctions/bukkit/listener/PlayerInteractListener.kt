@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.auctions.bukkit.listener
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
+import com.rpkit.auctions.bukkit.auction.RPKAuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
@@ -73,7 +73,7 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit) : Listener {
             return
         }
         val character = characterService.getActiveCharacter(minecraftProfile)
-        val auction = auctionService.getAuction(sign.getLine(1).toInt())
+        val auction = auctionService.getAuction(RPKAuctionId(sign.getLine(1).toInt()))
         if (auction == null) {
             event.player.sendMessage(plugin.messages.bidInvalidAuctionNotExistent)
             return

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +24,7 @@ import com.rpkit.permissions.bukkit.database.create
 import com.rpkit.permissions.bukkit.database.jooq.Tables.RPKIT_CHARACTER_GROUP
 import com.rpkit.permissions.bukkit.group.RPKCharacterGroup
 import com.rpkit.permissions.bukkit.group.RPKGroup
+import com.rpkit.permissions.bukkit.group.RPKGroupName
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 
 
@@ -57,12 +57,12 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
                         RPKIT_CHARACTER_GROUP.PRIORITY
                 )
                 .values(
-                        characterId,
-                        groupName,
+                        characterId.value,
+                        groupName.value,
                         entity.priority
                 )
                 .execute()
-        cache?.set(CharacterGroupCacheKey(characterId, groupName), entity)
+        cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
     }
 
     fun update(entity: RPKCharacterGroup) {
@@ -71,24 +71,24 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
         database.create
                 .update(RPKIT_CHARACTER_GROUP)
                 .set(RPKIT_CHARACTER_GROUP.PRIORITY, entity.priority)
-                .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(entity.character.id))
-                .and(RPKIT_CHARACTER_GROUP.GROUP_NAME.eq(entity.group.name))
+                .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_CHARACTER_GROUP.GROUP_NAME.eq(entity.group.name.value))
                 .execute()
-        cache?.set(CharacterGroupCacheKey(characterId, groupName), entity)
+        cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
     }
 
     operator fun get(character: RPKCharacter, group: RPKGroup): RPKCharacterGroup? {
         val characterId = character.id ?: return null
         val groupName = group.name
-        val cacheKey = CharacterGroupCacheKey(characterId, groupName)
+        val cacheKey = CharacterGroupCacheKey(characterId.value, groupName.value)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
         val result = database.create
                 .select(RPKIT_CHARACTER_GROUP.PRIORITY)
                 .from(RPKIT_CHARACTER_GROUP)
-                .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(character.id))
-                .and(RPKIT_CHARACTER_GROUP.GROUP_NAME.eq(group.name))
+                .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_CHARACTER_GROUP.GROUP_NAME.eq(groupName.value))
                 .fetchOne() ?: return null
         val characterGroup = RPKCharacterGroup(
                 character,
@@ -99,35 +99,38 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
         return characterGroup
     }
 
-    fun get(character: RPKCharacter): List<RPKCharacterGroup> = database.create
+    fun get(character: RPKCharacter): List<RPKCharacterGroup> {
+        val characterId = character.id ?: return emptyList()
+        return database.create
             .select(
-                    RPKIT_CHARACTER_GROUP.GROUP_NAME,
-                    RPKIT_CHARACTER_GROUP.PRIORITY
+                RPKIT_CHARACTER_GROUP.GROUP_NAME,
+                RPKIT_CHARACTER_GROUP.PRIORITY
             )
             .from(RPKIT_CHARACTER_GROUP)
-            .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(character.id))
+            .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(characterId.value))
             .orderBy(RPKIT_CHARACTER_GROUP.PRIORITY.desc())
             .fetch()
             .mapNotNull { result ->
                 val group = result[RPKIT_CHARACTER_GROUP.GROUP_NAME]
-                        .let { Services[RPKGroupService::class.java]?.getGroup(it) }
-                        ?: return@mapNotNull null
+                    .let { Services[RPKGroupService::class.java]?.getGroup(RPKGroupName(it)) }
+                    ?: return@mapNotNull null
                 RPKCharacterGroup(
-                        character,
-                        group,
-                        result[RPKIT_CHARACTER_GROUP.PRIORITY]
+                    character,
+                    group,
+                    result[RPKIT_CHARACTER_GROUP.PRIORITY]
                 )
             }
+    }
 
     fun delete(entity: RPKCharacterGroup) {
         val characterId = entity.character.id ?: return
         val groupName = entity.group.name
         database.create
                 .deleteFrom(RPKIT_CHARACTER_GROUP)
-                .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(entity.character.id))
-                .and(RPKIT_CHARACTER_GROUP.GROUP_NAME.eq(entity.group.name))
+                .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_CHARACTER_GROUP.GROUP_NAME.eq(groupName.value))
                 .execute()
-        cache?.set(CharacterGroupCacheKey(characterId, groupName), entity)
+        cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
     }
 
 }

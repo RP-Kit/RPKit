@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.chat.bukkit.database.table
 
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroup
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupId
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupInvite
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.chat.bukkit.database.create
@@ -25,6 +25,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 
 /**
@@ -33,15 +34,17 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 class RPKChatGroupInviteTable(private val database: Database) : Table {
 
     fun insert(entity: RPKChatGroupInvite) {
+        val chatGroupId = entity.chatGroup.id ?: return
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .insertInto(
-                        RPKIT_CHAT_GROUP_INVITE,
-                        RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID,
-                        RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID
+                    RPKIT_CHAT_GROUP_INVITE,
+                    RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID,
+                    RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID
                 )
                 .values(
-                        entity.chatGroup.id,
-                        entity.minecraftProfile.id
+                    chatGroupId.value,
+                    minecraftProfileId.value
                 )
                 .execute()
     }
@@ -52,21 +55,24 @@ class RPKChatGroupInviteTable(private val database: Database) : Table {
      * @param chatGroup The chat group
      * @return A list of chat group invites
      */
-    fun get(chatGroup: RPKChatGroup): List<RPKChatGroupInvite> = database.create
+    fun get(chatGroup: RPKChatGroup): List<RPKChatGroupInvite> {
+        val chatGroupId = chatGroup.id ?: return emptyList()
+        return database.create
             .select(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID)
             .from(RPKIT_CHAT_GROUP_INVITE)
-            .where(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID.eq(chatGroup.id))
+            .where(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID.eq(chatGroupId.value))
             .fetch()
             .mapNotNull { result ->
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@mapNotNull null
                 val minecraftProfile = minecraftProfileService
-                        .getMinecraftProfile(result[RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID])
-                        ?: return@mapNotNull null
+                    .getMinecraftProfile(RPKMinecraftProfileId(result[RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID]))
+                    ?: return@mapNotNull null
                 RPKChatGroupInvite(
-                        chatGroup,
-                        minecraftProfile
+                    chatGroup,
+                    minecraftProfile
                 )
             }
+    }
 
     /**
      * Gets a list of chat group invites for a particular Minecraft profile.
@@ -74,27 +80,32 @@ class RPKChatGroupInviteTable(private val database: Database) : Table {
      * @param minecraftProfile The Minecraft profile
      * @return A list of chat group invites for the Minecraft profile
      */
-    fun get(minecraftProfile: RPKMinecraftProfile): List<RPKChatGroupInvite> = database.create
+    fun get(minecraftProfile: RPKMinecraftProfile): List<RPKChatGroupInvite> {
+        val minecraftProfileId = minecraftProfile.id ?: return emptyList()
+        return database.create
             .select(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID)
             .from(RPKIT_CHAT_GROUP_INVITE)
-            .where(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+            .where(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
             .fetch()
             .mapNotNull { result ->
                 val chatGroupService = Services[RPKChatGroupService::class.java] ?: return@mapNotNull null
                 val chatGroup = chatGroupService
-                        .getChatGroup(result[RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID])
-                        ?: return@mapNotNull null
+                    .getChatGroup(RPKChatGroupId(result[RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID]))
+                    ?: return@mapNotNull null
                 RPKChatGroupInvite(
-                        chatGroup,
-                        minecraftProfile
+                    chatGroup,
+                    minecraftProfile
                 )
             }
+    }
 
     fun delete(entity: RPKChatGroupInvite) {
+        val chatGroupId = entity.chatGroup.id ?: return
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHAT_GROUP_INVITE)
-                .where(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID.eq(entity.chatGroup.id))
-                .and(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
+                .where(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID.eq(chatGroupId.value))
+                .and(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
     }
 

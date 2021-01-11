@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +13,6 @@
  * limitations under the License.
  */
 
-package com.rpkit.chat.bukkit.event.chatchannel
+package com.rpkit.kit.bukkit.kit
 
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
-
-
-interface RPKChatChannelUpdateEvent : RPKChatChannelEvent {
-
-    override val chatChannel: RPKChatChannel
-
-}
+data class RPKKitName(val value: String)

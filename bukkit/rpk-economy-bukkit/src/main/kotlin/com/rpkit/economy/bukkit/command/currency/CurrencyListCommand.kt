@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +41,7 @@ class CurrencyListCommand(private val plugin: RPKEconomyBukkit) : CommandExecuto
         sender.sendMessage(plugin.messages["currency-list-title"])
         for (currency in currencyService.currencies) {
             sender.sendMessage(plugin.messages["currency-list-item", mapOf(
-                "currency" to currency.name
+                "currency" to currency.name.value
             )])
         }
         return true

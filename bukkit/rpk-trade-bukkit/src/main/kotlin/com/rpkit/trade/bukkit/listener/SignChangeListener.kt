@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.trade.bukkit.listener
 
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.trade.bukkit.RPKTradeBukkit
 import org.bukkit.ChatColor.GREEN
@@ -55,7 +55,7 @@ class SignChangeListener(private val plugin: RPKTradeBukkit) : Listener {
             event.player.sendMessage(plugin.messages["no-currency-service"])
             return
         }
-        if (currencyService.getCurrency(event.getLine(3) ?: "") == null) {
+        if (currencyService.getCurrency(RPKCurrencyName(event.getLine(3) ?: "")) == null) {
             event.block.breakNaturally()
             event.player.sendMessage(plugin.messages["trader-sign-invalid-currency"])
             return

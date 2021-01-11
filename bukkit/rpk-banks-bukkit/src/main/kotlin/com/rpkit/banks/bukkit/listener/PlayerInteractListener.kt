@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +21,7 @@ import com.rpkit.banks.bukkit.event.bank.RPKBukkitBankDepositEvent
 import com.rpkit.banks.bukkit.event.bank.RPKBukkitBankWithdrawEvent
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -72,7 +72,7 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
         }
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
         val character = characterService.getActiveCharacter(minecraftProfile) ?: return
-        val currency = currencyService.getCurrency(sign.getLine(3)) ?: return
+        val currency = currencyService.getCurrency(RPKCurrencyName(sign.getLine(3))) ?: return
         if (event.action != RIGHT_CLICK_BLOCK) {
             if (event.action != Action.LEFT_CLICK_BLOCK) return
             when {

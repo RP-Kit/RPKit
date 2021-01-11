@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,25 +44,25 @@ class RPKPlayerGettingKeyTable(private val database: Database, private val plugi
                         RPKIT_PLAYER_GETTING_KEY,
                         RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID
                 )
-                .values(minecraftProfileId)
+                .values(minecraftProfileId.value)
                 .execute()
-        cache?.set(minecraftProfileId, entity)
+        cache?.set(minecraftProfileId.value, entity)
     }
 
     operator fun get(minecraftProfile: RPKMinecraftProfile): RPKPlayerGettingKey? {
         val minecraftProfileId = minecraftProfile.id ?: return null
-        if (cache?.containsKey(minecraftProfileId) == true) {
-            return cache[minecraftProfileId]
+        if (cache?.containsKey(minecraftProfileId.value) == true) {
+            return cache[minecraftProfileId.value]
         } else {
             database.create
                     .select(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID)
                     .from(RPKIT_PLAYER_GETTING_KEY)
-                    .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                    .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                     .fetchOne() ?: return null
             val playerGettingKey = RPKPlayerGettingKey(
                     minecraftProfile
             )
-            cache?.set(minecraftProfileId, playerGettingKey)
+            cache?.set(minecraftProfileId.value, playerGettingKey)
             return playerGettingKey
         }
     }
@@ -72,9 +71,9 @@ class RPKPlayerGettingKeyTable(private val database: Database, private val plugi
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
-                .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.remove(minecraftProfileId)
+        cache?.remove(minecraftProfileId.value)
     }
 
 }

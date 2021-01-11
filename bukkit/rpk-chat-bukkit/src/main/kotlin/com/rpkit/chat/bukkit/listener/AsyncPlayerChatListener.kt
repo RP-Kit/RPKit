@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,25 +53,23 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
                     .sortedBy { (match, _) -> match.range.first }
                     .forEach { (match, matchPattern) ->
                         sendMessage(
-                                chatChannelService,
-                                chatChannel,
-                                message.substring(readMessageIndex, match.range.first),
-                                event.player,
-                                profile,
-                                minecraftProfile,
-                                event.isAsynchronous
+                            chatChannel,
+                            message.substring(readMessageIndex, match.range.first),
+                            event.player,
+                            profile,
+                            minecraftProfile,
+                            event.isAsynchronous
                         )
                         match.groupValues.forEachIndexed { index, value ->
                             val otherChatChannel = matchPattern.groups[index]
                             if (otherChatChannel != null) {
                                 sendMessage(
-                                        chatChannelService,
-                                        otherChatChannel,
-                                        value,
-                                        event.player,
-                                        profile,
-                                        minecraftProfile,
-                                        event.isAsynchronous
+                                    otherChatChannel,
+                                    value,
+                                    event.player,
+                                    profile,
+                                    minecraftProfile,
+                                    event.isAsynchronous
                                 )
                             }
                         }
@@ -80,13 +77,12 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
                     }
             if (readMessageIndex < message.length) {
                 sendMessage(
-                        chatChannelService,
-                        chatChannel,
-                        message.substring(readMessageIndex, message.length),
-                        event.player,
-                        profile,
-                        minecraftProfile,
-                        event.isAsynchronous
+                    chatChannel,
+                    message.substring(readMessageIndex, message.length),
+                    event.player,
+                    profile,
+                    minecraftProfile,
+                    event.isAsynchronous
                 )
             }
         } else {
@@ -95,20 +91,18 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
     }
 
     private fun sendMessage(
-            chatChannelService: RPKChatChannelService,
-            chatChannel: RPKChatChannel?,
-            message: String,
-            bukkitPlayer: Player,
-            profile: RPKThinProfile,
-            minecraftProfile: RPKMinecraftProfile,
-            isAsynchronous: Boolean
+        chatChannel: RPKChatChannel?,
+        message: String,
+        bukkitPlayer: Player,
+        profile: RPKThinProfile,
+        minecraftProfile: RPKMinecraftProfile,
+        isAsynchronous: Boolean
     ) {
         if (chatChannel != null) {
             if (!chatChannel.listenerMinecraftProfiles.any { listenerMinecraftProfile ->
                         listenerMinecraftProfile.id == minecraftProfile.id
                     }) {
                 chatChannel.addListener(minecraftProfile, isAsynchronous)
-                chatChannelService.updateChatChannel(chatChannel, isAsynchronous)
             }
             if (message.isNotBlank()) {
                 chatChannel.sendMessage(

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +21,8 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 
 interface RPKGitHubProfileService : Service {
 
-    fun getGitHubProfile(id: Int): RPKGitHubProfile?
-    fun getGitHubProfile(name: String): RPKGitHubProfile?
+    fun getGitHubProfile(id: RPKGitHubProfileId): RPKGitHubProfile?
+    fun getGitHubProfile(name: RPKGitHubUsername): RPKGitHubProfile?
     fun getGitHubProfiles(profile: RPKProfile): List<RPKGitHubProfile>
     fun addGitHubProfile(profile: RPKGitHubProfile)
     fun updateGitHubProfile(profile: RPKGitHubProfile)

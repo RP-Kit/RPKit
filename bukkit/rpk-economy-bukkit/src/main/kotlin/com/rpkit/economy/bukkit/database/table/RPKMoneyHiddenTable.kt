@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,10 +50,10 @@ class RPKMoneyHiddenTable(
                         RPKIT_MONEY_HIDDEN.CHARACTER_ID
                 )
                 .values(
-                    characterId
+                    characterId.value
                 )
                 .execute()
-        characterCache?.set(characterId, entity)
+        characterCache?.set(characterId.value, entity)
     }
 
     /**
@@ -66,16 +65,16 @@ class RPKMoneyHiddenTable(
      */
     operator fun get(character: RPKCharacter): RPKMoneyHidden? {
         val characterId = character.id ?: return null
-        if (characterCache?.containsKey(characterId) == true) {
-            return characterCache[characterId]
+        if (characterCache?.containsKey(characterId.value) == true) {
+            return characterCache[characterId.value]
         } else {
             database.create
                     .select(RPKIT_MONEY_HIDDEN.CHARACTER_ID)
                     .from(RPKIT_MONEY_HIDDEN)
-                    .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId))
+                    .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId.value))
                     .fetchOne() ?: return null
             val moneyHidden = RPKMoneyHidden(character)
-            characterCache?.set(characterId, moneyHidden)
+            characterCache?.set(characterId.value, moneyHidden)
             return moneyHidden
         }
     }
@@ -84,9 +83,9 @@ class RPKMoneyHiddenTable(
         val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_MONEY_HIDDEN)
-                .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        characterCache?.remove(characterId)
+        characterCache?.remove(characterId.value)
     }
 
 }

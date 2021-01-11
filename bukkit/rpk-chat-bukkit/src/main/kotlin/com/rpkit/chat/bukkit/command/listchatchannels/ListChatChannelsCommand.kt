@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,9 +87,9 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                     messageComponents.add(textComponent)
                 }
                 if (matcher.group() == "\$channel") {
-                    val chatChannelComponent = TextComponent(chatChannel.name)
-                    chatChannelComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/chatchannel ${chatChannel.name}")
-                    chatChannelComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to talk in ${chatChannel.name}"))
+                    val chatChannelComponent = TextComponent(chatChannel.name.value)
+                    chatChannelComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/chatchannel ${chatChannel.name.value}")
+                    chatChannelComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to talk in ${chatChannel.name.value}"))
                     if (chatColor != null) {
                         chatChannelComponent.color = chatColor
                     }
@@ -107,8 +106,8 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                                 listenerMinecraftProfile.id == minecraftProfile.id
                             }) {
                         val muteComponent = TextComponent("Mute")
-                        muteComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mute ${chatChannel.name}")
-                        muteComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to mute ${chatChannel.name}"))
+                        muteComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mute ${chatChannel.name.value}")
+                        muteComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to mute ${chatChannel.name.value}"))
                         if (chatColor != null) {
                             muteComponent.color = chatColor
                         }
@@ -122,8 +121,8 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                         messageComponents.add(muteComponent)
                     } else {
                         val unmuteComponent = TextComponent("Unmute")
-                        unmuteComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/unmute ${chatChannel.name}")
-                        unmuteComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to unmute ${chatChannel.name}"))
+                        unmuteComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/unmute ${chatChannel.name.value}")
+                        unmuteComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to unmute ${chatChannel.name.value}"))
                         if (chatColor != null) {
                             unmuteComponent.color = chatColor
                         }

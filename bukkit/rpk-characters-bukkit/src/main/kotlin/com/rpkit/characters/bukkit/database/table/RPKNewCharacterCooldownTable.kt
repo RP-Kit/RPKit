@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,11 +46,11 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
                         RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP
                 )
                 .values(
-                    profileId,
-                        entity.cooldownExpiryTime
+                    profileId.value,
+                    entity.cooldownExpiryTime
                 )
                 .execute()
-        profileCache?.set(profileId, entity)
+        profileCache?.set(profileId.value, entity)
     }
 
     fun update(entity: RPKNewCharacterCooldown) {
@@ -59,15 +58,15 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
         database.create
                 .update(RPKIT_NEW_CHARACTER_COOLDOWN)
                 .set(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP, entity.cooldownExpiryTime)
-                .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId))
+                .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
                 .execute()
-        profileCache?.set(profileId, entity)
+        profileCache?.set(profileId.value, entity)
     }
 
     operator fun get(profile: RPKProfile): RPKNewCharacterCooldown? {
         val profileId = profile.id ?: return null
-        if (profileCache?.containsKey(profileId) == true) {
-            return profileCache[profileId]
+        if (profileCache?.containsKey(profileId.value) == true) {
+            return profileCache[profileId.value]
         }
         val result = database.create
             .select(
@@ -75,13 +74,13 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
                 RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP
             )
             .from(RPKIT_NEW_CHARACTER_COOLDOWN)
-            .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId))
+            .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
             .fetchOne() ?: return null
         val newCharacterCooldown = RPKNewCharacterCooldown(
             profile,
             result.get(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP)
         )
-        profileCache?.set(profileId, newCharacterCooldown)
+        profileCache?.set(profileId.value, newCharacterCooldown)
         return newCharacterCooldown
     }
 
@@ -89,9 +88,9 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
         val profileId = entity.profile.id ?: return
         database.create
                 .deleteFrom(RPKIT_NEW_CHARACTER_COOLDOWN)
-                .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId))
+                .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
                 .execute()
-        profileCache?.remove(profileId)
+        profileCache?.remove(profileId.value)
     }
 
 }

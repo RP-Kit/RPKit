@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,12 +58,12 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
                         RPKIT_BANK.BALANCE
                 )
                 .values(
-                        entity.character.id,
-                        entity.currency.id,
+                        characterId.value,
+                        currencyId.value,
                         entity.balance
                 )
                 .execute()
-        cache?.set(CharacterCurrencyCacheKey(characterId, currencyId), entity)
+        cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyId.value), entity)
     }
 
     fun update(entity: RPKBank) {
@@ -72,12 +71,12 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
         val currencyId = entity.currency.id ?: return
         database.create
                 .update(RPKIT_BANK)
-                .set(RPKIT_BANK.CURRENCY_ID, entity.currency.id)
+                .set(RPKIT_BANK.CURRENCY_ID, currencyId.value)
                 .set(RPKIT_BANK.BALANCE, entity.balance)
-                .where(RPKIT_BANK.CHARACTER_ID.eq(entity.character.id))
-                .and(RPKIT_BANK.CURRENCY_ID.eq(entity.currency.id))
+                .where(RPKIT_BANK.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_BANK.CURRENCY_ID.eq(currencyId.value))
                 .execute()
-        cache?.set(CharacterCurrencyCacheKey(characterId, currencyId), entity)
+        cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyId.value), entity)
     }
 
     /**
@@ -91,15 +90,15 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
     operator fun get(character: RPKCharacter, currency: RPKCurrency): RPKBank? {
         val characterId = character.id ?: return null
         val currencyId = currency.id ?: return null
-        val cacheKey = CharacterCurrencyCacheKey(characterId, currencyId)
+        val cacheKey = CharacterCurrencyCacheKey(characterId.value, currencyId.value)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
         val result = database.create
                 .select(RPKIT_BANK.BALANCE)
                 .from(RPKIT_BANK)
-                .where(RPKIT_BANK.CHARACTER_ID.eq(character.id))
-                .and(RPKIT_BANK.CURRENCY_ID.eq(currency.id))
+                .where(RPKIT_BANK.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_BANK.CURRENCY_ID.eq(currencyId.value))
                 .fetchOne() ?: return null
         val bank = RPKBank(
                 character,
@@ -125,7 +124,7 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
                         RPKIT_BANK.BALANCE
                 )
                 .from(RPKIT_BANK)
-                .where(RPKIT_BANK.CURRENCY_ID.eq(currencyId))
+                .where(RPKIT_BANK.CURRENCY_ID.eq(currencyId.value))
                 .orderBy(RPKIT_BANK.BALANCE.desc())
                 .limit(amount)
                 .fetch()
@@ -138,7 +137,7 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
                         database.create.deleteFrom(RPKIT_BANK)
                                 .where(RPKIT_BANK.CHARACTER_ID.eq(characterId))
                                 .execute()
-                        cache?.remove(CharacterCurrencyCacheKey(characterId, currencyId))
+                        cache?.remove(CharacterCurrencyCacheKey(characterId, currencyId.value))
                         null
                     } else {
                         RPKBank(
@@ -151,22 +150,24 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
         banks.forEach { bank ->
             val characterId = bank.character.id
             if (characterId != null) {
-                cache?.set(CharacterCurrencyCacheKey(characterId, currencyId), bank)
+                cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyId.value), bank)
             }
         }
         return banks
     }
 
     fun delete(entity: RPKBank) {
+        val characterId = entity.character.id ?: return
+        val currencyId = entity.currency.id ?: return
         database.create
                 .deleteFrom(RPKIT_BANK)
-                .where(RPKIT_BANK.CHARACTER_ID.eq(entity.character.id))
-                .and(RPKIT_BANK.CURRENCY_ID.eq(entity.currency.id))
+                .where(RPKIT_BANK.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_BANK.CURRENCY_ID.eq(currencyId.value))
                 .execute()
         if (cache != null) {
             val characterId = entity.character.id ?: return
             val currencyId = entity.currency.id ?: return
-            cache.remove(CharacterCurrencyCacheKey(characterId, currencyId))
+            cache.remove(CharacterCurrencyCacheKey(characterId.value, currencyId.value))
         }
     }
 

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +19,7 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.database.create
 import com.rpkit.characters.bukkit.database.jooq.Tables.RPKIT_RACE
 import com.rpkit.characters.bukkit.race.RPKRace
+import com.rpkit.characters.bukkit.race.RPKRaceId
 import com.rpkit.characters.bukkit.race.RPKRaceImpl
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
@@ -71,10 +71,10 @@ class RPKRaceTable(private val database: Database, private val plugin: RPKCharac
         database.create
                 .update(RPKIT_RACE)
                 .set(RPKIT_RACE.NAME, entity.name)
-                .where(RPKIT_RACE.ID.eq(id))
+                .where(RPKIT_RACE.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
-        nameCache?.set(entity.name, id)
+        cache?.set(id.value, entity)
+        nameCache?.set(entity.name, id.value)
     }
 
     operator fun get(id: Int): RPKRace? {
@@ -91,7 +91,7 @@ class RPKRaceTable(private val database: Database, private val plugin: RPKCharac
                     .where(RPKIT_RACE.ID.eq(id))
                     .fetchOne() ?: return null
             val race = RPKRaceImpl(
-                    id,
+                    RPKRaceId(id),
                     result.get(RPKIT_RACE.NAME)
             )
             cache?.set(id, race)
@@ -127,7 +127,7 @@ class RPKRaceTable(private val database: Database, private val plugin: RPKCharac
                     .fetchOne() ?: return null
             val id = result[RPKIT_RACE.ID]
             val race = RPKRaceImpl(
-                    id,
+                    RPKRaceId(id),
                     name
             )
             cache?.set(id, race)
@@ -140,9 +140,9 @@ class RPKRaceTable(private val database: Database, private val plugin: RPKCharac
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_RACE)
-                .where(RPKIT_RACE.ID.eq(id))
+                .where(RPKIT_RACE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
         nameCache?.remove(entity.name)
     }
 

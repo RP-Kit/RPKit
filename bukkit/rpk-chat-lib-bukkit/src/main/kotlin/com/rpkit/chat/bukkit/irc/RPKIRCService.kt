@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +16,7 @@
 package com.rpkit.chat.bukkit.irc
 
 import com.rpkit.core.service.Service
-import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 
 /**
@@ -33,7 +32,7 @@ interface RPKIRCService : Service {
     /**
      * The nickname of the IRC bridge bot
      */
-    val nick: IRCNick
+    val nick: RPKIRCNick
 
     /**
      * Sends a message to the given channel
@@ -47,7 +46,7 @@ interface RPKIRCService : Service {
      * @param nick The nick of the user to send a message to
      * @param message The message to send
      */
-    fun sendMessage(nick: IRCNick, message: String)
+    fun sendMessage(nick: RPKIRCNick, message: String)
 
     /**
      * Sends a message to the given IRC profile
@@ -62,14 +61,14 @@ interface RPKIRCService : Service {
      * @param nick The nickname to check
      * @return Whether the IRC profile is online
      */
-    fun isOnline(nick: IRCNick): Boolean
+    fun isOnline(nick: RPKIRCNick): Boolean
 
     /**
      * Sets whether a user with the given nick is online
      *
      * @param nick The nickname to set the online state of
      */
-    fun setOnline(nick: IRCNick, isOnline: Boolean)
+    fun setOnline(nick: RPKIRCNick, isOnline: Boolean)
 
     /**
      * Joins an IRC channel

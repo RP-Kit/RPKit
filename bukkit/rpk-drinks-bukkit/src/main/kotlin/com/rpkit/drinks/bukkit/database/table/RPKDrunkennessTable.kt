@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,11 +46,11 @@ class RPKDrunkennessTable(private val database: Database, private val plugin: RP
                         RPKIT_DRUNKENNESS.DRUNKENNESS
                 )
                 .values(
-                        characterId,
+                        characterId.value,
                         entity.drunkenness
                 )
                 .execute()
-        cache?.set(characterId, entity)
+        cache?.set(characterId.value, entity)
     }
 
     fun update(entity: RPKDrunkenness) {
@@ -59,15 +58,15 @@ class RPKDrunkennessTable(private val database: Database, private val plugin: RP
         database.create
                 .update(RPKIT_DRUNKENNESS)
                 .set(RPKIT_DRUNKENNESS.DRUNKENNESS, entity.drunkenness)
-                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.set(characterId, entity)
+        cache?.set(characterId.value, entity)
     }
 
     operator fun get(character: RPKCharacter): RPKDrunkenness? {
         val characterId = character.id ?: return null
-        if (cache?.containsKey(characterId) == true) {
-            return cache[characterId]
+        if (cache?.containsKey(characterId.value) == true) {
+            return cache[characterId.value]
         } else {
             val result = database.create
                     .select(
@@ -75,13 +74,13 @@ class RPKDrunkennessTable(private val database: Database, private val plugin: RP
                             RPKIT_DRUNKENNESS.DRUNKENNESS
                     )
                     .from(RPKIT_DRUNKENNESS)
-                    .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId))
+                    .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId.value))
                     .fetchOne() ?: return null
             val drunkenness = RPKDrunkenness(
                     character,
                     result.get(RPKIT_DRUNKENNESS.DRUNKENNESS)
             )
-            cache?.set(characterId, drunkenness)
+            cache?.set(characterId.value, drunkenness)
             return drunkenness
         }
     }
@@ -90,9 +89,9 @@ class RPKDrunkennessTable(private val database: Database, private val plugin: RP
         val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_DRUNKENNESS)
-                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.remove(characterId)
+        cache?.remove(characterId.value)
     }
 
 }

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +32,7 @@ class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchase
         return plugin.database.getTable(RPKPurchaseTable::class.java).get(profile)
     }
 
-    override fun getPurchase(id: Int): RPKPurchase? {
+    override fun getPurchase(id: RPKPurchaseId): RPKPurchase? {
         return plugin.database.getTable(RPKPurchaseTable::class.java)[id]
     }
 

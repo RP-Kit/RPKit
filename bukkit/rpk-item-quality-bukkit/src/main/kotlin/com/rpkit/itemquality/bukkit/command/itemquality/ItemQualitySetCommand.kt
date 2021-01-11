@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.itemquality.bukkit.command.itemquality
 
 import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.RPKItemQualityBukkit
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityName
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import org.bukkit.Material.AIR
 import org.bukkit.command.Command
@@ -46,7 +46,7 @@ class ItemQualitySetCommand(private val plugin: RPKItemQualityBukkit) : CommandE
             sender.sendMessage(plugin.messages["no-item-quality-service"])
             return true
         }
-        val itemQuality = itemQualityService.getItemQuality(args.joinToString(" "))
+        val itemQuality = itemQualityService.getItemQuality(RPKItemQualityName(args.joinToString(" ")))
         if (itemQuality == null) {
             sender.sendMessage(plugin.messages["itemquality-set-invalid-quality"])
             return true
@@ -59,7 +59,7 @@ class ItemQualitySetCommand(private val plugin: RPKItemQualityBukkit) : CommandE
         itemQualityService.setItemQuality(item, itemQuality)
         sender.inventory.setItemInMainHand(item)
         sender.sendMessage(plugin.messages["itemquality-set-valid", mapOf(
-            "quality" to itemQuality.name
+            "quality" to itemQuality.name.value
         )])
         return true
     }

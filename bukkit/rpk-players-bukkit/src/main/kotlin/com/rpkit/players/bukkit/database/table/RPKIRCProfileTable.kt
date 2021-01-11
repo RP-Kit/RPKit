@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,12 +21,15 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.create
 import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_IRC_PROFILE
-import com.rpkit.players.bukkit.profile.RPKIRCProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileId
+import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
-import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileId
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileImpl
 
 
 class RPKIRCProfileTable(private val database: Database, plugin: RPKPlayersBukkit) : Table {
@@ -53,7 +55,7 @@ class RPKIRCProfileTable(private val database: Database, plugin: RPKPlayersBukki
                 )
                 .values(
                         if (profile is RPKProfile) {
-                            profile.id
+                            profile.id?.value
                         } else {
                             null
                         },
@@ -61,7 +63,7 @@ class RPKIRCProfileTable(private val database: Database, plugin: RPKPlayersBukki
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKIRCProfileId(id)
         cache?.set(id, entity)
     }
 
@@ -73,20 +75,20 @@ class RPKIRCProfileTable(private val database: Database, plugin: RPKPlayersBukki
                 .set(
                         RPKIT_IRC_PROFILE.PROFILE_ID,
                         if (profile is RPKProfile) {
-                            profile.id
+                            profile.id?.value
                         } else {
                             null
                         }
                 )
                 .set(RPKIT_IRC_PROFILE.NICK, entity.nick.value)
-                .where(RPKIT_IRC_PROFILE.ID.eq(id))
+                .where(RPKIT_IRC_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKIRCProfile? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKIRCProfileId): RPKIRCProfile? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         }
         val result = database.create
                 .select(
@@ -94,51 +96,52 @@ class RPKIRCProfileTable(private val database: Database, plugin: RPKPlayersBukki
                         RPKIT_IRC_PROFILE.NICK
                 )
                 .from(RPKIT_IRC_PROFILE)
-                .where(RPKIT_IRC_PROFILE.ID.eq(id))
+                .where(RPKIT_IRC_PROFILE.ID.eq(id.value))
                 .fetchOne() ?: return null
         val profileService = Services[RPKProfileService::class.java] ?: return null
         val profileId = result.get(RPKIT_IRC_PROFILE.PROFILE_ID)
         val profile = if (profileId != null) {
-            profileService.getProfile(profileId)
+            profileService.getProfile(RPKProfileId(profileId))
         } else {
             null
-        } ?: RPKThinProfileImpl(result.get(RPKIT_IRC_PROFILE.NICK))
+        } ?: RPKThinProfileImpl(RPKProfileName(result.get(RPKIT_IRC_PROFILE.NICK)))
         val ircProfile = RPKIRCProfileImpl(
                 id,
                 profile,
-                IRCNick(result.get(RPKIT_IRC_PROFILE.NICK))
+                RPKIRCNick(result.get(RPKIT_IRC_PROFILE.NICK))
         )
-        cache?.set(id, ircProfile)
+        cache?.set(id.value, ircProfile)
         return ircProfile
     }
 
     fun get(profile: RPKProfile): List<RPKIRCProfile> {
+        val profileId = profile.id ?: return emptyList()
         val results = database.create
                 .select(RPKIT_IRC_PROFILE.ID)
                 .from(RPKIT_IRC_PROFILE)
-                .where(RPKIT_IRC_PROFILE.PROFILE_ID.eq(profile.id))
+                .where(RPKIT_IRC_PROFILE.PROFILE_ID.eq(profileId.value))
                 .fetch()
         return results.map { result ->
-            get(result.get(RPKIT_IRC_PROFILE.ID))
+            get(RPKIRCProfileId(result.get(RPKIT_IRC_PROFILE.ID)))
         }.filterNotNull()
     }
 
-    fun get(nick: IRCNick): RPKIRCProfile? {
+    fun get(nick: RPKIRCNick): RPKIRCProfile? {
         val result = database.create
                 .select(RPKIT_IRC_PROFILE.ID)
                 .from(RPKIT_IRC_PROFILE)
                 .where(RPKIT_IRC_PROFILE.NICK.eq(nick.value))
                 .fetchOne() ?: return null
-        return get(result.get(RPKIT_IRC_PROFILE.ID))
+        return get(RPKIRCProfileId(result.get(RPKIT_IRC_PROFILE.ID)))
     }
 
     fun delete(entity: RPKIRCProfile) {
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_IRC_PROFILE)
-                .where(RPKIT_IRC_PROFILE.ID.eq(id))
+                .where(RPKIT_IRC_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 
 }

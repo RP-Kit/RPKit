@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +22,8 @@ import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroup
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.groups
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Bukkit
 import org.bukkit.permissions.PermissionAttachment
 
@@ -87,12 +86,12 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
         val bukkitPlayer = Bukkit.getOfflinePlayer(minecraftProfile.minecraftUUID)
         val onlineBukkitPlayer = bukkitPlayer.player
         if (onlineBukkitPlayer != null) {
-            val permissionsAttachment = permissionsAttachments[minecraftProfileId]
+            val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
             if (permissionsAttachment == null) {
-                permissionsAttachments[minecraftProfileId] = onlineBukkitPlayer.addAttachment(plugin)
+                permissionsAttachments[minecraftProfileId.value] = onlineBukkitPlayer.addAttachment(plugin)
             } else {
                 onlineBukkitPlayer.removeAttachment(permissionsAttachment)
-                permissionsAttachments[minecraftProfileId] = onlineBukkitPlayer.addAttachment(plugin)
+                permissionsAttachments[minecraftProfileId.value] = onlineBukkitPlayer.addAttachment(plugin)
             }
             val groups = mutableListOf<RPKGroup>()
             val profile = minecraftProfile.profile
@@ -121,7 +120,8 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
         for (inheritedGroup in group.inheritance) {
             assignGroupPermissions(minecraftProfile, inheritedGroup, assignedGroups)
         }
-        val permissionsAttachment = permissionsAttachments[minecraftProfile.id]
+        val minecraftProfileId = minecraftProfile.id ?: return
+        val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
         if (permissionsAttachment != null) {
             for (node in group.allow) {
                 if (permissionsAttachment.permissions.containsKey(node)) {
@@ -142,10 +142,11 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
         val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
         val onlineBukkitPlayer = bukkitPlayer.player
         if (onlineBukkitPlayer != null) {
-            val permissionsAttachment = permissionsAttachments[minecraftProfile.id]
+            val minecraftProfileId = minecraftProfile.id ?: return
+            val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
             if (permissionsAttachment != null) {
                 onlineBukkitPlayer.removeAttachment(permissionsAttachment)
-                permissionsAttachments.remove(minecraftProfile.id)
+                permissionsAttachments.remove(minecraftProfileId)
             }
         }
     }

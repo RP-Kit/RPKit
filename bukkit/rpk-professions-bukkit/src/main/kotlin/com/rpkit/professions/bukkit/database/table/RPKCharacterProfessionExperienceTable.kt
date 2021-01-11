@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,12 +57,12 @@ class RPKCharacterProfessionExperienceTable(
                         RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE
                 )
                 .values(
-                        characterId,
-                        professionName,
+                        characterId.value,
+                        professionName.value,
                         entity.experience
                 )
                 .execute()
-        cache?.set(CharacterProfessionCacheKey(characterId, professionName), entity)
+        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
     }
 
     fun update(entity: RPKCharacterProfessionExperience) {
@@ -71,12 +70,12 @@ class RPKCharacterProfessionExperienceTable(
         val professionName = entity.profession.name
         database.create
                 .update(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID, entity.character.id)
-                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION, entity.profession.name)
+                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID, characterId.value)
+                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION, professionName.value)
                 .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE, entity.experience)
-                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(entity.character.id))
+                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.set(CharacterProfessionCacheKey(characterId, professionName), entity)
+        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
     }
 
     operator fun get(character: RPKCharacter, profession: RPKProfession): RPKCharacterProfessionExperience? {
@@ -85,15 +84,15 @@ class RPKCharacterProfessionExperienceTable(
         val result = database.create
                 .select(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE)
                 .from(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId))
-                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName))
+                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName.value))
                 .fetchOne() ?: return null
         val characterProfessionExperience = RPKCharacterProfessionExperience(
                 character,
                 profession,
                 result[RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE]
         )
-        cache?.set(CharacterProfessionCacheKey(characterId, professionName), characterProfessionExperience)
+        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), characterProfessionExperience)
         return characterProfessionExperience
     }
 
@@ -102,19 +101,20 @@ class RPKCharacterProfessionExperienceTable(
         val professionName = entity.profession.name
         database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(entity.character.id))
-                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(entity.profession.name))
+                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName.value))
                 .execute()
-        cache?.remove(CharacterProfessionCacheKey(characterId, professionName))
+        cache?.remove(CharacterProfessionCacheKey(characterId.value, professionName.value))
     }
 
     fun delete(character: RPKCharacter) {
+        val characterId = character.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(character.id))
+                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .execute()
         cache?.keys()
-            ?.filter { it.characterId == character.id }
+            ?.filter { it.characterId == characterId.value }
             ?.forEach { cache.remove(it) }
     }
 

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.essentials.bukkit.kit
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.kit.bukkit.kit.RPKKit
+import com.rpkit.kit.bukkit.kit.RPKKitName
 import com.rpkit.kit.bukkit.kit.RPKKitService
 
 
@@ -25,8 +25,8 @@ class RPKKitServiceImpl(override val plugin: RPKEssentialsBukkit) : RPKKitServic
 
     override val kits: MutableList<RPKKit> = plugin.config.getList("kits") as MutableList<RPKKit>
 
-    override fun getKit(name: String): RPKKit? {
-        return kits.firstOrNull { it.name == name }
+    override fun getKit(name: RPKKitName): RPKKit? {
+        return kits.firstOrNull { it.name.value == name.value }
     }
 
     override fun addKit(kit: RPKKit) {

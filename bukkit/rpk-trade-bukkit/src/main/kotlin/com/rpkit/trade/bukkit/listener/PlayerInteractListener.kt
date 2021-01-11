@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.trade.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.food.bukkit.expiry.RPKExpiryService
@@ -61,7 +61,7 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
             event.player.sendMessage(plugin.messages["no-currency-service"])
             return
         }
-        val currency = currencyService.getCurrency(sign.getLine(3))
+        val currency = currencyService.getCurrency(RPKCurrencyName(sign.getLine(3)))
         if (currency == null) {
             event.player.sendMessage(plugin.messages["trader-invalid-currency"])
             return

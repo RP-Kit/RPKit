@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +53,7 @@ interface RPKAuctionService : Service {
      * @param id The ID of the auction
      * @return The auction, or null if no auction is found with the given ID
      */
-    fun getAuction(id: Int): RPKAuction?
+    fun getAuction(id: RPKAuctionId): RPKAuction?
 
     /**
      * Gets a list of all auctions tracked by this auction service.

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,8 +31,7 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
             ?.getKeys(false)
             ?.map { className ->
                 RPKClassImpl(
-                        plugin,
-                        className,
+                        RPKClassName(className),
                         plugin.config.getInt("classes.$className.max-level"),
                         plugin.config.getConfigurationSection("classes.$className.prerequisites")
                                 ?.getKeys(false)
@@ -80,8 +78,8 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
             }
             ?: mutableListOf()
 
-    override fun getClass(name: String): RPKClass? {
-        return classes.firstOrNull { it.name.equals(name, ignoreCase = true) }
+    override fun getClass(name: RPKClassName): RPKClass? {
+        return classes.firstOrNull { it.name.value.equals(name.value, ignoreCase = true) }
     }
 
     override fun getClass(character: RPKCharacter): RPKClass? {

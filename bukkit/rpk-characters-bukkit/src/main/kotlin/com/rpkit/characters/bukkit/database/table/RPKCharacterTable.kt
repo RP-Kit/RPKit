@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.characters.bukkit.database.table
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterImpl
 import com.rpkit.characters.bukkit.database.create
 import com.rpkit.characters.bukkit.database.jooq.Tables.RPKIT_CHARACTER
@@ -29,8 +29,10 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.Location
 
@@ -121,7 +123,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKCharacterId(id)
         cache?.set(id, entity)
     }
 
@@ -129,12 +131,12 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
         val id = entity.id ?: return
         database.create
                 .update(RPKIT_CHARACTER)
-                .set(RPKIT_CHARACTER.PROFILE_ID, entity.profile?.id)
-                .set(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id)
+                .set(RPKIT_CHARACTER.PROFILE_ID, entity.profile?.id?.value)
+                .set(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id?.value)
                 .set(RPKIT_CHARACTER.NAME, entity.name)
                 .set(RPKIT_CHARACTER.GENDER, entity.gender)
                 .set(RPKIT_CHARACTER.AGE, entity.age)
-                .set(RPKIT_CHARACTER.RACE_ID, entity.race?.id)
+                .set(RPKIT_CHARACTER.RACE_ID, entity.race?.id?.value)
                 .set(RPKIT_CHARACTER.DESCRIPTION, entity.description)
                 .set(RPKIT_CHARACTER.DEAD, entity.isDead)
                 .set(RPKIT_CHARACTER.WORLD, entity.location.world?.name)
@@ -160,9 +162,9 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .set(RPKIT_CHARACTER.AGE_HIDDEN, entity.isAgeHidden)
                 .set(RPKIT_CHARACTER.RACE_HIDDEN, entity.isRaceHidden)
                 .set(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, entity.isDescriptionHidden)
-                .where(RPKIT_CHARACTER.ID.eq(id))
+                .where(RPKIT_CHARACTER.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
     operator fun get(id: Int): RPKCharacter? {
@@ -212,14 +214,20 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             val raceService = Services[RPKRaceService::class.java]
             val profileId = result[RPKIT_CHARACTER.PROFILE_ID]
-            val profile = if (profileId == null) null else profileService?.getProfile(profileId)
+            val profile = if (profileId == null) null else profileService?.getProfile(RPKProfileId(profileId))
             val minecraftProfileId = result[RPKIT_CHARACTER.MINECRAFT_PROFILE_ID]
-            val minecraftProfile = if (minecraftProfileId == null) null else minecraftProfileService?.getMinecraftProfile(minecraftProfileId)
+            val minecraftProfile = if (minecraftProfileId == null) {
+                null
+            } else {
+                minecraftProfileService?.getMinecraftProfile(
+                    RPKMinecraftProfileId(minecraftProfileId)
+                )
+            }
             val raceId = result[RPKIT_CHARACTER.RACE_ID]
             val race = if (raceId == null) null else raceService?.getRace(raceId)
             val character = RPKCharacterImpl(
                     plugin = plugin,
-                    id = result[RPKIT_CHARACTER.ID],
+                    id = RPKCharacterId(result[RPKIT_CHARACTER.ID]),
                     profile = profile,
                     minecraftProfile = minecraftProfile,
                     name = result[RPKIT_CHARACTER.NAME],
@@ -260,19 +268,21 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
     }
 
     fun get(minecraftProfile: RPKMinecraftProfile): RPKCharacter? {
+        val minecraftProfileId = minecraftProfile.id ?: return null
         val result = database.create
                 .select(RPKIT_CHARACTER.ID)
                 .from(RPKIT_CHARACTER)
-                .where(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                .where(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .fetchOne() ?: return null
         return get(result[RPKIT_CHARACTER.ID])
     }
 
     fun get(profile: RPKProfile): List<RPKCharacter> {
+        val profileId = profile.id ?: return emptyList()
         val results = database.create
                 .select(RPKIT_CHARACTER.ID)
                 .from(RPKIT_CHARACTER)
-                .where(RPKIT_CHARACTER.PROFILE_ID.eq(profile.id))
+                .where(RPKIT_CHARACTER.PROFILE_ID.eq(profileId.value))
                 .fetch()
         return results.map { result -> get(result[RPKIT_CHARACTER.ID]) }
                 .filterNotNull()
@@ -292,9 +302,9 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHARACTER)
-                .where(RPKIT_CHARACTER.ID.eq(id))
+                .where(RPKIT_CHARACTER.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 
 }

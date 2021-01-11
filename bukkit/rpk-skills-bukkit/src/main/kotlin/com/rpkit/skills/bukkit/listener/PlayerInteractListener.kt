@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,13 +41,13 @@ class PlayerInteractListener(private val plugin: RPKSkillsBukkit) : Listener {
         val skill = skillService.getSkillBinding(character, item) ?: return
         if (!character.canUse(skill)) {
             event.player.sendMessage(plugin.messages["skill-invalid-unmet-prerequisites", mapOf(
-                "skill" to skill.name
+                "skill" to skill.name.value
             )])
             return
         }
         if (character.mana < skill.manaCost) {
             event.player.sendMessage(plugin.messages["skill-invalid-not-enough-mana", mapOf(
-                "skill" to skill.name,
+                "skill" to skill.name.value,
                 "mana_cost" to skill.manaCost.toString(),
                 "mana" to character.mana.toString(),
                 "max_mana" to character.maxMana.toString()
@@ -57,7 +56,7 @@ class PlayerInteractListener(private val plugin: RPKSkillsBukkit) : Listener {
         }
         if (skillService.getSkillCooldown(character, skill) > 0) {
             event.player.sendMessage(plugin.messages["skill-invalid-on-cooldown", mapOf(
-                "skill" to skill.name,
+                "skill" to skill.name.value,
                 "cooldown" to skillService.getSkillCooldown(character, skill).toString()
             )])
             return
@@ -67,7 +66,7 @@ class PlayerInteractListener(private val plugin: RPKSkillsBukkit) : Listener {
         character.mana -= skill.manaCost
         characterService.updateCharacter(character)
         event.player.sendMessage(plugin.messages["skill-valid", mapOf(
-            "skill" to skill.name
+            "skill" to skill.name.value
         )])
     }
 

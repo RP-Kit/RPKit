@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +20,13 @@ import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
 class RPKStatAttributeServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKStatAttributeService {
 
     private val statAttributeMap: Map<String, RPKStatAttribute> = plugin.config.getConfigurationSection("stat-attributes")
-            ?.getKeys(false)
-            ?.map(::RPKStatAttributeImpl)
-            ?.associateBy(RPKStatAttribute::name)
-            ?: emptyMap()
+        ?.getKeys(false)
+        ?.map(::RPKStatAttributeName)
+        ?.map(::RPKStatAttributeImpl)
+        ?.associateBy { attribute -> attribute.name.value }
+        ?: emptyMap()
 
     override val statAttributes = statAttributeMap.values.toList()
 
-    override fun getStatAttribute(name: String) = statAttributeMap[name]
+    override fun getStatAttribute(name: RPKStatAttributeName) = statAttributeMap[name.value]
 }

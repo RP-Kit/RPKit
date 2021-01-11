@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +20,7 @@ import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
 import com.rpkit.chat.bukkit.irc.IRCChannel
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.MessageEvent
@@ -40,7 +39,7 @@ class IRCMessageListener(private val plugin: RPKChatBukkit) : ListenerAdapter() 
         val ircProfileService = Services[RPKIRCProfileService::class.java] ?: return
         // According to PircBotX documentation, user can be null if the hostmask doesn't match a user at creation time.
         val user = event.user ?: return
-        val senderIRCProfile = ircProfileService.getIRCProfile(IRCNick(user.nick)) ?: return
+        val senderIRCProfile = ircProfileService.getIRCProfile(RPKIRCNick(user.nick)) ?: return
         val senderProfile = senderIRCProfile.profile
         val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
         val chatChannel = chatChannelService.getChatChannelFromIRCChannel(IRCChannel(event.channel.name))

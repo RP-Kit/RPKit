@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,19 +32,19 @@ import org.bukkit.inventory.ItemStack
  * Auction implementation.
  */
 class RPKAuctionImpl(
-        private val plugin: RPKAuctionsBukkit,
-        override var id: Int? = null,
-        override val item: ItemStack,
-        override val currency: RPKCurrency,
-        override val location: Location?,
-        override val character: RPKCharacter,
-        override val duration: Long,
-        override val endTime: Long,
-        override val startPrice: Int,
-        override val buyOutPrice: Int?,
-        override val noSellPrice: Int?,
-        override val minimumBidIncrement: Int,
-        override var isBiddingOpen: Boolean = false
+    private val plugin: RPKAuctionsBukkit,
+    override var id: RPKAuctionId? = null,
+    override val item: ItemStack,
+    override val currency: RPKCurrency,
+    override val location: Location?,
+    override val character: RPKCharacter,
+    override val duration: Long,
+    override val endTime: Long,
+    override val startPrice: Int,
+    override val buyOutPrice: Int?,
+    override val noSellPrice: Int?,
+    override val minimumBidIncrement: Int,
+    override var isBiddingOpen: Boolean = false
 ) : RPKAuction {
 
     override val bids: List<RPKBid>
@@ -104,7 +103,7 @@ class RPKAuctionImpl(
                                         bukkitPlayer.player?.sendMessage(plugin.messages.auctionItemReceived.withParameters(
                                             amount = item.amount,
                                             itemType = item.type,
-                                            auctionId = id ?: -1
+                                            auctionId = id?.value ?: -1
                                         ))
                                     }
                                 }
@@ -131,7 +130,7 @@ class RPKAuctionImpl(
                     minecraftProfile.sendMessage(plugin.messages.auctionItemReceived.withParameters(
                         amount = item.amount,
                         itemType = item.type,
-                        auctionId = id ?: -1
+                        auctionId = id?.value ?: -1
                     ))
                 }
             }

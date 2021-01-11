@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +52,7 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
                         RPKIT_PREVIOUS_LOCATION.PITCH
                 )
                 .values(
-                    minecraftProfileId,
+                    minecraftProfileId.value,
                     entity.location.world?.name,
                     entity.location.x,
                     entity.location.y,
@@ -62,29 +61,29 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
                     entity.location.pitch.toDouble()
                 )
                 .execute()
-        cache?.set(minecraftProfileId, entity)
+        cache?.set(minecraftProfileId.value, entity)
     }
 
     fun update(entity: RPKPreviousLocation) {
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .update(RPKIT_PREVIOUS_LOCATION)
-                .set(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID, minecraftProfileId)
+                .set(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID, minecraftProfileId.value)
                 .set(RPKIT_PREVIOUS_LOCATION.WORLD, entity.location.world?.name)
                 .set(RPKIT_PREVIOUS_LOCATION.X, entity.location.x)
                 .set(RPKIT_PREVIOUS_LOCATION.Y, entity.location.y)
                 .set(RPKIT_PREVIOUS_LOCATION.Z, entity.location.z)
                 .set(RPKIT_PREVIOUS_LOCATION.YAW, entity.location.yaw.toDouble())
                 .set(RPKIT_PREVIOUS_LOCATION.PITCH, entity.location.pitch.toDouble())
-                .where(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.set(minecraftProfileId, entity)
+        cache?.set(minecraftProfileId.value, entity)
     }
 
     operator fun get(minecraftProfile: RPKMinecraftProfile): RPKPreviousLocation? {
         val minecraftProfileId = minecraftProfile.id ?: return null
-        if (cache?.containsKey(minecraftProfileId) == true) {
-            return cache[minecraftProfileId]
+        if (cache?.containsKey(minecraftProfileId.value) == true) {
+            return cache[minecraftProfileId.value]
         }
         val result = database.create
                 .select(
@@ -97,7 +96,7 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
                         RPKIT_PREVIOUS_LOCATION.PITCH
                 )
                 .from(RPKIT_PREVIOUS_LOCATION)
-                .where(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .fetchOne() ?: return null
         val previousLocation = RPKPreviousLocation(
                 minecraftProfile,
@@ -110,7 +109,7 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
                         result.get(RPKIT_PREVIOUS_LOCATION.PITCH).toFloat()
                 )
         )
-        cache?.set(minecraftProfileId, previousLocation)
+        cache?.set(minecraftProfileId.value, previousLocation)
         return previousLocation
     }
 
@@ -118,9 +117,9 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_PREVIOUS_LOCATION)
-                .where(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.remove(minecraftProfileId)
+        cache?.remove(minecraftProfileId.value)
     }
 
 }

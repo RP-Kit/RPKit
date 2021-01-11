@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupName
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -50,7 +50,7 @@ class ChatGroupJoinCommand(private val plugin: RPKChatBukkit) : CommandExecutor 
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
         }
-        val chatGroup = chatGroupService.getChatGroup(args[0])
+        val chatGroup = chatGroupService.getChatGroup(RPKChatGroupName(args[0]))
         if (chatGroup == null) {
             sender.sendMessage(plugin.messages["chat-group-join-invalid-chat-group"])
             return true
@@ -72,14 +72,14 @@ class ChatGroupJoinCommand(private val plugin: RPKChatBukkit) : CommandExecutor 
         }
         chatGroup.members.forEach { member ->
             member.sendMessage(plugin.messages["chat-group-join-received", mapOf(
-                    Pair("group", chatGroup.name),
-                    Pair("player", minecraftProfile.name)
+                "group" to chatGroup.name.value,
+                "player" to minecraftProfile.name
             )])
         }
         chatGroup.addMember(minecraftProfile)
         chatGroup.uninvite(minecraftProfile)
         sender.sendMessage(plugin.messages["chat-group-join-valid", mapOf(
-                Pair("group", chatGroup.name)
+            "group" to chatGroup.name.value
         )])
         return true
     }

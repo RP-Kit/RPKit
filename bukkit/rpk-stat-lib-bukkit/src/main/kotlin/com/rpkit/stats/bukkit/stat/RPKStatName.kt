@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +13,6 @@
  * limitations under the License.
  */
 
-package com.rpkit.players.bukkit.profile
+package com.rpkit.stats.bukkit.stat
 
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileLinkRequest
-
-
-class RPKMinecraftProfileLinkRequestImpl(
-        override val profile: RPKProfile,
-        override val minecraftProfile: RPKMinecraftProfile
-) : RPKMinecraftProfileLinkRequest
+data class RPKStatName(val value: String)

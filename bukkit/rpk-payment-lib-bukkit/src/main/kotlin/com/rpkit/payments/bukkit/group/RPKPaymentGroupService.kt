@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +34,7 @@ interface RPKPaymentGroupService : Service {
      * @param id The ID of the payment group
      * @return The payment group, or null if no payment group is found with the given ID
      */
-    fun getPaymentGroup(id: Int): RPKPaymentGroup?
+    fun getPaymentGroup(id: RPKPaymentGroupId): RPKPaymentGroup?
 
     /**
      * Gets a payment group by name.
@@ -43,7 +42,7 @@ interface RPKPaymentGroupService : Service {
      * @param name The name of the payment group
      * @return The payment group, or null if no payment group is found with the given name
      */
-    fun getPaymentGroup(name: String): RPKPaymentGroup?
+    fun getPaymentGroup(name: RPKPaymentGroupName): RPKPaymentGroup?
 
     /**
      * Adds a payment group to be tracked by this payment group service.

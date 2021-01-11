@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,10 +25,7 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.chatchannel.undirected.DiscordComponent
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
 import com.rpkit.chat.bukkit.discord.DiscordChannel
-import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelCreateEvent
-import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelDeleteEvent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelSwitchEvent
-import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelUpdateEvent
 import com.rpkit.chat.bukkit.irc.IRCChannel
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
 import com.rpkit.core.service.Services
@@ -46,7 +42,7 @@ class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatCha
             ?.map { channelName ->
                 RPKChatChannelImpl(
                         plugin = plugin,
-                        name = channelName,
+                        name = RPKChatChannelName(channelName),
                         color = Color(
                                 plugin.config.getInt("chat-channels.$channelName.color.red"),
                                 plugin.config.getInt("chat-channels.$channelName.color.green"),
@@ -60,7 +56,7 @@ class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatCha
                         isJoinedByDefault = plugin.config.getBoolean("chat-channels.$channelName.joined-by-default")
                 )
             }
-            ?.toMutableList<RPKChatChannel>()
+            ?.toMutableList()
             ?: mutableListOf()
 
     override val matchPatterns: List<RPKChatChannelMatchPattern> = plugin.config.getConfigurationSection("match-patterns")
@@ -70,7 +66,7 @@ class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatCha
                         regex = pattern,
                         groups = plugin.config.getConfigurationSection("match-patterns.$pattern.groups")
                                 ?.getKeys(false)
-                                ?.map { group -> group.toInt() to plugin.config.getString("match-patterns.$pattern.groups.$group")?.let { getChatChannel(it) } }
+                                ?.map { group -> group.toInt() to plugin.config.getString("match-patterns.$pattern.groups.$group")?.let { getChatChannel(RPKChatChannelName(it)) } }
                                 ?.filter { (_, chatChannel) -> chatChannel != null }
                                 ?.filterIsInstance<Pair<Int, RPKChatChannel>>()
                                 ?.toMap()
@@ -79,27 +75,8 @@ class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatCha
             }
             ?: emptyList()
 
-    override fun getChatChannel(name: String): RPKChatChannel? {
-        return chatChannels.firstOrNull { it.name == name }
-    }
-
-    override fun addChatChannel(chatChannel: RPKChatChannel) {
-        val event = RPKBukkitChatChannelCreateEvent(chatChannel)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        chatChannels.add(event.chatChannel)
-    }
-
-    override fun removeChatChannel(chatChannel: RPKChatChannel) {
-        val event = RPKBukkitChatChannelDeleteEvent(chatChannel)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        chatChannels.remove(event.chatChannel)
-    }
-
-    override fun updateChatChannel(chatChannel: RPKChatChannel, isAsync: Boolean) {
-        val event = RPKBukkitChatChannelUpdateEvent(chatChannel, isAsync)
-        plugin.server.pluginManager.callEvent(event)
+    override fun getChatChannel(name: RPKChatChannelName): RPKChatChannel? {
+        return chatChannels.firstOrNull { it.name.value == name.value }
     }
 
     override fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel? {
@@ -114,12 +91,10 @@ class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatCha
         oldChannel = event.oldChannel
         if (oldChannel != null) {
             oldChannel.removeSpeaker(minecraftProfile)
-            updateChatChannel(oldChannel, isAsync)
         }
         val chatChannel = event.chatChannel
         if (chatChannel != null) {
             chatChannel.addSpeaker(minecraftProfile)
-            updateChatChannel(chatChannel, isAsync)
         }
     }
 

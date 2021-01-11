@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -240,23 +239,23 @@ class RPKChatBukkit : RPKBukkitPlugin() {
     private fun registerChatChannelPermissions(chatChannelService: RPKChatChannelService) {
         chatChannelService.chatChannels.forEach { chatChannel ->
             server.pluginManager.addPermission(Permission(
-                    "rpkit.chat.command.chatchannel.${chatChannel.name}",
-                    "Allows speaking in ${chatChannel.name}",
+                    "rpkit.chat.command.chatchannel.${chatChannel.name.value}",
+                    "Allows speaking in ${chatChannel.name.value}",
                     PermissionDefault.OP
             ))
             server.pluginManager.addPermission(Permission(
-                    "rpkit.chat.command.mute.${chatChannel.name}",
-                    "Allows muting ${chatChannel.name}",
+                    "rpkit.chat.command.mute.${chatChannel.name.value}",
+                    "Allows muting ${chatChannel.name.value}",
                     PermissionDefault.OP
             ))
             server.pluginManager.addPermission(Permission(
-                    "rpkit.chat.command.unmute.${chatChannel.name}",
-                    "Allows unmuting ${chatChannel.name}",
+                    "rpkit.chat.command.unmute.${chatChannel.name.value}",
+                    "Allows unmuting ${chatChannel.name.value}",
                     PermissionDefault.OP
             ))
             server.pluginManager.addPermission(Permission(
-                    "rpkit.chat.listen.${chatChannel.name}",
-                    "Allows listening to ${chatChannel.name}",
+                    "rpkit.chat.listen.${chatChannel.name.value}",
+                    "Allows listening to ${chatChannel.name.value}",
                     PermissionDefault.OP
             ))
         }

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,7 +71,7 @@ class UnbindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor 
         sender.sendMessage(plugin.messages["unbind-skill-valid", mapOf(
                 "character" to character.name,
                 "item" to item.type.toString().toLowerCase().replace('_', ' '),
-                "skill" to skill.name
+                "skill" to skill.name.value
         )])
         return true
     }

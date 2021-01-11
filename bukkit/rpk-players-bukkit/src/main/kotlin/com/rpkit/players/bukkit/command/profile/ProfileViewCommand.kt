@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +29,7 @@ import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftUsername
 
 class ProfileViewCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
 
@@ -43,7 +43,7 @@ class ProfileViewCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecu
         }
         var target: RPKMinecraftProfile? = null
         if (args.isNotEmpty() && sender.hasPermission("rpkit.players.command.profile.view.other")) {
-            target = minecraftProfileService.getMinecraftProfile(args[0])
+            target = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(args[0]))
         }
         if (target == null) {
             if (!sender.hasPermission("rpkit.players.command.profile.view.self")) {

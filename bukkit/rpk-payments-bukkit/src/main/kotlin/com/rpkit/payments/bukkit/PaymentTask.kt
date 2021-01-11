@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +51,7 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                     // Send notification to member
                                     val notificationMessage = plugin.messages["payment-notification-member-fail-to-pay", mapOf(
                                         "member" to member.name,
-                                        "group" to group.name,
+                                        "group" to group.name.value,
                                         "date" to dateFormat.format(now)
                                     )]
                                     if (member.minecraftProfile?.isOnline == true) { // If online
@@ -70,7 +69,7 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                     }
                                     val ownerNotificationMessage = plugin.messages["payment-notification-owner-fail-to-pay", mapOf(
                                         "member" to member.name,
-                                        "group" to group.name,
+                                        "group" to group.name.value,
                                         "date" to dateFormat.format(now)
                                     )]
                                     group.owners.forEach { owner ->
@@ -98,7 +97,7 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                     // Send notification to member
                                     val notificationMessage = plugin.messages["payment-notification-member-fail-to-be-paid", mapOf(
                                         "member" to member.name,
-                                        "group" to group.name,
+                                        "group" to group.name.value,
                                         "date" to dateFormat.format(now)
                                     )]
                                     if (member.minecraftProfile?.isOnline != true) { // If offline
@@ -117,7 +116,7 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                     // Send notification to owners
                                     val ownerNotificationMessage = plugin.messages["payment-notification-owner-fail-to-be-paid", mapOf(
                                         "member" to member.name,
-                                        "group" to group.name,
+                                        "group" to group.name.value,
                                         "date" to dateFormat.format(now)
                                     )]
                                     group.owners.forEach { owner ->

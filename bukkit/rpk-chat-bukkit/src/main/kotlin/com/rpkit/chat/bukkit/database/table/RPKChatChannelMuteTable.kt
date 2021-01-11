@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,17 +55,17 @@ class RPKChatChannelMuteTable(private val database: Database, private val plugin
                         RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME
                 )
                 .values(
-                        minecraftProfileId,
-                        chatChannelName
+                        minecraftProfileId.value,
+                        chatChannelName.value
                 )
                 .execute()
-        cache?.set(MinecraftProfileChatChannelCacheKey(minecraftProfileId, chatChannelName), entity)
+        cache?.set(MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value), entity)
     }
 
     fun get(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): RPKChatChannelMute? {
         val minecraftProfileId = minecraftProfile.id ?: return null
         val chatChannelName = chatChannel.name
-        val cacheKey = MinecraftProfileChatChannelCacheKey(minecraftProfileId, chatChannelName)
+        val cacheKey = MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
@@ -76,8 +75,8 @@ class RPKChatChannelMuteTable(private val database: Database, private val plugin
                         RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME
                 )
                 .from(RPKIT_CHAT_CHANNEL_MUTE)
-                .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
-                .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME.eq(chatChannelName))
+                .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+                .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME.eq(chatChannelName.value))
                 .fetchOne() ?: return null
         val chatChannelMute = RPKChatChannelMute(
                 minecraftProfile,
@@ -90,11 +89,11 @@ class RPKChatChannelMuteTable(private val database: Database, private val plugin
     fun delete(entity: RPKChatChannelMute) {
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         val chatChannelName = entity.chatChannel.name
-        val cacheKey = MinecraftProfileChatChannelCacheKey(minecraftProfileId, chatChannelName)
+        val cacheKey = MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value)
         database.create
             .deleteFrom(RPKIT_CHAT_CHANNEL_MUTE)
-            .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
-            .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME.eq(chatChannelName))
+            .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME.eq(chatChannelName.value))
             .execute()
         cache?.remove(cacheKey)
     }

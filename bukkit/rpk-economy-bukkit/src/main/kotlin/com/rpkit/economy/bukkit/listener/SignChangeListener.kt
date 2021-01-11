@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.economy.bukkit.listener
 
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.event.EventHandler
@@ -48,7 +48,7 @@ class SignChangeListener(private val plugin: RPKEconomyBukkit) : Listener {
                 return
             }
             val fromCurrencyName = event.getLine(1)?.replaceFirst(Regex("\\d+\\s+"), "") ?: ""
-            val fromCurrency = currencyService.getCurrency(fromCurrencyName)
+            val fromCurrency = currencyService.getCurrency(RPKCurrencyName(fromCurrencyName))
             if (fromCurrency == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["exchange-sign-invalid-currency-from"])
@@ -56,7 +56,7 @@ class SignChangeListener(private val plugin: RPKEconomyBukkit) : Listener {
             }
             event.setLine(2, "for")
             val toCurrencyName = event.getLine(3) ?: ""
-            val toCurrency = currencyService.getCurrency(toCurrencyName)
+            val toCurrency = currencyService.getCurrency(RPKCurrencyName(toCurrencyName))
             if (toCurrency == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["exchange-sign-invalid-currency-to"])
@@ -81,7 +81,7 @@ class SignChangeListener(private val plugin: RPKEconomyBukkit) : Listener {
                 return
             }
             val fromCurrencyName = event.getLine(1)?.replaceFirst(Regex("\\d+\\s+"), "") ?: ""
-            val fromCurrency = currencyService.getCurrency(fromCurrencyName)
+            val fromCurrency = currencyService.getCurrency(RPKCurrencyName(fromCurrencyName))
             if (fromCurrency == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["dynexchange-sign-invalid-currency-from"])
@@ -94,7 +94,7 @@ class SignChangeListener(private val plugin: RPKEconomyBukkit) : Listener {
                 return
             }
             val toCurrencyName = event.getLine(3) ?: ""
-            val toCurrency = currencyService.getCurrency(toCurrencyName)
+            val toCurrency = currencyService.getCurrency(RPKCurrencyName(toCurrencyName))
             if (toCurrency == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["dynexchange-sign-invalid-currency-to"])

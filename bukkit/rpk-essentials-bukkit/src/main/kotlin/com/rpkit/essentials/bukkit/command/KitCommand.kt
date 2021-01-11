@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +18,7 @@ package com.rpkit.essentials.bukkit.command
 import com.rpkit.core.service.Services
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.kit.bukkit.kit.RPKKit
+import com.rpkit.kit.bukkit.kit.RPKKitName
 import com.rpkit.kit.bukkit.kit.RPKKitService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -45,19 +45,19 @@ class KitCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["kit-list-title"])
             for (kitName in kitService.kits.map(RPKKit::name)) {
                 sender.sendMessage(plugin.messages["kit-list-item", mapOf(
-                        "kit" to kitName
+                        "kit" to kitName.value
                 )])
             }
             return true
         }
-        val kit = kitService.getKit(args[0])
+        val kit = kitService.getKit(RPKKitName(args[0]))
         if (kit == null) {
             sender.sendMessage(plugin.messages["kit-invalid-kit"])
             return true
         }
         sender.inventory.addItem(*kit.items.toTypedArray())
         sender.sendMessage(plugin.messages["kit-valid", mapOf(
-                "kit" to kit.name
+                "kit" to kit.name.value
         )])
         return true
     }

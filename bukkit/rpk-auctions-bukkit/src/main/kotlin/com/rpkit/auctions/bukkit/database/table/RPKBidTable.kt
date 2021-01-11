@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +17,10 @@ package com.rpkit.auctions.bukkit.database.table
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
 import com.rpkit.auctions.bukkit.auction.RPKAuction
+import com.rpkit.auctions.bukkit.auction.RPKAuctionId
 import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.auctions.bukkit.bid.RPKBid
+import com.rpkit.auctions.bukkit.bid.RPKBidId
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
 import com.rpkit.auctions.bukkit.database.create
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_BID
@@ -48,6 +49,8 @@ class RPKBidTable(
     }
 
     fun insert(entity: RPKBid) {
+        val auctionId = entity.auction.id ?: return
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_BID,
@@ -56,31 +59,33 @@ class RPKBidTable(
                         RPKIT_BID.AMOUNT
                 )
                 .values(
-                        entity.auction.id,
-                        entity.character.id,
+                        auctionId.value,
+                        characterId.value,
                         entity.amount
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKBidId(id)
         cache?.set(id, entity)
     }
 
     fun update(entity: RPKBid) {
         val id = entity.id ?: return
+        val auctionId = entity.auction.id ?: return
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_BID)
-                .set(RPKIT_BID.AUCTION_ID, entity.auction.id)
-                .set(RPKIT_BID.CHARACTER_ID, entity.character.id)
+                .set(RPKIT_BID.AUCTION_ID, auctionId.value)
+                .set(RPKIT_BID.CHARACTER_ID, characterId.value)
                 .set(RPKIT_BID.AMOUNT, entity.amount)
-                .where(RPKIT_BID.ID.eq(id))
+                .where(RPKIT_BID.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKBid? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKBidId): RPKBid? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         }
         val result = database.create
             .select(
@@ -89,11 +94,11 @@ class RPKBidTable(
                 RPKIT_BID.AMOUNT
             )
             .from(RPKIT_BID)
-            .where(RPKIT_BID.ID.eq(id))
+            .where(RPKIT_BID.ID.eq(id.value))
             .fetchOne() ?: return null
         val auctionService = Services[RPKAuctionService::class.java] ?: return null
         val auctionId = result.get(RPKIT_BID.AUCTION_ID)
-        val auction = auctionService.getAuction(auctionId)
+        val auction = auctionService.getAuction(RPKAuctionId(auctionId))
         val characterService = Services[RPKCharacterService::class.java] ?: return null
         val characterId = result.get(RPKIT_BID.CHARACTER_ID)
         val character = characterService.getCharacter(characterId)
@@ -104,12 +109,12 @@ class RPKBidTable(
                 character,
                 result.get(RPKIT_BID.AMOUNT)
             )
-            cache?.set(id, bid)
+            cache?.set(id.value, bid)
             return bid
         } else {
             database.create
                 .deleteFrom(RPKIT_BID)
-                .where(RPKIT_BID.ID.eq(id))
+                .where(RPKIT_BID.ID.eq(id.value))
                 .execute()
             return null
         }
@@ -124,10 +129,10 @@ class RPKBidTable(
         val results = database.create
                 .select(RPKIT_BID.ID)
                 .from(RPKIT_BID)
-                .where(RPKIT_BID.AUCTION_ID.eq(auction.id))
+                .where(RPKIT_BID.AUCTION_ID.eq(auction.id?.value))
                 .fetch()
         return results.map { result ->
-            get(result.get(RPKIT_BID.ID))
+            get(RPKBidId(result.get(RPKIT_BID.ID)))
         }.filterNotNull()
     }
 
@@ -135,8 +140,8 @@ class RPKBidTable(
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_BID)
-                .where(RPKIT_BID.ID.eq(entity.id))
+                .where(RPKIT_BID.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 }

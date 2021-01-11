@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +21,7 @@ import java.time.LocalDateTime
 
 
 class RPKTimedPurchaseImpl(
-        override var id: Int? = null,
+        override var id: RPKPurchaseId? = null,
         override val storeItem: RPKTimedStoreItem,
         override val profile: RPKProfile,
         override val purchaseDate: LocalDateTime

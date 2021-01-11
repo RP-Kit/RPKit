@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.banks.bukkit.listener
 
 import com.rpkit.banks.bukkit.RPKBanksBukkit
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.event.EventHandler
@@ -54,14 +54,14 @@ class SignChangeListener(private val plugin: RPKBanksBukkit) : Listener {
                 return
             }
             val currencyName = event.getLine(3)
-            if (currencyName == null || currencyService.getCurrency(currencyName) == null) {
+            if (currencyName == null || currencyService.getCurrency(RPKCurrencyName(currencyName)) == null) {
                 val defaultCurrency = currencyService.defaultCurrency
                 if (defaultCurrency == null) {
                     event.block.breakNaturally()
                     event.player.sendMessage(plugin.messages["bank-sign-invalid-currency"])
                     return
                 } else {
-                    event.setLine(3, defaultCurrency.name)
+                    event.setLine(3, defaultCurrency.name.value)
                 }
             }
         }

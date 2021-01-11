@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +17,11 @@ package com.rpkit.payments.bukkit.command.payment.set
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
@@ -87,7 +88,7 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit) : Command
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(args.joinToString(" "))
+        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" ")))
         if (paymentGroup == null) {
             sender.sendMessage(plugin.messages["payment-set-currency-invalid-group"])
             return true
@@ -110,12 +111,12 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit) : Command
                     plugin.messages["currency-list-title"] + "\n" +
                     currencyService
                             .currencies
-                            .joinToString("\n") { currency -> plugin.messages["currency-list-item", mapOf(Pair("currency", currency.name))] }
+                            .joinToString("\n") { currency -> plugin.messages["currency-list-item", mapOf("currency" to currency.name.value)] }
         }
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
             if (Services[RPKPaymentGroupService::class.java] == null) return false
-            return Services[RPKCurrencyService::class.java]?.getCurrency(input) != null
+            return Services[RPKCurrencyService::class.java]?.getCurrency(RPKCurrencyName(input)) != null
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
@@ -127,7 +128,7 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit) : Command
             val paymentGroupService = Services[RPKPaymentGroupService::class.java] ?: return END_OF_CONVERSATION
             val currencyService = Services[RPKCurrencyService::class.java] ?: return END_OF_CONVERSATION
             val paymentGroup = context.getSessionData("payment_group") as RPKPaymentGroup
-            paymentGroup.currency = currencyService.getCurrency(input)
+            paymentGroup.currency = currencyService.getCurrency(RPKCurrencyName(input))
             paymentGroupService.updatePaymentGroup(paymentGroup)
             return CurrencySetPrompt()
         }

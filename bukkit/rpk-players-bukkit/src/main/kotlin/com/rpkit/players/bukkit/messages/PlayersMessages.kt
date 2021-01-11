@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,23 +20,25 @@ import com.rpkit.core.message.ParameterizedMessage
 import com.rpkit.core.message.to
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
+import com.rpkit.players.bukkit.profile.RPKProfileName
 
 class PlayersMessages(plugin: RPKPlayersBukkit) : BukkitMessages(plugin) {
 
     class ProfileSetNameValidMessage(private val message: ParameterizedMessage) {
-        fun withParameters(name: String) = message.withParameters("name" to name)
+        fun withParameters(name: RPKProfileName) = message.withParameters("name" to name.value)
     }
 
     class ProfileLinkRequestMessage(private val message: ParameterizedMessage) {
-        fun withParameters(profile: RPKProfile) = message.withParameters("profile" to profile.name)
+        fun withParameters(profile: RPKProfile) = message.withParameters("profile" to profile.name.value)
     }
 
     class ProfileViewValidMessage(private val message: List<ParameterizedMessage>) {
-        fun withParameters(name: String, discriminator: Int) =
+        fun withParameters(name: RPKProfileName, discriminator: RPKProfileDiscriminator) =
             message.map {
                 it.withParameters(
-                    "name" to name,
-                    "discriminator" to discriminator.toString()
+                    "name" to name.value,
+                    "discriminator" to discriminator.value.toString()
                 )
             }.toTypedArray()
     }

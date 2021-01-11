@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +21,8 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 
 interface RPKIRCProfileService : Service {
 
-    fun getIRCProfile(id: Int): RPKIRCProfile?
-    fun getIRCProfile(nick: IRCNick): RPKIRCProfile?
+    fun getIRCProfile(id: RPKIRCProfileId): RPKIRCProfile?
+    fun getIRCProfile(nick: RPKIRCNick): RPKIRCProfile?
     fun getIRCProfiles(profile: RPKProfile): List<RPKIRCProfile>
     fun addIRCProfile(profile: RPKIRCProfile)
     fun updateIRCProfile(profile: RPKIRCProfile)

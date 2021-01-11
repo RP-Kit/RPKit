@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,27 +46,27 @@ class RPKUnconsciousStateTable(private val database: Database, private val plugi
                         RPKIT_UNCONSCIOUS_STATE.DEATH_TIME
                 )
                 .values(
-                    characterId,
+                    characterId.value,
                     entity.deathTime
                 )
                 .execute()
-        cache?.set(characterId, entity)
+        cache?.set(characterId.value, entity)
     }
 
     fun update(entity: RPKUnconsciousState) {
         val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_UNCONSCIOUS_STATE)
-                .set(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID, characterId)
+                .set(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID, characterId.value)
                 .set(RPKIT_UNCONSCIOUS_STATE.DEATH_TIME, entity.deathTime)
                 .execute()
-        cache?.set(characterId, entity)
+        cache?.set(characterId.value, entity)
     }
 
     operator fun get(character: RPKCharacter): RPKUnconsciousState? {
         val characterId = character.id ?: return null
-        if (cache?.containsKey(characterId) == true) {
-            return cache[characterId]
+        if (cache?.containsKey(characterId.value) == true) {
+            return cache[characterId.value]
         } else {
             val result = database.create
                     .select(
@@ -75,14 +74,14 @@ class RPKUnconsciousStateTable(private val database: Database, private val plugi
                             RPKIT_UNCONSCIOUS_STATE.DEATH_TIME
                     )
                     .from(RPKIT_UNCONSCIOUS_STATE)
-                    .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(characterId))
+                    .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(characterId.value))
                     .fetchOne() ?: return null
             val deathTime = result[RPKIT_UNCONSCIOUS_STATE.DEATH_TIME]
             val unconsciousState = RPKUnconsciousState(
                     character,
                     deathTime
             )
-            cache?.set(characterId, unconsciousState)
+            cache?.set(characterId.value, unconsciousState)
             return unconsciousState
         }
     }
@@ -91,9 +90,9 @@ class RPKUnconsciousStateTable(private val database: Database, private val plugi
         val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_UNCONSCIOUS_STATE)
-                .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(characterId))
+                .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.remove(characterId)
+        cache?.remove(characterId.value)
     }
 
 }

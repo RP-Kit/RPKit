@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.chat.bukkit.database.table
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroup
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupId
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupMember
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.chat.bukkit.database.create
@@ -27,6 +27,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 
 /**
@@ -57,6 +58,8 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
     }
 
     fun insert(entity: RPKChatGroupMember) {
+        val chatGroupId = entity.chatGroup.id ?: return
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .insertInto(
                         RPKIT_CHAT_GROUP_MEMBER,
@@ -64,8 +67,8 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
                         RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID
                 )
                 .values(
-                        entity.chatGroup.id,
-                        entity.minecraftProfile.id
+                    chatGroupId.value,
+                    minecraftProfileId.value
                 )
                 .execute()
         cache(entity)
@@ -79,25 +82,25 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
      */
     fun get(chatGroup: RPKChatGroup): List<RPKChatGroupMember> {
         val chatGroupId = chatGroup.id ?: return emptyList()
-        return if (chatGroupCache?.containsKey(chatGroupId) == true) {
-            chatGroupCache[chatGroupId] as List<RPKChatGroupMember>
+        return if (chatGroupCache?.containsKey(chatGroupId.value) == true) {
+            chatGroupCache[chatGroupId.value] as List<RPKChatGroupMember>
         } else {
             val results = database.create
                     .select(RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID)
                     .from(RPKIT_CHAT_GROUP_MEMBER)
-                    .where(RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID.eq(chatGroupId))
+                    .where(RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID.eq(chatGroupId.value))
                     .fetch()
             val chatGroupMembers = results.mapNotNull { result ->
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@mapNotNull null
                 val minecraftProfile = minecraftProfileService
-                        .getMinecraftProfile(result[RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID])
+                        .getMinecraftProfile(RPKMinecraftProfileId(result[RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID]))
                         ?: return@mapNotNull null
                 RPKChatGroupMember(
                         chatGroup,
                         minecraftProfile
                 )
             }
-            chatGroupCache?.set(chatGroupId, chatGroupMembers.toMutableList())
+            chatGroupCache?.set(chatGroupId.value, chatGroupMembers.toMutableList())
             chatGroupMembers
         }
     }
@@ -110,34 +113,36 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
      */
     fun get(minecraftProfile: RPKMinecraftProfile): List<RPKChatGroupMember> {
         val minecraftProfileId = minecraftProfile.id ?: return emptyList()
-        return if (minecraftProfileCache?.containsKey(minecraftProfileId) == true) {
-            minecraftProfileCache[minecraftProfileId] as List<RPKChatGroupMember>
+        return if (minecraftProfileCache?.containsKey(minecraftProfileId.value) == true) {
+            minecraftProfileCache[minecraftProfileId.value] as List<RPKChatGroupMember>
         } else {
             val results = database.create
                     .select(RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID)
                     .from(RPKIT_CHAT_GROUP_MEMBER)
-                    .where(RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                    .where(RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                     .fetch()
             val chatGroupMembers = results.mapNotNull { result ->
                 val chatGroupService = Services[RPKChatGroupService::class.java] ?: return@mapNotNull null
                 val chatGroup = chatGroupService
-                        .getChatGroup(result[RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID])
+                        .getChatGroup(RPKChatGroupId(result[RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID]))
                         ?: return@mapNotNull null
                 RPKChatGroupMember(
                         chatGroup,
                         minecraftProfile
                 )
             }
-            minecraftProfileCache?.set(minecraftProfileId, chatGroupMembers.toMutableList())
+            minecraftProfileCache?.set(minecraftProfileId.value, chatGroupMembers.toMutableList())
             chatGroupMembers
         }
     }
 
     fun delete(entity: RPKChatGroupMember) {
+        val chatGroupId = entity.chatGroup.id ?: return
+        val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHAT_GROUP_MEMBER)
-                .where(RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID.eq(entity.chatGroup.id))
-                .and(RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
+                .where(RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID.eq(chatGroupId.value))
+                .and(RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
         uncache(entity)
     }
@@ -145,29 +150,29 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
     private fun cache(chatGroupMember: RPKChatGroupMember) {
         val chatGroupId = chatGroupMember.chatGroup.id ?: return
         val minecraftProfileId = chatGroupMember.minecraftProfile.id ?: return
-        val chatGroupMembers = chatGroupCache?.get(chatGroupId) ?: mutableListOf()
+        val chatGroupMembers = chatGroupCache?.get(chatGroupId.value) ?: mutableListOf()
         if (!chatGroupMember.let { chatGroupMembers.contains(it) }) {
             chatGroupMember.let { chatGroupMembers.add(it) }
         }
-        chatGroupCache?.set(chatGroupId, chatGroupMembers)
-        val minecraftProfileMembers = minecraftProfileCache?.get(minecraftProfileId)
+        chatGroupCache?.set(chatGroupId.value, chatGroupMembers)
+        val minecraftProfileMembers = minecraftProfileCache?.get(minecraftProfileId.value)
                 ?: mutableListOf()
         if (!chatGroupMember.let { minecraftProfileMembers.contains(it) }) {
             chatGroupMember.let { minecraftProfileMembers.add(it) }
         }
-        minecraftProfileCache?.set(minecraftProfileId, minecraftProfileMembers)
+        minecraftProfileCache?.set(minecraftProfileId.value, minecraftProfileMembers)
     }
 
     private fun uncache(chatGroupMember: RPKChatGroupMember) {
         val chatGroupId = chatGroupMember.chatGroup.id ?: return
         val minecraftProfileId = chatGroupMember.minecraftProfile.id ?: return
-        val chatGroupMembers = chatGroupCache?.get(chatGroupId) ?: mutableListOf()
+        val chatGroupMembers = chatGroupCache?.get(chatGroupId.value) ?: mutableListOf()
         chatGroupMember.let { chatGroupMembers.remove(it) }
-        chatGroupCache?.set(chatGroupId, chatGroupMembers)
-        val minecraftProfileMembers = minecraftProfileCache?.get(minecraftProfileId)
+        chatGroupCache?.set(chatGroupId.value, chatGroupMembers)
+        val minecraftProfileMembers = minecraftProfileCache?.get(minecraftProfileId.value)
                 ?: mutableListOf()
         chatGroupMember.let { minecraftProfileMembers.remove(it) }
-        minecraftProfileCache?.set(minecraftProfileId, minecraftProfileMembers)
+        minecraftProfileCache?.set(minecraftProfileId.value, minecraftProfileMembers)
     }
 
 }

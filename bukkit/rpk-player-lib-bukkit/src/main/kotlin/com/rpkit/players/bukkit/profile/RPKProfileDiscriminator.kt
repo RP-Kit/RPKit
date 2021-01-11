@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,18 +15,4 @@
 
 package com.rpkit.players.bukkit.profile
 
-import com.rpkit.players.bukkit.profile.github.RPKGitHubProfile
-import org.kohsuke.github.GitHub
-import java.io.IOException
-
-class RPKGitHubProfileImpl(
-        override var id: Int? = null,
-        override val profile: RPKProfile,
-        override val name: String,
-        override val oauthToken: String
-) : RPKGitHubProfile {
-
-    @Throws(IOException::class)
-    constructor(profile: RPKProfile, oauthToken: String) : this(profile = profile, name = GitHub.connectUsingOAuth(oauthToken).myself.login, oauthToken = oauthToken)
-
-}
+data class RPKProfileDiscriminator(val value: Int)

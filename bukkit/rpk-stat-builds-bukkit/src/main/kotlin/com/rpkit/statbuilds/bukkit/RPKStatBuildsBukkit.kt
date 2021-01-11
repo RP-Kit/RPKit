@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +33,7 @@ import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeServiceImpl
 import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildService
 import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildServiceImpl
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
+import com.rpkit.stats.bukkit.stat.RPKStatVariableName
 import com.rpkit.stats.bukkit.stat.RPKStatVariableService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
@@ -103,7 +103,7 @@ class RPKStatBuildsBukkit : RPKBukkitPlugin() {
         Services.require(RPKStatVariableService::class.java).whenAvailable { statVariableService ->
             statAttributeService.statAttributes.forEach { statAttribute ->
                 statVariableService.addStatVariable(object : RPKStatVariable {
-                    override val name = statAttribute.name
+                    override val name = RPKStatVariableName(statAttribute.name.value)
                     override fun get(character: RPKCharacter) =
                             statBuildService.getStatPoints(character, statAttribute).toDouble()
                 })
