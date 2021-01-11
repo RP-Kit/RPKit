@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.travel.bukkit.listener
 
 import com.rpkit.core.service.Services
 import com.rpkit.travel.bukkit.RPKTravelBukkit
+import com.rpkit.warp.bukkit.warp.RPKWarpName
 import com.rpkit.warp.bukkit.warp.RPKWarpService
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.event.EventHandler
@@ -39,7 +39,7 @@ class SignChangeListener(private val plugin: RPKTravelBukkit) : Listener {
             event.player.sendMessage(plugin.messages["no-warp-service"])
             return
         }
-        val warp = warpService.getWarp(event.getLine(1) ?: "")
+        val warp = warpService.getWarp(RPKWarpName(event.getLine(1) ?: ""))
         if (warp == null) {
             event.block.breakNaturally()
             event.player.sendMessage(plugin.messages["warp-sign-invalid-warp"])

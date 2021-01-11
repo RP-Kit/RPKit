@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +18,7 @@ package com.rpkit.travel.bukkit.command
 import com.rpkit.core.service.Services
 import com.rpkit.travel.bukkit.RPKTravelBukkit
 import com.rpkit.travel.bukkit.warp.RPKWarpImpl
+import com.rpkit.warp.bukkit.warp.RPKWarpName
 import com.rpkit.warp.bukkit.warp.RPKWarpService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -45,18 +45,18 @@ class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-warp-service"])
             return true
         }
-        if (warpService.getWarp(args[0]) != null) {
+        if (warpService.getWarp(RPKWarpName(args[0])) != null) {
             sender.sendMessage(plugin.messages["set-warp-invalid-name-already-in-use"])
             return true
         }
-        val warp = RPKWarpImpl(name = args[0], location = sender.location)
+        val warp = RPKWarpImpl(name = RPKWarpName(args[0]), location = sender.location)
         warpService.addWarp(warp)
         sender.sendMessage(plugin.messages["set-warp-valid", mapOf(
-                Pair("warp", warp.name),
-                Pair("world", warp.location.world?.name ?: ""),
-                Pair("x", warp.location.blockX.toString()),
-                Pair("y", warp.location.blockY.toString()),
-                Pair("z", warp.location.blockZ.toString())
+            "warp" to warp.name.value,
+            "world" to (warp.location.world?.name ?: ""),
+            "x" to warp.location.blockX.toString(),
+            "y" to warp.location.blockY.toString(),
+            "z" to warp.location.blockZ.toString()
         )])
         return true
     }

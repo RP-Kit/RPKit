@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.travel.bukkit.command
 
 import com.rpkit.core.service.Services
 import com.rpkit.travel.bukkit.RPKTravelBukkit
+import com.rpkit.warp.bukkit.warp.RPKWarpName
 import com.rpkit.warp.bukkit.warp.RPKWarpService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -35,11 +35,11 @@ class DeleteWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
                         sender.sendMessage(plugin.messages["no-warp-service"])
                         return true
                     }
-                    val warp = warpService.getWarp(args[0].toLowerCase())
+                    val warp = warpService.getWarp(RPKWarpName(args[0].toLowerCase()))
                     if (warp != null) {
                         warpService.removeWarp(warp)
                         sender.sendMessage(plugin.messages["delete-warp-valid", mapOf(
-                                Pair("warp", warp.name)
+                            "warp" to warp.name.value
                         )])
                     }
                 } else {

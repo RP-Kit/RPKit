@@ -13,13 +13,6 @@
  * limitations under the License.
  */
 
-package com.rpkit.travel.bukkit.warp
+package com.rpkit.warp.bukkit.warp
 
-import com.rpkit.warp.bukkit.warp.RPKWarp
-import com.rpkit.warp.bukkit.warp.RPKWarpName
-import org.bukkit.Location
-
-class RPKWarpImpl(
-        override val name: RPKWarpName,
-        override val location: Location
-) : RPKWarp
+data class RPKWarpName(val value: String)

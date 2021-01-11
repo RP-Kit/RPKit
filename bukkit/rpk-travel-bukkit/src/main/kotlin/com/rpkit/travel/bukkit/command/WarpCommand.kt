@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +20,13 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.travel.bukkit.RPKTravelBukkit
 import com.rpkit.warp.bukkit.event.warp.RPKBukkitWarpUseEvent
 import com.rpkit.warp.bukkit.warp.RPKWarp
+import com.rpkit.warp.bukkit.warp.RPKWarpName
 import com.rpkit.warp.bukkit.warp.RPKWarpService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import java.util.*
+import java.util.ArrayList
 
 class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
@@ -45,7 +45,7 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             return true
         }
         if (args.isNotEmpty()) {
-            val warp = warpService.getWarp(args[0].toLowerCase())
+            val warp = warpService.getWarp(RPKWarpName(args[0].toLowerCase()))
             if (warp == null) {
                 sender.sendMessage(plugin.messages["warp-invalid-warp"])
                 return true
@@ -65,7 +65,7 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             if (event.isCancelled) return true
             sender.teleport(event.warp.location)
             sender.sendMessage(plugin.messages["warp-valid", mapOf(
-                    Pair("warp", warp.name)
+                "warp" to warp.name.value
             )])
         } else {
             if (warpService.warps.isEmpty()) {
