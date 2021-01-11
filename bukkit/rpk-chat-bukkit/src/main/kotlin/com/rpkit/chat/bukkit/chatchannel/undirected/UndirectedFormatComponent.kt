@@ -50,7 +50,7 @@ class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineCo
             }
         }
         if (formattedMessage.contains("\$sender-player")) {
-            formattedMessage = formattedMessage.replace("\$sender-player", senderProfile.name)
+            formattedMessage = formattedMessage.replace("\$sender-player", senderProfile.name.value)
         }
         if (formattedMessage.contains("\$sender-character")) {
             if (senderCharacter != null) {

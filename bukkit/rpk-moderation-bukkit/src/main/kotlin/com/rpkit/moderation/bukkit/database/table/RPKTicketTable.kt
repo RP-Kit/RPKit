@@ -24,6 +24,7 @@ import com.rpkit.moderation.bukkit.database.jooq.Tables.RPKIT_TICKET
 import com.rpkit.moderation.bukkit.ticket.RPKTicket
 import com.rpkit.moderation.bukkit.ticket.RPKTicketId
 import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
+import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.bukkit.Location
 
@@ -42,6 +43,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
     }
 
     fun insert(entity: RPKTicket) {
+        val issuerId = entity.issuer.id ?: return
         database.create
                 .insertInto(
                         RPKIT_TICKET,
@@ -60,8 +62,8 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 )
                 .values(
                         entity.reason,
-                        entity.issuer.id,
-                        entity.resolver?.id,
+                        issuerId.value,
+                        entity.resolver?.id?.value,
                         entity.location?.world?.name,
                         entity.location?.x,
                         entity.location?.y,
@@ -80,11 +82,12 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
 
     fun update(entity: RPKTicket) {
         val ticketId = entity.id ?: return
+        val issuerId = entity.issuer.id ?: return
         database.create
                 .update(RPKIT_TICKET)
                 .set(RPKIT_TICKET.REASON, entity.reason)
-                .set(RPKIT_TICKET.ISSUER_ID, entity.issuer.id)
-                .set(RPKIT_TICKET.RESOLVER_ID, entity.resolver?.id)
+                .set(RPKIT_TICKET.ISSUER_ID, issuerId.value)
+                .set(RPKIT_TICKET.RESOLVER_ID, entity.resolver?.id?.value)
                 .set(RPKIT_TICKET.WORLD, entity.location?.world?.name)
                 .set(RPKIT_TICKET.X, entity.location?.x)
                 .set(RPKIT_TICKET.Y, entity.location?.y)
@@ -123,9 +126,9 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                     .fetchOne() ?: return null
             val profileService = Services[RPKProfileService::class.java]
             val issuerId = result[RPKIT_TICKET.ISSUER_ID]
-            val issuer = if (issuerId == null) null else profileService?.getProfile(issuerId)
+            val issuer = if (issuerId == null) null else profileService?.getProfile(RPKProfileId(issuerId))
             val resolverId = result[RPKIT_TICKET.RESOLVER_ID]
-            val resolver = if (resolverId == null) null else profileService?.getProfile(resolverId)
+            val resolver = if (resolverId == null) null else profileService?.getProfile(RPKProfileId(resolverId))
             val worldName = result[RPKIT_TICKET.WORLD]
             val world = if (worldName == null) null else plugin.server.getWorld(worldName)
             val x = result[RPKIT_TICKET.X]

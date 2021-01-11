@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,16 +16,16 @@
 package com.rpkit.players.bukkit.command.profile
 
 import com.rpkit.core.command.RPKCommandExecutor
-import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.command.result.CommandFailure
 import com.rpkit.core.command.result.CommandResult
 import com.rpkit.core.command.result.CommandSuccess
 import com.rpkit.core.command.result.IncorrectUsageFailure
 import com.rpkit.core.command.result.MissingServiceFailure
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
-import com.rpkit.players.bukkit.profile.RPKProfileImpl
+import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -61,7 +60,7 @@ class ProfileDenyLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandE
                     return MissingServiceFailure(RPKMinecraftProfileService::class.java)
                 }
                 val linkRequests = minecraftProfileService.getMinecraftProfileLinkRequests(sender).toMutableList()
-                val linkRequest = linkRequests.firstOrNull { request -> request.profile.id == id }
+                val linkRequest = linkRequests.firstOrNull { request -> request.profile.id?.value == id }
                 if (linkRequest == null) {
                     sender.sendMessage(plugin.messages.profileDenyLinkInvalidRequest)
                     return InvalidRequestFailure()
@@ -79,7 +78,7 @@ class ProfileDenyLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandE
                     sender.sendMessage(plugin.messages.noProfileService)
                     return MissingServiceFailure(RPKProfileService::class.java)
                 }
-                val profile = profileService.createProfile(sender.name)
+                val profile = profileService.createProfile(RPKProfileName(sender.name))
                 sender.profile = profile
                 minecraftProfileService.updateMinecraftProfile(sender)
                 sender.sendMessage(plugin.messages.profileDenyLinkProfileCreated)

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,15 +83,15 @@ class WarningCreateCommand(private val plugin: RPKModerationBukkit) : CommandExe
         warningService.addWarning(warning)
         sender.sendMessage(plugin.messages["warning-create-valid", mapOf(
             "reason" to warningReason,
-            "issuer" to issuerProfile.name,
-            "profile" to targetProfile.name,
+            "issuer" to issuerProfile.name.value,
+            "profile" to targetProfile.name.value,
             "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time),
             "index" to warningService.getWarnings(targetProfile).size.toString()
         )])
         targetPlayer.sendMessage(plugin.messages["warning-received", mapOf(
             "reason" to warningReason,
-            "issuer" to issuerProfile.name,
-            "profile" to targetProfile.name,
+            "issuer" to issuerProfile.name.value,
+            "profile" to targetProfile.name.value,
             "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time),
             "index" to warningService.getWarnings(targetProfile).size.toString()
         )])

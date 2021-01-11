@@ -57,12 +57,12 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
                         RPKIT_PROFILE_GROUP.PRIORITY
                 )
                 .values(
-                        profileId,
+                        profileId.value,
                         groupName.value,
                         entity.priority
                 )
                 .execute()
-        cache?.set(ProfileGroupCacheKey(profileId, groupName.value), entity)
+        cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
     }
 
     fun update(entity: RPKProfileGroup) {
@@ -71,16 +71,16 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
         database.create
                 .update(RPKIT_PROFILE_GROUP)
                 .set(RPKIT_PROFILE_GROUP.PRIORITY, entity.priority)
-                .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId))
+                .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId.value))
                 .and(RPKIT_PROFILE_GROUP.GROUP_NAME.eq(groupName.value))
                 .execute()
-        cache?.set(ProfileGroupCacheKey(profileId, groupName.value), entity)
+        cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
     }
 
     operator fun get(profile: RPKProfile, group: RPKGroup): RPKProfileGroup? {
         val profileId = profile.id ?: return null
         val groupName = group.name
-        val cacheKey = ProfileGroupCacheKey(profileId, groupName.value)
+        val cacheKey = ProfileGroupCacheKey(profileId.value, groupName.value)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
@@ -89,7 +89,7 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
                         RPKIT_PROFILE_GROUP.PRIORITY
                 )
                 .from(RPKIT_PROFILE_GROUP)
-                .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId))
+                .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId.value))
                 .and(RPKIT_PROFILE_GROUP.GROUP_NAME.eq(groupName.value))
                 .fetchOne() ?: return null
         val profileGroup = RPKProfileGroup(
@@ -101,35 +101,38 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
         return profileGroup
     }
 
-    fun get(profile: RPKProfile): List<RPKProfileGroup> = database.create
+    fun get(profile: RPKProfile): List<RPKProfileGroup> {
+        val profileId = profile.id ?: return emptyList()
+        return database.create
             .select(
-                    RPKIT_PROFILE_GROUP.GROUP_NAME,
-                    RPKIT_PROFILE_GROUP.PRIORITY
+                RPKIT_PROFILE_GROUP.GROUP_NAME,
+                RPKIT_PROFILE_GROUP.PRIORITY
             )
             .from(RPKIT_PROFILE_GROUP)
-            .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profile.id))
+            .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId.value))
             .orderBy(RPKIT_PROFILE_GROUP.PRIORITY.desc())
             .fetch()
             .mapNotNull { result ->
                 val group = result[RPKIT_PROFILE_GROUP.GROUP_NAME]
-                        .let { Services[RPKGroupService::class.java]?.getGroup(RPKGroupName(it)) }
-                        ?: return@mapNotNull null
+                    .let { Services[RPKGroupService::class.java]?.getGroup(RPKGroupName(it)) }
+                    ?: return@mapNotNull null
                 RPKProfileGroup(
-                        profile,
-                        group,
-                        result[RPKIT_PROFILE_GROUP.PRIORITY]
+                    profile,
+                    group,
+                    result[RPKIT_PROFILE_GROUP.PRIORITY]
                 )
             }
+    }
 
     fun delete(entity: RPKProfileGroup) {
         val profileId = entity.profile.id ?: return
         val groupName = entity.group.name
         database.create
                 .deleteFrom(RPKIT_PROFILE_GROUP)
-                .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(entity.profile.id))
+                .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId.value))
                 .and(RPKIT_PROFILE_GROUP.GROUP_NAME.eq(entity.group.name.value))
                 .execute()
-        cache?.set(ProfileGroupCacheKey(profileId, groupName.value), entity)
+        cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
     }
 
 }

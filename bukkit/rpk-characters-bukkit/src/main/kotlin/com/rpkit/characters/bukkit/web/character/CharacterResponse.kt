@@ -62,8 +62,8 @@ data class CharacterResponse(
 
 fun RPKCharacter.toCharacterResponse() = CharacterResponse(
     id?.value ?: 0,
-    profile?.id,
-    minecraftProfile?.id,
+    profile?.id?.value,
+    minecraftProfile?.id?.value,
     name,
     gender,
     age,

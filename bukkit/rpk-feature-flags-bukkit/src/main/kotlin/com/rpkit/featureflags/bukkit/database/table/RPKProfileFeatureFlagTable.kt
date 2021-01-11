@@ -39,6 +39,7 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
     } else null
 
     fun insert(entity: RPKProfileFeatureFlag) {
+        val profileId = entity.profile.id ?: return
         database.create
                 .insertInto(
                         RPKIT_PROFILE_FEATURE_FLAG,
@@ -47,7 +48,7 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
                         RPKIT_PROFILE_FEATURE_FLAG.ENABLED
                 )
                 .values(
-                        entity.profile.id,
+                        profileId.value,
                         entity.featureFlag.name.value,
                         entity.isEnabled
                 )
@@ -55,12 +56,13 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
     }
 
     fun update(entity: RPKProfileFeatureFlag) {
+        val profileId = entity.profile.id ?: return
         database.create
                 .update(RPKIT_PROFILE_FEATURE_FLAG)
-                .set(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID, entity.profile.id)
+                .set(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID, profileId.value)
                 .set(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME, entity.featureFlag.name.value)
                 .set(RPKIT_PROFILE_FEATURE_FLAG.ENABLED, entity.isEnabled)
-                .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(entity.profile.id))
+                .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profileId.value))
                 .execute()
     }
 
@@ -68,6 +70,7 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
         if (cache?.containsKey(featureFlag.name.value) == true) {
             return cache[featureFlag.name.value]
         }
+        val profileId = profile.id ?: return null
         val result = database.create
             .select(
                 RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID,
@@ -75,7 +78,7 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
                 RPKIT_PROFILE_FEATURE_FLAG.ENABLED
             )
             .from(RPKIT_PROFILE_FEATURE_FLAG)
-            .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profile.id))
+            .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profileId.value))
             .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(featureFlag.name.value))
             .fetchOne() ?: return null
         Services[RPKProfileService::class.java]
@@ -90,9 +93,10 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
     }
 
     fun delete(entity: RPKProfileFeatureFlag) {
+        val profileId = entity.profile.id ?: return
         database.create
                 .deleteFrom(RPKIT_PROFILE_FEATURE_FLAG)
-                .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(entity.profile.id))
+                .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profileId.value))
                 .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(entity.featureFlag.name.value))
                 .execute()
         cache?.remove(entity.featureFlag.name.value)

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +15,4 @@
 
 package com.rpkit.players.bukkit.profile
 
-import com.rpkit.players.bukkit.profile.discord.DiscordUserId
-import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfile
-import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileId
-
-class RPKDiscordProfileImpl(
-        override var id: RPKDiscordProfileId? = null,
-        override var profile: RPKThinProfile,
-        override val discordId: DiscordUserId
-) : RPKDiscordProfile
+data class RPKProfileDiscriminator(val value: Int)

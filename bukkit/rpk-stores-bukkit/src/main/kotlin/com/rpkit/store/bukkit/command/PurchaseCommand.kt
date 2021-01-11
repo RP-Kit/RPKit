@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +31,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class PurchaseCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
 
@@ -122,7 +121,7 @@ class PurchaseCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
             "player_name" to (bukkitOfflinePlayer.name ?: ""),
             "player_uuid" to bukkitOfflinePlayer.uniqueId.toString(),
             "profile_id" to profile.id.toString(),
-            "profile_name" to profile.name,
+            "profile_name" to profile.name.value,
             "store_item_identifier" to storeItem.identifier, // order is important
             "store_item_id" to storeItemId.toString(),
             "store_item_description" to storeItem.description,

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +24,7 @@ import com.rpkit.chat.bukkit.irc.listener.IRCChannelQuitListener
 import com.rpkit.chat.bukkit.irc.listener.IRCConnectListener
 import com.rpkit.chat.bukkit.irc.listener.IRCMessageListener
 import com.rpkit.chat.bukkit.irc.listener.IRCUserListListener
-import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 import org.bukkit.scheduler.BukkitRunnable
 import org.pircbotx.Configuration
@@ -111,8 +110,8 @@ class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
     override val isConnected: Boolean
         get() = ircBot.isConnected
 
-    override val nick: IRCNick
-        get() = IRCNick(ircBot.nick)
+    override val nick: RPKIRCNick
+        get() = RPKIRCNick(ircBot.nick)
 
     override fun sendMessage(channel: IRCChannel, message: String) {
         ircBot.send().message(channel.name, message)
@@ -122,15 +121,15 @@ class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
         sendMessage(user.nick, message)
     }
 
-    override fun sendMessage(nick: IRCNick, message: String) {
+    override fun sendMessage(nick: RPKIRCNick, message: String) {
         ircBot.send().message(nick.value, message)
     }
 
-    override fun isOnline(nick: IRCNick): Boolean {
+    override fun isOnline(nick: RPKIRCNick): Boolean {
         return onlineUsers.contains(nick.value)
     }
 
-    override fun setOnline(nick: IRCNick, isOnline: Boolean) {
+    override fun setOnline(nick: RPKIRCNick, isOnline: Boolean) {
         if (isOnline) {
             if (!onlineUsers.contains(nick.value)) {
                 onlineUsers.add(nick.value)

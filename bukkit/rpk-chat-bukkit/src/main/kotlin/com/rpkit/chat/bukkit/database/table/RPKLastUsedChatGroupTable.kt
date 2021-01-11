@@ -52,11 +52,11 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
                         RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID
                 )
                 .values(
-                    minecraftProfileId,
+                    minecraftProfileId.value,
                     chatGroupId.value
                 )
                 .execute()
-        minecraftProfileCache?.set(minecraftProfileId, entity)
+        minecraftProfileCache?.set(minecraftProfileId.value, entity)
     }
 
     fun update(entity: RPKLastUsedChatGroup) {
@@ -65,15 +65,15 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
         database.create
                 .update(RPKIT_LAST_USED_CHAT_GROUP)
                 .set(RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID, chatGroupId.value)
-                .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        minecraftProfileCache?.set(minecraftProfileId, entity)
+        minecraftProfileCache?.set(minecraftProfileId.value, entity)
     }
 
     fun get(minecraftProfile: RPKMinecraftProfile): RPKLastUsedChatGroup? {
         val minecraftProfileId = minecraftProfile.id ?: return null
-        if (minecraftProfileCache?.containsKey(minecraftProfileId) == true) {
-            return minecraftProfileCache[minecraftProfileId]
+        if (minecraftProfileCache?.containsKey(minecraftProfileId.value) == true) {
+            return minecraftProfileCache[minecraftProfileId.value]
         }
         val result = database.create
             .select(
@@ -81,7 +81,7 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
                 RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID
             )
             .from(RPKIT_LAST_USED_CHAT_GROUP)
-            .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+            .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
             .fetchOne() ?: return null
         val chatGroupService = Services[RPKChatGroupService::class.java] ?: return null
         val chatGroupId = result.get(RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID)
@@ -91,12 +91,12 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
                 minecraftProfile,
                 chatGroup
             )
-            minecraftProfileCache?.set(minecraftProfileId, lastUsedChatGroup)
+            minecraftProfileCache?.set(minecraftProfileId.value, lastUsedChatGroup)
             return lastUsedChatGroup
         } else {
             database.create
                 .deleteFrom(RPKIT_LAST_USED_CHAT_GROUP)
-                .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             return null
         }
@@ -106,9 +106,9 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_LAST_USED_CHAT_GROUP)
-                .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        minecraftProfileCache?.remove(minecraftProfileId)
+        minecraftProfileCache?.remove(minecraftProfileId.value)
     }
 
 }

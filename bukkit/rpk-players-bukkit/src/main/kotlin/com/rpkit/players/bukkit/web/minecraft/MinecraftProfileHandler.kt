@@ -1,9 +1,26 @@
+/*
+ * Copyright 2021 Ren Binden
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.players.bukkit.web.minecraft
 
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftUsername
 import com.rpkit.players.bukkit.web.ErrorResponse
 import com.rpkit.players.bukkit.web.authenticatedProfile
 import org.http4k.core.Request
@@ -30,7 +47,7 @@ class MinecraftProfileHandler {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Minecraft profile service not found"))
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(name)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(name))
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Minecraft profile not found"))
         return Response(OK)
@@ -46,7 +63,7 @@ class MinecraftProfileHandler {
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Minecraft profile service not found"))
         val profile = if (minecraftProfilePostRequest.profileId != null) {
-            val profile = profileService.getProfile(minecraftProfilePostRequest.profileId)
+            val profile = profileService.getProfile(RPKProfileId(minecraftProfilePostRequest.profileId))
                 ?: return Response(BAD_REQUEST)
                     .with(ErrorResponse.lens of ErrorResponse("Invalid profile ID"))
             if (profile != request.authenticatedProfile) {
@@ -75,7 +92,7 @@ class MinecraftProfileHandler {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Minecraft profile service not found"))
-        val profile = profileService.getProfile(profileId)
+        val profile = profileService.getProfile(RPKProfileId(profileId))
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
         val minecraftProfiles = minecraftProfileService.getMinecraftProfiles(profile)

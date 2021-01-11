@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +19,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.database.create
@@ -45,7 +45,7 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
     }
 
     fun insert(entity: RPKTimedPurchase) {
-        val id = database.getTable(RPKPurchaseTable::class.java).insert(entity)
+        val id = database.getTable(RPKPurchaseTable::class.java).insert(entity) ?: return
         database.create
                 .insertInto(
                         RPKIT_TIMED_PURCHASE,
@@ -92,7 +92,7 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
             return null
         }
         val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profile = profileService.getProfile(result[RPKIT_PURCHASE.PROFILE_ID])
+        val profile = profileService.getProfile(RPKProfileId(result[RPKIT_PURCHASE.PROFILE_ID]))
         if (profile == null) {
             database.create
                     .deleteFrom(RPKIT_PURCHASE)
@@ -116,6 +116,7 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
     }
 
     fun get(profile: RPKProfile): List<RPKTimedPurchase> {
+        val profileId = profile.id ?: return emptyList()
         val result = database.create
                 .select(RPKIT_TIMED_PURCHASE.PURCHASE_ID)
                 .from(
@@ -123,7 +124,7 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
                         RPKIT_TIMED_PURCHASE
                 )
                 .where(RPKIT_PURCHASE.ID.eq(RPKIT_TIMED_PURCHASE.ID))
-                .and(RPKIT_PURCHASE.PROFILE_ID.eq(profile.id))
+                .and(RPKIT_PURCHASE.PROFILE_ID.eq(profileId.value))
                 .fetch()
         return result.mapNotNull { row -> get(row[RPKIT_TIMED_PURCHASE.PURCHASE_ID]) }
     }

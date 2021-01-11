@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,25 +13,23 @@
  * limitations under the License.
  */
 
-package com.rpkit.players.bukkit.profile
+package com.rpkit.players.bukkit.profile.irc
 
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.table.RPKIRCProfileTable
 import com.rpkit.players.bukkit.event.ircprofile.RPKBukkitIRCProfileCreateEvent
 import com.rpkit.players.bukkit.event.ircprofile.RPKBukkitIRCProfileDeleteEvent
 import com.rpkit.players.bukkit.event.ircprofile.RPKBukkitIRCProfileUpdateEvent
-import com.rpkit.players.bukkit.profile.irc.IRCNick
-import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
-import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
+import com.rpkit.players.bukkit.profile.RPKProfile
 
 
 class RPKIRCProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKIRCProfileService {
 
-    override fun getIRCProfile(id: Int): RPKIRCProfile? {
+    override fun getIRCProfile(id: RPKIRCProfileId): RPKIRCProfile? {
         return plugin.database.getTable(RPKIRCProfileTable::class.java)[id]
     }
 
-    override fun getIRCProfile(nick: IRCNick): RPKIRCProfile? {
+    override fun getIRCProfile(nick: RPKIRCNick): RPKIRCProfile? {
         return plugin.database.getTable(RPKIRCProfileTable::class.java).get(nick)
     }
 

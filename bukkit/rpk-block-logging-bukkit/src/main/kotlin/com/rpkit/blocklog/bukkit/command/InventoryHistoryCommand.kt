@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +52,7 @@ class InventoryHistoryCommand(private val plugin: RPKBlockLoggingBukkit) : Comma
         for (change in changes.sortedBy(RPKBlockInventoryChange::time).take(100)) {
             sender.sendMessage(plugin.messages["inventory-history-change", mapOf(
                 "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time),
-                "profile" to (change.profile?.name ?: "None"),
+                "profile" to (change.profile?.name?.value ?: "None"),
                 "minecraft_profile" to (change.minecraftProfile?.name ?: "None"),
                 "character" to (change.character?.name ?: "None"),
                 "from" to change.from.contentToString(),

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +13,24 @@
  * limitations under the License.
  */
 
-package com.rpkit.players.bukkit.profile
+package com.rpkit.players.bukkit.profile.minecraft
 
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 import net.md_5.bungee.api.chat.BaseComponent
 import org.bukkit.Bukkit
-import java.util.*
+import java.util.UUID
 
 class RPKMinecraftProfileImpl(
-        override var id: Int? = null,
-        override var profile: RPKThinProfile,
-        override val minecraftUUID: UUID
+    override var id: RPKMinecraftProfileId? = null,
+    override var profile: RPKThinProfile,
+    override val minecraftUUID: UUID
 ) : RPKMinecraftProfile {
 
     override val isOnline: Boolean
         get() = Bukkit.getOfflinePlayer(minecraftUUID).isOnline
+
+    override val minecraftUsername: RPKMinecraftUsername
+        get() = RPKMinecraftUsername(name)
 
     override val name: String
         get() = Bukkit.getOfflinePlayer(minecraftUUID).name ?: ""

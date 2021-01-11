@@ -25,6 +25,7 @@ import com.rpkit.moderation.bukkit.warning.RPKWarning
 import com.rpkit.moderation.bukkit.warning.RPKWarningId
 import com.rpkit.moderation.bukkit.warning.RPKWarningImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 
 
@@ -42,6 +43,8 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
     }
 
     fun insert(entity: RPKWarning) {
+        val profileId = entity.profile.id ?: return
+        val issuerId = entity.issuer.id ?: return
         database.create
                 .insertInto(
                         RPKIT_WARNING,
@@ -51,10 +54,10 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                         RPKIT_WARNING.TIME
                 )
                 .values(
-                        entity.reason,
-                        entity.profile.id,
-                        entity.issuer.id,
-                        entity.time
+                    entity.reason,
+                    profileId.value,
+                    issuerId.value,
+                    entity.time
                 )
                 .execute()
         val id = database.create.lastID().toInt()
@@ -64,11 +67,13 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
 
     fun update(entity: RPKWarning) {
         val id = entity.id ?: return
+        val profileId = entity.profile.id ?: return
+        val issuerId = entity.issuer.id ?: return
         database.create
                 .update(RPKIT_WARNING)
                 .set(RPKIT_WARNING.REASON, entity.reason)
-                .set(RPKIT_WARNING.PROFILE_ID, entity.profile.id)
-                .set(RPKIT_WARNING.ISSUER_ID, entity.issuer.id)
+                .set(RPKIT_WARNING.PROFILE_ID, profileId.value)
+                .set(RPKIT_WARNING.ISSUER_ID, issuerId.value)
                 .set(RPKIT_WARNING.TIME, entity.time)
                 .where(RPKIT_WARNING.ID.eq(id.value))
                 .execute()
@@ -87,8 +92,8 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                 .where(RPKIT_WARNING.ID.eq(id.value))
                 .fetchOne() ?: return null
         val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profile = profileService.getProfile(result[RPKIT_WARNING.PROFILE_ID])
-        val issuer = profileService.getProfile(result[RPKIT_WARNING.ISSUER_ID])
+        val profile = profileService.getProfile(RPKProfileId(result[RPKIT_WARNING.PROFILE_ID]))
+        val issuer = profileService.getProfile(RPKProfileId(result[RPKIT_WARNING.ISSUER_ID]))
         if (profile != null && issuer != null) {
             val warning = RPKWarningImpl(
                     id,
@@ -110,10 +115,11 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
     }
 
     fun get(profile: RPKProfile): List<RPKWarning> {
+        val profileId = profile.id ?: return emptyList()
         val results = database.create
                 .select(RPKIT_WARNING.ID)
                 .from(RPKIT_WARNING)
-                .where(RPKIT_WARNING.PROFILE_ID.eq(profile.id))
+                .where(RPKIT_WARNING.PROFILE_ID.eq(profileId.value))
                 .fetch()
         return results.map { get(RPKWarningId(it[RPKIT_WARNING.ID])) }.filterNotNull()
     }

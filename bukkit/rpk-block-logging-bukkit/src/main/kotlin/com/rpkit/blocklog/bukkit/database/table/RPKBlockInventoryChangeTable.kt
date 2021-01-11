@@ -30,7 +30,9 @@ import com.rpkit.core.bukkit.util.toItemStackArray
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 
 
@@ -63,8 +65,8 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                 .values(
                         entity.blockHistory.id?.value,
                         entity.time,
-                        entity.profile?.id,
-                        entity.minecraftProfile?.id,
+                        entity.profile?.id?.value,
+                        entity.minecraftProfile?.id?.value,
                         entity.character?.id?.value,
                         entity.from.toByteArray(),
                         entity.to.toByteArray(),
@@ -82,8 +84,8 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                 .update(RPKIT_BLOCK_INVENTORY_CHANGE)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID, entity.blockHistory.id?.value)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.TIME, entity.time)
-                .set(RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID, entity.profile?.id)
-                .set(RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id)
+                .set(RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID, entity.profile?.id?.value)
+                .set(RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id?.value)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID, entity.character?.id?.value)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.FROM, entity.from.toByteArray())
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.TO, entity.to.toByteArray())
@@ -124,10 +126,14 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
         }
         val profileService = Services[RPKProfileService::class.java] ?: return null
         val profileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID)
-        val profile = if (profileId == null) null else profileService.getProfile(profileId)
+        val profile = if (profileId == null) null else profileService.getProfile(RPKProfileId(profileId))
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return null
         val minecraftProfileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID)
-        val minecraftProfile = if (minecraftProfileId == null) null else minecraftProfileService.getMinecraftProfile(minecraftProfileId)
+        val minecraftProfile = if (minecraftProfileId == null) {
+            null
+        } else {
+            minecraftProfileService.getMinecraftProfile(RPKMinecraftProfileId(minecraftProfileId))
+        }
         val characterService = Services[RPKCharacterService::class.java] ?: return null
         val characterId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID)
         val character = if (characterId == null) null else characterService.getCharacter(characterId)

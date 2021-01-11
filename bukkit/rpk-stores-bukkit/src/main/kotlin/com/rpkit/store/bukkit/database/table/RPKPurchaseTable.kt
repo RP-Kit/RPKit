@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +40,8 @@ class RPKPurchaseTable(
         null
     }
 
-    fun insert(entity: RPKPurchase): Int {
+    fun insert(entity: RPKPurchase): Int? {
+        val profileId = entity.profile.id ?: return null
         database.create
                 .insertInto(
                         RPKIT_PURCHASE,
@@ -51,7 +51,7 @@ class RPKPurchaseTable(
                 )
                 .values(
                         entity.storeItem.id,
-                        entity.profile.id,
+                        profileId.value,
                         entity.purchaseDate
                 )
                 .execute()
@@ -63,10 +63,11 @@ class RPKPurchaseTable(
 
     fun update(entity: RPKPurchase) {
         val id = entity.id ?: return
+        val profileId = entity.profile.id ?: return
         database.create
                 .update(RPKIT_PURCHASE)
                 .set(RPKIT_PURCHASE.STORE_ITEM_ID, entity.storeItem.id)
-                .set(RPKIT_PURCHASE.PROFILE_ID, entity.profile.id)
+                .set(RPKIT_PURCHASE.PROFILE_ID, profileId.value)
                 .set(RPKIT_PURCHASE.PURCHASE_DATE, entity.purchaseDate)
                 .where(RPKIT_PURCHASE.ID.eq(id))
                 .execute()

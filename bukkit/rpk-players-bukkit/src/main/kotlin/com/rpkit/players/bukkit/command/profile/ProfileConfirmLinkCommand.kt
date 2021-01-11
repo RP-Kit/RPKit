@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,7 +65,7 @@ class ProfileConfirmLinkCommand(private val plugin: RPKPlayersBukkit) : RPKComma
                     return AlreadyLinkedFailure(profile)
                 }
                 val linkRequests = minecraftProfileService.getMinecraftProfileLinkRequests(sender)
-                val linkRequest = linkRequests.firstOrNull { request -> request.profile.id == id }
+                val linkRequest = linkRequests.firstOrNull { request -> request.profile.id?.value == id }
                 if (linkRequest == null) {
                     sender.sendMessage(plugin.messages.profileConfirmLinkInvalidRequest)
                     return InvalidRequestFailure()

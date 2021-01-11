@@ -55,17 +55,17 @@ class RPKChatChannelMuteTable(private val database: Database, private val plugin
                         RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME
                 )
                 .values(
-                        minecraftProfileId,
+                        minecraftProfileId.value,
                         chatChannelName.value
                 )
                 .execute()
-        cache?.set(MinecraftProfileChatChannelCacheKey(minecraftProfileId, chatChannelName.value), entity)
+        cache?.set(MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value), entity)
     }
 
     fun get(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): RPKChatChannelMute? {
         val minecraftProfileId = minecraftProfile.id ?: return null
         val chatChannelName = chatChannel.name
-        val cacheKey = MinecraftProfileChatChannelCacheKey(minecraftProfileId, chatChannelName.value)
+        val cacheKey = MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
@@ -75,7 +75,7 @@ class RPKChatChannelMuteTable(private val database: Database, private val plugin
                         RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME
                 )
                 .from(RPKIT_CHAT_CHANNEL_MUTE)
-                .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME.eq(chatChannelName.value))
                 .fetchOne() ?: return null
         val chatChannelMute = RPKChatChannelMute(
@@ -89,10 +89,10 @@ class RPKChatChannelMuteTable(private val database: Database, private val plugin
     fun delete(entity: RPKChatChannelMute) {
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         val chatChannelName = entity.chatChannel.name
-        val cacheKey = MinecraftProfileChatChannelCacheKey(minecraftProfileId, chatChannelName.value)
+        val cacheKey = MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value)
         database.create
             .deleteFrom(RPKIT_CHAT_CHANNEL_MUTE)
-            .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+            .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
             .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME.eq(chatChannelName.value))
             .execute()
         cache?.remove(cacheKey)

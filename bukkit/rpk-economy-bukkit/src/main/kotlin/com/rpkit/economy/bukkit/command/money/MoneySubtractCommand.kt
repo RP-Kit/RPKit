@@ -24,6 +24,8 @@ import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
+import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
@@ -166,8 +168,8 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit) : CommandExecutor {
             context.setSessionData("profileDiscriminator", input.toInt())
             val profileService = Services[RPKProfileService::class.java] ?: return ProfileInvalidPrompt()
             val profile = profileService.getProfile(
-                    context.getSessionData("profileName") as String,
-                    context.getSessionData("profileDiscriminator") as Int
+                    RPKProfileName(context.getSessionData("profileName") as String),
+                    RPKProfileDiscriminator(context.getSessionData("profileDiscriminator") as Int)
             ) ?: return ProfileInvalidPrompt()
             context.setSessionData("profileService", profileService)
             context.setSessionData("profile", profile)

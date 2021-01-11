@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,24 +45,24 @@ class RPKPlayerUnclaimingTable(private val database: Database, private val plugi
                         RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID
                 )
                 .values(
-                        minecraftProfileId
+                        minecraftProfileId.value
                 )
                 .execute()
-        cache?.set(minecraftProfileId, entity)
+        cache?.set(minecraftProfileId.value, entity)
     }
 
     operator fun get(minecraftProfile: RPKMinecraftProfile): RPKPlayerUnclaiming? {
         val minecraftProfileId = minecraftProfile.id ?: return null
-        if (cache?.containsKey(minecraftProfileId) == true) {
-            return cache[minecraftProfileId]
+        if (cache?.containsKey(minecraftProfileId.value) == true) {
+            return cache[minecraftProfileId.value]
         } else {
             database.create
                     .select(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID)
                     .from(RPKIT_PLAYER_UNCLAIMING)
-                    .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                    .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                     .fetchOne() ?: return null
             val playerUnclaiming = RPKPlayerUnclaiming(minecraftProfile)
-            cache?.set(minecraftProfileId, playerUnclaiming)
+            cache?.set(minecraftProfileId.value, playerUnclaiming)
             return playerUnclaiming
         }
     }
@@ -72,9 +71,9 @@ class RPKPlayerUnclaimingTable(private val database: Database, private val plugi
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_PLAYER_UNCLAIMING)
-                .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
+                .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.remove(minecraftProfileId)
+        cache?.remove(minecraftProfileId.value)
     }
 
 }

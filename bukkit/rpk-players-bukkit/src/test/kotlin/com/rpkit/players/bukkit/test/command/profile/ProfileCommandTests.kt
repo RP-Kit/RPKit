@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,17 +39,21 @@ import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
 import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
 import com.rpkit.players.bukkit.messages.PlayersMessages
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
+import com.rpkit.players.bukkit.profile.RPKProfileId
+import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import com.rpkit.players.bukkit.profile.discord.DiscordUserId
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfile
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
-import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileLinkRequest
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftUsername
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -144,7 +147,7 @@ class ProfileCommandTests : WordSpec({
             val plugin = mockk<RPKPlayersBukkit>()
             every { plugin.messages } returns messages
             val minecraftProfileService = mockk<RPKMinecraftProfileService>()
-            every { minecraftProfileService.getMinecraftProfile("abc") } returns null
+            every { minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername("abc")) } returns null
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKMinecraftProfileService::class.java] } returns minecraftProfileService
             Services.delegate = testServicesDelegate
@@ -163,7 +166,7 @@ class ProfileCommandTests : WordSpec({
             val plugin = mockk<RPKPlayersBukkit>()
             every { plugin.messages } returns messages
             val minecraftProfileService = mockk<RPKMinecraftProfileService>()
-            every { minecraftProfileService.getMinecraftProfile("abc") } returns null
+            every { minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername("abc")) } returns null
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKMinecraftProfileService::class.java] } returns minecraftProfileService
             Services.delegate = testServicesDelegate
@@ -187,7 +190,7 @@ class ProfileCommandTests : WordSpec({
             val target = mockk<RPKMinecraftProfile>()
             val profile = mockk<RPKThinProfile>()
             every { target.profile } returns profile
-            every { minecraftProfileService.getMinecraftProfile("abc") } returns target
+            every { minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername("abc")) } returns target
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKMinecraftProfileService::class.java] } returns minecraftProfileService
             Services.delegate = testServicesDelegate
@@ -211,10 +214,10 @@ class ProfileCommandTests : WordSpec({
             val minecraftProfileService = mockk<RPKMinecraftProfileService>()
             val target = mockk<RPKMinecraftProfile>()
             val profile = mockk<RPKProfile>()
-            every { profile.name } returns "abc"
-            every { profile.discriminator } returns 1
+            every { profile.name } returns RPKProfileName("abc")
+            every { profile.discriminator } returns RPKProfileDiscriminator(1)
             every { target.profile } returns profile
-            every { minecraftProfileService.getMinecraftProfile("abc") } returns target
+            every { minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername("abc")) } returns target
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKMinecraftProfileService::class.java] } returns minecraftProfileService
             Services.delegate = testServicesDelegate
@@ -334,14 +337,14 @@ class ProfileCommandTests : WordSpec({
             every { profile.discriminator = any() } just runs
             every { sender.profile } returns profile
             val profileService = mockk<RPKProfileService>()
-            every { profileService.generateDiscriminatorFor(any()) } returns 1
+            every { profileService.generateDiscriminatorFor(any()) } returns RPKProfileDiscriminator(1)
             every { profileService.updateProfile(any()) } just runs
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKProfileService::class.java] } returns profileService
             Services.delegate = testServicesDelegate
             val profileCommand = ProfileCommand(plugin)
             profileCommand.onCommand(sender, arrayOf("set", "name", "abcd")) should beInstanceOf<CommandSuccess>()
-            verify(exactly = 1) { profile.name = "abcd" }
+            verify(exactly = 1) { profile.name = RPKProfileName("abcd") }
             verify(exactly = 1) { profileService.updateProfile(profile) }
             verify(exactly = 1) { sender.sendMessage("name set to abcd") }
         }
@@ -596,7 +599,7 @@ class ProfileCommandTests : WordSpec({
             val ircService = mockk<RPKIRCService>()
             val ircProfileService = mockk<RPKIRCProfileService>()
             val ircProfile = mockk<RPKIRCProfile>()
-            every { ircProfileService.getIRCProfile(any<IRCNick>()) } returns ircProfile
+            every { ircProfileService.getIRCProfile(any<RPKIRCNick>()) } returns ircProfile
             every { ircService.isOnline(any()) } returns true
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKIRCService::class.java] } returns ircService
@@ -621,7 +624,7 @@ class ProfileCommandTests : WordSpec({
             val ircService = mockk<RPKIRCService>()
             every { ircService.isOnline(any()) } returns true
             val ircProfileService = mockk<RPKIRCProfileService>()
-            every { ircProfileService.getIRCProfile(any<IRCNick>()) } returns null
+            every { ircProfileService.getIRCProfile(any<RPKIRCNick>()) } returns null
             every { ircProfileService.addIRCProfile(any()) } just runs
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKIRCService::class.java] } returns ircService
@@ -689,7 +692,7 @@ class ProfileCommandTests : WordSpec({
             every { sender.hasPermission("rpkit.players.command.profile.link.minecraft") } returns true
             val target = mockk<RPKMinecraftProfile>()
             val minecraftProfileService = mockk<RPKMinecraftProfileService>()
-            every { minecraftProfileService.getMinecraftProfile("abcd") } returns target
+            every { minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername("abcd")) } returns target
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKMinecraftProfileService::class.java] } returns minecraftProfileService
             Services.delegate = testServicesDelegate
@@ -708,7 +711,7 @@ class ProfileCommandTests : WordSpec({
             every { sender.hasPermission("rpkit.players.command.profile.link") } returns true
             every { sender.hasPermission("rpkit.players.command.profile.link.minecraft") } returns true
             val minecraftProfileService = mockk<RPKMinecraftProfileService>()
-            every { minecraftProfileService.getMinecraftProfile("abcd") } returns null
+            every { minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername("abcd")) } returns null
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKMinecraftProfileService::class.java] } returns minecraftProfileService
             Services.delegate = testServicesDelegate
@@ -729,7 +732,7 @@ class ProfileCommandTests : WordSpec({
             every { sender.hasPermission("rpkit.players.command.profile.link.minecraft") } returns true
             every { sender.profile } returns profile
             val minecraftProfileService = mockk<RPKMinecraftProfileService>()
-            every { minecraftProfileService.getMinecraftProfile("abcd") } returns null
+            every { minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername("abcd")) } returns null
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKMinecraftProfileService::class.java] } returns minecraftProfileService
             Services.delegate = testServicesDelegate
@@ -752,8 +755,8 @@ class ProfileCommandTests : WordSpec({
             val target = mockk<RPKMinecraftProfile>()
             val linkRequest = mockk<RPKMinecraftProfileLinkRequest>()
             val minecraftProfileService = mockk<RPKMinecraftProfileService>()
-            every { minecraftProfileService.getMinecraftProfile("abcd") } returns null
-            every { minecraftProfileService.createMinecraftProfile("abcd") } returns target
+            every { minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername("abcd")) } returns null
+            every { minecraftProfileService.createMinecraftProfile(RPKMinecraftUsername("abcd")) } returns target
             every { minecraftProfileService.createMinecraftProfileLinkRequest(profile, target) } returns linkRequest
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKMinecraftProfileService::class.java] } returns minecraftProfileService
@@ -761,7 +764,7 @@ class ProfileCommandTests : WordSpec({
             val profileCommand = ProfileCommand(plugin)
             profileCommand.onCommand(sender, arrayOf("link", "minecraft", "abcd")) should beInstanceOf<CommandSuccess>()
             verify(exactly = 1) { sender.sendMessage(minecraftProfileLinkedMessage) }
-            verify(exactly = 1) { minecraftProfileService.createMinecraftProfile("abcd") }
+            verify(exactly = 1) { minecraftProfileService.createMinecraftProfile(RPKMinecraftUsername("abcd")) }
             verify(exactly = 1) { minecraftProfileService.createMinecraftProfileLinkRequest(profile, target) }
         }
         "return not a player failure when link discord is used from console" {
@@ -916,7 +919,7 @@ class ProfileCommandTests : WordSpec({
             every { sender.hasPermission("rpkit.players.command.profile.link") } returns true
             every { sender.hasPermission("rpkit.players.command.profile.link.discord") } returns true
             val profile = mockk<RPKProfile>()
-            every { profile.name } returns "abcd"
+            every { profile.name } returns RPKProfileName("abcd")
             every { sender.profile } returns profile
             val userId = DiscordUserId(1)
             val discordProfile = mockk<RPKDiscordProfile>()
@@ -1035,7 +1038,7 @@ class ProfileCommandTests : WordSpec({
             every { sender.profile } returns thinProfile
             every { sender.profile = any() } just runs
             val profile = mockk<RPKProfile>()
-            every { profile.id } returns 1
+            every { profile.id } returns RPKProfileId(1)
             val linkRequest = mockk<RPKMinecraftProfileLinkRequest>()
             every { linkRequest.profile } returns profile
             val linkRequests = listOf(linkRequest)
@@ -1149,11 +1152,11 @@ class ProfileCommandTests : WordSpec({
             every { sender.profile } returns thinProfile
             every { sender.profile = any() } just runs
             val profile1 = mockk<RPKProfile>()
-            every { profile1.id } returns 1
+            every { profile1.id } returns RPKProfileId(1)
             val linkRequest1 = mockk<RPKMinecraftProfileLinkRequest>()
             every { linkRequest1.profile } returns profile1
             val profile2 = mockk<RPKProfile>()
-            every { profile2.id } returns 2
+            every { profile2.id } returns RPKProfileId(2)
             val linkRequest2 = mockk<RPKMinecraftProfileLinkRequest>()
             every { linkRequest2.profile } returns profile2
             val linkRequests = listOf(linkRequest1, linkRequest2)
@@ -1164,7 +1167,7 @@ class ProfileCommandTests : WordSpec({
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKMinecraftProfileService::class.java] } returns minecraftProfileService
             val profileService = mockk<RPKProfileService>()
-            every { profileService.generateDiscriminatorFor(any()) } returns 1
+            every { profileService.generateDiscriminatorFor(any()) } returns RPKProfileDiscriminator(1)
             val newProfile = mockk<RPKProfile>()
             every { profileService.createProfile(any(), any(), any()) } returns newProfile
             every { testServicesDelegate[RPKProfileService::class.java] } returns profileService
@@ -1188,7 +1191,7 @@ class ProfileCommandTests : WordSpec({
             every { sender.profile } returns thinProfile
             every { sender.profile = any() } just runs
             val profile1 = mockk<RPKProfile>()
-            every { profile1.id } returns 1
+            every { profile1.id } returns RPKProfileId(1)
             val linkRequest1 = mockk<RPKMinecraftProfileLinkRequest>()
             every { linkRequest1.profile } returns profile1
             val linkRequests = listOf(linkRequest1)
@@ -1219,7 +1222,7 @@ class ProfileCommandTests : WordSpec({
             every { sender.profile } returns thinProfile
             every { sender.profile = any() } just runs
             val profile1 = mockk<RPKProfile>()
-            every { profile1.id } returns 1
+            every { profile1.id } returns RPKProfileId(1)
             val linkRequest1 = mockk<RPKMinecraftProfileLinkRequest>()
             every { linkRequest1.profile } returns profile1
             val linkRequests = listOf(linkRequest1)
@@ -1228,7 +1231,7 @@ class ProfileCommandTests : WordSpec({
             every { minecraftProfileService.updateMinecraftProfile(any()) } just runs
             every { minecraftProfileService.removeMinecraftProfileLinkRequest(any()) } just runs
             val profileService = mockk<RPKProfileService>()
-            val discriminator = 1
+            val discriminator = RPKProfileDiscriminator(1)
             every { profileService.generateDiscriminatorFor(any()) } returns discriminator
             val newProfile = mockk<RPKProfile>()
             every { profileService.createProfile(any(), any(), any()) } returns newProfile
@@ -1240,7 +1243,7 @@ class ProfileCommandTests : WordSpec({
             profileCommand.onCommand(sender, arrayOf("denylink", "minecraft", "1")) should beInstanceOf<CommandSuccess>()
             verify(exactly = 1) { sender.sendMessage(profileCreatedMessage) }
             verify(exactly = 1) { minecraftProfileService.removeMinecraftProfileLinkRequest(linkRequest1) }
-            verify(exactly = 1) { profileService.createProfile("abcd", discriminator, null) }
+            verify(exactly = 1) { profileService.createProfile(RPKProfileName("abcd"), discriminator, null) }
         }
     }
 })

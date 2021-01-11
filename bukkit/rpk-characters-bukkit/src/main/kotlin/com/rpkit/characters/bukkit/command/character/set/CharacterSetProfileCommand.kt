@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +18,10 @@ package com.rpkit.characters.bukkit.command.character.set
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
+import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -103,7 +104,7 @@ class CharacterSetProfileCommand(private val plugin: RPKCharactersBukkit) : Comm
             sender.sendMessage(plugin.messages["character-set-profile-invalid-discriminator"])
             return true
         }
-        val newProfile = profileService.getProfile(name, discriminator)
+        val newProfile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
         if (newProfile == null) {
             sender.sendMessage(plugin.messages["character-set-profile-invalid-profile"])
             return true
@@ -131,7 +132,7 @@ class CharacterSetProfileCommand(private val plugin: RPKCharactersBukkit) : Comm
             val profileService = Services[RPKProfileService::class.java] ?: return END_OF_CONVERSATION
             val (name, discriminatorString) = input.split("#")
             val discriminator = discriminatorString.toIntOrNull() ?: return END_OF_CONVERSATION
-            val newProfile = profileService.getProfile(name, discriminator) ?: return END_OF_CONVERSATION
+            val newProfile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator)) ?: return END_OF_CONVERSATION
             character.profile = newProfile
             characterService.updateCharacter(character)
             characterService.setActiveCharacter(minecraftProfile, null)
@@ -148,7 +149,7 @@ class CharacterSetProfileCommand(private val plugin: RPKCharactersBukkit) : Comm
             if (!input.contains("#")) return false
             val (name, discriminatorString) = input.split("#")
             val discriminator = discriminatorString.toIntOrNull() ?: return false
-            profileService.getProfile(name, discriminator) ?: return false
+            profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator)) ?: return false
             return true
         }
 
@@ -163,7 +164,7 @@ class CharacterSetProfileCommand(private val plugin: RPKCharactersBukkit) : Comm
             if (!invalidInput.contains("#")) return plugin.messages["character-set-profile-invalid-no-discriminator"]
             val (name, discriminatorString) = invalidInput.split("#")
             val discriminator = discriminatorString.toIntOrNull() ?: return plugin.messages["character-set-profile-invalid-discriminator"]
-            profileService.getProfile(name, discriminator) ?: return plugin.messages["character-set-profile-invalid-profile"]
+            profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator)) ?: return plugin.messages["character-set-profile-invalid-profile"]
             return ""
         }
 

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,7 +46,7 @@ class SenderProfileNamePart(
         click
 ), ConfigurationSerializable {
 
-    override fun getText(context: DirectedPreFormatMessageContext) = context.senderProfile.name
+    override fun getText(context: DirectedPreFormatMessageContext) = context.senderProfile.name.value
 
     override fun serialize() = mutableMapOf(
             "font" to font,

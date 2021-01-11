@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,28 +41,27 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
     fun insert(entity: RPKSelection) {
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create.insertInto(
-                RPKIT_SELECTION_,
-                RPKIT_SELECTION_.MINECRAFT_PROFILE_ID,
-                RPKIT_SELECTION_.WORLD,
-                RPKIT_SELECTION_.X_1,
-                RPKIT_SELECTION_.Y_1,
-                RPKIT_SELECTION_.Z_1,
-                RPKIT_SELECTION_.X_2,
-                RPKIT_SELECTION_.Y_2,
-                RPKIT_SELECTION_.Z_2
+            RPKIT_SELECTION_,
+            RPKIT_SELECTION_.MINECRAFT_PROFILE_ID,
+            RPKIT_SELECTION_.WORLD,
+            RPKIT_SELECTION_.X_1,
+            RPKIT_SELECTION_.Y_1,
+            RPKIT_SELECTION_.Z_1,
+            RPKIT_SELECTION_.X_2,
+            RPKIT_SELECTION_.Y_2,
+            RPKIT_SELECTION_.Z_2
+        ).values(
+            minecraftProfileId.value,
+            entity.world.name,
+            entity.minimumPoint.x,
+            entity.minimumPoint.y,
+            entity.minimumPoint.z,
+            entity.maximumPoint.x,
+            entity.maximumPoint.y,
+            entity.maximumPoint.z
         )
-                .values(
-                        minecraftProfileId,
-                        entity.world.name,
-                        entity.minimumPoint.x,
-                        entity.minimumPoint.y,
-                        entity.minimumPoint.z,
-                        entity.maximumPoint.x,
-                        entity.maximumPoint.y,
-                        entity.maximumPoint.z
-                )
-                .execute()
-        cache?.set(minecraftProfileId, entity)
+        .execute()
+        cache?.set(minecraftProfileId.value, entity)
     }
 
     fun update(entity: RPKSelection) {
@@ -77,15 +75,15 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                 .set(RPKIT_SELECTION_.X_2, entity.maximumPoint.x)
                 .set(RPKIT_SELECTION_.Y_2, entity.maximumPoint.y)
                 .set(RPKIT_SELECTION_.Z_2, entity.maximumPoint.z)
-                .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(entity.minecraftProfile.id))
+                .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.set(minecraftProfileId, entity)
+        cache?.set(minecraftProfileId.value, entity)
     }
 
     operator fun get(minecraftProfile: RPKMinecraftProfile): RPKSelection? {
         val minecraftProfileId = minecraftProfile.id ?: return null
-        if (cache?.containsKey(minecraftProfileId) == true) {
-            return cache[minecraftProfileId]
+        if (cache?.containsKey(minecraftProfileId.value) == true) {
+            return cache[minecraftProfileId.value]
         } else {
             val result = database.create.select(
                     RPKIT_SELECTION_.MINECRAFT_PROFILE_ID,
@@ -98,15 +96,15 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                     RPKIT_SELECTION_.Z_2
             )
                     .from(RPKIT_SELECTION_)
-                    .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                    .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                     .fetchOne() ?: return null
             val world = plugin.server.getWorld(result[RPKIT_SELECTION_.WORLD])
             if (world == null) {
                 database.create
                         .deleteFrom(RPKIT_SELECTION_)
-                        .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfile.id))
+                        .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                         .execute()
-                cache?.remove(minecraftProfileId)
+                cache?.remove(minecraftProfileId.value)
                 return null
             }
             val block1 = world.getBlockAt(
@@ -125,7 +123,7 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                     block1,
                     block2
             )
-            cache?.set(minecraftProfileId, selection)
+            cache?.set(minecraftProfileId.value, selection)
             return selection
         }
     }
@@ -134,9 +132,9 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_SELECTION_)
-                .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.remove(minecraftProfileId)
+        cache?.remove(minecraftProfileId.value)
     }
 
 }

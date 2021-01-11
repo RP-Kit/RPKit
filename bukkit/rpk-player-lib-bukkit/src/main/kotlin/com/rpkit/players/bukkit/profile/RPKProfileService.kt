@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,13 +19,13 @@ import com.rpkit.core.service.Service
 
 interface RPKProfileService : Service {
 
-    fun getProfile(id: Int): RPKProfile?
-    fun getProfile(name: String, discriminator: Int): RPKProfile?
+    fun getProfile(id: RPKProfileId): RPKProfile?
+    fun getProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator): RPKProfile?
     fun addProfile(profile: RPKProfile)
     fun updateProfile(profile: RPKProfile)
     fun removeProfile(profile: RPKProfile)
-    fun createProfile(name: String, discriminator: Int = generateDiscriminatorFor(name), password: String? = null): RPKProfile
-    fun createThinProfile(name: String): RPKThinProfile
-    fun generateDiscriminatorFor(name: String): Int
+    fun createProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator = generateDiscriminatorFor(name), password: String? = null): RPKProfile
+    fun createThinProfile(name: RPKProfileName): RPKThinProfile
+    fun generateDiscriminatorFor(name: RPKProfileName): RPKProfileDiscriminator
 
 }

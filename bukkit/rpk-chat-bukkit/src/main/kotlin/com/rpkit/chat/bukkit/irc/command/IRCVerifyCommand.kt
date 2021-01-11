@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +18,7 @@ package com.rpkit.chat.bukkit.irc.command
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import org.pircbotx.Channel
 import org.pircbotx.User
 
@@ -40,7 +39,7 @@ class IRCVerifyCommand(private val plugin: RPKChatBukkit) : IRCCommand("verify")
             return
         }
         ircService.sendMessage(
-                IRCNick("NickServ"),
+                RPKIRCNick("NickServ"),
                 "VERIFY REGISTER " + ircService.nick.value + " " + args[0]
         )
         sender.send().message(plugin.messages["irc-verify-valid"])

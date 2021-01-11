@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +27,7 @@ import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
 import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
@@ -50,8 +50,8 @@ class ProfileSetNameCommand(private val plugin: RPKPlayersBukkit) : RPKCommandEx
             sender.sendMessage(plugin.messages.noProfileSelf)
             return NoProfileSelfFailure()
         }
-        val name = args[0]
-        if (!name.matches(Regex("[A-z0-9_]{3,16}"))) {
+        val name = RPKProfileName(args[0])
+        if (!name.value.matches(Regex("[A-z0-9_]{3,16}"))) {
             sender.sendMessage(plugin.messages.profileSetNameInvalidName)
             return InvalidNameFailure()
         }

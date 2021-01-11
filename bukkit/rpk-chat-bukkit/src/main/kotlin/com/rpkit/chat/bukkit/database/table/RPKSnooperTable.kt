@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +23,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 
 /**
@@ -52,19 +52,19 @@ class RPKSnooperTable(
                         RPKIT_SNOOPER,
                         RPKIT_SNOOPER.MINECRAFT_PROFILE_ID
                 )
-                .values(minecraftProfileId)
+                .values(minecraftProfileId.value)
                 .execute()
-        cache?.set(minecraftProfileId, entity)
+        cache?.set(minecraftProfileId.value, entity)
     }
 
     fun update(entity: RPKSnooper) {
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .update(RPKIT_SNOOPER)
-                .set(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID, minecraftProfileId)
-                .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .set(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID, minecraftProfileId.value)
+                .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.set(minecraftProfileId, entity)
+        cache?.set(minecraftProfileId.value, entity)
     }
 
     /**
@@ -76,18 +76,18 @@ class RPKSnooperTable(
      */
     fun get(minecraftProfile: RPKMinecraftProfile): RPKSnooper? {
         val minecraftProfileId = minecraftProfile.id ?: return null
-        if (cache?.containsKey(minecraftProfileId) == true) {
-            return cache.get(minecraftProfileId)
+        if (cache?.containsKey(minecraftProfileId.value) == true) {
+            return cache.get(minecraftProfileId.value)
         } else {
             database.create
                     .select(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)
                     .from(RPKIT_SNOOPER)
-                    .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                    .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                     .fetchOne() ?: return null
             val snooper = RPKSnooper(
                     minecraftProfile
             )
-            cache?.set(minecraftProfileId, snooper)
+            cache?.set(minecraftProfileId.value, snooper)
             return snooper
         }
     }
@@ -104,7 +104,7 @@ class RPKSnooperTable(
                 .fetch()
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(result.get(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID))
+            val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftProfileId(result.get(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)))
                     ?: return@mapNotNull null
             return@mapNotNull RPKSnooper(minecraftProfile)
         }
@@ -114,9 +114,9 @@ class RPKSnooperTable(
         val minecraftProfileId = entity.minecraftProfile.id ?: return
         database.create
                 .deleteFrom(RPKIT_SNOOPER)
-                .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId))
+                .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.remove(minecraftProfileId)
+        cache?.remove(minecraftProfileId.value)
     }
 
 }

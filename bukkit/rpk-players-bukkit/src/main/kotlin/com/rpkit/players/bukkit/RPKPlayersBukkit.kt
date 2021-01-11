@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,10 +34,10 @@ import com.rpkit.players.bukkit.database.table.RPKProfileTable
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
 import com.rpkit.players.bukkit.listener.PlayerLoginListener
 import com.rpkit.players.bukkit.messages.PlayersMessages
-import com.rpkit.players.bukkit.profile.RPKDiscordProfileServiceImpl
-import com.rpkit.players.bukkit.profile.RPKGitHubProfileServiceImpl
-import com.rpkit.players.bukkit.profile.RPKIRCProfileServiceImpl
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileServiceImpl
+import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileServiceImpl
+import com.rpkit.players.bukkit.profile.github.RPKGitHubProfileServiceImpl
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileServiceImpl
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileServiceImpl
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.RPKProfileServiceImpl
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService

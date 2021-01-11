@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +18,7 @@ package com.rpkit.chat.bukkit.irc.listener
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.irc.IRCNick
+import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.UserListEvent
 
@@ -31,7 +30,7 @@ class IRCUserListListener(private val plugin: RPKChatBukkit) : ListenerAdapter()
 
     override fun onUserList(event: UserListEvent) {
         val ircService = Services[RPKIRCService::class.java] ?: return
-        event.users.forEach { user -> ircService.setOnline(IRCNick(user.nick), true) }
+        event.users.forEach { user -> ircService.setOnline(RPKIRCNick(user.nick), true) }
     }
 
 }

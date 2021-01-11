@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +13,15 @@
  * limitations under the License.
  */
 
-package com.rpkit.players.bukkit.profile
+package com.rpkit.players.bukkit.profile.discord
 
 import com.rpkit.chat.bukkit.discord.RPKDiscordService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.table.RPKDiscordProfileTable
-import com.rpkit.players.bukkit.profile.discord.DiscordUserId
-import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfile
-import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileId
-import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
+import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileName
+import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
 
 class RPKDiscordProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKDiscordProfileService {
     override fun getDiscordProfile(id: RPKDiscordProfileId): RPKDiscordProfile? {
@@ -36,7 +34,9 @@ class RPKDiscordProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKD
         if (discordProfile == null) {
             val discordService = Services[RPKDiscordService::class.java]
             val userName = discordService?.getUserName(discordUserId)
-            discordProfile = RPKDiscordProfileImpl(discordId = discordUserId, profile = RPKThinProfileImpl(userName ?: "Unknown Discord User"))
+            discordProfile = RPKDiscordProfileImpl(discordId = discordUserId, profile = RPKThinProfileImpl(
+                RPKProfileName(userName ?: "Unknown Discord User")
+            ))
             discordProfileTable.insert(discordProfile)
         }
         return discordProfile
