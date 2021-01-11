@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +26,7 @@ class RPKStatServiceImpl(override val plugin: RPKStatsBukkit) : RPKStatService {
         get() = plugin.config.getConfigurationSection("stats")
                 ?.getKeys(false)
                 ?.map { name ->
-                    RPKStatImpl(name, plugin.config.getString("stats.$name") ?: "0")
+                    RPKStatImpl(RPKStatName(name), plugin.config.getString("stats.$name") ?: "0")
                 }
                 ?: emptyList()
 
@@ -41,8 +40,8 @@ class RPKStatServiceImpl(override val plugin: RPKStatsBukkit) : RPKStatService {
         plugin.saveConfig()
     }
 
-    override fun getStat(name: String): RPKStat? {
-        return stats.firstOrNull { stat -> stat.name == name }
+    override fun getStat(name: RPKStatName): RPKStat? {
+        return stats.firstOrNull { stat -> stat.name.value == name.value }
     }
 
 }

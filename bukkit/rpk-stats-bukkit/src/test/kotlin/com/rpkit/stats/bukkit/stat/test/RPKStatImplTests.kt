@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +17,9 @@ package com.rpkit.stats.bukkit.stat.test
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.stats.bukkit.stat.RPKStatImpl
+import com.rpkit.stats.bukkit.stat.RPKStatName
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
+import com.rpkit.stats.bukkit.stat.RPKStatVariableName
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
@@ -27,7 +28,7 @@ import io.mockk.mockk
 class RPKStatImplTests : WordSpec({
     val character = mockk<RPKCharacter>()
     val statVariables = listOf(object : RPKStatVariable {
-        override val name: String = "level"
+        override val name = RPKStatVariableName("level")
 
         override fun get(character: RPKCharacter): Double {
             return 5.toDouble()
@@ -35,7 +36,7 @@ class RPKStatImplTests : WordSpec({
 
     })
     val stat = RPKStatImpl(
-        "test",
+        RPKStatName("test"),
         "level*3"
     )
     "RPKStatImpl.get" should {

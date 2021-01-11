@@ -15,23 +15,4 @@
 
 package com.rpkit.stats.bukkit.stat
 
-import com.rpkit.characters.bukkit.character.RPKCharacter
-
-/**
- * Represents a stat variable.
- * Used when calculating stats.
- */
-interface RPKStatVariable {
-
-    /**
-     * The name of the variable.
-     */
-    val name: RPKStatVariableName
-
-    /**
-     * Gets the value of the variable for the given character.
-     * This may be any numerical type.
-     */
-    fun get(character: RPKCharacter): Double
-
-}
+data class RPKStatVariableName(val value: String)

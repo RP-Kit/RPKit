@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,7 +109,7 @@ class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit) : List
         parser.addFunction("ceil", CeilFunction())
         parser.addFunction("floor", FloorFunction())
         statService.stats.forEach {
-            parser.addVariable(it.name, it.get(character, statVariables).toDouble())
+            parser.addVariable(it.name.value, it.get(character, statVariables).toDouble())
         }
         parser.parseExpression(expression)
         return parser.value

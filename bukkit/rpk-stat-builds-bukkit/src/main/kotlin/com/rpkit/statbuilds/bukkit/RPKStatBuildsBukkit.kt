@@ -33,6 +33,7 @@ import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeServiceImpl
 import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildService
 import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildServiceImpl
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
+import com.rpkit.stats.bukkit.stat.RPKStatVariableName
 import com.rpkit.stats.bukkit.stat.RPKStatVariableService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
@@ -102,7 +103,7 @@ class RPKStatBuildsBukkit : RPKBukkitPlugin() {
         Services.require(RPKStatVariableService::class.java).whenAvailable { statVariableService ->
             statAttributeService.statAttributes.forEach { statAttribute ->
                 statVariableService.addStatVariable(object : RPKStatVariable {
-                    override val name = statAttribute.name.value
+                    override val name = RPKStatVariableName(statAttribute.name.value)
                     override fun get(character: RPKCharacter) =
                             statBuildService.getStatPoints(character, statAttribute).toDouble()
                 })
