@@ -25,6 +25,7 @@ import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.database.create
 import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_PURCHASE
 import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_TIMED_PURCHASE
+import com.rpkit.store.bukkit.purchase.RPKPurchaseId
 import com.rpkit.store.bukkit.purchase.RPKTimedPurchase
 import com.rpkit.store.bukkit.purchase.RPKTimedPurchaseImpl
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
@@ -52,20 +53,20 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
                         RPKIT_TIMED_PURCHASE.PURCHASE_ID
                 )
                 .values(
-                        id
+                        id.value
                 )
                 .execute()
         entity.id = id
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
     fun update(entity: RPKTimedPurchase) {
         val id = entity.id ?: return
         database.getTable(RPKPurchaseTable::class.java).update(entity)
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKTimedPurchase? {
+    operator fun get(id: RPKPurchaseId): RPKTimedPurchase? {
         val result = database.create
                 .select(
                         RPKIT_PURCHASE.STORE_ITEM_ID,
@@ -74,7 +75,7 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
                         RPKIT_TIMED_PURCHASE.PURCHASE_ID
                 )
                 .from(RPKIT_TIMED_PURCHASE)
-                .where(RPKIT_PURCHASE.ID.eq(id))
+                .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .and(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(RPKIT_PURCHASE.ID))
                 .fetchOne() ?: return null
         val storeItemService = Services[RPKStoreItemService::class.java] ?: return null
@@ -82,13 +83,13 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
         if (storeItem == null) {
             database.create
                     .deleteFrom(RPKIT_PURCHASE)
-                    .where(RPKIT_PURCHASE.ID.eq(id))
+                    .where(RPKIT_PURCHASE.ID.eq(id.value))
                     .execute()
             database.create
                     .deleteFrom(RPKIT_TIMED_PURCHASE)
-                    .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id))
+                    .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id.value))
                     .execute()
-            cache?.remove(id)
+            cache?.remove(id.value)
             return null
         }
         val profileService = Services[RPKProfileService::class.java] ?: return null
@@ -96,13 +97,13 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
         if (profile == null) {
             database.create
                     .deleteFrom(RPKIT_PURCHASE)
-                    .where(RPKIT_PURCHASE.ID.eq(id))
+                    .where(RPKIT_PURCHASE.ID.eq(id.value))
                     .execute()
             database.create
                     .deleteFrom(RPKIT_TIMED_PURCHASE)
-                    .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id))
+                    .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id.value))
                     .execute()
-            cache?.remove(id)
+            cache?.remove(id.value)
             return null
         }
         val timedPurchase = RPKTimedPurchaseImpl(
@@ -111,7 +112,7 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
                 profile,
                 result[RPKIT_PURCHASE.PURCHASE_DATE]
         )
-        cache?.set(id, timedPurchase)
+        cache?.set(id.value, timedPurchase)
         return timedPurchase
     }
 
@@ -126,7 +127,7 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
                 .where(RPKIT_PURCHASE.ID.eq(RPKIT_TIMED_PURCHASE.ID))
                 .and(RPKIT_PURCHASE.PROFILE_ID.eq(profileId.value))
                 .fetch()
-        return result.mapNotNull { row -> get(row[RPKIT_TIMED_PURCHASE.PURCHASE_ID]) }
+        return result.mapNotNull { row -> get(RPKPurchaseId(row[RPKIT_TIMED_PURCHASE.PURCHASE_ID])) }
     }
 
     fun delete(entity: RPKTimedPurchase) {
@@ -134,8 +135,8 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
         database.getTable(RPKPurchaseTable::class.java).delete(entity)
         database.create
                 .deleteFrom(RPKIT_TIMED_PURCHASE)
-                .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id))
+                .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 }

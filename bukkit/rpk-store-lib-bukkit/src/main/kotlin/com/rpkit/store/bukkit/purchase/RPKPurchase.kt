@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +30,7 @@ interface RPKPurchase {
      * Guaranteed to be unique.
      * Null if it has not yet been inserted into the database.
      */
-    var id: Int?
+    var id: RPKPurchaseId?
 
     /**
      * The store item that has been purchased

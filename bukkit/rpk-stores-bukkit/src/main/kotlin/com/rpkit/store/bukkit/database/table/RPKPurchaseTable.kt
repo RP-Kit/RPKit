@@ -22,6 +22,7 @@ import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.database.create
 import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_PURCHASE
 import com.rpkit.store.bukkit.purchase.RPKPurchase
+import com.rpkit.store.bukkit.purchase.RPKPurchaseId
 
 
 class RPKPurchaseTable(
@@ -40,7 +41,7 @@ class RPKPurchaseTable(
         null
     }
 
-    fun insert(entity: RPKPurchase): Int? {
+    fun insert(entity: RPKPurchase): RPKPurchaseId? {
         val profileId = entity.profile.id ?: return null
         database.create
                 .insertInto(
@@ -56,9 +57,9 @@ class RPKPurchaseTable(
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
+        entity.id = RPKPurchaseId(id)
         cache?.set(id, entity)
-        return id
+        return RPKPurchaseId(id)
     }
 
     fun update(entity: RPKPurchase) {
@@ -69,33 +70,33 @@ class RPKPurchaseTable(
                 .set(RPKIT_PURCHASE.STORE_ITEM_ID, entity.storeItem.id)
                 .set(RPKIT_PURCHASE.PROFILE_ID, profileId.value)
                 .set(RPKIT_PURCHASE.PURCHASE_DATE, entity.purchaseDate)
-                .where(RPKIT_PURCHASE.ID.eq(id))
+                .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+        cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKPurchase? {
-        if (cache?.containsKey(id) == true) return cache[id]
+    operator fun get(id: RPKPurchaseId): RPKPurchase? {
+        if (cache?.containsKey(id.value) == true) return cache[id.value]
         var purchase: RPKPurchase? = database.getTable(RPKConsumablePurchaseTable::class.java)[id]
         if (purchase != null) {
-            cache?.set(id, purchase)
+            cache?.set(id.value, purchase)
             return purchase
         } else {
-            cache?.remove(id)
+            cache?.remove(id.value)
         }
         purchase = database.getTable(RPKPermanentPurchaseTable::class.java)[id]
         if (purchase != null) {
-            cache?.set(id, purchase)
+            cache?.set(id.value, purchase)
             return purchase
         } else {
-            cache?.remove(id)
+            cache?.remove(id.value)
         }
         purchase = database.getTable(RPKTimedPurchaseTable::class.java)[id]
         if (purchase != null) {
-            cache?.set(id, purchase)
+            cache?.set(id.value, purchase)
             return purchase
         } else {
-            cache?.remove(id)
+            cache?.remove(id.value)
         }
         return null
     }
@@ -112,8 +113,8 @@ class RPKPurchaseTable(
         val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_PURCHASE)
-                .where(RPKIT_PURCHASE.ID.eq(id))
+                .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+        cache?.remove(id.value)
     }
 }

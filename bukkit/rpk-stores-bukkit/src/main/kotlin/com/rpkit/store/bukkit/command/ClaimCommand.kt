@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +19,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.purchase.RPKConsumablePurchase
+import com.rpkit.store.bukkit.purchase.RPKPurchaseId
 import com.rpkit.store.bukkit.purchase.RPKPurchaseService
 import com.rpkit.store.bukkit.resolver.RPKPurchaseResolverService
 import org.bukkit.command.Command
@@ -62,7 +62,7 @@ class ClaimCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-purchase-service"])
             return true
         }
-        val purchase = purchaseService.getPurchase(purchaseId)
+        val purchase = purchaseService.getPurchase(RPKPurchaseId(purchaseId))
         if (purchase == null) {
             sender.sendMessage(plugin.messages["claim-purchase-id-invalid-purchase"])
             return true

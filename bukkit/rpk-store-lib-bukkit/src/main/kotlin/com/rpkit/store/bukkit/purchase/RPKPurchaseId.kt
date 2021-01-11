@@ -15,14 +15,4 @@
 
 package com.rpkit.store.bukkit.purchase
 
-import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
-import java.time.LocalDateTime
-
-
-class RPKPermanentPurchaseImpl(
-        override var id: RPKPurchaseId? = null,
-        override val storeItem: RPKPermanentStoreItem,
-        override val profile: RPKProfile,
-        override val purchaseDate: LocalDateTime
-) : RPKPermanentPurchase
+data class RPKPurchaseId(val value: Int)
