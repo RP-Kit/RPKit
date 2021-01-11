@@ -15,17 +15,4 @@
 
 package com.rpkit.professions.bukkit.profession
 
-import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
-import org.bukkit.Material
-
-
-interface RPKProfession {
-
-    val name: RPKProfessionName
-    val maxLevel: Int
-    fun getAmountFor(action: RPKCraftingAction, material: Material, level: Int): Double
-    fun getQualityFor(action: RPKCraftingAction, material: Material, level: Int): RPKItemQuality?
-    fun getExperienceNeededForLevel(level: Int): Int
-    fun getExperienceFor(action: RPKCraftingAction, material: Material): Int
-
-}
+data class RPKProfessionName(val value: String)

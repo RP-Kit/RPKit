@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,7 +106,7 @@ class ProfessionViewCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor 
             val experienceNeededForNextLevel =
                     profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)
             sender.sendMessage(plugin.messages["profession-view-valid-item", mapOf(
-                    "profession" to profession.name,
+                    "profession" to profession.name.value,
                     "level" to level.toString(),
                     "total_experience" to professionService.getProfessionExperience(character, profession).toString(),
                     "total_next_level_experience" to profession.getExperienceNeededForLevel(level + 1).toString(),

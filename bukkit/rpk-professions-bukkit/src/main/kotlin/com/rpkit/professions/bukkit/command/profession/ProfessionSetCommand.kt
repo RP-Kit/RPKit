@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +19,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
+import com.rpkit.professions.bukkit.profession.RPKProfessionName
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -103,7 +103,7 @@ class ProfessionSetCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-profession-service"])
             return true
         }
-        val profession = professionService.getProfession(args[argsOffset])
+        val profession = professionService.getProfession(RPKProfessionName(args[argsOffset]))
         if (profession == null) {
             sender.sendMessage(plugin.messages["profession-set-invalid-profession"])
             return true
@@ -125,7 +125,7 @@ class ProfessionSetCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor {
                 )
         )
         sender.sendMessage(plugin.messages["profession-set-valid", mapOf(
-                "profession" to profession.name
+                "profession" to profession.name.value
         )])
         return true
     }

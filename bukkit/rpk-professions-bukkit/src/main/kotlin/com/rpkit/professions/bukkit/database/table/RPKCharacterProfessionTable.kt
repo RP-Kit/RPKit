@@ -24,6 +24,7 @@ import com.rpkit.professions.bukkit.database.create
 import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_CHARACTER_PROFESSION
 import com.rpkit.professions.bukkit.profession.RPKCharacterProfession
 import com.rpkit.professions.bukkit.profession.RPKProfession
+import com.rpkit.professions.bukkit.profession.RPKProfessionName
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
 
 
@@ -42,7 +43,7 @@ class RPKCharacterProfessionTable(
                 )
                 .values(
                         characterId.value,
-                        entity.profession.name
+                        entity.profession.name.value
                 )
                 .execute()
     }
@@ -51,7 +52,7 @@ class RPKCharacterProfessionTable(
         val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_CHARACTER_PROFESSION)
-                .set(RPKIT_CHARACTER_PROFESSION.PROFESSION, entity.profession.name)
+                .set(RPKIT_CHARACTER_PROFESSION.PROFESSION, entity.profession.name.value)
                 .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(characterId.value))
                 .execute()
     }
@@ -65,7 +66,7 @@ class RPKCharacterProfessionTable(
                 .fetch() ?: return emptyList()
         val professionService = Services[RPKProfessionService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
-            val profession = professionService.getProfession(result[RPKIT_CHARACTER_PROFESSION.PROFESSION])
+            val profession = professionService.getProfession(RPKProfessionName(result[RPKIT_CHARACTER_PROFESSION.PROFESSION]))
             if (profession == null) {
                 database.create
                         .deleteFrom(RPKIT_CHARACTER_PROFESSION)
@@ -89,7 +90,7 @@ class RPKCharacterProfessionTable(
                 )
                 .from(RPKIT_CHARACTER_PROFESSION)
                 .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_CHARACTER_PROFESSION.PROFESSION.eq(profession.name))
+                .and(RPKIT_CHARACTER_PROFESSION.PROFESSION.eq(profession.name.value))
                 .fetchOne() ?: return null
         return RPKCharacterProfession(character, profession)
     }
@@ -99,7 +100,7 @@ class RPKCharacterProfessionTable(
         database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION)
                 .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_CHARACTER_PROFESSION.PROFESSION.eq(entity.profession.name))
+                .and(RPKIT_CHARACTER_PROFESSION.PROFESSION.eq(entity.profession.name.value))
                 .execute()
     }
 }

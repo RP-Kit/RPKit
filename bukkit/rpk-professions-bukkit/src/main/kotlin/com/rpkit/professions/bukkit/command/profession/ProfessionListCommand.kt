@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +37,7 @@ class ProfessionListCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor 
         }
         professionService.professions.forEach { profession ->
             sender.sendMessage(plugin.messages["profession-list-item", mapOf(
-                    "profession" to profession.name
+                    "profession" to profession.name.value
             )])
         }
         return true

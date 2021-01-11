@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +19,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
+import com.rpkit.professions.bukkit.profession.RPKProfessionName
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -101,7 +101,7 @@ class ProfessionExperienceViewCommand(val plugin: RPKProfessionsBukkit) : Comman
             sender.sendMessage(plugin.messages["no-profession-service"])
             return true
         }
-        val profession = professionService.getProfession(args[argsOffset])
+        val profession = professionService.getProfession(RPKProfessionName(args[argsOffset]))
         if (profession == null) {
             sender.sendMessage(plugin.messages["profession-experience-view-invalid-profession"])
             return true
@@ -116,7 +116,7 @@ class ProfessionExperienceViewCommand(val plugin: RPKProfessionsBukkit) : Comman
         val experienceNeededForNextLevel =
                 profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)
         sender.sendMessage(plugin.messages["profession-experience-view-valid", mapOf(
-                "profession" to profession.name,
+                "profession" to profession.name.value,
                 "level" to level.toString(),
                 "total_experience" to professionService.getProfessionExperience(character, profession).toString(),
                 "total_next_level_experience" to profession.getExperienceNeededForLevel(level + 1).toString(),

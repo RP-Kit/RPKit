@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,13 +76,13 @@ class InventoryClickListener(private val plugin: RPKProfessionsBukkit) : Listene
         }
         event.currentItem = item
         professions.forEach { profession ->
-            val receivedExperience = plugin.config.getInt("professions.${profession.name}.experience.items.smelting.$material", 0) * item.amount
+            val receivedExperience = plugin.config.getInt("professions.${profession.name.value}.experience.items.smelting.$material", 0) * item.amount
             if (receivedExperience > 0) {
                 professionService.setProfessionExperience(character, profession, professionService.getProfessionExperience(character, profession) + receivedExperience)
                 val level = professionService.getProfessionLevel(character, profession)
                 val experience = professionService.getProfessionExperience(character, profession)
                 event.whoClicked.sendMessage(plugin.messages["smelt-experience", mapOf(
-                        "profession" to profession.name,
+                        "profession" to profession.name.value,
                         "level" to level.toString(),
                         "received_experience" to receivedExperience.toString(),
                         "experience" to (experience - profession.getExperienceNeededForLevel(level)).toString(),

@@ -58,11 +58,11 @@ class RPKCharacterProfessionExperienceTable(
                 )
                 .values(
                         characterId.value,
-                        professionName,
+                        professionName.value,
                         entity.experience
                 )
                 .execute()
-        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName), entity)
+        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
     }
 
     fun update(entity: RPKCharacterProfessionExperience) {
@@ -71,11 +71,11 @@ class RPKCharacterProfessionExperienceTable(
         database.create
                 .update(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
                 .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID, characterId.value)
-                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION, entity.profession.name)
+                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION, professionName.value)
                 .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE, entity.experience)
                 .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName), entity)
+        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
     }
 
     operator fun get(character: RPKCharacter, profession: RPKProfession): RPKCharacterProfessionExperience? {
@@ -85,14 +85,14 @@ class RPKCharacterProfessionExperienceTable(
                 .select(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE)
                 .from(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
                 .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName))
+                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName.value))
                 .fetchOne() ?: return null
         val characterProfessionExperience = RPKCharacterProfessionExperience(
                 character,
                 profession,
                 result[RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE]
         )
-        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName), characterProfessionExperience)
+        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), characterProfessionExperience)
         return characterProfessionExperience
     }
 
@@ -102,9 +102,9 @@ class RPKCharacterProfessionExperienceTable(
         database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
                 .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(entity.profession.name))
+                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName.value))
                 .execute()
-        cache?.remove(CharacterProfessionCacheKey(characterId.value, professionName))
+        cache?.remove(CharacterProfessionCacheKey(characterId.value, professionName.value))
     }
 
     fun delete(character: RPKCharacter) {

@@ -26,9 +26,9 @@ import kotlin.math.roundToInt
 
 
 class RPKProfessionImpl(
-        override val name: String,
-        override val maxLevel: Int,
-        val plugin: RPKProfessionsBukkit
+    override val name: RPKProfessionName,
+    override val maxLevel: Int,
+    val plugin: RPKProfessionsBukkit
 ) : RPKProfession {
     override fun getAmountFor(action: RPKCraftingAction, material: Material, level: Int): Double {
         val actionConfigSectionName = when (action) {
