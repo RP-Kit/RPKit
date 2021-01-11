@@ -18,6 +18,7 @@ package com.rpkit.classes.bukkit.classes
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkillType
+import com.rpkit.skills.bukkit.skills.RPKSkillTypeName
 import com.rpkit.skills.bukkit.skills.RPKSkillTypeService
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
 import org.nfunk.jep.JEP
@@ -44,7 +45,7 @@ class RPKClassImpl(
     val baseSkillPoints: Map<RPKSkillType, Int>
         get() = baseSkillPointsByName
                 .map { entry ->
-                    Services[RPKSkillTypeService::class.java]?.getSkillType(entry.key) to entry.value
+                    Services[RPKSkillTypeService::class.java]?.getSkillType(RPKSkillTypeName(entry.key)) to entry.value
                 }
                 .mapNotNull { (skillType, points) -> if (skillType == null) null else skillType to points}
                 .toMap()
@@ -52,7 +53,7 @@ class RPKClassImpl(
     val levelSkillPoints: Map<RPKSkillType, Int>
         get() = levelSkillPointsByName
                 .map { entry ->
-                    Services[RPKSkillTypeService::class.java]?.getSkillType(entry.key) to entry.value
+                    Services[RPKSkillTypeService::class.java]?.getSkillType(RPKSkillTypeName(entry.key)) to entry.value
                 }
                 .mapNotNull { (skillType, points) -> if (skillType == null) null else skillType to points }
                 .toMap()

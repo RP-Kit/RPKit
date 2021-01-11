@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +19,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.skills.bukkit.RPKSkillsBukkit
+import com.rpkit.skills.bukkit.skills.RPKSkillName
 import com.rpkit.skills.bukkit.skills.RPKSkillService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -43,7 +43,7 @@ class BindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor {
             return true
         }
         val skillName = args[0]
-        val skill = skillService.getSkill(skillName)
+        val skill = skillService.getSkill(RPKSkillName(skillName))
         if (skill == null) {
             sender.sendMessage(plugin.messages["bind-skill-invalid-skill"])
             return true
@@ -81,7 +81,7 @@ class BindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor {
         sender.sendMessage(plugin.messages["bind-skill-valid", mapOf(
                 "character" to character.name,
                 "item" to item.type.toString().toLowerCase().replace('_', ' '),
-                "skill" to skill.name
+                "skill" to skill.name.value
         )])
         return true
     }

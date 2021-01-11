@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,14 +20,17 @@ import com.rpkit.skills.bukkit.RPKSkillsBukkit
 
 class RPKSkillTypeServiceImpl(override val plugin: RPKSkillsBukkit) : RPKSkillTypeService {
 
-    private val skillTypes: MutableList<RPKSkillType> = plugin.config.getStringList("skill-types").map(::RPKSkillTypeImpl).toMutableList()
+    private val skillTypes: MutableList<RPKSkillType> = plugin.config.getStringList("skill-types")
+        .map(::RPKSkillTypeName)
+        .map(::RPKSkillTypeImpl)
+        .toMutableList()
 
     override fun getSkillTypes(): List<RPKSkillType> {
         return skillTypes
     }
 
-    override fun getSkillType(name: String): RPKSkillType? {
-        return skillTypes.firstOrNull { it.name == name }
+    override fun getSkillType(name: RPKSkillTypeName): RPKSkillType? {
+        return skillTypes.firstOrNull { it.name.value == name.value }
     }
 
     override fun addSkillType(skillType: RPKSkillType) {

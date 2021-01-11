@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,8 +29,8 @@ class RPKSkillServiceImpl(override val plugin: RPKSkillsBukkit) : RPKSkillServic
 
     override val skills: MutableList<RPKSkill> = mutableListOf()
 
-    override fun getSkill(name: String): RPKSkill? {
-        return skills.firstOrNull { it.name.equals(name, ignoreCase = true) }
+    override fun getSkill(name: RPKSkillName): RPKSkill? {
+        return skills.firstOrNull { it.name.value.equals(name.value, ignoreCase = true) }
     }
 
     override fun addSkill(skill: RPKSkill) {

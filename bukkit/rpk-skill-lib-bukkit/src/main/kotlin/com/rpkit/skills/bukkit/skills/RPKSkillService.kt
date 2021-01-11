@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +23,7 @@ import org.bukkit.inventory.ItemStack
 interface RPKSkillService : Service {
 
     val skills: List<RPKSkill>
-    fun getSkill(name: String): RPKSkill?
+    fun getSkill(name: RPKSkillName): RPKSkill?
     fun addSkill(skill: RPKSkill)
     fun removeSkill(skill: RPKSkill)
     fun getSkillCooldown(character: RPKCharacter, skill: RPKSkill): Int

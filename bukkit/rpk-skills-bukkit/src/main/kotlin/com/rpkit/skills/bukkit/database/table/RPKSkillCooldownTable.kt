@@ -55,11 +55,11 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
                 )
                 .values(
                         characterId.value,
-                        entity.skill.name,
+                        entity.skill.name.value,
                         entity.cooldownTimestamp
                 )
                 .execute()
-        cache?.set(CharacterSkillCacheKey(characterId.value, skillName), entity)
+        cache?.set(CharacterSkillCacheKey(characterId.value, skillName.value), entity)
     }
 
     fun update(entity: RPKSkillCooldown) {
@@ -69,15 +69,15 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
                 .update(RPKIT_SKILL_COOLDOWN)
                 .set(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP, entity.cooldownTimestamp)
                 .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(skillName))
+                .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(skillName.value))
                 .execute()
-        cache?.set(CharacterSkillCacheKey(characterId.value, skillName), entity)
+        cache?.set(CharacterSkillCacheKey(characterId.value, skillName.value), entity)
     }
 
     operator fun get(character: RPKCharacter, skill: RPKSkill): RPKSkillCooldown? {
         val characterId = character.id ?: return null
         val skillName = skill.name
-        val cacheKey = CharacterSkillCacheKey(characterId.value, skillName)
+        val cacheKey = CharacterSkillCacheKey(characterId.value, skillName.value)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
@@ -85,7 +85,7 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
                 .select(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP)
                 .from(RPKIT_SKILL_COOLDOWN)
                 .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(skill.name))
+                .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(skill.name.value))
                 .fetchOne() ?: return null
         val skillCooldown = RPKSkillCooldown(
                 character,
@@ -102,9 +102,9 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
         database.create
                 .deleteFrom(RPKIT_SKILL_COOLDOWN)
                 .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(entity.skill.name))
+                .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(entity.skill.name.value))
                 .execute()
-        cache?.remove(CharacterSkillCacheKey(characterId.value, skillName))
+        cache?.remove(CharacterSkillCacheKey(characterId.value, skillName.value))
     }
 
 }

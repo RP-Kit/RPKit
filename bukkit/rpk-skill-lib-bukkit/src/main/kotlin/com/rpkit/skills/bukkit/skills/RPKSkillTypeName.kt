@@ -15,14 +15,4 @@
 
 package com.rpkit.skills.bukkit.skills
 
-import com.rpkit.core.service.Service
-
-
-interface RPKSkillTypeService : Service {
-
-    fun getSkillTypes(): List<RPKSkillType>
-    fun getSkillType(name: RPKSkillTypeName): RPKSkillType?
-    fun addSkillType(skillType: RPKSkillType)
-    fun removeSkillType(skillType: RPKSkillType)
-
-}
+data class RPKSkillTypeName(val value: String)

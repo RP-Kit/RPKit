@@ -26,6 +26,7 @@ import com.rpkit.skills.bukkit.RPKSkillsBukkit
 import com.rpkit.skills.bukkit.database.create
 import com.rpkit.skills.bukkit.database.jooq.Tables.RPKIT_SKILL_BINDING
 import com.rpkit.skills.bukkit.skills.RPKSkillBinding
+import com.rpkit.skills.bukkit.skills.RPKSkillName
 import com.rpkit.skills.bukkit.skills.RPKSkillService
 
 class RPKSkillBindingTable(private val database: Database, private val plugin: RPKSkillsBukkit): Table {
@@ -53,7 +54,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                 .values(
                         characterId.value,
                         entity.item.toByteArray(),
-                        entity.skill.name
+                        entity.skill.name.value
                 )
                 .execute()
     }
@@ -63,7 +64,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
         database.create.update(RPKIT_SKILL_BINDING)
                 .set(RPKIT_SKILL_BINDING.CHARACTER_ID, characterId.value)
                 .set(RPKIT_SKILL_BINDING.ITEM, entity.item.toByteArray())
-                .set(RPKIT_SKILL_BINDING.SKILL_NAME, entity.skill.name)
+                .set(RPKIT_SKILL_BINDING.SKILL_NAME, entity.skill.name.value)
                 .where(RPKIT_SKILL_BINDING.ID.eq(entity.id))
                 .execute()
     }
@@ -86,7 +87,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
         val character = characterService.getCharacter(characterId)
         val skillService = Services[RPKSkillService::class.java] ?: return null
         val skillName = result[RPKIT_SKILL_BINDING.SKILL_NAME]
-        val skill = skillService.getSkill(skillName)
+        val skill = skillService.getSkill(RPKSkillName(skillName))
         if (character != null && skill != null) {
             val skillBinding = RPKSkillBinding(
                     id,
@@ -121,7 +122,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
         val skillService = Services[RPKSkillService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
             val skillName = result[RPKIT_SKILL_BINDING.SKILL_NAME]
-            val skill = skillService.getSkill(skillName)
+            val skill = skillService.getSkill(RPKSkillName(skillName))
             if (skill != null) {
                 val id = result[RPKIT_SKILL_BINDING.ID]
                 val skillBinding = RPKSkillBinding(
