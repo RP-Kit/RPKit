@@ -17,6 +17,7 @@ package com.rpkit.moderation.bukkit.warning
 
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.time.LocalDateTime
 
 /**
  * Provides warning-related functionality
@@ -45,6 +46,13 @@ interface RPKWarningService : Service {
      * @param warning The warning to add
      */
     fun addWarning(warning: RPKWarning)
+
+    fun createWarning(
+        reason: String,
+        profile: RPKProfile,
+        issuer: RPKProfile,
+        time: LocalDateTime
+    ): RPKWarning
 
     /**
      * Removes a warning.

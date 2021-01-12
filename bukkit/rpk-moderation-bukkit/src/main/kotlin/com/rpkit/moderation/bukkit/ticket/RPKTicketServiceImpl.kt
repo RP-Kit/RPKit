@@ -20,6 +20,9 @@ import com.rpkit.moderation.bukkit.database.table.RPKTicketTable
 import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketCreateEvent
 import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketDeleteEvent
 import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketUpdateEvent
+import com.rpkit.players.bukkit.profile.RPKProfile
+import org.bukkit.Location
+import java.time.LocalDateTime
 
 
 class RPKTicketServiceImpl(override val plugin: RPKModerationBukkit) : RPKTicketService {
@@ -41,6 +44,29 @@ class RPKTicketServiceImpl(override val plugin: RPKModerationBukkit) : RPKTicket
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKTicketTable::class.java).insert(event.ticket)
+    }
+
+    override fun createTicket(
+        reason: String,
+        issuer: RPKProfile,
+        resolver: RPKProfile?,
+        location: Location?,
+        openDate: LocalDateTime,
+        closeDate: LocalDateTime?,
+        isClosed: Boolean
+    ): RPKTicket {
+        val ticket = RPKTicketImpl(
+            null,
+            reason,
+            issuer,
+            resolver,
+            location,
+            openDate,
+            closeDate,
+            isClosed
+        )
+        addTicket(ticket)
+        return ticket
     }
 
     override fun updateTicket(ticket: RPKTicket) {
