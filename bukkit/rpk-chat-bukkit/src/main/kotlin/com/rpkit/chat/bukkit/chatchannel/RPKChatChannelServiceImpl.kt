@@ -76,7 +76,7 @@ class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatCha
             ?: emptyList()
 
     override fun getChatChannel(name: RPKChatChannelName): RPKChatChannel? {
-        return chatChannels.firstOrNull { it.name.value == name.value }
+        return chatChannels.firstOrNull { it.name.value.equals(name.value, ignoreCase = true) }
     }
 
     override fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel? {
