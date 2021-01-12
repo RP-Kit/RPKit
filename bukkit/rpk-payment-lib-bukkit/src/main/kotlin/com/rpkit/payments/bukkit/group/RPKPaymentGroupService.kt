@@ -16,6 +16,9 @@
 package com.rpkit.payments.bukkit.group
 
 import com.rpkit.core.service.Service
+import com.rpkit.economy.bukkit.currency.RPKCurrency
+import java.time.Duration
+import java.time.LocalDateTime
 
 /**
  * Provides payment group related operations.
@@ -50,6 +53,15 @@ interface RPKPaymentGroupService : Service {
      * @param paymentGroup The payment group to add
      */
     fun addPaymentGroup(paymentGroup: RPKPaymentGroup)
+
+    fun createPaymentGroup(
+        name: RPKPaymentGroupName,
+        amount: Int,
+        currency: RPKCurrency,
+        interval: Duration,
+        lastPaymentTime: LocalDateTime,
+        balance: Int
+    ): RPKPaymentGroup
 
     /**
      * Removes a payment group from being tracked by this payment group service.

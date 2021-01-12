@@ -21,8 +21,9 @@ import com.rpkit.moderation.bukkit.database.table.RPKWarningTable
 import com.rpkit.moderation.bukkit.event.warning.RPKBukkitWarningCreateEvent
 import com.rpkit.moderation.bukkit.event.warning.RPKBukkitWarningDeleteEvent
 import com.rpkit.moderation.bukkit.event.warning.RPKBukkitWarningUpdateEvent
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import java.time.LocalDateTime
 
 
 class RPKWarningServiceImpl(override val plugin: RPKModerationBukkit) : RPKWarningService {
@@ -49,6 +50,23 @@ class RPKWarningServiceImpl(override val plugin: RPKModerationBukkit) : RPKWarni
                 plugin.server.dispatchCommand(plugin.server.consoleSender, command)
             }
         }
+    }
+
+    override fun createWarning(
+        reason: String,
+        profile: RPKProfile,
+        issuer: RPKProfile,
+        time: LocalDateTime
+    ): RPKWarning {
+        val warning = RPKWarningImpl(
+            null,
+            reason,
+            profile,
+            issuer,
+            time
+        )
+        addWarning(warning)
+        return warning
     }
 
     override fun removeWarning(warning: RPKWarning) {

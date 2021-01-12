@@ -16,7 +16,6 @@
 package com.rpkit.auctions.bukkit.command.auction
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
-import com.rpkit.auctions.bukkit.auction.RPKAuctionImpl
 import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
@@ -331,18 +330,17 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
                     ?: return AuctionErrorPrompt(plugin.messages.noMinecraftProfile)
             val character = characterService.getActiveCharacter(minecraftProfile)
                     ?: return AuctionErrorPrompt(plugin.messages.noCharacter)
-            val auction = RPKAuctionImpl(
-                    plugin,
-                    item = bukkitPlayer.inventory.itemInMainHand,
-                    currency = context.getSessionData("currency") as RPKCurrency,
-                    location = bukkitPlayer.location,
-                    character = character,
-                    duration = (context.getSessionData("duration") as Int) * 3600000L, // 60 mins * 60 secs * 1000 millisecs
-                    endTime = System.currentTimeMillis() + ((context.getSessionData("duration") as Int) * 3600000L),
-                    startPrice = context.getSessionData("start_price") as Int,
-                    buyOutPrice = context.getSessionData("buy_out_price") as Int,
-                    noSellPrice = context.getSessionData("no_sell_price") as Int,
-                    minimumBidIncrement = context.getSessionData("minimum_bid_increment") as Int
+            val auction = auctionService.createAuction(
+                bukkitPlayer.inventory.itemInMainHand,
+                context.getSessionData("currency") as RPKCurrency,
+                bukkitPlayer.location,
+                character,
+                (context.getSessionData("duration") as Int) * 3600000L, // 60 mins * 60 secs * 1000 millisecs
+                System.currentTimeMillis() + ((context.getSessionData("duration") as Int) * 3600000L),
+                context.getSessionData("start_price") as Int,
+                context.getSessionData("buy_out_price") as Int,
+                context.getSessionData("no_sell_price") as Int,
+                context.getSessionData("minimum_bid_increment") as Int
             )
             if (!auctionService.addAuction(auction)) {
                 return AuctionErrorPrompt(plugin.messages.auctionCreateFailed)

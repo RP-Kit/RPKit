@@ -15,7 +15,11 @@
 
 package com.rpkit.auctions.bukkit.auction
 
+import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
+import com.rpkit.economy.bukkit.currency.RPKCurrency
+import org.bukkit.Location
+import org.bukkit.inventory.ItemStack
 
 /**
  * Provides auction-related operations.
@@ -29,6 +33,20 @@ interface RPKAuctionService : Service {
      * @return Whether adding the auction was successful
      */
     fun addAuction(auction: RPKAuction): Boolean
+
+    fun createAuction(
+        item: ItemStack,
+        currency: RPKCurrency,
+        location: Location?,
+        character: RPKCharacter,
+        duration: Long,
+        endTime: Long,
+        startPrice: Int,
+        buyOutPrice: Int?,
+        noSellPrice: Int?,
+        minimumBidIncrement: Int,
+        isBiddingOpen: Boolean = false
+    ): RPKAuction
 
     /**
      * Updates an auction's state in data storage.

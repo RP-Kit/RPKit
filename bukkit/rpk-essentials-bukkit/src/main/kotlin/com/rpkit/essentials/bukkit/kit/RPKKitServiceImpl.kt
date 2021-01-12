@@ -19,6 +19,7 @@ import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.kit.bukkit.kit.RPKKit
 import com.rpkit.kit.bukkit.kit.RPKKitName
 import com.rpkit.kit.bukkit.kit.RPKKitService
+import org.bukkit.inventory.ItemStack
 
 
 class RPKKitServiceImpl(override val plugin: RPKEssentialsBukkit) : RPKKitService {
@@ -33,6 +34,12 @@ class RPKKitServiceImpl(override val plugin: RPKEssentialsBukkit) : RPKKitServic
         kits.add(kit)
         plugin.config.set("kits", kits)
         plugin.saveConfig()
+    }
+
+    override fun createKit(name: RPKKitName, items: List<ItemStack>): RPKKit {
+        val kit = RPKKitImpl(name, items)
+        addKit(kit)
+        return kit
     }
 
     override fun updateKit(kit: RPKKit) {

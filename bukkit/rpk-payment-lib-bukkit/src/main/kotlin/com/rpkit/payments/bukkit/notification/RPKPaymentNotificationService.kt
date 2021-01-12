@@ -17,6 +17,8 @@ package com.rpkit.payments.bukkit.notification
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
+import com.rpkit.payments.bukkit.group.RPKPaymentGroup
+import java.time.LocalDateTime
 
 /**
  * Provides payment notification related operations.
@@ -51,6 +53,14 @@ interface RPKPaymentNotificationService : Service {
      * @param paymentNotification The payment notification to add
      */
     fun addPaymentNotification(paymentNotification: RPKPaymentNotification)
+
+    fun createPaymentNotification(
+        group: RPKPaymentGroup,
+        to: RPKCharacter,
+        character: RPKCharacter,
+        date: LocalDateTime,
+        text: String
+    ): RPKPaymentNotification
 
     /**
      * Removes a payment notification from being tracked by this payment notification service.

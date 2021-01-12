@@ -16,6 +16,7 @@
 package com.rpkit.warp.bukkit.warp
 
 import com.rpkit.core.service.Service
+import org.bukkit.Location
 
 
 interface RPKWarpService : Service {
@@ -23,6 +24,7 @@ interface RPKWarpService : Service {
     val warps: List<RPKWarp>
     fun getWarp(name: RPKWarpName): RPKWarp?
     fun addWarp(warp: RPKWarp)
+    fun createWarp(name: RPKWarpName, location: Location): RPKWarp
     fun updateWarp(warp: RPKWarp)
     fun removeWarp(warp: RPKWarp)
 

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +21,7 @@ import com.rpkit.auctions.bukkit.database.table.RPKBidTable
 import com.rpkit.auctions.bukkit.event.bid.RPKBukkitBidCreateEvent
 import com.rpkit.auctions.bukkit.event.bid.RPKBukkitBidDeleteEvent
 import com.rpkit.auctions.bukkit.event.bid.RPKBukkitBidUpdateEvent
+import com.rpkit.characters.bukkit.character.RPKCharacter
 
 /**
  * Bid service implementation.
@@ -34,6 +34,17 @@ class RPKBidServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKBidService 
         if (event.isCancelled) return false
         plugin.database.getTable(RPKBidTable::class.java).insert(event.bid)
         return true
+    }
+
+    override fun createBid(auction: RPKAuction, character: RPKCharacter, amount: Int): RPKBid {
+        val bid = RPKBidImpl(
+            null,
+            auction,
+            character,
+            amount
+        )
+        addBid(bid)
+        return bid
     }
 
     override fun updateBid(bid: RPKBid): Boolean {

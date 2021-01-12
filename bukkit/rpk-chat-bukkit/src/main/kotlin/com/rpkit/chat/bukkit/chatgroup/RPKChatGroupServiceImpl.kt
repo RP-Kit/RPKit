@@ -43,6 +43,12 @@ class RPKChatGroupServiceImpl(override val plugin: RPKChatBukkit) : RPKChatGroup
         plugin.database.getTable(RPKChatGroupTable::class.java).insert(event.chatGroup)
     }
 
+    override fun createChatGroup(name: RPKChatGroupName): RPKChatGroup {
+        val chatGroup = RPKChatGroupImpl(plugin, null, name)
+        addChatGroup(chatGroup)
+        return chatGroup
+    }
+
     override fun removeChatGroup(chatGroup: RPKChatGroup) {
         val event = RPKBukkitChatGroupDeleteEvent(chatGroup)
         plugin.server.pluginManager.callEvent(event)

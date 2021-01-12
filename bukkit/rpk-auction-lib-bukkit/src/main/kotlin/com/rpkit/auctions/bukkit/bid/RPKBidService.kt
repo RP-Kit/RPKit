@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.auctions.bukkit.bid
 
 import com.rpkit.auctions.bukkit.auction.RPKAuction
+import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 
 /**
@@ -31,6 +31,12 @@ interface RPKBidService : Service {
      * @return Whether adding the bid was successful
      */
     fun addBid(bid: RPKBid): Boolean
+
+    fun createBid(
+        auction: RPKAuction,
+        character: RPKCharacter,
+        amount: Int
+    ): RPKBid
 
     /**
      * Updates a bid in data storage.

@@ -48,6 +48,8 @@ interface RPKChatGroupService : Service {
      */
     fun addChatGroup(chatGroup: RPKChatGroup)
 
+    fun createChatGroup(name: RPKChatGroupName): RPKChatGroup
+
     /**
      * Removes a chat group from being tracked by this chat group service.
      *

@@ -21,6 +21,7 @@ import com.rpkit.players.bukkit.event.ircprofile.RPKBukkitIRCProfileCreateEvent
 import com.rpkit.players.bukkit.event.ircprofile.RPKBukkitIRCProfileDeleteEvent
 import com.rpkit.players.bukkit.event.ircprofile.RPKBukkitIRCProfileUpdateEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 
 
 class RPKIRCProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKIRCProfileService {
@@ -42,6 +43,19 @@ class RPKIRCProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKIRCPr
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKIRCProfileTable::class.java).insert(event.ircProfile)
+    }
+
+    override fun createIRCProfile(
+        profile: RPKThinProfile,
+        nick: RPKIRCNick
+    ): RPKIRCProfile {
+        val ircProfile = RPKIRCProfileImpl(
+            null,
+            profile,
+            nick
+        )
+        addIRCProfile(ircProfile)
+        return ircProfile
     }
 
     override fun updateIRCProfile(profile: RPKIRCProfile) {

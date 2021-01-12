@@ -16,6 +16,7 @@
 package com.rpkit.kit.bukkit.kit
 
 import com.rpkit.core.service.Service
+import org.bukkit.inventory.ItemStack
 
 
 interface RPKKitService : Service {
@@ -23,6 +24,7 @@ interface RPKKitService : Service {
     val kits: List<RPKKit>
     fun getKit(name: RPKKitName): RPKKit?
     fun addKit(kit: RPKKit)
+    fun createKit(name: RPKKitName, items: List<ItemStack>): RPKKit
     fun updateKit(kit: RPKKit)
     fun removeKit(kit: RPKKit)
 

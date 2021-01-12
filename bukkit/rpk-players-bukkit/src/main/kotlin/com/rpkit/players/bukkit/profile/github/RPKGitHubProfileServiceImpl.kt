@@ -44,6 +44,21 @@ class RPKGitHubProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKGi
         plugin.database.getTable(RPKGitHubProfileTable::class.java).insert(event.githubProfile)
     }
 
+    override fun createGitHubProfile(
+        profile: RPKProfile,
+        name: RPKGitHubUsername,
+        oauthToken: String
+    ): RPKGitHubProfile {
+        val gitHubProfile = RPKGitHubProfileImpl(
+            null,
+            profile,
+            name,
+            oauthToken
+        )
+        addGitHubProfile(gitHubProfile)
+        return gitHubProfile
+    }
+
     override fun updateGitHubProfile(profile: RPKGitHubProfile) {
         val event = RPKBukkitGitHubProfileUpdateEvent(profile)
         plugin.server.pluginManager.callEvent(event)

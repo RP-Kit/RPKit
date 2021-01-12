@@ -16,6 +16,9 @@
 package com.rpkit.moderation.bukkit.ticket
 
 import com.rpkit.core.service.Service
+import com.rpkit.players.bukkit.profile.RPKProfile
+import org.bukkit.Location
+import java.time.LocalDateTime
 
 /**
  * Provides ticket related functionality
@@ -50,6 +53,16 @@ interface RPKTicketService : Service {
      * @param ticket The ticket to add
      */
     fun addTicket(ticket: RPKTicket)
+
+    fun createTicket(
+        reason: String,
+        issuer: RPKProfile,
+        resolver: RPKProfile?,
+        location: Location?,
+        openDate: LocalDateTime,
+        closeDate: LocalDateTime?,
+        isClosed: Boolean
+    ): RPKTicket
 
     /**
      * Updates a ticket

@@ -24,6 +24,10 @@ import com.rpkit.store.bukkit.database.table.RPKTimedPurchaseTable
 import com.rpkit.store.bukkit.event.purchase.RPKBukkitPurchaseCreateEvent
 import com.rpkit.store.bukkit.event.purchase.RPKBukkitPurchaseDeleteEvent
 import com.rpkit.store.bukkit.event.purchase.RPKBukkitPurchaseUpdateEvent
+import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItem
+import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
+import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItem
+import java.time.LocalDateTime
 
 
 class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchaseService {
@@ -46,6 +50,53 @@ class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchase
             is RPKPermanentPurchase -> plugin.database.getTable(RPKPermanentPurchaseTable::class.java).insert(eventPurchase)
             is RPKTimedPurchase -> plugin.database.getTable(RPKTimedPurchaseTable::class.java).insert(eventPurchase)
         }
+    }
+
+    override fun createConsumablePurchase(
+        storeItem: RPKConsumableStoreItem,
+        profile: RPKProfile,
+        purchaseDate: LocalDateTime,
+        remainingUses: Int
+    ): RPKConsumablePurchase {
+        val purchase = RPKConsumablePurchaseImpl(
+            null,
+            storeItem,
+            remainingUses,
+            profile,
+            purchaseDate
+        )
+        addPurchase(purchase)
+        return purchase
+    }
+
+    override fun createPermanentPurchase(
+        storeItem: RPKPermanentStoreItem,
+        profile: RPKProfile,
+        purchaseDate: LocalDateTime
+    ): RPKPermanentPurchase {
+        val purchase = RPKPermanentPurchaseImpl(
+            null,
+            storeItem,
+            profile,
+            purchaseDate
+        )
+        addPurchase(purchase)
+        return purchase
+    }
+
+    override fun createTimedPurchase(
+        storeItem: RPKTimedStoreItem,
+        profile: RPKProfile,
+        purchaseDate: LocalDateTime
+    ): RPKTimedPurchase {
+        val purchase = RPKTimedPurchaseImpl(
+            null,
+            storeItem,
+            profile,
+            purchaseDate
+        )
+        addPurchase(purchase)
+        return purchase
     }
 
     override fun updatePurchase(purchase: RPKPurchase) {

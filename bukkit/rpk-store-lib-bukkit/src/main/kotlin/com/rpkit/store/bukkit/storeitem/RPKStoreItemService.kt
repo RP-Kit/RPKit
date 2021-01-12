@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.store.bukkit.storeitem
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.service.Service
+import java.time.Duration
 
 /**
  * Provides store item related operations
@@ -52,6 +52,29 @@ interface RPKStoreItemService : Service {
      * @param storeItem The store item to add
      */
     fun addStoreItem(storeItem: RPKStoreItem)
+
+    fun createConsumableStoreItem(
+        plugin: String,
+        identifier: String,
+        description: String,
+        cost: Int,
+        uses: Int
+    ): RPKConsumableStoreItem
+
+    fun createPermanentStoreItem(
+        plugin: String,
+        identifier: String,
+        description: String,
+        cost: Int
+    ): RPKPermanentStoreItem
+
+    fun createTimedStoreItem(
+        plugin: String,
+        identifier: String,
+        description: String,
+        cost: Int,
+        duration: Duration
+    ): RPKTimedStoreItem
 
     /**
      * Updates a store item in data storage

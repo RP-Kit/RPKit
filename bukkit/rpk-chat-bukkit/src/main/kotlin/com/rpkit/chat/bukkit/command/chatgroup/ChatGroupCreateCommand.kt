@@ -16,7 +16,6 @@
 package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupImpl
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupName
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.core.service.Services
@@ -63,7 +62,7 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val chatGroup = RPKChatGroupImpl(plugin = plugin, name = RPKChatGroupName(args[0]))
+        val chatGroup = chatGroupService.createChatGroup(RPKChatGroupName(args[0]))
         val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (senderMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])

@@ -16,7 +16,6 @@
 package com.rpkit.chat.bukkit.command.message
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupImpl
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupName
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.core.service.Services
@@ -97,7 +96,7 @@ class MessageCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
                 chatGroup1 != null -> chatGroup = chatGroup1
                 chatGroup2 != null -> chatGroup = chatGroup2
                 else -> {
-                    chatGroup = RPKChatGroupImpl(plugin, name = RPKChatGroupName("_pm_" + sender.getName() + "_" + receiver.name))
+                    chatGroup = chatGroupService.createChatGroup(RPKChatGroupName("_pm_" + sender.getName() + "_" + receiver.name))
                     chatGroupService.addChatGroup(chatGroup)
                     chatGroup.addMember(senderMinecraftProfile)
                     chatGroup.addMember(receiverMinecraftProfile)
