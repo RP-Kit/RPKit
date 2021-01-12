@@ -15,11 +15,14 @@
 
 package com.rpkit.payments.bukkit.group
 
+import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupTable
 import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupCreateEvent
 import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupDeleteEvent
 import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupUpdateEvent
+import java.time.Duration
+import java.time.LocalDateTime
 
 /**
  * Payment group service implementation.
@@ -42,6 +45,28 @@ class RPKPaymentGroupServiceImpl(override val plugin: RPKPaymentsBukkit) : RPKPa
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKPaymentGroupTable::class.java).insert(event.paymentGroup)
+    }
+
+    override fun createPaymentGroup(
+        name: RPKPaymentGroupName,
+        amount: Int,
+        currency: RPKCurrency,
+        interval: Duration,
+        lastPaymentTime: LocalDateTime,
+        balance: Int
+    ): RPKPaymentGroup {
+        val paymentGroup = RPKPaymentGroupImpl(
+            plugin,
+            null,
+            name,
+            amount,
+            currency,
+            interval,
+            lastPaymentTime,
+            balance
+        )
+        addPaymentGroup(paymentGroup)
+        return paymentGroup
     }
 
     override fun removePaymentGroup(paymentGroup: RPKPaymentGroup) {

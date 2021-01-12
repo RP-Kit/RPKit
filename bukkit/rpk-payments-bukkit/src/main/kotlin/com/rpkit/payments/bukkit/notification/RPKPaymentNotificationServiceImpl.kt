@@ -21,6 +21,8 @@ import com.rpkit.payments.bukkit.database.table.RPKPaymentNotificationTable
 import com.rpkit.payments.bukkit.event.notification.RPKBukkitPaymentNotificationCreateEvent
 import com.rpkit.payments.bukkit.event.notification.RPKBukkitPaymentNotificationDeleteEvent
 import com.rpkit.payments.bukkit.event.notification.RPKBukkitPaymentNotificationUpdateEvent
+import com.rpkit.payments.bukkit.group.RPKPaymentGroup
+import java.time.LocalDateTime
 
 
 class RPKPaymentNotificationServiceImpl(override val plugin: RPKPaymentsBukkit) : RPKPaymentNotificationService {
@@ -41,6 +43,25 @@ class RPKPaymentNotificationServiceImpl(override val plugin: RPKPaymentsBukkit) 
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKPaymentNotificationTable::class.java).insert(event.paymentNotification)
+    }
+
+    override fun createPaymentNotification(
+        group: RPKPaymentGroup,
+        to: RPKCharacter,
+        character: RPKCharacter,
+        date: LocalDateTime,
+        text: String
+    ): RPKPaymentNotification {
+        val paymentNotification = RPKPaymentNotificationImpl(
+            null,
+            group,
+            to,
+            character,
+            date,
+            text
+        )
+        addPaymentNotification(paymentNotification)
+        return paymentNotification
     }
 
     override fun removePaymentNotification(paymentNotification: RPKPaymentNotification) {
