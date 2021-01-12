@@ -20,6 +20,7 @@ import com.rpkit.economy.bukkit.database.table.RPKCurrencyTable
 import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyCreateEvent
 import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyDeleteEvent
 import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyUpdateEvent
+import org.bukkit.Material
 
 /**
  * Currency service implementation.
@@ -42,6 +43,27 @@ class RPKCurrencyServiceImpl(override val plugin: RPKEconomyBukkit) : RPKCurrenc
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKCurrencyTable::class.java).insert(event.currency)
+    }
+
+    override fun createCurrency(
+        name: RPKCurrencyName,
+        nameSingular: String,
+        namePlural: String,
+        rate: Double,
+        defaultAmount: Int,
+        material: Material
+    ): RPKCurrency {
+        val currency = RPKCurrencyImpl(
+            null,
+            name,
+            nameSingular,
+            namePlural,
+            rate,
+            defaultAmount,
+            material
+        )
+        addCurrency(currency)
+        return currency
     }
 
     override fun removeCurrency(currency: RPKCurrency) {

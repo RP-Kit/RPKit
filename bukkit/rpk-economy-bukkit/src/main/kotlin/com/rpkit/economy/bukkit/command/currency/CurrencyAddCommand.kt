@@ -17,7 +17,6 @@ package com.rpkit.economy.bukkit.command.currency
 
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
-import com.rpkit.economy.bukkit.currency.RPKCurrencyImpl
 import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.Material
@@ -246,15 +245,13 @@ class CurrencyAddCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
     private inner class CurrencyAddedPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val currencyService = Services[RPKCurrencyService::class.java] ?: return END_OF_CONVERSATION
-            currencyService.addCurrency(
-                    RPKCurrencyImpl(
-                            name = RPKCurrencyName(context.getSessionData("name") as String),
-                            nameSingular = context.getSessionData("name_singular") as String,
-                            namePlural = context.getSessionData("name_plural") as String,
-                            rate = context.getSessionData("rate") as Double,
-                            defaultAmount = context.getSessionData("default_amount") as Int,
-                            material = context.getSessionData("material") as Material
-                    )
+            currencyService.createCurrency(
+                name = RPKCurrencyName(context.getSessionData("name") as String),
+                nameSingular = context.getSessionData("name_singular") as String,
+                namePlural = context.getSessionData("name_plural") as String,
+                rate = context.getSessionData("rate") as Double,
+                defaultAmount = context.getSessionData("default_amount") as Int,
+                material = context.getSessionData("material") as Material
             )
             return END_OF_CONVERSATION
         }

@@ -16,6 +16,7 @@
 package com.rpkit.economy.bukkit.currency
 
 import com.rpkit.core.service.Service
+import org.bukkit.Material
 
 /**
  * Provides currency related operations.
@@ -59,6 +60,15 @@ interface RPKCurrencyService : Service {
      * @param currency The currency to add
      */
     fun addCurrency(currency: RPKCurrency)
+
+    fun createCurrency(
+        name: RPKCurrencyName,
+        nameSingular: String,
+        namePlural: String,
+        rate: Double,
+        defaultAmount: Int,
+        material: Material
+    ): RPKCurrency
 
     /**
      * Removes a currency.
