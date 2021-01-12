@@ -20,6 +20,7 @@ import com.rpkit.banks.bukkit.bank.RPKBank
 import com.rpkit.banks.bukkit.database.create
 import com.rpkit.banks.bukkit.database.jooq.Tables.RPKIT_BANK
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
@@ -132,7 +133,7 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
         val banks = results
                 .mapNotNull { result ->
                     val characterId = result[RPKIT_BANK.CHARACTER_ID]
-                    val character = characterService.getCharacter(characterId)
+                    val character = characterService.getCharacter(RPKCharacterId(characterId))
                     if (character == null) {
                         database.create.deleteFrom(RPKIT_BANK)
                                 .where(RPKIT_BANK.CHARACTER_ID.eq(characterId))
@@ -164,11 +165,7 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
                 .where(RPKIT_BANK.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_BANK.CURRENCY_ID.eq(currencyId.value))
                 .execute()
-        if (cache != null) {
-            val characterId = entity.character.id ?: return
-            val currencyId = entity.currency.id ?: return
-            cache.remove(CharacterCurrencyCacheKey(characterId.value, currencyId.value))
-        }
+        cache?.remove(CharacterCurrencyCacheKey(characterId.value, currencyId.value))
     }
 
 }

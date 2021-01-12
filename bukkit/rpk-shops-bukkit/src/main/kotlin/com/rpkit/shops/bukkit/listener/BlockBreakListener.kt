@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +15,7 @@
 
 package com.rpkit.shops.bukkit.listener
 
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -67,7 +67,11 @@ class BlockBreakListener(val plugin: RPKShopsBukkit) : Listener {
                     return
                 }
                 val character = characterService.getActiveCharacter(minecraftProfile)
-                val shopCharacter = if (sign.getLine(3).equals("admin", ignoreCase = true)) null else characterService.getCharacter(sign.getLine(3).toInt())
+                val shopCharacter = if (sign.getLine(3).equals("admin", ignoreCase = true)) {
+                    null
+                } else {
+                    characterService.getCharacter(RPKCharacterId(sign.getLine(3).toInt()))
+                }
                 if (character == null) {
                     event.isCancelled = true
                     return
@@ -99,7 +103,7 @@ class BlockBreakListener(val plugin: RPKShopsBukkit) : Listener {
                     return
                 }
                 val character = characterService.getActiveCharacter(minecraftProfile)
-                val rentCharacter = characterService.getCharacter(sign.getLine(1).toInt())
+                val rentCharacter = characterService.getCharacter(RPKCharacterId(sign.getLine(1).toInt()))
                 if (character == null) {
                     event.isCancelled = true
                     return

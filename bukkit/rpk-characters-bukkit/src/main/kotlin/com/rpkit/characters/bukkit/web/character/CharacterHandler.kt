@@ -16,6 +16,7 @@
 package com.rpkit.characters.bukkit.web.character
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.characters.bukkit.web.ErrorResponse
@@ -46,7 +47,7 @@ class CharacterHandler {
         val characterService = Services[RPKCharacterService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Character service not found"))
-        val character = characterService.getCharacter(id)
+        val character = characterService.getCharacter(RPKCharacterId(id))
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Character not found"))
         return Response(OK)
@@ -62,7 +63,7 @@ class CharacterHandler {
         val raceService = Services[RPKRaceService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Race service not found"))
-        val character = characterService.getCharacter(id)
+        val character = characterService.getCharacter(RPKCharacterId(id))
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Character not found"))
         if (character.profile?.id != request.authenticatedProfile?.id) {
@@ -94,7 +95,7 @@ class CharacterHandler {
         val raceService = Services[RPKRaceService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Race service not found"))
-        val character = characterService.getCharacter(id)
+        val character = characterService.getCharacter(RPKCharacterId(id))
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Character not found"))
         if (character.profile?.id != request.authenticatedProfile?.id) {
@@ -122,7 +123,7 @@ class CharacterHandler {
         val characterService = Services[RPKCharacterService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Character service not found"))
-        val character = characterService.getCharacter(id)
+        val character = characterService.getCharacter(RPKCharacterId(id))
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Character not found"))
         if (character.profile?.id != request.authenticatedProfile?.id) {

@@ -167,9 +167,9 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
         cache?.set(id.value, entity)
     }
 
-    operator fun get(id: Int): RPKCharacter? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKCharacterId): RPKCharacter? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         } else {
             val result = database.create
                     .select(
@@ -207,7 +207,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                             RPKIT_CHARACTER.DESCRIPTION_HIDDEN
                     )
                     .from(RPKIT_CHARACTER)
-                    .where(RPKIT_CHARACTER.ID.eq(id))
+                    .where(RPKIT_CHARACTER.ID.eq(id.value))
                     .fetchOne() ?: return null
 
             val profileService = Services[RPKProfileService::class.java]
@@ -262,7 +262,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                     isRaceHidden = result[RPKIT_CHARACTER.RACE_HIDDEN],
                     isDescriptionHidden = result[RPKIT_CHARACTER.DESCRIPTION_HIDDEN]
             )
-            cache?.set(id, character)
+            cache?.set(id.value, character)
             return character
         }
     }
@@ -274,7 +274,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .from(RPKIT_CHARACTER)
                 .where(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .fetchOne() ?: return null
-        return get(result[RPKIT_CHARACTER.ID])
+        return get(RPKCharacterId(result[RPKIT_CHARACTER.ID]))
     }
 
     fun get(profile: RPKProfile): List<RPKCharacter> {
@@ -284,7 +284,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .from(RPKIT_CHARACTER)
                 .where(RPKIT_CHARACTER.PROFILE_ID.eq(profileId.value))
                 .fetch()
-        return results.map { result -> get(result[RPKIT_CHARACTER.ID]) }
+        return results.map { result -> get(RPKCharacterId(result[RPKIT_CHARACTER.ID])) }
                 .filterNotNull()
     }
 
@@ -294,7 +294,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .from(RPKIT_CHARACTER)
                 .where(RPKIT_CHARACTER.NAME.likeIgnoreCase("%$name%"))
                 .fetch()
-        return results.map { result -> get(result[RPKIT_CHARACTER.ID]) }
+        return results.map { result -> get(RPKCharacterId(result[RPKIT_CHARACTER.ID])) }
                 .filterNotNull()
     }
 

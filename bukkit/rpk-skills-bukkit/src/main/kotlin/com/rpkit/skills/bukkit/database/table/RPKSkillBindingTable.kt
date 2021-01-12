@@ -16,6 +16,7 @@
 package com.rpkit.skills.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.util.toByteArray
 import com.rpkit.core.bukkit.util.toItemStack
@@ -84,7 +85,7 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                 .fetchOne() ?: return null
         val characterService = Services[RPKCharacterService::class.java] ?: return null
         val characterId = result[RPKIT_SKILL_BINDING.CHARACTER_ID]
-        val character = characterService.getCharacter(characterId)
+        val character = characterService.getCharacter(RPKCharacterId(characterId))
         val skillService = Services[RPKSkillService::class.java] ?: return null
         val skillName = result[RPKIT_SKILL_BINDING.SKILL_NAME]
         val skill = skillService.getSkill(RPKSkillName(skillName))

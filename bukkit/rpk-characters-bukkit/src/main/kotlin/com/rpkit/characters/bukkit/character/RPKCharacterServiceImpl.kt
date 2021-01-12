@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +35,7 @@ import org.bukkit.inventory.ItemStack
  */
 class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCharacterService {
 
-    override fun getCharacter(id: Int): RPKCharacter? {
+    override fun getCharacter(id: RPKCharacterId): RPKCharacter? {
         return plugin.database.getTable(RPKCharacterTable::class.java)[id]
     }
 

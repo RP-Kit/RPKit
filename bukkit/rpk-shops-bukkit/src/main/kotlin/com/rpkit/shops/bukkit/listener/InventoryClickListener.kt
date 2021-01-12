@@ -16,6 +16,7 @@
 package com.rpkit.shops.bukkit.listener
 
 import com.rpkit.banks.bukkit.bank.RPKBankService
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrencyName
@@ -81,7 +82,7 @@ class InventoryClickListener(val plugin: RPKShopsBukkit) : Listener {
         val sellerCharacter = if (sign.getLine(3).equals("admin", ignoreCase = true)) {
             null
         } else {
-            characterService.getCharacter(sign.getLine(3).toInt()) ?: return
+            characterService.getCharacter(RPKCharacterId(sign.getLine(3).toInt())) ?: return
         }
         val buyerBukkitPlayer = event.whoClicked as? Player ?: return
         val buyerMinecraftProfile = minecraftProfileService.getMinecraftProfile(buyerBukkitPlayer)

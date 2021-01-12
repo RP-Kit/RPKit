@@ -16,6 +16,7 @@
 package com.rpkit.economy.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
@@ -119,7 +120,7 @@ class RPKWalletTable(
         return results
                 .mapNotNull { result ->
                     val characterId = result[RPKIT_WALLET.CHARACTER_ID]
-                    val character = characterService.getCharacter(characterId) ?: return@mapNotNull null
+                    val character = characterService.getCharacter(RPKCharacterId(characterId)) ?: return@mapNotNull null
                     val wallet = RPKWallet(
                             character,
                             currency,

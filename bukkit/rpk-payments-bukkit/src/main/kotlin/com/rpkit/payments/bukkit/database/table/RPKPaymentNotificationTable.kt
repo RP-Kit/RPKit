@@ -16,6 +16,7 @@
 package com.rpkit.payments.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
@@ -111,9 +112,9 @@ class RPKPaymentNotificationTable(
         val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupId(paymentGroupId))
         val characterService = Services[RPKCharacterService::class.java] ?: return null
         val toId = result.get(RPKIT_PAYMENT_NOTIFICATION.TO_ID)
-        val to = characterService.getCharacter(toId)
+        val to = characterService.getCharacter(RPKCharacterId(toId))
         val characterId = result.get(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID)
-        val character = characterService.getCharacter(characterId)
+        val character = characterService.getCharacter(RPKCharacterId(characterId))
         if (paymentGroup != null && to != null && character != null) {
             val paymentNotification = RPKPaymentNotificationImpl(
                 id,

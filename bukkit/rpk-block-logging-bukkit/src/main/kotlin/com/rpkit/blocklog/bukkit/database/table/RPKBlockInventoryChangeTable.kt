@@ -24,6 +24,7 @@ import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChangeId
 import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChangeImpl
 import com.rpkit.blocklog.bukkit.database.create
 import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_INVENTORY_CHANGE
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.util.toByteArray
 import com.rpkit.core.bukkit.util.toItemStackArray
@@ -136,7 +137,7 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
         }
         val characterService = Services[RPKCharacterService::class.java] ?: return null
         val characterId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID)
-        val character = if (characterId == null) null else characterService.getCharacter(characterId)
+        val character = if (characterId == null) null else characterService.getCharacter(RPKCharacterId(characterId))
         val blockInventoryChange = RPKBlockInventoryChangeImpl(
                 id,
                 blockHistory,

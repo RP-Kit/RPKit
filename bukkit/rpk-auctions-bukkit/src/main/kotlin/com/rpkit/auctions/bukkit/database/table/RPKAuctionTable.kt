@@ -23,6 +23,7 @@ import com.rpkit.auctions.bukkit.bid.RPKBidId
 import com.rpkit.auctions.bukkit.database.create
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_AUCTION
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_BID
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.util.toByteArray
 import com.rpkit.core.bukkit.util.toItemStack
@@ -157,7 +158,7 @@ class RPKAuctionTable(
             val currency = currencyService.getCurrency(RPKCurrencyId(currencyId))
             val characterService = Services[RPKCharacterService::class.java] ?: return null
             val characterId = result.get(RPKIT_AUCTION.CHARACTER_ID)
-            val character = characterService.getCharacter(characterId)
+            val character = characterService.getCharacter(RPKCharacterId(characterId))
             if (currency != null && character != null) {
                 val auction = RPKAuctionImpl(
                         plugin,
