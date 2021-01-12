@@ -20,6 +20,10 @@ import com.rpkit.auctions.bukkit.database.table.RPKAuctionTable
 import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionCreateEvent
 import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionDeleteEvent
 import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionUpdateEvent
+import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.economy.bukkit.currency.RPKCurrency
+import org.bukkit.Location
+import org.bukkit.inventory.ItemStack
 
 /**
  * Auction service implementation.
@@ -36,6 +40,38 @@ class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuction
         if (event.isCancelled) return false
         plugin.database.getTable(RPKAuctionTable::class.java).insert(event.auction)
         return true
+    }
+
+    override fun createAuction(
+        item: ItemStack,
+        currency: RPKCurrency,
+        location: Location?,
+        character: RPKCharacter,
+        duration: Long,
+        endTime: Long,
+        startPrice: Int,
+        buyOutPrice: Int?,
+        noSellPrice: Int?,
+        minimumBidIncrement: Int,
+        isBiddingOpen: Boolean
+    ): RPKAuction {
+        val auction = RPKAuctionImpl(
+            plugin,
+            null,
+            item,
+            currency,
+            location,
+            character,
+            duration,
+            endTime,
+            startPrice,
+            buyOutPrice,
+            noSellPrice,
+            minimumBidIncrement,
+            isBiddingOpen
+        )
+        addAuction(auction)
+        return auction
     }
 
     override fun updateAuction(auction: RPKAuction): Boolean {
