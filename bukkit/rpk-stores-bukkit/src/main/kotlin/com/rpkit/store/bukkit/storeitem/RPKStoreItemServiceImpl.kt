@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +24,7 @@ import com.rpkit.store.bukkit.database.table.RPKTimedStoreItemTable
 import com.rpkit.store.bukkit.event.storeitem.RPKBukkitStoreItemCreateEvent
 import com.rpkit.store.bukkit.event.storeitem.RPKBukkitStoreItemDeleteEvent
 import com.rpkit.store.bukkit.event.storeitem.RPKBukkitStoreItemUpdateEvent
+import java.time.Duration
 
 
 class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreItemService {
@@ -51,6 +51,61 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
             is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class.java).insert(eventStoreItem)
             is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class.java).insert(eventStoreItem)
         }
+    }
+
+    override fun createConsumableStoreItem(
+        plugin: String,
+        identifier: String,
+        description: String,
+        cost: Int,
+        uses: Int
+    ): RPKConsumableStoreItem {
+        val storeItem = RPKConsumableStoreItemImpl(
+            null,
+            uses,
+            plugin,
+            identifier,
+            description,
+            cost
+        )
+        addStoreItem(storeItem)
+        return storeItem
+    }
+
+    override fun createPermanentStoreItem(
+        plugin: String,
+        identifier: String,
+        description: String,
+        cost: Int
+    ): RPKPermanentStoreItem {
+        val storeItem = RPKPermanentStoreItemImpl(
+            null,
+            plugin,
+            identifier,
+            description,
+            cost
+        )
+        addStoreItem(storeItem)
+        return storeItem
+    }
+
+    override fun createTimedStoreItem(
+        plugin: String,
+        identifier: String,
+        description: String,
+        cost: Int,
+        duration: Duration
+    ): RPKTimedStoreItem {
+        val storeItem = RPKTimedStoreItemImpl(
+            null,
+            duration,
+            plugin,
+            identifier,
+            description,
+            cost
+        )
+        addStoreItem(storeItem)
+        return storeItem
     }
 
     override fun updateStoreItem(storeItem: RPKStoreItem) {

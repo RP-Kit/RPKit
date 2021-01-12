@@ -17,6 +17,10 @@ package com.rpkit.store.bukkit.purchase
 
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItem
+import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
+import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItem
+import java.time.LocalDateTime
 
 /**
  * Provides purchase related operations.
@@ -45,6 +49,25 @@ interface RPKPurchaseService : Service {
      * @param purchase The purchase to add
      */
     fun addPurchase(purchase: RPKPurchase)
+
+    fun createConsumablePurchase(
+        storeItem: RPKConsumableStoreItem,
+        profile: RPKProfile,
+        purchaseDate: LocalDateTime,
+        remainingUses: Int
+    ): RPKConsumablePurchase
+
+    fun createPermanentPurchase(
+        storeItem: RPKPermanentStoreItem,
+        profile: RPKProfile,
+        purchaseDate: LocalDateTime
+    ): RPKPermanentPurchase
+
+    fun createTimedPurchase(
+        storeItem: RPKTimedStoreItem,
+        profile: RPKProfile,
+        purchaseDate: LocalDateTime
+    ): RPKTimedPurchase
 
     /**
      * Updates a purchase in data storage
