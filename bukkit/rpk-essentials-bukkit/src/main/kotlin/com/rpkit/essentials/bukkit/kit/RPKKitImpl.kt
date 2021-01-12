@@ -27,7 +27,7 @@ class RPKKitImpl(
 ) : RPKKit, ConfigurationSerializable {
     override fun serialize(): Map<String, Any> {
         return mapOf(
-                "name" to name,
+                "name" to name.value,
                 "items" to items
         )
     }
