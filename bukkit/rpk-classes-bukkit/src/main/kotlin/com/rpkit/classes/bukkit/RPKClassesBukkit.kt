@@ -34,6 +34,7 @@ import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkillPointService
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
+import com.rpkit.stats.bukkit.stat.RPKStatVariableName
 import com.rpkit.stats.bukkit.stat.RPKStatVariableService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
@@ -109,7 +110,7 @@ class RPKClassesBukkit : RPKBukkitPlugin() {
                         ?.toSet()
                         ?.forEach { statVariableName ->
                             statVariableService.addStatVariable(object : RPKStatVariable {
-                                override val name = statVariableName
+                                override val name = RPKStatVariableName(statVariableName)
 
                                 override fun get(character: RPKCharacter): Double {
                                     val `class` = classService.getClass(character)
