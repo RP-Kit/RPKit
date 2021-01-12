@@ -23,6 +23,7 @@ import com.rpkit.warp.bukkit.event.warp.RPKBukkitWarpUpdateEvent
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import com.rpkit.warp.bukkit.warp.RPKWarpName
 import com.rpkit.warp.bukkit.warp.RPKWarpService
+import org.bukkit.Location
 
 
 class RPKWarpServiceImpl(override val plugin: RPKTravelBukkit) : RPKWarpService {
@@ -38,6 +39,12 @@ class RPKWarpServiceImpl(override val plugin: RPKTravelBukkit) : RPKWarpService 
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.database.getTable(RPKWarpTable::class.java).insert(event.warp)
+    }
+
+    override fun createWarp(name: RPKWarpName, location: Location): RPKWarp {
+        val warp = RPKWarpImpl(name, location)
+        addWarp(warp)
+        return warp
     }
 
     override fun updateWarp(warp: RPKWarp) {
