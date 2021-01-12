@@ -24,6 +24,7 @@ import com.rpkit.auctions.bukkit.bid.RPKBidId
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
 import com.rpkit.auctions.bukkit.database.create
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_BID
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
@@ -101,7 +102,7 @@ class RPKBidTable(
         val auction = auctionService.getAuction(RPKAuctionId(auctionId))
         val characterService = Services[RPKCharacterService::class.java] ?: return null
         val characterId = result.get(RPKIT_BID.CHARACTER_ID)
-        val character = characterService.getCharacter(characterId)
+        val character = characterService.getCharacter(RPKCharacterId(characterId))
         if (auction != null && character != null) {
             val bid = RPKBidImpl(
                 id,

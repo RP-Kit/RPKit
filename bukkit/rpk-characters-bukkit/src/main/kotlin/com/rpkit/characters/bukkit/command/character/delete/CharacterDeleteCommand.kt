@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +16,7 @@
 package com.rpkit.characters.bukkit.command.character.delete
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -239,7 +239,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit) : CommandE
                 return END_OF_CONVERSATION
             }
             val characterService = Services[RPKCharacterService::class.java] ?: return END_OF_CONVERSATION
-            val character = characterService.getCharacter(context.getSessionData("character_id") as Int)
+            val character = characterService.getCharacter(RPKCharacterId(context.getSessionData("character_id") as Int))
             if (character != null) {
                 characterService.removeCharacter(character)
             }

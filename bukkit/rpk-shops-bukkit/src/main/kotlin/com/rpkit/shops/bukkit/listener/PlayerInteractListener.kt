@@ -16,6 +16,7 @@
 package com.rpkit.shops.bukkit.listener
 
 import com.rpkit.banks.bukkit.bank.RPKBankService
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrencyName
@@ -92,7 +93,7 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
                     return
                 }
                 val isAdminShop = state.getLine(3).equals("admin", ignoreCase = true)
-                val ownerCharacter = if (isAdminShop) null else characterService.getCharacter(state.getLine(3).toInt())
+                val ownerCharacter = if (isAdminShop) null else characterService.getCharacter(RPKCharacterId(state.getLine(3).toInt()))
                 if (ownerCharacter == null && !isAdminShop) {
                     event.player.sendMessage(plugin.messages["shop-character-invalid"])
                     return
@@ -178,7 +179,7 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
                 return
             }
             val character = characterService.getActiveCharacter(minecraftProfile)
-            val rentCharacter = characterService.getCharacter(state.getLine(1).toInt())
+            val rentCharacter = characterService.getCharacter(RPKCharacterId(state.getLine(1).toInt()))
             val cost = state.getLine(2).split(Regex("\\s+"))[0].toInt()
             val currency = currencyService.getCurrency(RPKCurrencyName(state.getLine(2)
                     .split(Regex("\\s+"))
@@ -194,7 +195,7 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
                 return
             }
             val isAdminShop = shopSign.getLine(3).equals("admin", ignoreCase = true)
-            val shopCharacter = if (isAdminShop) null else characterService.getCharacter(shopSign.getLine(3).toInt())
+            val shopCharacter = if (isAdminShop) null else characterService.getCharacter(RPKCharacterId(shopSign.getLine(3).toInt()))
             if (shopCharacter == null || shopCharacter.id == character.id) {
                 if (rentCharacter != null) {
                     if (currency != null) {

@@ -24,6 +24,7 @@ import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryId
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.blocklog.bukkit.database.create
 import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_CHANGE
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
@@ -134,7 +135,7 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
             }
             val characterService = Services[RPKCharacterService::class.java] ?: return null
             val characterId = result.get(RPKIT_BLOCK_CHANGE.CHARACTER_ID)
-            val character = if (characterId == null) null else characterService.getCharacter(characterId)
+            val character = if (characterId == null) null else characterService.getCharacter(RPKCharacterId(characterId))
             val fromMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM))
                     ?: Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM), true)
             val toMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO))

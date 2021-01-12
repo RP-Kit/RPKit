@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +34,7 @@ interface RPKCharacterService : Service {
      * @param id the ID of the character
      * @return The character, or null if no character is found with the given ID
      */
-    fun getCharacter(id: Int): RPKCharacter?
+    fun getCharacter(id: RPKCharacterId): RPKCharacter?
 
     /**
      * Gets a Minecraft profile's active character.

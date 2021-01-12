@@ -15,6 +15,7 @@
 
 package com.rpkit.payments.bukkit.database.table
 
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
@@ -56,7 +57,7 @@ class RPKPaymentGroupMemberTable(
                 .fetch()
         val characterService = Services[RPKCharacterService::class.java] ?: return emptyList()
         return results.mapNotNull { result ->
-            val character = characterService.getCharacter(result[RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID]) ?: return@mapNotNull null
+            val character = characterService.getCharacter(RPKCharacterId(result[RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID])) ?: return@mapNotNull null
             return@mapNotNull RPKPaymentGroupMember(
                     paymentGroup,
                     character
