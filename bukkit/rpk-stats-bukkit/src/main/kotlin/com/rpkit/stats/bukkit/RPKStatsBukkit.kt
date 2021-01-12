@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +24,7 @@ import com.rpkit.stats.bukkit.messages.StatsMessages
 import com.rpkit.stats.bukkit.stat.RPKStatService
 import com.rpkit.stats.bukkit.stat.RPKStatServiceImpl
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
+import com.rpkit.stats.bukkit.stat.RPKStatVariableName
 import com.rpkit.stats.bukkit.stat.RPKStatVariableService
 import com.rpkit.stats.bukkit.stat.RPKStatVariableServiceImpl
 import org.bstats.bukkit.Metrics
@@ -50,7 +50,7 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
         Services[RPKStatVariableService::class.java] = statVariableService
         Services[RPKStatService::class.java] = statService
         statVariableService.addStatVariable(object : RPKStatVariable {
-            override val name = "minecraftLevel"
+            override val name = RPKStatVariableName("minecraftLevel")
             override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 if (minecraftProfile != null) {
@@ -60,13 +60,13 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
-            override val name = "characterAge"
+            override val name = RPKStatVariableName("characterAge")
             override fun get(character: RPKCharacter): Double {
                 return character.age.toDouble()
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
-            override val name = "characterHealth"
+            override val name = RPKStatVariableName("characterHealth")
             override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
@@ -82,7 +82,7 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
-            override val name = "characterMaxHealth"
+            override val name = RPKStatVariableName("characterMaxHealth")
             override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
@@ -102,19 +102,19 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
-            override val name = "characterMana"
+            override val name = RPKStatVariableName("characterMana")
             override fun get(character: RPKCharacter): Double {
                 return character.mana.toDouble()
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
-            override val name = "characterMaxMana"
+            override val name = RPKStatVariableName("characterMaxMana")
             override fun get(character: RPKCharacter): Double {
                 return character.maxMana.toDouble()
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
-            override val name = "characterFoodLevel"
+            override val name = RPKStatVariableName("characterFoodLevel")
             override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
@@ -130,7 +130,7 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
-            override val name = "characterThirstLevel"
+            override val name = RPKStatVariableName("characterThirstLevel")
             override fun get(character: RPKCharacter): Double {
                 return character.thirstLevel.toDouble()
             }
