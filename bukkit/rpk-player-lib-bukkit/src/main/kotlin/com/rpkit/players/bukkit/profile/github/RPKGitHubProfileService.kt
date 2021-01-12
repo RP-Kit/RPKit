@@ -25,6 +25,11 @@ interface RPKGitHubProfileService : Service {
     fun getGitHubProfile(name: RPKGitHubUsername): RPKGitHubProfile?
     fun getGitHubProfiles(profile: RPKProfile): List<RPKGitHubProfile>
     fun addGitHubProfile(profile: RPKGitHubProfile)
+    fun createGitHubProfile(
+        profile: RPKProfile,
+        name: RPKGitHubUsername,
+        oauthToken: String
+    ): RPKGitHubProfile
     fun updateGitHubProfile(profile: RPKGitHubProfile)
     fun removeGitHubProfile(profile: RPKGitHubProfile)
 

@@ -28,7 +28,6 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
 import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
-import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
@@ -77,16 +76,12 @@ class ProfileLinkIRCCommand(private val plugin: RPKPlayersBukkit) : RPKCommandEx
             sender.sendMessage(plugin.messages.noIrcProfileService)
             return MissingServiceFailure(RPKIRCProfileService::class.java)
         }
-        var ircProfile = ircProfileService.getIRCProfile(nick)
+        val ircProfile = ircProfileService.getIRCProfile(nick)
         if (ircProfile != null) {
             sender.sendMessage(plugin.messages.profileLinkIrcInvalidAlreadyLinked)
             return IRCProfileAlreadyLinkedFailure(ircProfile)
         }
-        ircProfile = RPKIRCProfileImpl(
-            profile = profile,
-            nick = nick
-        )
-        ircProfileService.addIRCProfile(ircProfile)
+        ircProfileService.createIRCProfile(profile, nick)
         sender.sendMessage(plugin.messages.profileLinkIrcValid)
         return CommandSuccess
     }

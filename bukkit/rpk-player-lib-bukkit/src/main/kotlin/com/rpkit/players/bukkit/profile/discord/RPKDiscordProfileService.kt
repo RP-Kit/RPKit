@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.players.bukkit.profile.discord
 
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 
 interface RPKDiscordProfileService : Service {
 
@@ -25,6 +25,10 @@ interface RPKDiscordProfileService : Service {
     fun getDiscordProfile(discordUserId: DiscordUserId): RPKDiscordProfile
     fun getDiscordProfiles(profile: RPKProfile): List<RPKDiscordProfile>
     fun addDiscordProfile(profile: RPKDiscordProfile)
+    fun createDiscordProfile(
+        profile: RPKThinProfile,
+        discordId: DiscordUserId
+    ): RPKDiscordProfile
     fun updateDiscordProfile(profile: RPKDiscordProfile)
     fun removeDiscordProfile(profile: RPKDiscordProfile)
 

@@ -17,6 +17,7 @@ package com.rpkit.players.bukkit.profile.irc
 
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 
 
 interface RPKIRCProfileService : Service {
@@ -25,6 +26,10 @@ interface RPKIRCProfileService : Service {
     fun getIRCProfile(nick: RPKIRCNick): RPKIRCProfile?
     fun getIRCProfiles(profile: RPKProfile): List<RPKIRCProfile>
     fun addIRCProfile(profile: RPKIRCProfile)
+    fun createIRCProfile(
+        profile: RPKThinProfile,
+        nick: RPKIRCNick
+    ): RPKIRCProfile
     fun updateIRCProfile(profile: RPKIRCProfile)
     fun removeIRCProfile(profile: RPKIRCProfile)
 

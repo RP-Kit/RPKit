@@ -21,6 +21,7 @@ import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.table.RPKDiscordProfileTable
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileName
+import com.rpkit.players.bukkit.profile.RPKThinProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
 
 class RPKDiscordProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKDiscordProfileService {
@@ -48,6 +49,16 @@ class RPKDiscordProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKD
 
     override fun addDiscordProfile(profile: RPKDiscordProfile) {
         plugin.database.getTable(RPKDiscordProfileTable::class.java).insert(profile)
+    }
+
+    override fun createDiscordProfile(profile: RPKThinProfile, discordId: DiscordUserId): RPKDiscordProfile {
+        val discordProfile = RPKDiscordProfileImpl(
+            null,
+            profile,
+            discordId
+        )
+        addDiscordProfile(discordProfile)
+        return discordProfile
     }
 
     override fun updateDiscordProfile(profile: RPKDiscordProfile) {
