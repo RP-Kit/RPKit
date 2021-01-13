@@ -45,6 +45,17 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
         null
     }
 
+    private val minecraftUUIDCache = if (plugin.config.getBoolean("caching.rpkit_minecraft_profile.minecraft_uuid.enabled")) {
+        database.cacheManager.createCache(
+            "rpk-players-bukkit.rpkit_minecraft_profile.minecraft_uuid",
+            UUID::class.java,
+            RPKMinecraftProfile::class.java,
+            plugin.config.getLong("caching.rpkit_minecraft_profile.minecraft_uuid.size")
+        )
+    } else {
+        null
+    }
+
     fun insert(entity: RPKMinecraftProfile) {
         val profile = entity.profile
         database.create
@@ -65,6 +76,7 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
         val id = database.create.lastID().toInt()
         entity.id = RPKMinecraftProfileId(id)
         cache?.set(id, entity)
+        minecraftUUIDCache?.set(entity.minecraftUUID, entity)
     }
 
     fun update(entity: RPKMinecraftProfile) {
@@ -84,6 +96,7 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                 .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id.value))
                 .execute()
         cache?.set(id.value, entity)
+        minecraftUUIDCache?.set(entity.minecraftUUID, entity)
     }
 
     operator fun get(id: RPKMinecraftProfileId): RPKMinecraftProfile? {
@@ -115,6 +128,7 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                     UUID.fromString(result.get(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID))
             )
             cache?.set(id.value, minecraftProfile)
+            minecraftUUIDCache?.set(minecraftProfile.minecraftUUID, minecraftProfile)
             return minecraftProfile
         }
     }
@@ -132,6 +146,9 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
     }
 
     fun get(minecraftUUID: UUID): RPKMinecraftProfile? {
+        if (minecraftUUIDCache?.containsKey(minecraftUUID) == true) {
+            return minecraftUUIDCache[minecraftUUID]
+        }
         val result = database.create
                 .select(RPKIT_MINECRAFT_PROFILE.ID)
                 .from(RPKIT_MINECRAFT_PROFILE)
@@ -147,5 +164,6 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                 .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id.value))
                 .execute()
         cache?.remove(id.value)
+        minecraftUUIDCache?.remove(entity.minecraftUUID)
     }
 }
