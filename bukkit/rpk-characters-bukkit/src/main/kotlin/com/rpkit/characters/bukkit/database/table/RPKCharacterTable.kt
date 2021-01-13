@@ -52,6 +52,17 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
         null
     }
 
+    private val minecraftProfileIdCache = if (plugin.config.getBoolean("caching.rpkit_character.minecraft_profile_id.enabled")) {
+        database.cacheManager.createCache(
+            "rpk-characters-bukkit.rpkit_character.minecraft_profile_id",
+            Int::class.javaObjectType,
+            RPKCharacter::class.java,
+            plugin.config.getLong("caching.rpkit_character.minecraft_profile_id.size")
+        )
+    } else {
+        null
+    }
+
     fun insert(entity: RPKCharacter) {
         database.create
                 .insertInto(
@@ -125,6 +136,10 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
         val id = database.create.lastID().toInt()
         entity.id = RPKCharacterId(id)
         cache?.set(id, entity)
+        val minecraftProfileId = entity.minecraftProfile?.id
+        if (minecraftProfileId != null) {
+            minecraftProfileIdCache?.set(minecraftProfileId.value, entity)
+        }
     }
 
     fun update(entity: RPKCharacter) {
@@ -165,6 +180,10 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .where(RPKIT_CHARACTER.ID.eq(id.value))
                 .execute()
         cache?.set(id.value, entity)
+        val minecraftProfileId = entity.minecraftProfile?.id
+        if (minecraftProfileId != null) {
+            minecraftProfileIdCache?.set(minecraftProfileId.value, entity)
+        }
     }
 
     operator fun get(id: RPKCharacterId): RPKCharacter? {
@@ -269,6 +288,9 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
 
     fun get(minecraftProfile: RPKMinecraftProfile): RPKCharacter? {
         val minecraftProfileId = minecraftProfile.id ?: return null
+        if (minecraftProfileIdCache?.containsKey(minecraftProfileId.value) == true) {
+            return minecraftProfileIdCache[minecraftProfileId.value]
+        }
         val result = database.create
                 .select(RPKIT_CHARACTER.ID)
                 .from(RPKIT_CHARACTER)
@@ -305,6 +327,10 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .where(RPKIT_CHARACTER.ID.eq(id.value))
                 .execute()
         cache?.remove(id.value)
+        val minecraftProfileId = entity.minecraftProfile?.id
+        if (minecraftProfileId != null) {
+            minecraftProfileIdCache?.remove(minecraftProfileId.value)
+        }
     }
 
 }
