@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,7 +46,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
 
-    private static final long serialVersionUID = -1386523395;
+    private static final long serialVersionUID = -765373366;
 
     /**
      * The reference instance of <code>rpkit_characters.rpkit_character</code>
@@ -70,12 +69,12 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     /**
      * The column <code>rpkit_characters.rpkit_character.profile_id</code>.
      */
-    public final TableField<RpkitCharacterRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), org.jooq.impl.SQLDataType.INTEGER, this, "");
+    public final TableField<RpkitCharacterRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.minecraft_profile_id</code>.
      */
-    public final TableField<RpkitCharacterRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), org.jooq.impl.SQLDataType.INTEGER, this, "");
+    public final TableField<RpkitCharacterRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.name</code>.
@@ -85,7 +84,7 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     /**
      * The column <code>rpkit_characters.rpkit_character.gender</code>.
      */
-    public final TableField<RpkitCharacterRecord, String> GENDER = createField(DSL.name("gender"), org.jooq.impl.SQLDataType.VARCHAR(256), this, "");
+    public final TableField<RpkitCharacterRecord, String> GENDER = createField(DSL.name("gender"), org.jooq.impl.SQLDataType.VARCHAR(256).defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.age</code>.
@@ -95,7 +94,7 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     /**
      * The column <code>rpkit_characters.rpkit_character.race_id</code>.
      */
-    public final TableField<RpkitCharacterRecord, Integer> RACE_ID = createField(DSL.name("race_id"), org.jooq.impl.SQLDataType.INTEGER, this, "");
+    public final TableField<RpkitCharacterRecord, Integer> RACE_ID = createField(DSL.name("race_id"), org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.description</code>.
@@ -145,22 +144,22 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     /**
      * The column <code>rpkit_characters.rpkit_character.helmet</code>.
      */
-    public final TableField<RpkitCharacterRecord, byte[]> HELMET = createField(DSL.name("helmet"), org.jooq.impl.SQLDataType.BLOB, this, "");
+    public final TableField<RpkitCharacterRecord, byte[]> HELMET = createField(DSL.name("helmet"), org.jooq.impl.SQLDataType.BLOB.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.BLOB)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.chestplate</code>.
      */
-    public final TableField<RpkitCharacterRecord, byte[]> CHESTPLATE = createField(DSL.name("chestplate"), org.jooq.impl.SQLDataType.BLOB, this, "");
+    public final TableField<RpkitCharacterRecord, byte[]> CHESTPLATE = createField(DSL.name("chestplate"), org.jooq.impl.SQLDataType.BLOB.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.BLOB)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.leggings</code>.
      */
-    public final TableField<RpkitCharacterRecord, byte[]> LEGGINGS = createField(DSL.name("leggings"), org.jooq.impl.SQLDataType.BLOB, this, "");
+    public final TableField<RpkitCharacterRecord, byte[]> LEGGINGS = createField(DSL.name("leggings"), org.jooq.impl.SQLDataType.BLOB.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.BLOB)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.boots</code>.
      */
-    public final TableField<RpkitCharacterRecord, byte[]> BOOTS = createField(DSL.name("boots"), org.jooq.impl.SQLDataType.BLOB, this, "");
+    public final TableField<RpkitCharacterRecord, byte[]> BOOTS = createField(DSL.name("boots"), org.jooq.impl.SQLDataType.BLOB.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.BLOB)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.health</code>.
