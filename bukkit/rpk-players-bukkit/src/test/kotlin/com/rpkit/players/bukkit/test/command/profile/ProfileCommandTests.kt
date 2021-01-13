@@ -625,14 +625,15 @@ class ProfileCommandTests : WordSpec({
             every { ircService.isOnline(any()) } returns true
             val ircProfileService = mockk<RPKIRCProfileService>()
             every { ircProfileService.getIRCProfile(any<RPKIRCNick>()) } returns null
-            every { ircProfileService.addIRCProfile(any()) } just runs
+            val ircProfile = mockk<RPKIRCProfile>()
+            every { ircProfileService.createIRCProfile(any(), any()) } returns ircProfile
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKIRCService::class.java] } returns ircService
             every { testServicesDelegate[RPKIRCProfileService::class.java] } returns ircProfileService
             Services.delegate = testServicesDelegate
             val profileCommand = ProfileCommand(plugin)
             profileCommand.onCommand(sender, arrayOf("link", "irc", "abcd")) should beInstanceOf<CommandSuccess>()
-            verify(exactly = 1) { ircProfileService.addIRCProfile(any()) }
+            verify(exactly = 1) { ircProfileService.createIRCProfile(any(), any()) }
             verify(exactly = 1) { sender.sendMessage(profileLinkIrcValidMessage) }
         }
         "return no permission failure when link minecraft is used with no permission" {

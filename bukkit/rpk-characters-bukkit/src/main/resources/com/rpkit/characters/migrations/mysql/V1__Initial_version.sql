@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +30,7 @@ CREATE TABLE `rpkit_character`
     `z`                    double        NOT NULL,
     `yaw`                  real          NOT NULL,
     `pitch`                real          NOT NULL,
-    `inventory_contents`   blob          NOT NULL,
+    `inventory_contents`   longblob      NOT NULL,
     `helmet`               blob,
     `chestplate`           blob,
     `leggings`             blob,
