@@ -15,7 +15,7 @@
 
 package com.rpkit.chat.bukkit.irc.listener
 
-import com.rpkit.chat.bukkit.RPKChatBukkit
+import com.rpkit.chat.bukkit.irc.IRCWhitelistValidator
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
@@ -26,11 +26,14 @@ import org.pircbotx.hooks.events.UserListEvent
  * IRC user list listener.
  * Registers all users in channels with the IRC service upon receiving the user list.
  */
-class IRCUserListListener(private val plugin: RPKChatBukkit) : ListenerAdapter() {
+class IRCUserListListener(private val whitelistValidator: IRCWhitelistValidator) : ListenerAdapter() {
 
     override fun onUserList(event: UserListEvent) {
         val ircService = Services[RPKIRCService::class.java] ?: return
-        event.users.forEach { user -> ircService.setOnline(RPKIRCNick(user.nick), true) }
+        event.users.forEach { user ->
+            ircService.setOnline(RPKIRCNick(user.nick), true)
+            whitelistValidator.enforceWhitelist(user, RPKIRCNick(user.nick), event.getBot(), event.channel)
+        }
     }
 
 }

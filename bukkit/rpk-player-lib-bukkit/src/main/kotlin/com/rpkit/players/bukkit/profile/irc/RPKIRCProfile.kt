@@ -21,7 +21,7 @@ import com.rpkit.players.bukkit.profile.RPKThinProfile
 interface RPKIRCProfile {
 
     var id: RPKIRCProfileId?
-    val profile: RPKThinProfile
+    var profile: RPKThinProfile
     val nick: RPKIRCNick
 
 }
