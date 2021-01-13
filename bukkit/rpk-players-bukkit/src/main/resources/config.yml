@@ -18,6 +18,9 @@ caching:
     id:
       enabled: true
       size: 20
+    minecraft_uuid:
+      enabled: true
+      size: 20
   rpkit_profile:
     id:
       enabled: true
