@@ -29,6 +29,7 @@ import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
 import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
@@ -71,17 +72,27 @@ class ProfileLinkIRCCommand(private val plugin: RPKPlayersBukkit) : RPKCommandEx
             sender.sendMessage(plugin.messages.noProfileSelf)
             return NoProfileSelfFailure()
         }
+        val profileService = Services[RPKProfileService::class.java]
+        if (profileService == null) {
+            sender.sendMessage(plugin.messages.noProfileService)
+            return MissingServiceFailure(RPKProfileService::class.java)
+        }
         val ircProfileService = Services[RPKIRCProfileService::class.java]
         if (ircProfileService == null) {
             sender.sendMessage(plugin.messages.noIrcProfileService)
             return MissingServiceFailure(RPKIRCProfileService::class.java)
         }
-        val ircProfile = ircProfileService.getIRCProfile(nick)
-        if (ircProfile != null) {
+        val ircProfile = ircProfileService.getIRCProfile(nick) ?: null
+        if (ircProfile != null && ircProfile.profile is RPKProfile) {
             sender.sendMessage(plugin.messages.profileLinkIrcInvalidAlreadyLinked)
             return IRCProfileAlreadyLinkedFailure(ircProfile)
         }
-        ircProfileService.createIRCProfile(profile, nick)
+        if (ircProfile == null) {
+            ircProfileService.createIRCProfile(profile, nick)
+        } else {
+            ircProfile.profile = profile
+            ircProfileService.updateIRCProfile(ircProfile)
+        }
         sender.sendMessage(plugin.messages.profileLinkIrcValid)
         return CommandSuccess
     }

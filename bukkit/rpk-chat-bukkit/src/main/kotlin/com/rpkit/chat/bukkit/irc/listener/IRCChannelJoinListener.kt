@@ -15,13 +15,10 @@
 
 package com.rpkit.chat.bukkit.irc.listener
 
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
-import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
-import com.rpkit.chat.bukkit.irc.IRCChannel
+import com.rpkit.chat.bukkit.irc.IRCWhitelistValidator
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
-import org.pircbotx.PircBotX
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.JoinEvent
 
@@ -29,27 +26,14 @@ import org.pircbotx.hooks.events.JoinEvent
  * IRC channel join listener.
  * Prevents unauthorised users joining whitelisted channels.
  */
-class IRCChannelJoinListener : ListenerAdapter() {
+class IRCChannelJoinListener(val whitelistValidator: IRCWhitelistValidator) : ListenerAdapter() {
 
     override fun onJoin(event: JoinEvent) {
         val ircService = Services[RPKIRCService::class.java] ?: return
         val user = event.user ?: return
-        ircService.setOnline(RPKIRCNick(user.nick), true)
-        val verified = user.isVerified
-        val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
-        val chatChannel = chatChannelService.getChatChannelFromIRCChannel(IRCChannel(event.channel.name)) ?: return
-        if (chatChannel.undirectedPipeline
-                        .mapNotNull { component -> component as? IRCComponent }
-                        .firstOrNull()
-                        ?.isIRCWhitelisted != true) return
-        if (!verified) {
-            event.getBot<PircBotX>().sendIRC().message(event.channel.name, "/kick " + event.channel.name + " " + user.nick + " Only registered/identified users may join this channel.")
-            event.channel.send().message(user.nick + " attempted to join, but was not registered.")
-        } else if (!(user.channelsVoiceIn.contains(event.channel) || user.channelsHalfOpIn.contains(event.channel) || user.channelsOpIn.contains(event.channel))) {
-            //TODO: Once permissions is part of RPK, we can make this check permission via account link instead, where available.
-            event.getBot<PircBotX>().sendIRC().message(event.channel.name, "/kick " + event.channel.name + " " + user.nick + " Only authorised users may join this channel.")
-            event.channel.send().message(user.nick + " attempted to join, but was not authorised.")
-        }
+        val nick = RPKIRCNick(user.nick)
+        ircService.setOnline(nick, true)
+        whitelistValidator.enforceWhitelist(user, nick, event.getBot(), event.channel)
     }
 
 }

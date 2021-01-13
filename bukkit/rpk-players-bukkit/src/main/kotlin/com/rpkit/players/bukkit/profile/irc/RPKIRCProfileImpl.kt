@@ -19,6 +19,6 @@ import com.rpkit.players.bukkit.profile.RPKThinProfile
 
 class RPKIRCProfileImpl(
     override var id: RPKIRCProfileId? = null,
-    override val profile: RPKThinProfile,
+    override var profile: RPKThinProfile,
     override val nick: RPKIRCNick
 ) : RPKIRCProfile

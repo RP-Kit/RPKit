@@ -562,6 +562,28 @@ class ProfileCommandTests : WordSpec({
             profileCommand.onCommand(sender, arrayOf("link", "irc", "abcd")) should beInstanceOf<NoProfileSelfFailure>()
             verify(exactly = 1) { sender.sendMessage(noProfileSelfMessage) }
         }
+        "return missing service failure when link irc is used with no profile service present" {
+            val noProfileServiceMessage = "no profile service"
+            val messages = mockk<PlayersMessages>()
+            every { messages.noProfileService } returns noProfileServiceMessage
+            val plugin = mockk<RPKPlayersBukkit>()
+            every { plugin.messages } returns messages
+            val sender = mockk<RPKMinecraftProfile>()
+            every { sender.sendMessage(any<String>()) } just runs
+            every { sender.hasPermission("rpkit.players.command.profile.link") } returns true
+            every { sender.hasPermission("rpkit.players.command.profile.link.irc") } returns true
+            val profile = mockk<RPKProfile>()
+            every { sender.profile } returns profile
+            val ircService = mockk<RPKIRCService>()
+            every { ircService.isOnline(any()) } returns true
+            val testServicesDelegate = mockk<ServicesDelegate>()
+            every { testServicesDelegate[RPKIRCService::class.java] } returns ircService
+            every { testServicesDelegate[RPKProfileService::class.java] } returns null
+            Services.delegate = testServicesDelegate
+            val profileCommand = ProfileCommand(plugin)
+            profileCommand.onCommand(sender, arrayOf("link", "irc", "abcd")) should beInstanceOf<MissingServiceFailure>()
+            verify(exactly = 1) { sender.sendMessage(noProfileServiceMessage) }
+        }
         "return missing service failure when link irc is used with no IRC profile service present" {
             val noIrcProfileServiceMessage = "no irc profile service"
             val messages = mockk<PlayersMessages>()
@@ -576,8 +598,10 @@ class ProfileCommandTests : WordSpec({
             every { sender.profile } returns profile
             val ircService = mockk<RPKIRCService>()
             every { ircService.isOnline(any()) } returns true
+            val profileService = mockk<RPKProfileService>()
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKIRCService::class.java] } returns ircService
+            every { testServicesDelegate[RPKProfileService::class.java] } returns profileService
             every { testServicesDelegate[RPKIRCProfileService::class.java] } returns null
             Services.delegate = testServicesDelegate
             val profileCommand = ProfileCommand(plugin)
@@ -597,19 +621,23 @@ class ProfileCommandTests : WordSpec({
             val profile = mockk<RPKProfile>()
             every { sender.profile } returns profile
             val ircService = mockk<RPKIRCService>()
+            val profileService = mockk<RPKProfileService>()
             val ircProfileService = mockk<RPKIRCProfileService>()
             val ircProfile = mockk<RPKIRCProfile>()
+            val ircProfileProfile = mockk<RPKProfile>()
+            every { ircProfile.profile } returns ircProfileProfile
             every { ircProfileService.getIRCProfile(any<RPKIRCNick>()) } returns ircProfile
             every { ircService.isOnline(any()) } returns true
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKIRCService::class.java] } returns ircService
+            every { testServicesDelegate[RPKProfileService::class.java] } returns profileService
             every { testServicesDelegate[RPKIRCProfileService::class.java] } returns ircProfileService
             Services.delegate = testServicesDelegate
             val profileCommand = ProfileCommand(plugin)
             profileCommand.onCommand(sender, arrayOf("link", "irc", "abcd")) should beInstanceOf<ProfileLinkIRCCommand.IRCProfileAlreadyLinkedFailure>()
             verify(exactly = 1) { sender.sendMessage(ircProfileAlreadyLinkedMessage) }
         }
-        "return success when link irc is used with a valid IRC nick" {
+        "return success when link irc is used with a valid IRC nick and an IRC profile does not exist yet" {
             val profileLinkIrcValidMessage = "irc profile linked"
             val messages = mockk<PlayersMessages>()
             every { messages.profileLinkIrcValid } returns profileLinkIrcValidMessage
@@ -623,17 +651,55 @@ class ProfileCommandTests : WordSpec({
             every { sender.profile } returns profile
             val ircService = mockk<RPKIRCService>()
             every { ircService.isOnline(any()) } returns true
+            val profileService = mockk<RPKProfileService>()
+            val thinProfile = mockk<RPKThinProfile>()
+            every { profileService.createThinProfile(any()) } returns thinProfile
             val ircProfileService = mockk<RPKIRCProfileService>()
             every { ircProfileService.getIRCProfile(any<RPKIRCNick>()) } returns null
             val ircProfile = mockk<RPKIRCProfile>()
             every { ircProfileService.createIRCProfile(any(), any()) } returns ircProfile
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKIRCService::class.java] } returns ircService
+            every { testServicesDelegate[RPKProfileService::class.java] } returns profileService
             every { testServicesDelegate[RPKIRCProfileService::class.java] } returns ircProfileService
             Services.delegate = testServicesDelegate
             val profileCommand = ProfileCommand(plugin)
             profileCommand.onCommand(sender, arrayOf("link", "irc", "abcd")) should beInstanceOf<CommandSuccess>()
-            verify(exactly = 1) { ircProfileService.createIRCProfile(any(), any()) }
+            verify(exactly = 1) { ircProfileService.createIRCProfile(profile, RPKIRCNick("abcd")) }
+            verify(exactly = 1) { sender.sendMessage(profileLinkIrcValidMessage) }
+        }
+        "return success when link irc is used with a valid IRC nick and an IRC profile already exists but has not been linked" {
+            val profileLinkIrcValidMessage = "irc profile linked"
+            val messages = mockk<PlayersMessages>()
+            every { messages.profileLinkIrcValid } returns profileLinkIrcValidMessage
+            val plugin = mockk<RPKPlayersBukkit>()
+            every { plugin.messages } returns messages
+            val sender = mockk<RPKMinecraftProfile>()
+            every { sender.sendMessage(any<String>()) } just runs
+            every { sender.hasPermission("rpkit.players.command.profile.link") } returns true
+            every { sender.hasPermission("rpkit.players.command.profile.link.irc") } returns true
+            val profile = mockk<RPKProfile>()
+            every { sender.profile } returns profile
+            val ircService = mockk<RPKIRCService>()
+            every { ircService.isOnline(any()) } returns true
+            val profileService = mockk<RPKProfileService>()
+            val thinProfile = mockk<RPKThinProfile>()
+            every { profileService.createThinProfile(any()) } returns thinProfile
+            val ircProfileService = mockk<RPKIRCProfileService>()
+            every { ircProfileService.updateIRCProfile(any()) } just runs
+            val ircProfile = mockk<RPKIRCProfile>()
+            every { ircProfile.profile } returns thinProfile
+            every { ircProfile.profile = any() } just runs
+            every { ircProfileService.getIRCProfile(any<RPKIRCNick>()) } returns ircProfile
+            val testServicesDelegate = mockk<ServicesDelegate>()
+            every { testServicesDelegate[RPKIRCService::class.java] } returns ircService
+            every { testServicesDelegate[RPKProfileService::class.java] } returns profileService
+            every { testServicesDelegate[RPKIRCProfileService::class.java] } returns ircProfileService
+            Services.delegate = testServicesDelegate
+            val profileCommand = ProfileCommand(plugin)
+            profileCommand.onCommand(sender, arrayOf("link", "irc", "abcd")) should beInstanceOf<CommandSuccess>()
+            verify(exactly = 1) { ircProfile.profile = profile }
+            verify(exactly = 1) { ircProfileService.updateIRCProfile(ircProfile) }
             verify(exactly = 1) { sender.sendMessage(profileLinkIrcValidMessage) }
         }
         "return no permission failure when link minecraft is used with no permission" {

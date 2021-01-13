@@ -39,14 +39,15 @@ class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
     private val onlineUsers = mutableListOf<String>()
 
     init {
+        val whitelistValidator = IRCWhitelistValidator()
         val configuration = Configuration.Builder()
                 .setAutoNickChange(true)
                 .setCapEnabled(true)
-                .addListener(IRCChannelJoinListener())
+                .addListener(IRCChannelJoinListener(whitelistValidator))
                 .addListener(IRCChannelQuitListener())
                 .addListener(IRCConnectListener())
                 .addListener(IRCMessageListener(plugin))
-                .addListener(IRCUserListListener(plugin))
+                .addListener(IRCUserListListener(whitelistValidator))
                 .addListener(IRCRegisterCommand(plugin))
                 .addListener(IRCVerifyCommand(plugin))
                 .addListener(IRCListCommand(plugin))
