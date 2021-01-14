@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,7 +101,9 @@ class RPKMonstersBukkit : RPKBukkitPlugin() {
         Services[RPKMonsterExperienceService::class.java] = RPKMonsterExperienceServiceImpl(this)
         Services[RPKMonsterLevelService::class.java] = RPKMonsterLevelServiceImpl(this)
         Services[RPKMonsterSpawnAreaService::class.java] = RPKMonsterSpawnAreaServiceImpl(this)
-        Services[RPKMonsterStatService::class.java] = RPKMonsterStatServiceImpl(this)
+        val monsterStatService = RPKMonsterStatServiceImpl(this)
+        Services[RPKMonsterStatService::class.java] = monsterStatService
+        Services[RPKMonsterStatServiceImpl::class.java] = monsterStatService
 
         registerCommands()
         registerListeners()

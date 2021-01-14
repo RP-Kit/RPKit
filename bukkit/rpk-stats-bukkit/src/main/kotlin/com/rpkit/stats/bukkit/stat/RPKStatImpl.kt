@@ -16,8 +16,8 @@
 package com.rpkit.stats.bukkit.stat
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import org.nfunk.jep.JEP
-import kotlin.math.roundToInt
+import com.rpkit.core.expression.RPKExpressionService
+import com.rpkit.core.service.Services
 
 /**
  * Stat implementation.
@@ -27,13 +27,10 @@ class RPKStatImpl(
         override val formula: String
 ) : RPKStat {
     override fun get(character: RPKCharacter, variables: List<RPKStatVariable>): Int {
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        for (variable in variables) {
-            parser.addVariable(variable.name.value, variable.get(character))
-        }
-        parser.parseExpression(formula)
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
+        val expression = expressionService.createExpression(formula)
+        return expression.parseInt(variables.map { variable ->
+            variable.name.value to variable.get(character)
+        }.toMap()) ?: 0
     }
 }

@@ -16,14 +16,13 @@
 package com.rpkit.monsters.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
-import com.rpkit.monsters.bukkit.jep.CeilFunction
-import com.rpkit.monsters.bukkit.jep.FloorFunction
 import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.entity.LivingEntity
@@ -33,8 +32,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.inventory.ItemStack
-import org.nfunk.jep.JEP
-import kotlin.math.roundToInt
 
 
 class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
@@ -81,27 +78,19 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
     }
 
     private fun getExperience(entity: LivingEntity): Int {
-        val expression = plugin.config.getString("monsters.${entity.type}.experience", plugin.config.getString("monsters.default.experience"))
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addFunction("ceil", CeilFunction())
-        parser.addFunction("floor", FloorFunction())
-        parser.addVariable("level", Services[RPKMonsterLevelService::class.java]?.getMonsterLevel(entity)?.toDouble() ?: 1.0)
-        parser.parseExpression(expression)
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
+        val expression = expressionService.createExpression(plugin.config.getString("monsters.${entity.type}.experience", plugin.config.getString("monsters.default.experience")) ?: return 0)
+        return expression.parseInt(mapOf(
+            "level" to (Services[RPKMonsterLevelService::class.java]?.getMonsterLevel(entity)?.toDouble() ?: 1.0)
+        )) ?: 0
     }
 
     private fun getMoney(entity: LivingEntity, currency: RPKCurrency): Int {
-        val expression = plugin.config.getString("monsters.${entity.type}.money.${currency.name}", plugin.config.getString("monsters.default.money.${currency.name}"))
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addFunction("ceil", CeilFunction())
-        parser.addFunction("floor", FloorFunction())
-        parser.addVariable("level", Services[RPKMonsterLevelService::class.java]?.getMonsterLevel(entity)?.toDouble() ?: 1.0)
-        parser.parseExpression(expression)
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
+        val expression = expressionService.createExpression(plugin.config.getString("monsters.${entity.type}.money.${currency.name}", plugin.config.getString("monsters.default.money.${currency.name}")) ?: return 0)
+        return expression.parseInt(mapOf(
+            "level" to (Services[RPKMonsterLevelService::class.java]?.getMonsterLevel(entity)?.toDouble() ?: 1.0)
+        )) ?: 0
     }
 
 }

@@ -16,12 +16,18 @@
 package com.rpkit.stats.bukkit.stat.test
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.core.expression.RPKExpressionService
+import com.rpkit.core.expression.RPKExpressionServiceImpl
+import com.rpkit.core.plugin.RPKPlugin
+import com.rpkit.core.service.Services
+import com.rpkit.core.service.ServicesDelegate
 import com.rpkit.stats.bukkit.stat.RPKStatImpl
 import com.rpkit.stats.bukkit.stat.RPKStatName
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
 import com.rpkit.stats.bukkit.stat.RPKStatVariableName
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.shouldBe
+import io.mockk.every
 import io.mockk.mockk
 
 
@@ -41,6 +47,10 @@ class RPKStatImplTests : WordSpec({
     )
     "RPKStatImpl.get" should {
         "successfully parse its script and return the correct value" {
+            val plugin = mockk<RPKPlugin>()
+            val testServicesDelegate = mockk<ServicesDelegate>()
+            every { testServicesDelegate[RPKExpressionService::class.java] } returns RPKExpressionServiceImpl(plugin)
+            Services.delegate = testServicesDelegate
             stat.get(character, statVariables) shouldBe 15
         }
     }

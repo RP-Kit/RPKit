@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +16,11 @@
 package com.rpkit.experience.bukkit.experience
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.core.expression.RPKExpressionService
+import com.rpkit.core.service.Services
 import com.rpkit.experience.bukkit.RPKExperienceBukkit
 import com.rpkit.experience.bukkit.database.table.RPKExperienceTable
 import com.rpkit.experience.bukkit.event.experience.RPKBukkitExperienceChangeEvent
-import org.nfunk.jep.JEP
-import kotlin.math.roundToInt
 
 
 class RPKExperienceServiceImpl(override val plugin: RPKExperienceBukkit) : RPKExperienceService {
@@ -78,13 +77,11 @@ class RPKExperienceServiceImpl(override val plugin: RPKExperienceBukkit) : RPKEx
     }
 
     override fun getExperienceNeededForLevel(level: Int): Int {
-        val expression = plugin.config.getString("experience.formula")
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addVariable("level", level.toDouble())
-        parser.parseExpression(expression)
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return Int.MAX_VALUE
+        val expression = expressionService.createExpression(plugin.config.getString("experience.formula") ?: return Int.MAX_VALUE)
+        return expression.parseInt(mapOf(
+            "level" to level.toDouble()
+        )) ?: Int.MAX_VALUE
     }
 
 }

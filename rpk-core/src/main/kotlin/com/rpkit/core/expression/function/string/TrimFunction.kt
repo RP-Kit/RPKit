@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,23 +13,12 @@
  * limitations under the License.
  */
 
-package com.rpkit.monsters.bukkit.jep;
+package com.rpkit.core.expression.function.string
 
-import org.nfunk.jep.ParseException
-import org.nfunk.jep.function.PostfixMathCommand
-import java.util.*
-import kotlin.math.floor
+import com.rpkit.core.expression.RPKFunction
 
-class FloorFunction : PostfixMathCommand() {
-
-    init {
-        numberOfParameters = 1
+internal class TrimFunction : RPKFunction {
+    override fun invoke(vararg args: Any?): Any? {
+        return args[0].toString().trim()
     }
-
-    override fun run(stack: Stack<Any>) {
-        checkStack(stack)
-        val value = stack.pop() as? Double ?: throw ParseException("Invalid parameter type")
-        stack.push(floor(value))
-    }
-
 }

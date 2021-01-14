@@ -16,13 +16,12 @@
 package com.rpkit.classes.bukkit.classes
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkillType
 import com.rpkit.skills.bukkit.skills.RPKSkillTypeName
 import com.rpkit.skills.bukkit.skills.RPKSkillTypeService
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
-import org.nfunk.jep.JEP
-import kotlin.math.roundToInt
 
 
 class RPKClassImpl(
@@ -73,12 +72,10 @@ class RPKClassImpl(
     }
 
     override fun getStatVariableValue(statVariable: RPKStatVariable, level: Int): Int {
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addVariable("level", level.toDouble())
-        parser.parseExpression(statVariableFormulae[statVariable.name])
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
+        val statVariableFormula = statVariableFormulae[statVariable.name.value] ?: return 0
+        val expression = expressionService.createExpression(statVariableFormula)
+        return expression.parseInt(mapOf("level" to level)) ?: 0
     }
 
 }

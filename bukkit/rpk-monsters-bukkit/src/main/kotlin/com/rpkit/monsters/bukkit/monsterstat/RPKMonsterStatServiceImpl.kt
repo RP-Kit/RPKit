@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +15,14 @@
 
 package com.rpkit.monsters.bukkit.monsterstat
 
+import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
-import com.rpkit.monsters.bukkit.jep.CeilFunction
-import com.rpkit.monsters.bukkit.jep.FloorFunction
 import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelService
 import org.bukkit.ChatColor
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
-import org.nfunk.jep.JEP
 
 
 class RPKMonsterStatServiceImpl(override val plugin: RPKMonstersBukkit) : RPKMonsterStatService {
@@ -126,42 +123,30 @@ class RPKMonsterStatServiceImpl(override val plugin: RPKMonstersBukkit) : RPKMon
     }
 
     fun calculateMonsterMaxHealth(entityType: EntityType, level: Int): Double {
-        val expression = plugin.config.getString("monsters.$entityType.max-health")
-                ?: plugin.config.getString("monsters.default.max-health")
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addFunction("ceil", CeilFunction())
-        parser.addFunction("floor", FloorFunction())
-        parser.addVariable("level", level.toDouble())
-        parser.parseExpression(expression)
-        return parser.value
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 1.0
+        val expression = expressionService.createExpression(plugin.config.getString("monsters.$entityType.max-health")
+                ?: plugin.config.getString("monsters.default.max-health") ?: return 1.0)
+        return expression.parseDouble(mapOf(
+            "level" to level.toDouble()
+        )) ?: 1.0
     }
 
     fun calculateMonsterMinDamageMultiplier(entityType: EntityType, level: Int): Double {
-        val expression = plugin.config.getString("monsters.$entityType.min-damage-multiplier")
-                ?: plugin.config.getString("monsters.default.min-damage-multiplier")
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addFunction("ceil", CeilFunction())
-        parser.addFunction("floor", FloorFunction())
-        parser.addVariable("level", level.toDouble())
-        parser.parseExpression(expression)
-        return parser.value
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 1.0
+        val expression = expressionService.createExpression(plugin.config.getString("monsters.$entityType.min-damage-multiplier")
+                ?: plugin.config.getString("monsters.default.min-damage-multiplier") ?: return 1.0)
+        return expression.parseDouble(mapOf(
+            "level" to level.toDouble()
+        )) ?: 1.0
     }
 
     fun calculateMonsterMaxDamageMultiplier(entityType: EntityType, level: Int): Double {
-        val expression = plugin.config.getString("monsters.$entityType.max-damage-multiplier")
-                ?: plugin.config.getString("monsters.default.max-damage-multiplier")
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addFunction("ceil", CeilFunction())
-        parser.addFunction("floor", FloorFunction())
-        parser.addVariable("level", level.toDouble())
-        parser.parseExpression(expression)
-        return parser.value
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 1.0
+        val expression = expressionService.createExpression(plugin.config.getString("monsters.$entityType.max-damage-multiplier")
+                ?: plugin.config.getString("monsters.default.max-damage-multiplier") ?: return 1.0)
+        return expression.parseDouble(mapOf(
+            "level" to level.toDouble()
+        )) ?: 1.0
     }
 
     fun setMonsterNameplate(
