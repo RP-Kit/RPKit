@@ -29,6 +29,8 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Location
 import org.bukkit.attribute.Attribute
 import org.bukkit.inventory.ItemStack
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 
 /**
  * Character service implementation.
@@ -63,6 +65,10 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                 oldCharacter.location = bukkitPlayer.location
                 oldCharacter.health = bukkitPlayer.health
                 oldCharacter.foodLevel = bukkitPlayer.foodLevel
+                if (oldCharacter.isDead) {
+                    bukkitPlayer.removePotionEffect(PotionEffectType.BLINDNESS)
+                    bukkitPlayer.removePotionEffect(PotionEffectType.SLOW)
+                }
             }
             updateCharacter(oldCharacter)
         }
@@ -81,6 +87,10 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                 bukkitPlayer.foodLevel = newCharacter.foodLevel
                 if (plugin.config.getBoolean("characters.set-player-display-name")) {
                     bukkitPlayer.setDisplayName(newCharacter.name)
+                }
+                if (newCharacter.isDead) {
+                    bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))
+                    bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 255))
                 }
             }
             newCharacter.minecraftProfile = minecraftProfile

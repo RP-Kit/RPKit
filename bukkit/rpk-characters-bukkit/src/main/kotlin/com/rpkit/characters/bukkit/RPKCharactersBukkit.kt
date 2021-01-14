@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -171,7 +170,10 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
     }
 
     fun registerListeners() {
-        registerListeners(PlayerJoinListener(this), PlayerInteractEntityListener(this), PlayerMoveListener(this))
+        registerListeners(PlayerJoinListener(this), PlayerInteractEntityListener(this))
+        if (config.getBoolean("characters.strict-movement-prevention-when-dead")) {
+            registerListeners(PlayerMoveListener(this))
+        }
         if (config.getBoolean("characters.kill-character-on-death")) {
             registerListeners(PlayerDeathListener(this))
         }

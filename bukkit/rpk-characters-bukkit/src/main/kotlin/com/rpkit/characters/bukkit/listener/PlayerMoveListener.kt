@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +23,6 @@ import org.bukkit.Location
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType.BLINDNESS
 
 /**
  * Player move listener for preventing players from moving about with a dead character.
@@ -42,7 +39,6 @@ class PlayerMoveListener(private val plugin: RPKCharactersBukkit) : Listener {
         if (event.from.blockX == event.to?.blockX && event.from.blockZ == event.to?.blockZ) return
         event.player.teleport(Location(event.from.world, event.from.blockX + 0.5, event.from.blockY + 0.5, event.from.blockZ.toDouble(), event.from.yaw, event.from.pitch))
         event.player.sendMessage(plugin.messages["dead-character"])
-        event.player.addPotionEffect(PotionEffect(BLINDNESS, 60, 1))
     }
 
 }
