@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +19,8 @@ import com.rpkit.core.bukkit.command.sender.resolver.RPKBukkitCommandSenderResol
 import com.rpkit.core.bukkit.messages.CoreMessages
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.bukkit.service.BukkitServicesDelegate
+import com.rpkit.core.expression.RPKExpressionService
+import com.rpkit.core.expression.RPKExpressionServiceImpl
 import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
 
@@ -39,6 +40,7 @@ class RPKCoreBukkit : RPKBukkitPlugin() {
         messages = CoreMessages(this)
 
         Services[RPKBukkitCommandSenderResolutionService::class.java] = RPKBukkitCommandSenderResolutionService(this)
+        Services[RPKExpressionService::class.java] = RPKExpressionServiceImpl(this)
     }
 
 }

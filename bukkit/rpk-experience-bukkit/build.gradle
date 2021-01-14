@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +31,6 @@ dependencies {
     implementation group: "org.spigotmc", name: "spigot-api", version: "1.16.1-R0.1-SNAPSHOT"
     implementation group: "org.bstats", name: "bstats-bukkit", version: "1.7"
     implementation group: "org.jooq", name: "jooq", version: "3.13.2"
-    implementation group: "org.scijava", name: "jep", version: "2.4.2"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
@@ -62,7 +60,6 @@ shadowJar {
         include(dependency("org.reactivestreams:reactive-streams"))
         include(dependency("javax.xml.bind:jaxb-api"))
         include(dependency("javax.activation:javax.activation-api"))
-        include(dependency("org.scijava:jep"))
     }
 
     relocate "kotlin", "com.rpkit.experience.bukkit.shadow.impl.kotlin"
@@ -73,9 +70,6 @@ shadowJar {
     relocate "org.reactivestreams", "com.rpkit.experience.bukkit.shadow.impl.org.reactivestreams"
     relocate "javax.xml.bind", "com.rpkit.experience.bukkit.shadow.impl.javax.xml.bind"
     relocate "javax.activation", "com.rpkit.experience.bukkit.shadow.impl.javax.activation"
-    relocate "org.scijava", "com.rpkit.experience.bukkit.shadow.impl.org.scijava"
-    relocate "org.nfunk", "com.rpkit.experience.bukkit.shadow.impl.org.nfunk"
-    relocate "org.lsmp", "com.rpkit.experience.bukkit.shadow.impl.org.lsmp"
 
 }
 

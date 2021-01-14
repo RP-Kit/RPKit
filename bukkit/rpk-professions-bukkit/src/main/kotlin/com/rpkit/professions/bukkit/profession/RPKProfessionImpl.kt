@@ -15,14 +15,13 @@
 
 package com.rpkit.professions.bukkit.profession
 
+import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityName
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import org.bukkit.Material
-import org.nfunk.jep.JEP
-import kotlin.math.roundToInt
 
 
 class RPKProfessionImpl(
@@ -61,13 +60,11 @@ class RPKProfessionImpl(
     }
 
     override fun getExperienceNeededForLevel(level: Int): Int {
-        val expression = plugin.config.getString("professions.$name.experience.formula")
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addVariable("level", level.toDouble())
-        parser.parseExpression(expression)
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return Int.MAX_VALUE
+        val expression = expressionService.createExpression(plugin.config.getString("professions.$name.experience.formula") ?: return Int.MAX_VALUE)
+        return expression.parseInt(mapOf(
+            "level" to level.toDouble()
+        )) ?: Int.MAX_VALUE
     }
 
     override fun getExperienceFor(action: RPKCraftingAction, material: Material): Int {

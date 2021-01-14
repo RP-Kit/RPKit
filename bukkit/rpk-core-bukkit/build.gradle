@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +59,7 @@ shadowJar {
         include(dependency("org.slf4j:slf4j-api"))
         include(dependency("com.zaxxer:HikariCP"))
         include(dependency("org.flywaydb:flyway-core"))
+        include(dependency("org.scijava:parsington"))
     }
 
 
@@ -74,6 +74,7 @@ shadowJar {
     relocate "org.slf4j", "com.rpkit.core.bukkit.shadow.org.slf4j"
     relocate "com.zaxxer", "com.rpkit.core.bukkit.shadow.com.zaxxer"
     relocate "org.flywaydb", "com.rpkit.core.bukkit.shadow.org.flywaydb"
+    relocate "org.scijava", "com.rpkit.core.bukkit.shadow.org.scijava"
 
 }
 

@@ -16,10 +16,9 @@
 package com.rpkit.monsters.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
-import com.rpkit.monsters.bukkit.jep.CeilFunction
-import com.rpkit.monsters.bukkit.jep.FloorFunction
 import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelService
 import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatServiceImpl
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -32,7 +31,6 @@ import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.nfunk.jep.JEP
 
 
 class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit) : Listener {
@@ -95,53 +93,37 @@ class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit) : List
     }
 
     private fun getPlayerStat(player: Player, type: String, stat: String): Double {
-        val expression = plugin.config.getString("stats.$type.$stat")
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return 0.0
         val characterService = Services[RPKCharacterService::class.java] ?: return 0.0
         val statService = Services[RPKStatService::class.java] ?: return 0.0
         val statVariableService = Services[RPKStatVariableService::class.java] ?: return 0.0
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0.0
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(player) ?: return 0.0
         val character = characterService.getActiveCharacter(minecraftProfile) ?: return 0.0
+        val expression = expressionService.createExpression(plugin.config.getString("stats.$type.$stat") ?: return 0.0)
         val statVariables = statVariableService.statVariables
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addFunction("ceil", CeilFunction())
-        parser.addFunction("floor", FloorFunction())
-        statService.stats.forEach {
-            parser.addVariable(it.name.value, it.get(character, statVariables).toDouble())
-        }
-        parser.parseExpression(expression)
-        return parser.value
+        return expression.parseDouble(statService.stats.map { it.name.value to it.get(character, statVariables) }.toMap()) ?: 0.0
     }
 
     private fun getEntityStat(entity: LivingEntity, type: String, stat: String): Double {
-        val expression = plugin.config.getString("monsters.${entity.type}.stats.$type.$stat")
-                ?: plugin.config.getString("monsters.default.stats.$type.$stat")
         val monsterLevelService = Services[RPKMonsterLevelService::class.java] ?: return 0.0
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addFunction("ceil", CeilFunction())
-        parser.addFunction("floor", FloorFunction())
-        parser.addVariable("level", monsterLevelService.getMonsterLevel(entity).toDouble())
-        parser.addVariable("monsterType", entity.type.toString())
-        parser.parseExpression(expression)
-        return parser.value
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0.0
+        val expression = expressionService.createExpression(plugin.config.getString("monsters.${entity.type}.stats.$type.$stat")
+            ?: plugin.config.getString("monsters.default.stats.$type.$stat") ?: return 0.0)
+        return expression.parseDouble(mapOf(
+            "level" to monsterLevelService.getMonsterLevel(entity).toDouble(),
+            "monsterType" to "\"${entity.type}\""
+        )) ?: 0.0
     }
 
     private fun getDamage(originalDamage: Double, attack: Double, defence: Double): Double {
-        val expression = plugin.config.getString("damage")
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addFunction("ceil", CeilFunction())
-        parser.addFunction("floor", FloorFunction())
-        parser.addVariable("damage", originalDamage)
-        parser.addVariable("attack", attack)
-        parser.addVariable("defence", defence)
-        parser.parseExpression(expression)
-        return parser.value
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0.0
+        val expression = expressionService.createExpression(plugin.config.getString("damage") ?: return 0.0)
+        return expression.parseDouble(mapOf(
+            "damage" to originalDamage,
+            "attack" to attack,
+            "defence" to defence
+        )) ?: 0.0
     }
 
 }

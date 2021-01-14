@@ -16,6 +16,7 @@
 package com.rpkit.statbuilds.bukkit.skillpoint
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.service.Services
 import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import com.rpkit.skills.bukkit.skills.RPKSkillPointService
@@ -23,25 +24,19 @@ import com.rpkit.skills.bukkit.skills.RPKSkillType
 import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
 import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildService
-import org.nfunk.jep.JEP
-import kotlin.math.roundToInt
 
 class RPKSkillPointServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKSkillPointService {
     override fun getSkillPoints(character: RPKCharacter, skillType: RPKSkillType): Int {
-        val expression = plugin.config.getString("skill-points.${skillType.name}")
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
         val statBuildService = Services[RPKStatBuildService::class.java] ?: return 0
         val statAttributeService = Services[RPKStatAttributeService::class.java] ?: return 0
-        statAttributeService
-                .statAttributes
-                .forEach { statAttribute ->
-                    parser.addVariable(statAttribute.name.value, statBuildService.getStatPoints(character, statAttribute).toDouble())
-                }
         val experienceService = Services[RPKExperienceService::class.java] ?: return 0
-        parser.addVariable("level", experienceService.getLevel(character).toDouble())
-        parser.parseExpression(expression)
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
+        val expression = expressionService.createExpression(plugin.config.getString("skill-points.${skillType.name}") ?: return 0)
+        return expression.parseInt(mapOf(
+            "level" to experienceService.getLevel(character).toDouble(),
+            *statAttributeService.statAttributes.map { statAttribute ->
+                statAttribute.name.value to statBuildService.getStatPoints(character, statAttribute).toDouble()
+            }.toTypedArray()
+        )) ?: 0
     }
 }

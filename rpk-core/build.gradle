@@ -1,7 +1,6 @@
 
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +32,7 @@ dependencies {
     implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha1"
     implementation group: "com.zaxxer", name: "HikariCP", version: "3.4.5"
     implementation group: "org.flywaydb", name: "flyway-core", version: "6.5.1"
+    implementation group: "org.scijava", name: "parsington", version: "2.0.0"
 }
 
 artifacts {

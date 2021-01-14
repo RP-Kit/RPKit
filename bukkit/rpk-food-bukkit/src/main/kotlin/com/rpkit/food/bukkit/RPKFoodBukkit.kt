@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +38,9 @@ class RPKFoodBukkit : RPKBukkitPlugin() {
         Metrics(this, 4397)
         saveDefaultConfig()
 
-        Services[RPKExpiryService::class.java] = RPKExpiryServiceImpl(this)
+        val expiryService = RPKExpiryServiceImpl(this)
+        Services[RPKExpiryService::class.java] = expiryService
+        Services[RPKExpiryServiceImpl::class.java] = expiryService
 
         registerListeners()
     }

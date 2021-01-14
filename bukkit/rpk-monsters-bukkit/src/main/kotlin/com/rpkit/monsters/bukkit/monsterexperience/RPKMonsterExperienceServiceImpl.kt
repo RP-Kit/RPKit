@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,30 +15,23 @@
 
 package com.rpkit.monsters.bukkit.monsterexperience
 
+import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
-import com.rpkit.monsters.bukkit.jep.CeilFunction
-import com.rpkit.monsters.bukkit.jep.FloorFunction
 import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelService
 import org.bukkit.entity.LivingEntity
-import org.nfunk.jep.JEP
-import kotlin.math.roundToInt
 
 
 class RPKMonsterExperienceServiceImpl(override val plugin: RPKMonstersBukkit) : RPKMonsterExperienceService {
 
     override fun getExperienceFor(monster: LivingEntity): Int {
-        val entityType = monster.type
-        val expression = plugin.config.getString("monsters.$entityType.experience")
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addFunction("ceil", CeilFunction())
-        parser.addFunction("floor", FloorFunction())
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
         val monsterLevelService = Services[RPKMonsterLevelService::class.java] ?: return 0
-        parser.addVariable("level", monsterLevelService.getMonsterLevel(monster).toDouble())
-        parser.parseExpression(expression)
-        return parser.value.roundToInt()
+        val entityType = monster.type
+        val expression = expressionService.createExpression(plugin.config.getString("monsters.$entityType.experience") ?: return 0)
+        return expression.parseInt(mapOf(
+            "level" to monsterLevelService.getMonsterLevel(monster).toDouble()
+        )) ?: 0
     }
 
 }

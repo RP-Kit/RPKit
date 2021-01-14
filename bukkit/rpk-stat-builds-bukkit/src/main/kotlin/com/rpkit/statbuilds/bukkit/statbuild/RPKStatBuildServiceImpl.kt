@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +16,13 @@
 package com.rpkit.statbuilds.bukkit.statbuild
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.service.Services
 import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
 import com.rpkit.statbuilds.bukkit.database.table.RPKCharacterStatPointsTable
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttribute
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
-import org.nfunk.jep.JEP
-import kotlin.math.roundToInt
 
 class RPKStatBuildServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKStatBuildService {
 
@@ -50,23 +48,19 @@ class RPKStatBuildServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKSta
     }
 
     override fun getMaxStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int {
-        val expression = plugin.config.getString("stat-attributes.${statAttribute.name}.max-points")
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addVariable("level", Services[RPKExperienceService::class.java]?.getLevel(character)?.toDouble() ?: 1.0)
-        parser.parseExpression(expression)
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
+        val expression = expressionService.createExpression(plugin.config.getString("stat-attributes.${statAttribute.name}.max-points") ?: return 0)
+        return expression.parseInt(mapOf(
+            "level" to (Services[RPKExperienceService::class.java]?.getLevel(character)?.toDouble() ?: 1.0)
+        )) ?: 0
     }
 
     override fun getTotalStatPoints(character: RPKCharacter): Int {
-        val expression = plugin.config.getString("stat-attribute-points-formula")
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addVariable("level", Services[RPKExperienceService::class.java]?.getLevel(character)?.toDouble() ?: 1.0)
-        parser.parseExpression(expression)
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
+        val expression = expressionService.createExpression(plugin.config.getString("stat-attribute-points-formula") ?: return 0)
+        return expression.parseInt(mapOf(
+            "level" to (Services[RPKExperienceService::class.java]?.getLevel(character)?.toDouble() ?: 1.0)
+        )) ?: 0
     }
 
     override fun getUnassignedStatPoints(character: RPKCharacter): Int {
