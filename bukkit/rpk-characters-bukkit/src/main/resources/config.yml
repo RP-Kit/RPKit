@@ -28,6 +28,7 @@ characters:
   view-card-requires-sneak: true
   kill-character-on-death: false
   delete-character-on-death: false
+  strict-movement-prevention-when-dead: true
   set-player-display-name: false
   new-character-cooldown: 604800000
 caching:

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +19,17 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
-import org.apache.commons.lang.BooleanUtils
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.BooleanPrompt
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.Prompt
 import org.bukkit.entity.Player
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 
 /**
  * Character set dead command.
@@ -84,12 +88,19 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
             conversationFactory.buildConversation(sender).begin()
             return true
         }
-        val dead = BooleanUtils.toBoolean(args[0])
+        val dead = args[0].toBoolean()
         if (dead && sender.hasPermission("rpkit.characters.command.character.set.dead.yes") || !dead && sender.hasPermission("rpkit.characters.command.character.set.dead.no")) {
             character.isDead = dead
             characterService.updateCharacter(character)
             sender.sendMessage(plugin.messages["character-set-dead-valid"])
             character.showCharacterCard(minecraftProfile)
+            if (dead) {
+                sender.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))
+                sender.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 255))
+            } else {
+                sender.removePotionEffect(PotionEffectType.BLINDNESS)
+                sender.removePotionEffect(PotionEffectType.SLOW)
+            }
         } else {
             sender.sendMessage(plugin.messages["no-permission-character-set-dead-" + if (dead) "yes" else "no"])
             return true
@@ -109,6 +120,13 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
             if (input && conversable.hasPermission("rpkit.characters.command.character.set.dead.yes") || !input && conversable.hasPermission("rpkit.characters.command.character.set.dead.no")) {
                 character.isDead = input
                 characterService.updateCharacter(character)
+                if (input) {
+                    conversable.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))
+                    conversable.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 255))
+                } else {
+                    conversable.removePotionEffect(PotionEffectType.BLINDNESS)
+                    conversable.removePotionEffect(PotionEffectType.SLOW)
+                }
                 return DeadSetPrompt()
             } else {
                 return DeadNotSetNoPermissionPrompt(input)
