@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,11 +124,12 @@ fun ItemStack.withoutLore(lore: List<String>): ItemStack {
  *
  * @return A clone of the [ItemStack] with any lore matching the given [Regex] removed.
  */
-fun ItemStack.withoutLoreMatching(regex: Regex): ItemStack {
+fun ItemStack.withoutLoreMatching(regex: String): ItemStack {
     val newItemStack = clone()
     val meta = newItemStack.itemMeta ?: return newItemStack
-    val metaLore = meta.lore?.filter { loreItem -> !loreItem.matches(regex) } ?: mutableListOf()
+    val metaLore = meta.lore?.filter { loreItem -> !loreItem.matches(Regex(regex)) } ?: mutableListOf()
     meta.lore = metaLore
+    newItemStack.itemMeta = meta
     return newItemStack
 }
 

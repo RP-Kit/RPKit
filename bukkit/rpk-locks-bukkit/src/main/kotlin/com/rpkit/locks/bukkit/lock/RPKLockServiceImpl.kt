@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,7 +119,7 @@ class RPKLockServiceImpl(override val plugin: RPKLocksBukkit) : RPKLockService {
 
     override fun isKey(item: ItemStack): Boolean {
         val key = ItemStack(item)
-                .withoutLoreMatching(Regex("\\w+,-?\\d+,-?\\d+,-?\\d+"))
+                .withoutLoreMatching("\\w+,-?\\d+,-?\\d+,-?\\d+")
         return key.isSimilar(keyItem)
     }
 

@@ -137,9 +137,7 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
             val characterId = result.get(RPKIT_BLOCK_CHANGE.CHARACTER_ID)
             val character = if (characterId == null) null else characterService.getCharacter(RPKCharacterId(characterId))
             val fromMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM))
-                    ?: Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM), true)
             val toMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO))
-                    ?: Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO), true)
             if (fromMaterial == null || toMaterial == null) {
                 database.create
                         .deleteFrom(RPKIT_BLOCK_CHANGE)

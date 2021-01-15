@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +28,7 @@ if (propertiesFile.exists()) {
 dependencies {
     implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.4.21"
     implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.4.21"
-    implementation group: "org.spigotmc", name: "spigot-api", version: "1.16.1-R0.1-SNAPSHOT"
+    implementation group: "org.spigotmc", name: "spigot-api", version: "1.16.4-R0.1-SNAPSHOT"
     implementation group: "org.bstats", name: "bstats-bukkit", version: "1.7"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")

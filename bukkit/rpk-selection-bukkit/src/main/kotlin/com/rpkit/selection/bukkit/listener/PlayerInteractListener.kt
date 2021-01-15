@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +51,7 @@ class PlayerInteractListener(private val plugin: RPKSelectionBukkit) : Listener 
                     selection.world = clickedBlock.world
                     selection.point1 = clickedBlock
                     selectionService.updateSelection(selection)
-                    event.player.sendMessage(plugin.messages["wand_primary", mapOf(
+                    event.player.sendMessage(plugin.messages["wand-primary", mapOf(
                             Pair("world", clickedBlock.world.name),
                             Pair("x", clickedBlock.x.toString()),
                             Pair("y", clickedBlock.y.toString()),
@@ -64,11 +63,11 @@ class PlayerInteractListener(private val plugin: RPKSelectionBukkit) : Listener 
                         selection.world = clickedBlock.world
                         selection.point2 = clickedBlock
                         selectionService.updateSelection(selection)
-                        event.player.sendMessage(plugin.messages["wand_secondary", mapOf(
-                                Pair("world", clickedBlock.world.name),
-                                Pair("x", clickedBlock.x.toString()),
-                                Pair("y", clickedBlock.y.toString()),
-                                Pair("z", clickedBlock.z.toString())
+                        event.player.sendMessage(plugin.messages["wand-secondary", mapOf(
+                            "world" to clickedBlock.world.name,
+                            "x" to clickedBlock.x.toString(),
+                            "y" to clickedBlock.y.toString(),
+                            "z" to clickedBlock.z.toString()
                         )])
                     }
                 }

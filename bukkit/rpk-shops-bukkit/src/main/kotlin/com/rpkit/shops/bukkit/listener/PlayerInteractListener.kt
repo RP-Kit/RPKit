@@ -66,7 +66,6 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
                 val amount = state.getLine(1).split(Regex("\\s+"))[1].toInt()
                 val materialName = state.getLine(1).split(Regex("\\s+"))[2]
                 val material = Material.matchMaterial(materialName)
-                        ?: Material.matchMaterial(materialName, true)
                 if (material == null) {
                     event.player.sendMessage(plugin.messages["shop-material-invalid"])
                     return
