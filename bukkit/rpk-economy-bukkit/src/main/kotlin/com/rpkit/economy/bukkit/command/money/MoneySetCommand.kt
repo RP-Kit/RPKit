@@ -31,6 +31,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import org.bukkit.conversations.Conversable
 import org.bukkit.conversations.ConversationContext
 import org.bukkit.conversations.ConversationFactory
 import org.bukkit.conversations.MessagePrompt
@@ -62,10 +63,6 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
 
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
-            return true
-        }
         if (!sender.hasPermission("rpkit.economy.command.money.set")) {
             sender.sendMessage(plugin.messages["no-permission-money-set"])
             return true
@@ -90,47 +87,51 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-currency-service"])
             return true
         }
-        val fromMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
-        if (fromMinecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-            return true
-        }
-        val fromCharacter = characterService.getActiveCharacter(fromMinecraftProfile)
-        if (fromCharacter == null) {
-            sender.sendMessage(plugin.messages["no-character"])
-            return true
-        }
         if (args.isEmpty()) {
-            conversationFactory.buildConversation(sender).begin()
+            if (sender is Conversable) {
+                val conversation = conversationFactory.buildConversation(sender)
+                conversation.context.setSessionData("characterService", characterService)
+                conversation.begin()
+            } else {
+                sender.sendMessage(plugin.messages["not-from-console"])
+            }
             return true
         }
-        val toBukkitPlayer = plugin.server.getPlayer(args[0])
-        if (toBukkitPlayer == null) {
+        val bukkitPlayer = plugin.server.getPlayer(args[0])
+        if (bukkitPlayer == null) {
             sender.sendMessage(plugin.messages["money-set-profile-invalid-profile"])
             return true
         }
-        val toMinecraftProfile = minecraftProfileService.getMinecraftProfile(toBukkitPlayer)
-        if (toMinecraftProfile == null) {
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val toProfile = toMinecraftProfile.profile
-        if (toProfile !is RPKProfile) {
+        val profile = minecraftProfile.profile
+        if (profile !is RPKProfile) {
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
         if (args.size <= 1) {
-            conversationFactory.buildConversation(sender).begin()
+            if (sender is Conversable) {
+                conversationFactory.buildConversation(sender).begin()
+            } else {
+                sender.sendMessage(plugin.messages["not-from-console"])
+            }
             return true
         }
-        val character = characterService.getCharacters(toProfile)
+        val character = characterService.getCharacters(profile)
                 .firstOrNull { character -> character.name.startsWith(args[1]) }
         if (character == null) {
             sender.sendMessage(plugin.messages["money-set-character-invalid-character"])
             return true
         }
         if (args.size <= 2) {
-            conversationFactory.buildConversation(sender).begin()
+            if (sender is Conversable) {
+                conversationFactory.buildConversation(sender).begin()
+            } else {
+                sender.sendMessage(plugin.messages["not-from-console"])
+            }
             return true
         }
         val currency = currencyService.getCurrency(RPKCurrencyName(args[2]))
@@ -139,7 +140,11 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             return true
         }
         if (args.size <= 3) {
-            conversationFactory.buildConversation(sender).begin()
+            if (sender is Conversable) {
+                conversationFactory.buildConversation(sender).begin()
+            } else {
+                sender.sendMessage(plugin.messages["not-from-console"])
+            }
             return true
         }
         try {

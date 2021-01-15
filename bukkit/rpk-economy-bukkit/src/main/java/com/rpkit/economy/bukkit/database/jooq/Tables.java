@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +19,6 @@
 package com.rpkit.economy.bukkit.database.jooq;
 
 
-import com.rpkit.economy.bukkit.database.jooq.tables.RpkitCurrency;
 import com.rpkit.economy.bukkit.database.jooq.tables.RpkitMoneyHidden;
 import com.rpkit.economy.bukkit.database.jooq.tables.RpkitWallet;
 
@@ -30,11 +28,6 @@ import com.rpkit.economy.bukkit.database.jooq.tables.RpkitWallet;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
-
-    /**
-     * The table <code>rpkit_economy.rpkit_currency</code>.
-     */
-    public static final RpkitCurrency RPKIT_CURRENCY = RpkitCurrency.RPKIT_CURRENCY;
 
     /**
      * The table <code>rpkit_economy.rpkit_money_hidden</code>.

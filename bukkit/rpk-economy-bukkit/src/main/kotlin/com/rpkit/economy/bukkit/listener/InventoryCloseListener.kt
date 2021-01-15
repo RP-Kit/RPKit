@@ -44,23 +44,13 @@ class InventoryCloseListener : Listener {
                 ?: return
         val amount = event.inventory.contents
                 .filter { item ->
-                    item != null
-                            && item.type === currency.material
-                            && item.hasItemMeta()
-                            && item.itemMeta?.hasDisplayName() == true
-                            && item.itemMeta?.displayName == currency.nameSingular
+                    item != null && item.isSimilar(currency.item)
                 }
                 .map { item -> item.amount }
                 .sum()
         event.inventory.contents
                 .filter { item ->
-                    item != null
-                            && (
-                            item.type !== currency.material
-                                    || !item.hasItemMeta()
-                                    || item.itemMeta?.hasDisplayName() == false
-                                    || item.itemMeta?.displayName != currency.nameSingular
-                            )
+                    item != null && !item.isSimilar(currency.item)
                 }
                 .forEach { item ->
                     bukkitPlayer.world.dropItem(bukkitPlayer.location, item)

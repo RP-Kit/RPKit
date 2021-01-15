@@ -16,7 +16,6 @@
 package com.rpkit.economy.bukkit.currency
 
 import com.rpkit.core.service.Service
-import org.bukkit.Material
 
 /**
  * Provides currency related operations.
@@ -37,15 +36,6 @@ interface RPKCurrencyService : Service {
     val defaultCurrency: RPKCurrency?
 
     /**
-     * Gets a currency by ID.
-     * If there is no currency with the given ID, null is returned.
-     *
-     * @param id The ID of the currency
-     * @return The currency, or null if there is no currency with the given ID
-     */
-    fun getCurrency(id: RPKCurrencyId): RPKCurrency?
-
-    /**
      * Gets a currency by name.
      * If there is no currency with the given name, null is returned.
      *
@@ -53,35 +43,5 @@ interface RPKCurrencyService : Service {
      * @return The currency, or null if there is no currency with the given name
      */
     fun getCurrency(name: RPKCurrencyName): RPKCurrency?
-
-    /**
-     * Adds a currency.
-     *
-     * @param currency The currency to add
-     */
-    fun addCurrency(currency: RPKCurrency)
-
-    fun createCurrency(
-        name: RPKCurrencyName,
-        nameSingular: String,
-        namePlural: String,
-        rate: Double,
-        defaultAmount: Int,
-        material: Material
-    ): RPKCurrency
-
-    /**
-     * Removes a currency.
-     *
-     * @param currency The currency to remove
-     */
-    fun removeCurrency(currency: RPKCurrency)
-
-    /**
-     * Updates a currency.
-     *
-     * @param currency The currency to update
-     */
-    fun updateCurrency(currency: RPKCurrency)
 
 }

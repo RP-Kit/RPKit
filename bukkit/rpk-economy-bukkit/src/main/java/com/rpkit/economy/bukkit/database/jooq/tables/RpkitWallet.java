@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,12 +22,22 @@ package com.rpkit.economy.bukkit.database.jooq.tables;
 import com.rpkit.economy.bukkit.database.jooq.Keys;
 import com.rpkit.economy.bukkit.database.jooq.RpkitEconomy;
 import com.rpkit.economy.bukkit.database.jooq.tables.records.RpkitWalletRecord;
-import org.jooq.*;
-import org.jooq.impl.DSL;
-import org.jooq.impl.TableImpl;
 
 import java.util.Arrays;
 import java.util.List;
+
+import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.Name;
+import org.jooq.Record;
+import org.jooq.Row3;
+import org.jooq.Schema;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.TableOptions;
+import org.jooq.UniqueKey;
+import org.jooq.impl.DSL;
+import org.jooq.impl.TableImpl;
 
 
 /**
@@ -37,7 +46,7 @@ import java.util.List;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitWallet extends TableImpl<RpkitWalletRecord> {
 
-    private static final long serialVersionUID = 294387822;
+    private static final long serialVersionUID = 189994429;
 
     /**
      * The reference instance of <code>rpkit_economy.rpkit_wallet</code>
@@ -58,9 +67,9 @@ public class RpkitWallet extends TableImpl<RpkitWalletRecord> {
     public final TableField<RpkitWalletRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_economy.rpkit_wallet.currency_id</code>.
+     * The column <code>rpkit_economy.rpkit_wallet.currency_name</code>.
      */
-    public final TableField<RpkitWalletRecord, Integer> CURRENCY_ID = createField(DSL.name("currency_id"), org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<RpkitWalletRecord, String> CURRENCY_NAME = createField(DSL.name("currency_name"), org.jooq.impl.SQLDataType.VARCHAR(256).nullable(false), this, "");
 
     /**
      * The column <code>rpkit_economy.rpkit_wallet.balance</code>.
@@ -146,7 +155,7 @@ public class RpkitWallet extends TableImpl<RpkitWalletRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row3<Integer, Integer, Integer> fieldsRow() {
+    public Row3<Integer, String, Integer> fieldsRow() {
         return (Row3) super.fieldsRow();
     }
 }

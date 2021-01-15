@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +17,7 @@ CREATE TABLE `rpkit_auction`
 (
     `id`                    integer primary key     NOT NULL,
     `item`                  blob    NOT NULL,
-    `currency_id`           int     NOT NULL,
+    `currency_name`         varchar(256)     NOT NULL,
     `world`                 varchar(256) DEFAULT NULL,
     `x`                     double       DEFAULT NULL,
     `y`                     double       DEFAULT NULL,

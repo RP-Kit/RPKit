@@ -129,7 +129,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                 val rateChange = plugin.config.getDouble("dynamic-exchanges.rate-change")
                 rate -= rateChange
                 val newToAmount = Math.round(fromAmount.toDouble() / rate)
-                sign.setLine(3, "$newToAmount ${toCurrency.name}")
+                sign.setLine(3, "$newToAmount ${toCurrency.name.value}")
                 sign.update()
                 event.player.sendMessage(plugin.messages["exchange-valid", mapOf(
                     "from_amount" to fromAmount.toString(),
@@ -178,7 +178,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
             val rateChange = plugin.config.getDouble("dynamic-exchanges.rate-change")
             rate += rateChange
             val newToAmount = Math.round(fromAmount.toDouble() / rate)
-            sign.setLine(3, "$newToAmount ${toCurrency.name}")
+            sign.setLine(3, "$newToAmount ${toCurrency.name.value}")
             sign.update()
             event.player.sendMessage(plugin.messages["exchange-valid", mapOf(
                 "from_amount" to fromAmount.toString(),

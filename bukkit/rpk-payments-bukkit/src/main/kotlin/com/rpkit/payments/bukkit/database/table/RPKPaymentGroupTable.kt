@@ -18,7 +18,7 @@ package com.rpkit.payments.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
-import com.rpkit.economy.bukkit.currency.RPKCurrencyId
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.database.create
@@ -55,7 +55,7 @@ class RPKPaymentGroupTable(
                         RPKIT_PAYMENT_GROUP,
                         RPKIT_PAYMENT_GROUP.NAME,
                         RPKIT_PAYMENT_GROUP.AMOUNT,
-                        RPKIT_PAYMENT_GROUP.CURRENCY_ID,
+                        RPKIT_PAYMENT_GROUP.CURRENCY_NAME,
                         RPKIT_PAYMENT_GROUP.INTERVAL,
                         RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME,
                         RPKIT_PAYMENT_GROUP.BALANCE
@@ -63,7 +63,7 @@ class RPKPaymentGroupTable(
                 .values(
                         entity.name.value,
                         entity.amount,
-                        entity.currency?.id?.value,
+                        entity.currency?.name?.value,
                         entity.interval.toMillis(),
                         entity.lastPaymentTime,
                         entity.balance
@@ -80,7 +80,7 @@ class RPKPaymentGroupTable(
                 .update(RPKIT_PAYMENT_GROUP)
                 .set(RPKIT_PAYMENT_GROUP.NAME, entity.name.value)
                 .set(RPKIT_PAYMENT_GROUP.AMOUNT, entity.amount)
-                .set(RPKIT_PAYMENT_GROUP.CURRENCY_ID, entity.currency?.id?.value)
+                .set(RPKIT_PAYMENT_GROUP.CURRENCY_NAME, entity.currency?.name?.value)
                 .set(RPKIT_PAYMENT_GROUP.INTERVAL, entity.interval.toMillis())
                 .set(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME, entity.lastPaymentTime)
                 .set(RPKIT_PAYMENT_GROUP.BALANCE, entity.balance)
@@ -97,7 +97,7 @@ class RPKPaymentGroupTable(
                     .select(
                             RPKIT_PAYMENT_GROUP.NAME,
                             RPKIT_PAYMENT_GROUP.AMOUNT,
-                            RPKIT_PAYMENT_GROUP.CURRENCY_ID,
+                            RPKIT_PAYMENT_GROUP.CURRENCY_NAME,
                             RPKIT_PAYMENT_GROUP.INTERVAL,
                             RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME,
                             RPKIT_PAYMENT_GROUP.BALANCE
@@ -106,8 +106,8 @@ class RPKPaymentGroupTable(
                     .where(RPKIT_PAYMENT_GROUP.ID.eq(id.value))
                     .fetchOne()
             val currencyService = Services[RPKCurrencyService::class.java] ?: return null
-            val currencyId = result.get(RPKIT_PAYMENT_GROUP.CURRENCY_ID)
-            val currency = if (currencyId == null) null else currencyService.getCurrency(RPKCurrencyId(currencyId))
+            val currencyName = result.get(RPKIT_PAYMENT_GROUP.CURRENCY_NAME)
+            val currency = if (currencyName == null) null else currencyService.getCurrency(RPKCurrencyName(currencyName))
             val paymentGroup = RPKPaymentGroupImpl(
                     plugin,
                     id,

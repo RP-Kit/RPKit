@@ -31,7 +31,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
-import org.bukkit.inventory.ItemStack
 
 
 class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
@@ -67,7 +66,8 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
                     if (currency != null) {
                         val amount = getMoney(event.entity, currency)
                         if (amount > 0) {
-                            val coins = ItemStack(currency.material, amount)
+                            val coins = currency.item.clone()
+                            coins.amount = amount
                             val meta = coins.itemMeta ?: plugin.server.itemFactory.getItemMeta(coins.type) ?: return
                             meta.setDisplayName(currency.nameSingular)
                             coins.itemMeta = meta
@@ -87,7 +87,7 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
 
     private fun getMoney(entity: LivingEntity, currency: RPKCurrency): Int {
         val expressionService = Services[RPKExpressionService::class.java] ?: return 0
-        val expression = expressionService.createExpression(plugin.config.getString("monsters.${entity.type}.money.${currency.name}", plugin.config.getString("monsters.default.money.${currency.name}")) ?: return 0)
+        val expression = expressionService.createExpression(plugin.config.getString("monsters.${entity.type}.money.${currency.name.value}", plugin.config.getString("monsters.default.money.${currency.name.value}")) ?: return 0)
         return expression.parseInt(mapOf(
             "level" to (Services[RPKMonsterLevelService::class.java]?.getMonsterLevel(entity)?.toDouble() ?: 1.0)
         )) ?: 0

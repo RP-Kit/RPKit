@@ -15,79 +15,42 @@
 
 package com.rpkit.economy.bukkit.currency
 
+import com.rpkit.core.bukkit.util.withDisplayName
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
-import com.rpkit.economy.bukkit.database.table.RPKCurrencyTable
-import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyCreateEvent
-import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyDeleteEvent
-import com.rpkit.economy.bukkit.event.currency.RPKBukkitCurrencyUpdateEvent
-import org.bukkit.Material
+import org.bukkit.Material.GOLD_NUGGET
+import org.bukkit.inventory.ItemStack
 
 /**
  * Currency service implementation.
  */
 class RPKCurrencyServiceImpl(override val plugin: RPKEconomyBukkit) : RPKCurrencyService {
 
-    override fun getCurrency(id: RPKCurrencyId): RPKCurrency? {
-        return plugin.database.getTable(RPKCurrencyTable::class.java)[id.value]
-    }
-
-    override fun getCurrency(name: RPKCurrencyName): RPKCurrency? {
-        return plugin.database.getTable(RPKCurrencyTable::class.java)[name.value]
-    }
-
-    override val currencies: Collection<RPKCurrency>
-        get() = plugin.database.getTable(RPKCurrencyTable::class.java).getAll()
-
-    override fun addCurrency(currency: RPKCurrency) {
-        val event = RPKBukkitCurrencyCreateEvent(currency)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKCurrencyTable::class.java).insert(event.currency)
-    }
-
-    override fun createCurrency(
-        name: RPKCurrencyName,
-        nameSingular: String,
-        namePlural: String,
-        rate: Double,
-        defaultAmount: Int,
-        material: Material
-    ): RPKCurrency {
-        val currency = RPKCurrencyImpl(
-            null,
-            name,
-            nameSingular,
-            namePlural,
-            rate,
-            defaultAmount,
-            material
-        )
-        addCurrency(currency)
-        return currency
-    }
-
-    override fun removeCurrency(currency: RPKCurrency) {
-        val event = RPKBukkitCurrencyDeleteEvent(currency)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKCurrencyTable::class.java).delete(event.currency)
-    }
-
-    override fun updateCurrency(currency: RPKCurrency) {
-        val event = RPKBukkitCurrencyUpdateEvent(currency)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKCurrencyTable::class.java).update(event.currency)
-    }
+    override val currencies: List<RPKCurrency> = plugin.config.getConfigurationSection("currencies")
+        ?.getKeys(false)
+        ?.map { currencyName ->
+            RPKCurrencyImpl(
+                RPKCurrencyName(currencyName),
+                plugin.config.getString("currencies.$currencyName.name-singular") ?: currencyName,
+                plugin.config.getString("currencies.$currencyName.name-plural") ?: currencyName,
+                plugin.config.getDouble("currencies.$currencyName.rate"),
+                plugin.config.getInt("currencies.$currencyName.default-amount"),
+                plugin.config.getItemStack("currencies.$currencyName.item") ?: ItemStack(GOLD_NUGGET).withDisplayName(currencyName)
+            )
+        }
+        ?: emptyList()
 
     override val defaultCurrency: RPKCurrency?
         get() {
-            val currencyName = plugin.config.getString("currency.default")
+            val currencyName = plugin.config.getString("default-currency")
             return if (currencyName != null)
                 getCurrency(RPKCurrencyName(currencyName))
             else
                 null
         }
+
+    override fun getCurrency(name: RPKCurrencyName): RPKCurrency? {
+        return currencies.firstOrNull { it.name.value.equals(name.value, ignoreCase = true) }
+    }
 
 
 }
