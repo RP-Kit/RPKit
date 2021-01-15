@@ -40,7 +40,6 @@ class RPKDrinkServiceImpl(override val plugin: RPKDrinksBukkit) : RPKDrinkServic
                         ?.forEach { item ->
                             recipe.addIngredient(plugin.config.getInt("drinks.$name.recipe.$item"),
                                     Material.matchMaterial(item)
-                                            ?: Material.matchMaterial(item, true)
                                             ?: throw IllegalArgumentException("Invalid material $item in recipe for $name")
                             )
                         }

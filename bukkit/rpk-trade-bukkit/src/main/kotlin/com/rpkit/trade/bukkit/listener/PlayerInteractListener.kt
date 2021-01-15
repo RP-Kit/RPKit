@@ -46,8 +46,6 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
         if (sign.getLine(0) != "$GREEN[trader]") return
         val material = Material.matchMaterial(sign.getLine(1))
                 ?: Material.matchMaterial(sign.getLine(1).replace(Regex("\\d+\\s+"), ""))
-                ?: Material.matchMaterial(sign.getLine(1), true)
-                ?: Material.matchMaterial(sign.getLine(1).replace(Regex("\\d+\\s+"), ""), true)
         if (material == null) {
             event.player.sendMessage(plugin.messages["trader-material-invalid"])
             return

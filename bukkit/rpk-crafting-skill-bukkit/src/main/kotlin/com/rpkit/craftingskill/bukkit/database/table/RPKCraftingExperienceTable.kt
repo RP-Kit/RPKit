@@ -97,7 +97,7 @@ class RPKCraftingExperienceTable(private val database: Database, private val plu
                     val action = result[RPKIT_CRAFTING_EXPERIENCE.ACTION]?.let(RPKCraftingAction::valueOf)
                             ?: return@mapNotNull null
                     val material = result[RPKIT_CRAFTING_EXPERIENCE.MATERIAL]?.let {
-                        Material.matchMaterial(it) ?: Material.matchMaterial(it, true)
+                        Material.matchMaterial(it)
                     } ?: return@mapNotNull null
                     val experience = result[RPKIT_CRAFTING_EXPERIENCE.EXPERIENCE]
                     RPKCraftingExperienceValue(

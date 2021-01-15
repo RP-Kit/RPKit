@@ -1,19 +1,21 @@
 lock-item:
   ==: org.bukkit.inventory.ItemStack
+  v: 2584
   type: IRON_INGOT
   meta:
     ==: ItemMeta
     meta-type: UNSPECIFIC
-    display-name: Lock
+    display-name: '{"extra":[{"text":"Lock"}],"text":""}'
     lore:
-    - Used for locking chests
+      - '{"extra":[{"text":"Used for locking chests"}],"text":""}'
 key-item:
   ==: org.bukkit.inventory.ItemStack
+  v: 2584
   type: IRON_INGOT
   meta:
     ==: ItemMeta
     meta-type: UNSPECIFIC
-    display-name: Key
+    display-name: '{"extra":[{"text":"Key"}],"text":""}'
 caching:
   rpkit_keyring:
     character_id:
