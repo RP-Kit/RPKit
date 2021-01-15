@@ -112,15 +112,10 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
             bukkitPlayer.sendMessage(plugin.messages["no-character"])
             return
         }
-        val wallet = plugin.server.createInventory(null, 27, "Wallet [" + currency.name + "]")
-        val coin = ItemStack(currency.material)
-        val meta = coin.itemMeta ?: plugin.server.itemFactory.getItemMeta(coin.type) ?: return
-        meta.setDisplayName(currency.nameSingular)
-        coin.itemMeta = meta
-        val coinStack = ItemStack(currency.material, 64)
-        val stackMeta = coinStack.itemMeta ?: plugin.server.itemFactory.getItemMeta(coinStack.type) ?: return
-        stackMeta.setDisplayName(currency.nameSingular)
-        coinStack.itemMeta = stackMeta
+        val wallet = plugin.server.createInventory(null, 27, "Wallet [" + currency.name.value + "]")
+        val coin = currency.item
+        val coinStack = ItemStack(coin)
+        coinStack.amount = 64
         val remainder = (economyService.getBalance(character, currency) % 64)
         var i = 0
         while (i < economyService.getBalance(character, currency)) {

@@ -1,7 +1,55 @@
 payments:
   maximum-distance: 8
-currency:
-  default: null
+currencies:
+  gold:
+    name-singular: Gold
+    name-plural: Gold
+    rate: 1
+    default-amount: 0
+    item:
+      ==: org.bukkit.inventory.ItemStack
+      v: 2584
+      type: GOLD_NUGGET
+      amount: 1
+      meta:
+        ==: ItemMeta
+        meta-type: UNSPECIFIC
+        display-name: '{"extra":[{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"gold","text":"Gold Piece"}],"text":""}'
+        lore:
+          - '{"extra":[{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"yellow","text":"A gold piece with the face of the monarch on one side and a picture of an apple tree on the other"}],"text":""}'
+  silver:
+    name-singular: Silver
+    name-plural: Silver
+    rate: 100
+    default-amount: 0
+    item:
+      ==: org.bukkit.inventory.ItemStack
+      v: 2584
+      type: IRON_NUGGET
+      amount: 1
+      meta:
+        ==: ItemMeta
+        meta-type: UNSPECIFIC
+        display-name: '{"extra":[{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"gray","text":"Silver Piece"}],"text":""}'
+        lore:
+          - '{"extra":[{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"white","text":"A silver piece with the face of the princess on one side and a picture of an orange tree on the other"}],"text":""}'
+  copper:
+    name-singular: Copper
+    name-plural: Copper
+    rate: 10000
+    default-amount: 100
+    item:
+      ==: org.bukkit.inventory.ItemStack
+      v: 2584
+      type: GOLD_NUGGET
+      amount: 64
+      meta:
+        ==: ItemMeta
+        meta-type: UNSPECIFIC
+        display-name: '{"extra":[{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"dark_red","text":"Copper Piece"}],"text":""}'
+        lore:
+          - '{"extra":[{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"red","text":"A copper piece with the face of the prince on one side and a picture of a lemon tree on the other"}],"text":""}'
+default-currency: copper
 dynamic-exchanges:
   rate-change: 0.01
 caching:

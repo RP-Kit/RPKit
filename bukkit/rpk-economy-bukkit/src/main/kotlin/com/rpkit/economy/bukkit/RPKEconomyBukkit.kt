@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +29,6 @@ import com.rpkit.economy.bukkit.command.money.MoneyPayCommand
 import com.rpkit.economy.bukkit.command.money.MoneyWalletCommand
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.currency.RPKCurrencyServiceImpl
-import com.rpkit.economy.bukkit.database.table.RPKCurrencyTable
 import com.rpkit.economy.bukkit.database.table.RPKMoneyHiddenTable
 import com.rpkit.economy.bukkit.database.table.RPKWalletTable
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
@@ -103,7 +101,6 @@ class RPKEconomyBukkit : RPKBukkitPlugin() {
                 ),
                 classLoader
         )
-        database.addTable(RPKCurrencyTable(database, this))
         database.addTable(RPKWalletTable(database, this))
         database.addTable(RPKMoneyHiddenTable(database, this))
 

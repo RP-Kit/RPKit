@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +18,7 @@ CREATE TABLE `rpkit_payment_group`
     `id`                int          NOT NULL AUTO_INCREMENT,
     `name`              varchar(256) NOT NULL,
     `amount`            int          NOT NULL,
-    `currency_id`       int                   DEFAULT NULL,
+    `currency_name`     varchar(256)          DEFAULT NULL,
     `interval`          bigint(20)   NOT NULL,
     `last_payment_time` timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `balance`           int          NOT NULL,

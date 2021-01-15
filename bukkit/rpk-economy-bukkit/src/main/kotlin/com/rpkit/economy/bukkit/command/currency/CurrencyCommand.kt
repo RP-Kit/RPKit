@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,24 +26,18 @@ import org.bukkit.command.CommandSender
  */
 class CurrencyCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
 
-    private val currencyAddCommand = CurrencyAddCommand(plugin)
-    private val currencyRemoveCommand = CurrencyRemoveCommand(plugin)
     private val currencyListCommand = CurrencyListCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
-            if (args[0].equals("add", ignoreCase = true) || args[0].equals("create", ignoreCase = true) || args[0].equals("new", ignoreCase = true)) {
-                return currencyAddCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("remove", ignoreCase = true) || args[0].equals("delete", ignoreCase = true)) {
-                return currencyRemoveCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("list", ignoreCase = true)) {
+            if (args[0].equals("list", ignoreCase = true)) {
                 return currencyListCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.messages["currency-usage"])
+                sender.sendMessage(plugin.messages.currencyUsage)
             }
         } else {
-            sender.sendMessage(plugin.messages["currency-usage"])
+            sender.sendMessage(plugin.messages.currencyUsage)
         }
         return true
     }

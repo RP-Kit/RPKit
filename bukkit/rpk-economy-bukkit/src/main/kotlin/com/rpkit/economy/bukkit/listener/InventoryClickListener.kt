@@ -35,11 +35,7 @@ class InventoryClickListener(private val plugin: RPKEconomyBukkit) : Listener {
             ) ?: return
             val item = event.cursor ?: return
             if (item.type == AIR) return
-            if (item.type == currency.material
-                    && item.hasItemMeta()
-                    && item.itemMeta?.hasDisplayName() != false
-                    && item.itemMeta?.displayName == currency.nameSingular
-            ) return
+            if (item.isSimilar(currency.item)) return
             if (event.clickedInventory == event.view.topInventory) {
                 event.isCancelled = true
             }

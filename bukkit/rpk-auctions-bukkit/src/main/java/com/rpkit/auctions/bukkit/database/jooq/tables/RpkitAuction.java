@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +47,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitAuction extends TableImpl<RpkitAuctionRecord> {
 
-    private static final long serialVersionUID = 1036407403;
+    private static final long serialVersionUID = 172930628;
 
     /**
      * The reference instance of <code>rpkit_auctions.rpkit_auction</code>
@@ -74,39 +73,39 @@ public class RpkitAuction extends TableImpl<RpkitAuctionRecord> {
     public final TableField<RpkitAuctionRecord, byte[]> ITEM = createField(DSL.name("item"), org.jooq.impl.SQLDataType.BLOB.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_auctions.rpkit_auction.currency_id</code>.
+     * The column <code>rpkit_auctions.rpkit_auction.currency_name</code>.
      */
-    public final TableField<RpkitAuctionRecord, Integer> CURRENCY_ID = createField(DSL.name("currency_id"), org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<RpkitAuctionRecord, String> CURRENCY_NAME = createField(DSL.name("currency_name"), org.jooq.impl.SQLDataType.VARCHAR(256).nullable(false), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.world</code>.
      */
-    public final TableField<RpkitAuctionRecord, String> WORLD = createField(DSL.name("world"), org.jooq.impl.SQLDataType.VARCHAR(256), this, "");
+    public final TableField<RpkitAuctionRecord, String> WORLD = createField(DSL.name("world"), org.jooq.impl.SQLDataType.VARCHAR(256).defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.x</code>.
      */
-    public final TableField<RpkitAuctionRecord, Double> X = createField(DSL.name("x"), org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<RpkitAuctionRecord, Double> X = createField(DSL.name("x"), org.jooq.impl.SQLDataType.DOUBLE.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.y</code>.
      */
-    public final TableField<RpkitAuctionRecord, Double> Y = createField(DSL.name("y"), org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<RpkitAuctionRecord, Double> Y = createField(DSL.name("y"), org.jooq.impl.SQLDataType.DOUBLE.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.z</code>.
      */
-    public final TableField<RpkitAuctionRecord, Double> Z = createField(DSL.name("z"), org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<RpkitAuctionRecord, Double> Z = createField(DSL.name("z"), org.jooq.impl.SQLDataType.DOUBLE.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.yaw</code>.
      */
-    public final TableField<RpkitAuctionRecord, Double> YAW = createField(DSL.name("yaw"), org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<RpkitAuctionRecord, Double> YAW = createField(DSL.name("yaw"), org.jooq.impl.SQLDataType.DOUBLE.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.pitch</code>.
      */
-    public final TableField<RpkitAuctionRecord, Double> PITCH = createField(DSL.name("pitch"), org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<RpkitAuctionRecord, Double> PITCH = createField(DSL.name("pitch"), org.jooq.impl.SQLDataType.DOUBLE.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.character_id</code>.
@@ -131,12 +130,12 @@ public class RpkitAuction extends TableImpl<RpkitAuctionRecord> {
     /**
      * The column <code>rpkit_auctions.rpkit_auction.buy_out_price</code>.
      */
-    public final TableField<RpkitAuctionRecord, Integer> BUY_OUT_PRICE = createField(DSL.name("buy_out_price"), org.jooq.impl.SQLDataType.INTEGER, this, "");
+    public final TableField<RpkitAuctionRecord, Integer> BUY_OUT_PRICE = createField(DSL.name("buy_out_price"), org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.no_sell_price</code>.
      */
-    public final TableField<RpkitAuctionRecord, Integer> NO_SELL_PRICE = createField(DSL.name("no_sell_price"), org.jooq.impl.SQLDataType.INTEGER, this, "");
+    public final TableField<RpkitAuctionRecord, Integer> NO_SELL_PRICE = createField(DSL.name("no_sell_price"), org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.minimum_bid_increment</code>.
@@ -232,7 +231,7 @@ public class RpkitAuction extends TableImpl<RpkitAuctionRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row17<Integer, byte[], Integer, String, Double, Double, Double, Double, Double, Integer, Long, Long, Integer, Integer, Integer, Integer, Boolean> fieldsRow() {
+    public Row17<Integer, byte[], String, String, Double, Double, Double, Double, Double, Integer, Long, Long, Integer, Integer, Integer, Integer, Boolean> fieldsRow() {
         return (Row17) super.fieldsRow();
     }
 }

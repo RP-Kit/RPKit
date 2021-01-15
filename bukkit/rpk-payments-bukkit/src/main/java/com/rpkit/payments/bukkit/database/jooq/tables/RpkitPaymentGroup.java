@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +48,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitPaymentGroup extends TableImpl<RpkitPaymentGroupRecord> {
 
-    private static final long serialVersionUID = -1139237891;
+    private static final long serialVersionUID = 7566123;
 
     /**
      * The reference instance of <code>rpkit_payments.rpkit_payment_group</code>
@@ -80,9 +79,9 @@ public class RpkitPaymentGroup extends TableImpl<RpkitPaymentGroupRecord> {
     public final TableField<RpkitPaymentGroupRecord, Integer> AMOUNT = createField(DSL.name("amount"), org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_payments.rpkit_payment_group.currency_id</code>.
+     * The column <code>rpkit_payments.rpkit_payment_group.currency_name</code>.
      */
-    public final TableField<RpkitPaymentGroupRecord, Integer> CURRENCY_ID = createField(DSL.name("currency_id"), org.jooq.impl.SQLDataType.INTEGER, this, "");
+    public final TableField<RpkitPaymentGroupRecord, String> CURRENCY_NAME = createField(DSL.name("currency_name"), org.jooq.impl.SQLDataType.VARCHAR(256).defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>rpkit_payments.rpkit_payment_group.interval</code>.
@@ -92,7 +91,7 @@ public class RpkitPaymentGroup extends TableImpl<RpkitPaymentGroupRecord> {
     /**
      * The column <code>rpkit_payments.rpkit_payment_group.last_payment_time</code>.
      */
-    public final TableField<RpkitPaymentGroupRecord, LocalDateTime> LAST_PAYMENT_TIME = createField(DSL.name("last_payment_time"), org.jooq.impl.SQLDataType.LOCALDATETIME.nullable(false).defaultValue(DSL.field("CURRENT_TIMESTAMP", org.jooq.impl.SQLDataType.LOCALDATETIME)), this, "");
+    public final TableField<RpkitPaymentGroupRecord, LocalDateTime> LAST_PAYMENT_TIME = createField(DSL.name("last_payment_time"), org.jooq.impl.SQLDataType.LOCALDATETIME.nullable(false).defaultValue(org.jooq.impl.DSL.field("current_timestamp()", org.jooq.impl.SQLDataType.LOCALDATETIME)), this, "");
 
     /**
      * The column <code>rpkit_payments.rpkit_payment_group.balance</code>.
@@ -183,7 +182,7 @@ public class RpkitPaymentGroup extends TableImpl<RpkitPaymentGroupRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row7<Integer, String, Integer, Integer, Long, LocalDateTime, Integer> fieldsRow() {
+    public Row7<Integer, String, Integer, String, Long, LocalDateTime, Integer> fieldsRow() {
         return (Row7) super.fieldsRow();
     }
 }

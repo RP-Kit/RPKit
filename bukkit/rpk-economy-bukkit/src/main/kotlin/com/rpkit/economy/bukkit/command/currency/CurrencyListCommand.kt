@@ -30,19 +30,19 @@ class CurrencyListCommand(private val plugin: RPKEconomyBukkit) : CommandExecuto
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (!sender.hasPermission("rpkit.economy.command.currency.list")) {
-            sender.sendMessage(plugin.messages["no-permission-currency-list"])
+            sender.sendMessage(plugin.messages.noPermissionCurrencyList)
             return true
         }
         val currencyService = Services[RPKCurrencyService::class.java]
         if (currencyService == null) {
-            sender.sendMessage(plugin.messages["no-currency-service"])
+            sender.sendMessage(plugin.messages.noCurrencyService)
             return true
         }
-        sender.sendMessage(plugin.messages["currency-list-title"])
+        sender.sendMessage(plugin.messages.currencyListTitle)
         for (currency in currencyService.currencies) {
-            sender.sendMessage(plugin.messages["currency-list-item", mapOf(
-                "currency" to currency.name.value
-            )])
+            sender.sendMessage(plugin.messages.currencyListItem.withParameters(
+                currency = currency
+            ))
         }
         return true
     }

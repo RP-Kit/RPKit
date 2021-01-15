@@ -15,17 +15,16 @@
 
 package com.rpkit.economy.bukkit.currency
 
-import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
 
 /**
  * Currency implementation.
  */
 class RPKCurrencyImpl(
-        override var id: RPKCurrencyId? = null,
-        override var name: RPKCurrencyName,
-        override var nameSingular: String,
-        override var namePlural: String,
-        override var rate: Double,
-        override var defaultAmount: Int,
-        override var material: Material
+        override val name: RPKCurrencyName,
+        override val nameSingular: String,
+        override val namePlural: String,
+        override val rate: Double,
+        override val defaultAmount: Int,
+        override val item: ItemStack
 ) : RPKCurrency

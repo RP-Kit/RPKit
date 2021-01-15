@@ -30,7 +30,7 @@ import com.rpkit.core.bukkit.util.toItemStack
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
-import com.rpkit.economy.bukkit.currency.RPKCurrencyId
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.Location
 
@@ -54,13 +54,13 @@ class RPKAuctionTable(
     }
 
     fun insert(entity: RPKAuction) {
-        val currencyId = entity.currency.id ?: return
+        val currencyName = entity.currency.name
         val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_AUCTION,
                         RPKIT_AUCTION.ITEM,
-                        RPKIT_AUCTION.CURRENCY_ID,
+                        RPKIT_AUCTION.CURRENCY_NAME,
                         RPKIT_AUCTION.WORLD,
                         RPKIT_AUCTION.X,
                         RPKIT_AUCTION.Y,
@@ -78,7 +78,7 @@ class RPKAuctionTable(
                 )
                 .values(
                         entity.item.toByteArray(),
-                        currencyId.value,
+                        currencyName.value,
                         entity.location?.world?.name,
                         entity.location?.x,
                         entity.location?.y,
@@ -102,12 +102,12 @@ class RPKAuctionTable(
 
     fun update(entity: RPKAuction) {
         val id = entity.id ?: return
-        val currencyId = entity.currency.id ?: return
+        val currencyName = entity.currency.name
         val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_AUCTION)
                 .set(RPKIT_AUCTION.ITEM, entity.item.toByteArray())
-                .set(RPKIT_AUCTION.CURRENCY_ID, currencyId.value)
+                .set(RPKIT_AUCTION.CURRENCY_NAME, currencyName.value)
                 .set(RPKIT_AUCTION.WORLD, entity.location?.world?.name)
                 .set(RPKIT_AUCTION.X, entity.location?.x)
                 .set(RPKIT_AUCTION.Y, entity.location?.y)
@@ -134,7 +134,7 @@ class RPKAuctionTable(
             val result = database.create
                     .select(
                             RPKIT_AUCTION.ITEM,
-                            RPKIT_AUCTION.CURRENCY_ID,
+                            RPKIT_AUCTION.CURRENCY_NAME,
                             RPKIT_AUCTION.WORLD,
                             RPKIT_AUCTION.X,
                             RPKIT_AUCTION.Y,
@@ -154,8 +154,8 @@ class RPKAuctionTable(
                     .where(RPKIT_AUCTION.ID.eq(id.value))
                     .fetchOne() ?: return null
             val currencyService = Services[RPKCurrencyService::class.java] ?: return null
-            val currencyId = result.get(RPKIT_AUCTION.CURRENCY_ID)
-            val currency = currencyService.getCurrency(RPKCurrencyId(currencyId))
+            val currencyName = result.get(RPKIT_AUCTION.CURRENCY_NAME)
+            val currency = currencyService.getCurrency(RPKCurrencyName(currencyName))
             val characterService = Services[RPKCharacterService::class.java] ?: return null
             val characterId = result.get(RPKIT_AUCTION.CHARACTER_ID)
             val character = characterService.getCharacter(RPKCharacterId(characterId))

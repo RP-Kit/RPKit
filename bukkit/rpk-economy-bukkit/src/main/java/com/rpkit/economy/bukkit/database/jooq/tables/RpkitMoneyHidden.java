@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,7 +46,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitMoneyHidden extends TableImpl<RpkitMoneyHiddenRecord> {
 
-    private static final long serialVersionUID = 1673682434;
+    private static final long serialVersionUID = -1805181091;
 
     /**
      * The reference instance of <code>rpkit_economy.rpkit_money_hidden</code>
@@ -112,7 +111,7 @@ public class RpkitMoneyHidden extends TableImpl<RpkitMoneyHiddenRecord> {
 
     @Override
     public List<UniqueKey<RpkitMoneyHiddenRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitMoneyHiddenRecord>>asList(Keys.KEY_RPKIT_MONEY_HIDDEN_PRIMARY, Keys.KEY_RPKIT_MONEY_HIDDEN_RPKIT_MONEY_HIDDEN_CHARACTER_ID_UINDEX);
+        return Arrays.<UniqueKey<RpkitMoneyHiddenRecord>>asList(Keys.KEY_RPKIT_MONEY_HIDDEN_PRIMARY);
     }
 
     @Override

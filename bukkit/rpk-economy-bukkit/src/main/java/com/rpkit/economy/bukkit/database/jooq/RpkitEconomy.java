@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +19,6 @@
 package com.rpkit.economy.bukkit.database.jooq;
 
 
-import com.rpkit.economy.bukkit.database.jooq.tables.RpkitCurrency;
 import com.rpkit.economy.bukkit.database.jooq.tables.RpkitMoneyHidden;
 import com.rpkit.economy.bukkit.database.jooq.tables.RpkitWallet;
 
@@ -38,17 +36,12 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitEconomy extends SchemaImpl {
 
-    private static final long serialVersionUID = 764102330;
+    private static final long serialVersionUID = 1431527188;
 
     /**
      * The reference instance of <code>rpkit_economy</code>
      */
     public static final RpkitEconomy RPKIT_ECONOMY = new RpkitEconomy();
-
-    /**
-     * The table <code>rpkit_economy.rpkit_currency</code>.
-     */
-    public final RpkitCurrency RPKIT_CURRENCY = RpkitCurrency.RPKIT_CURRENCY;
 
     /**
      * The table <code>rpkit_economy.rpkit_money_hidden</code>.
@@ -76,7 +69,6 @@ public class RpkitEconomy extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.<Table<?>>asList(
-            RpkitCurrency.RPKIT_CURRENCY,
             RpkitMoneyHidden.RPKIT_MONEY_HIDDEN,
             RpkitWallet.RPKIT_WALLET);
     }

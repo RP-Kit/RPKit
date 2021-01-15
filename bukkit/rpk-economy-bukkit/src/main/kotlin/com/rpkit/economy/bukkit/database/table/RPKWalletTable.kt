@@ -37,7 +37,7 @@ class RPKWalletTable(
 
     private data class CharacterCurrencyCacheKey(
         val characterId: Int,
-        val currencyId: Int
+        val currencyName: String
     )
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_wallet.character_id.enabled")) {
@@ -53,39 +53,39 @@ class RPKWalletTable(
 
     fun insert(entity: RPKWallet) {
         val characterId = entity.character.id ?: return
-        val currencyId = entity.currency.id ?: return
+        val currencyName = entity.currency.name
         database.create
                 .insertInto(
                         RPKIT_WALLET,
                         RPKIT_WALLET.CHARACTER_ID,
-                        RPKIT_WALLET.CURRENCY_ID,
+                        RPKIT_WALLET.CURRENCY_NAME,
                         RPKIT_WALLET.BALANCE
                 )
                 .values(
                     characterId.value,
-                    currencyId.value,
+                    currencyName.value,
                     entity.balance
                 )
                 .execute()
-        cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyId.value), entity)
+        cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
     }
 
     fun update(entity: RPKWallet) {
         val characterId = entity.character.id ?: return
-        val currencyId = entity.currency.id ?: return
+        val currencyName = entity.currency.name
         database.create
                 .update(RPKIT_WALLET)
                 .set(RPKIT_WALLET.BALANCE, entity.balance)
                 .where(RPKIT_WALLET.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_WALLET.CURRENCY_ID.eq(currencyId.value))
+                .and(RPKIT_WALLET.CURRENCY_NAME.eq(currencyName.value))
                 .execute()
-        cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyId.value), entity)
+        cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
     }
 
     fun get(character: RPKCharacter, currency: RPKCurrency): RPKWallet? {
         val characterId = character.id ?: return null
-        val currencyId = currency.id ?: return null
-        val cacheKey = CharacterCurrencyCacheKey(characterId.value, currencyId.value)
+        val currencyName = currency.name
+        val cacheKey = CharacterCurrencyCacheKey(characterId.value, currencyName.value)
         if (cache?.containsKey(cacheKey) == true) {
             return cache[cacheKey]
         }
@@ -93,7 +93,7 @@ class RPKWalletTable(
                 .select(RPKIT_WALLET.BALANCE)
                 .from(RPKIT_WALLET)
                 .where(RPKIT_WALLET.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_WALLET.CURRENCY_ID.eq(currencyId.value))
+                .and(RPKIT_WALLET.CURRENCY_NAME.eq(currencyName.value))
                 .fetchOne() ?: return null
         val wallet = RPKWallet(
                 character,
@@ -105,14 +105,14 @@ class RPKWalletTable(
     }
 
     fun getTop(amount: Int = 5, currency: RPKCurrency): List<RPKWallet> {
-        val currencyId = currency.id ?: return emptyList()
+        val currencyName = currency.name
         val results = database.create
                 .select(
                         RPKIT_WALLET.CHARACTER_ID,
                         RPKIT_WALLET.BALANCE
                 )
                 .from(RPKIT_WALLET)
-                .where(RPKIT_WALLET.CURRENCY_ID.eq(currencyId.value))
+                .where(RPKIT_WALLET.CURRENCY_NAME.eq(currencyName.value))
                 .orderBy(RPKIT_WALLET.BALANCE.desc())
                 .limit(amount)
                 .fetch()
@@ -126,20 +126,20 @@ class RPKWalletTable(
                             currency,
                             result[RPKIT_WALLET.BALANCE]
                     )
-                    cache?.set(CharacterCurrencyCacheKey(characterId, currencyId.value), wallet)
+                    cache?.set(CharacterCurrencyCacheKey(characterId, currencyName.value), wallet)
                     return@mapNotNull wallet
                 }
     }
 
     fun delete(entity: RPKWallet) {
         val characterId = entity.character.id ?: return
-        val currencyId = entity.currency.id ?: return
+        val currencyName = entity.currency.name
         database.create
                 .deleteFrom(RPKIT_WALLET)
                 .where(RPKIT_WALLET.CHARACTER_ID.eq(characterId.value))
-                .and(RPKIT_WALLET.CURRENCY_ID.eq(currencyId.value))
+                .and(RPKIT_WALLET.CURRENCY_NAME.eq(currencyName.value))
                 .execute()
-        cache?.remove(CharacterCurrencyCacheKey(characterId.value, currencyId.value))
+        cache?.remove(CharacterCurrencyCacheKey(characterId.value, currencyName.value))
     }
 
 }

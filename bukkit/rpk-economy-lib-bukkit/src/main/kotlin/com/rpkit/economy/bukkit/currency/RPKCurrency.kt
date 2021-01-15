@@ -15,7 +15,7 @@
 
 package com.rpkit.economy.bukkit.currency
 
-import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
 import kotlin.math.floor
 
 /**
@@ -24,43 +24,36 @@ import kotlin.math.floor
 interface RPKCurrency {
 
     /**
-     * The ID of the currency.
-     * Guaranteed to be unique.
-     * Null if not yet inserted into the database.
-     */
-    var id: RPKCurrencyId?
-
-    /**
      * The name of the currency.
      */
-    var name: RPKCurrencyName
+    val name: RPKCurrencyName
 
     /**
      * The singular form of the name of the currency.
      * Used when referring to one of the currency.
      */
-    var nameSingular: String
+    val nameSingular: String
 
     /**
      * The plural form of the currency.
      * Used when referring to anything except one of the currency.
      */
-    var namePlural: String
+    val namePlural: String
 
     /**
      * The rate of conversion of the currency.
      */
-    var rate: Double
+    val rate: Double
 
     /**
      * The default amount of the currency owned by characters upon starting.
      */
-    var defaultAmount: Int
+    val defaultAmount: Int
 
     /**
      * The material used to represent the currency as a physical item.
      */
-    var material: Material
+    val item: ItemStack
 
     /**
      * Converts an amount of the currency to another currency.
