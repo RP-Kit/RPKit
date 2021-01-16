@@ -32,7 +32,7 @@ dependencies {
     implementation group: "org.bstats", name: "bstats-bukkit", version: "1.7"
     implementation group: "org.jooq", name: "jooq", version: "3.13.2"
     implementation group: "org.kohsuke", name: "github-api", version: "1.112"
-    implementation group: "org.slf4j", name: "slf4j-jdk14", version: "1.7.30"
+    implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha1"
     implementation platform("org.http4k:http4k-bom:3.285.2")
     implementation group: "org.http4k", name: "http4k-core"
     implementation group: "org.http4k", name: "http4k-server-jetty"
@@ -108,6 +108,8 @@ shadowJar {
     relocate "org.eclipse", "com.rpkit.players.bukkit.shadow.impl.org.eclipse"
     relocate "org.slf4j", "com.rpkit.players.bukkit.shadow.impl.org.slf4j"
     relocate "com.google", "com.rpkit.players.bukkit.shadow.impl.com.google"
+
+    mergeServiceFiles()
 
 }
 

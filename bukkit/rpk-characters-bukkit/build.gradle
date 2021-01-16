@@ -35,6 +35,7 @@ dependencies {
     implementation group: "org.http4k", name: "http4k-core"
     implementation group: "org.http4k", name: "http4k-server-jetty"
     implementation group: "org.http4k", name: "http4k-format-gson"
+    implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha1"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
@@ -96,6 +97,8 @@ shadowJar {
     relocate "org.eclipse", "com.rpkit.characters.bukkit.shadow.impl.org.eclipse"
     relocate "org.slf4j", "com.rpkit.characters.bukkit.shadow.impl.org.slf4j"
     relocate "com.google", "com.rpkit.characters.bukkit.shadow.impl.com.google"
+
+    mergeServiceFiles()
 
 }
 

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +20,6 @@ import com.rpkit.core.caching.RPKCacheManagerImpl
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
-import java.util.logging.Logger
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
@@ -33,16 +31,22 @@ import kotlin.reflect.KClass
  * @property migrationProperties The database migration properties
  */
 class Database(
-        val connectionProperties: DatabaseConnectionProperties,
-        val migrationProperties: DatabaseMigrationProperties,
-        val classLoader: ClassLoader
+    val connectionProperties: DatabaseConnectionProperties,
+    private val migrationProperties: DatabaseMigrationProperties,
+    flywayClassLoader: ClassLoader
 ) {
+
+    companion object {
+        lateinit var hikariClassLoader: ClassLoader
+    }
 
     val dataSource: DataSource
     private val tables: MutableMap<KClass<out Table>, Table> = mutableMapOf()
     val cacheManager: RPKCacheManager
 
     init {
+        val oldClassLoader = Thread.currentThread().contextClassLoader
+        Thread.currentThread().contextClassLoader = hikariClassLoader
         val hikariConfig = HikariConfig()
         hikariConfig.jdbcUrl = connectionProperties.url
         if (connectionProperties.username != null) {
@@ -54,8 +58,7 @@ class Database(
         hikariConfig.maximumPoolSize = connectionProperties.maximumPoolSize
         hikariConfig.minimumIdle = connectionProperties.minimumIdle
         dataSource = HikariDataSource(hikariConfig)
-        val oldClassLoader = Thread.currentThread().contextClassLoader
-        Thread.currentThread().contextClassLoader = classLoader
+        Thread.currentThread().contextClassLoader = flywayClassLoader
         val flyway = Flyway.configure().dataSource(dataSource)
                 .locations("classpath:${migrationProperties.location}")
                 .table(migrationProperties.schemaHistoryTable)

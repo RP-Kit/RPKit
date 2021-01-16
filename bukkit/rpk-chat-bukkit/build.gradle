@@ -35,7 +35,7 @@ dependencies {
     implementation(group: "net.dv8tion", name: "JDA", version: "4.1.1_155") {
         exclude module: "opus-java"
     }
-    implementation group: "org.slf4j", name: "slf4j-jdk14", version: "1.7.30"
+    implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha1"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
@@ -103,6 +103,8 @@ shadowJar {
     relocate "javax.xml.bind", "com.rpkit.chat.bukkit.shadow.impl.javax.xml.bind"
     relocate "javax.activation", "com.rpkit.chat.bukkit.shadow.impl.javax.activation"
     relocate "org.pircbotx", "com.rpkit.chat.bukkit.shadow.impl.org.pircbotx"
+
+    mergeServiceFiles()
 
 }
 
