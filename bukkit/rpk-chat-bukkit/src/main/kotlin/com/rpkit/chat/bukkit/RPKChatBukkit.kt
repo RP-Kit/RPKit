@@ -188,6 +188,13 @@ class RPKChatBukkit : RPKBukkitPlugin() {
         database.addTable(RPKLastUsedChatGroupTable(database, this))
         database.addTable(RPKSnooperTable(database, this))
 
+        // Class loader needs to be the plugin's class loader in order for ServiceLoader in slf4j to be able to find
+        // the SLF4JLoggerProvider implementation, as the remapped slf4j-jdk14 is loaded by the plugin's class loader
+        // and isn't accessible outside of that for whatever reason.
+        // Both JDA and PircBotX make use of slf4j for logging, so load the IRC and Discord services with the plugin
+        // class loader instead of the server's, before switching back to the normal class loader.
+        val oldClassLoader = Thread.currentThread().contextClassLoader
+        Thread.currentThread().contextClassLoader = classLoader
         if (config.getBoolean("irc.enabled")) {
             Services[RPKIRCService::class.java] = RPKIRCServiceImpl(this)
         }
@@ -195,6 +202,7 @@ class RPKChatBukkit : RPKBukkitPlugin() {
         if (config.getBoolean("discord.enabled")) {
             Services[RPKDiscordService::class.java] = RPKDiscordServiceImpl(this)
         }
+        Thread.currentThread().contextClassLoader = oldClassLoader
 
         val prefixService = RPKPrefixServiceImpl(this)
         Services[RPKPrefixService::class.java] = prefixService

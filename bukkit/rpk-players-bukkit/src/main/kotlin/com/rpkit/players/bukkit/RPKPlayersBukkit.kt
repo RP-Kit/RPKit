@@ -34,16 +34,16 @@ import com.rpkit.players.bukkit.database.table.RPKProfileTable
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
 import com.rpkit.players.bukkit.listener.PlayerLoginListener
 import com.rpkit.players.bukkit.messages.PlayersMessages
-import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileServiceImpl
-import com.rpkit.players.bukkit.profile.github.RPKGitHubProfileServiceImpl
-import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileServiceImpl
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileServiceImpl
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.RPKProfileServiceImpl
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
+import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileServiceImpl
 import com.rpkit.players.bukkit.profile.github.RPKGitHubProfileService
+import com.rpkit.players.bukkit.profile.github.RPKGitHubProfileServiceImpl
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileServiceImpl
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileServiceImpl
 import com.rpkit.players.bukkit.web.PlayersWebAPI
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.FileConfiguration
@@ -134,7 +134,10 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
 
         saveDefaultWebConfig()
         if (getWebConfig().getBoolean("enabled")) {
-            thread { PlayersWebAPI(this).start() }
+            thread(
+                name = "RPKit Players Web API thread",
+                contextClassLoader = classLoader
+            ) { PlayersWebAPI(this).start() }
         }
     }
 

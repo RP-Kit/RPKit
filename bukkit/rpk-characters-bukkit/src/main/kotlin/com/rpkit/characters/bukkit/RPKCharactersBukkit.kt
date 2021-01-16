@@ -160,7 +160,10 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
 
         saveDefaultWebConfig()
         if (getWebConfig().getBoolean("enabled")) {
-            thread { CharactersWebAPI(this).start() }
+            thread(
+                name = "RPKit Characters Web API thread",
+                contextClassLoader = classLoader
+            ) { CharactersWebAPI(this).start() }
         }
     }
 

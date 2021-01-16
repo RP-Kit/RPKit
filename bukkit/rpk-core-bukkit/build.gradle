@@ -70,11 +70,13 @@ shadowJar {
     relocate "com.mysql", "com.rpkit.core.bukkit.shadow.com.mysql"
     relocate "com.google.protobuf", "com.rpkit.core.bukkit.shadow.com.google.protobuf"
     relocate "google.protobuf", "com.rpkit.core.bukkit.shadow.google.protobuf"
-    relocate "org.sqlite", "com.rpkit.core.bukkit.shadow.org.sqlite"
+    // relocate "org.sqlite", "com.rpkit.core.bukkit.shadow.org.sqlite" // This includes native libraries which are broken by relocation
     relocate "org.slf4j", "com.rpkit.core.bukkit.shadow.org.slf4j"
     relocate "com.zaxxer", "com.rpkit.core.bukkit.shadow.com.zaxxer"
     relocate "org.flywaydb", "com.rpkit.core.bukkit.shadow.org.flywaydb"
     relocate "org.scijava", "com.rpkit.core.bukkit.shadow.org.scijava"
+
+    mergeServiceFiles()
 
 }
 

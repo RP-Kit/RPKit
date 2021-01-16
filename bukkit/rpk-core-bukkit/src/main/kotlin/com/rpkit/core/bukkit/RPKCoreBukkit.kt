@@ -19,6 +19,7 @@ import com.rpkit.core.bukkit.command.sender.resolver.RPKBukkitCommandSenderResol
 import com.rpkit.core.bukkit.messages.CoreMessages
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.bukkit.service.BukkitServicesDelegate
+import com.rpkit.core.database.Database
 import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.expression.RPKExpressionServiceImpl
 import com.rpkit.core.service.Services
@@ -36,6 +37,7 @@ class RPKCoreBukkit : RPKBukkitPlugin() {
         Metrics(this, 4371)
         Services.delegate = BukkitServicesDelegate()
         saveDefaultConfig()
+        Database.hikariClassLoader = classLoader
 
         messages = CoreMessages(this)
 

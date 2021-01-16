@@ -86,7 +86,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                     }
                     messageComponents.add(textComponent)
                 }
-                if (matcher.group() == "\$channel") {
+                if (matcher.group() == "\${channel}") {
                     val chatChannelComponent = TextComponent(chatChannel.name.value)
                     chatChannelComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/chatchannel ${chatChannel.name.value}")
                     chatChannelComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to talk in ${chatChannel.name.value}"))
@@ -101,7 +101,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                         chatChannelComponent.isItalic = chatFormat == ChatColor.ITALIC
                     }
                     messageComponents.add(chatChannelComponent)
-                } else if (matcher.group() == "\$mute") {
+                } else if (matcher.group() == "\${mute}") {
                     if (chatChannel.listenerMinecraftProfiles.any { listenerMinecraftProfile ->
                                 listenerMinecraftProfile.id == minecraftProfile.id
                             }) {
