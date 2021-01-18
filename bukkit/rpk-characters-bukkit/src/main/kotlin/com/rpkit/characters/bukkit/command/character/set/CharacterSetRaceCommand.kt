@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +17,7 @@ package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -97,7 +97,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             sender.sendMessage(plugin.messages["no-race-service"])
             return true
         }
-        val race = raceService.getRace(raceBuilder.toString())
+        val race = raceService.getRace(RPKRaceName(raceBuilder.toString()))
         if (race == null) {
             sender.sendMessage(plugin.messages["character-set-race-invalid-race"])
             return true
@@ -112,7 +112,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
     private inner class RacePrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return Services[RPKRaceService::class.java]?.getRace(input) != null
+            return Services[RPKRaceService::class.java]?.getRace(RPKRaceName(input)) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
@@ -123,7 +123,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             val raceService = Services[RPKRaceService::class.java] ?: return RaceSetPrompt()
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return RaceSetPrompt()
             val character = characterService.getActiveCharacter(minecraftProfile) ?: return RaceSetPrompt()
-            character.race = raceService.getRace(input)!!
+            character.race = raceService.getRace(RPKRaceName(input))!!
             characterService.updateCharacter(character)
             return RaceSetPrompt()
         }
@@ -137,7 +137,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             val raceListBuilder = StringBuilder()
             for (race in raceService.races) {
                 raceListBuilder.append(plugin.messages["race-list-item", mapOf(
-                    "race" to race.name
+                    "race" to race.name.value
                 )]).append('\n')
             }
             return plugin.messages["character-set-race-prompt"] + "\n" + raceListBuilder.toString()

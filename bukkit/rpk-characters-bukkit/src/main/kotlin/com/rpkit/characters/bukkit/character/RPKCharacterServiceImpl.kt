@@ -22,6 +22,7 @@ import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterDeleteEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterSwitchEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterUpdateEvent
 import com.rpkit.characters.bukkit.race.RPKRace
+import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -149,7 +150,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
             gender ?: plugin.config.getString("characters.defaults.gender"),
             age ?: plugin.config.getInt("characters.defaults.age"),
             race ?: plugin.config.getString("characters.defaults.race")
-                ?.let { Services[RPKRaceService::class.java]?.getRace(it) },
+                ?.let { Services[RPKRaceService::class.java]?.getRace(RPKRaceName(it)) },
             description ?: plugin.config.getString("characters.defaults.description") ?: "",
             isDead ?: plugin.config.getBoolean("characters.defaults.dead"),
             location ?: plugin.server.worlds[0].spawnLocation,

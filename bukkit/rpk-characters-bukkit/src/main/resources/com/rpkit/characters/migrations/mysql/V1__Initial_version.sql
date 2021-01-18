@@ -21,7 +21,7 @@ CREATE TABLE `rpkit_character`
     `name`                 varchar(256)  NOT NULL,
     `gender`               varchar(256) DEFAULT NULL,
     `age`                  int           NOT NULL,
-    `race_id`              int          DEFAULT NULL,
+    `race_name`            varchar(256) DEFAULT NULL,
     `description`          varchar(2048) NOT NULL,
     `dead`                 boolean       NOT NULL,
     `world`                varchar(256)  NOT NULL,
@@ -55,11 +55,4 @@ CREATE TABLE `rpkit_new_character_cooldown`
     `profile_id`         int      NOT NULL,
     `cooldown_timestamp` datetime NOT NULL,
     PRIMARY KEY (`profile_id`)
-);
-
-CREATE TABLE `rpkit_race`
-(
-    `id`   int          NOT NULL AUTO_INCREMENT,
-    `name` varchar(256) NOT NULL,
-    PRIMARY KEY (`id`)
 );

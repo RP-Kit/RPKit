@@ -38,7 +38,6 @@ import com.rpkit.characters.bukkit.command.character.CharacterCommand
 import com.rpkit.characters.bukkit.command.race.RaceCommand
 import com.rpkit.characters.bukkit.database.table.RPKCharacterTable
 import com.rpkit.characters.bukkit.database.table.RPKNewCharacterCooldownTable
-import com.rpkit.characters.bukkit.database.table.RPKRaceTable
 import com.rpkit.characters.bukkit.listener.PlayerDeathListener
 import com.rpkit.characters.bukkit.listener.PlayerInteractEntityListener
 import com.rpkit.characters.bukkit.listener.PlayerJoinListener
@@ -125,7 +124,6 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
                 ),
                 classLoader
         )
-        database.addTable(RPKRaceTable(database, this))
         database.addTable(RPKCharacterTable(database, this))
         database.addTable(RPKNewCharacterCooldownTable(database, this))
 

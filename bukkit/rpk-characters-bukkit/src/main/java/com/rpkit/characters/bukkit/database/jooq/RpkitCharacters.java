@@ -21,7 +21,6 @@ package com.rpkit.characters.bukkit.database.jooq;
 
 import com.rpkit.characters.bukkit.database.jooq.tables.RpkitCharacter;
 import com.rpkit.characters.bukkit.database.jooq.tables.RpkitNewCharacterCooldown;
-import com.rpkit.characters.bukkit.database.jooq.tables.RpkitRace;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +36,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitCharacters extends SchemaImpl {
 
-    private static final long serialVersionUID = -930078648;
+    private static final long serialVersionUID = -540681200;
 
     /**
      * The reference instance of <code>rpkit_characters</code>
@@ -53,11 +52,6 @@ public class RpkitCharacters extends SchemaImpl {
      * The table <code>rpkit_characters.rpkit_new_character_cooldown</code>.
      */
     public final RpkitNewCharacterCooldown RPKIT_NEW_CHARACTER_COOLDOWN = RpkitNewCharacterCooldown.RPKIT_NEW_CHARACTER_COOLDOWN;
-
-    /**
-     * The table <code>rpkit_characters.rpkit_race</code>.
-     */
-    public final RpkitRace RPKIT_RACE = RpkitRace.RPKIT_RACE;
 
     /**
      * No further instances allowed
@@ -76,7 +70,6 @@ public class RpkitCharacters extends SchemaImpl {
     public final List<Table<?>> getTables() {
         return Arrays.<Table<?>>asList(
             RpkitCharacter.RPKIT_CHARACTER,
-            RpkitNewCharacterCooldown.RPKIT_NEW_CHARACTER_COOLDOWN,
-            RpkitRace.RPKIT_RACE);
+            RpkitNewCharacterCooldown.RPKIT_NEW_CHARACTER_COOLDOWN);
     }
 }

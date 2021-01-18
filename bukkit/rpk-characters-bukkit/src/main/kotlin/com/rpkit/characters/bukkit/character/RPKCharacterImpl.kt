@@ -19,6 +19,7 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
 import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
 import com.rpkit.characters.bukkit.race.RPKRace
+import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -37,35 +38,35 @@ import org.bukkit.inventory.ItemStack
  * Character implementation.
  */
 class RPKCharacterImpl(
-        val plugin: RPKCharactersBukkit,
-        override var id: RPKCharacterId? = null,
-        override var profile: RPKProfile? = null,
-        override var minecraftProfile: RPKMinecraftProfile? = null,
-        name: String = plugin.config.getString("characters.defaults.name") ?: "",
-        override var gender: String? = plugin.config.getString("characters.defaults.gender"),
-        override var age: Int = plugin.config.getInt("characters.defaults.age"),
-        override var race: RPKRace? = plugin.config.getString("characters.defaults.race")
-            ?.let { Services[RPKRaceService::class.java]?.getRace(it) },
-        description: String = plugin.config.getString("characters.defaults.description") ?: "",
-        dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
-        override var location: Location = Bukkit.getWorlds()[0].spawnLocation,
-        override var inventoryContents: Array<ItemStack> = (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack>).toTypedArray(),
-        override var helmet: ItemStack? = plugin.config.getItemStack("characters.defaults.helmet"),
-        override var chestplate: ItemStack? = plugin.config.getItemStack("characters.defaults.chestplate"),
-        override var leggings: ItemStack? = plugin.config.getItemStack("characters.defaults.leggings"),
-        override var boots: ItemStack? = plugin.config.getItemStack("characters.defaults.boots"),
-        override var health: Double = plugin.config.getDouble("characters.defaults.health"),
-        override var maxHealth: Double = plugin.config.getDouble("characters.defaults.max-health"),
-        override var mana: Int = plugin.config.getInt("characters.defaults.mana"),
-        override var maxMana: Int = plugin.config.getInt("characters.defaults.max-mana"),
-        override var foodLevel: Int = plugin.config.getInt("characters.defaults.food-level"),
-        override var thirstLevel: Int = plugin.config.getInt("characters.defaults.thirst-level"),
-        override var isProfileHidden: Boolean = plugin.config.getBoolean("characters.defaults.profile-hidden"),
-        override var isNameHidden: Boolean = plugin.config.getBoolean("characters.defaults.name-hidden"),
-        override var isGenderHidden: Boolean = plugin.config.getBoolean("characters.defaults.gender-hidden"),
-        override var isAgeHidden: Boolean = plugin.config.getBoolean("characters.defaults.age-hidden"),
-        override var isRaceHidden: Boolean = plugin.config.getBoolean("characters.defaults.race-hidden"),
-        override var isDescriptionHidden: Boolean = plugin.config.getBoolean("characters.defaults.description-hidden")
+    val plugin: RPKCharactersBukkit,
+    override var id: RPKCharacterId? = null,
+    override var profile: RPKProfile? = null,
+    override var minecraftProfile: RPKMinecraftProfile? = null,
+    name: String = plugin.config.getString("characters.defaults.name") ?: "",
+    override var gender: String? = plugin.config.getString("characters.defaults.gender"),
+    override var age: Int = plugin.config.getInt("characters.defaults.age"),
+    override var race: RPKRace? = plugin.config.getString("characters.defaults.race")
+            ?.let { Services[RPKRaceService::class.java]?.getRace(RPKRaceName(it)) },
+    description: String = plugin.config.getString("characters.defaults.description") ?: "",
+    dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
+    override var location: Location = Bukkit.getWorlds()[0].spawnLocation,
+    override var inventoryContents: Array<ItemStack> = (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack>).toTypedArray(),
+    override var helmet: ItemStack? = plugin.config.getItemStack("characters.defaults.helmet"),
+    override var chestplate: ItemStack? = plugin.config.getItemStack("characters.defaults.chestplate"),
+    override var leggings: ItemStack? = plugin.config.getItemStack("characters.defaults.leggings"),
+    override var boots: ItemStack? = plugin.config.getItemStack("characters.defaults.boots"),
+    override var health: Double = plugin.config.getDouble("characters.defaults.health"),
+    override var maxHealth: Double = plugin.config.getDouble("characters.defaults.max-health"),
+    override var mana: Int = plugin.config.getInt("characters.defaults.mana"),
+    override var maxMana: Int = plugin.config.getInt("characters.defaults.max-mana"),
+    override var foodLevel: Int = plugin.config.getInt("characters.defaults.food-level"),
+    override var thirstLevel: Int = plugin.config.getInt("characters.defaults.thirst-level"),
+    override var isProfileHidden: Boolean = plugin.config.getBoolean("characters.defaults.profile-hidden"),
+    override var isNameHidden: Boolean = plugin.config.getBoolean("characters.defaults.name-hidden"),
+    override var isGenderHidden: Boolean = plugin.config.getBoolean("characters.defaults.gender-hidden"),
+    override var isAgeHidden: Boolean = plugin.config.getBoolean("characters.defaults.age-hidden"),
+    override var isRaceHidden: Boolean = plugin.config.getBoolean("characters.defaults.race-hidden"),
+    override var isDescriptionHidden: Boolean = plugin.config.getBoolean("characters.defaults.description-hidden")
 ) : RPKCharacter {
 
     override var name = name

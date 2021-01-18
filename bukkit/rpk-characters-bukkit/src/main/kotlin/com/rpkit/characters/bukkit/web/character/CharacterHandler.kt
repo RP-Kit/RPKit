@@ -18,6 +18,7 @@ package com.rpkit.characters.bukkit.web.character
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.characters.bukkit.web.ErrorResponse
 import com.rpkit.characters.bukkit.web.authenticatedProfile
@@ -73,7 +74,7 @@ class CharacterHandler {
         character.name = characterPutRequest.name
         character.gender = characterPutRequest.gender
         character.age = characterPutRequest.age
-        character.race = characterPutRequest.raceId?.let(raceService::getRace)
+        character.race = characterPutRequest.race?.let(::RPKRaceName)?.let(raceService::getRace)
         character.description = characterPutRequest.description
         character.isDead = characterPutRequest.isDead
         character.isProfileHidden = characterPutRequest.isProfileHidden
@@ -105,7 +106,7 @@ class CharacterHandler {
         character.name = characterPatchRequest.name ?: character.name
         character.gender = characterPatchRequest.gender ?: character.gender
         character.age = characterPatchRequest.age ?: character.age
-        character.race = characterPatchRequest.raceId?.let(raceService::getRace) ?: character.race
+        character.race = characterPatchRequest.race?.let(::RPKRaceName)?.let(raceService::getRace) ?: character.race
         character.description = characterPatchRequest.description ?: character.description
         character.isDead = characterPatchRequest.isDead ?: character.isDead
         character.isProfileHidden = characterPatchRequest.isProfileHidden ?: character.isProfileHidden
@@ -147,7 +148,7 @@ class CharacterHandler {
             characterPostRequest.name,
             characterPostRequest.gender,
             characterPostRequest.age,
-            characterPostRequest.raceId?.let(raceService::getRace),
+            characterPostRequest.race?.let(::RPKRaceName)?.let(raceService::getRace),
             characterPostRequest.description,
             characterPostRequest.isDead,
             null,

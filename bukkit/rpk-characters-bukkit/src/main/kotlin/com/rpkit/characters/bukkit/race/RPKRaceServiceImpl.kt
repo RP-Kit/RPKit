@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,26 +16,16 @@
 package com.rpkit.characters.bukkit.race
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.database.table.RPKRaceTable
 
 /**
  * Race service implementation.
  */
 class RPKRaceServiceImpl(override val plugin: RPKCharactersBukkit) : RPKRaceService {
 
-    override fun getRace(id: Int): RPKRace? = plugin.database.getTable(RPKRaceTable::class.java)[id]
-
-    override fun getRace(name: String): RPKRace? = plugin.database.getTable(RPKRaceTable::class.java)[name]
-
-    override val races: Collection<RPKRace>
-        get() = plugin.database.getTable(RPKRaceTable::class.java).getAll()
-
-    override fun addRace(race: RPKRace) {
-        plugin.database.getTable(RPKRaceTable::class.java).insert(race)
+    override val races: Collection<RPKRace> = plugin.config.getStringList("races").map { raceName ->
+        RPKRaceImpl(RPKRaceName(raceName))
     }
 
-    override fun removeRace(race: RPKRace) {
-        plugin.database.getTable(RPKRaceTable::class.java).delete(race)
-    }
+    override fun getRace(name: RPKRaceName): RPKRace? = races.firstOrNull { it.name.value.equals(name.value, ignoreCase = true) }
 
 }

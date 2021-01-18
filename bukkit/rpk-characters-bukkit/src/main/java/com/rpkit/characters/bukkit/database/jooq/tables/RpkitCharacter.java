@@ -46,7 +46,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
 
-    private static final long serialVersionUID = -765373366;
+    private static final long serialVersionUID = 1506020151;
 
     /**
      * The reference instance of <code>rpkit_characters.rpkit_character</code>
@@ -92,9 +92,9 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     public final TableField<RpkitCharacterRecord, Integer> AGE = createField(DSL.name("age"), org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_characters.rpkit_character.race_id</code>.
+     * The column <code>rpkit_characters.rpkit_character.race_name</code>.
      */
-    public final TableField<RpkitCharacterRecord, Integer> RACE_ID = createField(DSL.name("race_id"), org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.INTEGER)), this, "");
+    public final TableField<RpkitCharacterRecord, String> RACE_NAME = createField(DSL.name("race_name"), org.jooq.impl.SQLDataType.VARCHAR(256).defaultValue(org.jooq.impl.DSL.inline("NULL", org.jooq.impl.SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.description</code>.

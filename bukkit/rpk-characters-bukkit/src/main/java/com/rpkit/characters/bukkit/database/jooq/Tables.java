@@ -21,7 +21,6 @@ package com.rpkit.characters.bukkit.database.jooq;
 
 import com.rpkit.characters.bukkit.database.jooq.tables.RpkitCharacter;
 import com.rpkit.characters.bukkit.database.jooq.tables.RpkitNewCharacterCooldown;
-import com.rpkit.characters.bukkit.database.jooq.tables.RpkitRace;
 
 
 /**
@@ -39,9 +38,4 @@ public class Tables {
      * The table <code>rpkit_characters.rpkit_new_character_cooldown</code>.
      */
     public static final RpkitNewCharacterCooldown RPKIT_NEW_CHARACTER_COOLDOWN = RpkitNewCharacterCooldown.RPKIT_NEW_CHARACTER_COOLDOWN;
-
-    /**
-     * The table <code>rpkit_characters.rpkit_race</code>.
-     */
-    public static final RpkitRace RPKIT_RACE = RpkitRace.RPKIT_RACE;
 }

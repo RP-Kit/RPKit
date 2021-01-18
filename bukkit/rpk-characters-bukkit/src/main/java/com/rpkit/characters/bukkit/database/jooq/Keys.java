@@ -21,10 +21,8 @@ package com.rpkit.characters.bukkit.database.jooq;
 
 import com.rpkit.characters.bukkit.database.jooq.tables.RpkitCharacter;
 import com.rpkit.characters.bukkit.database.jooq.tables.RpkitNewCharacterCooldown;
-import com.rpkit.characters.bukkit.database.jooq.tables.RpkitRace;
 import com.rpkit.characters.bukkit.database.jooq.tables.records.RpkitCharacterRecord;
 import com.rpkit.characters.bukkit.database.jooq.tables.records.RpkitNewCharacterCooldownRecord;
-import com.rpkit.characters.bukkit.database.jooq.tables.records.RpkitRaceRecord;
 
 import org.jooq.Identity;
 import org.jooq.TableField;
@@ -44,7 +42,6 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final Identity<RpkitCharacterRecord, Integer> IDENTITY_RPKIT_CHARACTER = Identities0.IDENTITY_RPKIT_CHARACTER;
-    public static final Identity<RpkitRaceRecord, Integer> IDENTITY_RPKIT_RACE = Identities0.IDENTITY_RPKIT_RACE;
 
     // -------------------------------------------------------------------------
     // UNIQUE and PRIMARY KEY definitions
@@ -52,7 +49,6 @@ public class Keys {
 
     public static final UniqueKey<RpkitCharacterRecord> KEY_RPKIT_CHARACTER_PRIMARY = UniqueKeys0.KEY_RPKIT_CHARACTER_PRIMARY;
     public static final UniqueKey<RpkitNewCharacterCooldownRecord> KEY_RPKIT_NEW_CHARACTER_COOLDOWN_PRIMARY = UniqueKeys0.KEY_RPKIT_NEW_CHARACTER_COOLDOWN_PRIMARY;
-    public static final UniqueKey<RpkitRaceRecord> KEY_RPKIT_RACE_PRIMARY = UniqueKeys0.KEY_RPKIT_RACE_PRIMARY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
@@ -65,12 +61,10 @@ public class Keys {
 
     private static class Identities0 {
         public static Identity<RpkitCharacterRecord, Integer> IDENTITY_RPKIT_CHARACTER = Internal.createIdentity(RpkitCharacter.RPKIT_CHARACTER, RpkitCharacter.RPKIT_CHARACTER.ID);
-        public static Identity<RpkitRaceRecord, Integer> IDENTITY_RPKIT_RACE = Internal.createIdentity(RpkitRace.RPKIT_RACE, RpkitRace.RPKIT_RACE.ID);
     }
 
     private static class UniqueKeys0 {
         public static final UniqueKey<RpkitCharacterRecord> KEY_RPKIT_CHARACTER_PRIMARY = Internal.createUniqueKey(RpkitCharacter.RPKIT_CHARACTER, "KEY_rpkit_character_PRIMARY", new TableField[] { RpkitCharacter.RPKIT_CHARACTER.ID }, true);
         public static final UniqueKey<RpkitNewCharacterCooldownRecord> KEY_RPKIT_NEW_CHARACTER_COOLDOWN_PRIMARY = Internal.createUniqueKey(RpkitNewCharacterCooldown.RPKIT_NEW_CHARACTER_COOLDOWN, "KEY_rpkit_new_character_cooldown_PRIMARY", new TableField[] { RpkitNewCharacterCooldown.RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID }, true);
-        public static final UniqueKey<RpkitRaceRecord> KEY_RPKIT_RACE_PRIMARY = Internal.createUniqueKey(RpkitRace.RPKIT_RACE, "KEY_rpkit_race_PRIMARY", new TableField[] { RpkitRace.RPKIT_RACE.ID }, true);
     }
 }

@@ -21,6 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterImpl
 import com.rpkit.characters.bukkit.database.create
 import com.rpkit.characters.bukkit.database.jooq.Tables.RPKIT_CHARACTER
+import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.core.bukkit.util.toByteArray
 import com.rpkit.core.bukkit.util.toItemStack
@@ -72,7 +73,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                         RPKIT_CHARACTER.NAME,
                         RPKIT_CHARACTER.GENDER,
                         RPKIT_CHARACTER.AGE,
-                        RPKIT_CHARACTER.RACE_ID,
+                        RPKIT_CHARACTER.RACE_NAME,
                         RPKIT_CHARACTER.DESCRIPTION,
                         RPKIT_CHARACTER.DEAD,
                         RPKIT_CHARACTER.WORLD,
@@ -100,12 +101,12 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                         RPKIT_CHARACTER.DESCRIPTION_HIDDEN
                 )
                 .values(
-                        entity.profile?.id,
-                        entity.minecraftProfile?.id,
+                        entity.profile?.id?.value,
+                        entity.minecraftProfile?.id?.value,
                         entity.name,
                         entity.gender,
                         entity.age,
-                        entity.race?.id,
+                        entity.race?.name?.value,
                         entity.description,
                         entity.isDead,
                         entity.location.world?.name,
@@ -151,7 +152,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .set(RPKIT_CHARACTER.NAME, entity.name)
                 .set(RPKIT_CHARACTER.GENDER, entity.gender)
                 .set(RPKIT_CHARACTER.AGE, entity.age)
-                .set(RPKIT_CHARACTER.RACE_ID, entity.race?.id?.value)
+                .set(RPKIT_CHARACTER.RACE_NAME, entity.race?.name?.value)
                 .set(RPKIT_CHARACTER.DESCRIPTION, entity.description)
                 .set(RPKIT_CHARACTER.DEAD, entity.isDead)
                 .set(RPKIT_CHARACTER.WORLD, entity.location.world?.name)
@@ -198,7 +199,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                             RPKIT_CHARACTER.NAME,
                             RPKIT_CHARACTER.GENDER,
                             RPKIT_CHARACTER.AGE,
-                            RPKIT_CHARACTER.RACE_ID,
+                            RPKIT_CHARACTER.RACE_NAME,
                             RPKIT_CHARACTER.DESCRIPTION,
                             RPKIT_CHARACTER.DEAD,
                             RPKIT_CHARACTER.WORLD,
@@ -242,8 +243,8 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                     RPKMinecraftProfileId(minecraftProfileId)
                 )
             }
-            val raceId = result[RPKIT_CHARACTER.RACE_ID]
-            val race = if (raceId == null) null else raceService?.getRace(raceId)
+            val raceName = result[RPKIT_CHARACTER.RACE_NAME]
+            val race = if (raceName == null) null else raceService?.getRace(RPKRaceName(raceName))
             val character = RPKCharacterImpl(
                     plugin = plugin,
                     id = RPKCharacterId(result[RPKIT_CHARACTER.ID]),

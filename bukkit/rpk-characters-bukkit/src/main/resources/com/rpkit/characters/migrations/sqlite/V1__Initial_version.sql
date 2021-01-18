@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +21,7 @@ CREATE TABLE `rpkit_character`
     `name`                 varchar(256)  NOT NULL,
     `gender`               varchar(256) DEFAULT NULL,
     `age`                  int           NOT NULL,
-    `race_id`              int          DEFAULT NULL,
+    `race_name`            varchar(256) DEFAULT NULL,
     `description`          varchar(2048) NOT NULL,
     `dead`                 boolean       NOT NULL,
     `world`                varchar(256)  NOT NULL,
@@ -55,10 +54,4 @@ CREATE TABLE `rpkit_new_character_cooldown`
     `profile_id`         int      NOT NULL,
     `cooldown_timestamp` datetime NOT NULL,
     PRIMARY KEY (`profile_id`)
-);
-
-CREATE TABLE `rpkit_race`
-(
-    `id`   integer primary key          NOT NULL,
-    `name` varchar(256) NOT NULL
 );

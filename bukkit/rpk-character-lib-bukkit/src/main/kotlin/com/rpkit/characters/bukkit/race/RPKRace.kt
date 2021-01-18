@@ -21,13 +21,8 @@ package com.rpkit.characters.bukkit.race
 interface RPKRace {
 
     /**
-     * The ID of the race. Guaranteed to be unique. If set to null, the race has not yet been inserted into the database.
-     */
-    var id: RPKRaceId?
-
-    /**
      * The name of the race.
      */
-    val name: String
+    val name: RPKRaceName
 
 }
