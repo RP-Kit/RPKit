@@ -102,7 +102,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                     }
                     messageComponents.add(chatChannelComponent)
                 } else if (matcher.group() == "\${mute}") {
-                    if (chatChannel.listenerMinecraftProfiles.any { listenerMinecraftProfile ->
+                    if (chatChannel.listeners.any { listenerMinecraftProfile ->
                                 listenerMinecraftProfile.id == minecraftProfile.id
                             }) {
                         val muteComponent = TextComponent("Mute")
