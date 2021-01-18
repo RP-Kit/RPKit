@@ -50,12 +50,12 @@ class RPKChatChannelImpl(
         override val isJoinedByDefault: Boolean
 ) : RPKChatChannel {
 
-    override val speakerMinecraftProfiles: List<RPKMinecraftProfile>
+    override val speakers: List<RPKMinecraftProfile>
         get() = plugin.server.onlinePlayers
                 .mapNotNull { player -> Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfile(player) }
                 .filter { minecraftProfile -> Services[RPKChatChannelSpeakerService::class.java]?.getMinecraftProfileChannel(minecraftProfile) == this }
 
-    override val listenerMinecraftProfiles: List<RPKMinecraftProfile>
+    override val listeners: List<RPKMinecraftProfile>
         get() = plugin.server.onlinePlayers
                 .filter { player -> player.hasPermission("rpkit.chat.listen.${name.value}") }
                 .mapNotNull { player -> Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfile(player) }
@@ -111,7 +111,7 @@ class RPKChatChannelImpl(
         val event = RPKBukkitChatChannelMessageEvent(sender, senderMinecraftProfile, this, message, isAsync)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        listenerMinecraftProfiles.forEach { listener ->
+        listeners.forEach { listener ->
             var preFormatContext: DirectedPreFormatMessageContext = DirectedPreFormatMessageContextImpl(
                     event.chatChannel,
                     event.profile,

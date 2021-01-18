@@ -51,14 +51,14 @@ interface RPKChatChannel {
      * If a speaker sends a message without indicating who it is directed to, it will be sent to this channel.
      * Chat participants may only be speakers in a single channel.
      */
-    val speakerMinecraftProfiles: List<RPKMinecraftProfile>
+    val speakers: List<RPKMinecraftProfile>
 
     /**
      * A list of all listeners in the channel.
      * If a message is sent to a channel, it will be heard by all listeners.
      * Chat participants may listen to multiple channels.
      */
-    val listenerMinecraftProfiles: List<RPKMinecraftProfile>
+    val listeners: List<RPKMinecraftProfile>
 
     /**
      * The directed pre-format pipeline for the channel.
