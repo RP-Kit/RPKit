@@ -27,15 +27,15 @@ class RPKLanguageImpl(
 ) : RPKLanguage {
 
     override fun getBaseUnderstanding(race: RPKRace): Float {
-        return baseUnderstanding[race.name] ?: 0f
+        return baseUnderstanding[race.name.value] ?: 0f
     }
 
     override fun getMinimumUnderstandingIncrement(race: RPKRace): Float {
-        return minimumUnderstandingIncrement[race.name] ?: 0f
+        return minimumUnderstandingIncrement[race.name.value] ?: 0f
     }
 
     override fun getMaximumUnderstandingIncrement(race: RPKRace): Float {
-        return maximumUnderstandingIncrement[race.name] ?: 0f
+        return maximumUnderstandingIncrement[race.name.value] ?: 0f
     }
 
     override fun randomUnderstandingIncrement(race: RPKRace): Float {
