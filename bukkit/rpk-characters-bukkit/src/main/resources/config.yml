@@ -31,6 +31,13 @@ characters:
   strict-movement-prevention-when-dead: true
   set-player-display-name: false
   new-character-cooldown: 604800000
+races:
+- Human
+- Elf
+- Dwarf
+- Orc
+- Half-Elf
+- Half-Orc
 caching:
   rpkit_character:
     id:

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +41,7 @@ class RaceListCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor
         sender.sendMessage(plugin.messages["race-list-title"])
         for (race in raceService.races) {
             sender.sendMessage(plugin.messages["race-list-item", mapOf(
-                "race" to race.name
+                "race" to race.name.value
             )])
         }
         return true

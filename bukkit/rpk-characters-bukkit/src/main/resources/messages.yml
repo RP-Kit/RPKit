@@ -71,7 +71,7 @@ character-delete-invalid-character: '&cYou do not have a character by that name.
 character-delete-confirmation: '&fThis operation will be permanent, and you will not be able to recover your character. Are you sure you wish to continue?'
 character-delete-confirmation-invalid-boolean: '&cThat''s not a valid answer.'
 character-delete-valid: '&aCharacter deleted.'
-race-usage: '&cUsage: /race [add|remove|list]'
+race-usage: '&cUsage: /race [list]'
 race-add-prompt: '&fWhat is the name of the race you would like to add? &7(Type cancel to cancel)'
 race-add-invalid-race: '&cThat race already exists.'
 race-add-valid: '&aRace added.'

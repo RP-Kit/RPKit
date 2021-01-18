@@ -31,7 +31,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RpkitCharacterRecord extends UpdatableRecordImpl<RpkitCharacterRecord> {
 
-    private static final long serialVersionUID = -1591168367;
+    private static final long serialVersionUID = 1422744505;
 
     /**
      * Setter for <code>rpkit_characters.rpkit_character.id</code>.
@@ -118,17 +118,17 @@ public class RpkitCharacterRecord extends UpdatableRecordImpl<RpkitCharacterReco
     }
 
     /**
-     * Setter for <code>rpkit_characters.rpkit_character.race_id</code>.
+     * Setter for <code>rpkit_characters.rpkit_character.race_name</code>.
      */
-    public void setRaceId(Integer value) {
+    public void setRaceName(String value) {
         set(6, value);
     }
 
     /**
-     * Getter for <code>rpkit_characters.rpkit_character.race_id</code>.
+     * Getter for <code>rpkit_characters.rpkit_character.race_name</code>.
      */
-    public Integer getRaceId() {
-        return (Integer) get(6);
+    public String getRaceName() {
+        return (String) get(6);
     }
 
     /**
@@ -504,7 +504,7 @@ public class RpkitCharacterRecord extends UpdatableRecordImpl<RpkitCharacterReco
     /**
      * Create a detached, initialised RpkitCharacterRecord
      */
-    public RpkitCharacterRecord(Integer id, Integer profileId, Integer minecraftProfileId, String name, String gender, Integer age, Integer raceId, String description, Boolean dead, String world, Double x, Double y, Double z, Float yaw, Float pitch, byte[] inventoryContents, byte[] helmet, byte[] chestplate, byte[] leggings, byte[] boots, Double health, Double maxHealth, Integer mana, Integer maxMana, Integer foodLevel, Integer thirstLevel, Boolean profileHidden, Boolean nameHidden, Boolean genderHidden, Boolean ageHidden, Boolean raceHidden, Boolean descriptionHidden) {
+    public RpkitCharacterRecord(Integer id, Integer profileId, Integer minecraftProfileId, String name, String gender, Integer age, String raceName, String description, Boolean dead, String world, Double x, Double y, Double z, Float yaw, Float pitch, byte[] inventoryContents, byte[] helmet, byte[] chestplate, byte[] leggings, byte[] boots, Double health, Double maxHealth, Integer mana, Integer maxMana, Integer foodLevel, Integer thirstLevel, Boolean profileHidden, Boolean nameHidden, Boolean genderHidden, Boolean ageHidden, Boolean raceHidden, Boolean descriptionHidden) {
         super(RpkitCharacter.RPKIT_CHARACTER);
 
         set(0, id);
@@ -513,7 +513,7 @@ public class RpkitCharacterRecord extends UpdatableRecordImpl<RpkitCharacterReco
         set(3, name);
         set(4, gender);
         set(5, age);
-        set(6, raceId);
+        set(6, raceName);
         set(7, description);
         set(8, dead);
         set(9, world);
