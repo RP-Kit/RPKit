@@ -54,7 +54,7 @@ class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuction
         noSellPrice: Int?,
         minimumBidIncrement: Int,
         isBiddingOpen: Boolean
-    ): RPKAuction {
+    ): RPKAuction? {
         val auction = RPKAuctionImpl(
             plugin,
             null,
@@ -70,7 +70,7 @@ class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuction
             minimumBidIncrement,
             isBiddingOpen
         )
-        addAuction(auction)
+        if (!addAuction(auction)) return null
         return auction
     }
 
