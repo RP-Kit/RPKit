@@ -34,6 +34,22 @@ interface RPKAuctionService : Service {
      */
     fun addAuction(auction: RPKAuction): Boolean
 
+    /**
+     * Creates an auction with the given parameters
+     *
+     * @param item The item being auctioned
+     * @param currency The currency the auction will be held in
+     * @param location The location of the auction
+     * @param character The character holding the auction
+     * @param duration The duration the auction will continue for
+     * @param endTime The time at which the auction will end
+     * @param startPrice The price at which the auction started
+     * @param buyOutPrice The price at which the item will be automatically sold
+     * @param noSellPrice The price at which the item will not be sold if the auction does not surpass it
+     * @param minimumBidIncrement The minimum increment between bids
+     * @param isBiddingOpen Whether bidding on the auction is open
+     * @return The auction if creation was successful, otherwise null
+     */
     fun createAuction(
         item: ItemStack,
         currency: RPKCurrency,
@@ -46,7 +62,7 @@ interface RPKAuctionService : Service {
         noSellPrice: Int?,
         minimumBidIncrement: Int,
         isBiddingOpen: Boolean = false
-    ): RPKAuction
+    ): RPKAuction?
 
     /**
      * Updates an auction's state in data storage.

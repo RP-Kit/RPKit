@@ -341,16 +341,13 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
                 context.getSessionData("buy_out_price") as Int,
                 context.getSessionData("no_sell_price") as Int,
                 context.getSessionData("minimum_bid_increment") as Int
-            )
-            if (!auctionService.addAuction(auction)) {
-                return AuctionErrorPrompt(plugin.messages.auctionCreateFailed)
-            }
+            ) ?: return AuctionErrorPrompt(plugin.messages.auctionCreateFailed)
             auction.openBidding()
             if (!auctionService.updateAuction(auction)) {
                 return AuctionErrorPrompt(plugin.messages.auctionUpdateFailed)
             }
             bukkitPlayer.inventory.setItemInMainHand(null)
-            context.setSessionData("id", auction.id)
+            context.setSessionData("id", auction.id?.value)
             return AuctionIDPrompt()
         }
 
