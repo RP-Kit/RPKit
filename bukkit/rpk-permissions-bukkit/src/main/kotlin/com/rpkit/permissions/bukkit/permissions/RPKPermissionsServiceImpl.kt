@@ -30,7 +30,7 @@ import org.bukkit.permissions.PermissionAttachment
 class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKPermissionsService {
 
     val defaultGroup = plugin.config.get("default-group") as RPKGroup
-    val permissionsAttachments = mutableMapOf<Int, PermissionAttachment>()
+    private val permissionsAttachments = mutableMapOf<Int, PermissionAttachment>()
 
     override fun hasPermission(group: RPKGroup, node: String): Boolean {
         return hasPermission(group, node, plugin.server.pluginManager.getPermission(node)?.default?.getValue(false)
@@ -83,15 +83,14 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
     override fun assignPermissions(minecraftProfile: RPKMinecraftProfile) {
         val minecraftProfileId = minecraftProfile.id
                 ?: throw IllegalStateException("Minecraft profile has not yet been inserted into the database.")
-        val bukkitPlayer = Bukkit.getOfflinePlayer(minecraftProfile.minecraftUUID)
-        val onlineBukkitPlayer = bukkitPlayer.player
-        if (onlineBukkitPlayer != null) {
+        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
+        if (bukkitPlayer != null) {
             val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
             if (permissionsAttachment == null) {
-                permissionsAttachments[minecraftProfileId.value] = onlineBukkitPlayer.addAttachment(plugin)
+                permissionsAttachments[minecraftProfileId.value] = bukkitPlayer.addAttachment(plugin)
             } else {
-                onlineBukkitPlayer.removeAttachment(permissionsAttachment)
-                permissionsAttachments[minecraftProfileId.value] = onlineBukkitPlayer.addAttachment(plugin)
+                bukkitPlayer.removeAttachment(permissionsAttachment)
+                permissionsAttachments[minecraftProfileId.value] = bukkitPlayer.addAttachment(plugin)
             }
             val groups = mutableListOf<RPKGroup>()
             val profile = minecraftProfile.profile
@@ -139,14 +138,13 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
     }
 
     override fun unassignPermissions(minecraftProfile: RPKMinecraftProfile) {
-        val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
-        val onlineBukkitPlayer = bukkitPlayer.player
-        if (onlineBukkitPlayer != null) {
+        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
+        if (bukkitPlayer != null) {
             val minecraftProfileId = minecraftProfile.id ?: return
             val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
             if (permissionsAttachment != null) {
-                onlineBukkitPlayer.removeAttachment(permissionsAttachment)
-                permissionsAttachments.remove(minecraftProfileId)
+                bukkitPlayer.removeAttachment(permissionsAttachment)
+                permissionsAttachments.remove(minecraftProfileId.value)
             }
         }
     }
