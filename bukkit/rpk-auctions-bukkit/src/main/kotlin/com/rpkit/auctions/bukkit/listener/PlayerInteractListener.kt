@@ -91,7 +91,7 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit) : Listener {
             event.player.sendMessage(plugin.messages.noCharacter)
             return
         }
-        if (bidAmount >= economyService.getBalance(character, auction.currency)) {
+        if (bidAmount > economyService.getBalance(character, auction.currency)) {
             event.player.sendMessage(plugin.messages.bidInvalidNotEnoughMoney)
             return
         }
