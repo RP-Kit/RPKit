@@ -27,30 +27,32 @@ import org.bukkit.entity.Player
 class DeleteWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender.hasPermission("rpkit.travel.command.deletewarp")) {
-            if (sender is Player) {
-                if (args.isNotEmpty()) {
-                    val warpService = Services[RPKWarpService::class.java]
-                    if (warpService == null) {
-                        sender.sendMessage(plugin.messages["no-warp-service"])
-                        return true
-                    }
-                    val warp = warpService.getWarp(RPKWarpName(args[0].toLowerCase()))
-                    if (warp != null) {
-                        warpService.removeWarp(warp)
-                        sender.sendMessage(plugin.messages["delete-warp-valid", mapOf(
-                            "warp" to warp.name.value
-                        )])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["delete-warp-usage"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["not-from-console"])
-            }
-        } else {
-            sender.sendMessage(plugin.messages["no-permission-delete-warp"])
+        if (!sender.hasPermission("rpkit.travel.command.deletewarp")) {
+            sender.sendMessage(plugin.messages.noPermissionDeleteWarp)
+            return true
         }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages.notFromConsole)
+            return true
+        }
+        if (args.isEmpty()) {
+            sender.sendMessage(plugin.messages.deleteWarpUsage)
+            return true
+        }
+        val warpService = Services[RPKWarpService::class.java]
+        if (warpService == null) {
+            sender.sendMessage(plugin.messages.noWarpService)
+            return true
+        }
+        val warp = warpService.getWarp(RPKWarpName(args[0].toLowerCase()))
+        if (warp == null) {
+            sender.sendMessage(plugin.messages.deleteWarpInvalidWarp)
+            return true
+        }
+        warpService.removeWarp(warp)
+        sender.sendMessage(plugin.messages.deleteWarpValid.withParameters(
+            warp = warp
+        ))
         return true
     }
 }

@@ -35,14 +35,14 @@ class PlayerInteractListener(private val plugin: RPKTravelBukkit) : Listener {
         if (!sign.getLine(0).equals("$GREEN[warp]", ignoreCase = true)) return
         val warpService = Services[RPKWarpService::class.java]
         if (warpService == null) {
-            event.player.sendMessage(plugin.messages["no-warp-service"])
+            event.player.sendMessage(plugin.messages.noWarpService)
             return
         }
         val warp = warpService.getWarp(RPKWarpName(sign.getLine(1)))
         if (warp != null) {
             event.player.teleport(warp.location)
         } else {
-            event.player.sendMessage(plugin.messages["warp-invalid-warp"])
+            event.player.sendMessage(plugin.messages.warpInvalidWarp)
         }
     }
 
