@@ -32,48 +32,46 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (!sender.hasPermission("rpkit.travel.command.warp")) {
-            sender.sendMessage(plugin.messages["no-permission-warp"])
+            sender.sendMessage(plugin.messages.noPermissionWarp)
             return true
         }
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         val warpService = Services[RPKWarpService::class.java]
         if (warpService == null) {
-            sender.sendMessage(plugin.messages["no-warp-service"])
+            sender.sendMessage(plugin.messages.noWarpService)
             return true
         }
         if (args.isNotEmpty()) {
             val warp = warpService.getWarp(RPKWarpName(args[0].toLowerCase()))
             if (warp == null) {
-                sender.sendMessage(plugin.messages["warp-invalid-warp"])
+                sender.sendMessage(plugin.messages.warpInvalidWarp)
                 return true
             }
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             if (minecraftProfileService == null) {
-                sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+                sender.sendMessage(plugin.messages.noMinecraftProfileService)
                 return true
             }
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
             if (minecraftProfile == null) {
-                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                sender.sendMessage(plugin.messages.noMinecraftProfile)
                 return true
             }
             val event = RPKBukkitWarpUseEvent(warp, minecraftProfile)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return true
             sender.teleport(event.warp.location)
-            sender.sendMessage(plugin.messages["warp-valid", mapOf(
-                "warp" to warp.name.value
-            )])
+            sender.sendMessage(plugin.messages.warpValid.withParameters(warp = event.warp))
         } else {
             if (warpService.warps.isEmpty()) {
-                sender.sendMessage(plugin.messages["warp-list-invalid-empty"])
+                sender.sendMessage(plugin.messages.warpListInvalidEmpty)
                 return true
             }
-            sender.sendMessage(plugin.messages["warp-list-title"])
-            val warps = warpService.warps.map(RPKWarp::name)
+            sender.sendMessage(plugin.messages.warpListTitle)
+            val warps = warpService.warps.map { warp -> warp.name.value }
             val warpMessages = ArrayList<String>()
             var warpsBuilder = StringBuilder()
             for (i in warps.indices) {
@@ -90,9 +88,7 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
                 warpMessages.add(warpsBuilder.delete(warpsBuilder.length - 2, warpsBuilder.length).toString())
             }
             for (message in warpMessages) {
-                sender.sendMessage(plugin.messages["warp-list-item", mapOf(
-                    "warps" to message
-                )])
+                sender.sendMessage(plugin.messages.warpListItem.withParameters(warps = message))
             }
         }
         return true

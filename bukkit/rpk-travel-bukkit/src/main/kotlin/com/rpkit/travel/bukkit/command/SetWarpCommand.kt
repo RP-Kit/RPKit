@@ -29,35 +29,35 @@ class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (!sender.hasPermission("rpkit.travel.command.setwarp")) {
-            sender.sendMessage(plugin.messages["no-permission-set-warp"])
+            sender.sendMessage(plugin.messages.noPermissionSetWarp)
             return true
         }
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         if (!args.isNotEmpty()) {
-            sender.sendMessage(plugin.messages["set-warp-usage"])
+            sender.sendMessage(plugin.messages.setWarpUsage)
             return true
         }
         val warpService = Services[RPKWarpService::class.java]
         if (warpService == null) {
-            sender.sendMessage(plugin.messages["no-warp-service"])
+            sender.sendMessage(plugin.messages.noWarpService)
             return true
         }
         if (warpService.getWarp(RPKWarpName(args[0])) != null) {
-            sender.sendMessage(plugin.messages["set-warp-invalid-name-already-in-use"])
+            sender.sendMessage(plugin.messages.setWarpInvalidNameAlreadyInUse)
             return true
         }
         val warp = RPKWarpImpl(name = RPKWarpName(args[0]), location = sender.location)
         warpService.addWarp(warp)
-        sender.sendMessage(plugin.messages["set-warp-valid", mapOf(
-            "warp" to warp.name.value,
-            "world" to (warp.location.world?.name ?: ""),
-            "x" to warp.location.blockX.toString(),
-            "y" to warp.location.blockY.toString(),
-            "z" to warp.location.blockZ.toString()
-        )])
+        sender.sendMessage(plugin.messages.setWarpValid.withParameters(
+            warp = warp,
+            world = warp.location.world!!,
+            x = warp.location.blockX,
+            y = warp.location.blockY,
+            z = warp.location.blockZ
+        ))
         return true
     }
 

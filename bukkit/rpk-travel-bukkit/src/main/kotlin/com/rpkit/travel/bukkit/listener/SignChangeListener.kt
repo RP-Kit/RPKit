@@ -31,22 +31,22 @@ class SignChangeListener(private val plugin: RPKTravelBukkit) : Listener {
     fun onSignChange(event: SignChangeEvent) {
         if (!event.getLine(0).equals("[warp]", ignoreCase = true)) return
         if (!event.player.hasPermission("rpkit.travel.sign.warp.create")) {
-            event.player.sendMessage(plugin.messages["no-permission-warp-sign-create"])
+            event.player.sendMessage(plugin.messages.noPermissionWarpSignCreate)
             return
         }
         val warpService = Services[RPKWarpService::class.java]
         if (warpService == null) {
-            event.player.sendMessage(plugin.messages["no-warp-service"])
+            event.player.sendMessage(plugin.messages.noWarpService)
             return
         }
         val warp = warpService.getWarp(RPKWarpName(event.getLine(1) ?: ""))
         if (warp == null) {
             event.block.breakNaturally()
-            event.player.sendMessage(plugin.messages["warp-sign-invalid-warp"])
+            event.player.sendMessage(plugin.messages.warpSignInvalidWarp)
             return
         }
         event.setLine(0, "$GREEN[warp]")
-        event.player.sendMessage(plugin.messages["warp-sign-valid"])
+        event.player.sendMessage(plugin.messages.warpSignValid)
     }
 
 }
