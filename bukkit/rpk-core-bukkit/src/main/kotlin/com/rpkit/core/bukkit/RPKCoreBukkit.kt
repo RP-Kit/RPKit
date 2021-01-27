@@ -36,7 +36,6 @@ class RPKCoreBukkit : RPKBukkitPlugin() {
     override fun onEnable() {
         Metrics(this, 4371)
         Services.delegate = BukkitServicesDelegate()
-        saveDefaultConfig()
         Database.hikariClassLoader = classLoader
 
         messages = CoreMessages(this)
