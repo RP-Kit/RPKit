@@ -56,7 +56,6 @@ class PlayerLoginListener(private val plugin: RPKPlayersBukkit) : Listener {
                 profileName,
                 profileService.generateDiscriminatorFor(profileName)
             )
-            profileService.addProfile(profile)
             minecraftProfile.profile = profile
             minecraftProfileService.updateMinecraftProfile(minecraftProfile)
         }
