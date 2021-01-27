@@ -21,14 +21,8 @@ commands:
     usage: /<command>
   currency:
     description: Currency management command
-    usage: /<command> [add|remove|list]
+    usage: /<command> [list]
 permissions:
-  rpkit.economy.command.currency.add:
-    description: Allows adding currencies
-    default: op
-  rpkit.economy.command.currency.remove:
-    description: Allows removing currencies
-    default: op
   rpkit.economy.command.currency.list:
     description: Allows listing currencies
     default: true
