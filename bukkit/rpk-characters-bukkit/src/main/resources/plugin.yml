@@ -16,7 +16,7 @@ commands:
     usage: /<command> [set|card|switch|list|new|delete]
   race:
     description: Race management command
-    usage: /<command> [add|remove|list]
+    usage: /<command> [list]
 permissions:
   rpkit.characters.command.character.card.self:
     description: Allows viewing your own character card
@@ -101,12 +101,6 @@ permissions:
     default: true
   rpkit.characters.command.character.delete:
     description: Allows deleting characters
-    default: op
-  rpkit.characters.command.race.add:
-    description: Allows creation of races
-    default: op
-  rpkit.characters.command.race.remove:
-    description: Allows removal of races
     default: op
   rpkit.characters.command.race.list:
     description: Allows listing of races
