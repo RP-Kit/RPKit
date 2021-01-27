@@ -35,7 +35,7 @@ professions:
           amount: 1
       3:
         BREAD:
-          quality: adequate
+          quality: common
       5:
         CAKE:
           amount: 1
@@ -47,7 +47,7 @@ professions:
       5:
         COOKED_CHICKEN:
           amount: 2
-          quality: adequate
+          quality: common
   miner:
     levels:
       max-level: 100
