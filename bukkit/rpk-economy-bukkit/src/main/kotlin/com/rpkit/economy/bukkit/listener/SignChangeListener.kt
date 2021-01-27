@@ -93,7 +93,7 @@ class SignChangeListener(private val plugin: RPKEconomyBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["dynexchange-sign-invalid-format-to"])
                 return
             }
-            val toCurrencyName = event.getLine(3) ?: ""
+            val toCurrencyName = event.getLine(3)?.replaceFirst(Regex("\\d+\\s+"), "") ?: ""
             val toCurrency = currencyService.getCurrency(RPKCurrencyName(toCurrencyName))
             if (toCurrency == null) {
                 event.block.breakNaturally()

@@ -29,6 +29,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action.LEFT_CLICK_BLOCK
 import org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK
 import org.bukkit.event.player.PlayerInteractEvent
+import kotlin.math.roundToInt
 
 
 class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
@@ -128,7 +129,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                 var rate = fromAmount.toDouble() / toAmount.toDouble()
                 val rateChange = plugin.config.getDouble("dynamic-exchanges.rate-change")
                 rate -= rateChange
-                val newToAmount = Math.round(fromAmount.toDouble() / rate)
+                val newToAmount = (fromAmount.toDouble() / rate).roundToInt()
                 sign.setLine(3, "$newToAmount ${toCurrency.name.value}")
                 sign.update()
                 event.player.sendMessage(plugin.messages["exchange-valid", mapOf(
@@ -174,11 +175,11 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
             if (economyService.getBalance(character, toCurrency) + toAmount > 1728) return
             economyService.setBalance(character, fromCurrency, economyService.getBalance(character, fromCurrency) - fromAmount)
             economyService.setBalance(character, toCurrency, economyService.getBalance(character, toCurrency) + toAmount)
-            var rate = fromAmount.toDouble() / toAmount.toDouble()
+            var rate = toAmount.toDouble() / fromAmount.toDouble()
             val rateChange = plugin.config.getDouble("dynamic-exchanges.rate-change")
             rate += rateChange
-            val newToAmount = Math.round(fromAmount.toDouble() / rate)
-            sign.setLine(3, "$newToAmount ${toCurrency.name.value}")
+            val newToAmount = (toAmount.toDouble() / rate).roundToInt()
+            sign.setLine(3, "$newToAmount ${fromCurrency.name.value}")
             sign.update()
             event.player.sendMessage(plugin.messages["exchange-valid", mapOf(
                 "from_amount" to fromAmount.toString(),
