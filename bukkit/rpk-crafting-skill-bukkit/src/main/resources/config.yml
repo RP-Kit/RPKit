@@ -12,10 +12,10 @@ crafting:
       quality: poor
     '100':
       amount: 1
-      quality: adequate
+      quality: common
     '200':
       amount: 1
-      quality: good
+      quality: uncommon
 smelting:
   IRON_INGOT:
     '0':
@@ -30,10 +30,10 @@ smelting:
       quality: poor
     '100':
       amount: 1
-      quality: adequate
+      quality: common
     '200':
       amount: 1
-      quality: good
+      quality: uncommon
 mining:
   COAL:
     '0':
