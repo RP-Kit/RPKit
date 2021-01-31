@@ -30,11 +30,19 @@ import java.util.logging.Level.SEVERE
 open class BukkitMessages(private val plugin: RPKBukkitPlugin) : Messages {
 
     private val messagesConfigFile = File(plugin.dataFolder, "messages.yml")
+    private val defaultMessagesConfig: FileConfiguration
     private val messagesConfig: FileConfiguration
 
     init {
+        val defaultMessagesConfigResource = plugin.getResource("messages.yml")
+        defaultMessagesConfig = if (defaultMessagesConfigResource != null) {
+            YamlConfiguration.loadConfiguration(defaultMessagesConfigResource.reader())
+        } else {
+            YamlConfiguration()
+        }
         saveDefaultMessagesConfig()
         messagesConfig = YamlConfiguration.loadConfiguration(messagesConfigFile)
+        messagesConfig.setDefaults(defaultMessagesConfig)
     }
 
     fun saveMessagesConfig() {

@@ -74,6 +74,9 @@ commands:
   runas:
     description: Runs a command as another player
     usage: /<command> [player] [command]
+  saveitem:
+    description: Saves the item you are holding to YAML
+    usage: /<command> [name]
   seen:
     description: Shows when a player was last seen
     usage: /<command> [player]
@@ -169,6 +172,9 @@ permissions:
     default: op
   rpkit.essentials.command.runas:
     description: Allows you to run a command as another player
+    default: op
+  rpkit.essentials.command.saveitem:
+    description: Allows you to save items to YAML
     default: op
   rpkit.essentials.command.seen:
     description: Allows you to see when a player was last seen online

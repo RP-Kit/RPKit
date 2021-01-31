@@ -17,6 +17,17 @@
 package com.rpkit.essentials.bukkit.messages
 
 import com.rpkit.core.bukkit.message.BukkitMessages
+import com.rpkit.core.message.ParameterizedMessage
+import com.rpkit.core.message.to
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 
-class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin)
+class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
+
+    class SaveItemValidMessage(private val message: ParameterizedMessage) {
+        fun withParameters(name: String) = message.withParameters("name" to name)
+    }
+    val saveItemUsage = get("save-item-usage")
+    val saveItemValid = getParameterized("save-item-valid").let(::SaveItemValidMessage)
+    val noPermissionSaveItem = get("no-permission-save-item")
+    val notFromConsole = get("not-from-console")
+}
