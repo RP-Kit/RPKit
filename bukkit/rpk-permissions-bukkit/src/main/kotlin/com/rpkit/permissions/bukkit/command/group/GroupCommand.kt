@@ -30,6 +30,7 @@ class GroupCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
     private val groupAddCommand = GroupAddCommand(plugin)
     private val groupRemoveCommand = GroupRemoveCommand(plugin)
     private val groupListCommand = GroupListCommand(plugin)
+    private val permissionGroupListCommand = PermissionGroupListCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
@@ -37,6 +38,7 @@ class GroupCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
                 args[0].equals("add", ignoreCase = true) -> return groupAddCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
                 args[0].equals("remove", ignoreCase = true) -> return groupRemoveCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
                 args[0].equals("list", ignoreCase = true) -> return groupListCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+                args[0].equals("view", ignoreCase = true) -> return permissionGroupListCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
                 else -> sender.sendMessage(plugin.messages["group-usage"])
             }
         } else {
