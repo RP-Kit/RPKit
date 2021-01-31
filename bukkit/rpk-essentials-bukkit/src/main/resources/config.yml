@@ -2,13 +2,13 @@ distance-command:
   maximum-distance: 64000
   item-requirement:
     ==: org.bukkit.inventory.ItemStack
-    v: 2584
+    v: 2586
     type: COMPASS
 track-command:
   maximum-distance: 1000
   item-requirement:
     ==: org.bukkit.inventory.ItemStack
-    v: 2584
+    v: 2586
     type: COMPASS
 time-slow-factor: 4
 daily-messages:
@@ -34,7 +34,7 @@ kits:
   name: eggxample # "I take full credit" - LiamLime
   items:
   - ==: org.bukkit.inventory.ItemStack
-    v: 2584
+    v: 2586
     type: EGG
 caching:
   rpkit_log_messages_enabled:

@@ -16,6 +16,7 @@
 
 package com.rpkit.essentials.bukkit
 
+import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
@@ -23,34 +24,7 @@ import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
 import com.rpkit.dailyquote.bukkit.dailyquote.RPKDailyQuoteService
-import com.rpkit.essentials.bukkit.command.BackCommand
-import com.rpkit.essentials.bukkit.command.CloneCommand
-import com.rpkit.essentials.bukkit.command.DistanceCommand
-import com.rpkit.essentials.bukkit.command.EnchantCommand
-import com.rpkit.essentials.bukkit.command.FeedCommand
-import com.rpkit.essentials.bukkit.command.FlyCommand
-import com.rpkit.essentials.bukkit.command.GetBookCommand
-import com.rpkit.essentials.bukkit.command.GetSignCommand
-import com.rpkit.essentials.bukkit.command.HealCommand
-import com.rpkit.essentials.bukkit.command.InventoryCommand
-import com.rpkit.essentials.bukkit.command.ItemCommand
-import com.rpkit.essentials.bukkit.command.ItemMetaCommand
-import com.rpkit.essentials.bukkit.command.JumpCommand
-import com.rpkit.essentials.bukkit.command.KitCommand
-import com.rpkit.essentials.bukkit.command.RepairCommand
-import com.rpkit.essentials.bukkit.command.RunAsCommand
-import com.rpkit.essentials.bukkit.command.SeenCommand
-import com.rpkit.essentials.bukkit.command.SetSpawnCommand
-import com.rpkit.essentials.bukkit.command.SmiteCommand
-import com.rpkit.essentials.bukkit.command.SpawnCommand
-import com.rpkit.essentials.bukkit.command.SpawnMobCommand
-import com.rpkit.essentials.bukkit.command.SpawnerCommand
-import com.rpkit.essentials.bukkit.command.SpeedCommand
-import com.rpkit.essentials.bukkit.command.SudoCommand
-import com.rpkit.essentials.bukkit.command.ToggleLogMessagesCommand
-import com.rpkit.essentials.bukkit.command.ToggleTrackingCommand
-import com.rpkit.essentials.bukkit.command.TrackCommand
-import com.rpkit.essentials.bukkit.command.UnsignCommand
+import com.rpkit.essentials.bukkit.command.*
 import com.rpkit.essentials.bukkit.dailyquote.RPKDailyQuoteServiceImpl
 import com.rpkit.essentials.bukkit.database.table.RPKLogMessagesEnabledTable
 import com.rpkit.essentials.bukkit.database.table.RPKPreviousLocationTable
@@ -161,6 +135,7 @@ class RPKEssentialsBukkit : RPKBukkitPlugin() {
         getCommand("kit")?.setExecutor(KitCommand(this))
         getCommand("repair")?.setExecutor(RepairCommand(this))
         getCommand("runas")?.setExecutor(RunAsCommand(this))
+        getCommand("saveitem")?.setExecutor(SaveItemCommand(this).toBukkit())
         getCommand("seen")?.setExecutor(SeenCommand(this))
         getCommand("setspawn")?.setExecutor(SetSpawnCommand(this))
         getCommand("smite")?.setExecutor(SmiteCommand(this))
