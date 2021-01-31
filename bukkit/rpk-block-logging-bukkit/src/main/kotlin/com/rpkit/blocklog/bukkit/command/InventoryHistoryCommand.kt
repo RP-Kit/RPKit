@@ -23,6 +23,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 
@@ -51,7 +52,7 @@ class InventoryHistoryCommand(private val plugin: RPKBlockLoggingBukkit) : Comma
         }
         for (change in changes.sortedBy(RPKBlockInventoryChange::time).take(100)) {
             sender.sendMessage(plugin.messages["inventory-history-change", mapOf(
-                "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time),
+                "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time.atZone(ZoneId.systemDefault())),
                 "profile" to (change.profile?.name?.value ?: "None"),
                 "minecraft_profile" to (change.minecraftProfile?.name ?: "None"),
                 "character" to (change.character?.name ?: "None"),
