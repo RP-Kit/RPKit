@@ -63,7 +63,7 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
         }
         chatChannelService.chatChannels.forEach { chatChannel ->
             val messageComponents = mutableListOf<BaseComponent>()
-            val pattern = Pattern.compile("(\\\$\\{channel\\})|(\\\$\\{mute\\})|(${ChatColor.COLOR_CHAR}[0-9a-f])")
+            val pattern = Pattern.compile("(\\\$\\{channel\\})|(\\\$\\{mute\\})|(${ChatColor.COLOR_CHAR}x(${ChatColor.COLOR_CHAR}[0-9a-f]){6})|(${ChatColor.COLOR_CHAR}[0-9a-f])")
             val template = plugin.messages["listchatchannels-item", mapOf(
                 "color" to ChatColor.of(chatChannel.color).toString()
             )]
@@ -136,17 +136,22 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                         messageComponents.add(unmuteComponent)
                     }
                 } else {
-                    val colorOrFormat = ChatColor.getByChar(matcher.group().drop(1)[0])
-                    if (colorOrFormat?.color != null) {
-                        chatColor = colorOrFormat
-                        chatFormat = null
-                    }
-                    if (colorOrFormat?.color == null) {
-                        chatFormat = colorOrFormat
-                    }
-                    if (colorOrFormat == ChatColor.RESET) {
-                        chatColor = null
-                        chatFormat = null
+                    val match = matcher.group()
+                    if (match.startsWith("${ChatColor.COLOR_CHAR}x") && match.length == 14) {
+                        chatColor = ChatColor.of("#${match[3]}${match[5]}${match[7]}${match[9]}${match[11]}${match[13]}")
+                    } else {
+                        val colorOrFormat = ChatColor.getByChar(match.drop(1)[0])
+                        if (colorOrFormat?.color != null) {
+                            chatColor = colorOrFormat
+                            chatFormat = null
+                        }
+                        if (colorOrFormat?.color == null) {
+                            chatFormat = colorOrFormat
+                        }
+                        if (colorOrFormat == ChatColor.RESET) {
+                            chatColor = null
+                            chatFormat = null
+                        }
                     }
                 }
                 index = matcher.end()
