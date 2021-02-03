@@ -4,7 +4,7 @@ bank-withdraw-invalid-wallet-full: '&cYou cannot withdraw that amount, it would 
 bank-withdraw-invalid-not-enough-money: '&cYou cannot withdraw that amount, your bank balance is not high enough.'
 bank-withdraw-valid: '&aWithdrew ${amount} ${currency}. Wallet balance: ${wallet_balance}. Bank balance: ${bank_balance}'
 bank-deposit-invalid-not-enough-money: '&cYou cannot deposit that amount, your wallet balance is not high enough.'
-bank-deposit-valid: '&aDeposited ${amount} ${currency}. Wallet balance: ${wallet-balance}. Bank balance: ${bank-balance}.'
+bank-deposit-valid: '&aDeposited ${amount} ${currency}. Wallet balance: ${wallet_balance}. Bank balance: ${bank_balance}.'
 bank-balance-valid: '&aBalance: ${amount} ${currency}'
 no-permission-bank-create: '&cYou do not have permission to create banks.'
 no-currency-service: '&cThere is no currency service available.'
