@@ -46,6 +46,8 @@ class RPKBanksBukkit : RPKBukkitPlugin() {
         Metrics(this, 4378)
         saveDefaultConfig()
 
+        messages = BanksMessages(this)
+
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
             saveResource("database.yml", false)
