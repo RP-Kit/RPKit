@@ -47,7 +47,7 @@ class LanguageComponent : DirectedPreFormatPipelineComponent, ConfigurationSeria
         val characterLanguageService = Services[RPKCharacterLanguageService::class.java] ?: return context
         val senderUnderstanding = characterLanguageService.getCharacterLanguageUnderstanding(senderCharacter, language)
         val receiverUnderstanding = characterLanguageService.getCharacterLanguageUnderstanding(receiverCharacter, language)
-        context.message = "[${language.name}] ${language.apply(message, senderUnderstanding, receiverUnderstanding)}"
+        context.message = "[${language.name.value}] ${language.apply(message, senderUnderstanding, receiverUnderstanding)}"
         if (receiverRace != null) {
             characterLanguageService.setCharacterLanguageUnderstanding(
                     receiverCharacter,
