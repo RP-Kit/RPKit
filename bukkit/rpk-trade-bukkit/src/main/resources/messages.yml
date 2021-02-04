@@ -1,4 +1,4 @@
-trader-buy: '&fBought $quantity ${material} from the trader for ${price}'
+trader-buy: '&fBought ${quantity} ${material} from the trader for ${price}'
 trader-sell: '&fSold ${quantity} ${material} to the trader for ${price}'
 trader-invalid-currency: '&cThat trader is not using a valid currency.'
 trader-buy-insufficient-funds: '&cYou can not afford to buy that.'
