@@ -15,9 +15,9 @@
 
 package com.rpkit.locks.bukkit.lock
 
-import com.rpkit.core.bukkit.util.withDisplayName
-import com.rpkit.core.bukkit.util.withLore
-import com.rpkit.core.bukkit.util.withoutLoreMatching
+import com.rpkit.core.bukkit.extension.withDisplayName
+import com.rpkit.core.bukkit.extension.withLore
+import com.rpkit.core.bukkit.extension.withoutLoreMatching
 import com.rpkit.core.service.Services
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.database.table.RPKLockedBlockTable

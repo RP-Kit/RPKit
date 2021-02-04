@@ -16,18 +16,13 @@
 package com.rpkit.blocklog.bukkit.database.table
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
-import com.rpkit.blocklog.bukkit.block.RPKBlockHistory
-import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryId
-import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
-import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChange
-import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChangeId
-import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChangeImpl
+import com.rpkit.blocklog.bukkit.block.*
 import com.rpkit.blocklog.bukkit.database.create
 import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_INVENTORY_CHANGE
 import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
-import com.rpkit.core.bukkit.util.toByteArray
-import com.rpkit.core.bukkit.util.toItemStackArray
+import com.rpkit.core.bukkit.extension.toByteArray
+import com.rpkit.core.bukkit.extension.toItemStackArray
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services

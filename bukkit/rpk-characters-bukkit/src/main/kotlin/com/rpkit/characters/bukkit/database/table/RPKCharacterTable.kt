@@ -23,9 +23,9 @@ import com.rpkit.characters.bukkit.database.create
 import com.rpkit.characters.bukkit.database.jooq.Tables.RPKIT_CHARACTER
 import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.race.RPKRaceService
-import com.rpkit.core.bukkit.util.toByteArray
-import com.rpkit.core.bukkit.util.toItemStack
-import com.rpkit.core.bukkit.util.toItemStackArray
+import com.rpkit.core.bukkit.extension.toByteArray
+import com.rpkit.core.bukkit.extension.toItemStack
+import com.rpkit.core.bukkit.extension.toItemStackArray
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services

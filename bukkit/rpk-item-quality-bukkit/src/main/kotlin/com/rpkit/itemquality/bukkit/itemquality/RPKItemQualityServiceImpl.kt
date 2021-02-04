@@ -15,8 +15,8 @@
 
 package com.rpkit.itemquality.bukkit.itemquality
 
-import com.rpkit.core.bukkit.util.addLore
-import com.rpkit.core.bukkit.util.removeLore
+import com.rpkit.core.bukkit.extension.addLore
+import com.rpkit.core.bukkit.extension.removeLore
 import com.rpkit.itemquality.bukkit.RPKItemQualityBukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material

@@ -29,18 +29,18 @@ class CharacterGroupCommand(private val plugin: RPKPermissionsBukkit) : CommandE
 
     private val characterGroupAddCommand = CharacterGroupAddCommand(plugin)
     private val characterGroupRemoveCommand = CharacterGroupRemoveCommand(plugin)
-    private val characterGroupListCommand = CharacterGroupRemoveCommand(plugin)
+    private val characterGroupViewCommand = CharacterGroupViewCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
             when {
                 args[0].equals("add", ignoreCase = true) -> return characterGroupAddCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
                 args[0].equals("remove", ignoreCase = true) -> return characterGroupRemoveCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
-                args[0].equals("list", ignoreCase = true) -> return characterGroupListCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
-                else -> sender.sendMessage(plugin.messages["character-group-usage"])
+                args[0].equals("view", ignoreCase = true) -> return characterGroupViewCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+                else -> sender.sendMessage(plugin.messages.characterGroupUsage)
             }
         } else {
-            sender.sendMessage(plugin.messages["character-group-usage"])
+            sender.sendMessage(plugin.messages.characterGroupUsage)
         }
         return true
     }

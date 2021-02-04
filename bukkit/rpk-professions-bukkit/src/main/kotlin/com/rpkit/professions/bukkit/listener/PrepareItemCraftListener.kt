@@ -17,7 +17,7 @@
 package com.rpkit.professions.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
-import com.rpkit.core.bukkit.util.addLore
+import com.rpkit.core.bukkit.extension.addLore
 import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService

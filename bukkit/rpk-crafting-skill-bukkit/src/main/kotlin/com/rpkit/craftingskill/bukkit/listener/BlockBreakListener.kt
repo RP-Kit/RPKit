@@ -17,7 +17,7 @@
 package com.rpkit.craftingskill.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
-import com.rpkit.core.bukkit.util.addLore
+import com.rpkit.core.bukkit.extension.addLore
 import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction

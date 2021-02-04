@@ -15,7 +15,7 @@
 
 package com.rpkit.economy.bukkit.currency
 
-import com.rpkit.core.bukkit.util.withDisplayName
+import com.rpkit.core.bukkit.extension.withDisplayName
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import org.bukkit.Material.GOLD_NUGGET
 import org.bukkit.inventory.ItemStack

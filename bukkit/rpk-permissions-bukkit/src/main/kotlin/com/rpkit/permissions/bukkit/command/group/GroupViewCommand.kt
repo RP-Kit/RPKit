@@ -5,66 +5,67 @@ import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class PermissionGroupListCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
+class GroupViewCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
-        if (!sender.hasPermission("rpkit.permissions.command.character.group.list")) {
-            sender.sendMessage(plugin.messages["no-permission-character-group-list"])
+        if (!sender.hasPermission("rpkit.permissions.command.group.view")) {
+            sender.sendMessage(plugin.messages.noPermissionGroupView)
             return true
         }
 
         var playerUUID = sender.uniqueId;
 
         if (args.isNotEmpty()) {
-            val player = Bukkit.getPlayer(args[0]);
+            val player = plugin.server.getPlayer(args[0]);
             if (player != null) {
-                playerUUID = Bukkit.getPlayer(args[0])!!.uniqueId;
+                playerUUID = player.uniqueId;
             } else {
-                sender.sendMessage(plugin.messages["no-player"])
+                sender.sendMessage(plugin.messages.groupViewInvalidPlayer)
                 return true
             }
         }
 
-        val rpkGroupService = Services[RPKGroupService::class.java]
-        if (rpkGroupService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
+        val groupService = Services[RPKGroupService::class.java]
+        if (groupService == null) {
+            sender.sendMessage(plugin.messages.noGroupService)
             return true
         }
 
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
 
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(playerUUID)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true
         }
 
         val profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
-            sender.sendMessage(plugin.messages["no-profile"])
+            sender.sendMessage(plugin.messages.noProfile)
             return true
         }
 
-        sender.sendMessage(plugin.messages["character-group-list-title"])
-        for (group in rpkGroupService.getGroups(profile)) {
+        sender.sendMessage(plugin.messages.groupViewTitle.withParameters(
+            profile = profile
+        ))
+        for (group in groupService.getGroups(profile)) {
             sender.sendMessage(
-                plugin.messages["group-list-item", mapOf(
-                    "group" to group.name.value
-                )]
+                plugin.messages.groupViewItem.withParameters(
+                    group = group
+                )
             )
         }
         return true
