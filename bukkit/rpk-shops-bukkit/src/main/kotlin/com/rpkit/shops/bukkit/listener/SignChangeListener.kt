@@ -108,7 +108,7 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
             }
             event.setLine(0, "$GREEN[shop]")
             if (!event.getLine(3).equals("admin", ignoreCase = true)) {
-                event.setLine(3, character.id.toString())
+                event.setLine(3, character.id?.value.toString())
             } else {
                 if (!event.player.hasPermission("rpkit.shops.sign.shop.admin")) {
                     event.block.breakNaturally()
@@ -116,16 +116,18 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
                     return
                 }
             }
-            event.block.getRelative(DOWN).type = CHEST
-            val chest = event.block.getRelative(DOWN).state
+            val chestBlock = event.block.getRelative(DOWN)
+            chestBlock.type = CHEST
+            val chest = chestBlock.state
             if (chest is Chest) {
                 val chestData = chest.blockData
                 if (chestData is org.bukkit.block.data.type.Chest) {
                     val sign = event.block.state
                     if (sign is Sign) {
                         val signData = sign.blockData
-                        if (signData is org.bukkit.block.data.type.Sign) {
-                            chestData.facing = signData.rotation
+                        if (signData is org.bukkit.block.data.type.WallSign) {
+                            chestData.facing = signData.facing
+                            chest.blockData = chestData
                             chest.update()
                         }
                     }
@@ -170,7 +172,7 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-character"])
                 return
             }
-            event.setLine(1, character.id.toString())
+            event.setLine(1, character.id?.value.toString())
             if (event.getLine(2)?.matches(Regex("\\d+\\s+.+")) != true) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["rent-line-2-invalid"])
