@@ -7,7 +7,6 @@ depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
-- rpk-warp-lib-bukkit
 - rpk-kit-lib-bukkit
 - rpk-drink-lib-bukkit
 - rpk-location-history-lib-bukkit
@@ -21,9 +20,6 @@ commands:
   clone:
     description: Clones the item in your hand
     usage: /<command>
-  deletewarp:
-    description: Deletes a warp
-    usage: /<command> [name]
   distance:
     description: Calculates the distance to a player
     usage: /<command> [player]
@@ -65,9 +61,6 @@ commands:
   kit:
     description: Claims a kit
     usage: /<command> (kit)
-  msg:
-    description: Messages a player
-    usage: /<command> [player] [message]
   repair:
     description: Repairs the item in your hand
     usage: /<command>
@@ -86,9 +79,6 @@ commands:
   setspawn:
     description: Sets the worlds spawn location
     usage: /<command>
-  setwarp:
-    description: Sets a warp at your current location
-    usage: /<command> [name]
   spawn:
     description: Teleports you to your worlds spawn
     usage: /<command>
@@ -115,13 +105,7 @@ commands:
   unsign:
     description: Unsigns written books
     usage: /<command>
-  warp:
-    description: Warps to a location
-    usage: /<command> [warp]
 permissions:
-  rpkit.essentials.sign.warp.create:
-    description: Allows you to create warp signs
-    default: op
   rpkit.essentials.command.back:
     description: Allows you to teleport to the last location teleported to
     default: op
