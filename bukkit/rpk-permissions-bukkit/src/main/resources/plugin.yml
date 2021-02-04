@@ -11,10 +11,10 @@ api-version: '1.16'
 commands:
   group:
     description: Group management command
-    usage: /<command> [add|remove|list]
+    usage: /<command> [add|remove|list|view]
   charactergroup:
     description: Character group management command
-    usage: /<command> [add|remove]
+    usage: /<command> [add|remove|view]
 permissions:
   rpkit.permissions.command.group.list:
     description: Allows listing groups
@@ -25,9 +25,15 @@ permissions:
   rpkit.permissions.command.group.remove:
     description: Allows removing groups from players
     default: op
+  rpkit.permissions.command.group.view:
+    description: Allows viewing a player's groups
+    default: op
   rpkit.permissions.command.charactergroup.add:
     description: Allows adding groups to characters
     default: op
   rpkit.permissions.command.charactergroup.remove:
     description: Allows removing groups from characters
+    default: op
+  rpkit.permissions.command.charactergroup.view:
+    description: Allows viewing a character's groups
     default: op

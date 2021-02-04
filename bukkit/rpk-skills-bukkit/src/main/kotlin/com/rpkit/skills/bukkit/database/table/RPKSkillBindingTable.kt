@@ -18,8 +18,8 @@ package com.rpkit.skills.bukkit.database.table
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
-import com.rpkit.core.bukkit.util.toByteArray
-import com.rpkit.core.bukkit.util.toItemStack
+import com.rpkit.core.bukkit.extension.toByteArray
+import com.rpkit.core.bukkit.extension.toItemStack
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services

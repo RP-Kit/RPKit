@@ -16,8 +16,8 @@
 package com.rpkit.locks.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.bukkit.util.toByteArray
-import com.rpkit.core.bukkit.util.toItemStackArray
+import com.rpkit.core.bukkit.extension.toByteArray
+import com.rpkit.core.bukkit.extension.toItemStackArray
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.locks.bukkit.RPKLocksBukkit

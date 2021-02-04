@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.rpkit.core.bukkit.util
+package com.rpkit.core.bukkit.extension
 
 import net.md_5.bungee.api.ChatColor
-
-import java.awt.Color
 
 operator fun ChatColor.plus(string: String) = toString() + string
 operator fun ChatColor.plus(color: ChatColor) = toString() + color.toString()

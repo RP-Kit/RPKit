@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.rpkit.core.bukkit.util
+package com.rpkit.core.bukkit.extension
 
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.io.BukkitObjectInputStream
