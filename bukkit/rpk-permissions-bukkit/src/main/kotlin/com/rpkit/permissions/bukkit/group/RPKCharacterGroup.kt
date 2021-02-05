@@ -22,5 +22,5 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 class RPKCharacterGroup(
         val character: RPKCharacter,
         val group: RPKGroup,
-        val priority: Int
+        var priority: Int
 )

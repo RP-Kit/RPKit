@@ -34,59 +34,59 @@ class CharacterGroupAddCommand(private val plugin: RPKPermissionsBukkit) : Comma
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.permissions.command.charactergroup.add")) {
-            sender.sendMessage(plugin.messages["no-permission-group-add"])
+            sender.sendMessage(plugin.messages.noPermissionCharacterGroupAdd)
             return true
         }
         if (args.size <= 1) {
-            sender.sendMessage(plugin.messages["character-group-add-usage"])
+            sender.sendMessage(plugin.messages.characterGroupAddUsage)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
         val groupService = Services[RPKGroupService::class.java]
         if (groupService == null) {
-            sender.sendMessage(plugin.messages["no-group-service"])
+            sender.sendMessage(plugin.messages.noGroupService)
             return true
         }
         val bukkitPlayer = plugin.server.getPlayer(args[0])
         if (bukkitPlayer == null) {
-            sender.sendMessage(plugin.messages["character-group-add-invalid-player"])
+            sender.sendMessage(plugin.messages.characterGroupAddInvalidPlayer)
             return true
         }
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileOther)
             return true
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
+            sender.sendMessage(plugin.messages.noCharacterService)
             return true
         }
         val character = characterService.getActiveCharacter(minecraftProfile)
         if (character == null) {
-            sender.sendMessage(plugin.messages["no-character"])
+            sender.sendMessage(plugin.messages.noCharacter)
             return true
         }
         val group = groupService.getGroup(RPKGroupName(args[1]))
         if (group == null) {
-            sender.sendMessage(plugin.messages["character-group-add-invalid-group"])
+            sender.sendMessage(plugin.messages.characterGroupAddInvalidGroup)
             return true
         }
-        if (!sender.hasPermission("rpkit.permissions.command.group.add.${group.name.value}")) {
-            sender.sendMessage(plugin.messages["no-permission-group-add-group", mapOf(
-                    "group" to group.name.value
-            )])
+        if (!sender.hasPermission("rpkit.permissions.command.charactergroup.add.${group.name.value}")) {
+            sender.sendMessage(plugin.messages.noPermissionCharacterGroupAddGroup.withParameters(
+                group = group
+            ))
             return true
         }
         character.addGroup(group)
-        sender.sendMessage(plugin.messages["character-group-add-valid", mapOf(
-                "group" to group.name.value,
-                "character" to character.name
-        )])
+        sender.sendMessage(plugin.messages.characterGroupAddValid.withParameters(
+            group = group,
+            character = character
+        ))
         return true
     }
 
