@@ -97,11 +97,47 @@ interface RPKGroupService : Service {
     fun getGroups(profile: RPKProfile): List<RPKGroup>
 
     /**
+     * Gets group priority for the given group on the given profile
+     *
+     * @param profile The profile
+     * @param group The group
+     * @return The priority of the group on the profile, or null if the group is absent
+     */
+    fun getGroupPriority(profile: RPKProfile, group: RPKGroup): Int?
+
+    /**
+     * Sets group priority for the given group on the given profile
+     *
+     * @param profile The profile
+     * @param group The group
+     * @param priority The priority to set
+     */
+    fun setGroupPriority(profile: RPKProfile, group: RPKGroup, priority: Int)
+
+    /**
      * Gets groups assigned to a character.
      *
      * @oaram character: The character
      * @return A list of groups assigned to the character
      */
     fun getGroups(character: RPKCharacter): List<RPKGroup>
+
+    /**
+     * Gets group priority for the given group on the given character
+     *
+     * @param character The character
+     * @param group The group
+     * @return The priority of the group on the character, or null if the group is absent
+     */
+    fun getGroupPriority(character: RPKCharacter, group: RPKGroup): Int?
+
+    /**
+     * Sets group priority for the given group on the given character
+     *
+     * @param character The character
+     * @param group The group
+     * @param priority The priority to set
+     */
+    fun setGroupPriority(character: RPKCharacter, group: RPKGroup, priority: Int)
 
 }

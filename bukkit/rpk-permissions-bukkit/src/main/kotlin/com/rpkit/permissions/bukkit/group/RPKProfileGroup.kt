@@ -22,5 +22,5 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 class RPKProfileGroup(
         val profile: RPKProfile,
         val group: RPKGroup,
-        val priority: Int
+        var priority: Int
 )

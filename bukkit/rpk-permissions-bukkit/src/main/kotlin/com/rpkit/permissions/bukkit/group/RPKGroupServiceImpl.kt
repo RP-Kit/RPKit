@@ -25,6 +25,7 @@ import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupAssignProfileEvent
 import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupUnassignCharacterEvent
 import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupUnassignProfileEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
@@ -44,9 +45,19 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
                     PermissionDefault.OP
             ))
             plugin.server.pluginManager.addPermission(Permission(
+                "rpkit.permissions.command.charactergroup.add.${group.name.value}",
+                "Allows adding the ${group.name.value} group to players",
+                PermissionDefault.OP
+            ))
+            plugin.server.pluginManager.addPermission(Permission(
                     "rpkit.permissions.command.group.remove.${group.name.value}",
                     "Allows removing the ${group.name.value} group from players",
                     PermissionDefault.OP
+            ))
+            plugin.server.pluginManager.addPermission(Permission(
+                "rpkit.permissions.command.charactergroup.remove.${group.name.value}",
+                "Allows removing the ${group.name.value} group from players",
+                PermissionDefault.OP
             ))
         }
     }
@@ -150,8 +161,37 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
         return plugin.database.getTable(RPKProfileGroupTable::class.java).get(profile).map(RPKProfileGroup::group)
     }
 
+    override fun getGroupPriority(profile: RPKProfile, group: RPKGroup): Int? {
+        val profileGroupTable = plugin.database.getTable(RPKProfileGroupTable::class.java)
+        val profileGroup = profileGroupTable[profile, group] ?: return null
+        return profileGroup.priority
+    }
+
+    override fun setGroupPriority(profile: RPKProfile, group: RPKGroup, priority: Int) {
+        val profileGroupTable = plugin.database.getTable(RPKProfileGroupTable::class.java)
+        val profileGroup = profileGroupTable[profile, group] ?: return
+        profileGroup.priority = priority
+        profileGroupTable.update(profileGroup)
+        Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfiles(profile)
+            ?.forEach(RPKMinecraftProfile::assignPermissions)
+    }
+
     override fun getGroups(character: RPKCharacter): List<RPKGroup> {
         return plugin.database.getTable(RPKCharacterGroupTable::class.java).get(character).map(RPKCharacterGroup::group)
+    }
+
+    override fun getGroupPriority(character: RPKCharacter, group: RPKGroup): Int? {
+        val characterGroupTable = plugin.database.getTable(RPKCharacterGroupTable::class.java)
+        val characterGroup = characterGroupTable[character, group] ?: return null
+        return characterGroup.priority
+    }
+
+    override fun setGroupPriority(character: RPKCharacter, group: RPKGroup, priority: Int) {
+        val characterGroupTable = plugin.database.getTable(RPKCharacterGroupTable::class.java)
+        val characterGroup = characterGroupTable[character, group] ?: return
+        characterGroup.priority = priority
+        characterGroupTable.update(characterGroup)
+        character.minecraftProfile?.assignPermissions()
     }
 
 }

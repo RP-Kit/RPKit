@@ -16,6 +16,7 @@
 
 package com.rpkit.permissions.bukkit.command.charactergroup
 
+import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -30,13 +31,17 @@ class CharacterGroupCommand(private val plugin: RPKPermissionsBukkit) : CommandE
     private val characterGroupAddCommand = CharacterGroupAddCommand(plugin)
     private val characterGroupRemoveCommand = CharacterGroupRemoveCommand(plugin)
     private val characterGroupViewCommand = CharacterGroupViewCommand(plugin)
+    private val characterGroupPrepareSwitchPriorityCommand = CharacterGroupPrepareSwitchPriorityCommand(plugin)
+    private val characterGroupSwitchPriorityCommand = CharacterGroupSwitchPriorityCommand(plugin).toBukkit()
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
-            when {
-                args[0].equals("add", ignoreCase = true) -> return characterGroupAddCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
-                args[0].equals("remove", ignoreCase = true) -> return characterGroupRemoveCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
-                args[0].equals("view", ignoreCase = true) -> return characterGroupViewCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+            when (args[0].toLowerCase()) {
+                "add" -> return characterGroupAddCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+                "remove" -> return characterGroupRemoveCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+                "view" -> return characterGroupViewCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+                "prepareswitchpriority" -> return characterGroupPrepareSwitchPriorityCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+                "switchpriority" -> return characterGroupSwitchPriorityCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
                 else -> sender.sendMessage(plugin.messages.characterGroupUsage)
             }
         } else {

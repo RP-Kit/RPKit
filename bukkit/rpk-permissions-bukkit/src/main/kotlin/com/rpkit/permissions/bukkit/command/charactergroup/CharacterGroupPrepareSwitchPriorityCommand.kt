@@ -1,11 +1,16 @@
-package com.rpkit.permissions.bukkit.command.group
+package com.rpkit.permissions.bukkit.command.charactergroup
 
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.bukkit.extension.levenshtein
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupService
-import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import com.rpkit.permissions.bukkit.group.groups
+import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
+import com.rpkit.players.bukkit.profile.RPKProfileName
+import com.rpkit.players.bukkit.profile.RPKProfileService
 import net.md_5.bungee.api.ChatColor
+import net.md_5.bungee.api.ChatColor.COLOR_CHAR
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ClickEvent.Action.RUN_COMMAND
@@ -16,60 +21,54 @@ import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 
-class GroupViewCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
-
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages.notFromConsole)
-            return true
-        }
-        if (!sender.hasPermission("rpkit.permissions.command.group.view")) {
-            sender.sendMessage(plugin.messages.noPermissionGroupView)
-            return true
-        }
-
-        var playerUUID = sender.uniqueId;
-
-        if (args.isNotEmpty()) {
-            val player = plugin.server.getPlayer(args[0]);
-            if (player != null) {
-                playerUUID = player.uniqueId;
-            } else {
-                sender.sendMessage(plugin.messages.groupViewInvalidPlayer)
-                return true
-            }
-        }
-
+class CharacterGroupPrepareSwitchPriorityCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         val groupService = Services[RPKGroupService::class.java]
         if (groupService == null) {
             sender.sendMessage(plugin.messages.noGroupService)
             return true
         }
-
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
-        if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages.noMinecraftProfileService)
+        if (args.size < 3) {
+            sender.sendMessage(plugin.messages.characterGroupPrepareSwitchPriorityUsage)
             return true
         }
-
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(playerUUID)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages.noMinecraftProfileSelf)
+        val profileName = args.first()
+        val characterName = args.drop(1).dropLast(1).joinToString(" ")
+        val nameParts = profileName.split("#")
+        val name = nameParts[0]
+        val discriminator = nameParts[1].toIntOrNull()
+        if (discriminator == null) {
+            sender.sendMessage(plugin.messages.characterGroupViewInvalidProfileName)
             return true
         }
-
-        val profile = minecraftProfile.profile
-        if (profile !is RPKProfile) {
-            sender.sendMessage(plugin.messages.noProfile)
+        val profileService = Services[RPKProfileService::class.java]
+        if (profileService == null) {
+            sender.sendMessage(plugin.messages.noProfileService)
             return true
         }
-
-        sender.sendMessage(plugin.messages.groupViewTitle.withParameters(
-            profile = profile
-        ))
-        for (group in groupService.getGroups(profile)) {
+        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
+        if (profile == null) {
+            sender.sendMessage(plugin.messages.characterGroupViewInvalidProfile)
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages.noCharacterService)
+            return true
+        }
+        val characters = characterService.getCharacters(profile)
+        if (characters.isEmpty()) {
+            sender.sendMessage(plugin.messages.noCharacter)
+            return true
+        }
+        val character = characters.minByOrNull { args.drop(1).joinToString(" ").levenshtein(it.name) }
+        if (character == null) {
+            sender.sendMessage(plugin.messages.noCharacter)
+            return true
+        }
+        val group1 = args.last()
+        character.groups.forEach { group ->
             val message = plugin.messages.groupViewItem.withParameters(group = group)
             val messageComponents = mutableListOf<BaseComponent>()
             var chatColor: ChatColor? = null
@@ -77,7 +76,7 @@ class GroupViewCommand(private val plugin: RPKPermissionsBukkit) : CommandExecut
             var messageBuffer = StringBuilder()
             var i = 0
             while (i < message.length) {
-                if (message[i] == ChatColor.COLOR_CHAR) {
+                if (message[i] == COLOR_CHAR) {
                     appendComponent(messageComponents, messageBuffer, chatColor, chatFormat)
                     messageBuffer = StringBuilder()
                     if (message[i + 1] == 'x') {
@@ -112,8 +111,8 @@ class GroupViewCommand(private val plugin: RPKPermissionsBukkit) : CommandExecut
                             it.isItalic = chatFormat == ChatColor.ITALIC
                         }
                     }
-                    reorderButton.hoverEvent = HoverEvent(SHOW_TEXT, listOf(Text("Click to switch ${group.name.value}'s priority with another group")))
-                    reorderButton.clickEvent = ClickEvent(RUN_COMMAND, "/group prepareswitchpriority ${minecraftProfile.minecraftUsername.value} ${group.name.value}")
+                    reorderButton.hoverEvent = HoverEvent(SHOW_TEXT, listOf(Text("Click to switch $group1 with ${group.name.value}")))
+                    reorderButton.clickEvent = ClickEvent(RUN_COMMAND, "/charactergroup switchpriority $profileName $characterName $group1 ${group.name.value}")
                     messageComponents.add(reorderButton)
                     i += "\${reorder}".length
                 } else {
@@ -145,5 +144,4 @@ class GroupViewCommand(private val plugin: RPKPermissionsBukkit) : CommandExecut
             }
         })
     }
-
 }

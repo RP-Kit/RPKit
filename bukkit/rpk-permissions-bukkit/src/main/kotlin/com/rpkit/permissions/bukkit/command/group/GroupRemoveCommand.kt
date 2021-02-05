@@ -34,48 +34,54 @@ class GroupRemoveCommand(private val plugin: RPKPermissionsBukkit) : CommandExec
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.permissions.command.group.remove")) {
-            sender.sendMessage(plugin.messages["no-permission-group-remove-group"])
+            sender.sendMessage(plugin.messages.noPermissionGroupRemove)
             return true
         }
         if (args.size <= 1) {
-            sender.sendMessage(plugin.messages["group-remove-usage"])
+            sender.sendMessage(plugin.messages.groupRemoveUsage)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
         val groupService = Services[RPKGroupService::class.java]
         if (groupService == null) {
-            sender.sendMessage(plugin.messages["no-group-service"])
+            sender.sendMessage(plugin.messages.noGroupService)
             return true
         }
         val bukkitPlayer = plugin.server.getPlayer(args[0])
         if (bukkitPlayer == null) {
-            sender.sendMessage(plugin.messages["group-remove-invalid-player"])
+            sender.sendMessage(plugin.messages.groupRemoveInvalidPlayer)
             return true
         }
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileOther)
             return true
         }
         val profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
-            sender.sendMessage(plugin.messages["no-profile"])
+            sender.sendMessage(plugin.messages.noProfile)
             return true
         }
         val group = groupService.getGroup(RPKGroupName(args[1]))
         if (group == null) {
-            sender.sendMessage(plugin.messages["group-remove-invalid-group"])
+            sender.sendMessage(plugin.messages.groupRemoveInvalidGroup)
+            return true
+        }
+        if (!sender.hasPermission("rpkit.permissions.command.group.remove.${group.name.value}")) {
+            sender.sendMessage(plugin.messages.noPermissionGroupRemoveGroup.withParameters(
+                group = group
+            ))
             return true
         }
         profile.removeGroup(group)
-        sender.sendMessage(plugin.messages["group-remove-valid", mapOf(
-            "group" to group.name.value,
-            "player" to minecraftProfile.name
-        )])
+        sender.sendMessage(plugin.messages.groupRemoveValid.withParameters(
+            group = group,
+            profile = profile
+        ))
         return true
     }
 

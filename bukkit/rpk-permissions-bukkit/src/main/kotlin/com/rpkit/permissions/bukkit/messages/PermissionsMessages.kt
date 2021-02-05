@@ -33,9 +33,37 @@ class PermissionsMessages(plugin: RPKPermissionsBukkit) : BukkitMessages(plugin)
         )
     }
 
+    class GroupRemoveValidMessage(private val message: ParameterizedMessage) {
+        fun withParameters(group: RPKGroup, profile: RPKProfile) = message.withParameters(
+            "group" to group.name.value,
+            "player" to profile.name.value
+        )
+    }
+
     class GroupListItemMessage(private val message: ParameterizedMessage) {
         fun withParameters(group: RPKGroup) = message.withParameters(
             "group" to group.name.value
+        )
+    }
+
+    class GroupSwitchPriorityInvalidGroupMessage(private val message: ParameterizedMessage) {
+        fun withParameters(groupName: String) = message.withParameters(
+            "group_name" to groupName
+        )
+    }
+
+    class GroupSwitchPriorityGroupNotPresentMessage(private val message: ParameterizedMessage) {
+        fun withParameters(profile: RPKProfile, group: RPKGroup) = message.withParameters(
+            "profile" to profile.name + profile.discriminator,
+            "group" to group.name.value
+        )
+    }
+
+    class GroupSwitchPriorityValidMessage(private val message: ParameterizedMessage) {
+        fun withParameters(profile: RPKProfile, group1: RPKGroup, group2: RPKGroup) = message.withParameters(
+            "profile" to profile.name + profile.discriminator,
+            "group1" to group1.name.value,
+            "group2" to group2.name.value
         )
     }
 
@@ -50,18 +78,6 @@ class PermissionsMessages(plugin: RPKPermissionsBukkit) : BukkitMessages(plugin)
         fun withParameters(group: RPKGroup, character: RPKCharacter) = message.withParameters(
             "group" to group.name.value,
             "character" to character.name
-        )
-    }
-
-    class NoPermissionGroupAddGroupMessage(private val message: ParameterizedMessage) {
-        fun withParameters(group: RPKGroup) = message.withParameters(
-            "group" to group.name.value
-        )
-    }
-
-    class NoPermissionGroupRemoveGroupMessage(private val message: ParameterizedMessage) {
-        fun withParameters(group: RPKGroup) = message.withParameters(
-            "group" to group.name.value
         )
     }
 
@@ -89,12 +105,57 @@ class PermissionsMessages(plugin: RPKPermissionsBukkit) : BukkitMessages(plugin)
         )
     }
 
+    class CharacterGroupSwitchPriorityInvalidGroupMessage(private val message: ParameterizedMessage) {
+        fun withParameters(groupName: String) = message.withParameters(
+            "group_name" to groupName
+        )
+    }
+
+    class CharacterGroupSwitchPriorityInvalidGroupNotPresentMessage(private val message: ParameterizedMessage) {
+        fun withParameters(character: RPKCharacter, group: RPKGroup) = message.withParameters(
+            "character" to character.name,
+            "group" to group.name.value
+        )
+    }
+
+    class CharacterGroupSwitchPriorityValidMessage(private val message: ParameterizedMessage) {
+        fun withParameters(character: RPKCharacter, group1: RPKGroup, group2: RPKGroup) = message.withParameters(
+            "character" to character.name,
+            "group1" to group1.name.value,
+            "group2" to group2.name.value
+        )
+    }
+
+    class NoPermissionGroupAddGroupMessage(private val message: ParameterizedMessage) {
+        fun withParameters(group: RPKGroup) = message.withParameters(
+            "group" to group.name.value
+        )
+    }
+
+    class NoPermissionGroupRemoveGroupMessage(private val message: ParameterizedMessage) {
+        fun withParameters(group: RPKGroup) = message.withParameters(
+            "group" to group.name.value
+        )
+    }
+
+    class NoPermissionCharacterGroupAddGroupMessage(private val message: ParameterizedMessage) {
+        fun withParameters(group: RPKGroup) = message.withParameters(
+            "group" to group.name.value
+        )
+    }
+
+    class NoPermissionCharacterGroupRemoveGroupMessage(private val message: ParameterizedMessage) {
+        fun withParameters(group: RPKGroup) = message.withParameters(
+            "group" to group.name.value
+        )
+    }
+
     val groupUsage = get("group-usage")
     val groupAddValid = getParameterized("group-add-valid").let(::GroupAddValidMessage)
     val groupAddInvalidGroup = get("group-add-invalid-group")
     val groupAddInvalidPlayer = get("group-add-invalid-player")
     val groupAddUsage = get("group-add-usage")
-    val groupRemoveValid = get("group-remove-valid")
+    val groupRemoveValid = getParameterized("group-remove-valid").let(::GroupRemoveValidMessage)
     val groupRemoveInvalidGroup = get("group-remove-invalid-group")
     val groupRemoveInvalidPlayer = get("group-remove-invalid-player")
     val groupRemoveUsage = get("group-remove-usage")
@@ -103,6 +164,12 @@ class PermissionsMessages(plugin: RPKPermissionsBukkit) : BukkitMessages(plugin)
     val groupViewInvalidPlayer = get("group-view-invalid-player")
     val groupViewTitle = getParameterized("group-view-title").let(::GroupViewTitleMessage)
     val groupViewItem = getParameterized("group-view-item").let(::GroupViewItemMessage)
+    val groupSwitchPriorityUsage = get("group-switch-priority-usage")
+    val groupSwitchPriorityInvalidTarget = get("group-switch-priority-invalid-target")
+    val groupSwitchPriorityInvalidGroup = getParameterized("group-switch-priority-invalid-group").let(::GroupSwitchPriorityInvalidGroupMessage)
+    val groupSwitchPriorityInvalidGroupNotPresent = getParameterized("group-switch-priority-group-not-present").let(::GroupSwitchPriorityGroupNotPresentMessage)
+    val groupSwitchPriorityValid = getParameterized("group-switch-priority-valid").let(::GroupSwitchPriorityValidMessage)
+    val groupPrepareSwitchPriorityUsage = get("group-prepare-switch-priority-usage")
     val characterGroupUsage = get("character-group-usage")
     val characterGroupAddValid = getParameterized("character-group-add-valid").let(::CharacterGroupAddValidMessage)
     val characterGroupAddInvalidGroup = get("character-group-add-invalid-group")
@@ -117,8 +184,16 @@ class PermissionsMessages(plugin: RPKPermissionsBukkit) : BukkitMessages(plugin)
     val characterGroupViewInvalidProfile = get("character-group-view-invalid-profile")
     val characterGroupViewTitle = getParameterized("character-group-view-title").let(::CharacterGroupViewTitleMessage)
     val characterGroupViewItem = getParameterized("character-group-view-item").let(::CharacterGroupViewItemMessage)
+    val characterGroupSwitchPriorityUsage = get("character-group-switch-priority-usage")
+    val characterGroupSwitchPriorityInvalidProfileName = get("character-group-switch-priority-invalid-profile-name")
+    val characterGroupSwitchPriorityInvalidProfile = get("character-group-switch-priority-invalid-profile")
+    val characterGroupSwitchPriorityInvalidGroup = getParameterized("character-group-switch-priority-invalid-group").let(::CharacterGroupSwitchPriorityInvalidGroupMessage)
+    val characterGroupSwitchPriorityInvalidGroupNotPresent = getParameterized("character-group-switch-priority-invalid-group-not-present").let(::CharacterGroupSwitchPriorityInvalidGroupNotPresentMessage)
+    val characterGroupSwitchPriorityValid = getParameterized("character-group-switch-priority-valid").let(::CharacterGroupSwitchPriorityValidMessage)
+    val characterGroupPrepareSwitchPriorityUsage = get("character-group-prepare-switch-priority")
     val noProfile = get("no-profile")
-    val noMinecraftProfile = get("no-minecraft-profile")
+    val noMinecraftProfileSelf = get("no-minecraft-profile-self")
+    val noMinecraftProfileOther = get("no-minecraft-profile-other")
     val noCharacter = get("no-character")
     val noPermissionGroupAdd = get("no-permission-group-add")
     val noPermissionGroupRemove = get("no-permission-group-remove")
@@ -126,7 +201,13 @@ class PermissionsMessages(plugin: RPKPermissionsBukkit) : BukkitMessages(plugin)
     val noPermissionGroupRemoveGroup = getParameterized("no-permission-group-remove-group").let(::NoPermissionGroupRemoveGroupMessage)
     val noPermissionGroupList = get("no-permission-group-list")
     val noPermissionGroupView = get("no-permission-group-view")
+    val noPermissionGroupSwitchPriority = get("no-permission-group-switch-priority")
+    val noPermissionCharacterGroupAdd = get("no-permission-character-group-add")
+    val noPermissionCharacterGroupRemove = get("no-permission-character-group-remove")
+    val noPermissionCharacterGroupAddGroup = getParameterized("no-permission-character-group-add-group").let(::NoPermissionCharacterGroupAddGroupMessage)
+    val noPermissionCharacterGroupRemoveGroup = getParameterized("no-permission-character-group-remove-group").let(::NoPermissionCharacterGroupRemoveGroupMessage)
     val noPermissionCharacterGroupView = get("no-permission-character-group-view")
+    val noPermissionCharacterGroupSwitchPriority = get("no-permission-character-group-switch-priority")
     val noProfileService = get("no-profile-service")
     val noMinecraftProfileService = get("no-minecraft-profile-service")
     val noCharacterService = get("no-character-service")
