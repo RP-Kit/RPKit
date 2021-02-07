@@ -27,8 +27,8 @@ if (propertiesFile.exists()) {
 dependencies {
     implementation group: "mysql", name: "mysql-connector-java", version: "8.0.20"
     implementation group: "org.xerial", name: "sqlite-jdbc", version: "3.31.1"
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.4.21"
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.4.21"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.4.30"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.4.30"
     implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha1"
     implementation group: "com.zaxxer", name: "HikariCP", version: "3.4.5"
     implementation group: "org.flywaydb", name: "flyway-core", version: "6.5.1"
@@ -39,16 +39,23 @@ artifacts {
     archives jar
 }
 
-uploadArchives {
-    repositories.mavenDeployer {
-
-        repository(url: "https://repo.rpkit.com/repository/maven-releases/") {
-            authentication(userName: repoUserName, password: repoPassword)
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username repoUserName
+                password repoPassword
+            }
+            url "https://repo.rpkit.com/repository/maven-releases/"
         }
+    }
+    publications {
+        maven(MavenPublication) { publication ->
+            version = project(":rpk-core").version
+            artifactId = project(":rpk-core").name
+            groupId = project(":rpk-core").group
 
-        pom.version = project(":rpk-core").version
-        pom.artifactId = project(":rpk-core").name
-        pom.groupId = project(":rpk-core").group
-
+            from project(":rpk-core").components.getByName("java")
+        }
     }
 }

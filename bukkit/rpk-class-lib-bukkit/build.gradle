@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+plugins {
+    id "com.github.johnrengelman.shadow" version "6.1.0"
+}
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
@@ -26,8 +29,8 @@ if (propertiesFile.exists()) {
 }
 
 dependencies {
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.4.21"
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.4.21"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.4.30"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.4.30"
     implementation group: "org.spigotmc", name: "spigot-api", version: "1.16.4-R0.1-SNAPSHOT"
     implementation group: "org.bstats", name: "bstats-bukkit", version: "1.7"
     implementation project(":rpk-core")
@@ -43,8 +46,6 @@ processResources {
             "version": version
     ]
 }
-
-apply plugin: "com.github.johnrengelman.shadow"
 
 shadowJar {
 
@@ -68,16 +69,23 @@ artifacts {
     archives shadowJar
 }
 
-uploadArchives {
-    repositories.mavenDeployer {
-
-        repository(url: "https://repo.rpkit.com/repository/maven-releases/") {
-            authentication(userName: repoUserName, password: repoPassword)
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username repoUserName
+                password repoPassword
+            }
+            url "https://repo.rpkit.com/repository/maven-releases/"
         }
+    }
+    publications {
+        maven(MavenPublication) { publication ->
+            version = project(":bukkit:rpk-class-lib-bukkit").version
+            artifactId = project(":bukkit:rpk-class-lib-bukkit").name
+            groupId = project(":bukkit:rpk-class-lib-bukkit").group
 
-        pom.version = project(":bukkit:rpk-class-lib-bukkit").version
-        pom.artifactId = project(":bukkit:rpk-class-lib-bukkit").name
-        pom.groupId = project(":bukkit:rpk-class-lib-bukkit").group
-
+            from project(":bukkit:rpk-class-lib-bukkit").shadow.component(publication)
+        }
     }
 }
