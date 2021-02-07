@@ -26,7 +26,7 @@ if (propertiesFile.exists()) {
 
 dependencies {
     implementation group: "mysql", name: "mysql-connector-java", version: "8.0.23"
-    implementation group: "org.xerial", name: "sqlite-jdbc", version: "3.31.1"
+    implementation group: "org.xerial", name: "sqlite-jdbc", version: "3.34.0"
     implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.4.30"
     implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.4.30"
     implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha1"
