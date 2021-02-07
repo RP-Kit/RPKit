@@ -36,7 +36,7 @@ dependencies {
     implementation group: "org.jooq", name: "jooq", version: "3.14.7"
     implementation group: "org.kohsuke", name: "github-api", version: "1.112"
     implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha1"
-    implementation platform("org.http4k:http4k-bom:3.285.2")
+    implementation platform("org.http4k:http4k-bom:4.3.0.0")
     implementation group: "org.http4k", name: "http4k-core"
     implementation group: "org.http4k", name: "http4k-server-jetty"
     implementation group: "org.http4k", name: "http4k-format-gson"
