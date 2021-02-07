@@ -35,7 +35,7 @@ dependencies {
     implementation group: "org.bstats", name: "bstats-bukkit", version: "1.8"
     implementation group: "com.github.pircbotx", name: "pircbotx", version: "2.2"
     implementation group: "org.jooq", name: "jooq", version: "3.14.7"
-    implementation(group: "net.dv8tion", name: "JDA", version: "4.1.1_155") {
+    implementation(group: "net.dv8tion", name: "JDA", version: "4.2.0_227") {
         exclude module: "opus-java"
     }
     implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha1"
