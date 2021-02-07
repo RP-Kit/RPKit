@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,33 @@
 
 package com.rpkit.locks.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.locks.bukkit.RPKLocksBukkit
-import com.rpkit.locks.bukkit.keyring.RPKKeyringProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.locks.bukkit.keyring.RPKKeyringService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryCloseEvent
 
 
-class InventoryCloseListener(private val plugin: RPKLocksBukkit): Listener {
+class InventoryCloseListener(private val plugin: RPKLocksBukkit) : Listener {
 
     @EventHandler
     fun onInventoryClose(event: InventoryCloseEvent) {
-        if (event.view.title.equals("Keyring", ignoreCase = true)) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val keyringProvider = plugin.core.serviceManager.getServiceProvider(RPKKeyringProvider::class)
-            val bukkitPlayer = event.player
-            if (bukkitPlayer is Player) {
-                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-                if (minecraftProfile != null) {
-                    val character = characterProvider.getActiveCharacter(minecraftProfile)
-                    if (character != null) {
-                        val keyring = keyringProvider.getKeyring(character)
-                        keyring.clear()
-                        keyring.addAll(event.inventory.contents.filterNotNull())
-                        keyringProvider.setKeyring(character, keyring)
-                    }
-                }
-            }
-        }
+        if (!event.view.title.equals("Keyring", ignoreCase = true)) return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val keyringService = Services[RPKKeyringService::class.java] ?: return
+        val bukkitPlayer = event.player
+        if (bukkitPlayer !is Player) return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val keyring = keyringService.getKeyring(character)
+        keyring.clear()
+        keyring.addAll(event.inventory.contents.filterNotNull())
+        keyringService.setKeyring(character, keyring)
     }
 
 }

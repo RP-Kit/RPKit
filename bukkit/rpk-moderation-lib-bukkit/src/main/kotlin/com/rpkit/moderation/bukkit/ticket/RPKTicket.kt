@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +15,14 @@
 
 package com.rpkit.moderation.bukkit.ticket
 
-import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Location
 import java.time.LocalDateTime
 
 
-interface RPKTicket: Entity {
+interface RPKTicket {
 
+    var id: RPKTicketId?
     val reason: String
     val issuer: RPKProfile
     var resolver: RPKProfile?

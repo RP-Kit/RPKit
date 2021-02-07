@@ -16,54 +16,67 @@
 
 package com.rpkit.unconsciousness.bukkit.command
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
-import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProvider
+import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class WakeCommand(private val plugin: RPKUnconsciousnessBukkit): CommandExecutor {
+class WakeCommand(private val plugin: RPKUnconsciousnessBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.unconsciousness.command.wake")) {
             sender.sendMessage(plugin.messages["no-permission-wake"])
             return true
         }
         val target = if (args.isNotEmpty()) plugin.server.getPlayer(args[0]) ?: sender as? Player else sender as? Player
-        if (target != null) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val unconsciousnessProvider = plugin.core.serviceManager.getServiceProvider(RPKUnconsciousnessProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(target)
-            if (minecraftProfile != null) {
-                val character = characterProvider.getActiveCharacter(minecraftProfile)
-                if (character != null) {
-                    if (unconsciousnessProvider.isUnconscious(character)) {
-                        unconsciousnessProvider.setUnconscious(character, false)
-                        sender.sendMessage(plugin.messages["wake-success", mapOf(
-                                Pair("character", character.name)
-                        )])
-                    } else {
-                        sender.sendMessage(plugin.messages["wake-already-awake", mapOf(
-                                Pair("character", character.name)
-                        )])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["no-character-other", mapOf(
-                            Pair("player", minecraftProfile.minecraftUsername)
-                    )])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["no-minecraft-profile-other", mapOf(
-                        Pair("player", target.name)
-                )])
-            }
-        } else {
+        if (target == null) {
             sender.sendMessage(plugin.messages["wake-no-target"])
+            return true
         }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val unconsciousnessService = Services[RPKUnconsciousnessService::class.java]
+        if (unconsciousnessService == null) {
+            sender.sendMessage(plugin.messages["no-unconsciousness-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-other", mapOf(
+                    "player" to target.name
+            )])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null) {
+            sender.sendMessage(plugin.messages["no-character-other", mapOf(
+                    "player" to minecraftProfile.name
+            )])
+            return true
+        }
+        if (!unconsciousnessService.isUnconscious(character)) {
+            sender.sendMessage(plugin.messages["wake-already-awake", mapOf(
+                    "character" to character.name
+            )])
+            return true
+        }
+        unconsciousnessService.setUnconscious(character, false)
+        sender.sendMessage(plugin.messages["wake-success", mapOf(
+                "character" to character.name
+        )])
         return true
     }
 }

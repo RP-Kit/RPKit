@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 
-class TicketListCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class TicketListCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
 
     private val ticketListOpenCommand = TicketListOpenCommand(plugin)
     private val ticketListClosedCommand = TicketListClosedCommand(plugin)

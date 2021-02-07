@@ -21,7 +21,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-class StatAttributeListCommand(private val plugin: RPKStatBuildsBukkit): CommandExecutor {
+class StatAttributeListCommand(private val plugin: RPKStatBuildsBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.statbuilds.command.statattribute.list")) {
@@ -32,10 +32,10 @@ class StatAttributeListCommand(private val plugin: RPKStatBuildsBukkit): Command
         plugin.config.getConfigurationSection("stat-attributes")
                 ?.getKeys(false)
                 ?.forEach { statAttributeName ->
-            sender.sendMessage(plugin.messages["stat-attribute-list-item", mapOf(
-                "stat-attribute" to statAttributeName
-            )])
-        }
+                    sender.sendMessage(plugin.messages["stat-attribute-list-item", mapOf(
+                            "stat_attribute" to statAttributeName
+                    )])
+                }
         return true
     }
 

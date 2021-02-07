@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.bukkit.command.CommandSender
  * Parent for all auction management commands.
  * Currently, the only accepted operation is to create an auction by specifying 'create' or 'new'.
  */
-class AuctionCommand(private val plugin: RPKAuctionsBukkit): CommandExecutor {
+class AuctionCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
 
     private val auctionCreateCommand = AuctionCreateCommand(plugin)
 
@@ -36,10 +36,10 @@ class AuctionCommand(private val plugin: RPKAuctionsBukkit): CommandExecutor {
             if (args[0].equals("create", ignoreCase = true) || args[0].equals("new", ignoreCase = true)) {
                 return auctionCreateCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.messages["auction-usage"])
+                sender.sendMessage(plugin.messages.auctionUsage)
             }
         } else {
-            sender.sendMessage(plugin.messages["auction-usage"])
+            sender.sendMessage(plugin.messages.auctionUsage)
         }
         return true
     }

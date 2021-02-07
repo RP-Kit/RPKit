@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +15,13 @@
 
 package com.rpkit.permissions.bukkit.command.charactergroup
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
-import com.rpkit.permissions.bukkit.group.RPKGroupProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.permissions.bukkit.group.RPKGroupName
+import com.rpkit.permissions.bukkit.group.RPKGroupService
+import com.rpkit.permissions.bukkit.group.removeGroup
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -28,45 +30,63 @@ import org.bukkit.command.CommandSender
  * Group remove command.
  * Removes a group.
  */
-class CharacterGroupRemoveCommand(private val plugin: RPKPermissionsBukkit): CommandExecutor {
+class CharacterGroupRemoveCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("rpkit.permissions.command.charactergroup.remove")) {
-            if (args.size > 1) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val groupProvider = plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class)
-                val bukkitPlayer = plugin.server.getPlayer(args[0])
-                if (bukkitPlayer != null) {
-                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-                    if (minecraftProfile != null) {
-                        val character = characterProvider.getActiveCharacter(minecraftProfile)
-                        if (character != null) {
-                            val group = groupProvider.getGroup(args[1])
-                            if (group != null) {
-                                groupProvider.removeGroup(character, group)
-                                sender.sendMessage(plugin.messages["character-group-remove-valid", mapOf(
-                                        Pair("group", group.name),
-                                        Pair("character", character.name)
-                                )])
-                            } else {
-                                sender.sendMessage(plugin.messages["character-group-remove-invalid-group"])
-                            }
-                        } else {
-                            sender.sendMessage(plugin.messages["no-character"])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["character-group-remove-invalid-player"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["character-group-remove-usage"])
-            }
-        } else {
-            sender.sendMessage(plugin.messages["no-permission-group-remove-group"])
+        if (!sender.hasPermission("rpkit.permissions.command.charactergroup.remove")) {
+            sender.sendMessage(plugin.messages.noPermissionCharacterGroupRemove)
+            return true
         }
+        if (args.size <= 1) {
+            sender.sendMessage(plugin.messages.characterGroupRemoveUsage)
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages.noCharacterService)
+            return true
+        }
+        val groupService = Services[RPKGroupService::class.java]
+        if (groupService == null) {
+            sender.sendMessage(plugin.messages.noGroupService)
+            return true
+        }
+        val bukkitPlayer = plugin.server.getPlayer(args[0])
+        if (bukkitPlayer == null) {
+            sender.sendMessage(plugin.messages.characterGroupRemoveInvalidPlayer)
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages.noMinecraftProfileOther)
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null) {
+            sender.sendMessage(plugin.messages.noCharacter)
+            return true
+        }
+        val group = groupService.getGroup(RPKGroupName(args[1]))
+        if (group == null) {
+            sender.sendMessage(plugin.messages.characterGroupRemoveInvalidGroup)
+            return true
+        }
+        if (!sender.hasPermission("rpkit.permissions.command.charactergroup.remove.${group.name.value}")) {
+            sender.sendMessage(plugin.messages.noPermissionCharacterGroupRemoveGroup.withParameters(
+                group = group
+            ))
+            return true
+        }
+        character.removeGroup(group)
+        sender.sendMessage(plugin.messages.characterGroupRemoveValid.withParameters(
+            group = group,
+            character = character
+        ))
         return true
     }
 

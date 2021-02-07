@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 package com.rpkit.chat.bukkit.command.reply
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -28,38 +29,42 @@ import org.bukkit.entity.Player
  * Reply command.
  * Replies to the last chat group used.
  */
-class ReplyCommand(private val plugin: RPKChatBukkit): CommandExecutor {
+class ReplyCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("rpkit.chat.command.reply")) {
-            if (sender is Player) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
-                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                if (minecraftProfile != null) {
-                    val chatGroup = chatGroupProvider.getLastUsedChatGroup(minecraftProfile)
-                    if (chatGroup != null) {
-                        if (args.isNotEmpty()) {
-                            val message = StringBuilder()
-                            for (arg in args) {
-                                message.append(arg).append(" ")
-                            }
-                            chatGroup.sendMessage(minecraftProfile, message.toString())
-                        } else {
-                            sender.sendMessage(plugin.messages["reply-usage"])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["reply-invalid-chat-group"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["not-from-console"])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.chat.command.reply")) {
             sender.sendMessage(plugin.messages["no-permission-reply"])
+            return true
         }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val chatGroupService = Services[RPKChatGroupService::class.java]
+        if (chatGroupService == null) {
+            sender.sendMessage(plugin.messages["no-chat-group-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val chatGroup = chatGroupService.getLastUsedChatGroup(minecraftProfile)
+        if (chatGroup == null) {
+            sender.sendMessage(plugin.messages["reply-invalid-chat-group"])
+            return true
+        }
+        if (args.isEmpty()) {
+            sender.sendMessage(plugin.messages["reply-usage"])
+            return true
+        }
+        chatGroup.sendMessage(minecraftProfile, args.joinToString(" "))
         return true
     }
 

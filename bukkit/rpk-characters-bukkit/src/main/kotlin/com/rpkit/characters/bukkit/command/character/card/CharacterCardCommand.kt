@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 package com.rpkit.characters.bukkit.command.character.card
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -28,43 +29,51 @@ import org.bukkit.entity.Player
  * Character card command.
  * Displays the character card of the active character of either the player running the command or the specified player.
  */
-class CharacterCardCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class CharacterCardCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender is Player) {
-            if (sender.hasPermission("rpkit.characters.command.character.card.self")) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                var minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                if (sender.hasPermission("rpkit.characters.command.character.card.other")) {
-                    if (args.isNotEmpty()) {
-                        val bukkitPlayer = plugin.server.getPlayer(args[0])
-                        if (bukkitPlayer != null) {
-                            minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-                        }
-                    }
-                }
-                if (minecraftProfile != null) {
-                    val character = characterProvider.getActiveCharacter(minecraftProfile)
-                    if (character != null) {
-                        val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                        if (senderMinecraftProfile != null) {
-                            character.showCharacterCard(senderMinecraftProfile)
-                        } else {
-                            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["no-character"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["no-permission-character-card-self"])
-            }
-        } else {
+        if (sender !is Player) {
             sender.sendMessage(plugin.messages["not-from-console"])
+            return true
         }
+        if (!sender.hasPermission("rpkit.characters.command.character.card.self")) {
+            sender.sendMessage(plugin.messages["no-permission-character-card-self"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        var minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (sender.hasPermission("rpkit.characters.command.character.card.other")) {
+            if (args.isNotEmpty()) {
+                val bukkitPlayer = plugin.server.getPlayer(args[0])
+                if (bukkitPlayer != null) {
+                    minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+                }
+            }
+        }
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null) {
+            sender.sendMessage(plugin.messages["no-character"])
+            return true
+        }
+        val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (senderMinecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        character.showCharacterCard(senderMinecraftProfile)
         return true
     }
 

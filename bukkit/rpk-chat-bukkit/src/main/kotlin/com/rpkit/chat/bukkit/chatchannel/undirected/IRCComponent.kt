@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package com.rpkit.chat.bukkit.chatchannel.undirected
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.context.UndirectedChatChannelMessageContext
-import com.rpkit.chat.bukkit.irc.RPKIRCProvider
+import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
+import com.rpkit.chat.bukkit.context.UndirectedMessageContext
+import com.rpkit.chat.bukkit.irc.IRCChannel
+import com.rpkit.chat.bukkit.irc.RPKIRCService
+import com.rpkit.core.service.Services
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
@@ -32,15 +34,15 @@ import org.bukkit.configuration.serialization.SerializableAs
 @SerializableAs("IRCComponent")
 class IRCComponent(
         private val plugin: RPKChatBukkit,
-        val ircChannel: String,
+        val ircChannel: IRCChannel,
         val isIRCWhitelisted: Boolean
-): UndirectedChatChannelPipelineComponent, ConfigurationSerializable {
+) : UndirectedPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: UndirectedChatChannelMessageContext): UndirectedChatChannelMessageContext {
+    override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         if (!context.isCancelled) {
-            val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
-            if (ircProvider.ircBot.isConnected) {
-                ircProvider.ircBot.sendIRC().message(ircChannel, ChatColor.stripColor(context.message))
+            val ircService = Services[RPKIRCService::class.java] ?: return context
+            if (ircService.isConnected) {
+                ircService.sendMessage(ircChannel, ChatColor.stripColor(context.message)!!)
             }
         }
         return context
@@ -48,8 +50,8 @@ class IRCComponent(
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-                Pair("irc-channel", ircChannel),
-                Pair("irc-whitelisted", isIRCWhitelisted)
+                "irc-channel" to ircChannel.name,
+                "irc-whitelisted" to isIRCWhitelisted
         )
     }
 
@@ -58,7 +60,7 @@ class IRCComponent(
         fun deserialize(serialized: MutableMap<String, Any>): IRCComponent {
             return IRCComponent(
                     Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
-                    serialized["irc-channel"] as String,
+                    IRCChannel(serialized["irc-channel"] as String),
                     serialized["irc-whitelisted"] as Boolean
             )
         }

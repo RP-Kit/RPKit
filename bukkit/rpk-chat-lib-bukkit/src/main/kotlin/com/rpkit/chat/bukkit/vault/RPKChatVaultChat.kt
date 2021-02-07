@@ -17,8 +17,9 @@
 package com.rpkit.chat.bukkit.vault
 
 import com.rpkit.chat.bukkit.RPKChatLibBukkit
-import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.chat.bukkit.prefix.RPKPrefixService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.permission.Permission
@@ -26,11 +27,11 @@ import net.milkbowl.vault.permission.Permission
 /**
  * A Vault [Chat] implementation for chat plugins.
  */
-class RPKChatVaultChat(private val plugin: RPKChatLibBukkit): Chat(plugin.server.servicesManager.getRegistration(Permission::class.java)?.provider) {
+class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.server.servicesManager.getRegistration(Permission::class.java)?.provider) {
 
     override fun getGroupPrefix(world: String, group: String): String {
-        val prefixProvider = plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class)
-        return prefixProvider.getPrefix(group)?.prefix?:""
+        val prefixService = Services[RPKPrefixService::class.java]
+        return prefixService?.getPrefix(group)?.prefix ?: ""
     }
 
     override fun getName(): String {
@@ -58,22 +59,22 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit): Chat(plugin.server
     }
 
     override fun getPlayerPrefix(world: String, playerName: String): String {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val prefixProvider = plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        val prefixService = Services[RPKPrefixService::class.java]
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService?.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
             if (profile is RPKProfile) {
-                return prefixProvider.getPrefix(profile)
+                return prefixService?.getPrefix(profile) ?: ""
             }
         }
         return ""
     }
 
     override fun setGroupPrefix(world: String, group: String, prefix: String) {
-        val prefixProvider = plugin.core.serviceManager.getServiceProvider(RPKPrefixProvider::class)
-        prefixProvider.getPrefix(group)?.prefix = prefix
+        val prefixService = Services[RPKPrefixService::class.java]
+        prefixService?.getPrefix(group)?.prefix = prefix
     }
 
     override fun setPlayerInfoDouble(world: String, playerName: String, node: String, value: Double) {

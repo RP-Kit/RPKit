@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +15,13 @@
 
 package com.rpkit.professions.bukkit.profession
 
-import com.rpkit.core.database.Entity
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
 import org.bukkit.Material
 
 
-interface RPKProfession: Entity {
+interface RPKProfession {
 
-    val name: String
+    val name: RPKProfessionName
     val maxLevel: Int
     fun getAmountFor(action: RPKCraftingAction, material: Material, level: Int): Double
     fun getQualityFor(action: RPKCraftingAction, material: Material, level: Int): RPKItemQuality?

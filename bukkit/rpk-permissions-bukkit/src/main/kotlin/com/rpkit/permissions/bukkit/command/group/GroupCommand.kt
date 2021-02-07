@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.rpkit.permissions.bukkit.command.group
 
+import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -25,22 +26,28 @@ import org.bukkit.command.CommandSender
  * Group command.
  * Parent command for all group management commands.
  */
-class GroupCommand(private val plugin: RPKPermissionsBukkit): CommandExecutor {
+class GroupCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
 
     private val groupAddCommand = GroupAddCommand(plugin)
     private val groupRemoveCommand = GroupRemoveCommand(plugin)
     private val groupListCommand = GroupListCommand(plugin)
+    private val groupViewCommand = GroupViewCommand(plugin)
+    private val groupPrepareSwitchPriorityCommand = GroupPrepareSwitchPriorityCommand(plugin)
+    private val groupSwitchPriorityCommand = GroupSwitchPriorityCommand(plugin).toBukkit()
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.isNotEmpty()) {
-            when {
-                args[0].equals("add", ignoreCase = true) -> return groupAddCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
-                args[0].equals("remove", ignoreCase = true) -> return groupRemoveCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
-                args[0].equals("list", ignoreCase = true) -> return groupListCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
-                else -> sender.sendMessage(plugin.messages["group-usage"])
-            }
-        } else {
+        if (args.isEmpty()) {
             sender.sendMessage(plugin.messages["group-usage"])
+            return true
+        }
+        when (args[0].toLowerCase()) {
+            "add" -> return groupAddCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+            "remove" -> return groupRemoveCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+            "list" -> return groupListCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+            "view" -> return groupViewCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+            "prepareswitchpriority" -> return groupPrepareSwitchPriorityCommand.onCommand(sender, command, label, args.drop(1).toTypedArray()   )
+            "switchpriority" -> return groupSwitchPriorityCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
+            else -> sender.sendMessage(plugin.messages.groupUsage)
         }
         return true
     }

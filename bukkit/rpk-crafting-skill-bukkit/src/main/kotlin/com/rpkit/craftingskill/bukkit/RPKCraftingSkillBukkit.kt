@@ -18,28 +18,87 @@ package com.rpkit.craftingskill.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.command.craftingskill.CraftingSkillCommand
-import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillProviderImpl
+import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillService
+import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillServiceImpl
 import com.rpkit.craftingskill.bukkit.database.table.RPKCraftingExperienceTable
-import com.rpkit.craftingskill.bukkit.listener.*
+import com.rpkit.craftingskill.bukkit.listener.BlockBreakListener
+import com.rpkit.craftingskill.bukkit.listener.CraftItemListener
+import com.rpkit.craftingskill.bukkit.listener.InventoryClickListener
+import com.rpkit.craftingskill.bukkit.listener.PrepareItemCraftListener
+import com.rpkit.craftingskill.bukkit.listener.RPKBukkitCharacterDeleteListener
+import com.rpkit.craftingskill.bukkit.messages.CraftingSkillMessages
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
 
-class RPKCraftingSkillBukkit: RPKBukkitPlugin() {
+class RPKCraftingSkillBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
+    lateinit var messages: CraftingSkillMessages
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.craftingskill.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 5350)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKCraftingSkillProviderImpl(this)
+
+        messages = CraftingSkillMessages(this)
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/craftingskill/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/craftingskill/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_crafting_skill"
+                ),
+                classLoader
         )
-    }
-
-    override fun createTables(database: Database) {
         database.addTable(RPKCraftingExperienceTable(database, this))
+
+        Services[RPKCraftingSkillService::class.java] = RPKCraftingSkillServiceImpl(this)
+
+        registerListeners()
+        registerCommands()
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
                 RPKBukkitCharacterDeleteListener(this),
                 BlockBreakListener(this),
@@ -49,23 +108,8 @@ class RPKCraftingSkillBukkit: RPKBukkitPlugin() {
         )
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("craftingskill")?.setExecutor(CraftingSkillCommand(this))
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("no-character", "&cYou need to have a character to perform this action.")
-        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("not-from-console", "&cYou may not use this command from console.")
-        messages.setDefault("craft-experience", "&aCrafting experience gained: &e\$received-experience &7(Total: \$total-experience)")
-        messages.setDefault("mine-experience", "&aMining experience gained: &e\$received-experience &7(Total: \$total-experience)")
-        messages.setDefault("smelt-experience", "&aSmelting experience gained: &e\$received-experience &7(Total: \$total-experience)")
-        messages.setDefault("no-permission-crafting-skill", "&cYou do not have permission to view your crafting skill.")
-        messages.setDefault("crafting-skill-usage", "&cUsage: /craftingskill [craft|smelt|mine] [material]")
-        messages.setDefault("crafting-skill-actions-title", "&7Actions:")
-        messages.setDefault("crafting-skill-actions-item", "&7 - &f\$action")
-        messages.setDefault("crafting-skill-invalid-material", "&cInvalid material")
-        messages.setDefault("crafting-skill-valid", "&aCrafting skill for &7\$action &a- &7\$material &a- &e\$total-experience/\$max-experience")
     }
 
 }

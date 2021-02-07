@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,28 +26,26 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
 
-class RPKBukkitCharacterDeleteListener(private val plugin: RPKProfessionsBukkit): Listener {
+class RPKBukkitCharacterDeleteListener(private val plugin: RPKProfessionsBukkit) : Listener {
 
     @EventHandler
     fun onCharacterDelete(event: RPKBukkitCharacterDeleteEvent) {
-        val characterProfessionChangeCooldownTable = plugin.core.database.getTable(RPKCharacterProfessionChangeCooldownTable::class)
+        val characterProfessionChangeCooldownTable = plugin.database.getTable(RPKCharacterProfessionChangeCooldownTable::class.java)
         val characterProfessionChangeCooldown = characterProfessionChangeCooldownTable.get(event.character)
         if (characterProfessionChangeCooldown != null) {
             characterProfessionChangeCooldownTable.delete(characterProfessionChangeCooldown)
         }
 
-        val characterProfessionExperienceTable = plugin.core.database.getTable(RPKCharacterProfessionExperienceTable::class)
-        characterProfessionExperienceTable.get(event.character).forEach { characterProfessionExperience ->
-            characterProfessionExperienceTable.delete(characterProfessionExperience)
-        }
+        val characterProfessionExperienceTable = plugin.database.getTable(RPKCharacterProfessionExperienceTable::class.java)
+        characterProfessionExperienceTable.delete(event.character)
 
-        val characterProfessionTable = plugin.core.database.getTable(RPKCharacterProfessionTable::class)
-        characterProfessionTable.get(event.character).forEach { characterProfession ->
+        val characterProfessionTable = plugin.database.getTable(RPKCharacterProfessionTable::class.java)
+        characterProfessionTable[event.character].forEach { characterProfession ->
             characterProfessionTable.delete(characterProfession)
         }
 
-        val professionHiddenTable = plugin.core.database.getTable(RPKProfessionHiddenTable::class)
-        val professionHidden = professionHiddenTable.get(event.character)
+        val professionHiddenTable = plugin.database.getTable(RPKProfessionHiddenTable::class.java)
+        val professionHidden = professionHiddenTable[event.character]
         if (professionHidden != null) {
             professionHiddenTable.delete(professionHidden)
         }

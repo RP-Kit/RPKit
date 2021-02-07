@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package com.rpkit.payments.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.payments.bukkit.RPKPaymentsBukkit
-import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -27,22 +27,18 @@ import org.bukkit.event.player.PlayerJoinEvent
 /**
  * Player join listener for sending payment notifications.
  */
-class PlayerJoinListener(private val plugin: RPKPaymentsBukkit): Listener {
+class PlayerJoinListener : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
-        if (minecraftProfile != null) {
-            val character = characterProvider.getActiveCharacter(minecraftProfile)
-            if (character != null) {
-                paymentNotificationProvider.getPaymentNotificationsFor(character).forEach { notification ->
-                    event.player.sendMessage(notification.text)
-                    paymentNotificationProvider.removePaymentNotification(notification)
-                }
-            }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val paymentNotificationService = Services[RPKPaymentNotificationService::class.java] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        paymentNotificationService.getPaymentNotificationsFor(character).forEach { notification ->
+            event.player.sendMessage(notification.text)
+            paymentNotificationService.removePaymentNotification(notification)
         }
     }
 

@@ -10,15 +10,15 @@ depend:
 - rpk-skill-lib-bukkit
 - rpk-experience-lib-bukkit
 - rpk-class-lib-bukkit
-api-version: '1.15'
+api-version: '1.16'
 commands:
-    class:
-        description: Class management command
-        usage: /<command> [set|list]
+  class:
+    description: Class management command
+    usage: /<command> [set|list]
 permissions:
-    rpkit.classes.command.class.set:
-        description: Allows setting your class
-        default: true
-    rpkit.classes.command.class.list:
-        description: Allows listing classes
-        default: true
+  rpkit.classes.command.class.set:
+    description: Allows setting your class
+    default: true
+  rpkit.classes.command.class.list:
+    description: Allows listing classes
+    default: true

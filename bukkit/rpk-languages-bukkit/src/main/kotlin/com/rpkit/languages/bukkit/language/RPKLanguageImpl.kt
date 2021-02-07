@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,23 +19,23 @@ import com.rpkit.characters.bukkit.race.RPKRace
 import kotlin.random.Random
 
 class RPKLanguageImpl(
-        override val name: String,
+        override val name: RPKLanguageName,
         private val baseUnderstanding: Map<String, Float>,
         private val minimumUnderstandingIncrement: Map<String, Float>,
         private val maximumUnderstandingIncrement: Map<String, Float>,
         private val cypher: Map<String, String>
-): RPKLanguage {
+) : RPKLanguage {
 
     override fun getBaseUnderstanding(race: RPKRace): Float {
-        return baseUnderstanding[race.name] ?: 0f
+        return baseUnderstanding[race.name.value] ?: 0f
     }
 
     override fun getMinimumUnderstandingIncrement(race: RPKRace): Float {
-        return minimumUnderstandingIncrement[race.name] ?: 0f
+        return minimumUnderstandingIncrement[race.name.value] ?: 0f
     }
 
     override fun getMaximumUnderstandingIncrement(race: RPKRace): Float {
-        return maximumUnderstandingIncrement[race.name] ?: 0f
+        return maximumUnderstandingIncrement[race.name.value] ?: 0f
     }
 
     override fun randomUnderstandingIncrement(race: RPKRace): Float {

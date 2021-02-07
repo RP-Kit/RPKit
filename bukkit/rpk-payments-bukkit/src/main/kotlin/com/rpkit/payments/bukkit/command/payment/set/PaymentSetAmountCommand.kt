@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,22 +15,28 @@
 
 package com.rpkit.payments.bukkit.command.payment.set
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
-import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.NumericPrompt
+import org.bukkit.conversations.Prompt
 import org.bukkit.entity.Player
 
 /**
  * Payment set amount command.
  * Sets the amount a payment group charges.
  */
-class PaymentSetAmountCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
+class PaymentSetAmountCommand(private val plugin: RPKPaymentsBukkit) : CommandExecutor {
 
     private val conversationFactory = ConversationFactory(plugin)
             .withModality(true)
@@ -48,45 +53,58 @@ class PaymentSetAmountCommand(private val plugin: RPKPaymentsBukkit): CommandExe
             }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("rpkit.payments.command.payment.set.amount")) {
-            if (sender is Player) {
-                if (args.isNotEmpty()) {
-                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                    if (minecraftProfile != null) {
-                        val character = characterProvider.getActiveCharacter(minecraftProfile)
-                        val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-                        val paymentGroup = paymentGroupProvider.getPaymentGroup(args.joinToString(" "))
-                        if (paymentGroup != null) {
-                            if (paymentGroup.owners.contains(character)) {
-                                val conversation = conversationFactory.buildConversation(sender)
-                                conversation.context.setSessionData("payment_group", paymentGroup)
-                                conversation.begin()
-                            } else {
-                                sender.sendMessage(plugin.messages["payment-set-amount-invalid-owner"])
-                            }
-                        } else {
-                            sender.sendMessage(plugin.messages["payment-set-amount-invalid-group"])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["payment-set-amount-usage"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["not-from-console"])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.payments.command.payment.set.amount")) {
             sender.sendMessage(plugin.messages["no-permission-payment-set-amount"])
+            return true
         }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        if (args.isEmpty()) {
+            sender.sendMessage(plugin.messages["payment-set-amount-usage"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        val paymentGroupService = Services[RPKPaymentGroupService::class.java]
+        if (paymentGroupService == null) {
+            sender.sendMessage(plugin.messages["no-payment-group-service"])
+            return true
+        }
+        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" ")))
+        if (paymentGroup == null) {
+            sender.sendMessage(plugin.messages["payment-set-amount-invalid-group"])
+            return true
+        }
+        if (!paymentGroup.owners.contains(character)) {
+            sender.sendMessage(plugin.messages["payment-set-amount-invalid-owner"])
+            return true
+        }
+        val conversation = conversationFactory.buildConversation(sender)
+        conversation.context.setSessionData("payment_group", paymentGroup)
+        conversation.begin()
         return true
     }
 
-    private inner class AmountPrompt: NumericPrompt() {
+    private inner class AmountPrompt : NumericPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
+            if (Services[RPKPaymentGroupService::class.java] == null) return plugin.messages["no-payment-group-service"]
             return plugin.messages["payment-set-amount-prompt"]
         }
 
@@ -95,16 +113,16 @@ class PaymentSetAmountCommand(private val plugin: RPKPaymentsBukkit): CommandExe
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
-            val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
+            val paymentGroupService = Services[RPKPaymentGroupService::class.java] ?: return END_OF_CONVERSATION
             val paymentGroup = context.getSessionData("payment_group") as RPKPaymentGroup
             paymentGroup.amount = input.toInt()
-            paymentGroupProvider.updatePaymentGroup(paymentGroup)
+            paymentGroupService.updatePaymentGroup(paymentGroup)
             return AmountSetPrompt()
         }
 
     }
 
-    private inner class AmountSetPrompt: MessagePrompt() {
+    private inner class AmountSetPrompt : MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return END_OF_CONVERSATION

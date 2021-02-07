@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,52 +16,21 @@
 
 package com.rpkit.core.bukkit.plugin
 
-import com.rpkit.core.RPKCore
-import com.rpkit.core.database.Database
-import com.rpkit.core.message.Messages
-import com.rpkit.core.service.ServiceProvider
-import com.rpkit.core.web.RPKServlet
+import com.rpkit.core.plugin.RPKPlugin
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
-import java.sql.SQLException
 
 /**
  * Represents an RPK plugin.
- * Provides convenience methods for registering listeners, commands, database tables, and provides service providers and
+ * Provides convenience methods for registering listeners, commands, database tables, and provides service services and
  * servlets.
  */
-abstract class RPKBukkitPlugin: JavaPlugin() {
-
-    lateinit var core: RPKCore
-    lateinit var messages: Messages
-
-    open fun onPostEnable() {
-
-    }
-
-    open fun registerCommands() {
-
-    }
-
-    open fun registerListeners() {
-
-    }
+abstract class RPKBukkitPlugin : JavaPlugin(), RPKPlugin {
 
     fun registerListeners(vararg listeners: Listener) {
         for (listener in listeners) {
             server.pluginManager.registerEvents(listener, this)
         }
-    }
-
-    @Throws(SQLException::class)
-    open fun createTables(database: Database) {
-    }
-
-    var serviceProviders = arrayOf<ServiceProvider>()
-    var servlets = arrayOf<RPKServlet>()
-
-    open fun setDefaultMessages() {
-
     }
 
 }

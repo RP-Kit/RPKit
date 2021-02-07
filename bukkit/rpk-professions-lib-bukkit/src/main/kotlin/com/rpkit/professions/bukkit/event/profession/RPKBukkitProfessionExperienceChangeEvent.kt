@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,11 @@ class RPKBukkitProfessionExperienceChangeEvent(
         override val profession: RPKProfession,
         override val oldExperience: Int,
         override var experience: Int
-): RPKBukkitEvent(), RPKProfessionExperienceChangeEvent, Cancellable {
+) : RPKBukkitEvent(), RPKProfessionExperienceChangeEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +17,6 @@ package com.rpkit.auctions.bukkit.auction
 
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
@@ -26,7 +24,12 @@ import org.bukkit.inventory.ItemStack
 /**
  * Represents an auction.
  */
-interface RPKAuction: Entity {
+interface RPKAuction {
+
+    /**
+     * The auction ID. Guaranteed to be unique.
+     */
+    var id: RPKAuctionId?
 
     /**
      * The item being auctioned.

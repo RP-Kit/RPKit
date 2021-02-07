@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,11 @@ import org.bukkit.event.HandlerList
 class RPKBukkitGroupUnassignCharacterEvent(
         override val group: RPKGroup,
         override val character: RPKCharacter
-): RPKBukkitEvent(), RPKGroupUnassignCharacterEvent, Cancellable {
+) : RPKBukkitEvent(), RPKGroupUnassignCharacterEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +16,8 @@
 package com.rpkit.chat.bukkit.chatchannel.undirected
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.context.UndirectedChatChannelMessageContext
+import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
+import com.rpkit.chat.bukkit.context.UndirectedMessageContext
 import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
@@ -27,16 +26,16 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 /**
  * Log component.
  * Logs messages to a dated log file.
  */
 @SerializableAs("LogComponent")
-class LogComponent(private val plugin: RPKChatBukkit): UndirectedChatChannelPipelineComponent, ConfigurationSerializable {
+class LogComponent(private val plugin: RPKChatBukkit) : UndirectedPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: UndirectedChatChannelMessageContext): UndirectedChatChannelMessageContext {
+    override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         val logDirectory = File(plugin.dataFolder, "logs")
         val logDateFormat = SimpleDateFormat("yyyy-MM-dd")
         val datedLogDirectory = File(logDirectory, logDateFormat.format(Date()))
@@ -44,7 +43,7 @@ class LogComponent(private val plugin: RPKChatBukkit): UndirectedChatChannelPipe
             if (!datedLogDirectory.mkdirs())
                 throw IOException("Could not create log directory. Does the server have permission to write to the directory?")
         }
-        val log = File(datedLogDirectory, context.chatChannel.name + ".log")
+        val log = File(datedLogDirectory, context.chatChannel.name.value + ".log")
         if (!log.exists()) {
             if (!log.createNewFile())
                 throw IOException("Failed to create log file. Does the server have permission to write to the directory?")

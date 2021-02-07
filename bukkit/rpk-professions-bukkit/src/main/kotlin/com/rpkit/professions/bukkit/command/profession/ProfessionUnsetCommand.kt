@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +15,18 @@
 
 package com.rpkit.professions.bukkit.command.profession
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
-import com.rpkit.professions.bukkit.profession.RPKProfessionProvider
+import com.rpkit.professions.bukkit.profession.RPKProfessionName
+import com.rpkit.professions.bukkit.profession.RPKProfessionService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class ProfessionUnsetCommand(val plugin: RPKProfessionsBukkit): CommandExecutor {
+class ProfessionUnsetCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.professions.command.profession.unset")) {
@@ -63,8 +64,12 @@ class ProfessionUnsetCommand(val plugin: RPKProfessionsBukkit): CommandExecutor 
             sender.sendMessage(plugin.messages["profession-unset-usage"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(target)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
         if (minecraftProfile == null) {
             if (target == sender) {
                 sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
@@ -75,8 +80,12 @@ class ProfessionUnsetCommand(val plugin: RPKProfessionsBukkit): CommandExecutor 
             }
             return true
         }
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val character = characterProvider.getActiveCharacter(minecraftProfile)
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
         if (character == null) {
             if (target == sender) {
                 sender.sendMessage(plugin.messages["no-character-self"])
@@ -87,31 +96,35 @@ class ProfessionUnsetCommand(val plugin: RPKProfessionsBukkit): CommandExecutor 
             }
             return true
         }
-        val professionProvider = plugin.core.serviceManager.getServiceProvider(RPKProfessionProvider::class)
-        val profession = professionProvider.getProfession(args[argsOffset])
+        val professionService = Services[RPKProfessionService::class.java]
+        if (professionService == null) {
+            sender.sendMessage(plugin.messages["no-profession-service"])
+            return true
+        }
+        val profession = professionService.getProfession(RPKProfessionName(args[argsOffset]))
         if (profession == null) {
             sender.sendMessage(plugin.messages["profession-unset-invalid-profession"])
             return true
         }
-        if (!professionProvider.getProfessions(character).contains(profession)) {
+        if (!professionService.getProfessions(character).contains(profession)) {
             sender.sendMessage(plugin.messages["profession-unset-invalid-not-using-profession"])
             return true
         }
         if (target == sender) {
-            val professionChangeCooldown = professionProvider.getProfessionChangeCooldown(character)
+            val professionChangeCooldown = professionService.getProfessionChangeCooldown(character)
             if (!professionChangeCooldown.isZero) {
                 sender.sendMessage(plugin.messages["profession-unset-invalid-on-cooldown", mapOf(
-                        "cooldown-days" to professionChangeCooldown.toDays().toString(),
-                        "cooldown-hours" to (professionChangeCooldown.toHours() % 24).toString(),
-                        "cooldown-minutes" to (professionChangeCooldown.toMinutes() % 60).toString(),
-                        "cooldown-seconds" to (professionChangeCooldown.seconds % 60).toString()
+                        "cooldown_days" to professionChangeCooldown.toDays().toString(),
+                        "cooldown_hours" to (professionChangeCooldown.toHours() % 24).toString(),
+                        "cooldown_minutes" to (professionChangeCooldown.toMinutes() % 60).toString(),
+                        "cooldown_seconds" to (professionChangeCooldown.seconds % 60).toString()
                 )])
                 return true
             }
         }
-        professionProvider.removeProfession(character, profession)
+        professionService.removeProfession(character, profession)
         sender.sendMessage(plugin.messages["profession-unset-valid", mapOf(
-                "profession" to profession.name
+                "profession" to profession.name.value
         )])
         return true
     }

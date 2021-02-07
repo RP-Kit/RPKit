@@ -28,12 +28,11 @@ import org.bukkit.plugin.ServicePriority
  * With this plugin loaded, a Vault economy service is added for banks plugins on [ServicePriority.High].
  * If banks plugins wish to provide their own economy service, they should register on [ServicePriority.Highest]
  */
-class RPKBankLibBukkit: RPKBukkitPlugin() {
+class RPKBankLibBukkit : RPKBukkitPlugin() {
 
 
     override fun onEnable() {
         Metrics(this, 4377)
-        serviceProviders = arrayOf()
         if (server.pluginManager.getPlugin("Vault") != null) {
             server.servicesManager.register(Economy::class.java, RPKBanksVaultEconomy(this), this, ServicePriority.High)
         }

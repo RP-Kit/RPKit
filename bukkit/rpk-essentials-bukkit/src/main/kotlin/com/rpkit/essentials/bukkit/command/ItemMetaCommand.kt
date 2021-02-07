@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
@@ -25,14 +41,14 @@ class ItemMetaCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                             val name = ChatColor.translateAlternateColorCodes('&', args.drop(1).joinToString(" "))
                             meta.setDisplayName(name)
                             sender.sendMessage(plugin.messages["item-meta-set-name-valid", mapOf(
-                                    Pair("name", name)
+                                "name" to name
                             )])
                         } else if (args[0].equals("addlore", ignoreCase = true)) {
                             val lore = meta.lore ?: mutableListOf<String>()
                             val loreItem = ChatColor.translateAlternateColorCodes('&', args.drop(1).joinToString(" "))
                             lore.add(loreItem)
                             sender.sendMessage(plugin.messages["item-meta-add-lore-valid", mapOf(
-                                    Pair("lore", loreItem)
+                                "lore" to loreItem
                             )])
                             meta.lore = lore
                         } else if (args[0].equals("removelore", ignoreCase = true)) {
@@ -42,7 +58,7 @@ class ItemMetaCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                                 if (lore.contains(loreItem)) {
                                     lore.remove(loreItem)
                                     sender.sendMessage(plugin.messages["item-meta-remove-lore-valid", mapOf(
-                                            Pair("lore", loreItem)
+                                        "lore" to loreItem
                                     )])
                                 } else {
                                     sender.sendMessage(plugin.messages["item-meta-remove-lore-invalid-lore-item"])

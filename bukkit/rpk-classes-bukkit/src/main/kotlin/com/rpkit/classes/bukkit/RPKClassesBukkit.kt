@@ -17,103 +17,120 @@
 package com.rpkit.classes.bukkit
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldProvider
+import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
 import com.rpkit.classes.bukkit.character.ClassField
-import com.rpkit.classes.bukkit.classes.RPKClassProvider
-import com.rpkit.classes.bukkit.classes.RPKClassProviderImpl
+import com.rpkit.classes.bukkit.classes.RPKClassService
+import com.rpkit.classes.bukkit.classes.RPKClassServiceImpl
 import com.rpkit.classes.bukkit.command.`class`.ClassCommand
 import com.rpkit.classes.bukkit.database.table.RPKCharacterClassTable
 import com.rpkit.classes.bukkit.database.table.RPKClassExperienceTable
-import com.rpkit.classes.bukkit.listener.RPKServiceProviderReadyListener
-import com.rpkit.classes.bukkit.skillpoint.RPKSkillPointProviderImpl
+import com.rpkit.classes.bukkit.messages.ClassesMessages
+import com.rpkit.classes.bukkit.skillpoint.RPKSkillPointServiceImpl
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
-import com.rpkit.core.exception.UnregisteredServiceException
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
+import com.rpkit.skills.bukkit.skills.RPKSkillPointService
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
-import com.rpkit.stats.bukkit.stat.RPKStatVariableProvider
+import com.rpkit.stats.bukkit.stat.RPKStatVariableName
+import com.rpkit.stats.bukkit.stat.RPKStatVariableService
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
 
-class RPKClassesBukkit: RPKBukkitPlugin() {
+class RPKClassesBukkit : RPKBukkitPlugin() {
 
-    private var statsInitialized = false
-    private var characterCardFieldsInitialized = false
+    lateinit var database: Database
+    lateinit var messages: ClassesMessages
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.classes.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4386)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKClassProviderImpl(this),
-                RPKSkillPointProviderImpl(this)
+
+        messages = ClassesMessages(this)
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/classes/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/classes/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_classes"
+                ),
+                classLoader
         )
-    }
-
-    override fun onPostEnable() {
-        attemptStatRegistration()
-        attemptCharacterCardFieldRegistration()
-    }
-
-    override fun registerCommands() {
-        getCommand("class")?.setExecutor(ClassCommand(this))
-    }
-
-    override fun registerListeners() {
-        registerListeners(
-                RPKServiceProviderReadyListener(this)
-        )
-    }
-
-    override fun createTables(database: Database) {
         database.addTable(RPKCharacterClassTable(database, this))
         database.addTable(RPKClassExperienceTable(database, this))
+
+        Services[RPKClassService::class.java] = RPKClassServiceImpl(this)
+        Services[RPKSkillPointService::class.java] = RPKSkillPointServiceImpl(this)
+
+        Services.require(RPKStatVariableService::class.java).whenAvailable { statVariableService ->
+            Services.require(RPKClassService::class.java).whenAvailable { classService ->
+                config.getConfigurationSection("classes")
+                        ?.getKeys(false)
+                        ?.flatMap { className ->
+                            config.getConfigurationSection("classes.$className.stat-variables")?.getKeys(false) ?: setOf()
+                        }
+                        ?.toSet()
+                        ?.forEach { statVariableName ->
+                            statVariableService.addStatVariable(object : RPKStatVariable {
+                                override val name = RPKStatVariableName(statVariableName)
+
+                                override fun get(character: RPKCharacter): Double {
+                                    val `class` = classService.getClass(character)
+                                    return `class`?.getStatVariableValue(this, classService.getLevel(character, `class`))?.toDouble()
+                                            ?: 0.0
+                                }
+                            })
+                        }
+            }
+        }
+
+        Services.require(RPKCharacterCardFieldService::class.java).whenAvailable { service ->
+            service.characterCardFields.add(ClassField())
+        }
+
+        registerCommands()
     }
 
-    override fun setDefaultMessages() {
-        messages.setDefault("class-usage", "&cUsage: /class [set|list]")
-        messages.setDefault("no-permission-class-set", "&cYou do not have permission to set your class.")
-        messages.setDefault("class-set-usage", "&cUsage: /class set [class]")
-        messages.setDefault("not-from-console", "&cYou must be a player to perform this command.")
-        messages.setDefault("no-character", "&cYou require a character to perform that command.")
-        messages.setDefault("class-set-invalid-class", "&cThat class is invalid.")
-        messages.setDefault("class-set-invalid-prerequisites", "&cYou do not have the prerequisites for that class.")
-        messages.setDefault("class-set-valid", "&aClass set to \$class.")
-        messages.setDefault("no-permission-class-list", "&cYou do not have permission to list classes.")
-        messages.setDefault("class-list-title", "&fClasses:")
-        messages.setDefault("class-list-item", "&f- &7\$class")
-        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-    }
-
-    fun attemptStatRegistration() {
-        if (statsInitialized) return
-        try {
-            val statVariableProvider = core.serviceManager.getServiceProvider(RPKStatVariableProvider::class)
-            val classProvider = core.serviceManager.getServiceProvider(RPKClassProvider::class)
-            config.getConfigurationSection("classes")
-                    ?.getKeys(false)
-                    ?.flatMap { className ->
-                        config.getConfigurationSection("classes.$className.stat-variables")?.getKeys(false) ?: setOf() }
-                    ?.toSet()
-                    ?.forEach { statVariableName ->
-                        statVariableProvider.addStatVariable(object: RPKStatVariable {
-                            override val name = statVariableName
-
-                            override fun get(character: RPKCharacter): Int {
-                                val `class` = classProvider.getClass(character)
-                                return `class`?.getStatVariableValue(this, classProvider.getLevel(character, `class`)) ?: 0
-                            }
-                        })
-                    }
-            statsInitialized = true
-        } catch (ignore: UnregisteredServiceException) {}
-    }
-
-    fun attemptCharacterCardFieldRegistration() {
-        if (characterCardFieldsInitialized) return
-        try {
-            val characterCardFieldProvider = core.serviceManager.getServiceProvider(RPKCharacterCardFieldProvider::class)
-            characterCardFieldProvider.characterCardFields.add(ClassField(this))
-            characterCardFieldsInitialized = true
-        } catch (ignore: UnregisteredServiceException) {}
+    fun registerCommands() {
+        getCommand("class")?.setExecutor(ClassCommand(this))
     }
 
 }

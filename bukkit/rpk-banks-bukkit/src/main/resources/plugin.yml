@@ -8,8 +8,8 @@ depend:
 - rpk-character-lib-bukkit
 - rpk-economy-lib-bukkit
 - rpk-bank-lib-bukkit
-api-version: '1.15'
+api-version: '1.16'
 permissions:
-    rpkit.banks.sign.bank:
-        description: Allows the creation of bank signs
-        default: op
+  rpkit.banks.sign.bank:
+    description: Allows the creation of bank signs
+    default: op

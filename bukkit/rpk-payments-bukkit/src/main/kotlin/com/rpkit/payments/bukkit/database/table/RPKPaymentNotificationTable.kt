@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,58 +16,43 @@
 package com.rpkit.payments.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterId
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
-import com.rpkit.payments.bukkit.database.jooq.rpkit.Tables.RPKIT_PAYMENT_NOTIFICATION
-import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
+import com.rpkit.payments.bukkit.database.create
+import com.rpkit.payments.bukkit.database.jooq.Tables.RPKIT_PAYMENT_NOTIFICATION
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupId
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotification
+import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationId
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
-import java.sql.Date
 
 /**
  * Represents payment notification table.
  */
 class RPKPaymentNotificationTable(
-        database: Database,
-        private val plugin: RPKPaymentsBukkit
-): Table<RPKPaymentNotification>(database, RPKPaymentNotification::class) {
+        private val database: Database,
+        plugin: RPKPaymentsBukkit
+) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_payment_notification.id.enabled")) {
-        database.cacheManager.createCache("rpk-payments-bukkit.rpkit_payment_notification.id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPaymentNotification::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_payment_notification.id.size"))))
+        database.cacheManager.createCache(
+            "rpk-payments-bukkit.rpkit_payment_notification.id",
+            Int::class.javaObjectType,
+            RPKPaymentNotification::class.java,
+            plugin.config.getLong("caching.rpkit_payment_notification.id.size")
+        )
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_PAYMENT_NOTIFICATION)
-                .column(RPKIT_PAYMENT_NOTIFICATION.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_PAYMENT_NOTIFICATION.GROUP_ID, SQLDataType.INTEGER)
-                .column(RPKIT_PAYMENT_NOTIFICATION.TO_ID, SQLDataType.INTEGER)
-                .column(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID, SQLDataType.INTEGER)
-                .column(RPKIT_PAYMENT_NOTIFICATION.DATE, SQLDataType.DATE)
-                .column(RPKIT_PAYMENT_NOTIFICATION.TEXT, SQLDataType.VARCHAR(1024))
-                .constraints(
-                        constraint("pk_rpkit_payment_notification").primaryKey(RPKIT_PAYMENT_NOTIFICATION.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "0.4.0")
-        }
-    }
-
-    override fun insert(entity: RPKPaymentNotification): Int {
+    fun insert(entity: RPKPaymentNotification) {
+        val groupId = entity.group.id ?: return
+        val toId = entity.to.id ?: return
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_PAYMENT_NOTIFICATION,
@@ -79,73 +63,75 @@ class RPKPaymentNotificationTable(
                         RPKIT_PAYMENT_NOTIFICATION.TEXT
                 )
                 .values(
-                        entity.group.id,
-                        entity.to.id,
-                        entity.character.id,
-                        Date(entity.date),
+                        groupId.value,
+                        toId.value,
+                        characterId.value,
+                        entity.date,
                         entity.text
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
+        entity.id = RPKPaymentNotificationId(id)
+        cache?.set(id, entity)
     }
 
-    override fun update(entity: RPKPaymentNotification) {
+    fun update(entity: RPKPaymentNotification) {
+        val groupId = entity.group.id ?: return
+        val toId = entity.to.id ?: return
+        val characterId = entity.character.id ?: return
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_PAYMENT_NOTIFICATION)
-                .set(RPKIT_PAYMENT_NOTIFICATION.GROUP_ID, entity.group.id)
-                .set(RPKIT_PAYMENT_NOTIFICATION.TO_ID, entity.to.id)
-                .set(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID, entity.character.id)
-                .set(RPKIT_PAYMENT_NOTIFICATION.DATE, Date(entity.date))
+                .set(RPKIT_PAYMENT_NOTIFICATION.GROUP_ID, groupId.value)
+                .set(RPKIT_PAYMENT_NOTIFICATION.TO_ID, toId.value)
+                .set(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID, characterId.value)
+                .set(RPKIT_PAYMENT_NOTIFICATION.DATE, entity.date)
                 .set(RPKIT_PAYMENT_NOTIFICATION.TEXT, entity.text)
-                .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(entity.id))
+                .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(id.value))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id.value, entity)
     }
 
-    override fun get(id: Int): RPKPaymentNotification? {
-        if (cache?.containsKey(id) == true) {
-            return cache.get(id)
+    operator fun get(id: RPKPaymentNotificationId): RPKPaymentNotification? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
+        }
+        val result = database.create
+            .select(
+                RPKIT_PAYMENT_NOTIFICATION.GROUP_ID,
+                RPKIT_PAYMENT_NOTIFICATION.TO_ID,
+                RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID,
+                RPKIT_PAYMENT_NOTIFICATION.DATE,
+                RPKIT_PAYMENT_NOTIFICATION.TEXT
+            )
+            .from(RPKIT_PAYMENT_NOTIFICATION)
+            .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(id.value))
+            .fetchOne() ?: return null
+        val paymentGroupService = Services[RPKPaymentGroupService::class.java] ?: return null
+        val paymentGroupId = result.get(RPKIT_PAYMENT_NOTIFICATION.GROUP_ID)
+        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupId(paymentGroupId))
+        val characterService = Services[RPKCharacterService::class.java] ?: return null
+        val toId = result.get(RPKIT_PAYMENT_NOTIFICATION.TO_ID)
+        val to = characterService.getCharacter(RPKCharacterId(toId))
+        val characterId = result.get(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID)
+        val character = characterService.getCharacter(RPKCharacterId(characterId))
+        if (paymentGroup != null && to != null && character != null) {
+            val paymentNotification = RPKPaymentNotificationImpl(
+                id,
+                paymentGroup,
+                to,
+                character,
+                result.get(RPKIT_PAYMENT_NOTIFICATION.DATE),
+                result.get(RPKIT_PAYMENT_NOTIFICATION.TEXT)
+            )
+            cache?.set(id.value, paymentNotification)
+            return paymentNotification
         } else {
-            val result = database.create
-                    .select(
-                            RPKIT_PAYMENT_NOTIFICATION.GROUP_ID,
-                            RPKIT_PAYMENT_NOTIFICATION.TO_ID,
-                            RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID,
-                            RPKIT_PAYMENT_NOTIFICATION.DATE,
-                            RPKIT_PAYMENT_NOTIFICATION.TEXT
-                    )
-                    .from(RPKIT_PAYMENT_NOTIFICATION)
-                    .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(id))
-                    .fetchOne() ?: return null
-            val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-            val paymentGroupId = result.get(RPKIT_PAYMENT_NOTIFICATION.GROUP_ID)
-            val paymentGroup = paymentGroupProvider.getPaymentGroup(paymentGroupId)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val toId = result.get(RPKIT_PAYMENT_NOTIFICATION.TO_ID)
-            val to = characterProvider.getCharacter(toId)
-            val characterId = result.get(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID)
-            val character = characterProvider.getCharacter(characterId)
-            if (paymentGroup != null && to != null && character != null) {
-                val paymentNotification = RPKPaymentNotificationImpl(
-                        id,
-                        paymentGroup,
-                        to,
-                        character,
-                        result.get(RPKIT_PAYMENT_NOTIFICATION.DATE).time,
-                        result.get(RPKIT_PAYMENT_NOTIFICATION.TEXT)
-                )
-                cache?.put(id, paymentNotification)
-                return paymentNotification
-            } else {
-                database.create
-                        .deleteFrom(RPKIT_PAYMENT_NOTIFICATION)
-                        .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(id))
-                        .execute()
-                return null
-            }
+            database.create
+                .deleteFrom(RPKIT_PAYMENT_NOTIFICATION)
+                .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(id.value))
+                .execute()
+            return null
         }
     }
 
@@ -154,26 +140,28 @@ class RPKPaymentNotificationTable(
                 .select(RPKIT_PAYMENT_NOTIFICATION.ID)
                 .from(RPKIT_PAYMENT_NOTIFICATION)
                 .fetch()
-        return results.map { result -> get(result.get(RPKIT_PAYMENT_NOTIFICATION.ID)) }
+        return results.map { result -> get(RPKPaymentNotificationId(result.get(RPKIT_PAYMENT_NOTIFICATION.ID))) }
                 .filterNotNull()
     }
 
     fun get(character: RPKCharacter): List<RPKPaymentNotification> {
+        val characterId = character.id ?: return emptyList()
         val results = database.create
                 .select(RPKIT_PAYMENT_NOTIFICATION.ID)
                 .from(RPKIT_PAYMENT_NOTIFICATION)
-                .where(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID.eq(character.id))
+                .where(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID.eq(characterId.value))
                 .fetch()
-        return results.map { result -> get(result.get(RPKIT_PAYMENT_NOTIFICATION.ID)) }
+        return results.map { result -> get(RPKPaymentNotificationId(result.get(RPKIT_PAYMENT_NOTIFICATION.ID))) }
                 .filterNotNull()
     }
 
-    override fun delete(entity: RPKPaymentNotification) {
+    fun delete(entity: RPKPaymentNotification) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_PAYMENT_NOTIFICATION)
-                .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(entity.id))
+                .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(id.value))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id.value)
     }
 
 }

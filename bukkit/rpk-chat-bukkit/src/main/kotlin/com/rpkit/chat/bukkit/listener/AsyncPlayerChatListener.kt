@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,58 +16,104 @@
 package com.rpkit.chat.bukkit.listener
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKThinProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
-import java.util.regex.Pattern
 
 /**
  * Player chat listener.
  * Cancels normal message processing and passes the message to the appropriate chat channel.
  */
-class AsyncPlayerChatListener(private val plugin: RPKChatBukkit): Listener {
+class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
 
     @EventHandler
     fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
         event.isCancelled = true
-        val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+        val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
-            var chatChannel = chatChannelProvider.getMinecraftProfileChannel(minecraftProfile)
-            var message = event.message
-            for (otherChannel in chatChannelProvider.chatChannels) {
-                val matchPattern = otherChannel.matchPattern
-                if (matchPattern != null) {
-                    if (matchPattern.isNotEmpty()) {
-                        if (message.matches(matchPattern.toRegex())) {
-                            chatChannel = otherChannel
-                            val pattern = Pattern.compile(matchPattern)
-                            val matcher = pattern.matcher(message)
-                            if (matcher.matches()) {
-                                if (matcher.groupCount() > 0) {
-                                    message = matcher.group(1)
-                                }
-                            }
-                            if (!chatChannel.listenerMinecraftProfiles.any { listenerMinecraftProfile ->
-                                        listenerMinecraftProfile.id == minecraftProfile.id }) {
-                                chatChannel.addListener(minecraftProfile, event.isAsynchronous)
-                                chatChannelProvider.updateChatChannel(chatChannel, event.isAsynchronous)
+            val chatChannel = chatChannelService.getMinecraftProfileChannel(minecraftProfile)
+            val message = event.message
+            var readMessageIndex = 0
+            chatChannelService.matchPatterns
+                    .map { matchPattern ->
+                        val matches = matchPattern.regex.let(::Regex).findAll(message).toList()
+                        matches to matchPattern
+                    }
+                    .flatMap { (matches, matchPattern) -> matches.associateWith { matchPattern }.toList() }
+                    .sortedBy { (match, _) -> match.range.first }
+                    .forEach { (match, matchPattern) ->
+                        sendMessage(
+                            chatChannel,
+                            message.substring(readMessageIndex, match.range.first),
+                            event.player,
+                            profile,
+                            minecraftProfile,
+                            event.isAsynchronous
+                        )
+                        match.groupValues.forEachIndexed { index, value ->
+                            val otherChatChannel = matchPattern.groups[index]
+                            if (otherChatChannel != null) {
+                                sendMessage(
+                                    otherChatChannel,
+                                    value,
+                                    event.player,
+                                    profile,
+                                    minecraftProfile,
+                                    event.isAsynchronous
+                                )
                             }
                         }
+                        readMessageIndex = match.range.last + 1
                     }
-                }
-            }
-            if (chatChannel != null) {
-                chatChannel.sendMessage(profile, minecraftProfile, message, event.isAsynchronous)
-            } else {
-                event.player.sendMessage(plugin.messages["no-chat-channel"])
+            if (readMessageIndex < message.length) {
+                sendMessage(
+                    chatChannel,
+                    message.substring(readMessageIndex, message.length),
+                    event.player,
+                    profile,
+                    minecraftProfile,
+                    event.isAsynchronous
+                )
             }
         } else {
             event.player.sendMessage(plugin.messages["no-minecraft-profile"])
+        }
+    }
+
+    private fun sendMessage(
+        chatChannel: RPKChatChannel?,
+        message: String,
+        bukkitPlayer: Player,
+        profile: RPKThinProfile,
+        minecraftProfile: RPKMinecraftProfile,
+        isAsynchronous: Boolean
+    ) {
+        if (chatChannel != null) {
+            if (!chatChannel.listeners.any { listenerMinecraftProfile ->
+                        listenerMinecraftProfile.id == minecraftProfile.id
+                    }) {
+                chatChannel.addListener(minecraftProfile, isAsynchronous)
+            }
+            if (message.isNotBlank()) {
+                chatChannel.sendMessage(
+                        profile,
+                        minecraftProfile,
+                        message.trim(),
+                        isAsynchronous
+                )
+            }
+        } else {
+            bukkitPlayer.sendMessage(plugin.messages["no-chat-channel"])
         }
     }
 

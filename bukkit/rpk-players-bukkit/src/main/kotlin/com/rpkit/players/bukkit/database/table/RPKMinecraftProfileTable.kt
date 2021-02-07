@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,46 +17,46 @@ package com.rpkit.players.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.database.jooq.rpkit.Tables.RPKIT_MINECRAFT_PROFILE
-import com.rpkit.players.bukkit.profile.*
-import org.bukkit.OfflinePlayer
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
-import java.util.*
+import com.rpkit.players.bukkit.database.create
+import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_MINECRAFT_PROFILE
+import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileId
+import com.rpkit.players.bukkit.profile.RPKProfileName
+import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileImpl
+import java.util.UUID
 
 
-class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayersBukkit): Table<RPKMinecraftProfile>(database, RPKMinecraftProfile::class) {
+class RPKMinecraftProfileTable(private val database: Database, private val plugin: RPKPlayersBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_minecraft_profile.id.enabled")) {
-        database.cacheManager.createCache("rpk-players-bukkit.rpkit_minecraft_profile.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKMinecraftProfile::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_minecraft_profile.id.size"))))
+        database.cacheManager.createCache(
+            "rpk-players-bukkit.rpkit_minecraft_profile.id",
+            Int::class.javaObjectType,
+            RPKMinecraftProfile::class.java,
+            plugin.config.getLong("caching.rpkit_minecraft_profile.id.size")
+        )
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_MINECRAFT_PROFILE)
-                .column(RPKIT_MINECRAFT_PROFILE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_MINECRAFT_PROFILE.PROFILE_ID, SQLDataType.INTEGER)
-                .column(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID, SQLDataType.VARCHAR(36))
-                .constraints(
-                        constraint("pk_rpkit_minecraft_profile").primaryKey(RPKIT_MINECRAFT_PROFILE.ID)
-                )
-                .execute()
+    private val minecraftUUIDCache = if (plugin.config.getBoolean("caching.rpkit_minecraft_profile.minecraft_uuid.enabled")) {
+        database.cacheManager.createCache(
+            "rpk-players-bukkit.rpkit_minecraft_profile.minecraft_uuid",
+            UUID::class.java,
+            RPKMinecraftProfile::class.java,
+            plugin.config.getLong("caching.rpkit_minecraft_profile.minecraft_uuid.size")
+        )
+    } else {
+        null
     }
 
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.3.0")
-        }
-    }
-
-    override fun insert(entity: RPKMinecraftProfile): Int {
+    fun insert(entity: RPKMinecraftProfile) {
         val profile = entity.profile
         database.create
                 .insertInto(
@@ -67,7 +66,7 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
                 )
                 .values(
                         if (profile is RPKProfile) {
-                            profile.id
+                            profile.id?.value
                         } else {
                             null
                         },
@@ -75,32 +74,34 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
+        entity.id = RPKMinecraftProfileId(id)
+        cache?.set(id, entity)
+        minecraftUUIDCache?.set(entity.minecraftUUID, entity)
     }
 
-    override fun update(entity: RPKMinecraftProfile) {
+    fun update(entity: RPKMinecraftProfile) {
         val profile = entity.profile
+        val id = entity.id ?: return
         database.create
                 .update(RPKIT_MINECRAFT_PROFILE)
                 .set(
                         RPKIT_MINECRAFT_PROFILE.PROFILE_ID,
                         if (profile is RPKProfile) {
-                            profile.id
+                            profile.id?.value
                         } else {
                             null
                         }
                 )
                 .set(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID, entity.minecraftUUID.toString())
-                .where(RPKIT_MINECRAFT_PROFILE.ID.eq(entity.id))
+                .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id.value, entity)
+        minecraftUUIDCache?.set(entity.minecraftUUID, entity)
     }
 
-    override fun get(id: Int): RPKMinecraftProfile? {
-        if (cache?.containsKey(id) == true) {
-            return cache.get(id)
+    operator fun get(id: RPKMinecraftProfileId): RPKMinecraftProfile? {
+        if (cache?.containsKey(id.value) == true) {
+            return cache[id.value]
         } else {
             val result = database.create
                     .select(
@@ -108,54 +109,61 @@ class RPKMinecraftProfileTable(database: Database, private val plugin: RPKPlayer
                             RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID
                     )
                     .from(RPKIT_MINECRAFT_PROFILE)
-                    .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id))
+                    .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id.value))
                     .fetchOne() ?: return null
-            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
+            val profileService = Services[RPKProfileService::class.java]
             val profileId = result.get(RPKIT_MINECRAFT_PROFILE.PROFILE_ID)
-            val profile = if (profileId != null) {
-                profileProvider.getProfile(profileId)
+            val profile = if (profileId != null && profileService != null) {
+                profileService.getProfile(RPKProfileId(profileId))
             } else {
                 null
             } ?: RPKThinProfileImpl(
-                    plugin.server.getOfflinePlayer(
+                    RPKProfileName(plugin.server.getOfflinePlayer(
                             UUID.fromString(result.get(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID))
-                    ).name ?: "Unknown Minecraft user"
+                    ).name ?: "Unknown Minecraft user")
             )
             val minecraftProfile = RPKMinecraftProfileImpl(
                     id,
                     profile,
                     UUID.fromString(result.get(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID))
             )
-            cache?.put(id, minecraftProfile)
+            cache?.set(id.value, minecraftProfile)
+            minecraftUUIDCache?.set(minecraftProfile.minecraftUUID, minecraftProfile)
             return minecraftProfile
         }
     }
 
     fun get(profile: RPKProfile): List<RPKMinecraftProfile> {
+        val profileId = profile.id ?: return emptyList()
         val results = database.create
                 .select(RPKIT_MINECRAFT_PROFILE.ID)
                 .from(RPKIT_MINECRAFT_PROFILE)
-                .where(RPKIT_MINECRAFT_PROFILE.PROFILE_ID.eq(profile.id))
+                .where(RPKIT_MINECRAFT_PROFILE.PROFILE_ID.eq(profileId.value))
                 .fetch()
         return results.map { result ->
-            get(result.get(RPKIT_MINECRAFT_PROFILE.ID))
+            get(RPKMinecraftProfileId(result.get(RPKIT_MINECRAFT_PROFILE.ID)))
         }.filterNotNull()
     }
 
-    fun get(player: OfflinePlayer): RPKMinecraftProfile? {
+    fun get(minecraftUUID: UUID): RPKMinecraftProfile? {
+        if (minecraftUUIDCache?.containsKey(minecraftUUID) == true) {
+            return minecraftUUIDCache[minecraftUUID]
+        }
         val result = database.create
                 .select(RPKIT_MINECRAFT_PROFILE.ID)
                 .from(RPKIT_MINECRAFT_PROFILE)
-                .where(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID.eq(player.uniqueId.toString()))
+                .where(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID.eq(minecraftUUID.toString()))
                 .fetchOne() ?: return null
-        return get(result.get(RPKIT_MINECRAFT_PROFILE.ID))
+        return get(RPKMinecraftProfileId(result.get(RPKIT_MINECRAFT_PROFILE.ID)))
     }
 
-    override fun delete(entity: RPKMinecraftProfile) {
+    fun delete(entity: RPKMinecraftProfile) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_MINECRAFT_PROFILE)
-                .where(RPKIT_MINECRAFT_PROFILE.ID.eq(entity.id))
+                .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id.value)
+        minecraftUUIDCache?.remove(entity.minecraftUUID)
     }
 }

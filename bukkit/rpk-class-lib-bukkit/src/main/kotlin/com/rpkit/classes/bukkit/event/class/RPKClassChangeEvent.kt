@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.event.character.RPKCharacterEvent
 import com.rpkit.classes.bukkit.classes.RPKClass
 
 
-interface RPKClassChangeEvent: RPKClassEvent, RPKCharacterEvent {
+interface RPKClassChangeEvent : RPKClassEvent, RPKCharacterEvent {
 
     override val character: RPKCharacter
     val oldClass: RPKClass?

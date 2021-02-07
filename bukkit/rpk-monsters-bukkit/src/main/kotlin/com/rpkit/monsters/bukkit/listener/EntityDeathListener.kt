@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,27 +15,25 @@
 
 package com.rpkit.monsters.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.core.exception.UnregisteredServiceException
-import com.rpkit.core.expression.function.addRPKitFunctions
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.expression.RPKExpressionService
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrency
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.experience.bukkit.experience.RPKExperienceProvider
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
+import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
-import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.monsters.bukkit.monsterlevel.RPKMonsterLevelService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
-import org.bukkit.inventory.ItemStack
-import org.nfunk.jep.JEP
-import kotlin.math.roundToInt
 
 
-class EntityDeathListener(private val plugin: RPKMonstersBukkit): Listener {
+class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
 
     @EventHandler
     fun onEntityDeath(event: EntityDeathEvent) {
@@ -48,29 +45,29 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit): Listener {
         if (lastDamageEvent !is EntityDamageByEntityEvent) return
         val damager = lastDamageEvent.damager
         if (damager !is Player) return
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(damager) ?: return
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val character = characterProvider.getActiveCharacter(minecraftProfile) ?: return
-        val experienceProvider = plugin.core.serviceManager.getServiceProvider(RPKExperienceProvider::class)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(damager) ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val experienceService = Services[RPKExperienceService::class.java] ?: return
         val experience = getExperience(event.entity)
-        experienceProvider.setExperience(character, experienceProvider.getExperience(character) + experience)
+        experienceService.setExperience(character, experienceService.getExperience(character) + experience)
         damager.sendMessage(plugin.messages["experience-gained", mapOf(
-                "experience-gained" to experience.toString(),
-                "experience" to (experienceProvider.getExperience(character) - experienceProvider.getExperienceNeededForLevel(experienceProvider.getLevel(character))).toString(),
-                "required-experience" to experienceProvider.getExperienceNeededForLevel(experienceProvider.getLevel(character) + 1).toString()
+                "experience_gained" to experience.toString(),
+                "experience" to (experienceService.getExperience(character) - experienceService.getExperienceNeededForLevel(experienceService.getLevel(character))).toString(),
+                "required_experience" to experienceService.getExperienceNeededForLevel(experienceService.getLevel(character) + 1).toString()
         )])
-        try {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            val moneyConfigSection = plugin.config.getConfigurationSection("monsters.${event.entityType}.money")
-                    ?: plugin.config.getConfigurationSection("monsters.default.money")
-            moneyConfigSection?.getKeys(false)
+        val currencyService = Services[RPKCurrencyService::class.java] ?: return
+        val moneyConfigSection = plugin.config.getConfigurationSection("monsters.${event.entityType}.money")
+                ?: plugin.config.getConfigurationSection("monsters.default.money")
+        moneyConfigSection?.getKeys(false)
                 ?.forEach { currencyName ->
-                    val currency = currencyProvider.getCurrency(currencyName)
+                    val currency = currencyService.getCurrency(RPKCurrencyName(currencyName))
                     if (currency != null) {
                         val amount = getMoney(event.entity, currency)
                         if (amount > 0) {
-                            val coins = ItemStack(currency.material, amount)
+                            val coins = currency.item.clone()
+                            coins.amount = amount
                             val meta = coins.itemMeta ?: plugin.server.itemFactory.getItemMeta(coins.type) ?: return
                             meta.setDisplayName(currency.nameSingular)
                             coins.itemMeta = meta
@@ -78,29 +75,22 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit): Listener {
                         }
                     }
                 }
-        } catch (exception: UnregisteredServiceException) {}
     }
 
     private fun getExperience(entity: LivingEntity): Int {
-        val expression = plugin.config.getString("monsters.${entity.type}.experience", plugin.config.getString("monsters.default.experience"))
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addRPKitFunctions()
-        parser.addVariable("level", plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class).getMonsterLevel(entity).toDouble())
-        parser.parseExpression(expression)
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
+        val expression = expressionService.createExpression(plugin.config.getString("monsters.${entity.type}.experience", plugin.config.getString("monsters.default.experience")) ?: return 0)
+        return expression.parseInt(mapOf(
+            "level" to (Services[RPKMonsterLevelService::class.java]?.getMonsterLevel(entity)?.toDouble() ?: 1.0)
+        )) ?: 0
     }
 
     private fun getMoney(entity: LivingEntity, currency: RPKCurrency): Int {
-        val expression = plugin.config.getString("monsters.${entity.type}.money.${currency.name}", plugin.config.getString("monsters.default.money.${currency.name}"))
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addRPKitFunctions()
-        parser.addVariable("level", plugin.core.serviceManager.getServiceProvider(RPKMonsterLevelProvider::class).getMonsterLevel(entity).toDouble())
-        parser.parseExpression(expression)
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
+        val expression = expressionService.createExpression(plugin.config.getString("monsters.${entity.type}.money.${currency.name.value}", plugin.config.getString("monsters.default.money.${currency.name.value}")) ?: return 0)
+        return expression.parseInt(mapOf(
+            "level" to (Services[RPKMonsterLevelService::class.java]?.getMonsterLevel(entity)?.toDouble() ?: 1.0)
+        )) ?: 0
     }
 
 }

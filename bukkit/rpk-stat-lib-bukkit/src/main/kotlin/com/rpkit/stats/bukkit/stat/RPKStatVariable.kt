@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,12 +26,12 @@ interface RPKStatVariable {
     /**
      * The name of the variable.
      */
-    val name: String
+    val name: RPKStatVariableName
 
     /**
      * Gets the value of the variable for the given character.
-     * This may be any type, and should be documented with the supplier of the variable implementation.
+     * This may be any numerical type.
      */
-    fun get(character: RPKCharacter): Any?
+    fun get(character: RPKCharacter): Double
 
 }

@@ -1,5 +1,5 @@
 caching:
-    rpkit_bank:
-        id:
-            enabled: true
-            size: 20
+  rpkit_bank:
+    character_id:
+      enabled: true
+      size: 20

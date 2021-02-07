@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Payment command.
  * Parent for all payment group management commands.
  */
-class PaymentCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
+class PaymentCommand(private val plugin: RPKPaymentsBukkit) : CommandExecutor {
 
     private val paymentCreateCommand = PaymentCreateCommand(plugin)
     private val paymentRemoveCommand = PaymentRemoveCommand(plugin)

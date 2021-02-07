@@ -6,12 +6,12 @@ depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
-api-version: '1.15'
+api-version: '1.16'
 commands:
-    roll:
-        description: Rolls
-        usage: /<command> [roll]
+  roll:
+    description: Rolls
+    usage: /<command> [roll]
 permissions:
-    rpkit.rolling.command.roll:
-        description: Allows rolling
-        default: true
+  rpkit.rolling.command.roll:
+    description: Allows rolling
+    default: true

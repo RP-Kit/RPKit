@@ -1,93 +1,100 @@
 drinks:
-    beer:
-        item:
-            ==: org.bukkit.inventory.ItemStack
-            type: POTION
-            meta:
-                ==: ItemMeta
-                meta-type: UNSPECIFIC
-                display-name: Beer
-                lore:
-                - Alcoholic drink fermented from grain starches.
-        recipe:
-            WHEAT: 1
-            POTION: 1
-            POTATO: 1
-            SUGAR: 1
-        drunkenness: 3
-    wine:
-        item:
-            ==: org.bukkit.inventory.ItemStack
-            type: POTION
-            meta:
-                ==: ItemMeta
-                meta-type: UNSPECIFIC
-                display-name: Wine
-                lore:
-                - Alcoholic beverage fermented from grapes.
-        recipe:
-            MELON: 1
-            POTION: 1
-        drunkenness: 6
-    vodka:
-        item:
-            ==: org.bukkit.inventory.ItemStack
-            type: POTION
-            meta:
-                ==: ItemMeta
-                meta-type: UNSPECIFIC
-                display-name: Vodka
-                lore:
-                - Beverage made from the distillation of fermented potatoes.
-        recipe:
-            POISONOUS_POTATO: 1
-            POTION: 1
-        drunkenness: 20
-    whisky:
-        item:
-            ==: org.bukkit.inventory.ItemStack
-            type: POTION
-            meta:
-                ==: ItemMeta
-                meta-type: UNSPECIFIC
-                display-name: Whisky
-                lore:
-                - Distilled alcoholic beverage made from fermented grain mash.
-        recipe:
-            WHEAT: 5
-            POTION: 1
-        drunkenness: 20
-    rum:
-        item:
-            ==: org.bukkit.inventory.ItemStack
-            type: POTION
-            meta:
-                ==: ItemMeta
-                meta-type: UNSPECIFIC
-                display-name: Rum
-                lore:
-                - Distilled alcoholic beverage made from sugarcaen byproducts by process of fermentation and distillation.
-        recipe:
-            SUGAR_CANE: 1
-            POTION: 1
-        drunkenness: 20
-    cider:
-        item:
-            ==: org.bukkit.inventory.ItemStack
-            type: POTION
-            meta:
-                ==: ItemMeta
-                meta-type: UNSPECIFIC
-                display-name: Cider
-                lore:
-                - Alcoholic beverage made from the fermented juice of apples.
-        recipe:
-            APPLE: 1
-            POTION: 1
-        drunkenness: 3
+  beer:
+    item:
+      ==: org.bukkit.inventory.ItemStack
+      v: 2586
+      type: POTION
+      meta:
+        ==: ItemMeta
+        meta-type: POTION
+        display-name: '{"extra":[{"text":"Beer"}],"text":""}'
+        lore:
+          - '{"extra":[{"text":"Alcoholic drink fermented from grain starches."}],"text":""}'
+    recipe:
+      WHEAT: 1
+      POTION: 1
+      POTATO: 1
+      SUGAR: 1
+    drunkenness: 3
+  wine:
+    item:
+      ==: org.bukkit.inventory.ItemStack
+      v: 2586
+      type: POTION
+      meta:
+        ==: ItemMeta
+        meta-type: POTION
+        display-name: '{"extra":[{"text":"Wine"}],"text":""}'
+        lore:
+          - '{"extra":[{"text":"Alcoholic beverage fermented from grapes."}],"text":""}'
+    recipe:
+      SWEET_BERRIES: 1
+      POTION: 1
+    drunkenness: 6
+  vodka:
+    item:
+      ==: org.bukkit.inventory.ItemStack
+      v: 2586
+      type: POTION
+      meta:
+        ==: ItemMeta
+        meta-type: POTION
+        display-name: '{"extra":[{"text":"Vodka"}],"text":""}'
+        lore:
+          - '{"extra":[{"text":"Beverage made from the distillation of fermented potatoes."}],"text":""}'
+    recipe:
+      POISONOUS_POTATO: 1
+      POTION: 1
+    drunkenness: 20
+  whisky:
+    item:
+      ==: org.bukkit.inventory.ItemStack
+      v: 2586
+      type: POTION
+      meta:
+        ==: ItemMeta
+        meta-type: POTION
+        display-name: '{"extra":[{"text":"Whisky"}],"text":""}'
+        lore:
+          - '{"extra":[{"text":"Distilled alcoholic beverage made from fermented grain mash."}],"text":""}'
+    recipe:
+      WHEAT: 5
+      POTION: 1
+    drunkenness: 20
+  rum:
+    item:
+      ==: org.bukkit.inventory.ItemStack
+      v: 2586
+      type: POTION
+      meta:
+        ==: ItemMeta
+        meta-type: POTION
+        display-name: '{"extra":[{"text":"Rum"}],"text":""}'
+        lore:
+          - '{"extra":[{"text":"Distilled alcoholic beverage made from sugarcane byproducts
+          by process of fermentation and distillation."}],"text":""}'
+    recipe:
+      SUGAR_CANE: 1
+      POTION: 1
+    drunkenness: 20
+  cider:
+    item:
+      ==: org.bukkit.inventory.ItemStack
+      v: 2586
+      type: POTION
+      meta:
+        ==: ItemMeta
+        meta-type: POTION
+        display-name: '{"extra":[{"text":"Cider"}],"text":""}'
+        lore:
+          - '{"extra":[{"text":"Alcoholic beverage made from the fermented juice of apples."}],"text":""}'
+    recipe:
+      APPLE: 1
+      POTION: 1
+    drunkenness: 3
 kill-characters: true
 caching:
-    rpkit_drunkenness:
-        id:
-            enabled: true
-            size: 20
+  rpkit_drunkenness:
+    id:
+      enabled: true
+      size: 20

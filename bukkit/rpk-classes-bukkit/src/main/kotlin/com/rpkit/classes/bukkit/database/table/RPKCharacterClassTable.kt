@@ -1,48 +1,47 @@
+/*
+ * Copyright 2021 Ren Binden
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.classes.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.classes.bukkit.RPKClassesBukkit
 import com.rpkit.classes.bukkit.classes.RPKCharacterClass
-import com.rpkit.classes.bukkit.classes.RPKClassProvider
-import com.rpkit.classes.bukkit.database.jooq.rpkit.Tables.RPKIT_CHARACTER_CLASS
+import com.rpkit.classes.bukkit.classes.RPKClassName
+import com.rpkit.classes.bukkit.classes.RPKClassService
+import com.rpkit.classes.bukkit.database.create
+import com.rpkit.classes.bukkit.database.jooq.Tables.RPKIT_CHARACTER_CLASS
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
+import com.rpkit.core.service.Services
 
 
-class RPKCharacterClassTable(database: Database, private val plugin: RPKClassesBukkit): Table<RPKCharacterClass>(database, RPKCharacterClass::class) {
+class RPKCharacterClassTable(private val database: Database, private val plugin: RPKClassesBukkit) : Table {
 
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_character_class.id.enabled")) {
-        database.cacheManager.createCache("rpk-classes-bukkit.rpkit_character_class.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacterClass::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character_class.id.size"))))
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_character_class.character_id.enabled")) {
+        database.cacheManager.createCache(
+            "rpk-classes-bukkit.rpkit_character_class.character_id",
+            Int::class.javaObjectType,
+            RPKCharacterClass::class.java,
+            plugin.config.getLong("caching.rpkit_character_class.character_id.size")
+        )
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_CHARACTER_CLASS)
-                .column(RPKIT_CHARACTER_CLASS.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_CHARACTER_CLASS.CHARACTER_ID, SQLDataType.INTEGER)
-                .column(RPKIT_CHARACTER_CLASS.CLASS_NAME, SQLDataType.VARCHAR(256))
-                .constraints(
-                        constraint("pk_rpkit_character_class").primaryKey(RPKIT_CHARACTER_CLASS.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.2.0")
-        }
-    }
-
-    override fun insert(entity: RPKCharacterClass): Int {
+    fun insert(entity: RPKCharacterClass) {
+        val characterId = entity.character.id ?: return
         database.create
                 .insertInto(
                         RPKIT_CHARACTER_CLASS,
@@ -50,29 +49,27 @@ class RPKCharacterClassTable(database: Database, private val plugin: RPKClassesB
                         RPKIT_CHARACTER_CLASS.CLASS_NAME
                 )
                 .values(
-                        entity.character.id,
-                        entity.`class`.name
+                    characterId.value,
+                    entity.`class`.name.value
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
+        cache?.set(characterId.value, entity)
     }
 
-    override fun update(entity: RPKCharacterClass) {
+    fun update(entity: RPKCharacterClass) {
+        val characterId = entity.character.id ?: return
         database.create
                 .update(RPKIT_CHARACTER_CLASS)
-                .set(RPKIT_CHARACTER_CLASS.CHARACTER_ID, entity.character.id)
-                .set(RPKIT_CHARACTER_CLASS.CLASS_NAME, entity.`class`.name)
-                .where(RPKIT_CHARACTER_CLASS.ID.eq(entity.id))
+                .set(RPKIT_CHARACTER_CLASS.CLASS_NAME, entity.`class`.name.value)
+                .where(RPKIT_CHARACTER_CLASS.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(characterId.value, entity)
     }
 
-    override fun get(id: Int): RPKCharacterClass? {
-        if (cache?.containsKey(id) == true) {
-            return cache.get(id)
+    operator fun get(character: RPKCharacter): RPKCharacterClass? {
+        val characterId = character.id ?: return null
+        if (cache?.containsKey(characterId.value) == true) {
+            return cache[characterId.value]
         } else {
             val result = database.create
                     .select(
@@ -80,46 +77,34 @@ class RPKCharacterClassTable(database: Database, private val plugin: RPKClassesB
                             RPKIT_CHARACTER_CLASS.CLASS_NAME
                     )
                     .from(RPKIT_CHARACTER_CLASS)
-                    .where(RPKIT_CHARACTER_CLASS.ID.eq(id))
+                    .where(RPKIT_CHARACTER_CLASS.CHARACTER_ID.eq(characterId.value))
                     .fetchOne() ?: return null
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val characterId = result.get(RPKIT_CHARACTER_CLASS.CHARACTER_ID)
-            val character = characterProvider.getCharacter(characterId)
-            val classProvider = plugin.core.serviceManager.getServiceProvider(RPKClassProvider::class)
+            val classService = Services[RPKClassService::class.java] ?: return null
             val className = result.get(RPKIT_CHARACTER_CLASS.CLASS_NAME)
-            val `class` = classProvider.getClass(className)
-            return if (character != null && `class` != null) {
+            val `class` = classService.getClass(RPKClassName(className))
+            return if (`class` != null) {
                 val characterClass = RPKCharacterClass(
-                        id,
                         character,
                         `class`
                 )
-                cache?.put(id, characterClass)
+                cache?.set(characterId.value, characterClass)
                 characterClass
             } else {
                 database.create
                         .deleteFrom(RPKIT_CHARACTER_CLASS)
-                        .where(RPKIT_CHARACTER_CLASS.ID.eq(id))
+                        .where(RPKIT_CHARACTER_CLASS.CHARACTER_ID.eq(characterId.value))
                         .execute()
                 null
             }
         }
     }
 
-    fun get(character: RPKCharacter): RPKCharacterClass? {
-        val result = database.create
-                .select(RPKIT_CHARACTER_CLASS.ID)
-                .from(RPKIT_CHARACTER_CLASS)
-                .where(RPKIT_CHARACTER_CLASS.CHARACTER_ID.eq(character.id))
-                .fetchOne() ?: return null
-        return get(result.get(RPKIT_CHARACTER_CLASS.ID))
-    }
-
-    override fun delete(entity: RPKCharacterClass) {
+    fun delete(entity: RPKCharacterClass) {
+        val characterId = entity.character.id ?: return
         database.create
                 .deleteFrom(RPKIT_CHARACTER_CLASS)
-                .where(RPKIT_CHARACTER_CLASS.ID.eq(entity.id))
+                .where(RPKIT_CHARACTER_CLASS.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(characterId.value)
     }
 }

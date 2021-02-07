@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.event.chatchannel
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 
@@ -27,10 +27,11 @@ class RPKBukkitChatChannelUnmuteEvent(
         override val minecraftProfile: RPKMinecraftProfile,
         override val chatChannel: RPKChatChannel,
         isAsync: Boolean = false
-): RPKBukkitEvent(isAsync), RPKChatChannelUnmuteEvent, Cancellable {
+) : RPKBukkitEvent(isAsync), RPKChatChannelUnmuteEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

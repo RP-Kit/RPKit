@@ -1,94 +1,51 @@
 distance-command:
-    maximum-distance: 64000
-    item-requirement:
-        ==: org.bukkit.inventory.ItemStack
-        type: COMPASS
+  maximum-distance: 64000
+  item-requirement:
+    ==: org.bukkit.inventory.ItemStack
+    v: 2586
+    type: COMPASS
 track-command:
-    maximum-distance: 1000
-    item-requirement:
-        ==: org.bukkit.inventory.ItemStack
-        type: COMPASS
+  maximum-distance: 1000
+  item-requirement:
+    ==: org.bukkit.inventory.ItemStack
+    v: 2586
+    type: COMPASS
 time-slow-factor: 4
 daily-messages:
-- '&7"That makes sense!"'
-- '&7"You can always grind on a sheep!"'
-- '&7"I am the best butt-kisser around!"'
-- '&7"Dwarves are short!"'
-- '&7"You probably think you''re ugly, but you''re actually pretty decent!"'
-- '&7"Oh no... I must hide my stupidity!"'
-- '&7"Dammit!"'
-- '&7"Why stops me from quoting myself? Huh!?"'
-- '&7"Oh shit, my thirst is 4!"'
-- '&7"Train hard!"'
-- '&7"Be excellent to each other. And... PARTY ON DUDES!"'
-- '&7"Evil will always triumph over good because good is dumb."'
-- '&7"There''s only two things I hate in this world. People who are intolerant of other people''s cultures and the Dwarves."'
-- '&7"I''m sure that we can handle this situation maturely, just like the responsible adults that we are. Isn''t that right, Mr. Poopy Pants?"'
-- '&7"The only thing we don''t have a god for is premature ejaculation but I hear that''s coming quickly."'
-- '&7"I fart in your general direction. Your mother was a hamster and your father smelt of elderberries.  Now go away, or I shall taunt you a second time."'
-- '&7"Time marches on and sooner or later you realize it is marching across your face."'
-- '&7"Fat, drunk, and stupid is no way to go through life, son."'
-- '&7"Listen, strange women lyin'' in ponds distributin'' swords is no basis for a system of government. Supreme executive power derives from a mandate from the masses, not from some farcical aquatic ceremony."'
-- '&7"If she weighed the same as a duck... she''s made of wood. And therefore... a witch!'
-- '&7"Look, you stupid Bastard. You''ve got no arms left."'
-- '&7"Oh, but you can''t expect to wield supreme executive power just because some watery tart threw a sword at you."'
-- '&7"We are now the Knights who say... "Ekki-Ekki-Ekki-Ekki-PTANG. Zoom-Boing. Z''nourrwringmm."'
-- '&7"...and that, my liege, is how we know the Earth to be banana shaped."'
-- '&7"This new learning amazes me, Sir Bedevere. Explain again how sheep''s bladders may be employed to prevent earthquakes."'
-- '&7"That''s the most foul, cruel, and bad-tempered rodent you ever set eyes on!"'
-- '&7"Oh, king eh? Very nice. And how''d you get that, eh? By exploiting the workers. By hanging on to outdated imperialist dogma which perpetuates the economic and social differences in our society."'
-- '&7"I *warned* you, but did you listen to me? Oh, no, you *knew*, didn''t you? Oh, it''s just a harmless little *bunny*, isn''t it?"'
-- '&7"Don''t like her? What''s wrong with her? She''s beautiful, she''s rich, she''s got huge... tracts of land."'
-- '&7"You must spank her well, and after you are done with her, you may deal with her as you like... and then... spank me."'
-- '&7"I''m not going to be a sexualised character unless I need to be to get things"'
-- '&7"You gotta update your Linux drivers!"'
-- '&7"I don''t know how Hitler lost World War 2, it''s so easy!"'
-- '&7"Words piss me off!"'
-- '&7"There must be more to the game than this! There''s doors but I can''t get through the doors."'
-- '&7"We all just received large amounts of justice to our internal organs"'
-- '&7"Everyone deserves a 60th chance"'
-- '&7"Do they even know how to Ball Cam?"'
-- '&7"How did he [Buddha] even find out about Nirvana anyway? They weren''t even a band until 1990!"'
-- '&7"These Pokémon defy Minecraft logic!"'
-- '&7"Kony? Wasn''t he a clown or something?"'
-- '&7"I''m a pro terrorist: I''m both in favour of terrorists, and a good one."'
-- '&7"You''re basically a Sven who can charge and screams ''Moo''!"'
-- '&7"Believe in the dream."'
-- '&7"It is not uncommon for things during Ludum Dare to just not work."'
-- '&7"My pizzas are more processed than a word document."'
-- '&7"All I hear is BAR BAR BAR."'
-- '&7"Gonna get some banana cake! And ice cream! I''m a responsible adult, okay?"'
-- '&7"Think how swag we could look, we could have the top dog edgies and the pleb edgies"'
-- '&7"Back in my day..."'
-- '&7"Licences are butts anyway."'
-- '&7"You may not take credit for a stupid idea that somehow worked!"'
-- '&7"I''ve always wanted to make a second fake tinder account, just to cat fish people"'
-- '&7"Is Ulti really calling me retarded..."'
-- '&7"I love legacy code"'
-- '&7"I hate anime so much."'
-- '&7"Can our family motto not be incest is wincest?"'
-- '&7Mitchell: "Would you fuck a black person Tomi?" Tomi: *In a disgusted manner* "No."'
-- '&7"At least I haven''t gotten into the quotes yet."'
-- '&7"I fell asleep and I woke up on top of him."'
-- '&7"I showed pictures to everyone."'
-- '&7"That''s what physics is: using dumb models nobody understands to solve problems nobody cares about."'
+- '&7"Ye can''t crown a king with a bobble ''at"'
+- '&7"Let me check my wocket potch"'
+- '&7"Who built a wooden bridge over a lava?!"'
+- '&7"Go back! I want to be Monkey!"'
+- '&7"Luck be a lady, and she just so happens to be a lesbian"'
+- '&7"Nace is my emotional support pyromancer"'
+- '&7"Lord Cain Soren cracks his fingers. "Today. Aye shall play. Megalovania."'
+- '&7"one simp, two simp, red tief, pink tief"'
+- '&7"I have a stack of papers with plans to ruin just about everyone in this tavern."'
+- '&7"Ze wolf was... big"'
+- '&7"***INTENSE EATING SOUNDS***"'
+- '&7"theres the two elven women havign [sic] a normal conversation, the water twink doing what the water twink does best, and two angry grumps having a battle to the death"'
+- '&7"want to help us spin the mushroom god"'
+- '&7"All have drink, toast to life suck, okay?"'
+- '&7"Batsharks are just a child''s tale, Nace. Bats don''t exist."'
+
 kits:
 - ==: com.rpkit.essentials.bukkit.kit.RPKKitImpl
   id: 1
   name: eggxample # "I take full credit" - LiamLime
   items:
   - ==: org.bukkit.inventory.ItemStack
+    v: 2586
     type: EGG
 caching:
-    rpkit_log_messages_enabled:
-        id:
-            enabled: true
-            size: 20
-    rpkit_previous_location:
-        id:
-            enabled: true
-            size: 20
-    rpkit_tracking_enabled:
-        id:
-            enabled: true
-            size: 20
+  rpkit_log_messages_enabled:
+    minecraft_profile_id:
+      enabled: true
+      size: 20
+  rpkit_previous_location:
+    minecraft_profile_id:
+      enabled: true
+      size: 20
+  rpkit_tracking_enabled:
+    id:
+      enabled: true
+      size: 20

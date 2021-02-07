@@ -16,37 +16,36 @@
 
 package com.rpkit.chat.bukkit.chatchannel.undirected
 
-import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.context.UndirectedChatChannelMessageContext
-import com.rpkit.chat.bukkit.discord.RPKDiscordProvider
-import org.bukkit.Bukkit
+import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
+import com.rpkit.chat.bukkit.context.UndirectedMessageContext
+import com.rpkit.chat.bukkit.discord.DiscordChannel
+import com.rpkit.chat.bukkit.discord.RPKDiscordService
+import com.rpkit.core.service.Services
 import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 
 class DiscordComponent(
-        private val plugin: RPKChatBukkit,
-        val discordChannel: String
-): UndirectedChatChannelPipelineComponent, ConfigurationSerializable {
-    override fun process(context: UndirectedChatChannelMessageContext): UndirectedChatChannelMessageContext {
+        val discordChannel: DiscordChannel
+) : UndirectedPipelineComponent, ConfigurationSerializable {
+    override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
         if (!context.isCancelled) {
-            val discordProvider = plugin.core.serviceManager.getServiceProvider(RPKDiscordProvider::class)
-            discordProvider.sendMessage(discordChannel, ChatColor.stripColor(context.message)!!)
+            val discordService = Services[RPKDiscordService::class.java] ?: return context
+            discordService.sendMessage(discordChannel, ChatColor.stripColor(context.message)!!)
         }
         return context
     }
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-                "discord-channel" to discordChannel
+                "discord-channel-id" to discordChannel.id
         )
     }
 
     companion object {
-        @JvmStatic fun deserialize(serialized: Map<String, Any>): DiscordComponent {
+        @JvmStatic
+        fun deserialize(serialized: Map<String, Any>): DiscordComponent {
             return DiscordComponent(
-                    Bukkit.getServer().pluginManager.getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
-                    serialized["discord-channel"] as String
+                    DiscordChannel(serialized["discord-channel-id"] as Long)
             )
         }
     }

@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +15,11 @@
 
 package com.rpkit.skills.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.skills.bukkit.RPKSkillsBukkit
-import com.rpkit.skills.bukkit.skills.RPKSkillProvider
+import com.rpkit.skills.bukkit.skills.RPKSkillService
 import com.rpkit.skills.bukkit.skills.canUse
 import com.rpkit.skills.bukkit.skills.use
 import org.bukkit.event.EventHandler
@@ -27,56 +27,47 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 
 
-class PlayerInteractListener(private val plugin: RPKSkillsBukkit): Listener {
+class PlayerInteractListener(private val plugin: RPKSkillsBukkit) : Listener {
 
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (event.player.hasPermission("rpkit.skills.command.skill")) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val skillProvider = plugin.core.serviceManager.getServiceProvider(RPKSkillProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
-            if (minecraftProfile != null) {
-                val character = characterProvider.getActiveCharacter(minecraftProfile)
-                if (character != null) {
-                    val item = event.item
-                    if (item != null) {
-                        val skill = skillProvider.getSkillBinding(character, item)
-                        if (skill != null) {
-                            if (character.canUse(skill)) {
-                                if (character.mana >= skill.manaCost) {
-                                    if (skillProvider.getSkillCooldown(character, skill) <= 0) {
-                                        character.use(skill)
-                                        skillProvider.setSkillCooldown(character, skill, skill.cooldown)
-                                        character.mana -= skill.manaCost
-                                        characterProvider.updateCharacter(character)
-                                        event.player.sendMessage(plugin.messages["skill-valid", mapOf(
-                                                Pair("skill", skill.name)
-                                        )])
-                                    } else {
-                                        event.player.sendMessage(plugin.messages["skill-invalid-on-cooldown", mapOf(
-                                                Pair("skill", skill.name),
-                                                Pair("cooldown", skillProvider.getSkillCooldown(character, skill).toString())
-                                        )])
-                                    }
-                                } else {
-                                    event.player.sendMessage(plugin.messages["skill-invalid-not-enough-mana", mapOf(
-                                            Pair("skill", skill.name),
-                                            Pair("mana-cost", skill.manaCost.toString()),
-                                            Pair("mana", character.mana.toString()),
-                                            Pair("max-mana", character.maxMana.toString())
-                                    )])
-                                }
-                            } else {
-                                event.player.sendMessage(plugin.messages["skill-invalid-unmet-prerequisites", mapOf(
-                                        Pair("skill", skill.name)
-                                )])
-                            }
-                        }
-                    }
-                }
-            }
+        if (!event.player.hasPermission("rpkit.skills.command.skill")) return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val skillService = Services[RPKSkillService::class.java] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val item = event.item ?: return
+        val skill = skillService.getSkillBinding(character, item) ?: return
+        if (!character.canUse(skill)) {
+            event.player.sendMessage(plugin.messages["skill-invalid-unmet-prerequisites", mapOf(
+                "skill" to skill.name.value
+            )])
+            return
         }
+        if (character.mana < skill.manaCost) {
+            event.player.sendMessage(plugin.messages["skill-invalid-not-enough-mana", mapOf(
+                "skill" to skill.name.value,
+                "mana_cost" to skill.manaCost.toString(),
+                "mana" to character.mana.toString(),
+                "max_mana" to character.maxMana.toString()
+            )])
+            return
+        }
+        if (skillService.getSkillCooldown(character, skill) > 0) {
+            event.player.sendMessage(plugin.messages["skill-invalid-on-cooldown", mapOf(
+                "skill" to skill.name.value,
+                "cooldown" to skillService.getSkillCooldown(character, skill).toString()
+            )])
+            return
+        }
+        character.use(skill)
+        skillService.setSkillCooldown(character, skill, skill.cooldown)
+        character.mana -= skill.manaCost
+        characterService.updateCharacter(character)
+        event.player.sendMessage(plugin.messages["skill-valid", mapOf(
+            "skill" to skill.name.value
+        )])
     }
 
 }

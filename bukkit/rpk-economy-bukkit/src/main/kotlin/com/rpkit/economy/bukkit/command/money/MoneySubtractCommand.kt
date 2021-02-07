@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,29 +16,39 @@
 package com.rpkit.economy.bukkit.command.money
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
+import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
+import com.rpkit.players.bukkit.profile.RPKProfileName
+import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.NumericPrompt
+import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.StringPrompt
+import org.bukkit.conversations.ValidatingPrompt
 import org.bukkit.entity.Player
 
 /**
  * Money subtract command.
  * Takes money from a player's active character.
  */
-class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
+class MoneySubtractCommand(val plugin: RPKEconomyBukkit) : CommandExecutor {
 
     private val conversationFactory = ConversationFactory(plugin)
             .withModality(true)
-            .withFirstPrompt(ProfilePrompt())
+            .withFirstPrompt(ProfileNamePrompt())
             .withEscapeSequence("cancel")
             .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
             .addConversationAbandonedListener { event ->
@@ -52,95 +61,119 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
             }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender is Player) {
-            if (sender.hasPermission("rpkit.economy.command.money.subtract")) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-                val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                if (args.isNotEmpty()) {
-                    val bukkitPlayer = plugin.server.getPlayer(args[0])
-                    if (bukkitPlayer != null) {
-                        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-                        if (minecraftProfile != null) {
-                            val profile = minecraftProfile.profile
-                            if (profile is RPKProfile) {
-                                if (args.size > 1) {
-                                    val character = characterProvider.getCharacters(profile)
-                                            .firstOrNull { character -> character.name.startsWith(args[1]) }
-                                    if (character != null) {
-                                        if (args.size > 2) {
-                                            val currency = currencyProvider.getCurrency(args[2])
-                                            if (currency != null) {
-                                                if (args.size > 3) {
-                                                    try {
-                                                        val amount = args[3].toInt()
-                                                        if (amount >= 0) {
-                                                            economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - amount)
-                                                            sender.sendMessage(plugin.messages["money-subtract-amount-valid"])
-                                                            sender.sendMessage(plugin.messages["money-subtract-valid"])
-                                                        } else {
-                                                            sender.sendMessage(plugin.messages["money-subtract-value-invalid-value-negative"])
-                                                        }
-                                                    } catch (exception: NumberFormatException) {
-                                                        sender.sendMessage(plugin.messages["money-subtract-value-invalid-value-number"])
-                                                    }
-                                                } else {
-                                                    conversationFactory.buildConversation(sender).begin()
-                                                }
-                                            } else {
-                                                sender.sendMessage(plugin.messages["money-subtract-currency-invalid-currency"])
-                                            }
-                                        } else {
-                                            conversationFactory.buildConversation(sender).begin()
-                                        }
-                                    } else {
-                                        sender.sendMessage(plugin.messages["money-subtract-character-invalid-character"])
-                                    }
-                                } else {
-                                    conversationFactory.buildConversation(sender).begin()
-                                }
-                            } else {
-                                sender.sendMessage(plugin.messages["no-profile"])
-                            }
-                        } else {
-                            sender.sendMessage(plugin.messages["no-profile"])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["money-subtract-profile-invalid-profile"])
-                    }
-                } else {
-                    conversationFactory.buildConversation(sender).begin()
-                }
-            } else {
-                sender.sendMessage(plugin.messages["no-permission-money-subtract"])
-            }
-        } else {
+        if (sender !is Player) {
             sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        if (!sender.hasPermission("rpkit.economy.command.money.subtract")) {
+            sender.sendMessage(plugin.messages["no-permission-money-subtract"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val economyService = Services[RPKEconomyService::class.java]
+        if (economyService == null) {
+            sender.sendMessage(plugin.messages["no-economy-service"])
+            return true
+        }
+        val currencyService = Services[RPKCurrencyService::class.java]
+        if (currencyService == null) {
+            sender.sendMessage(plugin.messages["no-currency-service"])
+            return true
+        }
+        if (args.isEmpty()) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        val bukkitPlayer = plugin.server.getPlayer(args[0])
+        if (bukkitPlayer == null) {
+            sender.sendMessage(plugin.messages["money-subtract-profile-invalid-profile"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-profile"])
+            return true
+        }
+        val profile = minecraftProfile.profile
+        if (profile !is RPKProfile) {
+            sender.sendMessage(plugin.messages["no-profile"])
+            return true
+        }
+        if (args.size <= 1) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        val character = characterService.getCharacters(profile)
+                .firstOrNull { character -> character.name.startsWith(args[1]) }
+        if (character == null) {
+            sender.sendMessage(plugin.messages["money-subtract-character-invalid-character"])
+            return true
+        }
+        if (args.size <= 2) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        val currency = currencyService.getCurrency(RPKCurrencyName(args[2]))
+        if (currency == null) {
+            sender.sendMessage(plugin.messages["money-subtract-currency-invalid-currency"])
+            return true
+        }
+        if (args.size <= 3) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        try {
+            val amount = args[3].toInt()
+            if (amount < 0) {
+                sender.sendMessage(plugin.messages["money-subtract-value-invalid-value-negative"])
+                return true
+            }
+            economyService.setBalance(character, currency, economyService.getBalance(character, currency) - amount)
+            sender.sendMessage(plugin.messages["money-subtract-amount-valid"])
+            sender.sendMessage(plugin.messages["money-subtract-valid"])
+        } catch (exception: NumberFormatException) {
+            sender.sendMessage(plugin.messages["money-subtract-value-invalid-value-number"])
         }
         return true
     }
 
-    private inner class ProfilePrompt: ValidatingPrompt() {
-
-        override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-            val profile = profileProvider.getProfile(input)
-            context.setSessionData("profile", profile)
-            return ProfileSetPrompt()
-        }
-
-        override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-            return profileProvider.getProfile(input) != null
-        }
+    private inner class ProfileNamePrompt : StringPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages["money-subtract-profile-prompt"]
+            return plugin.messages["money-subtract-profile-name-prompt"]
         }
 
-        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return plugin.messages["money-subtract-profile-invalid-profile"]
+        override fun acceptInput(context: ConversationContext, input: String?): Prompt {
+            context.setSessionData("profileName", input)
+            return ProfileDiscriminatorPrompt()
+        }
+
+    }
+
+    private inner class ProfileDiscriminatorPrompt : NumericPrompt() {
+        override fun getPromptText(context: ConversationContext): String {
+            return plugin.messages["money-subtract-profile-discriminator-prompt"]
+        }
+
+        override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
+            context.setSessionData("profileDiscriminator", input.toInt())
+            val profileService = Services[RPKProfileService::class.java] ?: return ProfileInvalidPrompt()
+            val profile = profileService.getProfile(
+                    RPKProfileName(context.getSessionData("profileName") as String),
+                    RPKProfileDiscriminator(context.getSessionData("profileDiscriminator") as Int)
+            ) ?: return ProfileInvalidPrompt()
+            context.setSessionData("profileService", profileService)
+            context.setSessionData("profile", profile)
+            return ProfileSetPrompt()
         }
 
     }
@@ -156,15 +189,28 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class CharacterPrompt: ValidatingPrompt() {
+    private inner class ProfileInvalidPrompt : MessagePrompt() {
+        override fun getPromptText(context: ConversationContext): String {
+            return plugin.messages["money-subtract-profile-invalid-profile"]
+        }
+
+        override fun getNextPrompt(context: ConversationContext): Prompt? {
+            return ProfileNamePrompt()
+        }
+
+    }
+
+    private inner class CharacterPrompt : ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterService = context.getSessionData("characterService") as RPKCharacterService
+            return characterService
                     .getCharacters(context.getSessionData("profile") as RPKProfile)
                     .any { character -> character.name == input }
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("character", plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+            val characterService = context.getSessionData("characterService") as RPKCharacterService
+            context.setSessionData("character", characterService
                     .getCharacters(context.getSessionData("profile") as RPKProfile)
                     .first { character -> character.name == input }
             )
@@ -172,13 +218,14 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getPromptText(context: ConversationContext): String {
+            val characterService = context.getSessionData("characterService") as RPKCharacterService
             return plugin.messages["money-subtract-character-prompt"] +
                     "\n" +
-                    plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                    characterService
                             .getCharacters(context.getSessionData("profile") as RPKProfile)
                             .joinToString("\n") { character ->
                                 plugin.messages["money-subtract-character-prompt-list-item", mapOf(
-                                        Pair("character", character.name)
+                                    "character" to character.name
                                 )]
                             }
         }
@@ -188,33 +235,39 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
     }
 
-    private inner class CharacterSetPrompt: MessagePrompt() {
+    private inner class CharacterSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return END_OF_CONVERSATION
+            context.setSessionData("currencyService", currencyService)
             return CurrencyPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
+            if (Services[RPKCurrencyService::class.java] == null) return plugin.messages["no-currency-service"]
             return plugin.messages["money-subtract-character-valid"]
         }
 
     }
 
-    private inner class CurrencyPrompt: ValidatingPrompt() {
+    private inner class CurrencyPrompt : ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(input) != null
+            val currencyService = context.getSessionData("currencyService") as RPKCurrencyService
+            return currencyService.getCurrency(RPKCurrencyName(input)) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("currency", plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(input))
+            val currencyService = context.getSessionData("currencyService") as RPKCurrencyService
+            context.setSessionData("currency", currencyService.getCurrency(RPKCurrencyName(input)))
             return CurrencySetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
+            val currencyService = context.getSessionData("currencyService") as RPKCurrencyService
             return plugin.messages["money-subtract-currency-prompt"] + "\n" +
-                    plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
+                    currencyService.currencies
                             .joinToString("\n") { currency ->
                                 plugin.messages["money-subtract-currency-prompt-list-item", mapOf(
-                                        Pair("currency", currency.name)
+                                    "currency" to currency.name.value
                                 )]
                             }
         }
@@ -224,7 +277,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
     }
 
-    private inner class CurrencySetPrompt: MessagePrompt() {
+    private inner class CurrencySetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return AmountPrompt()
         }
@@ -235,11 +288,11 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class AmountPrompt: NumericPrompt() {
+    private inner class AmountPrompt : NumericPrompt() {
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
-            val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-            val balance = economyProvider.getBalance(context.getSessionData("character") as RPKCharacter, context.getSessionData("currency") as RPKCurrency)
+            val economyService = Services[RPKEconomyService::class.java] ?: return false
+            val balance = economyService.getBalance(context.getSessionData("character") as RPKCharacter, context.getSessionData("currency") as RPKCurrency)
             return input.toInt() in 1..balance
         }
 
@@ -253,6 +306,9 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
+            if (Services[RPKEconomyService::class.java] == null) {
+                return plugin.messages["no-economy-service"]
+            }
             return if (invalidInput.toInt() <= 0) {
                 plugin.messages["money-subtract-amount-invalid-amount-negative"]
             } else {
@@ -266,7 +322,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class AmountSetPrompt: MessagePrompt() {
+    private inner class AmountSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return MoneySubtractCompletePrompt()
         }
@@ -277,17 +333,17 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class MoneySubtractCompletePrompt: MessagePrompt() {
+    private inner class MoneySubtractCompletePrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
+            val economyService = Services[RPKEconomyService::class.java] ?: return plugin.messages["no-economy-service"]
             val character = context.getSessionData("character") as RPKCharacter
             val currency = context.getSessionData("currency") as RPKCurrency
             val amount = context.getSessionData("amount") as Int
-            economyProvider.setBalance(character, currency, economyProvider.getBalance(character, currency) - amount)
+            economyService.setBalance(character, currency, economyService.getBalance(character, currency) - amount)
             return plugin.messages["money-subtract-valid"]
         }
 

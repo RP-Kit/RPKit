@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package com.rpkit.chat.bukkit.event.snooper
 
 import com.rpkit.core.event.RPKEvent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
-interface RPKSnooperEvent: RPKEvent {
+interface RPKSnooperEvent : RPKEvent {
 
     val snooper: RPKMinecraftProfile
 

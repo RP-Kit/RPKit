@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +23,7 @@ import org.bukkit.configuration.serialization.SerializableAs
  */
 @SerializableAs("RPKGroupImpl")
 data class RPKGroupImpl(
-        override val name: String,
+        override val name: RPKGroupName,
         override val allow: List<String>,
         override val deny: List<String>,
         override val inheritance: List<RPKGroup>
@@ -32,7 +31,7 @@ data class RPKGroupImpl(
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-                Pair("name", name),
+                Pair("name", name.value),
                 Pair("allow", allow),
                 Pair("deny", deny),
                 Pair("inheritance", inheritance)
@@ -43,7 +42,7 @@ data class RPKGroupImpl(
         @JvmStatic
         fun deserialize(serialized: MutableMap<String, Any>): RPKGroupImpl {
             return RPKGroupImpl(
-                    serialized["name"] as String,
+                    RPKGroupName(serialized["name"] as String),
                     serialized["allow"] as List<String>,
                     serialized["deny"] as List<String>,
                     serialized["inheritance"] as List<RPKGroup>

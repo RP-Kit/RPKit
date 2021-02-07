@@ -8,24 +8,24 @@ depend:
 - rpk-character-lib-bukkit
 - rpk-economy-lib-bukkit
 - rpk-auction-lib-bukkit
-api-version: '1.15'
+api-version: '1.16'
 commands:
-    auction:
-        description: Auction management command
-        usage: /<command>
-    bid:
-        description: Bidding command
-        usage: /<command> [player] [amount]
+  auction:
+    description: Auction management command
+    usage: /<command>
+  bid:
+    description: Bidding command
+    usage: /<command> [player] [amount]
 permissions:
-    rpkit.auctions.command.auction.create:
-        description: Allows the creation of auctions
-        default: true
-    rpkit.auctions.command.bid:
-        description: Allows bidding on auctions
-        default: true
-    rpkit.auctions.sign.auction:
-        description: Allows creating auction signs
-        default: true
-    rpkit.auctions.sign.auction.bid:
-        description: Allows bidding via auction signs
-        default: true
+  rpkit.auctions.command.auction.create:
+    description: Allows the creation of auctions
+    default: true
+  rpkit.auctions.command.bid:
+    description: Allows bidding on auctions
+    default: true
+  rpkit.auctions.sign.auction:
+    description: Allows creating auction signs
+    default: true
+  rpkit.auctions.sign.auction.bid:
+    description: Allows bidding via auction signs
+    default: true

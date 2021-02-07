@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,34 @@
 
 package com.rpkit.unconsciousness.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
-import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProvider
+import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 
 
-class PlayerCommandPreprocessListener(private val plugin: RPKUnconsciousnessBukkit): Listener {
+class PlayerCommandPreprocessListener(private val plugin: RPKUnconsciousnessBukkit) : Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     fun onPlayerCommandPreprocess(event: PlayerCommandPreprocessEvent) {
         val bukkitPlayer = event.player
-        if (!bukkitPlayer.hasPermission("rpkit.unconsciousness.unconscious.commands")) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val unconsciousnessProvider = plugin.core.serviceManager.getServiceProvider(RPKUnconsciousnessProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile != null) {
-                val character = characterProvider.getActiveCharacter(minecraftProfile)
-                if (character != null) {
-                    if (unconsciousnessProvider.isUnconscious(character)) {
-                        if (!plugin.config.getStringList("allowed-commands")
-                                        .map { command -> "/$command" }
-                                        .contains(event.message.split(Regex("\\s+"))[0])) {
-                            event.isCancelled = true
-                            bukkitPlayer.sendMessage(plugin.messages["unconscious-command-blocked"])
-                        }
-                    }
-                }
-            }
-        }
+        if (bukkitPlayer.hasPermission("rpkit.unconsciousness.unconscious.commands")) return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        if (!unconsciousnessService.isUnconscious(character)) return
+        if (plugin.config.getStringList("allowed-commands")
+                        .map { command -> "/$command" }
+                        .contains(event.message.split(Regex("\\s+"))[0])) return
+        event.isCancelled = true
+        bukkitPlayer.sendMessage(plugin.messages["unconscious-command-blocked"])
     }
 
 }

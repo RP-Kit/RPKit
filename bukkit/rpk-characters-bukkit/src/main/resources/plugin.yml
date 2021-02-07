@@ -8,115 +8,100 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-permissions-lib-bukkit
-api-version: '1.15'
+api-version: '1.16'
 commands:
-    character:
-        description: Character management command
-        aliases: [char, c]
-        usage: /<command> [set|card|switch|list|new|delete]
-    race:
-        description: Race management command
-        usage: /<command> [add|remove|list]
+  character:
+    description: Character management command
+    aliases: [char, c]
+    usage: /<command> [set|card|switch|list|new|delete]
+  race:
+    description: Race management command
+    usage: /<command> [list]
 permissions:
-    rpkit.characters.command.character.card.self:
-        description: Allows viewing your own character card
-        default: true
-    rpkit.characters.command.character.card.other:
-        description: Allows viewing other character cards
-        default: true
-    rpkit.characters.command.character.list:
-        description: Allows viewing your own character list
-        default: true
-    rpkit.characters.command.character.new:
-        description: Allows creating a new character
-        default: true
-    rpkit.characters.command.character.new.nocooldown:
-        description: Removes the cooldown from creating characters
-        default: op
-    rpkit.characters.command.character.set.age:
-        description: Allows setting your character''s age
-        default: true
-    rpkit.characters.command.character.set.dead:
-        description: Allows setting your character''s dead state
-        default: true
-    rpkit.characters.command.character.set.dead.yes:
-        description: Allows setting your character to be dead
-        default: true
-    rpkit.characters.command.character.set.dead.no:
-        description: Allows setting your character to be not dead
-        default: op
-    rpkit.characters.command.character.set.description:
-        description: Allows setting your character''s description
-        default: true
-    rpkit.characters.command.character.set.gender:
-        description: Allows setting your character''s gender
-        default: true
-    rpkit.characters.command.character.set.name:
-        description: Allows setting your character''s name
-        default: true
-    rpkit.characters.command.character.set.player:
-        description: Allows assigning your characters to a different player
-        default: op
-    rpkit.characters.command.character.set.profile:
-        description: Allows assigning your characters to a different profile
-        default: op
-    rpkit.characters.command.character.set.race:
-        description: Allows setting your character''s race
-        default: true
-    rpkit.characters.command.character.hide.age:
-        description: Allows hiding your character''s age
-        default: true
-    rpkit.characters.command.character.hide.description:
-        description: Allows hiding your character''s description
-        default: true
-    rpkit.characters.command.character.hide.gender:
-        description: Allows hiding your character''s gender
-        default: true
-    rpkit.characters.command.character.hide.name:
-        description: Allows hiding your character''s name
-        default: true
-    rpkit.characters.command.character.hide.player:
-        description: Allows hiding your character''s player
-        default: true
-    rpkit.characters.command.character.hide.profile:
-        description: Allows hiding your character''s profile
-        default: true
-    rpkit.characters.command.character.hide.race:
-        description: Allows hiding your character''s race
-        default: true
-    rpkit.characters.command.character.unhide.age:
-        description: Allows unhiding your character''s age
-        default: true
-    rpkit.characters.command.character.unhide.description:
-        description: Allows unhiding your character''s description
-        default: true
-    rpkit.characters.command.character.unhide.gender:
-        description: Allows unhiding your character''s gender
-        default: true
-    rpkit.characters.command.character.unhide.name:
-        description: Allows unhiding your character''s name
-        default: true
-    rpkit.characters.command.character.unhide.player:
-        description: Allows unhiding your character''s player
-        default: true
-    rpkit.characters.command.character.unhide.profile:
-        description: Allows unhiding your character''s profile
-        default: true
-    rpkit.characters.command.character.unhide.race:
-        description: Allows unhiding your character''s race
-        default: true
-    rpkit.characters.command.character.switch:
-        description: Allows switching to other characters
-        default: true
-    rpkit.characters.command.character.delete:
-        description: Allows deleting characters
-        default: op
-    rpkit.characters.command.race.add:
-        description: Allows creation of races
-        default: op
-    rpkit.characters.command.race.remove:
-        description: Allows removal of races
-        default: op
-    rpkit.characters.command.race.list:
-        description: Allows listing of races
-        default: true
+  rpkit.characters.command.character.card.self:
+    description: Allows viewing your own character card
+    default: true
+  rpkit.characters.command.character.card.other:
+    description: Allows viewing other character cards
+    default: true
+  rpkit.characters.command.character.list:
+    description: Allows viewing your own character list
+    default: true
+  rpkit.characters.command.character.new:
+    description: Allows creating a new character
+    default: true
+  rpkit.characters.command.character.new.nocooldown:
+    description: Removes the cooldown from creating characters
+    default: op
+  rpkit.characters.command.character.set.age:
+    description: Allows setting your character''s age
+    default: true
+  rpkit.characters.command.character.set.dead:
+    description: Allows setting your character''s dead state
+    default: true
+  rpkit.characters.command.character.set.dead.yes:
+    description: Allows setting your character to be dead
+    default: true
+  rpkit.characters.command.character.set.dead.no:
+    description: Allows setting your character to be not dead
+    default: op
+  rpkit.characters.command.character.set.description:
+    description: Allows setting your character''s description
+    default: true
+  rpkit.characters.command.character.set.gender:
+    description: Allows setting your character''s gender
+    default: true
+  rpkit.characters.command.character.set.name:
+    description: Allows setting your character''s name
+    default: true
+  rpkit.characters.command.character.set.profile:
+    description: Allows assigning your characters to a different profile
+    default: op
+  rpkit.characters.command.character.set.race:
+    description: Allows setting your character''s race
+    default: true
+  rpkit.characters.command.character.hide.age:
+    description: Allows hiding your character''s age
+    default: true
+  rpkit.characters.command.character.hide.description:
+    description: Allows hiding your character''s description
+    default: true
+  rpkit.characters.command.character.hide.gender:
+    description: Allows hiding your character''s gender
+    default: true
+  rpkit.characters.command.character.hide.name:
+    description: Allows hiding your character''s name
+    default: true
+  rpkit.characters.command.character.hide.profile:
+    description: Allows hiding your character''s profile
+    default: true
+  rpkit.characters.command.character.hide.race:
+    description: Allows hiding your character''s race
+    default: true
+  rpkit.characters.command.character.unhide.age:
+    description: Allows unhiding your character''s age
+    default: true
+  rpkit.characters.command.character.unhide.description:
+    description: Allows unhiding your character''s description
+    default: true
+  rpkit.characters.command.character.unhide.gender:
+    description: Allows unhiding your character''s gender
+    default: true
+  rpkit.characters.command.character.unhide.name:
+    description: Allows unhiding your character''s name
+    default: true
+  rpkit.characters.command.character.unhide.profile:
+    description: Allows unhiding your character''s profile
+    default: true
+  rpkit.characters.command.character.unhide.race:
+    description: Allows unhiding your character''s race
+    default: true
+  rpkit.characters.command.character.switch:
+    description: Allows switching to other characters
+    default: true
+  rpkit.characters.command.character.delete:
+    description: Allows deleting characters
+    default: op
+  rpkit.characters.command.race.list:
+    description: Allows listing of races
+    default: true

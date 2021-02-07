@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,33 +16,45 @@
 package com.rpkit.food.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.food.bukkit.expiry.RPKExpiryProviderImpl
-import com.rpkit.food.bukkit.listener.*
+import com.rpkit.core.service.Services
+import com.rpkit.food.bukkit.expiry.RPKExpiryService
+import com.rpkit.food.bukkit.expiry.RPKExpiryServiceImpl
+import com.rpkit.food.bukkit.listener.EntityDeathListener
+import com.rpkit.food.bukkit.listener.EntityPickupItemListener
+import com.rpkit.food.bukkit.listener.FurnaceSmeltListener
+import com.rpkit.food.bukkit.listener.InventoryOpenListener
+import com.rpkit.food.bukkit.listener.PlayerFishListener
+import com.rpkit.food.bukkit.listener.PlayerItemConsumeListener
+import com.rpkit.food.bukkit.listener.PlayerJoinListener
+import com.rpkit.food.bukkit.listener.PrepareItemCraftListener
 import org.bstats.bukkit.Metrics
 
 /**
  * RPK food plugin default implementation.
  */
-class RPKFoodBukkit: RPKBukkitPlugin() {
+class RPKFoodBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4397)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKExpiryProviderImpl(this)
-        )
+
+        val expiryService = RPKExpiryServiceImpl(this)
+        Services[RPKExpiryService::class.java] = expiryService
+        Services[RPKExpiryServiceImpl::class.java] = expiryService
+
+        registerListeners()
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
-                EntityDeathListener(this),
+                EntityDeathListener(),
                 FurnaceSmeltListener(this),
-                InventoryOpenListener(this),
-                PlayerFishListener(this),
+                InventoryOpenListener(),
+                PlayerFishListener(),
                 PlayerItemConsumeListener(this),
-                PlayerJoinListener(this),
-                PlayerPickupItemListener(this),
-                PrepareItemCraftListener(this)
+                PlayerJoinListener(),
+                EntityPickupItemListener(),
+                PrepareItemCraftListener()
         )
     }
 

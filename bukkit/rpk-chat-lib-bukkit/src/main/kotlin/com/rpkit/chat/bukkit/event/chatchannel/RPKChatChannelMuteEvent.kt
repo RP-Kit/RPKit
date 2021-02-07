@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package com.rpkit.chat.bukkit.event.chatchannel
 
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 
-interface RPKChatChannelMuteEvent: RPKChatChannelEvent, RPKMinecraftProfileEvent {
+interface RPKChatChannelMuteEvent : RPKChatChannelEvent, RPKMinecraftProfileEvent {
 
     override val minecraftProfile: RPKMinecraftProfile
     override val chatChannel: RPKChatChannel

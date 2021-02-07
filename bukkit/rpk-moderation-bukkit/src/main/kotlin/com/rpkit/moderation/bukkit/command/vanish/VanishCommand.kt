@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package com.rpkit.moderation.bukkit.command.vanish
 
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
-import com.rpkit.moderation.bukkit.vanish.RPKVanishProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.moderation.bukkit.vanish.RPKVanishService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class VanishCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class VanishCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.moderation.command.vanish")) {
             sender.sendMessage(plugin.messages["no-permission-vanish"])
@@ -35,14 +36,22 @@ class VanishCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val vanishProvider = plugin.core.serviceManager.getServiceProvider(RPKVanishProvider::class)
-        vanishProvider.setVanished(minecraftProfile, true)
+        val vanishService = Services[RPKVanishService::class.java]
+        if (vanishService == null) {
+            sender.sendMessage(plugin.messages["no-vanish-service"])
+            return true
+        }
+        vanishService.setVanished(minecraftProfile, true)
         sender.sendMessage(plugin.messages["vanish-valid"])
         return true
     }

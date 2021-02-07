@@ -1,6 +1,0 @@
-database:
-    url: jdbc:sqlite:rpkit.db
-    dialect: SQLITE
-web-server:
-    port: 8089
-    title: RPKit

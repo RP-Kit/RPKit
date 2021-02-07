@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,46 +19,28 @@ package com.rpkit.store.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.store.bukkit.RPKStoresBukkit
+import com.rpkit.store.bukkit.database.create
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_CONSUMABLE_STORE_ITEM
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_STORE_ITEM
 import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItemImpl
-import com.rpkit.stores.bukkit.database.jooq.rpkit.Tables.RPKIT_CONSUMABLE_STORE_ITEM
-import com.rpkit.stores.bukkit.database.jooq.rpkit.Tables.RPKIT_STORE_ITEM
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 
-class RPKConsumableStoreItemTable(database: Database, private val plugin: RPKStoresBukkit): Table<RPKConsumableStoreItem>(database, RPKConsumableStoreItem::class) {
+class RPKConsumableStoreItemTable(private val database: Database, private val plugin: RPKStoresBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_consumable_store_item.id.enabled")) {
-        database.cacheManager.createCache("rpkit-stores-bukkit.rpkit_consumable_store_item.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKConsumableStoreItem::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_consumable_store_item.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpkit-stores-bukkit.rpkit_consumable_store_item.id",
+            Int::class.javaObjectType,
+            RPKConsumableStoreItem::class.java,
+            plugin.config.getLong("caching.rpkit_consumable_store_item.id.size")
+        )
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_CONSUMABLE_STORE_ITEM)
-                .column(RPKIT_CONSUMABLE_STORE_ITEM.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_CONSUMABLE_STORE_ITEM.STORE_ITEM_ID, SQLDataType.INTEGER)
-                .column(RPKIT_CONSUMABLE_STORE_ITEM.USES, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("pk_rpkit_consumable_store_item").primaryKey(RPKIT_CONSUMABLE_STORE_ITEM.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.6.0")
-        }
-    }
-
-    override fun insert(entity: RPKConsumableStoreItem): Int {
-        val id = database.getTable(RPKStoreItemTable::class).insert(entity)
+    fun insert(entity: RPKConsumableStoreItem) {
+        val id = database.getTable(RPKStoreItemTable::class.java).insert(entity)
         database.create
                 .insertInto(
                         RPKIT_CONSUMABLE_STORE_ITEM,
@@ -71,21 +53,21 @@ class RPKConsumableStoreItemTable(database: Database, private val plugin: RPKSto
                 )
                 .execute()
         entity.id = id
-        cache?.put(id, entity)
-        return id
+        cache?.set(id, entity)
     }
 
-    override fun update(entity: RPKConsumableStoreItem) {
-        database.getTable(RPKStoreItemTable::class).update(entity)
+    fun update(entity: RPKConsumableStoreItem) {
+        val id = entity.id ?: return
+        database.getTable(RPKStoreItemTable::class.java).update(entity)
         database.create
                 .update(RPKIT_CONSUMABLE_STORE_ITEM)
                 .set(RPKIT_CONSUMABLE_STORE_ITEM.USES, entity.uses)
-                .where(RPKIT_CONSUMABLE_STORE_ITEM.STORE_ITEM_ID.eq(entity.id))
+                .where(RPKIT_CONSUMABLE_STORE_ITEM.STORE_ITEM_ID.eq(id))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id, entity)
     }
 
-    override fun get(id: Int): RPKConsumableStoreItem? {
+    operator fun get(id: Int): RPKConsumableStoreItem? {
         if (cache?.containsKey(id) == true) {
             return cache[id]
         } else {
@@ -112,17 +94,18 @@ class RPKConsumableStoreItemTable(database: Database, private val plugin: RPKSto
                     result[RPKIT_STORE_ITEM.DESCRIPTION],
                     result[RPKIT_STORE_ITEM.COST]
             )
-            cache?.put(id, storeItem)
+            cache?.set(id, storeItem)
             return storeItem
         }
     }
 
-    override fun delete(entity: RPKConsumableStoreItem) {
-        database.getTable(RPKStoreItemTable::class).delete(entity)
+    fun delete(entity: RPKConsumableStoreItem) {
+        database.getTable(RPKStoreItemTable::class.java).delete(entity)
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_CONSUMABLE_STORE_ITEM)
-                .where(RPKIT_CONSUMABLE_STORE_ITEM.ID.eq(entity.id))
+                .where(RPKIT_CONSUMABLE_STORE_ITEM.ID.eq(id))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id)
     }
 }

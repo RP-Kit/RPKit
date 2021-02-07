@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction
 import org.bukkit.Material
 
 
-interface RPKCraftingSkillExperienceChangeEvent: RPKCharacterEvent {
+interface RPKCraftingSkillExperienceChangeEvent : RPKCharacterEvent {
 
     override val character: RPKCharacter
     val action: RPKCraftingAction

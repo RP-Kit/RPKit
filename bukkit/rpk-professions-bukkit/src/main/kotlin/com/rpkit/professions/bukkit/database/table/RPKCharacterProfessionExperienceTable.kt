@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,56 +16,39 @@
 package com.rpkit.professions.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
-import com.rpkit.professions.bukkit.database.jooq.rpkit.Tables.RPKIT_CHARACTER_PROFESSION_EXPERIENCE
+import com.rpkit.professions.bukkit.database.create
+import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_CHARACTER_PROFESSION_EXPERIENCE
 import com.rpkit.professions.bukkit.profession.RPKCharacterProfessionExperience
 import com.rpkit.professions.bukkit.profession.RPKProfession
-import com.rpkit.professions.bukkit.profession.RPKProfessionProvider
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
 
 
 class RPKCharacterProfessionExperienceTable(
-        database: Database,
+        private val database: Database,
         val plugin: RPKProfessionsBukkit
-): Table<RPKCharacterProfessionExperience>(
-        database,
-        RPKCharacterProfessionExperience::class
-) {
+) : Table {
 
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_character_profession_experience.id.enabled")) {
-        database.cacheManager.createCache("rpk-professions-bukkit.rpkit_character_profession_experience.id", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(Int::class.javaObjectType, RPKCharacterProfessionExperience::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_character_profession_experience.id.size"))).build())
+    private data class CharacterProfessionCacheKey(
+        val characterId: Int,
+        val professionName: String
+    )
+
+    private val cache = if (plugin.config.getBoolean("caching.rpkit_character_profession_experience.character_id.enabled")) {
+        database.cacheManager.createCache(
+            "rpk-professions-bukkit.rpkit_character_profession_experience.character_id",
+            CharacterProfessionCacheKey::class.java,
+            RPKCharacterProfessionExperience::class.java,
+            plugin.config.getLong("caching.rpkit_character_profession_experience.character_id.size")
+        )
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .column(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID, SQLDataType.INTEGER)
-                .column(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION, SQLDataType.VARCHAR(256))
-                .column(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE, SQLDataType.INTEGER)
-                .constraints(
-                        constraint("pk_rpkit_character_profession_experience").primaryKey(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.7.0")
-        }
-    }
-
-    override fun insert(entity: RPKCharacterProfessionExperience): Int {
+    fun insert(entity: RPKCharacterProfessionExperience) {
+        val characterId = entity.character.id ?: return
+        val professionName = entity.profession.name
         database.create
                 .insertInto(
                         RPKIT_CHARACTER_PROFESSION_EXPERIENCE,
@@ -75,96 +57,65 @@ class RPKCharacterProfessionExperienceTable(
                         RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE
                 )
                 .values(
-                        entity.character.id,
-                        entity.profession.name,
+                        characterId.value,
+                        professionName.value,
                         entity.experience
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
+        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
     }
 
-    override fun update(entity: RPKCharacterProfessionExperience) {
+    fun update(entity: RPKCharacterProfessionExperience) {
+        val characterId = entity.character.id ?: return
+        val professionName = entity.profession.name
         database.create
                 .update(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID, entity.character.id)
-                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION, entity.profession.name)
+                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID, characterId.value)
+                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION, professionName.value)
                 .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE, entity.experience)
-                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.ID.eq(entity.id))
+                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
     }
 
-    override fun get(id: Int): RPKCharacterProfessionExperience? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
-        }
+    operator fun get(character: RPKCharacter, profession: RPKProfession): RPKCharacterProfessionExperience? {
+        val characterId = character.id ?: return null
+        val professionName = profession.name
         val result = database.create
-                .select(
-                        RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID,
-                        RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION,
-                        RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE
-                )
+                .select(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE)
                 .from(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.ID.eq(id))
+                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName.value))
                 .fetchOne() ?: return null
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val character = characterProvider.getCharacter(result[RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID])
-        if (character == null) {
-            database.create
-                    .deleteFrom(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                    .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.ID.eq(id))
-                    .execute()
-            cache?.remove(id)
-            return null
-        }
-        val professionProvider = plugin.core.serviceManager.getServiceProvider(RPKProfessionProvider::class)
-        val profession = professionProvider.getProfession(result[RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION])
-        if (profession == null) {
-            database.create
-                    .deleteFrom(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                    .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.ID.eq(id))
-                    .execute()
-            cache?.remove(id)
-            return null
-        }
         val characterProfessionExperience = RPKCharacterProfessionExperience(
-                id,
                 character,
                 profession,
                 result[RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE]
         )
-        cache?.put(id, characterProfessionExperience)
+        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), characterProfessionExperience)
         return characterProfessionExperience
     }
 
-    fun get(character: RPKCharacter): List<RPKCharacterProfessionExperience> {
-        val results = database.create
-                .select(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.ID)
-                .from(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(character.id))
-                .fetch()
-        return results.mapNotNull { result -> get(result[RPKIT_CHARACTER_PROFESSION_EXPERIENCE.ID]) }
-    }
-
-    fun get(character: RPKCharacter, profession: RPKProfession): RPKCharacterProfessionExperience? {
-        val result = database.create
-                .select(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.ID)
-                .from(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(character.id))
-                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(profession.name))
-                .fetchOne() ?: return null
-        return get(result[RPKIT_CHARACTER_PROFESSION_EXPERIENCE.ID])
-    }
-
-    override fun delete(entity: RPKCharacterProfessionExperience) {
+    fun delete(entity: RPKCharacterProfessionExperience) {
+        val characterId = entity.character.id ?: return
+        val professionName = entity.profession.name
         database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.ID.eq(entity.id))
+                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName.value))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(CharacterProfessionCacheKey(characterId.value, professionName.value))
+    }
+
+    fun delete(character: RPKCharacter) {
+        val characterId = character.id ?: return
+        database.create
+                .deleteFrom(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
+                .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
+                .execute()
+        cache?.keys()
+            ?.filter { it.characterId == characterId.value }
+            ?.forEach { cache.remove(it) }
     }
 
 }

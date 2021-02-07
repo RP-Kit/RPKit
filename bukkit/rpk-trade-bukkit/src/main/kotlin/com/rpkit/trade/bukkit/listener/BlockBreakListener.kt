@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,23 +26,16 @@ import org.bukkit.event.block.BlockBreakEvent
 /**
  * Block break listener for trader signs.
  */
-class BlockBreakListener(private val plugin: RPKTradeBukkit): Listener {
+class BlockBreakListener(private val plugin: RPKTradeBukkit) : Listener {
 
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
-        if (event.block != null) {
-            if (event.block.state != null) {
-                if (event.block.state is Sign) {
-                    val sign = event.block.state as Sign
-                    if (sign.getLine(0) == "$GREEN[trader]") {
-                        if (!event.player.hasPermission("rpkit.trade.sign.trader.destroy")) {
-                            event.isCancelled = true
-                            event.player.sendMessage(plugin.messages["no-permission-trader-destroy"])
-                        }
-                    }
-                }
-            }
-        }
+        if (event.block.state !is Sign) return
+        val sign = event.block.state as Sign
+        if (sign.getLine(0) != "$GREEN[trader]") return
+        if (event.player.hasPermission("rpkit.trade.sign.trader.destroy")) return
+        event.isCancelled = true
+        event.player.sendMessage(plugin.messages["no-permission-trader-destroy"])
     }
 
 }

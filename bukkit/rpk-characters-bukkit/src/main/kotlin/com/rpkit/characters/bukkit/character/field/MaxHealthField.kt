@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * Character card field for max health.
  */
-class MaxHealthField: CharacterCardField {
+class MaxHealthField : CharacterCardField {
 
-    override val name = "max-health"
+    override val name = "max_health"
     override fun get(character: RPKCharacter): String {
         return character.maxHealth.toString()
     }

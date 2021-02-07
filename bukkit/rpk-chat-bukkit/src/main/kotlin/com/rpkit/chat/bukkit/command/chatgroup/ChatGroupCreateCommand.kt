@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +16,10 @@
 package com.rpkit.chat.bukkit.command.chatgroup
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupImpl
-import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupName
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -29,42 +29,50 @@ import org.bukkit.entity.Player
  * Chat group create command.
  * Creates a chat group.
  */
-class ChatGroupCreateCommand(private val plugin: RPKChatBukkit): CommandExecutor {
+class ChatGroupCreateCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("rpkit.chat.command.chatgroup.create")) {
-            if (args.isNotEmpty()) {
-                if (sender is Player) {
-                    val chatGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKChatGroupProvider::class)
-                    if (chatGroupProvider.getChatGroup(args[0]) == null) {
-                        if (!args[0].startsWith("_pm_")) {
-                            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                            val chatGroup = RPKChatGroupImpl(plugin = plugin, name = args[0])
-                            val senderMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                            if (senderMinecraftProfile != null) {
-                                chatGroupProvider.addChatGroup(chatGroup)
-                                chatGroup.addMember(senderMinecraftProfile)
-                                sender.sendMessage(plugin.messages["chat-group-create-valid", mapOf(
-                                        Pair("group", chatGroup.name)
-                                )])
-                            } else {
-                                sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                            }
-                        } else {
-                            sender.sendMessage(plugin.messages["chat-group-create-invalid-reserved"])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["chat-group-create-invalid-taken"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["not-from-console"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["chat-group-create-usage"])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.chat.command.chatgroup.create")) {
             sender.sendMessage(plugin.messages["no-permission-chat-group-create"])
+            return true
         }
+        if (args.isEmpty()) {
+            sender.sendMessage(plugin.messages["chat-group-create-usage"])
+            return true
+        }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        val chatGroupService = Services[RPKChatGroupService::class.java]
+        if (chatGroupService == null) {
+            sender.sendMessage(plugin.messages["no-chat-group-service"])
+            return true
+        }
+        if (chatGroupService.getChatGroup(RPKChatGroupName(args[0])) != null) {
+            sender.sendMessage(plugin.messages["chat-group-create-invalid-taken"])
+            return true
+        }
+        if (args[0].startsWith("_pm_")) {
+            sender.sendMessage(plugin.messages["chat-group-create-invalid-reserved"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val chatGroup = chatGroupService.createChatGroup(RPKChatGroupName(args[0]))
+        val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (senderMinecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        chatGroupService.addChatGroup(chatGroup)
+        chatGroup.addMember(senderMinecraftProfile)
+        sender.sendMessage(plugin.messages["chat-group-create-valid", mapOf(
+            "group" to chatGroup.name.value
+        )])
         return true
     }
 

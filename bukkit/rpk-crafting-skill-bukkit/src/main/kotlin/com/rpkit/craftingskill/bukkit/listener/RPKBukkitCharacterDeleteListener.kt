@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
 
-class RPKBukkitCharacterDeleteListener(private val plugin: RPKCraftingSkillBukkit): Listener {
+class RPKBukkitCharacterDeleteListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
 
     @EventHandler
     fun onCharacterDelete(event: RPKBukkitCharacterDeleteEvent) {
-        val craftingExperienceTable = plugin.core.database.getTable(RPKCraftingExperienceTable::class)
+        val craftingExperienceTable = plugin.database.getTable(RPKCraftingExperienceTable::class.java)
         craftingExperienceTable.get(event.character)
-                .forEach { craftingExperienceTable.delete(it)}
+                .forEach { craftingExperienceTable.delete(it) }
     }
 
 }

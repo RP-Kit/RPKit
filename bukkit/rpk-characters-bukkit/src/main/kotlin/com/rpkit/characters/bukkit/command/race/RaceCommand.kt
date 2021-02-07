@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,20 +24,14 @@ import org.bukkit.command.CommandSender
  * Race command.
  * Parent for all race management commands.
  */
-class RaceCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class RaceCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
-    private val raceAddCommand = RaceAddCommand(plugin)
-    private val raceRemoveCommand = RaceRemoveCommand(plugin)
     private val raceListCommand = RaceListCommand(plugin)
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
-            if (args[0].equals("add", ignoreCase = true) || args[0].equals("create", ignoreCase = true) || args[0].equals("new", ignoreCase = true)) {
-                return raceAddCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("remove", ignoreCase = true) || args[0].equals("delete", ignoreCase = true)) {
-                return raceRemoveCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("list", ignoreCase = true)) {
+            if (args[0].equals("list", ignoreCase = true)) {
                 return raceListCommand.onCommand(sender, command, label, newArgs)
             } else {
                 sender.sendMessage(plugin.messages["race-usage"])

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package com.rpkit.food.bukkit.listener
 
-import com.rpkit.food.bukkit.RPKFoodBukkit
-import com.rpkit.food.bukkit.expiry.RPKExpiryProviderImpl
+import com.rpkit.core.service.Services
+import com.rpkit.food.bukkit.expiry.RPKExpiryServiceImpl
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -27,16 +27,16 @@ import org.bukkit.inventory.ItemStack
 /**
  * Entity death listener for setting expiry dates.
  */
-class EntityDeathListener(private val plugin: RPKFoodBukkit): Listener {
+class EntityDeathListener : Listener {
 
     @EventHandler
     fun onEntityDeath(event: EntityDeathEvent) {
         if (event.entity is Player) return
-        val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProviderImpl::class)
+        val expiryService = Services[RPKExpiryServiceImpl::class.java]
         val newDrops = mutableListOf<ItemStack>()
         for (drop in event.drops) {
             if (drop.type.isEdible) {
-                expiryProvider.setExpiry(drop)
+                expiryService?.setExpiry(drop)
             }
             newDrops.add(drop)
         }

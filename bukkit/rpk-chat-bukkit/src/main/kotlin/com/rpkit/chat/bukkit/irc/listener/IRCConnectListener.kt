@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package com.rpkit.chat.bukkit.irc.listener
 
-import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
-import com.rpkit.chat.bukkit.irc.RPKIRCProvider
+import com.rpkit.chat.bukkit.irc.RPKIRCService
+import com.rpkit.core.service.Services
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.ConnectEvent
 
@@ -27,17 +27,17 @@ import org.pircbotx.hooks.events.ConnectEvent
  * IRC connect listener.
  * Joins each of the channels upon connecting.
  */
-class IRCConnectListener(private val plugin: RPKChatBukkit): ListenerAdapter() {
+class IRCConnectListener : ListenerAdapter() {
 
     override fun onConnect(event: ConnectEvent?) {
-        val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
-        val chatChannelProvider = plugin.core.serviceManager.getServiceProvider(RPKChatChannelProvider::class)
-        for (channel in chatChannelProvider.chatChannels) {
+        val ircService = Services[RPKIRCService::class.java] ?: return
+        val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
+        for (channel in chatChannelService.chatChannels) {
             val ircChannel = channel.undirectedPipeline
                     .mapNotNull { component -> component as? IRCComponent }
                     .firstOrNull()?.ircChannel
             if (ircChannel != null) {
-                ircProvider.ircBot.sendIRC().joinChannel(ircChannel)
+                ircService.joinChannel(ircChannel)
             }
         }
     }

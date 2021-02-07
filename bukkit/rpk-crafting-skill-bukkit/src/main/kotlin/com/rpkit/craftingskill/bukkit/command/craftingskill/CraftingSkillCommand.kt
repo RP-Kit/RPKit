@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package com.rpkit.craftingskill.bukkit.command.craftingskill
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction
-import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -28,7 +29,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit): CommandExecutor {
+class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender !is Player) {
@@ -65,30 +66,42 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit): CommandE
             sender.sendMessage(plugin.messages["crafting-skill-invalid-material"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val character = characterProvider.getActiveCharacter(minecraftProfile)
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
-        val craftingSkillProvider = plugin.core.serviceManager.getServiceProvider(RPKCraftingSkillProvider::class)
-        val totalExperience = craftingSkillProvider.getCraftingExperience(character, action, material)
+        val craftingSkillService = Services[RPKCraftingSkillService::class.java]
+        if (craftingSkillService == null) {
+            sender.sendMessage(plugin.messages["no-crafting-skill-service"])
+            return true
+        }
+        val totalExperience = craftingSkillService.getCraftingExperience(character, action, material)
         val maxExperience = plugin.config.getConfigurationSection("$actionConfigSectionName.$material")
-                ?.getKeys(false)
-                ?.map(String::toInt)
-                ?.max()
-                ?: 0
+            ?.getKeys(false)
+            ?.map(String::toInt)
+            ?.maxOrNull()
+            ?: 0
         sender.sendMessage(plugin.messages["crafting-skill-valid", mapOf(
                 "action" to action.toString().toLowerCase(),
                 "material" to material.toString().toLowerCase().replace('_', ' '),
-                "total-experience" to totalExperience.toString(),
-                "max-experience" to maxExperience.toString()
+                "total_experience" to totalExperience.toString(),
+                "max_experience" to maxExperience.toString()
         )])
         return true
     }

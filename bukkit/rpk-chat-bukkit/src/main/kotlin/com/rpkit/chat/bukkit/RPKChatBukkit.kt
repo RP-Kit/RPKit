@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +15,36 @@
 
 package com.rpkit.chat.bukkit
 
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProvider
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelProviderImpl
-import com.rpkit.chat.bukkit.chatchannel.directed.*
-import com.rpkit.chat.bukkit.chatchannel.undirected.*
-import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupProviderImpl
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelServiceImpl
+import com.rpkit.chat.bukkit.chatchannel.directed.postformat.SendMessageComponent
+import com.rpkit.chat.bukkit.chatchannel.directed.postformat.SnoopComponent
+import com.rpkit.chat.bukkit.chatchannel.directed.preformat.DrunkenSlurComponent
+import com.rpkit.chat.bukkit.chatchannel.directed.preformat.GarbleComponent
+import com.rpkit.chat.bukkit.chatchannel.directed.preformat.LanguageComponent
+import com.rpkit.chat.bukkit.chatchannel.directed.preformat.RadiusFilterComponent
+import com.rpkit.chat.bukkit.chatchannel.format.click.CopyToClipboardClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.OpenFileClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.OpenURLClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.RunCommandClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.SuggestCommandClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.hover.ShowTextHoverAction
+import com.rpkit.chat.bukkit.chatchannel.format.part.ChannelPart
+import com.rpkit.chat.bukkit.chatchannel.format.part.MessagePart
+import com.rpkit.chat.bukkit.chatchannel.format.part.ReceiverCharacterNamePart
+import com.rpkit.chat.bukkit.chatchannel.format.part.ReceiverPrefixPart
+import com.rpkit.chat.bukkit.chatchannel.format.part.ReceiverProfileNamePart
+import com.rpkit.chat.bukkit.chatchannel.format.part.SenderCharacterNamePart
+import com.rpkit.chat.bukkit.chatchannel.format.part.SenderPrefixPart
+import com.rpkit.chat.bukkit.chatchannel.format.part.SenderProfileNamePart
+import com.rpkit.chat.bukkit.chatchannel.format.part.TextPart
+import com.rpkit.chat.bukkit.chatchannel.undirected.DiscordComponent
+import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
+import com.rpkit.chat.bukkit.chatchannel.undirected.LogComponent
+import com.rpkit.chat.bukkit.chatchannel.undirected.UndirectedFormatComponent
+import com.rpkit.chat.bukkit.chatchannel.undirected.WebComponent
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
+import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupServiceImpl
 import com.rpkit.chat.bukkit.command.chatchannel.ChatChannelCommand
 import com.rpkit.chat.bukkit.command.chatgroup.ChatGroupCommand
 import com.rpkit.chat.bukkit.command.listchatchannels.ListChatChannelsCommand
@@ -29,47 +53,83 @@ import com.rpkit.chat.bukkit.command.mute.MuteCommand
 import com.rpkit.chat.bukkit.command.reply.ReplyCommand
 import com.rpkit.chat.bukkit.command.snoop.SnoopCommand
 import com.rpkit.chat.bukkit.command.unmute.UnmuteCommand
-import com.rpkit.chat.bukkit.database.table.*
-import com.rpkit.chat.bukkit.discord.RPKDiscordProviderImpl
-import com.rpkit.chat.bukkit.irc.RPKIRCProvider
-import com.rpkit.chat.bukkit.irc.RPKIRCProviderImpl
+import com.rpkit.chat.bukkit.database.table.RPKChatChannelMuteTable
+import com.rpkit.chat.bukkit.database.table.RPKChatChannelSpeakerTable
+import com.rpkit.chat.bukkit.database.table.RPKChatGroupInviteTable
+import com.rpkit.chat.bukkit.database.table.RPKChatGroupMemberTable
+import com.rpkit.chat.bukkit.database.table.RPKChatGroupTable
+import com.rpkit.chat.bukkit.database.table.RPKLastUsedChatGroupTable
+import com.rpkit.chat.bukkit.database.table.RPKSnooperTable
+import com.rpkit.chat.bukkit.discord.RPKDiscordService
+import com.rpkit.chat.bukkit.discord.RPKDiscordServiceImpl
+import com.rpkit.chat.bukkit.irc.RPKIRCService
+import com.rpkit.chat.bukkit.irc.RPKIRCServiceImpl
 import com.rpkit.chat.bukkit.listener.AsyncPlayerChatListener
 import com.rpkit.chat.bukkit.listener.PlayerCommandPreprocessListener
-import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteProvider
-import com.rpkit.chat.bukkit.prefix.RPKPrefixProvider
-import com.rpkit.chat.bukkit.prefix.RPKPrefixProviderImpl
-import com.rpkit.chat.bukkit.servlet.ChatServlet
-import com.rpkit.chat.bukkit.servlet.websocket.ChatWebSocketServlet
-import com.rpkit.chat.bukkit.servlet.websocket.RPKChatWebSocketProvider
-import com.rpkit.chat.bukkit.snooper.RPKSnooperProviderImpl
-import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerProvider
+import com.rpkit.chat.bukkit.messages.ChatMessages
+import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteService
+import com.rpkit.chat.bukkit.prefix.RPKPrefixService
+import com.rpkit.chat.bukkit.prefix.RPKPrefixServiceImpl
+import com.rpkit.chat.bukkit.snooper.RPKSnooperService
+import com.rpkit.chat.bukkit.snooper.RPKSnooperServiceImpl
+import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
-import com.rpkit.core.web.NavigationLink
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.eclipse.jetty.servlet.ServletHolder
+import java.io.File
 
 /**
  * RPK chat plugin default implementation.
  */
-class RPKChatBukkit: RPKBukkitPlugin() {
+class RPKChatBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
+    lateinit var messages: ChatMessages
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.chat.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4383)
-        // Directed chat channel pipeline components
-        ConfigurationSerialization.registerClass(DirectedFormatComponent::class.java, "DirectedFormatComponent")
+        // Directed pre-format pipeline components
         ConfigurationSerialization.registerClass(DrunkenSlurComponent::class.java, "DrunkenSlurComponent")
         ConfigurationSerialization.registerClass(GarbleComponent::class.java, "GarbleComponent")
         ConfigurationSerialization.registerClass(LanguageComponent::class.java, "LanguageComponent")
         ConfigurationSerialization.registerClass(RadiusFilterComponent::class.java, "RadiusFilterComponent")
+
+        // Format parts
+        ConfigurationSerialization.registerClass(ChannelPart::class.java, "ChannelPart")
+        ConfigurationSerialization.registerClass(MessagePart::class.java, "MessagePart")
+        ConfigurationSerialization.registerClass(ReceiverCharacterNamePart::class.java, "ReceiverCharacterNamePart")
+        ConfigurationSerialization.registerClass(ReceiverPrefixPart::class.java, "ReceiverPrefixPart")
+        ConfigurationSerialization.registerClass(ReceiverProfileNamePart::class.java, "ReceiverProfileNamePart")
+        ConfigurationSerialization.registerClass(SenderCharacterNamePart::class.java, "SenderCharacterNamePart")
+        ConfigurationSerialization.registerClass(SenderPrefixPart::class.java, "SenderPrefixPart")
+        ConfigurationSerialization.registerClass(SenderProfileNamePart::class.java, "SenderProfileNamePart")
+        ConfigurationSerialization.registerClass(TextPart::class.java)
+
+        // Hover actions
+        ConfigurationSerialization.registerClass(ShowTextHoverAction::class.java, "ShowTextHoverAction")
+
+        // Click actions
+        ConfigurationSerialization.registerClass(CopyToClipboardClickAction::class.java, "CopyToClipboardClickAction")
+        ConfigurationSerialization.registerClass(OpenFileClickAction::class.java, "OpenFileClickAction")
+        ConfigurationSerialization.registerClass(OpenURLClickAction::class.java, "OpenURLClickAction")
+        ConfigurationSerialization.registerClass(RunCommandClickAction::class.java, "RunCommandClickAction")
+        ConfigurationSerialization.registerClass(SuggestCommandClickAction::class.java, "SuggestCommandClickAction")
+
+        //Directed post-format pipeline components
         ConfigurationSerialization.registerClass(SendMessageComponent::class.java, "SendMessageComponent")
         ConfigurationSerialization.registerClass(SnoopComponent::class.java, "SnoopComponent")
 
-        // Undirected chat channel pipline components
+        // Undirected pipeline components
         ConfigurationSerialization.registerClass(DiscordComponent::class.java, "DiscordComponent")
         ConfigurationSerialization.registerClass(IRCComponent::class.java, "IRCComponent")
         ConfigurationSerialization.registerClass(LogComponent::class.java, "LogComponent")
@@ -78,58 +138,95 @@ class RPKChatBukkit: RPKBukkitPlugin() {
 
         saveDefaultConfig()
 
-        val ircProvider = if (config.getBoolean("irc.enabled")) {
-            RPKIRCProviderImpl(this)
-        } else null
+        messages = ChatMessages(this)
 
-        val discordProvider = if (config.getBoolean("discord.enabled")) {
-            RPKDiscordProviderImpl(this)
-        } else null
-
-        val prefixProvider = RPKPrefixProviderImpl(this)
-        val chatChannelProvider = RPKChatChannelProviderImpl(this)
-        val chatChannelMuteProvider = RPKChatChannelMuteProvider(this)
-        val chatChannelSpeakerProvider = RPKChatChannelSpeakerProvider(this)
-        val chatGroupProvider = RPKChatGroupProviderImpl(this)
-        val snooperProvider =  RPKSnooperProviderImpl(this)
-        val chatWebSocketProvider = RPKChatWebSocketProvider()
-
-        serviceProviders = listOfNotNull(
-                ircProvider,
-                discordProvider,
-                prefixProvider,
-                chatChannelProvider,
-                chatChannelMuteProvider,
-                chatChannelSpeakerProvider,
-                chatGroupProvider,
-                snooperProvider,
-                chatWebSocketProvider
-        ).toTypedArray()
-
-        registerChatChannelPermissions(chatChannelProvider)
-        registerPrefixPermissions(prefixProvider)
-        servlets = arrayOf(
-                ChatServlet(this)
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/chat/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/chat/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_chat"
+                ),
+                classLoader
         )
-    }
+        database.addTable(RPKChatChannelMuteTable(database, this))
+        database.addTable(RPKChatChannelSpeakerTable(database, this))
+        database.addTable(RPKChatGroupTable(database, this))
+        database.addTable(RPKChatGroupInviteTable(database))
+        database.addTable(RPKChatGroupMemberTable(database, this))
+        database.addTable(RPKLastUsedChatGroupTable(database, this))
+        database.addTable(RPKSnooperTable(database, this))
 
-    override fun onPostEnable() {
-        core.web.navigationBar.add(NavigationLink("Chat", "/chat/"))
-        val originalClassLoader = Thread.currentThread().contextClassLoader
-        Thread.currentThread().contextClassLoader = javaClass.classLoader
-        (core.web.server.handler as ServletContextHandler).addServlet(ServletHolder(ChatWebSocketServlet(this)), "/chat/ws")
-        Thread.currentThread().contextClassLoader = originalClassLoader
+        // Class loader needs to be the plugin's class loader in order for ServiceLoader in slf4j to be able to find
+        // the SLF4JLoggerProvider implementation, as the remapped slf4j-jdk14 is loaded by the plugin's class loader
+        // and isn't accessible outside of that for whatever reason.
+        // Both JDA and PircBotX make use of slf4j for logging, so load the IRC and Discord services with the plugin
+        // class loader instead of the server's, before switching back to the normal class loader.
+        val oldClassLoader = Thread.currentThread().contextClassLoader
+        Thread.currentThread().contextClassLoader = classLoader
+        if (config.getBoolean("irc.enabled")) {
+            Services[RPKIRCService::class.java] = RPKIRCServiceImpl(this)
+        }
+
+        if (config.getBoolean("discord.enabled")) {
+            Services[RPKDiscordService::class.java] = RPKDiscordServiceImpl(this)
+        }
+        Thread.currentThread().contextClassLoader = oldClassLoader
+
+        val prefixService = RPKPrefixServiceImpl(this)
+        Services[RPKPrefixService::class.java] = prefixService
+        val chatChannelService = RPKChatChannelServiceImpl(this)
+        Services[RPKChatChannelService::class.java] = chatChannelService
+        Services[RPKChatChannelMuteService::class.java] = RPKChatChannelMuteService(this)
+        Services[RPKChatChannelSpeakerService::class.java] = RPKChatChannelSpeakerService(this)
+        Services[RPKChatGroupService::class.java] = RPKChatGroupServiceImpl(this)
+        Services[RPKSnooperService::class.java] = RPKSnooperServiceImpl(this)
+
+        registerChatChannelPermissions(chatChannelService)
+        registerPrefixPermissions(prefixService)
+
+        registerCommands()
+        registerListeners()
     }
 
     override fun onDisable() {
         if (config.getBoolean("irc.enabled")) {
-            val ircBot = core.serviceManager.getServiceProvider(RPKIRCProvider::class).ircBot
-            ircBot.stopBotReconnect()
-            ircBot.sendIRC().quitServer(messages["irc-quit"])
+            Services[RPKIRCService::class.java]?.disconnect()
         }
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("chatchannel")?.setExecutor(ChatChannelCommand(this))
         getCommand("mute")?.setExecutor(MuteCommand(this))
         getCommand("unmute")?.setExecutor(UnmuteCommand(this))
@@ -140,146 +237,46 @@ class RPKChatBukkit: RPKBukkitPlugin() {
         getCommand("snoop")?.setExecutor(SnoopCommand(this))
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
                 AsyncPlayerChatListener(this),
                 PlayerCommandPreprocessListener(this)
         )
     }
 
-    override fun createTables(database: Database) {
-        database.addTable(RPKChatChannelMuteTable(database, this))
-        database.addTable(RPKChatChannelSpeakerTable(database, this))
-        database.addTable(RPKChatGroupTable(database, this))
-        database.addTable(ChatGroupInviteTable(database, this))
-        database.addTable(ChatGroupMemberTable(database, this))
-        database.addTable(LastUsedChatGroupTable(database, this))
-        database.addTable(RPKSnooperTable(database, this))
-    }
-
-    private fun registerChatChannelPermissions(chatChannelProvider: RPKChatChannelProvider) {
-        chatChannelProvider.chatChannels.forEach { chatChannel ->
+    private fun registerChatChannelPermissions(chatChannelService: RPKChatChannelService) {
+        chatChannelService.chatChannels.forEach { chatChannel ->
             server.pluginManager.addPermission(Permission(
-                    "rpkit.chat.command.chatchannel.${chatChannel.name}",
-                    "Allows speaking in ${chatChannel.name}",
+                    "rpkit.chat.command.chatchannel.${chatChannel.name.value}",
+                    "Allows speaking in ${chatChannel.name.value}",
                     PermissionDefault.OP
             ))
             server.pluginManager.addPermission(Permission(
-                    "rpkit.chat.command.mute.${chatChannel.name}",
-                    "Allows muting ${chatChannel.name}",
+                    "rpkit.chat.command.mute.${chatChannel.name.value}",
+                    "Allows muting ${chatChannel.name.value}",
                     PermissionDefault.OP
             ))
             server.pluginManager.addPermission(Permission(
-                    "rpkit.chat.command.unmute.${chatChannel.name}",
-                    "Allows unmuting ${chatChannel.name}",
+                    "rpkit.chat.command.unmute.${chatChannel.name.value}",
+                    "Allows unmuting ${chatChannel.name.value}",
                     PermissionDefault.OP
             ))
             server.pluginManager.addPermission(Permission(
-                    "rpkit.chat.listen.${chatChannel.name}",
-                    "Allows listening to ${chatChannel.name}",
+                    "rpkit.chat.listen.${chatChannel.name.value}",
+                    "Allows listening to ${chatChannel.name.value}",
                     PermissionDefault.OP
             ))
         }
     }
 
-    private fun registerPrefixPermissions(prefixProvider: RPKPrefixProvider) {
-        prefixProvider.prefixes.forEach { prefix ->
+    private fun registerPrefixPermissions(prefixService: RPKPrefixService) {
+        prefixService.prefixes.forEach { prefix ->
             server.pluginManager.addPermission(Permission(
                     "rpkit.chat.prefix.${prefix.name}",
                     "Gives the player the prefix ${prefix.name}",
                     PermissionDefault.FALSE
             ))
         }
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("chatchannel-valid", "&aNow speaking in \$channel.")
-        messages.setDefault("chatchannel-invalid-chatchannel", "&cNo chat channel by that name exists.")
-        messages.setDefault("chatchannel-usage", "&cUsage: /chatchannel [channel]")
-        messages.setDefault("mute-valid", "&aMuted \$channel.")
-        messages.setDefault("mute-invalid-chatchannel", "&cNo chat channel by that name exists.")
-        messages.setDefault("mute-usage", "&cUsage: /mute [channel]")
-        messages.setDefault("unmute-valid", "&aUnmuted \$channel.")
-        messages.setDefault("unmute-invalid-chatchannel", "&cNo chat channel by that name exists.")
-        messages.setDefault("unmute-usage", "&cUsage: /unmute [channel]")
-        messages.setDefault("listchatchannels-title", "&fChat channels:")
-        messages.setDefault("listchatchannels-item", "&f- \$color\$channel &f(&a&l\$mute&f)")
-        messages.setDefault("irc-register-valid", "Registered. Please check your email for the verification code to complete the verification process.")
-        messages.setDefault("irc-register-invalid-email-invalid", "You did not specify a valid email.")
-        messages.setDefault("irc-register-invalid-email-not-specified", "You must specify an email.")
-        messages.setDefault("irc-verify-valid", "Attempted to verify. If you correctly entered the verification code, I should now be verified.")
-        messages.setDefault("irc-verify-invalid-verification-code-not-specified", "You must specify the registration code from your email.")
-        messages.setDefault("irc-quit", "Server shut down.")
-        messages.setDefault("irc-list-title", "Online players: ")
-        messages.setDefault("irc-list-item", "\$player, ")
-        messages.setDefault("snoop-usage", "&cUsage: /snoop [on|off|check]")
-        messages.setDefault("snoop-enabled", "&aSnooping enabled.")
-        messages.setDefault("snoop-already-enabled", "&cSnooping was already enabled.")
-        messages.setDefault("snoop-disabled", "&aSnooping disabled.")
-        messages.setDefault("snoop-already-disabled", "&cSnooping was already disabled.")
-        messages.setDefault("snoop-check-on", "&aSnooping is enabled.")
-        messages.setDefault("snoop-check-off", "&aSnooping is disabled.")
-        messages.setDefault("chat-group-create-valid", "&aChat group created. Use /chatgroup invite \$group [player] to invite players.")
-        messages.setDefault("chat-group-create-invalid-reserved", "&cChat groups starting with _pm_ are reserved. Please choose a different name.")
-        messages.setDefault("chat-group-create-invalid-taken", "&cA chat group by that name already exists. Please choose a different name.")
-        messages.setDefault("chat-group-create-usage", "&cUsage: /chatgroup create [name]")
-        messages.setDefault("chat-group-disband-valid", "&aChat group \$group disbanded.")
-        messages.setDefault("chat-group-disband-invalid-nonexistent", "&cNo chat group by that name exists.")
-        messages.setDefault("chat-group-disband-invalid-not-a-member", "&cYou are not a member of that chat group.")
-        messages.setDefault("chat-group-disband-usage", "&cUsage: /chatgroup disband [name]")
-        messages.setDefault("chat-group-invite-received", "&aYou have been invited to chat group \$group. Use /chatgroup join \$group to join.")
-        messages.setDefault("chat-group-invite-valid", "&aYou invited \$player to the chat group \$group.")
-        messages.setDefault("chat-group-invite-invalid-player", "&cNo player by that name is online.")
-        messages.setDefault("chat-group-invite-invalid-not-a-member", "&cYou are not a member of that chat group.")
-        messages.setDefault("chat-group-invite-invalid-chat-group", "&cNo chat group by that name exists.")
-        messages.setDefault("chat-group-invite-usage", "&cUsage: /chatgroup invite [name] [player]")
-        messages.setDefault("chat-group-join-received", "&a\$player joined \$group.")
-        messages.setDefault("chat-group-join-valid", "&aJoined chat group \$group.")
-        messages.setDefault("chat-group-join-invalid-no-invite", "&cYou have not been invited to that chat group.")
-        messages.setDefault("chat-group-join-invalid-chat-group", "&cNo chat group by that name exists.")
-        messages.setDefault("chat-group-join-usage", "&cUsage: /chatgroup join [name]")
-        messages.setDefault("chat-group-leave-valid", "&aLeft chat group \$group.")
-        messages.setDefault("chat-group-leave-invalid-not-a-member", "&cYou are not a member of that chat group.")
-        messages.setDefault("chat-group-leave-invalid-chat-group", "&cNo chat group by that name exists.")
-        messages.setDefault("chat-group-leave-usage", "&cUsage: /chatgroup leave [name]")
-        messages.setDefault("chat-group-message-invalid-not-a-member", "&cYou are not a member of that chat group.")
-        messages.setDefault("chat-group-message-invalid-chat-group", "&cNo chat group by that name exists.")
-        messages.setDefault("chat-group-message-usage", "&cUsage: /chatgroup message [name] [message]")
-        messages.setDefault("chat-group-members-list-title", "&aMembers:")
-        messages.setDefault("chat-group-members-list-item", "&f- &7\$player")
-        messages.setDefault("chat-group-invitations-list-title", "&aPending invitations:")
-        messages.setDefault("chat-group-invitations-list-item", "&f- &7\$player")
-        messages.setDefault("chat-group-members-invalid-chat-group", "&cNo chat group by that name exists.")
-        messages.setDefault("chat-group-members-usage", "&cUsage: /chatgroup members [name]")
-        messages.setDefault("chat-group-usage", "&cUsage: /chatgroup [create|disband|invite|join|leave|message|players]")
-        messages.setDefault("reply-usage", "&cUsage: /reply [message]")
-        messages.setDefault("reply-invalid-chat-group", "&cYou have not used a chat group or private messaged anyone recently.")
-        messages.setDefault("message-invalid-target", "&cNo chat group or player by that name exists.")
-        messages.setDefault("message-invalid-self", "&cYou cannot message yourself.")
-        messages.setDefault("message-usage", "&cUsage: /message [target] [message]")
-        messages.setDefault("not-from-console", "&cYou may not use this command from console.")
-        messages.setDefault("no-character", "&cYou do not currently have an active character. Please create one with /character new, or switch to an old one using /character switch.")
-        messages.setDefault("no-minecraft-profile", "&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.")
-        messages.setDefault("no-chat-channel", "&cYou are not currently speaking in a chat channel. Please list channels with /listchatchannels and then speak in one using /chatchannel [channel].")
-        messages.setDefault("no-permission-chatchannel", "&cYou do not have permission to speak in \$channel.")
-        messages.setDefault("no-permission-listchatchannels", "&cYou do not have permission to list chat channels.")
-        messages.setDefault("no-permission-mute", "&cYou do not have permission to mute \$channel.")
-        messages.setDefault("no-permission-unmute", "&cYou do not have permission to unmute \$channel.")
-        messages.setDefault("no-permission-snoop-on", "&cYou do not have permission to enable snooping.")
-        messages.setDefault("no-permission-snoop-off", "&cYou do not have permission to disable snooping.")
-        messages.setDefault("no-permission-snoop-check", "&cYou do not have permission to check whether you are snooping.")
-        messages.setDefault("no-permission-chat-group", "&cYou do not have permission to use chat group commands.")
-        messages.setDefault("no-permission-chat-group-create", "&cYou do not have permission to create chat groups.")
-        messages.setDefault("no-permission-chat-group-disband", "&cYou do not have permission to disband chat groups.")
-        messages.setDefault("no-permission-chat-group-invite", "&cYou do not have permission to invite people to chat groups.")
-        messages.setDefault("no-permission-chat-group-join", "&cYou do not have permission to join chat groups.")
-        messages.setDefault("no-permission-chat-group-leave", "&cYou do not have permission to leave chat groups.")
-        messages.setDefault("no-permission-chat-group-members", "&cYou do not have permission to list chat group members.")
-        messages.setDefault("no-permission-chat-group-message", "&cYou do not have permission to message chat groups.")
-        messages.setDefault("no-permission-message", "&cYou do not have permission to send private messages.")
-        messages.setDefault("no-permission-reply", "&cYou do not have permission to reply to messages.")
-        messages.setDefault("command-snoop", "&2[command] \$sender-player: \$command")
-        messages.setDefault("account-link-discord-successful", "&aDiscord profile \$discord-tag successfully linked.")
     }
 
 }

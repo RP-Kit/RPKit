@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package com.rpkit.players.bukkit.event.githubprofile
 
 import com.rpkit.core.event.RPKEvent
-import com.rpkit.players.bukkit.profile.RPKGitHubProfile
+import com.rpkit.players.bukkit.profile.github.RPKGitHubProfile
 
 
-interface RPKGitHubProfileEvent: RPKEvent {
+interface RPKGitHubProfileEvent : RPKEvent {
 
     val githubProfile: RPKGitHubProfile
 

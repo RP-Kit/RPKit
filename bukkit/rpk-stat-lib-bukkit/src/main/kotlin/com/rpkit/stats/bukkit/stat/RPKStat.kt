@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,30 +16,28 @@
 package com.rpkit.stats.bukkit.stat
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 
 /**
  * Represents a stat.
  */
-interface RPKStat: Entity {
+interface RPKStat {
 
     /**
      * The name of the stat.
      */
-    val name: String
+    val name: RPKStatName
 
     /**
-     * The script used to calculate the stat.
-     * Written in JavaScript, parsed with Nashorn.
+     * The expression used to calculate the stat.
      */
-    val script: String
+    val formula: String
 
     /**
      * Gets the stat for the given character, and the given stat variables.
      *
      * @param character The character
      * @param variables A list containing all variables required to get the stat.
-     *                  Usually [RPKStatVariableProvider.statVariables]
+     *                  Usually [RPKStatVariableService.statVariables]
      */
     fun get(character: RPKCharacter, variables: List<RPKStatVariable>): Int
 

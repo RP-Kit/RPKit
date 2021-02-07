@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.bukkit.command.CommandSender
  * Payment set command.
  * Parent for all payment group modification commands.
  */
-class PaymentSetCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
+class PaymentSetCommand(private val plugin: RPKPaymentsBukkit) : CommandExecutor {
 
     private val paymentSetNameCommand = PaymentSetNameCommand(plugin)
     private val paymentSetAmountCommand = PaymentSetAmountCommand(plugin)

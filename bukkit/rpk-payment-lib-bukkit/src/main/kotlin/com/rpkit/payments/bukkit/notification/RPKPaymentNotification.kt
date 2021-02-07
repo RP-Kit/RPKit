@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,15 +16,22 @@
 package com.rpkit.payments.bukkit.notification
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
+import java.time.LocalDateTime
 
 /**
  * Represents a payment notification.
  * A payment notification is created when a character fails to pay or is failed to be paid by a payment group.
  * Upon players coming online, the payment notifications are sent and cleared from the DB.
  */
-interface RPKPaymentNotification: Entity {
+interface RPKPaymentNotification {
+
+    /**
+     * The ID of the payment notification.
+     * Guaranteed to be unique.
+     * Null if the payment notification has not yet been inserted into the database.
+     */
+    var id: RPKPaymentNotificationId?
 
     /**
      * The group for which the payment notification concerns.
@@ -45,7 +51,7 @@ interface RPKPaymentNotification: Entity {
     /**
      * The date at which the notification occurred.
      */
-    val date: Long
+    val date: LocalDateTime
 
     /**
      * The text of the notification.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.time.Duration
  * Represents a timed store item.
  * A timed store item expires after a certain amount of time has passed.
  */
-interface RPKTimedStoreItem: RPKStoreItem {
+interface RPKTimedStoreItem : RPKStoreItem {
 
     /**
      * The duration for which the store item lasts.

@@ -1,10 +1,7 @@
 shops:
-    limit: 2
+  limit: 2
 caching:
-    rpkit_shop_count:
-        id:
-            enabled: true
-            size: 20
-        character_id:
-            enabled: true
-            size: 20
+  rpkit_shop_count:
+    character_id:
+      enabled: true
+      size: 20

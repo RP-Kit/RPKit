@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,20 +15,25 @@
 
 package com.rpkit.chat.bukkit.irc.listener
 
-import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.irc.RPKIRCProvider
+import com.rpkit.chat.bukkit.irc.IRCWhitelistValidator
+import com.rpkit.chat.bukkit.irc.RPKIRCService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.UserListEvent
 
 /**
  * IRC user list listener.
- * Registers all users in channels with the IRC provider upon receiving the user list.
+ * Registers all users in channels with the IRC service upon receiving the user list.
  */
-class IRCUserListListener(private val plugin: RPKChatBukkit): ListenerAdapter() {
+class IRCUserListListener(private val whitelistValidator: IRCWhitelistValidator) : ListenerAdapter() {
 
     override fun onUserList(event: UserListEvent) {
-        val ircProvider = plugin.core.serviceManager.getServiceProvider(RPKIRCProvider::class)
-        event.users.forEach { user -> ircProvider.addIRCUser(user) }
+        val ircService = Services[RPKIRCService::class.java] ?: return
+        event.users.forEach { user ->
+            ircService.setOnline(RPKIRCNick(user.nick), true)
+            whitelistValidator.enforceWhitelist(user, RPKIRCNick(user.nick), event.getBot(), event.channel)
+        }
     }
 
 }

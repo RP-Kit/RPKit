@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,11 @@
 
 package com.rpkit.chat.bukkit.snooper
 
-import com.rpkit.core.database.Entity
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 
 /**
  * Represents a snooper.
  */
 class RPKSnooper(
-        override var id: Int = 0,
         val minecraftProfile: RPKMinecraftProfile
-): Entity
+)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitWarpUpdateEvent(
         override val warp: RPKWarp
-): RPKBukkitEvent(), RPKWarpUpdateEvent, Cancellable {
+) : RPKBukkitEvent(), RPKWarpUpdateEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

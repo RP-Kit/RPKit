@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.rpkit.chat.bukkit.event.chatgroup
 import com.rpkit.players.bukkit.event.minecraftprofile.RPKMinecraftProfileEvent
 
 
-interface RPKChatGroupMessageEvent: RPKChatGroupEvent, RPKMinecraftProfileEvent {
+interface RPKChatGroupMessageEvent : RPKChatGroupEvent, RPKMinecraftProfileEvent {
 
     var message: String
 

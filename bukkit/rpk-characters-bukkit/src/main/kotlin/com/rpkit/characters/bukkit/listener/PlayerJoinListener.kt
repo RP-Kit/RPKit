@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 package com.rpkit.characters.bukkit.listener
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -28,19 +29,16 @@ import org.bukkit.event.player.PlayerJoinEvent
  * Updates player display names upon joining in order to allow for chat plugins that do not have built-in RPK
  * support to utilise character names.
  */
-class PlayerJoinListener(val plugin: RPKCharactersBukkit): Listener {
+class PlayerJoinListener(val plugin: RPKCharactersBukkit) : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        if (plugin.config.getBoolean("characters.set-player-display-name")) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
-            if (minecraftProfile != null) {
-                val character = characterProvider.getActiveCharacter(minecraftProfile)
-                event.player.setDisplayName(character?.name ?: event.player.name)
-            }
-        }
+        if (!plugin.config.getBoolean("characters.set-player-display-name")) return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        event.player.setDisplayName(character?.name ?: event.player.name)
     }
 
 }

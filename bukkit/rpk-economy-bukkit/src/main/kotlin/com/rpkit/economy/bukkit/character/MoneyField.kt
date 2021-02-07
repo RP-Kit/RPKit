@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,39 +18,42 @@ package com.rpkit.economy.bukkit.character
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.economy.bukkit.database.table.MoneyHiddenTable
-import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
+import com.rpkit.economy.bukkit.database.table.RPKMoneyHiddenTable
+import com.rpkit.economy.bukkit.economy.RPKEconomyService
 
 /**
  * Character card field for money.
  * Shows money for all currencies, separated by ", "
  */
-class MoneyField(val plugin: RPKEconomyBukkit): HideableCharacterCardField {
+class MoneyField(val plugin: RPKEconomyBukkit) : HideableCharacterCardField {
 
     override val name = "money"
     override fun get(character: RPKCharacter): String {
         return if (isHidden(character)) {
             "[HIDDEN]"
         } else {
-            val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            currencyProvider.currencies
+            val economyService = Services[RPKEconomyService::class.java] ?: return plugin.messages["no-economy-service"]
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return plugin.messages["no-currency-service"]
+            currencyService.currencies
                     .joinToString(", ") { currency ->
-                        val balance = economyProvider.getBalance(character, currency)
+                        val balance = economyService.getBalance(character, currency)
                         "$balance ${if (balance == 1) currency.nameSingular else currency.namePlural}"
                     }
         }
     }
+
     override fun isHidden(character: RPKCharacter): Boolean {
-        return plugin.core.database.getTable(MoneyHiddenTable::class).get(character) != null
+        return plugin.database.getTable(RPKMoneyHiddenTable::class.java).get(character) != null
     }
+
     override fun setHidden(character: RPKCharacter, hidden: Boolean) {
-        val moneyHiddenTable = plugin.core.database.getTable(MoneyHiddenTable::class)
+        val moneyHiddenTable = plugin.database.getTable(RPKMoneyHiddenTable::class.java)
         if (hidden) {
             if (moneyHiddenTable.get(character) == null) {
-                moneyHiddenTable.insert(MoneyHidden(character = character))
+                moneyHiddenTable.insert(RPKMoneyHidden(character = character))
             }
         } else {
             val moneyHidden = moneyHiddenTable.get(character)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.rpkit.shops.bukkit.shopcount
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 
 /**
  * Represents a shop count.
@@ -26,7 +25,6 @@ import com.rpkit.core.database.Entity
  * @property count The amount of shops owned by the character
  */
 class RPKShopCount(
-        override var id: Int = 0,
         val character: RPKCharacter,
         var count: Int
-): Entity
+)

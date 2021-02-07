@@ -2,7 +2,7 @@ name: rpk-block-logging-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
-api-version: '1.15'
+api-version: '1.16'
 depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
@@ -10,22 +10,22 @@ depend:
 - rpk-character-lib-bukkit
 - rpk-block-log-lib-bukkit
 commands:
-    history:
-        description: Shows block change history on the block in front of the player
-        usage: /<command>
-    inventoryhistory:
-        description: Shows block inventory change history on the block in front of the player
-        usage: /<command>
-    rollback:
-        description: Rolls back the blocks around the player to a previous state
-        usage: /<command> [radius] [minutes]
+  history:
+    description: Shows block change history on the block in front of the player
+    usage: /<command>
+  inventoryhistory:
+    description: Shows block inventory change history on the block in front of the player
+    usage: /<command>
+  rollback:
+    description: Rolls back the blocks around the player to a previous state
+    usage: /<command> [radius] [minutes]
 permissions:
-    rpkit.blocklogging.command.history:
-        description: Allows viewing block history
-        default: op
-    rpkit.blocklogging.command.inventoryhistory:
-        description: Allows viewing inventory history
-        default: op
-    rpkit.blocklogging.command.rollback:
-        description: Allows rolling back changes
-        default: op
+  rpkit.blocklogging.command.history:
+    description: Allows viewing block history
+    default: op
+  rpkit.blocklogging.command.inventoryhistory:
+    description: Allows viewing inventory history
+    default: op
+  rpkit.blocklogging.command.rollback:
+    description: Allows rolling back changes
+    default: op

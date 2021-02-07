@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,35 +16,29 @@
 package com.rpkit.characters.bukkit.listener
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.Location
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType.BLINDNESS
 
 /**
  * Player move listener for preventing players from moving about with a dead character.
  */
-class PlayerMoveListener(private val plugin: RPKCharactersBukkit): Listener {
+class PlayerMoveListener(private val plugin: RPKCharactersBukkit) : Listener {
 
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
-        if (minecraftProfile != null) {
-            val character = characterProvider.getActiveCharacter(minecraftProfile)
-            if (character != null && character.isDead) {
-                if (event.from.blockX != event.to?.blockX || event.from.blockZ != event.to?.blockZ) {
-                    event.player.teleport(Location(event.from.world, event.from.blockX + 0.5, event.from.blockY + 0.5, event.from.blockZ.toDouble(), event.from.yaw, event.from.pitch))
-                    event.player.sendMessage(plugin.messages["dead-character"])
-                    event.player.addPotionEffect(PotionEffect(BLINDNESS, 60, 1))
-                }
-            }
-        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null || !character.isDead) return
+        if (event.from.blockX == event.to?.blockX && event.from.blockZ == event.to?.blockZ) return
+        event.player.teleport(Location(event.from.world, event.from.blockX + 0.5, event.from.blockY + 0.5, event.from.blockZ.toDouble(), event.from.yaw, event.from.pitch))
+        event.player.sendMessage(plugin.messages["dead-character"])
     }
 
 }

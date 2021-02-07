@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,11 @@ class RPKBukkitFeatureFlagSetEvent(
         override val profile: RPKProfile,
         override val featureFlag: RPKFeatureFlag,
         override var enabled: Boolean
-): RPKBukkitEvent(), RPKFeatureFlagSetEvent, Cancellable {
+) : RPKBukkitEvent(), RPKFeatureFlagSetEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

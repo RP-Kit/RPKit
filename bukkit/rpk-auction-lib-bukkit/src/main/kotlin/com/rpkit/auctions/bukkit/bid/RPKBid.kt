@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +17,16 @@ package com.rpkit.auctions.bukkit.bid
 
 import com.rpkit.auctions.bukkit.auction.RPKAuction
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 
 /**
  * Represents a bid.
  */
-interface RPKBid: Entity {
+interface RPKBid {
+
+    /**
+     * The bid ID. Guaranteed to be unique.
+     */
+    var id: RPKBidId?
 
     /**
      * The auction that this bid is for.

@@ -1,4 +1,4 @@
 caching:
-    rpkit_feature_flag:
-        enabled: true
-        size: 50
+  rpkit_feature_flag:
+    enabled: true
+    size: 50

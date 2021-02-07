@@ -16,42 +16,95 @@
 
 package com.rpkit.drinks.bukkit
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
+import com.rpkit.drink.bukkit.drink.RPKDrinkService
 import com.rpkit.drinks.bukkit.database.table.RPKDrunkennessTable
-import com.rpkit.drinks.bukkit.drink.RPKDrinkProviderImpl
+import com.rpkit.drinks.bukkit.drink.RPKDrinkServiceImpl
 import com.rpkit.drinks.bukkit.listener.PlayerItemConsumeListener
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bstats.bukkit.Metrics
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
+import java.io.File
 
 
-class RPKDrinksBukkit: RPKBukkitPlugin() {
+class RPKDrinksBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.drinks.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4389)
         saveDefaultConfig()
-        val drinkProvider = RPKDrinkProviderImpl(this)
-        drinkProvider.drinks.forEach { server.addRecipe(it.recipe) }
-        serviceProviders = arrayOf(
-                drinkProvider
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/drinks/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/drinks/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_drinks"
+                ),
+                classLoader
         )
-        object: BukkitRunnable() {
+        database.addTable(RPKDrunkennessTable(database, this))
+
+        val drinkService = RPKDrinkServiceImpl(this)
+        drinkService.drinks.forEach { server.addRecipe(it.recipe) }
+
+        Services[RPKDrinkService::class.java] = drinkService
+        object : BukkitRunnable() {
             override fun run() {
-                val minecraftProfileProvider = core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val characterProvider = core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+                val characterService = Services[RPKCharacterService::class.java]
                 server.onlinePlayers.forEach { bukkitPlayer ->
-                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer) ?: return@forEach
-                    val character = characterProvider.getActiveCharacter(minecraftProfile) ?: return@forEach
-                    val drunkenness = drinkProvider.getDrunkenness(character)
+                    val minecraftProfile = minecraftProfileService?.getMinecraftProfile(bukkitPlayer) ?: return@forEach
+                    val character = characterService?.getActiveCharacter(minecraftProfile) ?: return@forEach
+                    val drunkenness = drinkService.getDrunkenness(character)
                     if (drunkenness > 0) {
                         if (drunkenness > 1000) {
                             if (config.getBoolean("kill-characters"))
                                 character.isDead = true
-                            characterProvider.updateCharacter(character)
+                            characterService.updateCharacter(character)
                         }
                         if (drunkenness >= 75) {
                             bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.POISON, 1200, drunkenness))
@@ -63,20 +116,18 @@ class RPKDrinksBukkit: RPKBukkitPlugin() {
                             bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.WEAKNESS, 1200, drunkenness))
                         }
                         bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.CONFUSION, 1200, drunkenness))
-                        drinkProvider.setDrunkenness(character, drunkenness - 1)
+                        drinkService.setDrunkenness(character, drunkenness - 1)
                     }
                 }
             }
         }.runTaskTimer(this, 1200, 1200)
+
+        registerListeners()
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
                 PlayerItemConsumeListener(this)
         )
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKDrunkennessTable(database, this))
     }
 }

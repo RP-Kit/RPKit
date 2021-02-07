@@ -17,17 +17,19 @@
 package com.rpkit.players.bukkit.event.ircprofile
 
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
-import com.rpkit.players.bukkit.profile.RPKIRCProfile
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 
 
 class RPKBukkitIRCProfileCreateEvent(
-        override val ircProfile: RPKIRCProfile
-): RPKBukkitEvent(), RPKIRCProfileCreateEvent, Cancellable {
+        override val ircProfile: RPKIRCProfile,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKIRCProfileCreateEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

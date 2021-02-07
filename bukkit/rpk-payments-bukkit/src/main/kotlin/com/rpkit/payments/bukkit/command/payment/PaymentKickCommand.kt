@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,78 +15,96 @@
 
 package com.rpkit.payments.bukkit.command.payment
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
-import com.rpkit.payments.bukkit.group.RPKPaymentGroupProvider
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
+import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
-import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 /**
  * Payment kick command.
  * Kicks a character from a payment group.
  */
-class PaymentKickCommand(private val plugin: RPKPaymentsBukkit): CommandExecutor {
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz")
+class PaymentKickCommand(private val plugin: RPKPaymentsBukkit) : CommandExecutor {
+    val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz")
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("rpkit.payments.command.payment.kick")) {
-            if (args.size > 1) {
-                val paymentGroupProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentGroupProvider::class)
-                val paymentGroup = paymentGroupProvider.getPaymentGroup(args.dropLast(1).joinToString(" "))
-                if (paymentGroup != null) {
-                    val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                    val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                    val bukkitPlayer = plugin.server.getPlayer(args.last())
-                    if (bukkitPlayer == null) {
-                        sender.sendMessage(plugin.messages[""])
-                        return true
-                    }
-                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-                    if (minecraftProfile != null) {
-                        val character = characterProvider.getActiveCharacter(minecraftProfile)
-                        if (character != null) {
-                            paymentGroup.removeInvite(character)
-                            paymentGroup.removeMember(character)
-                            sender.sendMessage(plugin.messages["payment-kick-valid"])
-                            val paymentNotificationProvider = plugin.core.serviceManager.getServiceProvider(RPKPaymentNotificationProvider::class)
-                            val now = System.currentTimeMillis()
-                            val notificationMessage = plugin.messages["payment-notification-kick", mapOf(
-                                    Pair("member", character.name),
-                                    Pair("group", paymentGroup.name),
-                                    Pair("date", dateFormat.format(Date(now)))
-                            )]
-                            if (!minecraftProfile.isOnline) { // If offline
-                                paymentNotificationProvider.addPaymentNotification(
-                                        RPKPaymentNotificationImpl(
-                                                group = paymentGroup,
-                                                to = character,
-                                                character = character,
-                                                date = now,
-                                                text = notificationMessage
-                                        )
-                                )
-                            } else { // If online
-                                minecraftProfile.sendMessage(notificationMessage)
-                            }
-                        } else {
-                            sender.sendMessage(plugin.messages["payment-kick-invalid-character"])
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["payment-kick-invalid-group"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["payment-kick-usage"])
-            }
-        } else {
+        if (!sender.hasPermission("rpkit.payments.command.payment.kick")) {
             sender.sendMessage(plugin.messages["no-permission-payment-kick"])
+            return true
+        }
+        if (args.size <= 1) {
+            sender.sendMessage(plugin.messages["payment-kick-usage"])
+            return true
+        }
+        val paymentGroupService = Services[RPKPaymentGroupService::class.java]
+        if (paymentGroupService == null) {
+            sender.sendMessage(plugin.messages["no-payment-group-service"])
+            return true
+        }
+        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.dropLast(1).joinToString(" ")))
+        if (paymentGroup == null) {
+            sender.sendMessage(plugin.messages["payment-kick-invalid-group"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val bukkitPlayer = plugin.server.getPlayer(args.last())
+        if (bukkitPlayer == null) {
+            sender.sendMessage(plugin.messages["payment-kick-invalid-player"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null) {
+            sender.sendMessage(plugin.messages["payment-kick-invalid-character"])
+            return true
+        }
+        paymentGroup.removeInvite(character)
+        paymentGroup.removeMember(character)
+        sender.sendMessage(plugin.messages["payment-kick-valid"])
+        val paymentNotificationService = Services[RPKPaymentNotificationService::class.java]
+        if (paymentNotificationService == null) {
+            sender.sendMessage(plugin.messages["no-payment-notification-service"])
+            return true
+        }
+        val now = LocalDateTime.now()
+        val notificationMessage = plugin.messages["payment-notification-kick", mapOf(
+                "member" to character.name,
+                "group" to paymentGroup.name.value,
+                "date" to dateFormat.format(now)
+        )]
+        if (!minecraftProfile.isOnline) { // If offline
+            paymentNotificationService.addPaymentNotification(
+                    RPKPaymentNotificationImpl(
+                            group = paymentGroup,
+                            to = character,
+                            character = character,
+                            date = now,
+                            text = notificationMessage
+                    )
+            )
+        } else { // If online
+            minecraftProfile.sendMessage(notificationMessage)
         }
         return true
     }

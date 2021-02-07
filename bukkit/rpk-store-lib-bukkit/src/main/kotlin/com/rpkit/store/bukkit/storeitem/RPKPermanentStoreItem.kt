@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,4 +20,4 @@ package com.rpkit.store.bukkit.storeitem
  * Represents a permanent store item.
  * A permanent store item stays attached to a profile indefinitely.
  */
-interface RPKPermanentStoreItem: RPKStoreItem
+interface RPKPermanentStoreItem : RPKStoreItem

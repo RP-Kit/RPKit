@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.rpkit.core.event.RPKEvent
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 
 
-interface RPKPaymentGroupEvent: RPKEvent {
+interface RPKPaymentGroupEvent : RPKEvent {
 
     val paymentGroup: RPKPaymentGroup
 

@@ -17,9 +17,10 @@
 package com.rpkit.characters.bukkit.command.character.list
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -29,32 +30,42 @@ import org.bukkit.entity.Player
  * Character list command.
  * Lists player's characters.
  */
-class CharacterListCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class CharacterListCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender is Player) {
-            if (sender.hasPermission("rpkit.characters.command.character.list")) {
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                if (minecraftProfile != null) {
-                    val profile = minecraftProfile.profile
-                    if (profile is RPKProfile) {
-                        sender.sendMessage(plugin.messages["character-list-title"])
-                        for (character in characterProvider.getCharacters(profile)) {
-                            sender.sendMessage(plugin.messages["character-list-item", mapOf(
-                                    Pair("character", character.name)
-                            )])
-                        }
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["no-permission-character-list"])
-            }
-        } else {
+        if (sender !is Player) {
             sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        if (!sender.hasPermission("rpkit.characters.command.character.list")) {
+            sender.sendMessage(plugin.messages["no-permission-character-list"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (minecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val profile = minecraftProfile.profile
+        if (profile !is RPKProfile) {
+            sender.sendMessage(plugin.messages["no-profile"])
+            return true
+        }
+        sender.sendMessage(plugin.messages["character-list-title"])
+        for (character in characterService.getCharacters(profile)) {
+            sender.sendMessage(plugin.messages["character-list-item", mapOf(
+                "character" to character.name
+            )])
         }
         return true
     }

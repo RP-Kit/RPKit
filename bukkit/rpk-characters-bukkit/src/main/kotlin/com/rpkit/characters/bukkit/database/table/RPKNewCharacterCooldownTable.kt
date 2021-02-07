@@ -1,72 +1,44 @@
+/*
+ * Copyright 2021 Ren Binden
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.characters.bukkit.database.table
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.database.jooq.rpkit.Tables.RPKIT_NEW_CHARACTER_COOLDOWN
+import com.rpkit.characters.bukkit.database.create
+import com.rpkit.characters.bukkit.database.jooq.Tables.RPKIT_NEW_CHARACTER_COOLDOWN
 import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldown
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileProvider
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.DSL.field
-import org.jooq.impl.SQLDataType
-import java.sql.Date
 
 
-class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCharactersBukkit): Table<RPKNewCharacterCooldown>(database, RPKNewCharacterCooldown::class) {
-
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_new_character_cooldown.id.enabled")) {
-        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_new_character_cooldown.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKNewCharacterCooldown::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_new_character_cooldown.id.size"))).build())
-    } else {
-        null
-    }
+class RPKNewCharacterCooldownTable(private val database: Database, private val plugin: RPKCharactersBukkit) : Table {
 
     private val profileCache = if (plugin.config.getBoolean("caching.rpkit_new_character_cooldown.profile_id.enabled")) {
-        database.cacheManager.createCache("rpk-characters-bukkit.rpkit_new_character_cooldown.profile_id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, Int::class.javaObjectType,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_new_character_cooldown.profile_id.size"))).build())
+        database.cacheManager.createCache(
+            "rpk-characters-bukkit.rpkit_new_character_cooldown.profile_id",
+            Int::class.javaObjectType,
+            RPKNewCharacterCooldown::class.java,
+            plugin.config.getLong("caching.rpkit_new_character_cooldown.profile_id.size")
+        )
     } else {
         null
     }
 
-
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_NEW_CHARACTER_COOLDOWN)
-                .column(RPKIT_NEW_CHARACTER_COOLDOWN.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID, SQLDataType.INTEGER)
-                .column(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP, SQLDataType.DATE)
-                .constraints(
-                        constraint("pk_rpkit_new_character_cooldown").primaryKey(RPKIT_NEW_CHARACTER_COOLDOWN.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.3.0")
-        }
-        if (database.getTableVersion(this) == "1.1.0") {
-            database.create
-                    .truncate(RPKIT_NEW_CHARACTER_COOLDOWN)
-                    .execute()
-            database.create
-                    .alterTable(RPKIT_NEW_CHARACTER_COOLDOWN)
-                    .dropColumn(field("player_id"))
-                    .execute()
-            database.create
-                    .alterTable(RPKIT_NEW_CHARACTER_COOLDOWN)
-                    .addColumn(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID, SQLDataType.INTEGER)
-                    .execute()
-            database.setTableVersion(this, "1.3.0")
-        }
-    }
-
-    override fun insert(entity: RPKNewCharacterCooldown): Int {
+    fun insert(entity: RPKNewCharacterCooldown) {
+        val profileId = entity.profile.id ?: return
         database.create
                 .insertInto(
                         RPKIT_NEW_CHARACTER_COOLDOWN,
@@ -74,91 +46,51 @@ class RPKNewCharacterCooldownTable(database: Database, private val plugin: RPKCh
                         RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP
                 )
                 .values(
-                        entity.profile.id,
-                        Date(entity.cooldownTimestamp)
+                    profileId.value,
+                    entity.cooldownExpiryTime
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        profileCache?.put(entity.profile.id, id)
-        return id
+        profileCache?.set(profileId.value, entity)
     }
 
-    override fun update(entity: RPKNewCharacterCooldown) {
+    fun update(entity: RPKNewCharacterCooldown) {
+        val profileId = entity.profile.id ?: return
         database.create
                 .update(RPKIT_NEW_CHARACTER_COOLDOWN)
-                .set(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID, entity.profile.id)
-                .set(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP, Date(entity.cooldownTimestamp))
-                .where(RPKIT_NEW_CHARACTER_COOLDOWN.ID.eq(entity.id))
+                .set(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP, entity.cooldownExpiryTime)
+                .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
                 .execute()
-        cache?.put(entity.id, entity)
-        profileCache?.put(entity.profile.id, entity.id)
+        profileCache?.set(profileId.value, entity)
     }
 
-    override fun get(id: Int): RPKNewCharacterCooldown? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID,
-                            RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP
-                    )
-                    .from(RPKIT_NEW_CHARACTER_COOLDOWN)
-                    .where(RPKIT_NEW_CHARACTER_COOLDOWN.ID.eq(id))
-                    .fetchOne() ?: return null
-            val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-            val profile = profileProvider.getProfile(result.get(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID))
-            if (profile != null) {
-                val newCharacterCooldown = RPKNewCharacterCooldown(
-                        result.get(RPKIT_NEW_CHARACTER_COOLDOWN.ID),
-                        profile,
-                        result.get(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP).time
-                )
-                cache?.put(id, newCharacterCooldown)
-                profileCache?.put(newCharacterCooldown.profile.id, id)
-                return newCharacterCooldown
-            } else {
-                database.create
-                        .deleteFrom(RPKIT_NEW_CHARACTER_COOLDOWN)
-                        .where(RPKIT_NEW_CHARACTER_COOLDOWN.ID.eq(id))
-                        .execute()
-                return null
-            }
+    operator fun get(profile: RPKProfile): RPKNewCharacterCooldown? {
+        val profileId = profile.id ?: return null
+        if (profileCache?.containsKey(profileId.value) == true) {
+            return profileCache[profileId.value]
         }
-    }
-
-    fun get(profile: RPKProfile): RPKNewCharacterCooldown? {
-        if (profileCache?.containsKey(profile.id) == true) {
-            return get(profileCache[profile.id])
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_NEW_CHARACTER_COOLDOWN.ID,
-                            RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP
-                    )
-                    .from(RPKIT_NEW_CHARACTER_COOLDOWN)
-                    .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profile.id))
-                    .fetchOne() ?: return null
-            val newCharacterCooldown = RPKNewCharacterCooldown(
-                    result.get(RPKIT_NEW_CHARACTER_COOLDOWN.ID),
-                    profile,
-                    result.get(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP).time
+        val result = database.create
+            .select(
+                RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID,
+                RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP
             )
-            cache?.put(newCharacterCooldown.id, newCharacterCooldown)
-            profileCache?.put(profile.id, newCharacterCooldown.id)
-            return newCharacterCooldown
-        }
+            .from(RPKIT_NEW_CHARACTER_COOLDOWN)
+            .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
+            .fetchOne() ?: return null
+        val newCharacterCooldown = RPKNewCharacterCooldown(
+            profile,
+            result.get(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP)
+        )
+        profileCache?.set(profileId.value, newCharacterCooldown)
+        return newCharacterCooldown
     }
 
-    override fun delete(entity: RPKNewCharacterCooldown) {
+    fun delete(entity: RPKNewCharacterCooldown) {
+        val profileId = entity.profile.id ?: return
         database.create
                 .deleteFrom(RPKIT_NEW_CHARACTER_COOLDOWN)
-                .where(RPKIT_NEW_CHARACTER_COOLDOWN.ID.eq(entity.id))
+                .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
                 .execute()
-        cache?.remove(entity.id)
-        profileCache?.remove(entity.profile.id)
+        profileCache?.remove(profileId.value)
     }
 
 }

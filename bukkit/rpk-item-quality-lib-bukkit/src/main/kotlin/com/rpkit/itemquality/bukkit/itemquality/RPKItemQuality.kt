@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +21,7 @@ import org.bukkit.inventory.ItemStack
 
 interface RPKItemQuality {
 
-    val name: String
+    val name: RPKItemQualityName
     val lore: List<String>
     val durabilityModifier: Double
     val applicableItems: List<Material>

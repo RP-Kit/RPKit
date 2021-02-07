@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,29 +15,27 @@
 
 package com.rpkit.economy.bukkit.listener
 
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.Material.AIR
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 
-class InventoryClickListener(private val plugin: RPKEconomyBukkit): Listener {
+class InventoryClickListener(private val plugin: RPKEconomyBukkit) : Listener {
 
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
         if (event.view.title.toLowerCase().contains("wallet")) {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            val currency = currencyProvider.getCurrency(
-                    event.view.title.substringAfterLast("[").substringBeforeLast("]")
+            val currencyService = Services[RPKCurrencyService::class.java] ?: return
+            val currency = currencyService.getCurrency(
+                    RPKCurrencyName(event.view.title.substringAfterLast("[").substringBeforeLast("]"))
             ) ?: return
             val item = event.cursor ?: return
             if (item.type == AIR) return
-            if (item.type == currency.material
-                    && item.hasItemMeta()
-                    && item.itemMeta?.hasDisplayName() != false
-                    && item.itemMeta?.displayName == currency.nameSingular
-            ) return
+            if (item.isSimilar(currency.item)) return
             if (event.clickedInventory == event.view.topInventory) {
                 event.isCancelled = true
             }

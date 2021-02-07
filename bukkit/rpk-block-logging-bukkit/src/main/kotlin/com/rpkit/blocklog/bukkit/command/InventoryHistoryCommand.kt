@@ -1,18 +1,33 @@
+/*
+ * Copyright 2021 Ren Binden
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.blocklog.bukkit.command
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
-import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryProvider
+import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChange
-import org.bukkit.Material
+import com.rpkit.core.service.Services
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
-class InventoryHistoryCommand(private val plugin: RPKBlockLoggingBukkit): CommandExecutor {
+class InventoryHistoryCommand(private val plugin: RPKBlockLoggingBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender !is Player) {
@@ -23,13 +38,13 @@ class InventoryHistoryCommand(private val plugin: RPKBlockLoggingBukkit): Comman
             sender.sendMessage(plugin.messages["no-permission-inventory-history"])
             return true
         }
-        val targetBlock = sender.getTargetBlock(null as? HashSet<Material>, 8)
-        if (targetBlock == null) {
-            sender.sendMessage(plugin.messages["inventory-history-no-target-block"])
+        val targetBlock = sender.getTargetBlock(null, 8)
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java]
+        if (blockHistoryService == null) {
+            sender.sendMessage(plugin.messages["no-block-history-service"])
             return true
         }
-        val blockHistoryProvider = plugin.core.serviceManager.getServiceProvider(RPKBlockHistoryProvider::class)
-        val blockHistory = blockHistoryProvider.getBlockHistory(targetBlock)
+        val blockHistory = blockHistoryService.getBlockHistory(targetBlock)
         val changes = blockHistory.inventoryChanges
         if (changes.isEmpty()) {
             sender.sendMessage(plugin.messages["inventory-history-no-changes"])
@@ -37,13 +52,13 @@ class InventoryHistoryCommand(private val plugin: RPKBlockLoggingBukkit): Comman
         }
         for (change in changes.sortedBy(RPKBlockInventoryChange::time).take(100)) {
             sender.sendMessage(plugin.messages["inventory-history-change", mapOf(
-                    Pair("time", SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz").format(Date(change.time))),
-                    Pair("profile", change.profile?.name?:"None"),
-                    Pair("minecraft-profile", change.minecraftProfile?.minecraftUsername?:"None"),
-                    Pair("character", change.character?.name?:"None"),
-                    Pair("from", Arrays.toString(change.from)),
-                    Pair("to", Arrays.toString(change.to)),
-                    Pair("reason", change.reason)
+                "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time.atZone(ZoneId.systemDefault())),
+                "profile" to (change.profile?.name?.value ?: "None"),
+                "minecraft_profile" to (change.minecraftProfile?.name ?: "None"),
+                "character" to (change.character?.name ?: "None"),
+                "from" to change.from.contentToString(),
+                "to" to change.to.contentToString(),
+                "reason" to change.reason
             )])
         }
         return true

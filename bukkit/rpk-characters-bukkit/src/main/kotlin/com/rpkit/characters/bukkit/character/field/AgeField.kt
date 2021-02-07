@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,17 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * A character card field for age.
  */
-class AgeField: HideableCharacterCardField {
+class AgeField : HideableCharacterCardField {
 
     override val name = "age"
     override fun get(character: RPKCharacter): String {
         return if (isHidden(character)) "[HIDDEN]" else character.age.toString()
     }
+
     override fun isHidden(character: RPKCharacter): Boolean {
         return character.isAgeHidden
     }
+
     override fun setHidden(character: RPKCharacter, hidden: Boolean) {
         character.isAgeHidden = hidden
     }

@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,23 +15,23 @@
 
 package com.rpkit.chat.bukkit.chatchannel
 
-import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedChatChannelPipelineComponent
-import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedChatChannelPipelineComponent
-import com.rpkit.core.database.Entity
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.chat.bukkit.chatchannel.format.FormatPart
+import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPostFormatPipelineComponent
+import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineComponent
+import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.players.bukkit.profile.RPKThinProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.awt.Color
 
 /**
  * Represents a chat channel
  */
-interface RPKChatChannel: Entity {
+interface RPKChatChannel {
 
     /**
      * The name of the chat channel.
      */
-    val name: String
+    val name: RPKChatChannelName
 
     /**
      * The colour used to represent the chat channel.
@@ -50,53 +49,48 @@ interface RPKChatChannel: Entity {
     /**
      * A list of all speakers in the channel.
      * If a speaker sends a message without indicating who it is directed to, it will be sent to this channel.
-     * Players may only be speakers in a single channel.
-     */
-    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("speakerParticipants"))
-    val speakers: List<RPKPlayer>
-
-    /**
-     * A list of all speakers in the channel.
-     * If a speaker sends a message without indicating who it is directed to, it will be sent to this channel.
      * Chat participants may only be speakers in a single channel.
      */
-    val speakerMinecraftProfiles: List<RPKMinecraftProfile>
-
-    /**
-     * A list of all listeners in the channel.
-     * If a message is sent to a channel, it will be heard by all listeners.
-     * Players may listen to multiple channels.
-     */
-    @Deprecated("Old players API. Please move to new profiles APIs.", ReplaceWith("listenerMinecraftProfiles"))
-    val listeners: List<RPKPlayer>
+    val speakers: List<RPKMinecraftProfile>
 
     /**
      * A list of all listeners in the channel.
      * If a message is sent to a channel, it will be heard by all listeners.
      * Chat participants may listen to multiple channels.
      */
-    val listenerMinecraftProfiles: List<RPKMinecraftProfile>
+    val listeners: List<RPKMinecraftProfile>
 
     /**
-     * The directed pipeline for the channel.
-     * Messages to this channel will pass through this pipeline for each listener, so that formatting may be applied for
-     * each recipient.
+     * The directed pre-format pipeline for the channel.
+     * Messages to this channel will pass through this pipeline for each listener, which will apply garble, languages,
+     * drunken slurs, radius filters, etc.
+     * They will then be passed through the formatter which transforms the message into chat components, and then
+     * finally the post-format pipeline, which performs operations such as sending the message or showing it to
+     * players with snoop enabled.
      */
-    val directedPipeline: List<DirectedChatChannelPipelineComponent>
+    val directedPreFormatPipeline: List<DirectedPreFormatPipelineComponent>
+
+    /**
+     * The format to transform the message with after passing it through the pre-format pipeline and before passing it
+     * to the post-format pipeline.
+     */
+    val format: List<FormatPart>
+
+    /**
+     * The directed post-format pipeline for the channel.
+     * Messages to this channel will first pass through the pre-format pipeline (which applies garble, languages,
+     * drunken slurs, radius filters etc), then the formatter (which transforms the message to chat components),
+     * and then finally this pipeline (which sends the message or shows it to players with snoop enabled), for each
+     * player.
+     */
+    val directedPostFormatPipeline: List<DirectedPostFormatPipelineComponent>
 
     /**
      * The undirected pipeline for the channel.
      * Messages to this channel will pass through this pipeline once, so that messages may be logged or sent to IRC only
      * a single time.
      */
-    val undirectedPipeline: List<UndirectedChatChannelPipelineComponent>
-
-    /**
-     * The match pattern for this channel.
-     * If a player's message matches the match pattern, it should be directed to this channel.
-     * In the case of a chat channel not having a match pattern, this may be set to null.
-     */
-    val matchPattern: String?
+    val undirectedPipeline: List<UndirectedPipelineComponent>
 
     /**
      * Whether this channel should be joined by default.
@@ -104,20 +98,6 @@ interface RPKChatChannel: Entity {
      * first time. If they are not, the channel is muted until they join it.
      */
     val isJoinedByDefault: Boolean
-
-    /**
-     * Adds a speaker to the channel.
-     *
-     * @param speaker The player to add
-     */
-    fun addSpeaker(speaker: RPKPlayer)
-
-    /**
-     * Removes a speaker from the channel.
-     *
-     * @param speaker The player to remove
-     */
-    fun removeSpeaker(speaker: RPKPlayer)
 
     /**
      * Adds a speaker to the channel.
@@ -132,20 +112,6 @@ interface RPKChatChannel: Entity {
      * @param speaker The chat participant to remove
      */
     fun removeSpeaker(speaker: RPKMinecraftProfile)
-
-    /**
-     * Adds a listener to the channel.
-     *
-     * @param listener The player to add
-     */
-    fun addListener(listener: RPKPlayer)
-
-    /**
-     * Removes a listener from the channel.
-     *
-     * @param listener The player to remove
-     */
-    fun removeListener(listener: RPKPlayer)
 
     /**
      * Adds a listener to the channel.
@@ -166,34 +132,17 @@ interface RPKChatChannel: Entity {
      * Sends a message to the channel, passing it through the directed pipeline once for each listener, and the
      * undirected pipeline once.
      *
-     * @param sender The player sending the message
-     * @param message The message
-     * @param isAsync Whether the message is being sent asynchronously
-     */
-    fun sendMessage(sender: RPKPlayer, message: String, isAsync: Boolean = false)
-
-    /**
-     * Sends the message to the channel, passing it through the specified directed pipeline once for each listener, and
-     * the specified undirected pipeline once.
-     *
-     * @param sender The player sending the message
-     * @param message The message
-     * @param directedPipeline The directed pipeline
-     * @param undirectedPipeline The undirected pipeline
-     * @param isAsync Whether the message is being sent asynchronously
-     */
-    fun sendMessage(sender: RPKPlayer, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>, isAsync: Boolean = false)
-
-    /**
-     * Sends a message to the channel, passing it through the directed pipeline once for each listener, and the
-     * undirected pipeline once.
-     *
      * @param sender The profile sending the message
      * @param senderMinecraftProfile The Minecraft profile used to send the message, or null if not sent from Minecraft
      * @param message The message
      * @param isAsync Whether the message is being sent asynchronously
      */
-    fun sendMessage(sender: RPKThinProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, isAsync: Boolean = false)
+    fun sendMessage(
+            sender: RPKThinProfile,
+            senderMinecraftProfile: RPKMinecraftProfile?,
+            message: String,
+            isAsync: Boolean = false
+    )
 
     /**
      * Sends a message to the channel, passing it through the specified directed pipeline once for each listener, and
@@ -202,10 +151,20 @@ interface RPKChatChannel: Entity {
      * @param sender The profile sending the message
      * @param senderMinecraftProfile The Minecraft profile used to send the message, or null if not sent from Minecraft
      * @param message The message
-     * @param directedPipeline The directed pipeline
+     * @param directedPreFormatPipeline The directed pre-format pipeline
+     * @param directedPostFormatPipeline The directed post-format pipeline
      * @param undirectedPipeline The undirected pipeline
      * @param isAsync Whether the message is being sent asynchronously
      */
-    fun sendMessage(sender: RPKThinProfile, senderMinecraftProfile: RPKMinecraftProfile?, message: String, directedPipeline: List<DirectedChatChannelPipelineComponent>, undirectedPipeline: List<UndirectedChatChannelPipelineComponent>, isAsync: Boolean = false)
+    fun sendMessage(
+            sender: RPKThinProfile,
+            senderMinecraftProfile: RPKMinecraftProfile?,
+            message: String,
+            directedPreFormatPipeline: List<DirectedPreFormatPipelineComponent>,
+            format: List<FormatPart>,
+            directedPostFormatPipeline: List<DirectedPostFormatPipelineComponent>,
+            undirectedPipeline: List<UndirectedPipelineComponent>,
+            isAsync: Boolean = false
+    )
 
 }

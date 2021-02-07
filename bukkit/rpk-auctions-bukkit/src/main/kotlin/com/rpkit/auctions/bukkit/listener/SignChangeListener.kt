@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +16,10 @@
 package com.rpkit.auctions.bukkit.listener
 
 import com.rpkit.auctions.bukkit.RPKAuctionsBukkit
-import com.rpkit.auctions.bukkit.auction.RPKAuctionProvider
+import com.rpkit.auctions.bukkit.auction.RPKAuctionId
+import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.auctions.bukkit.bid.RPKBid
+import com.rpkit.core.service.Services
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -27,7 +28,7 @@ import org.bukkit.event.block.SignChangeEvent
 /**
  * Sign change listener for auction signs.
  */
-class SignChangeListener(private val plugin: RPKAuctionsBukkit): Listener {
+class SignChangeListener(private val plugin: RPKAuctionsBukkit) : Listener {
 
     @EventHandler
     fun onSignChange(event: SignChangeEvent) {
@@ -35,32 +36,34 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit): Listener {
             event.setLine(0, "$GREEN[auction]")
             if (!event.player.hasPermission("rpkit.auctions.sign.auction")) {
                 event.block.breakNaturally()
-                event.player.sendMessage(plugin.messages["no-permission-auction-sign-create"])
+                event.player.sendMessage(plugin.messages.noPermissionAuctionSignCreate)
                 return
             }
             try {
-                val auctionProvider = plugin.core.serviceManager.getServiceProvider(RPKAuctionProvider::class)
+                val auctionService = Services[RPKAuctionService::class.java]
+                if (auctionService == null) {
+                    event.player.sendMessage(plugin.messages.noAuctionService)
+                    return
+                }
                 val auctionId = event.getLine(1)?.toInt()
                 if (auctionId == null) {
                     event.block.breakNaturally()
-                    event.player.sendMessage(plugin.messages["auction-sign-invalid-id-not-a-number"])
+                    event.player.sendMessage(plugin.messages.auctionSignInvalidIdNotANumber)
                     return
                 }
-                val auction = auctionProvider.getAuction(auctionId)
+                val auction = auctionService.getAuction(RPKAuctionId(auctionId))
                 if (auction == null) {
                     event.block.breakNaturally()
-                    event.player.sendMessage(plugin.messages["auction-sign-invalid-auction-does-not-exist"])
+                    event.player.sendMessage(plugin.messages.auctionSignInvalidAuctionDoesNotExist)
                     return
                 } else {
                     event.setLine(2, auction.item.amount.toString() + " x " + auction.item.type.toString().toLowerCase().replace('_', ' '))
-                    event.setLine(3, ((auction.bids
-                            .sortedByDescending(RPKBid::amount)
-                            .firstOrNull()
-                            ?.amount?:auction.startPrice) + auction.minimumBidIncrement).toString())
+                    event.setLine(3, ((auction.bids.maxByOrNull(RPKBid::amount)
+                            ?.amount ?: auction.startPrice) + auction.minimumBidIncrement).toString())
                 }
             } catch (exception: NumberFormatException) {
                 event.block.breakNaturally()
-                event.player.sendMessage(plugin.messages["auction-sign-invalid-id-not-a-number"])
+                event.player.sendMessage(plugin.messages.auctionSignInvalidIdNotANumber)
                 return
             }
         }

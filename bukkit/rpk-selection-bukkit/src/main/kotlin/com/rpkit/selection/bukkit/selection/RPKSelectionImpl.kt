@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,17 @@
 
 package com.rpkit.selection.bukkit.selection
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.World
 import org.bukkit.block.Block
 
 
 class RPKSelectionImpl(
-        override var id: Int = 0,
         override val minecraftProfile: RPKMinecraftProfile,
         override var world: World,
         override var point1: Block,
         override var point2: Block
-): RPKSelection {
+) : RPKSelection {
 
     override val minimumPoint: Block
         get() = world.getBlockAt(

@@ -18,31 +18,41 @@ package com.rpkit.blocklog.bukkit.listener
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockChangeImpl
-import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryProvider
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority.MONITOR
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
+import java.time.LocalDateTime
 
 
-class BlockBreakListener(private val plugin: RPKBlockLoggingBukkit): Listener {
+class BlockBreakListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
 
     @EventHandler(priority = MONITOR)
     fun onBlockBreak(event: BlockBreakEvent) {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val blockHistoryProvider = plugin.core.serviceManager.getServiceProvider(RPKBlockHistoryProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        val characterService = Services[RPKCharacterService::class.java]
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java]
+        if (blockHistoryService == null) {
+            plugin.logger.severe("Failed to retrieve block history service, did the plugin load correctly?")
+            return
+        }
+        val minecraftProfile = minecraftProfileService?.getMinecraftProfile(event.player)
         val profile = minecraftProfile?.profile as? RPKProfile
-        val character = if (minecraftProfile == null) null else characterProvider.getActiveCharacter(minecraftProfile)
-        val blockHistory = blockHistoryProvider.getBlockHistory(event.block)
+        val character = if (minecraftProfile == null) {
+            null
+        } else {
+            characterService?.getActiveCharacter(minecraftProfile)
+        }
+        val blockHistory = blockHistoryService.getBlockHistory(event.block)
         val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
-                time = System.currentTimeMillis(),
+                time = LocalDateTime.now(),
                 profile = profile,
                 minecraftProfile = minecraftProfile,
                 character = character,
@@ -50,7 +60,7 @@ class BlockBreakListener(private val plugin: RPKBlockLoggingBukkit): Listener {
                 to = Material.AIR,
                 reason = "BREAK"
         )
-        blockHistoryProvider.addBlockChange(blockChange)
+        blockHistoryService.addBlockChange(blockChange)
     }
 
 }

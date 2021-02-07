@@ -16,41 +16,18 @@
 
 package com.rpkit.skills.bukkit.fireball
 
-import com.rpkit.core.bukkit.event.provider.RPKBukkitServiceProviderReadyEvent
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
-import com.rpkit.core.exception.UnregisteredServiceException
-import com.rpkit.skills.bukkit.skills.RPKSkillProvider
-import org.bukkit.event.EventHandler
+import com.rpkit.core.service.Services
+import com.rpkit.skills.bukkit.skills.RPKSkillService
 import org.bukkit.event.Listener
 
 class RPKFireballSkillBukkit : RPKBukkitPlugin(), Listener {
 
-    private var registered = false
-
     override fun onEnable() {
         saveDefaultConfig()
-    }
-
-    override fun onPostEnable() {
-        attemptSkillRegistration()
-    }
-
-    override fun registerListeners() {
-        registerListeners(this)
-    }
-
-    @EventHandler
-    fun onServiceProviderReady(event: RPKBukkitServiceProviderReadyEvent) {
-        attemptSkillRegistration()
-    }
-
-    fun attemptSkillRegistration() {
-        if (registered) return
-        try {
-            val skillProvider = core.serviceManager.getServiceProvider(RPKSkillProvider::class)
-            skillProvider.addSkill(FireballSkill(this))
-            registered = true
-        } catch (ignored: UnregisteredServiceException) {}
+        Services.require(RPKSkillService::class.java).whenAvailable { skillService ->
+            skillService.addSkill(FireballSkill(this))
+        }
     }
 
 }

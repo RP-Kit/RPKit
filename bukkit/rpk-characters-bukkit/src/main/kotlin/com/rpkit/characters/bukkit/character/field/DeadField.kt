@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * A character card field for dead.
  */
-class DeadField: CharacterCardField {
+class DeadField : CharacterCardField {
 
     override val name = "dead"
     override fun get(character: RPKCharacter): String {

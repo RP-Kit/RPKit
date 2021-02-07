@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@
 package com.rpkit.unconsciousness.bukkit.unconsciousness
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
+import java.time.LocalDateTime
 
 
 class RPKUnconsciousState(
-        override var id: Int = 0,
         val character: RPKCharacter,
-        var deathTime: Long
-) : Entity
+        var deathTime: LocalDateTime
+)

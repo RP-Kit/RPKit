@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +15,12 @@
 
 package com.rpkit.moderation.bukkit.command.warn
 
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.warning.RPKWarningImpl
-import com.rpkit.moderation.bukkit.warning.RPKWarningProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.moderation.bukkit.warning.RPKWarningService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -28,7 +28,7 @@ import org.bukkit.entity.Player
 import java.time.format.DateTimeFormatter
 
 
-class WarningCreateCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class WarningCreateCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.moderation.command.warning.create")) {
@@ -48,13 +48,17 @@ class WarningCreateCommand(private val plugin: RPKModerationBukkit): CommandExec
             sender.sendMessage(plugin.messages["warning-create-invalid-target"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val targetMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(targetPlayer)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val targetMinecraftProfile = minecraftProfileService.getMinecraftProfile(targetPlayer)
         if (targetMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val issuerMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val issuerMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (issuerMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -70,22 +74,26 @@ class WarningCreateCommand(private val plugin: RPKModerationBukkit): CommandExec
             return true
         }
         val warningReason = args.drop(1).joinToString(" ")
-        val warningProvider = plugin.core.serviceManager.getServiceProvider(RPKWarningProvider::class)
+        val warningService = Services[RPKWarningService::class.java]
+        if (warningService == null) {
+            sender.sendMessage(plugin.messages["no-warning-service"])
+            return true
+        }
         val warning = RPKWarningImpl(warningReason, targetProfile, issuerProfile)
-        warningProvider.addWarning(warning)
+        warningService.addWarning(warning)
         sender.sendMessage(plugin.messages["warning-create-valid", mapOf(
-                Pair("reason", warningReason),
-                Pair("issuer", issuerProfile.name),
-                Pair("profile", targetProfile.name),
-                Pair("time", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time)),
-                Pair("index", warningProvider.getWarnings(targetProfile).size.toString())
+            "reason" to warningReason,
+            "issuer" to issuerProfile.name.value,
+            "profile" to targetProfile.name.value,
+            "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time),
+            "index" to warningService.getWarnings(targetProfile).size.toString()
         )])
         targetPlayer.sendMessage(plugin.messages["warning-received", mapOf(
-                Pair("reason", warningReason),
-                Pair("issuer", issuerProfile.name),
-                Pair("profile", targetProfile.name),
-                Pair("time", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time)),
-                Pair("index", warningProvider.getWarnings(targetProfile).size.toString())
+            "reason" to warningReason,
+            "issuer" to issuerProfile.name.value,
+            "profile" to targetProfile.name.value,
+            "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time),
+            "index" to warningService.getWarnings(targetProfile).size.toString()
         )])
         return true
     }

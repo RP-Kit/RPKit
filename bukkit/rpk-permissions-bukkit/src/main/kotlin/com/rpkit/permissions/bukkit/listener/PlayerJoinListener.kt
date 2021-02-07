@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package com.rpkit.permissions.bukkit.listener
 
-import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
-import com.rpkit.permissions.bukkit.group.RPKGroupProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.core.service.Services
+import com.rpkit.permissions.bukkit.group.assignPermissions
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority.LOWEST
 import org.bukkit.event.Listener
@@ -27,17 +27,14 @@ import org.bukkit.event.player.PlayerJoinEvent
 /**
  * Player join listener for assigning permissions.
  */
-class PlayerJoinListener(private val plugin: RPKPermissionsBukkit): Listener {
+class PlayerJoinListener : Listener {
 
     @EventHandler(priority = LOWEST)
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        if (!event.player.isBanned) {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
-            if (minecraftProfile != null) {
-                plugin.core.serviceManager.getServiceProvider(RPKGroupProvider::class).assignPermissions(minecraftProfile)
-            }
-        }
+        if (event.player.isBanned) return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        minecraftProfile.assignPermissions()
     }
 
 }

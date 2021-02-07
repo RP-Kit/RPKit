@@ -23,11 +23,10 @@ import org.bstats.bukkit.Metrics
  * Class to allow player lib to load as a plugin.
  * This allows plugins requiring players or implementing players to depend on the plugin.
  */
-class RPKPlayerLibBukkit: RPKBukkitPlugin() {
+class RPKPlayerLibBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         Metrics(this, 4373)
-        serviceProviders = arrayOf()
     }
 
 }

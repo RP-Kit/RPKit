@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package com.rpkit.players.bukkit.event.ircprofile
 
 import com.rpkit.core.event.RPKEvent
-import com.rpkit.players.bukkit.profile.RPKIRCProfile
+import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 
 
-interface RPKIRCProfileEvent: RPKEvent {
+interface RPKIRCProfileEvent : RPKEvent {
 
     val ircProfile: RPKIRCProfile
 

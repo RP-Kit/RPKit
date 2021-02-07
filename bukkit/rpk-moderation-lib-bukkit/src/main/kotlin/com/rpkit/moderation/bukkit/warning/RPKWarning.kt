@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +15,13 @@
 
 package com.rpkit.moderation.bukkit.warning
 
-import com.rpkit.core.database.Entity
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.time.LocalDateTime
 
 
-interface RPKWarning: Entity {
+interface RPKWarning {
 
+    var id: RPKWarningId?
     val reason: String
     val profile: RPKProfile
     val issuer: RPKProfile

@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,45 +19,30 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.store.bukkit.RPKStoresBukkit
+import com.rpkit.store.bukkit.database.create
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_PURCHASE
 import com.rpkit.store.bukkit.purchase.RPKPurchase
-import com.rpkit.stores.bukkit.database.jooq.rpkit.Tables.RPKIT_PURCHASE
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL.constraint
-import org.jooq.impl.SQLDataType
-import java.sql.Timestamp
+import com.rpkit.store.bukkit.purchase.RPKPurchaseId
 
 
-class RPKPurchaseTable(database: Database, private val plugin: RPKStoresBukkit): Table<RPKPurchase>(database, RPKPurchase::class) {
+class RPKPurchaseTable(
+        private val database: Database,
+        plugin: RPKStoresBukkit
+) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_purchase.id.enabled")) {
-        database.cacheManager.createCache("rpkit-stores-bukkit.rpkit_purchase.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKPurchase::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_consumable_purchase.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpkit-stores-bukkit.rpkit_purchase.id",
+            Int::class.javaObjectType,
+            RPKPurchase::class.java,
+            plugin.config.getLong("caching.rpkit_consumable_purchase.id.size")
+        )
     } else {
         null
     }
 
-    override fun create() {
-        database.create
-                .createTableIfNotExists(RPKIT_PURCHASE)
-                .column(RPKIT_PURCHASE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_PURCHASE.STORE_ITEM_ID, SQLDataType.INTEGER)
-                .column(RPKIT_PURCHASE.PROFILE_ID, SQLDataType.INTEGER)
-                .column(RPKIT_PURCHASE.PURCHASE_DATE, SQLDataType.TIMESTAMP)
-                .constraints(
-                        constraint("pk_rpkit_purchase").primaryKey(RPKIT_PURCHASE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.6.0")
-        }
-    }
-
-    override fun insert(entity: RPKPurchase): Int {
+    fun insert(entity: RPKPurchase): RPKPurchaseId? {
+        val profileId = entity.profile.id ?: return null
         database.create
                 .insertInto(
                         RPKIT_PURCHASE,
@@ -68,66 +52,69 @@ class RPKPurchaseTable(database: Database, private val plugin: RPKStoresBukkit):
                 )
                 .values(
                         entity.storeItem.id,
-                        entity.profile.id,
-                        Timestamp.valueOf(entity.purchaseDate)
+                        profileId.value,
+                        entity.purchaseDate
                 )
                 .execute()
         val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.put(id, entity)
-        return id
+        entity.id = RPKPurchaseId(id)
+        cache?.set(id, entity)
+        return RPKPurchaseId(id)
     }
 
-    override fun update(entity: RPKPurchase) {
+    fun update(entity: RPKPurchase) {
+        val id = entity.id ?: return
+        val profileId = entity.profile.id ?: return
         database.create
                 .update(RPKIT_PURCHASE)
                 .set(RPKIT_PURCHASE.STORE_ITEM_ID, entity.storeItem.id)
-                .set(RPKIT_PURCHASE.PROFILE_ID, entity.profile.id)
-                .set(RPKIT_PURCHASE.PURCHASE_DATE, Timestamp.valueOf(entity.purchaseDate))
-                .where(RPKIT_PURCHASE.ID.eq(entity.id))
+                .set(RPKIT_PURCHASE.PROFILE_ID, profileId.value)
+                .set(RPKIT_PURCHASE.PURCHASE_DATE, entity.purchaseDate)
+                .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .execute()
-        cache?.put(entity.id, entity)
+        cache?.set(id.value, entity)
     }
 
-    override fun get(id: Int): RPKPurchase? {
-        if (cache?.containsKey(id) == true) return cache[id]
-        var purchase: RPKPurchase? = database.getTable(RPKConsumablePurchaseTable::class)[id]
+    operator fun get(id: RPKPurchaseId): RPKPurchase? {
+        if (cache?.containsKey(id.value) == true) return cache[id.value]
+        var purchase: RPKPurchase? = database.getTable(RPKConsumablePurchaseTable::class.java)[id]
         if (purchase != null) {
-            cache?.put(id, purchase)
+            cache?.set(id.value, purchase)
             return purchase
         } else {
-            cache?.remove(id)
+            cache?.remove(id.value)
         }
-        purchase = database.getTable(RPKPermanentPurchaseTable::class)[id]
+        purchase = database.getTable(RPKPermanentPurchaseTable::class.java)[id]
         if (purchase != null) {
-            cache?.put(id, purchase)
+            cache?.set(id.value, purchase)
             return purchase
         } else {
-            cache?.remove(id)
+            cache?.remove(id.value)
         }
-        purchase = database.getTable(RPKTimedPurchaseTable::class)[id]
+        purchase = database.getTable(RPKTimedPurchaseTable::class.java)[id]
         if (purchase != null) {
-            cache?.put(id, purchase)
+            cache?.set(id.value, purchase)
             return purchase
         } else {
-            cache?.remove(id)
+            cache?.remove(id.value)
         }
         return null
     }
 
     fun get(profile: RPKProfile): List<RPKPurchase> {
         return listOf(
-                *database.getTable(RPKConsumablePurchaseTable::class).get(profile).toTypedArray(),
-                *database.getTable(RPKPermanentPurchaseTable::class).get(profile).toTypedArray(),
-                *database.getTable(RPKTimedPurchaseTable::class).get(profile).toTypedArray()
+                *database.getTable(RPKConsumablePurchaseTable::class.java).get(profile).toTypedArray(),
+                *database.getTable(RPKPermanentPurchaseTable::class.java).get(profile).toTypedArray(),
+                *database.getTable(RPKTimedPurchaseTable::class.java).get(profile).toTypedArray()
         )
     }
 
-    override fun delete(entity: RPKPurchase) {
+    fun delete(entity: RPKPurchase) {
+        val id = entity.id ?: return
         database.create
                 .deleteFrom(RPKIT_PURCHASE)
-                .where(RPKIT_PURCHASE.ID.eq(entity.id))
+                .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id.value)
     }
 }

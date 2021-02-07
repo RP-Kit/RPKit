@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.bukkit.command.CommandSender
  * Character command.
  * Parent command for all character management commands.
  */
-class CharacterCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class CharacterCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
     private val characterSetCommand = CharacterSetCommand(plugin)
     private val characterHideCommand = CharacterHideCommand(plugin)

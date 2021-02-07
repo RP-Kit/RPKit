@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,25 +15,33 @@
 
 package com.rpkit.economy.bukkit.command.money
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
-import com.rpkit.economy.bukkit.economy.RPKEconomyProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.economy.bukkit.currency.RPKCurrencyName
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
+import com.rpkit.economy.bukkit.economy.RPKEconomyService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.*
+import org.bukkit.conversations.ConversationContext
+import org.bukkit.conversations.ConversationFactory
+import org.bukkit.conversations.MessagePrompt
+import org.bukkit.conversations.NumericPrompt
+import org.bukkit.conversations.PlayerNamePrompt
+import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.ValidatingPrompt
 import org.bukkit.entity.Player
 
 /**
  * Money pay command.
  * Pays money to another character from the user's active character.
  */
-class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
-    
+class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
+
     private val conversationFactory = ConversationFactory(plugin)
             .withModality(true)
             .withFirstPrompt(PlayerPrompt())
@@ -50,111 +57,128 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
             }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender is Player) {
-            if (sender.hasPermission("rpkit.economy.command.money.pay")) {
-                val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
-                val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-                val fromMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
-                if (fromMinecraftProfile != null) {
-                    val fromCharacter = characterProvider.getActiveCharacter(fromMinecraftProfile)
-                    if (fromCharacter != null) {
-                        if (args.isNotEmpty()) {
-                            val toBukkitPlayer = plugin.server.getPlayer(args[0])
-                            if (toBukkitPlayer != null) {
-                                val toMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(toBukkitPlayer)
-                                if (toMinecraftProfile != null) {
-                                    val toCharacter = characterProvider.getActiveCharacter(toMinecraftProfile)
-                                    if (toCharacter != null) {
-                                        if (args.size > 1) {
-                                            try {
-                                                val amount = args[1].toInt()
-                                                if (amount >= 0) {
-                                                    if (args.size > 2) {
-                                                        var currency = currencyProvider.getCurrency(args[2])
-                                                        if (currency == null) {
-                                                            currency = currencyProvider.defaultCurrency
-                                                        }
-                                                        if (currency != null) {
-                                                            if (sender.location.distanceSquared(toBukkitPlayer.location) <= plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
-                                                                if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
-                                                                    if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
-                                                                        economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
-                                                                        sender.sendMessage(plugin.messages["money-pay-amount-valid"])
-                                                                        sender.sendMessage(plugin.messages["money-pay-valid", mapOf(
-                                                                                Pair("amount", amount.toString()),
-                                                                                Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
-                                                                                Pair("character", toCharacter.name),
-                                                                                Pair("player", toMinecraftProfile.minecraftUsername)
-                                                                        )])
-                                                                        toMinecraftProfile.sendMessage(plugin.messages["money-pay-received", mapOf(
-                                                                                Pair("amount", amount.toString()),
-                                                                                Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
-                                                                                Pair("character", fromCharacter.name),
-                                                                                Pair("player", fromMinecraftProfile.minecraftUsername)
-                                                                        )])
-                                                                    } else {
-                                                                        sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-limit"])
-                                                                    }
-                                                                } else {
-                                                                    sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-balance"])
-                                                                }
-                                                            } else {
-                                                                sender.sendMessage(plugin.messages["money-pay-player-invalid-player-distance"])
-                                                            }
-                                                        } else {
-                                                            sender.sendMessage(plugin.messages["money-pay-currency-invalid-currency"])
-                                                        }
-                                                    } else {
-                                                        conversationFactory.buildConversation(sender).begin()
-                                                    }
-                                                } else {
-                                                    sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-negative"])
-                                                }
-                                            } catch (exception: NumberFormatException) {
-                                                sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-number"])
-                                            }
-                                        } else {
-                                            conversationFactory.buildConversation(sender).begin()
-                                        }
-                                    } else {
-                                        sender.sendMessage(plugin.messages["money-pay-character-invalid-character"])
-                                    }
-                                } else {
-                                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                                }
-                            } else {
-                                sender.sendMessage(plugin.messages["money-pay-player-invalid-player-offline"])
-                            }
-                        } else {
-                            conversationFactory.buildConversation(sender).begin()
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["no-character"])
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["no-permission-money-pay"])
-            }
-        } else {
+        if (sender !is Player) {
             sender.sendMessage(plugin.messages["not-from-console"])
+            return true
+        }
+        if (!sender.hasPermission("rpkit.economy.command.money.pay")) {
+            sender.sendMessage(plugin.messages["no-permission-money-pay"])
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val economyService = Services[RPKEconomyService::class.java]
+        if (economyService == null) {
+            sender.sendMessage(plugin.messages["no-economy-service"])
+            return true
+        }
+        val currencyService = Services[RPKCurrencyService::class.java]
+        if (currencyService == null) {
+            sender.sendMessage(plugin.messages["no-currency-service"])
+            return true
+        }
+        val fromMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        if (fromMinecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val fromCharacter = characterService.getActiveCharacter(fromMinecraftProfile)
+        if (fromCharacter == null) {
+            sender.sendMessage(plugin.messages["no-character"])
+            return true
+        }
+        if (args.isEmpty()) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        val toBukkitPlayer = plugin.server.getPlayer(args[0])
+        if (toBukkitPlayer == null) {
+            sender.sendMessage(plugin.messages["money-pay-player-invalid-player-offline"])
+            return true
+        }
+        val toMinecraftProfile = minecraftProfileService.getMinecraftProfile(toBukkitPlayer)
+        if (toMinecraftProfile == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            return true
+        }
+        val toCharacter = characterService.getActiveCharacter(toMinecraftProfile)
+        if (toCharacter == null) {
+            sender.sendMessage(plugin.messages["money-pay-character-invalid-character"])
+            return true
+        }
+        if (args.size <= 1) {
+            conversationFactory.buildConversation(sender).begin()
+            return true
+        }
+        try {
+            val amount = args[1].toInt()
+            if (amount < 0) {
+                sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-negative"])
+                return true
+            }
+            if (args.size <= 2) {
+                conversationFactory.buildConversation(sender).begin()
+                return true
+            }
+            var currency = currencyService.getCurrency(RPKCurrencyName(args[2]))
+            if (currency == null) {
+                currency = currencyService.defaultCurrency
+            }
+            if (currency == null) {
+                sender.sendMessage(plugin.messages["money-pay-currency-invalid-currency"])
+                return true
+            }
+            if (sender.location.distanceSquared(toBukkitPlayer.location) > plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
+                sender.sendMessage(plugin.messages["money-pay-player-invalid-player-distance"])
+                return true
+            }
+            if (economyService.getBalance(fromCharacter, currency) < amount) {
+                sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-balance"])
+                return true
+            }
+            if (economyService.getBalance(toCharacter, currency) + amount > 1728) {
+                sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-limit"])
+                return true
+            }
+            economyService.transfer(fromCharacter, toCharacter, currency, amount)
+            sender.sendMessage(plugin.messages["money-pay-amount-valid"])
+            sender.sendMessage(plugin.messages["money-pay-valid", mapOf(
+                    "amount" to amount.toString(),
+                    "currency" to if (amount == 1) currency.nameSingular else currency.namePlural,
+                    "character" to toCharacter.name,
+                    "player" to toMinecraftProfile.name
+            )])
+            toMinecraftProfile.sendMessage(plugin.messages["money-pay-received", mapOf(
+                    "amount" to amount.toString(),
+                    "currency" to if (amount == 1) currency.nameSingular else currency.namePlural,
+                    "character" to fromCharacter.name,
+                    "player" to fromMinecraftProfile.name
+            )])
+        } catch (exception: NumberFormatException) {
+            sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-number"])
         }
         return true
     }
 
-    private inner class PlayerPrompt: PlayerNamePrompt(plugin) {
+    private inner class PlayerPrompt : PlayerNamePrompt(plugin) {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Player): Prompt {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(input)
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return END_OF_CONVERSATION
+            val minecraftProfile = minecraftProfileService.getMinecraftProfile(input)
             context.setSessionData("minecraft_profile", minecraftProfile)
             return PlayerSetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
+            if (Services[RPKMinecraftProfileService::class.java] == null) return plugin.messages["no-minecraft-profile-service"]
             return plugin.messages["money-pay-player-prompt"]
         }
 
@@ -164,7 +188,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class PlayerSetPrompt: MessagePrompt() {
+    private inner class PlayerSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return CurrencyPrompt()
         }
@@ -175,32 +199,33 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class CurrencyPrompt: ValidatingPrompt() {
+    private inner class CurrencyPrompt : ValidatingPrompt() {
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(input) != null
+            return Services[RPKCurrencyService::class.java]?.getCurrency(RPKCurrencyName(input)) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            context.setSessionData("currency", plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).getCurrency(input))
+            context.setSessionData("currency", Services[RPKCurrencyService::class.java]?.getCurrency(RPKCurrencyName(input)))
             return CurrencySetPrompt()
         }
 
         override fun getPromptText(context: ConversationContext): String {
             return plugin.messages["money-pay-currency-prompt"] + "\n" +
-                    plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class).currencies
-                            .joinToString("\n") { currency ->
+                    Services[RPKCurrencyService::class.java]?.currencies
+                            ?.joinToString("\n") { currency ->
                                 plugin.messages["money-pay-currency-prompt-list-item", mapOf(
-                                        Pair("currency", currency.name)
+                                        "currency" to currency.name.value
                                 )]
                             }
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
+            if (Services[RPKCurrencyService::class.java] == null) return plugin.messages["no-currency-service"]
             return plugin.messages["money-pay-currency-invalid-currency"]
         }
     }
 
-    private inner class CurrencySetPrompt: MessagePrompt() {
+    private inner class CurrencySetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return AmountPrompt()
         }
@@ -211,7 +236,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class AmountPrompt: NumericPrompt() {
+    private inner class AmountPrompt : NumericPrompt() {
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
             return input.toInt() > 0
@@ -236,7 +261,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class AmountSetPrompt: MessagePrompt() {
+    private inner class AmountSetPrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt {
             return MoneyPayCompletePrompt()
         }
@@ -247,61 +272,55 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
 
     }
 
-    private inner class MoneyPayCompletePrompt: MessagePrompt() {
+    private inner class MoneyPayCompletePrompt : MessagePrompt() {
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             return END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val economyProvider = plugin.core.serviceManager.getServiceProvider(RPKEconomyProvider::class)
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+                    ?: return plugin.messages["no-minecraft-profile-service"]
+            val characterService = Services[RPKCharacterService::class.java] ?: return plugin.messages["no-character-service"]
+            val economyService = Services[RPKEconomyService::class.java] ?: return plugin.messages["no-economy-service"]
             val fromBukkitPlayer = context.forWhom as Player
-            val fromMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(fromBukkitPlayer)
-            if (fromMinecraftProfile != null) {
-                val fromCharacter = characterProvider.getActiveCharacter(fromMinecraftProfile)
-                val toMinecraftProfile = context.getSessionData("minecraft_profile") as RPKMinecraftProfile
-                val toCharacter = characterProvider.getActiveCharacter(toMinecraftProfile)
-                val currency = context.getSessionData("currency") as RPKCurrency
-                val amount = context.getSessionData("amount") as Int
-                if (fromCharacter != null) {
-                    if (toCharacter != null) {
-                        val toBukkitOfflinePlayer = plugin.server.getOfflinePlayer(toMinecraftProfile.minecraftUUID)
-                        val toBukkitPlayer = toBukkitOfflinePlayer.player ?: return plugin.messages["money-pay-player-invalid-player-distance"]
-                        if (fromBukkitPlayer.location.distanceSquared(toBukkitPlayer.location) <= plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
-                            if (economyProvider.getBalance(fromCharacter, currency) >= amount) {
-                                if (economyProvider.getBalance(toCharacter, currency) + amount <= 1728) {
-                                    economyProvider.transfer(fromCharacter, toCharacter, currency, amount)
-                                    toMinecraftProfile.sendMessage(plugin.messages["money-pay-received", mapOf(
-                                            Pair("amount", amount.toString()),
-                                            Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
-                                            Pair("character", fromCharacter.name),
-                                            Pair("player", fromMinecraftProfile.minecraftUsername)
-                                    )])
-                                    return plugin.messages["money-pay-valid", mapOf(
-                                            Pair("amount", amount.toString()),
-                                            Pair("currency", if (amount == 1) currency.nameSingular else currency.namePlural),
-                                            Pair("character", toCharacter.name),
-                                            Pair("player", toMinecraftProfile.minecraftUsername)
-                                    )]
-                                } else {
-                                    return plugin.messages["money-pay-amount-invalid-amount-limit"]
-                                }
-                            } else {
-                                return plugin.messages["money-pay-amount-invalid-amount-balance"]
-                            }
-                        } else {
-                            return plugin.messages["money-pay-player-invalid-player-distance"]
-                        }
-                    } else {
-                        return plugin.messages["recipient-no-character"]
-                    }
-                } else {
-                    return plugin.messages["no-character"]
-                }
-            } else {
-                return plugin.messages["no-minecraft-profile"]
+            val fromMinecraftProfile = minecraftProfileService.getMinecraftProfile(fromBukkitPlayer)
+                    ?: return plugin.messages["no-minecraft-profile"]
+            val fromCharacter = characterService.getActiveCharacter(fromMinecraftProfile)
+            val toMinecraftProfile = context.getSessionData("minecraft_profile") as RPKMinecraftProfile
+            val toCharacter = characterService.getActiveCharacter(toMinecraftProfile)
+            val currency = context.getSessionData("currency") as RPKCurrency
+            val amount = context.getSessionData("amount") as Int
+            if (fromCharacter == null) {
+                return plugin.messages["no-character"]
             }
+            if (toCharacter == null) {
+                return plugin.messages["recipient-no-character"]
+            }
+            val toBukkitOfflinePlayer = plugin.server.getOfflinePlayer(toMinecraftProfile.minecraftUUID)
+            val toBukkitPlayer = toBukkitOfflinePlayer.player
+                    ?: return plugin.messages["money-pay-player-invalid-player-distance"]
+            if (fromBukkitPlayer.location.distanceSquared(toBukkitPlayer.location) > plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
+                return plugin.messages["money-pay-player-invalid-player-distance"]
+            }
+            if (economyService.getBalance(fromCharacter, currency) < amount) {
+                return plugin.messages["money-pay-amount-invalid-amount-balance"]
+            }
+            if (economyService.getBalance(toCharacter, currency) + amount > 1728) {
+                return plugin.messages["money-pay-amount-invalid-amount-limit"]
+            }
+            economyService.transfer(fromCharacter, toCharacter, currency, amount)
+            toMinecraftProfile.sendMessage(plugin.messages["money-pay-received", mapOf(
+                    "amount" to amount.toString(),
+                    "currency" to if (amount == 1) currency.nameSingular else currency.namePlural,
+                    "character" to fromCharacter.name,
+                    "player" to fromMinecraftProfile.name
+            )])
+            return plugin.messages["money-pay-valid", mapOf(
+                    "amount" to amount.toString(),
+                    "currency" to if (amount == 1) currency.nameSingular else currency.namePlural,
+                    "character" to toCharacter.name,
+                    "player" to toMinecraftProfile.name
+            )]
         }
 
     }

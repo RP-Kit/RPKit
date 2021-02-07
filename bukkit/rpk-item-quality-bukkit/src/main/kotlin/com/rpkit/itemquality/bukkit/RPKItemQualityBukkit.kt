@@ -17,43 +17,39 @@
 package com.rpkit.itemquality.bukkit
 
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.command.itemquality.ItemQualityCommand
-import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityProviderImpl
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityServiceImpl
 import com.rpkit.itemquality.bukkit.listener.PlayerItemDamageListener
+import com.rpkit.itemquality.bukkit.messages.ItemQualityMessages
 import org.bstats.bukkit.Metrics
 
 
-class RPKItemQualityBukkit: RPKBukkitPlugin() {
+class RPKItemQualityBukkit : RPKBukkitPlugin() {
+
+    lateinit var messages: ItemQualityMessages
 
     override fun onEnable() {
         Metrics(this, 6658)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKItemQualityProviderImpl(this)
-        )
+
+        messages = ItemQualityMessages(this)
+
+        Services[RPKItemQualityService::class.java] = RPKItemQualityServiceImpl(this)
+
+        registerListeners()
+        registerCommands()
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
                 PlayerItemDamageListener(this)
         )
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("itemquality")?.setExecutor(ItemQualityCommand(this))
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("not-from-console", "&cYou may not use this command from console.")
-        messages.setDefault("no-permission-itemquality-list", "&cYou do not have permission to view a list of item qualities.")
-        messages.setDefault("no-permission-itemquality-set", "&cYou do not have permission to set an item's quality.")
-        messages.setDefault("itemquality-set-usage", "&cUsage: /itemquality set [quality]")
-        messages.setDefault("itemquality-set-invalid-quality", "&cThere is no quality by that name.")
-        messages.setDefault("itemquality-set-invalid-item-none", "&cYou must be holding an item to perform this command.")
-        messages.setDefault("itemquality-set-valid", "&aItem quality set to \$quality")
-        messages.setDefault("itemquality-list-title", "&7Item Qualities:")
-        messages.setDefault("itemquality-list-item", "&7- &f\$quality")
-        messages.setDefault("itemquality-usage", "&cUsage: /itemquality [list|set]")
     }
 
 }

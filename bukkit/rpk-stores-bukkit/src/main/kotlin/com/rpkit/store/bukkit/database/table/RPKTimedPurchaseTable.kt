@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,69 +17,56 @@ package com.rpkit.store.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileProvider
+import com.rpkit.players.bukkit.profile.RPKProfileId
+import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.store.bukkit.RPKStoresBukkit
+import com.rpkit.store.bukkit.database.create
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_PURCHASE
+import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_TIMED_PURCHASE
+import com.rpkit.store.bukkit.purchase.RPKPurchaseId
 import com.rpkit.store.bukkit.purchase.RPKTimedPurchase
 import com.rpkit.store.bukkit.purchase.RPKTimedPurchaseImpl
-import com.rpkit.store.bukkit.storeitem.RPKStoreItemProvider
+import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
 import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItem
-import com.rpkit.stores.bukkit.database.jooq.rpkit.Tables.RPKIT_PURCHASE
-import com.rpkit.stores.bukkit.database.jooq.rpkit.Tables.RPKIT_TIMED_PURCHASE
-import org.ehcache.config.builders.CacheConfigurationBuilder
-import org.ehcache.config.builders.ResourcePoolsBuilder
-import org.jooq.impl.DSL
-import org.jooq.impl.SQLDataType
 
 
-class RPKTimedPurchaseTable(database: Database, private val plugin: RPKStoresBukkit): Table<RPKTimedPurchase>(database, RPKTimedPurchase::class) {
+class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBukkit) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_timed_purchase.id.enabled")) {
-        database.cacheManager.createCache("rpkit-stores-bukkit.rpkit_timed_purchase.id",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Int::class.javaObjectType, RPKTimedPurchase::class.java,
-                        ResourcePoolsBuilder.heap(plugin.config.getLong("caching.rpkit_timed_purchase.id.size"))).build())
+        database.cacheManager.createCache(
+            "rpkit-stores-bukkit.rpkit_timed_purchase.id",
+            Int::class.javaObjectType,
+            RPKTimedPurchase::class.java,
+            plugin.config.getLong("caching.rpkit_timed_purchase.id.size")
+        )
     } else {
         null
     }
 
-    override fun create() {
-        database.create.createTableIfNotExists(RPKIT_TIMED_PURCHASE)
-                .column(RPKIT_TIMED_PURCHASE.ID, SQLDataType.INTEGER.identity(true))
-                .column(RPKIT_TIMED_PURCHASE.PURCHASE_ID, SQLDataType.INTEGER)
-                .constraints(
-                        DSL.constraint("pk_rpkit_timed_purchase").primaryKey(RPKIT_TIMED_PURCHASE.ID)
-                )
-                .execute()
-    }
-
-    override fun applyMigrations() {
-        if (database.getTableVersion(this) == null) {
-            database.setTableVersion(this, "1.6.0")
-        }
-    }
-
-    override fun insert(entity: RPKTimedPurchase): Int {
-        val id = database.getTable(RPKPurchaseTable::class).insert(entity)
+    fun insert(entity: RPKTimedPurchase) {
+        val id = database.getTable(RPKPurchaseTable::class.java).insert(entity) ?: return
         database.create
                 .insertInto(
                         RPKIT_TIMED_PURCHASE,
                         RPKIT_TIMED_PURCHASE.PURCHASE_ID
                 )
                 .values(
-                        id
+                        id.value
                 )
                 .execute()
         entity.id = id
-        cache?.put(id, entity)
-        return id
+        cache?.set(id.value, entity)
     }
 
-    override fun update(entity: RPKTimedPurchase) {
-        database.getTable(RPKPurchaseTable::class).update(entity)
-        cache?.put(entity.id, entity)
+    fun update(entity: RPKTimedPurchase) {
+        val id = entity.id ?: return
+        database.getTable(RPKPurchaseTable::class.java).update(entity)
+        cache?.set(id.value, entity)
     }
 
-    override fun get(id: Int): RPKTimedPurchase? {
+    operator fun get(id: RPKPurchaseId): RPKTimedPurchase? {
         val result = database.create
                 .select(
                         RPKIT_PURCHASE.STORE_ITEM_ID,
@@ -89,48 +75,49 @@ class RPKTimedPurchaseTable(database: Database, private val plugin: RPKStoresBuk
                         RPKIT_TIMED_PURCHASE.PURCHASE_ID
                 )
                 .from(RPKIT_TIMED_PURCHASE)
-                .where(RPKIT_PURCHASE.ID.eq(id))
+                .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .and(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(RPKIT_PURCHASE.ID))
                 .fetchOne() ?: return null
-        val storeItemProvider = plugin.core.serviceManager.getServiceProvider(RPKStoreItemProvider::class)
-        val storeItem = storeItemProvider.getStoreItem(result[RPKIT_PURCHASE.STORE_ITEM_ID]) as? RPKTimedStoreItem
+        val storeItemService = Services[RPKStoreItemService::class.java] ?: return null
+        val storeItem = storeItemService.getStoreItem(result[RPKIT_PURCHASE.STORE_ITEM_ID]) as? RPKTimedStoreItem
         if (storeItem == null) {
             database.create
                     .deleteFrom(RPKIT_PURCHASE)
-                    .where(RPKIT_PURCHASE.ID.eq(id))
+                    .where(RPKIT_PURCHASE.ID.eq(id.value))
                     .execute()
             database.create
                     .deleteFrom(RPKIT_TIMED_PURCHASE)
-                    .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id))
+                    .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id.value))
                     .execute()
-            cache?.remove(id)
+            cache?.remove(id.value)
             return null
         }
-        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
-        val profile = profileProvider.getProfile(result[RPKIT_PURCHASE.PROFILE_ID])
+        val profileService = Services[RPKProfileService::class.java] ?: return null
+        val profile = profileService.getProfile(RPKProfileId(result[RPKIT_PURCHASE.PROFILE_ID]))
         if (profile == null) {
             database.create
                     .deleteFrom(RPKIT_PURCHASE)
-                    .where(RPKIT_PURCHASE.ID.eq(id))
+                    .where(RPKIT_PURCHASE.ID.eq(id.value))
                     .execute()
             database.create
                     .deleteFrom(RPKIT_TIMED_PURCHASE)
-                    .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id))
+                    .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id.value))
                     .execute()
-            cache?.remove(id)
+            cache?.remove(id.value)
             return null
         }
         val timedPurchase = RPKTimedPurchaseImpl(
                 id,
                 storeItem,
                 profile,
-                result[RPKIT_PURCHASE.PURCHASE_DATE].toLocalDateTime()
+                result[RPKIT_PURCHASE.PURCHASE_DATE]
         )
-        cache?.put(id, timedPurchase)
+        cache?.set(id.value, timedPurchase)
         return timedPurchase
     }
 
     fun get(profile: RPKProfile): List<RPKTimedPurchase> {
+        val profileId = profile.id ?: return emptyList()
         val result = database.create
                 .select(RPKIT_TIMED_PURCHASE.PURCHASE_ID)
                 .from(
@@ -138,17 +125,18 @@ class RPKTimedPurchaseTable(database: Database, private val plugin: RPKStoresBuk
                         RPKIT_TIMED_PURCHASE
                 )
                 .where(RPKIT_PURCHASE.ID.eq(RPKIT_TIMED_PURCHASE.ID))
-                .and(RPKIT_PURCHASE.PROFILE_ID.eq(profile.id))
+                .and(RPKIT_PURCHASE.PROFILE_ID.eq(profileId.value))
                 .fetch()
-        return result.mapNotNull { row -> get(row[RPKIT_TIMED_PURCHASE.PURCHASE_ID]) }
+        return result.mapNotNull { row -> get(RPKPurchaseId(row[RPKIT_TIMED_PURCHASE.PURCHASE_ID])) }
     }
 
-    override fun delete(entity: RPKTimedPurchase) {
-        database.getTable(RPKPurchaseTable::class).delete(entity)
+    fun delete(entity: RPKTimedPurchase) {
+        val id = entity.id ?: return
+        database.getTable(RPKPurchaseTable::class.java).delete(entity)
         database.create
                 .deleteFrom(RPKIT_TIMED_PURCHASE)
-                .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(entity.id))
+                .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id.value))
                 .execute()
-        cache?.remove(entity.id)
+        cache?.remove(id.value)
     }
 }

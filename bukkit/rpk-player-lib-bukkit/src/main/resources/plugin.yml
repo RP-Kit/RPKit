@@ -4,4 +4,4 @@ version: @version@
 main: com.rpkit.players.bukkit.RPKPlayerLibBukkit
 depend:
 - rpk-core-bukkit
-api-version: '1.15'
+api-version: '1.16'

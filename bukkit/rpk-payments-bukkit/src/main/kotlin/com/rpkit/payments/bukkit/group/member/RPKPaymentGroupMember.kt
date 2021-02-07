@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.rpkit.payments.bukkit.group.member
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.database.Entity
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 
 /**
@@ -27,7 +26,6 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroup
  * @property character The character
  */
 class RPKPaymentGroupMember(
-        override var id: Int = 0,
         val paymentGroup: RPKPaymentGroup,
         val character: RPKCharacter
-): Entity
+)

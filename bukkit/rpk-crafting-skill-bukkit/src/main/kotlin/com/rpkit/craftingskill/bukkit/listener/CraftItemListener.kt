@@ -16,11 +16,12 @@
 
 package com.rpkit.craftingskill.bukkit.listener
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.CRAFT
-import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -33,104 +34,103 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 
 
-class CraftItemListener(private val plugin: RPKCraftingSkillBukkit): Listener {
+class CraftItemListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
 
     @EventHandler
     fun onCraftItem(event: CraftItemEvent) {
         val bukkitPlayer = event.whoClicked
-        if (bukkitPlayer is Player) {
-            if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
-            val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-            val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-            val craftingSkillProvider = plugin.core.serviceManager.getServiceProvider(RPKCraftingSkillProvider::class)
-            val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-            if (minecraftProfile == null) {
-                event.isCancelled = true
-                bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile"])
-                return
-            }
-            val character = characterProvider.getActiveCharacter(minecraftProfile)
-            if (character == null) {
-                event.isCancelled = true
-                bukkitPlayer.sendMessage(plugin.messages["no-character"])
-                return
-            }
-            val itemType = event.recipe.result.type
-            val craftingExperience = craftingSkillProvider.getCraftingExperience(character, CRAFT, itemType)
-            var amountCrafted = getAmountCrafted(event)
-            val craftingSkill = craftingSkillProvider.getCraftingExperience(character, CRAFT, itemType)
-            val amount = craftingSkillProvider.getAmountFor(CRAFT, itemType, craftingSkill)
-            if (amount > 1) {
-                amountCrafted *= amount.roundToInt()
-            } else if (amount < 1) {
-                amountCrafted = (amountCrafted * amount).roundToInt()
-                if (amountCrafted == 0) {
-                    if (Random.nextDouble() <= amount) {
-                        amountCrafted = 1
-                    }
-                }
-            }
-            val currentItem = event.currentItem
-            val item = if (currentItem == null) {
-                ItemStack(event.recipe.result)
-            } else {
-                ItemStack(currentItem)
-            }
-            item.amount = amountCrafted
+        if (bukkitPlayer !is Player) return
+        if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val craftingSkillService = Services[RPKCraftingSkillService::class.java] ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        if (minecraftProfile == null) {
             event.isCancelled = true
-            if (event.isShiftClick) {
-                if (amountCrafted > 0) {
-                    event.whoClicked.inventory.addItem(item)
-                    val matrixItems = event.inventory.matrix
-                    val newMatrixItems = arrayOfNulls<ItemStack>(9)
-                    for ((i, matrixItem) in matrixItems.withIndex()) {
-                        if (matrixItem == null) {
-                            continue
-                        }
-                        matrixItem.amount -= amountCrafted
-                        if (matrixItem.amount <= 0) {
-                            newMatrixItems[i] = null
-                            event.inventory.result = null
-                        } else {
-                            newMatrixItems[i] = matrixItem
-                        }
+            bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile"])
+            return
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
+        if (character == null) {
+            event.isCancelled = true
+            bukkitPlayer.sendMessage(plugin.messages["no-character"])
+            return
+        }
+        val itemType = event.recipe.result.type
+        val craftingExperience = craftingSkillService.getCraftingExperience(character, CRAFT, itemType)
+        var amountCrafted = getAmountCrafted(event)
+        val craftingSkill = craftingSkillService.getCraftingExperience(character, CRAFT, itemType)
+        val amount = craftingSkillService.getAmountFor(CRAFT, itemType, craftingSkill)
+        if (amount > 1) {
+            amountCrafted *= amount.roundToInt()
+        } else if (amount < 1) {
+            amountCrafted = (amountCrafted * amount).roundToInt()
+            if (amountCrafted == 0) {
+                if (Random.nextDouble() <= amount) {
+                    amountCrafted = 1
+                }
+            }
+        }
+        val currentItem = event.currentItem
+        val item = if (currentItem == null) {
+            ItemStack(event.recipe.result)
+        } else {
+            ItemStack(currentItem)
+        }
+        item.amount = amountCrafted
+        event.isCancelled = true
+        if (event.isShiftClick) {
+            if (amountCrafted > 0) {
+                event.whoClicked.inventory.addItem(item)
+                val matrixItems = event.inventory.matrix
+                val newMatrixItems = arrayOfNulls<ItemStack>(9)
+                for ((i, matrixItem) in matrixItems.withIndex()) {
+                    if (matrixItem == null) {
+                        continue
+                    }
+                    matrixItem.amount -= amountCrafted
+                    if (matrixItem.amount <= 0) {
+                        newMatrixItems[i] = null
+                        event.inventory.result = null
+                    } else {
+                        newMatrixItems[i] = matrixItem
                     }
                 }
+            }
+        } else {
+            if (amountCrafted > 0) {
+                event.currentItem = item
+                event.isCancelled = false
             } else {
-                if (amountCrafted > 0) {
-                    event.currentItem = item
-                    event.isCancelled = false
-                } else {
-                    event.currentItem = null
-                    val matrixItems = event.inventory.matrix
-                    val newMatrixItems = arrayOfNulls<ItemStack>(9)
-                    for ((i, matrixItem) in matrixItems.withIndex()) {
-                        if (matrixItem == null) {
-                            continue
-                        }
-                        matrixItem.amount -= amountCrafted
-                        if (matrixItem.amount <= 0) {
-                            newMatrixItems[i] = null
-                        } else {
-                            newMatrixItems[i] = matrixItem
-                        }
+                event.currentItem = null
+                val matrixItems = event.inventory.matrix
+                val newMatrixItems = arrayOfNulls<ItemStack>(9)
+                for ((i, matrixItem) in matrixItems.withIndex()) {
+                    if (matrixItem == null) {
+                        continue
                     }
-                    event.inventory.matrix = newMatrixItems
+                    matrixItem.amount -= amountCrafted
+                    if (matrixItem.amount <= 0) {
+                        newMatrixItems[i] = null
+                    } else {
+                        newMatrixItems[i] = matrixItem
+                    }
                 }
+                event.inventory.matrix = newMatrixItems
             }
-            val maxExperience = plugin.config.getConfigurationSection("crafting.$itemType")
-                    ?.getKeys(false)
-                    ?.map(String::toInt)
-                    ?.max()
-                    ?: 0
-            if (maxExperience != 0 && craftingExperience < maxExperience) {
-                val totalExperience = min(craftingExperience + amountCrafted, maxExperience)
-                craftingSkillProvider.setCraftingExperience(character, CRAFT, itemType, totalExperience)
-                event.whoClicked.sendMessage(plugin.messages["craft-experience", mapOf(
-                        Pair("total-experience", totalExperience.toString()),
-                        Pair("received-experience", amountCrafted.toString())
-                )])
-            }
+        }
+        val maxExperience = plugin.config.getConfigurationSection("crafting.$itemType")
+            ?.getKeys(false)
+            ?.map(String::toInt)
+            ?.maxOrNull()
+            ?: 0
+        if (maxExperience != 0 && craftingExperience < maxExperience) {
+            val totalExperience = min(craftingExperience + amountCrafted, maxExperience)
+            craftingSkillService.setCraftingExperience(character, CRAFT, itemType, totalExperience)
+            event.whoClicked.sendMessage(plugin.messages["craft-experience", mapOf(
+                "total_experience" to totalExperience.toString(),
+                "received_experience" to amountCrafted.toString()
+            )])
         }
     }
 

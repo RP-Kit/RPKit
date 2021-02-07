@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +15,16 @@
 
 package com.rpkit.economy.bukkit.currency
 
-import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
 
 /**
  * Currency implementation.
  */
 class RPKCurrencyImpl(
-        override var id: Int = 0,
-        override var name: String,
-        override var nameSingular: String,
-        override var namePlural: String,
-        override var rate: Double,
-        override var defaultAmount: Int,
-        override var material: Material
-): RPKCurrency
+        override val name: RPKCurrencyName,
+        override val nameSingular: String,
+        override val namePlural: String,
+        override val rate: Double,
+        override val defaultAmount: Int,
+        override val item: ItemStack
+) : RPKCurrency

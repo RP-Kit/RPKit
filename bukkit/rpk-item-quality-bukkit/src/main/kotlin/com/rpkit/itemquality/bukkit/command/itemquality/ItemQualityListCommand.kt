@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,24 +15,29 @@
 
 package com.rpkit.itemquality.bukkit.command.itemquality
 
+import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.RPKItemQualityBukkit
-import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityProvider
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 
-class ItemQualityListCommand(private val plugin: RPKItemQualityBukkit): CommandExecutor {
+class ItemQualityListCommand(private val plugin: RPKItemQualityBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.itemquality.command.itemquality.list")) {
             sender.sendMessage(plugin.messages["no-permission-itemquality-list"])
             return true
         }
         sender.sendMessage(plugin.messages["itemquality-list-title"])
-        val itemQualityProvider = plugin.core.serviceManager.getServiceProvider(RPKItemQualityProvider::class)
-        itemQualityProvider.itemQualities.forEach { quality ->
+        val itemQualityService = Services[RPKItemQualityService::class.java]
+        if (itemQualityService == null) {
+            sender.sendMessage(plugin.messages["no-item-quality-service"])
+            return true
+        }
+        itemQualityService.itemQualities.forEach { quality ->
             sender.sendMessage(plugin.messages["itemquality-list-item", mapOf(
-                    Pair("quality", quality.name)
+                "quality" to quality.name.value
             )])
         }
         return true

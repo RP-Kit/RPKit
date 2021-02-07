@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +19,5 @@ package com.rpkit.characters.bukkit.race
  * Race implementation.
  */
 class RPKRaceImpl(
-        override var id: Int = 0,
-        override val name: String
-): RPKRace
+        override val name: RPKRaceName
+) : RPKRace

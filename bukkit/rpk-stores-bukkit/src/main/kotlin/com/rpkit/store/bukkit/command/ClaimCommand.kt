@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +15,19 @@
 
 package com.rpkit.store.bukkit.command
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.purchase.RPKConsumablePurchase
-import com.rpkit.store.bukkit.purchase.RPKPurchaseProvider
-import com.rpkit.store.bukkit.resolver.RPKPurchaseResolverProvider
+import com.rpkit.store.bukkit.purchase.RPKPurchaseId
+import com.rpkit.store.bukkit.purchase.RPKPurchaseService
+import com.rpkit.store.bukkit.resolver.RPKPurchaseResolverService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class ClaimCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
+class ClaimCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.stores.command.claim")) {
@@ -41,8 +42,12 @@ class ClaimCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
@@ -52,8 +57,12 @@ class ClaimCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
             sender.sendMessage(plugin.messages["claim-purchase-id-invalid-integer"])
             return true
         }
-        val purchaseProvider = plugin.core.serviceManager.getServiceProvider(RPKPurchaseProvider::class)
-        val purchase = purchaseProvider.getPurchase(purchaseId)
+        val purchaseService = Services[RPKPurchaseService::class.java]
+        if (purchaseService == null) {
+            sender.sendMessage(plugin.messages["no-purchase-service"])
+            return true
+        }
+        val purchase = purchaseService.getPurchase(RPKPurchaseId(purchaseId))
         if (purchase == null) {
             sender.sendMessage(plugin.messages["claim-purchase-id-invalid-purchase"])
             return true
@@ -71,13 +80,13 @@ class ClaimCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
             sender.sendMessage(plugin.messages["claim-plugin-not-installed"])
             return true
         }
-        if (purchasePlugin !is RPKPurchaseResolverProvider) {
+        if (purchasePlugin !is RPKPurchaseResolverService) {
             sender.sendMessage(plugin.messages["claim-plugin-cannot-claim"])
             return true
         }
         purchasePlugin.getPurchaseResolver(purchase.storeItem.identifier).claim(purchase, minecraftProfile)
         purchase.remainingUses--
-        purchaseProvider.updatePurchase(purchase)
+        purchaseService.updatePurchase(purchase)
         sender.sendMessage(plugin.messages["claim-successful"])
         return true
     }

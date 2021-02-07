@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ import com.rpkit.players.bukkit.event.profile.RPKProfileEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 
-interface RPKGroupAssignProfileEvent: RPKGroupEvent, RPKProfileEvent {
+interface RPKGroupAssignProfileEvent : RPKGroupEvent, RPKProfileEvent {
 
     override val profile: RPKProfile
+    val priority: Int
 
 }

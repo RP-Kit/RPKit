@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ package com.rpkit.chat.bukkit.prefix
  * Prefix implementation.
  */
 class RPKPrefixImpl(
-        override var id: Int = 0,
         override val name: String,
         override var prefix: String
-): RPKPrefix
+) : RPKPrefix

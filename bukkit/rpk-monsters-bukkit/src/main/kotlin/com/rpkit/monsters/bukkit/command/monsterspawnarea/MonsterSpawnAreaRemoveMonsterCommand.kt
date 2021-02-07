@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package com.rpkit.monsters.bukkit.command.monsterspawnarea
 
+import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
-import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaProvider
+import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -25,7 +26,7 @@ import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 
 
-class MonsterSpawnAreaRemoveMonsterCommand(private val plugin: RPKMonstersBukkit): CommandExecutor {
+class MonsterSpawnAreaRemoveMonsterCommand(private val plugin: RPKMonstersBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.monsters.command.monsterspawnarea.removemonster")) {
@@ -36,8 +37,12 @@ class MonsterSpawnAreaRemoveMonsterCommand(private val plugin: RPKMonstersBukkit
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val monsterSpawnAreaProvider = plugin.core.serviceManager.getServiceProvider(RPKMonsterSpawnAreaProvider::class)
-        val monsterSpawnArea = monsterSpawnAreaProvider.getSpawnArea(sender.location)
+        val monsterSpawnAreaService = Services[RPKMonsterSpawnAreaService::class.java]
+        if (monsterSpawnAreaService == null) {
+            sender.sendMessage(plugin.messages["no-monster-spawn-area-service"])
+            return true
+        }
+        val monsterSpawnArea = monsterSpawnAreaService.getSpawnArea(sender.location)
         if (monsterSpawnArea == null) {
             sender.sendMessage(plugin.messages["monster-spawn-area-remove-monster-invalid-area"])
             return true

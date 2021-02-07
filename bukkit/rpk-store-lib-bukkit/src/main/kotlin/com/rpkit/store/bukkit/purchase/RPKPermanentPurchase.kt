@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
  * Represents a permanent purchase.
  * This type of purchase stays attached a profile indefinitely.
  */
-interface RPKPermanentPurchase: RPKPurchase {
+interface RPKPermanentPurchase : RPKPurchase {
 
     /**
      * The store item that has been purchased

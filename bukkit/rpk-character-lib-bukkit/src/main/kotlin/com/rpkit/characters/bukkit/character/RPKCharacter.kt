@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,33 +15,25 @@
 
 package com.rpkit.characters.bukkit.character
 
-import com.rpkit.characters.bukkit.gender.RPKGender
-import com.rpkit.characters.bukkit.gender.RPKGenderProvider
 import com.rpkit.characters.bukkit.race.RPKRace
-import com.rpkit.characters.bukkit.race.RPKRaceProvider
-import com.rpkit.core.database.Entity
-import com.rpkit.players.bukkit.player.RPKPlayer
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 
 /**
  * Represents a character.
  * Players may have multiple characters, so data that is dependant on the character is stored in the character.
- * Each player has a currently-active character retrievable from the [RPKCharacterProvider].
+ * Each player has a currently-active character retrievable from the [RPKCharacterService].
  */
-interface RPKCharacter: Entity {
+interface RPKCharacter {
 
     /**
-     * The player.
-     * Only this player may use the character.
-     * Some characters may not have a player assigned, in which case this will be null.
-     * It is important to remember the player may not always be playing the character, so operations like inventory
-     * modification should be checked before directly modifying the player's inventory on platforms such as Bukkit.
+     * The ID of the character. Guaranteed to be unique.
+     * If set to null it is a new character that has not yet been inserted into the database.
      */
-    @Deprecated("Old players API. Please move to new profiles APIs.", replaceWith = ReplaceWith("profile"))
-    var player: RPKPlayer?
+    var id: RPKCharacterId?
 
     /**
      * The profile.
@@ -68,11 +59,8 @@ interface RPKCharacter: Entity {
 
     /**
      * The gender of the character.
-     * May be set to any gender implementation, as long as it has been registered with the [RPKGenderProvider].
-     * This may be set to null, which is the current default in the config, as genders must be set up by the admins of
-     * the server.
      */
-    var gender: RPKGender?
+    var gender: String?
 
     /**
      * The age of the character.
@@ -82,7 +70,7 @@ interface RPKCharacter: Entity {
 
     /**
      * The race of the character.
-     * May be set to any race implementation, as long as it has been registered with the [RPKRaceProvider].
+     * May be set to any race implementation, as long as it has been registered with the [RPKRaceService].
      * This may be set to null, which is the current default in the config, as races must be set up by the admins of
      * the server.
      */
@@ -213,14 +201,6 @@ interface RPKCharacter: Entity {
     var thirstLevel: Int
 
     /**
-     * Whether the player playing the character is hidden on the character's character card. If the player is hidden,
-     * it is a good idea to maintain this behaviour in other plugins as well (at least to other players).
-     * As of Minecraft 1.10, it is impossible to hide the nameplate while keeping the skin of the player. (This was
-     * possible in Minecraft 1.7 for a short time)
-     */
-    var isPlayerHidden: Boolean
-
-    /**
      * Whether the profile playing the character is hidden on the character's character card. If the profile is hidden,
      * it is a good idea to maintain this behaviour in
      */
@@ -259,13 +239,6 @@ interface RPKCharacter: Entity {
      * description.
      */
     var isDescriptionHidden: Boolean
-
-    /**
-     * Shows the character card to the given player.
-     * How this is done may be implementation-dependant, but the most common usage will be to show this in Minecraft.
-     */
-    @Deprecated("Old players API. Please move to new profiles API.", ReplaceWith("showCharacterCard(minecraftProfile)"))
-    fun showCharacterCard(player: RPKPlayer)
 
     /**
      * Shows the character card to the given Minecraft profile.

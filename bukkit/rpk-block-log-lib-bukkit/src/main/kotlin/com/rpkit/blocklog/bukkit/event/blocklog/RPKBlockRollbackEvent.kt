@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@ package com.rpkit.blocklog.bukkit.event.blocklog
 
 import com.rpkit.core.event.RPKEvent
 import org.bukkit.block.Block
+import java.time.LocalDateTime
 
 
-interface RPKBlockRollbackEvent: RPKEvent {
+interface RPKBlockRollbackEvent : RPKEvent {
 
     val block: Block
-    var time: Long
+    var time: LocalDateTime
 
 }

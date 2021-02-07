@@ -1,211 +1,356 @@
 chat-channels:
-    general:
-        color:
-            red: 170
-            green: 170
-            blue: 170
-        radius: -1
-        directed-pipeline:
-        - ==: DirectedFormatComponent
-          format: '$color[$channel] $sender-prefix$color$sender-player: &f$message'
-        - ==: SendMessageComponent
-        undirected-pipeline:
-        - ==: UndirectedFormatComponent
-          format: '$color[$channel] $sender-prefix$color$sender-player: &f$message'
-        - ==: IRCComponent
-          irc-channel: '#rpkit-general'
-          irc-whitelisted: false
-        - ==: WebComponent
-        - ==: LogComponent
-        joined-by-default: true
-    support:
-        color:
-            red: 0
-            green: 170
-            blue: 0
-        radius: -1
-        directed-pipeline:
-        - ==: DirectedFormatComponent
-          format: '$color[$channel] $sender-prefix$color$sender-player: &f$message'
-        - ==: SendMessageComponent
-        undirected-pipeline:
-        - ==: UndirectedFormatComponent
-          format: '$color[$channel] $sender-prefix$color$sender-player: &f$message'
-        - ==: IRCComponent
-          irc-channel: '#rpkit-support'
-          irc-whitelisted: false
-        - ==: WebComponent
-        - ==: LogComponent
-        joined-by-default: true
-    staff:
-        color:
-            red: 170
-            green: 0
-            blue: 170
-        radius: -1
-        directed-pipeline:
-        - ==: DirectedFormatComponent
-          format: '$color[$channel] $sender-prefix$color$sender-player: &f$message'
-        - ==: SendMessageComponent
-        undirected-pipeline:
-        - ==: UndirectedFormatComponent
-          format: '$color[$channel] $sender-prefix$color$sender-player: &f$message'
-        - ==: IRCComponent
-          irc-channel: '#rpkit-staff'
-          irc-whitelisted: false
-        - ==: WebComponent
-        - ==: LogComponent
-        joined-by-default: false
-    say:
-        color:
-            red: 85
-            green: 255
-            blue: 85
-        radius: 16
-        directed-pipeline:
-        - ==: RadiusFilterComponent
-        - ==: LanguageComponent
-        - ==: DrunkenSlurComponent
-          drunkenness: 5
-        - ==: GarbleComponent
-          clear-radius: 8
-        - ==: DirectedFormatComponent
-          format: '$color$sender-character says: &f$message'
-        - ==: SendMessageComponent
-        - ==: SnoopComponent
-        undirected-pipeline:
-        - ==: UndirectedFormatComponent
-          format: '$color$sender-character says: &f$message'
-        - ==: LogComponent
-        joined-by-default: true
-    shout:
-        color:
-            red: 255
-            green: 85
-            blue: 85
-        radius: 32
-        directed-pipeline:
-        - ==: RadiusFilterComponent
-        - ==: LanguageComponent
-        - ==: DrunkenSlurComponent
-          drunkenness: 5
-        - ==: GarbleComponent
-          clear-radius: 16
-        - ==: DirectedFormatComponent
-          format: '$color$sender-character shouts: &f$message'
-        - ==: SendMessageComponent
-        - ==: SnoopComponent
-        undirected-pipeline:
-        - ==: UndirectedFormatComponent
-          format: '$color$sender-character shouts: &f$message'
-        - ==: LogComponent
-        joined-by-default: true
-    whisper:
-        color:
-            red: 85
-            green: 255
-            blue: 255
-        radius: 8
-        directed-pipeline:
-        - ==: RadiusFilterComponent
-        - ==: LanguageComponent
-        - ==: DrunkenSlurComponent
-          drunkenness: 5
-        - ==: GarbleComponent
-          clear-radius: 4
-        - ==: DirectedFormatComponent
-          format: '$color$sender-character whispers: &f$message'
-        - ==: SendMessageComponent
-        - ==: SnoopComponent
-        undirected-pipeline:
-        - ==: UndirectedFormatComponent
-          format: '$color$sender-character whispers: &f$message'
-        - ==: LogComponent
-        joined-by-default: true
-    emote:
-        color:
-            red: 255
-            green: 255
-            blue: 85
-        radius: 16
-        directed-pipeline:
-        - ==: RadiusFilterComponent
-        - ==: DirectedFormatComponent
-          format: '$color&o$sender-character $message'
-        - ==: SendMessageComponent
-        - ==: SnoopComponent
-        undirected-pipeline:
-        - ==: UndirectedFormatComponent
-          format: '$color&o$sender-character $message'
-        - ==: LogComponent
-        match-pattern: '\*([^\*]+)\*?'
-        joined-by-default: true
+  general:
+    color:
+      red: 170
+      green: 170
+      blue: 170
+    radius: -1
+    directed-pre-format-pipeline: []
+    format:
+    - ==: TextPart
+      text: '['
+      color: '#AAAAAA'
+    - ==: ChannelPart
+      color: '#AAAAAA'
+      click:
+        ==: RunCommandClickAction
+        command: /chatchannel general
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: TextPart
+          text: 'Click here to switch channel to general.'
+    - ==: TextPart
+      text: '] '
+      color: '#AAAAAA'
+    - ==: SenderPrefixPart
+    - ==: SenderProfileNamePart
+      color: '#AAAAAA'
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: SenderCharacterNamePart
+    - ==: TextPart
+      text: ': '
+      color: '#AAAAAA'
+    - ==: MessagePart
+      color: '#FFFFFF'
+    directed-post-format-pipeline:
+    - ==: SendMessageComponent
+    undirected-pipeline:
+    - ==: UndirectedFormatComponent
+      format: '$color[$channel] $sender-prefix$color$sender-player: &f$message'
+    - ==: WebComponent
+    - ==: LogComponent
+    joined-by-default: true
+  support:
+    color:
+      red: 0
+      green: 170
+      blue: 0
+    radius: -1
+    directed-pre-format-pipeline: []
+    format:
+    - ==: TextPart
+      text: '['
+      color: '#00AA00'
+    - ==: ChannelPart
+      color: '#00AA00'
+      click:
+        ==: RunCommandClickAction
+        command: /chatchannel support
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: TextPart
+          text: 'Click here to switch channel to support.'
+    - ==: TextPart
+      text: '] '
+      color: '#00AA00'
+    - ==: SenderPrefixPart
+    - ==: SenderProfileNamePart
+      color: '#00AA00'
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: SenderCharacterNamePart
+    - ==: TextPart
+      text: ': '
+      color: '#00AA00'
+    - ==: MessagePart
+      color: '#FFFFFF'
+    directed-post-format-pipeline:
+    - ==: SendMessageComponent
+    undirected-pipeline:
+    - ==: UndirectedFormatComponent
+      format: '$color[$channel] $sender-prefix$color$sender-player: &f$message'
+    - ==: WebComponent
+    - ==: LogComponent
+    joined-by-default: true
+  staff:
+    color:
+      red: 170
+      green: 0
+      blue: 170
+    radius: -1
+    directed-pre-format-pipeline: []
+    format:
+    - ==: TextPart
+      text: '['
+      color: '#AA00AA'
+    - ==: ChannelPart
+      color: '#AA00AA'
+      click:
+        ==: RunCommandClickAction
+        command: /chatchannel staff
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: TextPart
+          text: 'Click here to switch channel to staff.'
+    - ==: TextPart
+      text: '] '
+      color: '#AA00AA'
+    - ==: SenderPrefixPart
+    - ==: SenderProfileNamePart
+      color: '#AA00AA'
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: SenderCharacterNamePart
+    - ==: TextPart
+      text: ': '
+      color: '#AA00AA'
+    - ==: MessagePart
+      color: '#FFFFFF'
+    directed-post-format-pipeline:
+    - ==: SendMessageComponent
+    undirected-pipeline:
+    - ==: UndirectedFormatComponent
+      format: '$color[$channel] $sender-prefix$color$sender-player: &f$message'
+    - ==: WebComponent
+    - ==: LogComponent
+    joined-by-default: false
+  say:
+    color:
+      red: 85
+      green: 255
+      blue: 85
+    radius: 16
+    directed-pre-format-pipeline:
+    - ==: RadiusFilterComponent
+    - ==: LanguageComponent
+    - ==: DrunkenSlurComponent
+      drunkenness: 5
+    - ==: GarbleComponent
+      clear-radius: 8
+    format:
+    - ==: SenderCharacterNamePart
+      color: '#55FF55'
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: SenderProfileNamePart
+    - ==: TextPart
+      text: ' says: '
+      color: '#55FF55'
+      click:
+        ==: RunCommandClickAction
+        command: /chatchannel say
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: TextPart
+          text: 'Click here to switch channel to say.'
+    - ==: MessagePart
+      color: '#FFFFFF'
+    directed-post-format-pipeline:
+    - ==: SendMessageComponent
+    - ==: SnoopComponent
+    undirected-pipeline:
+    - ==: UndirectedFormatComponent
+      format: '$color$sender-character says: &f$message'
+    - ==: LogComponent
+    joined-by-default: true
+  shout:
+    color:
+      red: 255
+      green: 85
+      blue: 85
+    radius: 32
+    directed-pre-format-pipeline:
+    - ==: RadiusFilterComponent
+    - ==: LanguageComponent
+    - ==: DrunkenSlurComponent
+      drunkenness: 5
+    - ==: GarbleComponent
+      clear-radius: 16
+    format:
+    - ==: SenderCharacterNamePart
+      color: '#FF5555'
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: SenderProfileNamePart
+    - ==: TextPart
+      text: ' shouts: '
+      color: '#FF5555'
+      click:
+        ==: RunCommandClickAction
+        command: /chatchannel shout
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: TextPart
+          text: 'Click here to switch channel to shout.'
+    - ==: MessagePart
+      color: '#FFFFFF'
+    directed-post-format-pipeline:
+    - ==: SendMessageComponent
+    - ==: SnoopComponent
+    undirected-pipeline:
+    - ==: UndirectedFormatComponent
+      format: '$color$sender-character shouts: &f$message'
+    - ==: LogComponent
+    joined-by-default: true
+  whisper:
+    color:
+      red: 85
+      green: 255
+      blue: 255
+    radius: 8
+    directed-pre-format-pipeline:
+    - ==: RadiusFilterComponent
+    - ==: LanguageComponent
+    - ==: DrunkenSlurComponent
+      drunkenness: 5
+    - ==: GarbleComponent
+      clear-radius: 4
+    format:
+    - ==: SenderCharacterNamePart
+      color: '#55FFFF'
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: SenderProfileNamePart
+    - ==: TextPart
+      text: ' whispers: '
+      color: '#55FFFF'
+      click:
+        ==: RunCommandClickAction
+        command: /chatchannel whisper
+      hover:
+        ==: ShowTextHoverAction
+        text:
+        - ==: TextPart
+          text: 'Click here to switch channel to whisper.'
+    - ==: MessagePart
+      color: '#FFFFFF'
+    directed-post-format-pipeline:
+    - ==: SendMessageComponent
+    - ==: SnoopComponent
+    undirected-pipeline:
+    - ==: UndirectedFormatComponent
+      format: '$color$sender-character whispers: &f$message'
+    - ==: LogComponent
+    joined-by-default: true
+  emote:
+    color:
+      red: 255
+      green: 255
+      blue: 85
+    radius: 16
+    directed-pre-format-pipeline:
+    - ==: RadiusFilterComponent
+    format:
+    - ==: SenderCharacterNamePart
+      color: '#FFFF55'
+      italic: true
+    - ==: TextPart
+      text: ' '
+      color: '#FFFF55'
+      italic: true
+    - ==: MessagePart
+      color: '#FFFF55'
+      italic: true
+    directed-post-format-pipeline:
+    - ==: SendMessageComponent
+    - ==: SnoopComponent
+    undirected-pipeline:
+    - ==: UndirectedFormatComponent
+      format: '$color&o$sender-character $message'
+    - ==: LogComponent
+    joined-by-default: true
+match-patterns:
+  '\*([^\*]+)\*':
+    groups:
+      '1': emote
+  '\"([^\"]+)\"':
+    groups:
+      '1': say
 irc:
-    enabled: true
-    name: 'rpkit'
-    real-name: 'rpkit'
-    login: 'rpkit'
-    cap-enabled: true
-    auto-nick-change-enabled: true
-    auto-split-message-enabled: false
-    server: 'chat.freenode.net:6667'
-    password: 'change_me'
+  enabled: false
+  name: 'rpkit'
+  real-name: 'rpkit'
+  login: 'rpkit'
+  cap-enabled: true
+  auto-nick-change-enabled: true
+  auto-split-message-enabled: false
+  server: 'chat.freenode.net:6667'
+  password: 'change_me'
 discord:
-    enabled: false
-    token: 'change_me'
-    server-name: RPKit
+  enabled: false
+  token: 'change_me'
+  server-name: RPKit
 prefixes:
-    admin: '&e[Admin]'
-    mod: '&9[Moderator]'
-    dev: '&4[Developer]'
-    et: '&3[Event Team]'
+  admin: '&e[Admin]'
+  mod: '&9[Moderator]'
+  dev: '&4[Developer]'
+  et: '&3[Event Team]'
 chat-group:
-    format: '&8[$group] $sender-player: &f$message'
+  format: '&8[$group] $sender-player: &f$message'
 caching:
-    chat_group_invite:
-        id:
-            enabled: true
-            size: 20
-        chat_group_id:
-            enabled: true
-            size: 20
-        minecraft_profile_id:
-            enabled: true
-            size: 20
-    chat_group_member:
-        id:
-            enabled: true
-            size: 20
-        chat_group_id:
-            enabled: true
-            size: 20
-        minecraft_profile_id:
-            enabled: true
-            size: 20
-    last_used_chat_group:
-        id:
-            enabled: true
-            size: 20
-        minecraft_profile_id:
-            enabled: true
-            size: 20
-    rpkit_chat_channel_mute:
-        id:
-            enabled: true
-            size: 20
-    rpkit_chat_channel_speaker:
-        id:
-            enabled: true
-            size: 20
-    rpkit_chat_group:
-        id:
-            enabled: true
-            size: 20
-        name:
-            enabled: true
-            size: 20
-    rpkit_snooper:
-        id:
-            enabled: true
-            size: 20
+  rpkit_chat_group_invite:
+    id:
+      enabled: true
+      size: 20
+    chat_group_id:
+      enabled: true
+      size: 20
+    minecraft_profile_id:
+      enabled: true
+      size: 20
+  rpkit_chat_group_member:
+    id:
+      enabled: true
+      size: 20
+    chat_group_id:
+      enabled: true
+      size: 20
+    minecraft_profile_id:
+      enabled: true
+      size: 20
+  rpkit_last_used_chat_group:
+    minecraft_profile_id:
+      enabled: true
+      size: 20
+  rpkit_chat_channel_mute:
+    minecraft_profile_id:
+      enabled: true
+      size: 20
+  rpkit_chat_channel_speaker:
+    minecraft_profile_id:
+      enabled: true
+      size: 20
+  rpkit_chat_group:
+    id:
+      enabled: true
+      size: 20
+    name:
+      enabled: true
+      size: 20
+  rpkit_snooper:
+    minecraft_profile_id:
+      enabled: true
+      size: 20
 

@@ -16,10 +16,12 @@
 
 package com.rpkit.unconsciousness.bukkit
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.core.database.DatabaseConnectionProperties
+import com.rpkit.core.database.DatabaseMigrationProperties
+import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.service.Services
 import com.rpkit.unconsciousness.bukkit.command.WakeCommand
 import com.rpkit.unconsciousness.bukkit.database.table.RPKUnconsciousStateTable
 import com.rpkit.unconsciousness.bukkit.listener.EntityDamageByEntityListener
@@ -32,78 +34,97 @@ import com.rpkit.unconsciousness.bukkit.listener.PlayerInteractListener
 import com.rpkit.unconsciousness.bukkit.listener.PlayerJoinListener
 import com.rpkit.unconsciousness.bukkit.listener.PlayerMoveListener
 import com.rpkit.unconsciousness.bukkit.listener.PlayerRespawnListener
-import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProvider
-import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessProviderImpl
+import com.rpkit.unconsciousness.bukkit.messages.UnconsciousnessMessages
+import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
+import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.GameRule.KEEP_INVENTORY
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
-import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
 
-class RPKUnconsciousnessBukkit: RPKBukkitPlugin() {
+class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
+
+    lateinit var database: Database
+    lateinit var messages: UnconsciousnessMessages
 
     override fun onEnable() {
+        System.setProperty("com.rpkit.unconsciousness.bukkit.shadow.impl.org.jooq.no-logo", "true")
+
         Metrics(this, 4425)
         saveDefaultConfig()
-        serviceProviders = arrayOf(
-                RPKUnconsciousnessProviderImpl(this)
+
+        messages = UnconsciousnessMessages(this)
+
+        val databaseConfigFile = File(dataFolder, "database.yml")
+        if (!databaseConfigFile.exists()) {
+            saveResource("database.yml", false)
+        }
+        val databaseConfig = YamlConfiguration.loadConfiguration(databaseConfigFile)
+        val databaseUrl = databaseConfig.getString("database.url")
+        if (databaseUrl == null) {
+            logger.severe("Database URL not set!")
+            isEnabled = false
+            return
+        }
+        val databaseUsername = databaseConfig.getString("database.username")
+        val databasePassword = databaseConfig.getString("database.password")
+        val databaseSqlDialect = databaseConfig.getString("database.dialect")
+        val databaseMaximumPoolSize = databaseConfig.getInt("database.maximum-pool-size", 3)
+        val databaseMinimumIdle = databaseConfig.getInt("database.minimum-idle", 3)
+        if (databaseSqlDialect == null) {
+            logger.severe("Database SQL dialect not set!")
+            isEnabled = false
+            return
+        }
+        database = Database(
+                DatabaseConnectionProperties(
+                        databaseUrl,
+                        databaseUsername,
+                        databasePassword,
+                        databaseSqlDialect,
+                        databaseMaximumPoolSize,
+                        databaseMinimumIdle
+                ),
+                DatabaseMigrationProperties(
+                        when (databaseSqlDialect) {
+                            "MYSQL" -> "com/rpkit/unconsciousness/migrations/mysql"
+                            "SQLITE" -> "com/rpkit/unconsciousness/migrations/sqlite"
+                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                        },
+                        "flyway_schema_history_unconsciousness"
+                ),
+                classLoader
         )
-        object: BukkitRunnable() {
-            override fun run() {
-                val minecraftProfileProvider = core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-                val characterProvider = core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-                val unconsciousnessProvider = core.serviceManager.getServiceProvider(RPKUnconsciousnessProvider::class)
-                server.onlinePlayers.forEach { bukkitPlayer ->
-                    val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(bukkitPlayer)
-                    if (minecraftProfile != null) {
-                        val character = characterProvider.getActiveCharacter(minecraftProfile)
-                        if (character != null) {
-                            if (!unconsciousnessProvider.isUnconscious(character)) {
-                                bukkitPlayer.addPotionEffect(
-                                        PotionEffect(PotionEffectType.BLINDNESS, 0, 0),
-                                        true
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }.runTaskTimer(this, 200L, 200L)
+        database.addTable(RPKUnconsciousStateTable(database, this))
+
+        Services[RPKUnconsciousnessService::class.java] = RPKUnconsciousnessServiceImpl(this)
+
+        WakeTask(this).runTaskTimer(this, 200L, 200L)
         server.worlds.forEach { world ->
             world.setGameRule(KEEP_INVENTORY, true)
         }
+
+        registerCommands()
+        registerListeners()
     }
 
-    override fun registerCommands() {
+    fun registerCommands() {
         getCommand("wake")?.setExecutor(WakeCommand(this))
     }
 
-    override fun registerListeners() {
+    fun registerListeners() {
         registerListeners(
-                PlayerDeathListener(this),
+                PlayerDeathListener(),
                 PlayerRespawnListener(this),
-                PlayerMoveListener(this),
+                PlayerMoveListener(),
                 PlayerInteractEntityListener(this),
                 PlayerCommandPreprocessListener(this),
                 EntityDamageListener(this),
                 EntityTargetListener(this),
-                PlayerJoinListener(this),
-                PlayerInteractListener(this),
+                PlayerJoinListener(),
+                PlayerInteractListener(),
                 EntityDamageByEntityListener(this)
         )
-    }
-
-    override fun createTables(database: Database) {
-        database.addTable(RPKUnconsciousStateTable(database, this))
-    }
-
-    override fun setDefaultMessages() {
-        messages.setDefault("unconscious-command-blocked", "&cYou are not permitted to use that command while unconscious.")
-        messages.setDefault("wake-success", "&aWoke \$character.")
-        messages.setDefault("wake-already-awake", "&c\$character is already awake.")
-        messages.setDefault("no-permission-wake", "&cYou do not have permission to wake people up.")
-        messages.setDefault("no-character-other", "&c\$player does not have an active character.")
-        messages.setDefault("no-minecraft-profile-other", "&c\$player does not have a Minecraft profile.")
     }
 
 }

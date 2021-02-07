@@ -1,16 +1,36 @@
+/*
+ * Copyright 2020 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.blocklog.bukkit.command
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
-import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryProvider
+import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.blocklog.bukkit.event.blocklog.RPKBukkitBlockRollbackEvent
+import com.rpkit.core.service.Services
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.InventoryHolder
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit.MINUTES
 
 
-class RollbackCommand(private val plugin: RPKBlockLoggingBukkit): CommandExecutor {
+class RollbackCommand(private val plugin: RPKBlockLoggingBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender !is Player) {
@@ -25,7 +45,11 @@ class RollbackCommand(private val plugin: RPKBlockLoggingBukkit): CommandExecuto
             sender.sendMessage(plugin.messages["rollback-usage"])
             return true
         }
-        val blockHistoryProvider = plugin.core.serviceManager.getServiceProvider(RPKBlockHistoryProvider::class)
+        val blockHistoryService = Services[RPKBlockHistoryService::class.java]
+        if (blockHistoryService == null) {
+            sender.sendMessage(plugin.messages["no-block-history-service"])
+            return true
+        }
         val radius = args[0].toIntOrNull()
         if (radius == null || radius <= 0) {
             sender.sendMessage(plugin.messages["rollback-invalid-radius"])
@@ -36,8 +60,7 @@ class RollbackCommand(private val plugin: RPKBlockLoggingBukkit): CommandExecuto
             sender.sendMessage(plugin.messages["rollback-invalid-time"])
             return true
         }
-        val millis = minutes * 60000
-        val time = System.currentTimeMillis() - millis
+        val time = LocalDateTime.now().minus(Duration.of(minutes.toLong(), MINUTES))
         for (x in (sender.location.blockX - radius)..(sender.location.blockX + radius)) {
             for (y in (sender.location.blockY - radius)..(sender.location.blockY + radius)) {
                 for (z in (sender.location.blockZ - radius)..(sender.location.blockZ + radius)) {
@@ -45,10 +68,10 @@ class RollbackCommand(private val plugin: RPKBlockLoggingBukkit): CommandExecuto
                     val event = RPKBukkitBlockRollbackEvent(block, time)
                     plugin.server.pluginManager.callEvent(event)
                     if (event.isCancelled) continue
-                    block.type = blockHistoryProvider.getBlockTypeAtTime(event.block, event.time)
+                    block.type = blockHistoryService.getBlockTypeAtTime(event.block, event.time)
                     val state = block.state
                     if (state is InventoryHolder) {
-                        state.inventory.contents = blockHistoryProvider.getBlockInventoryAtTime(event.block, event.time)
+                        state.inventory.contents = blockHistoryService.getBlockInventoryAtTime(event.block, event.time)
                         state.update()
                     }
                 }

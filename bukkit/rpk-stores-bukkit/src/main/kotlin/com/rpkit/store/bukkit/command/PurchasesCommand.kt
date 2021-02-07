@@ -16,17 +16,18 @@
 
 package com.rpkit.store.bukkit.command
 
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.store.bukkit.RPKStoresBukkit
-import com.rpkit.store.bukkit.purchase.RPKPurchaseProvider
+import com.rpkit.store.bukkit.purchase.RPKPurchaseService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.time.format.DateTimeFormatter
 
-class PurchasesCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
+class PurchasesCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.stores.command.purchases")) {
             sender.sendMessage(plugin.messages["no-permission-purchases"])
@@ -36,8 +37,12 @@ class PurchasesCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
@@ -47,9 +52,13 @@ class PurchasesCommand(private val plugin: RPKStoresBukkit): CommandExecutor {
             sender.sendMessage(plugin.messages["no-profile-self"])
             return true
         }
-        val purchaseProvider = plugin.core.serviceManager.getServiceProvider(RPKPurchaseProvider::class)
+        val purchaseService = Services[RPKPurchaseService::class.java]
+        if (purchaseService == null) {
+            sender.sendMessage(plugin.messages["no-purchase-service"])
+            return true
+        }
         sender.sendMessage(plugin.messages["purchases-title"])
-        purchaseProvider.getPurchases(profile).forEach { purchase ->
+        purchaseService.getPurchases(profile).forEach { purchase ->
             sender.sendMessage(plugin.messages["purchases-item", mapOf(
                     Pair("purchase_id", purchase.id.toString()),
                     Pair("purchase_date", DateTimeFormatter.ISO_DATE_TIME.format(purchase.purchaseDate)),

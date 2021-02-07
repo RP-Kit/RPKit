@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +15,17 @@
 
 package com.rpkit.professions.bukkit.command.profession
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
-import com.rpkit.professions.bukkit.profession.RPKProfessionProvider
+import com.rpkit.professions.bukkit.profession.RPKProfessionService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class ProfessionViewCommand(val plugin: RPKProfessionsBukkit): CommandExecutor {
+class ProfessionViewCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.professions.command.profession.view")) {
@@ -57,8 +57,12 @@ class ProfessionViewCommand(val plugin: RPKProfessionsBukkit): CommandExecutor {
                 return true
             }
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(target)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
         if (minecraftProfile == null) {
             if (target == sender) {
                 sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
@@ -69,8 +73,12 @@ class ProfessionViewCommand(val plugin: RPKProfessionsBukkit): CommandExecutor {
             }
             return true
         }
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val character = characterProvider.getActiveCharacter(minecraftProfile)
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
         if (character == null) {
             if (target == sender) {
                 sender.sendMessage(plugin.messages["no-character-self"])
@@ -81,25 +89,29 @@ class ProfessionViewCommand(val plugin: RPKProfessionsBukkit): CommandExecutor {
             }
             return true
         }
-        val professionProvider = plugin.core.serviceManager.getServiceProvider(RPKProfessionProvider::class)
+        val professionService = Services[RPKProfessionService::class.java]
+        if (professionService == null) {
+            sender.sendMessage(plugin.messages["no-profession-service"])
+            return true
+        }
         sender.sendMessage(plugin.messages["profession-view-valid-title"])
-        professionProvider.getProfessions(character).forEach { profession ->
-            val level = professionProvider.getProfessionLevel(character, profession)
+        professionService.getProfessions(character).forEach { profession ->
+            val level = professionService.getProfessionLevel(character, profession)
             val experienceSinceLastLevel =
                     if (level > 1) {
-                        professionProvider.getProfessionExperience(character, profession) - profession.getExperienceNeededForLevel(level)
+                        professionService.getProfessionExperience(character, profession) - profession.getExperienceNeededForLevel(level)
                     } else {
-                        professionProvider.getProfessionExperience(character, profession)
+                        professionService.getProfessionExperience(character, profession)
                     }
             val experienceNeededForNextLevel =
                     profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)
             sender.sendMessage(plugin.messages["profession-view-valid-item", mapOf(
-                    "profession" to profession.name,
+                    "profession" to profession.name.value,
                     "level" to level.toString(),
-                    "total-experience" to professionProvider.getProfessionExperience(character, profession).toString(),
-                    "total-next-level-experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
+                    "total_experience" to professionService.getProfessionExperience(character, profession).toString(),
+                    "total_next_level_experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
                     "experience" to experienceSinceLastLevel.toString(),
-                    "next-level-experience" to experienceNeededForNextLevel.toString()
+                    "next_level_experience" to experienceNeededForNextLevel.toString()
             )])
         }
         return true

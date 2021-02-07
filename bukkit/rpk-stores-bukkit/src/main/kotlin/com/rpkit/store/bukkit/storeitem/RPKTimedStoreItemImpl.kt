@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import java.time.Duration
 
 
 class RPKTimedStoreItemImpl(
-        override var id: Int = 0,
+        override var id: Int? = null,
         override val duration: Duration,
         override val plugin: String,
         override val identifier: String,
         override val description: String,
         override val cost: Int
-): RPKTimedStoreItem
+) : RPKTimedStoreItem

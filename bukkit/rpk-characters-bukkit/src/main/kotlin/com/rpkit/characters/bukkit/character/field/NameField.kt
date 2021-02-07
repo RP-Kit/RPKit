@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,17 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 /**
  * Character card field for name.
  */
-class NameField: HideableCharacterCardField {
+class NameField : HideableCharacterCardField {
 
     override val name = "name"
     override fun get(character: RPKCharacter): String {
         return if (isHidden(character)) "[HIDDEN]" else character.name
     }
+
     override fun isHidden(character: RPKCharacter): Boolean {
         return character.isNameHidden
     }
+
     override fun setHidden(character: RPKCharacter, hidden: Boolean) {
         character.isNameHidden = hidden
     }

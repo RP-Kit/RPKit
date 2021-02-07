@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +15,14 @@
 
 package com.rpkit.players.bukkit.profile
 
-import com.rpkit.core.database.Entity
 
+interface RPKProfile : RPKThinProfile {
 
-interface RPKProfile: Entity, RPKThinProfile {
-
-    override var name: String
-    var passwordHash: ByteArray
-    var passwordSalt: ByteArray
+    var id: RPKProfileId?
+    override var name: RPKProfileName
+    var discriminator: RPKProfileDiscriminator
+    var passwordHash: ByteArray?
+    var passwordSalt: ByteArray?
     fun setPassword(password: CharArray)
     fun checkPassword(password: CharArray): Boolean
 

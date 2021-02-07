@@ -1,6 +1,5 @@
 /*
- * Copyright 2019 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +15,18 @@
 
 package com.rpkit.professions.bukkit.command.profession.experience
 
-import com.rpkit.characters.bukkit.character.RPKCharacterProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
-import com.rpkit.professions.bukkit.profession.RPKProfessionProvider
+import com.rpkit.professions.bukkit.profession.RPKProfessionName
+import com.rpkit.professions.bukkit.profession.RPKProfessionService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class ProfessionExperienceSetCommand(val plugin: RPKProfessionsBukkit): CommandExecutor {
+class ProfessionExperienceSetCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.professions.command.profession.experience.set")) {
@@ -59,8 +60,12 @@ class ProfessionExperienceSetCommand(val plugin: RPKProfessionsBukkit): CommandE
                 return true
             }
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(target)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
         if (minecraftProfile == null) {
             if (sender == target) {
                 sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
@@ -69,8 +74,12 @@ class ProfessionExperienceSetCommand(val plugin: RPKProfessionsBukkit): CommandE
             }
             return true
         }
-        val characterProvider = plugin.core.serviceManager.getServiceProvider(RPKCharacterProvider::class)
-        val character = characterProvider.getActiveCharacter(minecraftProfile)
+        val characterService = Services[RPKCharacterService::class.java]
+        if (characterService == null) {
+            sender.sendMessage(plugin.messages["no-character-service"])
+            return true
+        }
+        val character = characterService.getActiveCharacter(minecraftProfile)
         if (character == null) {
             if (sender == target) {
                 sender.sendMessage(plugin.messages["no-character-self"])
@@ -79,7 +88,11 @@ class ProfessionExperienceSetCommand(val plugin: RPKProfessionsBukkit): CommandE
             }
             return true
         }
-        val professionProvider = plugin.core.serviceManager.getServiceProvider(RPKProfessionProvider::class)
+        val professionService = Services[RPKProfessionService::class.java]
+        if (professionService == null) {
+            sender.sendMessage(plugin.messages["no-profession-service"])
+            return true
+        }
         if (args.size < 2) {
             sender.sendMessage(plugin.messages["profession-experience-set-usage"])
             return true
@@ -90,17 +103,17 @@ class ProfessionExperienceSetCommand(val plugin: RPKProfessionsBukkit): CommandE
             sender.sendMessage(plugin.messages["profession-experience-set-invalid-exp-not-a-number"])
             return true
         }
-        val profession = professionProvider.getProfession(args[argsOffset])
+        val profession = professionService.getProfession(RPKProfessionName(args[argsOffset]))
         if (profession == null) {
             sender.sendMessage(plugin.messages["profession-experience-set-invalid-profession"])
             return true
         }
-        professionProvider.setProfessionExperience(character, profession, exp)
+        professionService.setProfessionExperience(character, profession, exp)
         sender.sendMessage(plugin.messages["profession-experience-set-valid", mapOf(
-                "player" to minecraftProfile.minecraftUsername,
+                "player" to minecraftProfile.name,
                 "character" to if (!character.isNameHidden) character.name else "[HIDDEN]",
-                "profession" to profession.name,
-                "total-experience" to professionProvider.getProfessionExperience(character, profession).toString()
+                "profession" to profession.name.value,
+                "total_experience" to professionService.getProfessionExperience(character, profession).toString()
         )])
         return true
     }

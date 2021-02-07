@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.rpkit.chat.bukkit.event.chatgroup
 
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroup
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 
@@ -27,10 +27,11 @@ class RPKBukkitChatGroupMessageEvent(
         override val minecraftProfile: RPKMinecraftProfile,
         override val chatGroup: RPKChatGroup,
         override var message: String
-): RPKBukkitEvent(), RPKChatGroupMessageEvent, Cancellable {
+) : RPKBukkitEvent(), RPKChatGroupMessageEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

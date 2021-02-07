@@ -11,92 +11,92 @@ depend:
 - rpk-chat-lib-bukkit
 - rpk-drink-lib-bukkit
 - rpk-language-lib-bukkit
-api-version: '1.15'
+api-version: '1.16'
 commands:
-    chatchannel:
-        description: Switches which chat channel you are speaking in
-        usage: /<command> [channel]
-        aliases: [channel, chan, ch]
-    mute:
-        description: Mutes a chat channel
-        usage: /<command> [channel]
-    unmute:
-        description: Umutes a chat channel
-        usage: /<command> [channel]
-    listchatchannels:
-        description: Lists available chat channels
-        usage: /<command>
-        aliases: [listchannels, listchan, listch, lsc]
-    snoop:
-        description: |
-            Snooping command
-            /snoop on - Enables snooping
-            /snoop off - Disables snooping
-            /snoop check - Checks if you are snooping
-        usage: /<command> [on|off|check]
-    chatgroup:
-        description: |
-            Chat group management command
-            /chatgroup create - Creates a chat group
-            /chatgroup disband - Disbands a chat group
-            /chatgroup invite - Invites a player to a chat group
-            /chatgroup join - Joins a chat group
-            /chatgroup leave - Leaves a chat group
-            /chatgroup message - Sends a message to a chat group
-            /chatgroup members - Lists members of a chat group
-        aliases: [cg]
-        usage: /<command> [create|disband|invite|join|leave|message|members]
-    message:
-        description: Message a player or chat group
-        aliases: [msg, pm]
-        usage: /<command> [target] [message]
-    reply:
-        description: Reply to the last private message or chat group message sent to you
-        aliases: [r]
-        usage: /<command> [message]
+  chatchannel:
+    description: Switches which chat channel you are speaking in
+    usage: /<command> [channel]
+    aliases: [channel, chan, ch]
+  mute:
+    description: Mutes a chat channel
+    usage: /<command> [channel]
+  unmute:
+    description: Umutes a chat channel
+    usage: /<command> [channel]
+  listchatchannels:
+    description: Lists available chat channels
+    usage: /<command>
+    aliases: [listchannels, listchan, listch, lsc]
+  snoop:
+    description: |
+      Snooping command
+      /snoop on - Enables snooping
+      /snoop off - Disables snooping
+      /snoop check - Checks if you are snooping
+    usage: /<command> [on|off|check]
+  chatgroup:
+    description: |
+      Chat group management command
+      /chatgroup create - Creates a chat group
+      /chatgroup disband - Disbands a chat group
+      /chatgroup invite - Invites a player to a chat group
+      /chatgroup join - Joins a chat group
+      /chatgroup leave - Leaves a chat group
+      /chatgroup message - Sends a message to a chat group
+      /chatgroup members - Lists members of a chat group
+    aliases: [cg]
+    usage: /<command> [create|disband|invite|join|leave|message|members]
+  message:
+    description: Message a player or chat group
+    aliases: [msg, pm]
+    usage: /<command> [target] [message]
+  reply:
+    description: Reply to the last private message or chat group message sent to you
+    aliases: [r]
+    usage: /<command> [message]
 permissions:
-    rpkit.chat.command.listchatchannels:
-        description: Allows listing chat channels
-        default: true
-    rpkit.chat.prefix.[prefix]:
-        description: Adds the prefix to the player when speaking in chat
-        default: false
-    rpkit.chat.command.snoop.on:
-        description: Allows enabling snoop
-        default: op
-    rpkit.chat.command.snoop.off:
-        description: Allows disabling snoop
-        default: op
-    rpkit.chat.command.snoop.check:
-        description: Allows checking snoop
-        default: op
-    rpkit.chat.command.chatgroup:
-        description: Allows using chat group commands
-        default: true
-    rpkit.chat.command.chatgroup.create:
-        description: Allows creation of chat groups
-        default: true
-    rpkit.chat.command.chatgroup.disband:
-        description: Allows disbanding chat groups
-        default: true
-    rpkit.chat.command.chatgroup.invite:
-        description: Allows inviting people to chat groups
-        default: true
-    rpkit.chat.command.chatgroup.join:
-        description: Allows joining chat groups
-        default: true
-    rpkit.chat.command.chatgroup.leave:
-        description: Allows leaving chat groups
-        default: true
-    rpkit.chat.command.chatgroup.members:
-        description: Allows listing members of chat groups
-        default: true
-    rpkit.chat.command.chatgroup.message:
-        description: Allows messaging a chat group
-        default: true
-    rpkit.chat.command.message:
-        description: Allows private messaging
-        default: true
-    rpkit.chat.command.reply:
-        description: Allows replying to private messages
-        default: true
+  rpkit.chat.command.listchatchannels:
+    description: Allows listing chat channels
+    default: true
+  rpkit.chat.prefix.[prefix]:
+    description: Adds the prefix to the player when speaking in chat
+    default: false
+  rpkit.chat.command.snoop.on:
+    description: Allows enabling snoop
+    default: op
+  rpkit.chat.command.snoop.off:
+    description: Allows disabling snoop
+    default: op
+  rpkit.chat.command.snoop.check:
+    description: Allows checking snoop
+    default: op
+  rpkit.chat.command.chatgroup:
+    description: Allows using chat group commands
+    default: true
+  rpkit.chat.command.chatgroup.create:
+    description: Allows creation of chat groups
+    default: true
+  rpkit.chat.command.chatgroup.disband:
+    description: Allows disbanding chat groups
+    default: true
+  rpkit.chat.command.chatgroup.invite:
+    description: Allows inviting people to chat groups
+    default: true
+  rpkit.chat.command.chatgroup.join:
+    description: Allows joining chat groups
+    default: true
+  rpkit.chat.command.chatgroup.leave:
+    description: Allows leaving chat groups
+    default: true
+  rpkit.chat.command.chatgroup.members:
+    description: Allows listing members of chat groups
+    default: true
+  rpkit.chat.command.chatgroup.message:
+    description: Allows messaging a chat group
+    default: true
+  rpkit.chat.command.message:
+    description: Allows private messaging
+    default: true
+  rpkit.chat.command.reply:
+    description: Allows replying to private messages
+    default: true

@@ -16,18 +16,19 @@
 
 package com.rpkit.moderation.bukkit.command.ticket
 
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
-import com.rpkit.moderation.bukkit.ticket.RPKTicketProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.moderation.bukkit.ticket.RPKTicketService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class TicketCreateCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class TicketCreateCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.moderation.command.ticket.create")) {
@@ -43,8 +44,12 @@ class TicketCreateCommand(private val plugin: RPKModerationBukkit): CommandExecu
             return true
         }
         val reason = args.joinToString(" ")
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val minecraftProfile = minecraftProfileProvider.getMinecraftProfile(sender)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -54,16 +59,20 @@ class TicketCreateCommand(private val plugin: RPKModerationBukkit): CommandExecu
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        val ticketProvider = plugin.core.serviceManager.getServiceProvider(RPKTicketProvider::class)
+        val ticketService = Services[RPKTicketService::class.java]
+        if (ticketService == null) {
+            sender.sendMessage(plugin.messages["no-ticket-service"])
+            return true
+        }
         val ticket = RPKTicketImpl(
                 reason,
                 profile,
                 sender.location
         )
-        ticketProvider.addTicket(ticket)
+        ticketService.addTicket(ticket)
         sender.sendMessage(plugin.messages["ticket-create-valid", mapOf(
-                Pair("id", ticket.id.toString()),
-                Pair("reason", reason)
+            "id" to ticket.id.toString(),
+            "reason" to reason
         )])
         return true
     }

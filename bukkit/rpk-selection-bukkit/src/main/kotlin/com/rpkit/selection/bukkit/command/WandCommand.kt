@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class WandCommand(private val plugin: RPKSelectionBukkit): CommandExecutor {
+class WandCommand(private val plugin: RPKSelectionBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.selection.command.wand")) {

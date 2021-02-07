@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package com.rpkit.food.bukkit.listener
 
-import com.rpkit.food.bukkit.RPKFoodBukkit
-import com.rpkit.food.bukkit.expiry.RPKExpiryProviderImpl
+import com.rpkit.core.service.Services
+import com.rpkit.food.bukkit.expiry.RPKExpiryServiceImpl
 import org.bukkit.entity.Item
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -26,7 +26,7 @@ import org.bukkit.event.player.PlayerFishEvent
 /**
  * Player fish listener for adding expiry dates.
  */
-class PlayerFishListener(private val plugin: RPKFoodBukkit): Listener {
+class PlayerFishListener : Listener {
 
     @EventHandler
     fun onPlayerFish(event: PlayerFishEvent) {
@@ -34,8 +34,8 @@ class PlayerFishListener(private val plugin: RPKFoodBukkit): Listener {
         if (caught != null) {
             if (caught is Item) {
                 val item = caught.itemStack
-                val expiryProvider = plugin.core.serviceManager.getServiceProvider(RPKExpiryProviderImpl::class)
-                expiryProvider.setExpiry(item)
+                val expiryService = Services[RPKExpiryServiceImpl::class.java] ?: return
+                expiryService.setExpiry(item)
                 caught.setItemStack(item)
             }
         }

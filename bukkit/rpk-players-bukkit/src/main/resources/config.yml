@@ -1,45 +1,27 @@
 caching:
-    rpkit_discord_profile:
-        id:
-            enabled: true
-            size: 20
-    rpkit_github_profile:
-        id:
-            enabled: true
-            size: 20
-    rpkit_irc_profile:
-        id:
-            enabled: true
-            size: 20
-    rpkit_minecraft_profile_link_request:
-        id:
-            enabled: true
-            size: 20
-    rpkit_minecraft_profile:
-        id:
-            enabled: true
-            size: 20
-    rpkit_minecraft_profile_token:
-        id:
-            enabled: true
-            size: 20
-    rpkit_player:
-        id:
-            enabled: true
-            size: 20
-        name:
-            enabled: true
-            size: 20
-        minecraft_uuid:
-            enabled: true
-            size: 20
-        irc_nick:
-            enabled: true
-            size: 20
-        last_known_ip:
-            enabled: true
-            size: 20
-    rpkit_profile:
-        id:
-            enabled: true
-            size: 20
+  rpkit_discord_profile:
+    id:
+      enabled: true
+      size: 20
+  rpkit_github_profile:
+    id:
+      enabled: true
+      size: 20
+    name:
+      enabled: true
+      size: 20
+  rpkit_irc_profile:
+    id:
+      enabled: true
+      size: 20
+  rpkit_minecraft_profile:
+    id:
+      enabled: true
+      size: 20
+    minecraft_uuid:
+      enabled: true
+      size: 20
+  rpkit_profile:
+    id:
+      enabled: true
+      size: 20

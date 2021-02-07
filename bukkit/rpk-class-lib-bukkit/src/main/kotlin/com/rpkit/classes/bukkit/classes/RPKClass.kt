@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +22,7 @@ import com.rpkit.stats.bukkit.stat.RPKStatVariable
 
 interface RPKClass {
 
-    val name: String
+    val name: RPKClassName
     val maxLevel: Int
     fun hasPrerequisites(character: RPKCharacter): Boolean
     fun getSkillPoints(skillType: RPKSkillType, level: Int): Int

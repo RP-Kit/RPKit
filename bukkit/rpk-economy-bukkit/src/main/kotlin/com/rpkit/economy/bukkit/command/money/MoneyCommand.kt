@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.bukkit.command.CommandSender
  * Money command.
  * Parent command for all money management commands.
  */
-class MoneyCommand(val plugin: RPKEconomyBukkit): CommandExecutor {
+class MoneyCommand(val plugin: RPKEconomyBukkit) : CommandExecutor {
 
     private val moneySubtractCommand = MoneySubtractCommand(plugin)
     private val moneyAddCommand = MoneyAddCommand(plugin)

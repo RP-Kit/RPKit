@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,8 @@ import org.bukkit.command.CommandSender
  * Character hide command.
  * Parent command for commands to hide different character card fields.
  */
-class CharacterHideCommand(private val plugin: RPKCharactersBukkit): CommandExecutor {
+class CharacterHideCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
-    private val characterHidePlayerCommand = CharacterHidePlayerCommand(plugin)
     private val characterHideProfileCommand = CharacterHideProfileCommand(plugin)
     private val characterHideNameCommand = CharacterHideNameCommand(plugin)
     private val characterHideGenderCommand = CharacterHideGenderCommand(plugin)
@@ -38,9 +37,7 @@ class CharacterHideCommand(private val plugin: RPKCharactersBukkit): CommandExec
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
-            if (args[0].equals("player", ignoreCase = true)) {
-                return characterHidePlayerCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("profile", ignoreCase = true)) {
+            if (args[0].equals("profile", ignoreCase = true)) {
                 return characterHideProfileCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("name", ignoreCase = true)) {
                 return characterHideNameCommand.onCommand(sender, command, label, newArgs)

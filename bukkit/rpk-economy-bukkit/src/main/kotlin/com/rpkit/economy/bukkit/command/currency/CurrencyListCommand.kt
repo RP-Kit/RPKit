@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +15,9 @@
 
 package com.rpkit.economy.bukkit.command.currency
 
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
-import com.rpkit.economy.bukkit.currency.RPKCurrencyProvider
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -26,19 +26,23 @@ import org.bukkit.command.CommandSender
  * Currency list command.
  * Lists available currencies.
  */
-class CurrencyListCommand(private val plugin: RPKEconomyBukkit): CommandExecutor {
+class CurrencyListCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender.hasPermission("rpkit.economy.command.currency.list")) {
-            val currencyProvider = plugin.core.serviceManager.getServiceProvider(RPKCurrencyProvider::class)
-            sender.sendMessage(plugin.messages["currency-list-title"])
-            for (currency in currencyProvider.currencies) {
-                sender.sendMessage(plugin.messages["currency-list-item", mapOf(
-                        Pair("currency", currency.name)
-                )])
-            }
-        } else {
-            sender.sendMessage(plugin.messages["no-permission-currency-list"])
+        if (!sender.hasPermission("rpkit.economy.command.currency.list")) {
+            sender.sendMessage(plugin.messages.noPermissionCurrencyList)
+            return true
+        }
+        val currencyService = Services[RPKCurrencyService::class.java]
+        if (currencyService == null) {
+            sender.sendMessage(plugin.messages.noCurrencyService)
+            return true
+        }
+        sender.sendMessage(plugin.messages.currencyListTitle)
+        for (currency in currencyService.currencies) {
+            sender.sendMessage(plugin.messages.currencyListItem.withParameters(
+                currency = currency
+            ))
         }
         return true
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,18 @@
 package com.rpkit.players.bukkit.event.githubprofile
 
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
-import com.rpkit.players.bukkit.profile.RPKGitHubProfile
+import com.rpkit.players.bukkit.profile.github.RPKGitHubProfile
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 
 
 class RPKBukkitGitHubProfileCreateEvent(
         override val githubProfile: RPKGitHubProfile
-): RPKBukkitEvent(), RPKGitHubProfileCreateEvent, Cancellable {
+) : RPKBukkitEvent(), RPKGitHubProfileCreateEvent, Cancellable {
 
     companion object {
-        @JvmStatic val handlerList = HandlerList()
+        @JvmStatic
+        val handlerList = HandlerList()
     }
 
     private var cancel: Boolean = false

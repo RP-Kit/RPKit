@@ -7,18 +7,18 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-experience-lib-bukkit
-api-version: '1.15'
+api-version: '1.16'
 commands:
-    experience:
-        description: Experience command
-        usage: /<command> [add|set|setlevel]
+  experience:
+    description: Experience command
+    usage: /<command> [add|set|setlevel]
 permissions:
-    rpkit.experience.command.experience.add:
-        description: Allows adding experience
-        default: op
-    rpkit.experience.command.experience.set:
-        description: Allows setting experience
-        default: op
-    rpkit.experience.command.experience.setlevel:
-        description: Allows setting level
-        default: op
+  rpkit.experience.command.experience.add:
+    description: Allows adding experience
+    default: op
+  rpkit.experience.command.experience.set:
+    description: Allows setting experience
+    default: op
+  rpkit.experience.command.experience.setlevel:
+    description: Allows setting level
+    default: op

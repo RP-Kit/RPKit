@@ -16,15 +16,16 @@
 
 package com.rpkit.moderation.bukkit.command.warn
 
+import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
-import com.rpkit.moderation.bukkit.warning.RPKWarningProvider
-import com.rpkit.players.bukkit.profile.RPKMinecraftProfileProvider
+import com.rpkit.moderation.bukkit.warning.RPKWarningService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
-class WarningRemoveCommand(private val plugin: RPKModerationBukkit): CommandExecutor {
+class WarningRemoveCommand(private val plugin: RPKModerationBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.moderation.command.warning.remove")) {
@@ -40,8 +41,12 @@ class WarningRemoveCommand(private val plugin: RPKModerationBukkit): CommandExec
             sender.sendMessage(plugin.messages["warning-remove-invalid-target"])
             return true
         }
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        val targetMinecraftProfile = minecraftProfileProvider.getMinecraftProfile(targetPlayer)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            return true
+        }
+        val targetMinecraftProfile = minecraftProfileService.getMinecraftProfile(targetPlayer)
         if (targetMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -51,8 +56,12 @@ class WarningRemoveCommand(private val plugin: RPKModerationBukkit): CommandExec
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        val warningProvider = plugin.core.serviceManager.getServiceProvider(RPKWarningProvider::class)
-        val warnings = warningProvider.getWarnings(targetProfile)
+        val warningService = Services[RPKWarningService::class.java]
+        if (warningService == null) {
+            sender.sendMessage(plugin.messages["no-warning-service"])
+            return true
+        }
+        val warnings = warningService.getWarnings(targetProfile)
         try {
             val warningIndex = args[1].toInt()
             if (warningIndex > warnings.size) {
@@ -60,7 +69,7 @@ class WarningRemoveCommand(private val plugin: RPKModerationBukkit): CommandExec
                 return true
             }
             val warning = warnings[warningIndex - 1]
-            warningProvider.removeWarning(warning)
+            warningService.removeWarning(warning)
             sender.sendMessage(plugin.messages["warning-remove-valid"])
             return true
         } catch (exception: NumberFormatException) {

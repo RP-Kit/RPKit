@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,38 +15,49 @@
 
 package com.rpkit.players.bukkit.listener
 
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
-import com.rpkit.players.bukkit.profile.*
+import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileName
+import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerLoginEvent
 
 
-class PlayerLoginListener(private val plugin: RPKPlayersBukkit): Listener {
+class PlayerLoginListener(private val plugin: RPKPlayersBukkit) : Listener {
 
     @EventHandler
     fun onPlayerLogin(event: PlayerLoginEvent) {
-        val minecraftProfileProvider = plugin.core.serviceManager.getServiceProvider(RPKMinecraftProfileProvider::class)
-        var minecraftProfile = minecraftProfileProvider.getMinecraftProfile(event.player)
-        if (minecraftProfile == null) { // Player hasn't logged in while profile generation is active
-            minecraftProfile = RPKMinecraftProfileImpl(
-                    profile = RPKThinProfileImpl(event.player.name),
-                    minecraftUUID = event.player.uniqueId
-            )
-            minecraftProfileProvider.addMinecraftProfile(minecraftProfile)
-        } else if (minecraftProfileProvider.getMinecraftProfileLinkRequests(minecraftProfile).isNotEmpty()) { // Minecraft profile has a link request, so skip and let them know on join.
+        val profileService = Services[RPKProfileService::class.java]
+        if (profileService == null) {
+            plugin.logger.warning("Profile service not found so could not create profiles for ${event.player.name}. Did the plugin enable correctly?")
             return
         }
-        val profileProvider = plugin.core.serviceManager.getServiceProvider(RPKProfileProvider::class)
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            plugin.logger.warning("Minecraft profile service not found so could not create profiles for ${event.player.name}. Did the plugin enable correctly?")
+            return
+        }
+        var minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+        if (minecraftProfile == null) { // Player hasn't logged in while profile generation is active
+            minecraftProfile = minecraftProfileService.createMinecraftProfile(
+                event.player.uniqueId,
+                profileService.createThinProfile(RPKProfileName(event.player.name))
+            )
+        } else if (minecraftProfileService.getMinecraftProfileLinkRequests(minecraftProfile).isNotEmpty()) { // Minecraft profile has a link request, so skip and let them know on join.
+            return
+        }
         var profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
-            profile = RPKProfileImpl(
-                    event.player.name,
-                    ""
+            val profileName = RPKProfileName(event.player.name)
+            profile = profileService.createProfile(
+                profileName,
+                profileService.generateDiscriminatorFor(profileName)
             )
-            profileProvider.addProfile(profile)
             minecraftProfile.profile = profile
-            minecraftProfileProvider.updateMinecraftProfile(minecraftProfile)
+            minecraftProfileService.updateMinecraftProfile(minecraftProfile)
         }
     }
 }

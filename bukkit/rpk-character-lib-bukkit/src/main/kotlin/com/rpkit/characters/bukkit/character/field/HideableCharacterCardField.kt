@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ross Binden
+ * Copyright 2020 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
  * What should be visible when the character card field is hidden is up to the implementation, and should be included
  * in the [get] method.
  */
-interface HideableCharacterCardField: CharacterCardField {
+interface HideableCharacterCardField : CharacterCardField {
 
     /**
      * Checks whether the field is hidden for the given character.

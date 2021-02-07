@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
- *
+ * Copyright 2021 Ren Binden
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,20 +15,20 @@
 
 package com.rpkit.professions.bukkit.profession
 
+import com.rpkit.core.expression.RPKExpressionService
+import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
-import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityProvider
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityName
+import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import org.bukkit.Material
-import org.nfunk.jep.JEP
-import kotlin.math.roundToInt
 
 
 class RPKProfessionImpl(
-        override var id: Int = 0,
-        override val name: String,
-        override val maxLevel: Int,
-        val plugin: RPKProfessionsBukkit
-): RPKProfession {
+    override val name: RPKProfessionName,
+    override val maxLevel: Int,
+    val plugin: RPKProfessionsBukkit
+) : RPKProfession {
     override fun getAmountFor(action: RPKCraftingAction, material: Material, level: Int): Double {
         val actionConfigSectionName = when (action) {
             RPKCraftingAction.CRAFT -> "crafting"
@@ -50,24 +49,22 @@ class RPKProfessionImpl(
             RPKCraftingAction.SMELT -> "smelting"
             RPKCraftingAction.MINE -> "mining"
         }
-        val itemQualityProvider = plugin.core.serviceManager.getServiceProvider(RPKItemQualityProvider::class)
+        val itemQualityService = Services[RPKItemQualityService::class.java] ?: return null
         val itemQualityName = plugin.config.getString("professions.$name.$actionConfigSectionName.$level.$material.quality")
                 ?: when {
                     level > 1 -> return getQualityFor(action, material, level - 1)
                     else -> plugin.config.getString("default.$actionConfigSectionName.$material.quality")
                 }
                 ?: return null
-        return itemQualityProvider.getItemQuality(itemQualityName)
+        return itemQualityService.getItemQuality(RPKItemQualityName(itemQualityName))
     }
 
     override fun getExperienceNeededForLevel(level: Int): Int {
-        val expression = plugin.config.getString("professions.$name.experience.formula")
-        val parser = JEP()
-        parser.addStandardConstants()
-        parser.addStandardFunctions()
-        parser.addVariable("level", level.toDouble())
-        parser.parseExpression(expression)
-        return parser.value.roundToInt()
+        val expressionService = Services[RPKExpressionService::class.java] ?: return Int.MAX_VALUE
+        val expression = expressionService.createExpression(plugin.config.getString("professions.$name.experience.formula") ?: return Int.MAX_VALUE)
+        return expression.parseInt(mapOf(
+            "level" to level.toDouble()
+        )) ?: Int.MAX_VALUE
     }
 
     override fun getExperienceFor(action: RPKCraftingAction, material: Material): Int {
