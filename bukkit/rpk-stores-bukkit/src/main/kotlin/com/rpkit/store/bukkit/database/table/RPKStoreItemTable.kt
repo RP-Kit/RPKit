@@ -108,7 +108,7 @@ class RPKStoreItemTable(
                 .from(RPKIT_STORE_ITEM)
                 .where(RPKIT_STORE_ITEM.PLUGIN.eq(plugin.name))
                 .and(RPKIT_STORE_ITEM.IDENTIFIER.eq(identifier))
-                .fetchOne()
+                .fetchOne() ?: return null
         return get(result[RPKIT_STORE_ITEM.ID])
     }
 

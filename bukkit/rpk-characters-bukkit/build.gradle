@@ -33,7 +33,7 @@ dependencies {
     implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.4.30"
     implementation group: "org.spigotmc", name: "spigot-api", version: "1.16.5-R0.1-SNAPSHOT"
     implementation group: "org.bstats", name: "bstats-bukkit", version: "1.8"
-    implementation group: "org.jooq", name: "jooq", version: "3.13.2"
+    implementation group: "org.jooq", name: "jooq", version: "3.14.7"
     implementation platform("org.http4k:http4k-bom:3.285.2")
     implementation group: "org.http4k", name: "http4k-core"
     implementation group: "org.http4k", name: "http4k-server-jetty"

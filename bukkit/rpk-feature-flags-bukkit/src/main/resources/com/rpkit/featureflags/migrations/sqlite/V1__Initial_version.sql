@@ -17,6 +17,6 @@
 CREATE TABLE `rpkit_profile_feature_flag`
 (
     `profile_id`        int     NOT NULL,
-    `feature_flag_name` int     NOT NULL,
+    `feature_flag_name` varchar(1024)     NOT NULL,
     `enabled`           boolean NOT NULL
 );
