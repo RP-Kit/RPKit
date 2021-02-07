@@ -104,7 +104,7 @@ class RPKPaymentGroupTable(
                     )
                     .from(RPKIT_PAYMENT_GROUP)
                     .where(RPKIT_PAYMENT_GROUP.ID.eq(id.value))
-                    .fetchOne()
+                    .fetchOne() ?: return null
             val currencyService = Services[RPKCurrencyService::class.java] ?: return null
             val currencyName = result.get(RPKIT_PAYMENT_GROUP.CURRENCY_NAME)
             val currency = if (currencyName == null) null else currencyService.getCurrency(RPKCurrencyName(currencyName))

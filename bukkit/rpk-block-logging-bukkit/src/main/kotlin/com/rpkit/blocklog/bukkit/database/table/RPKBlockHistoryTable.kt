@@ -86,7 +86,7 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                     )
                     .from(RPKIT_BLOCK_HISTORY)
                     .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
-                    .fetchOne()
+                    .fetchOne() ?: return null
             val world = plugin.server.getWorld(result.get(RPKIT_BLOCK_HISTORY.WORLD))
             if (world == null) {
                 database.create
