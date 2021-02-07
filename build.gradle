@@ -52,6 +52,7 @@ subprojects {
         maven { url "https://maven.sk89q.com/repo/" }
         maven { url "https://repo.codemc.org/repository/maven-public" }
         maven { url "https://dl.bintray.com/xafero-solutions/xafero-source/" }
+        maven { url "https://jitpack.io" }
     }
 
     compileKotlin {

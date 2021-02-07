@@ -19,16 +19,13 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.irc.command.IRCListCommand
 import com.rpkit.chat.bukkit.irc.command.IRCRegisterCommand
 import com.rpkit.chat.bukkit.irc.command.IRCVerifyCommand
-import com.rpkit.chat.bukkit.irc.listener.IRCChannelJoinListener
-import com.rpkit.chat.bukkit.irc.listener.IRCChannelQuitListener
-import com.rpkit.chat.bukkit.irc.listener.IRCConnectListener
-import com.rpkit.chat.bukkit.irc.listener.IRCMessageListener
-import com.rpkit.chat.bukkit.irc.listener.IRCUserListListener
+import com.rpkit.chat.bukkit.irc.listener.*
 import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 import org.bukkit.scheduler.BukkitRunnable
 import org.pircbotx.Configuration
 import org.pircbotx.PircBotX
+import org.pircbotx.delay.StaticDelay
 
 /**
  * IRC service implementation.
@@ -97,7 +94,7 @@ class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
         }
         if (plugin.config.get("irc.message-delay") != null) {
             val messageDelay = plugin.config.getLong("irc.message-delay")
-            configuration.messageDelay = messageDelay
+            configuration.messageDelay = StaticDelay(messageDelay)
         }
         if (plugin.config.get("irc.password") != null) {
             val password = plugin.config.getString("irc.password")
