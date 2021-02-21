@@ -33,6 +33,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.Location
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents the auction table.
@@ -53,58 +54,61 @@ class RPKAuctionTable(
         null
     }
 
-    fun insert(entity: RPKAuction) {
+    fun insert(entity: RPKAuction): CompletableFuture<Void> {
         val currencyName = entity.currency.name
-        val characterId = entity.character.id ?: return
-        database.create
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_AUCTION,
-                        RPKIT_AUCTION.ITEM,
-                        RPKIT_AUCTION.CURRENCY_NAME,
-                        RPKIT_AUCTION.WORLD,
-                        RPKIT_AUCTION.X,
-                        RPKIT_AUCTION.Y,
-                        RPKIT_AUCTION.Z,
-                        RPKIT_AUCTION.YAW,
-                        RPKIT_AUCTION.PITCH,
-                        RPKIT_AUCTION.CHARACTER_ID,
-                        RPKIT_AUCTION.DURATION,
-                        RPKIT_AUCTION.END_TIME,
-                        RPKIT_AUCTION.START_PRICE,
-                        RPKIT_AUCTION.BUY_OUT_PRICE,
-                        RPKIT_AUCTION.NO_SELL_PRICE,
-                        RPKIT_AUCTION.MINIMUM_BID_INCREMENT,
-                        RPKIT_AUCTION.BIDDING_OPEN
+                    RPKIT_AUCTION,
+                    RPKIT_AUCTION.ITEM,
+                    RPKIT_AUCTION.CURRENCY_NAME,
+                    RPKIT_AUCTION.WORLD,
+                    RPKIT_AUCTION.X,
+                    RPKIT_AUCTION.Y,
+                    RPKIT_AUCTION.Z,
+                    RPKIT_AUCTION.YAW,
+                    RPKIT_AUCTION.PITCH,
+                    RPKIT_AUCTION.CHARACTER_ID,
+                    RPKIT_AUCTION.DURATION,
+                    RPKIT_AUCTION.END_TIME,
+                    RPKIT_AUCTION.START_PRICE,
+                    RPKIT_AUCTION.BUY_OUT_PRICE,
+                    RPKIT_AUCTION.NO_SELL_PRICE,
+                    RPKIT_AUCTION.MINIMUM_BID_INCREMENT,
+                    RPKIT_AUCTION.BIDDING_OPEN
                 )
                 .values(
-                        entity.item.toByteArray(),
-                        currencyName.value,
-                        entity.location?.world?.name,
-                        entity.location?.x,
-                        entity.location?.y,
-                        entity.location?.z,
-                        entity.location?.yaw?.toDouble(),
-                        entity.location?.pitch?.toDouble(),
-                        characterId.value,
-                        entity.duration,
-                        entity.endTime,
-                        entity.startPrice,
-                        entity.buyOutPrice,
-                        entity.noSellPrice,
-                        entity.minimumBidIncrement,
-                        entity.isBiddingOpen
+                    entity.item.toByteArray(),
+                    currencyName.value,
+                    entity.location?.world?.name,
+                    entity.location?.x,
+                    entity.location?.y,
+                    entity.location?.z,
+                    entity.location?.yaw?.toDouble(),
+                    entity.location?.pitch?.toDouble(),
+                    characterId.value,
+                    entity.duration,
+                    entity.endTime,
+                    entity.startPrice,
+                    entity.buyOutPrice,
+                    entity.noSellPrice,
+                    entity.minimumBidIncrement,
+                    entity.isBiddingOpen
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKAuctionId(id)
-        cache?.set(id, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKAuctionId(id)
+            cache?.set(id, entity)
+        }
     }
 
-    fun update(entity: RPKAuction) {
-        val id = entity.id ?: return
+    fun update(entity: RPKAuction): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = entity.currency.name
-        val characterId = entity.character.id ?: return
-        database.create
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_AUCTION)
                 .set(RPKIT_AUCTION.ITEM, entity.item.toByteArray())
                 .set(RPKIT_AUCTION.CURRENCY_NAME, currencyName.value)
@@ -124,54 +128,56 @@ class RPKAuctionTable(
                 .set(RPKIT_AUCTION.BIDDING_OPEN, entity.isBiddingOpen)
                 .where(RPKIT_AUCTION.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKAuctionId): RPKAuction? {
+    operator fun get(id: RPKAuctionId): CompletableFuture<RPKAuction?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
+            return CompletableFuture.completedFuture(cache[id.value])
         } else {
-            val result = database.create
+            return CompletableFuture.supplyAsync {
+                val result = database.create
                     .select(
-                            RPKIT_AUCTION.ITEM,
-                            RPKIT_AUCTION.CURRENCY_NAME,
-                            RPKIT_AUCTION.WORLD,
-                            RPKIT_AUCTION.X,
-                            RPKIT_AUCTION.Y,
-                            RPKIT_AUCTION.Z,
-                            RPKIT_AUCTION.YAW,
-                            RPKIT_AUCTION.PITCH,
-                            RPKIT_AUCTION.CHARACTER_ID,
-                            RPKIT_AUCTION.DURATION,
-                            RPKIT_AUCTION.END_TIME,
-                            RPKIT_AUCTION.START_PRICE,
-                            RPKIT_AUCTION.BUY_OUT_PRICE,
-                            RPKIT_AUCTION.NO_SELL_PRICE,
-                            RPKIT_AUCTION.MINIMUM_BID_INCREMENT,
-                            RPKIT_AUCTION.BIDDING_OPEN
+                        RPKIT_AUCTION.ITEM,
+                        RPKIT_AUCTION.CURRENCY_NAME,
+                        RPKIT_AUCTION.WORLD,
+                        RPKIT_AUCTION.X,
+                        RPKIT_AUCTION.Y,
+                        RPKIT_AUCTION.Z,
+                        RPKIT_AUCTION.YAW,
+                        RPKIT_AUCTION.PITCH,
+                        RPKIT_AUCTION.CHARACTER_ID,
+                        RPKIT_AUCTION.DURATION,
+                        RPKIT_AUCTION.END_TIME,
+                        RPKIT_AUCTION.START_PRICE,
+                        RPKIT_AUCTION.BUY_OUT_PRICE,
+                        RPKIT_AUCTION.NO_SELL_PRICE,
+                        RPKIT_AUCTION.MINIMUM_BID_INCREMENT,
+                        RPKIT_AUCTION.BIDDING_OPEN
                     )
                     .from(RPKIT_AUCTION)
                     .where(RPKIT_AUCTION.ID.eq(id.value))
-                    .fetchOne() ?: return null
-            val currencyService = Services[RPKCurrencyService::class.java] ?: return null
-            val currencyName = result.get(RPKIT_AUCTION.CURRENCY_NAME)
-            val currency = currencyService.getCurrency(RPKCurrencyName(currencyName))
-            val characterService = Services[RPKCharacterService::class.java] ?: return null
-            val characterId = result.get(RPKIT_AUCTION.CHARACTER_ID)
-            val character = characterService.getCharacter(RPKCharacterId(characterId))
-            if (currency != null && character != null) {
-                val auction = RPKAuctionImpl(
+                    .fetchOne() ?: return@supplyAsync null
+                val currencyService = Services[RPKCurrencyService::class.java] ?: return@supplyAsync null
+                val currencyName = result.get(RPKIT_AUCTION.CURRENCY_NAME)
+                val currency = currencyService.getCurrency(RPKCurrencyName(currencyName))
+                val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync null
+                val characterId = result.get(RPKIT_AUCTION.CHARACTER_ID)
+                val character = characterService.getCharacter(RPKCharacterId(characterId))
+                if (currency != null && character != null) {
+                    val auction = RPKAuctionImpl(
                         plugin,
                         id,
                         result.get(RPKIT_AUCTION.ITEM).toItemStack(),
                         currency,
                         Location(
-                                plugin.server.getWorld(result.get(RPKIT_AUCTION.WORLD)),
-                                result.get(RPKIT_AUCTION.X),
-                                result.get(RPKIT_AUCTION.Y),
-                                result.get(RPKIT_AUCTION.Z),
-                                result.get(RPKIT_AUCTION.YAW).toFloat(),
-                                result.get(RPKIT_AUCTION.PITCH).toFloat()
+                            plugin.server.getWorld(result.get(RPKIT_AUCTION.WORLD)),
+                            result.get(RPKIT_AUCTION.X),
+                            result.get(RPKIT_AUCTION.Y),
+                            result.get(RPKIT_AUCTION.Z),
+                            result.get(RPKIT_AUCTION.YAW).toFloat(),
+                            result.get(RPKIT_AUCTION.PITCH).toFloat()
                         ),
                         character,
                         result.get(RPKIT_AUCTION.DURATION),
@@ -181,24 +187,25 @@ class RPKAuctionTable(
                         result.get(RPKIT_AUCTION.NO_SELL_PRICE),
                         result.get(RPKIT_AUCTION.MINIMUM_BID_INCREMENT),
                         result.get(RPKIT_AUCTION.BIDDING_OPEN)
-                )
-                cache?.set(id.value, auction)
-                return auction
-            } else {
-                val bidTable = database.getTable(RPKBidTable::class.java)
-                database.create
+                    )
+                    cache?.set(id.value, auction)
+                    return@supplyAsync auction
+                } else {
+                    val bidTable = database.getTable(RPKBidTable::class.java)
+                    database.create
                         .select(RPKIT_BID.ID)
                         .from(RPKIT_BID)
                         .where(RPKIT_BID.AUCTION_ID.eq(id.value))
                         .fetch()
                         .map { it[RPKIT_BID.ID] }
-                        .mapNotNull { bidId -> bidTable[RPKBidId(bidId)] }
+                        .mapNotNull { bidId -> bidTable[RPKBidId(bidId)].join() }
                         .forEach { bid -> bidTable.delete(bid) }
-                database.create
+                    database.create
                         .deleteFrom(RPKIT_AUCTION)
                         .where(RPKIT_AUCTION.ID.eq(id.value))
                         .execute()
-                return null
+                    return@supplyAsync null
+                }
             }
         }
     }
@@ -208,26 +215,31 @@ class RPKAuctionTable(
      *
      * @return A list containing all auctions
      */
-    fun getAll(): List<RPKAuction> {
-        val results = database.create
+    fun getAll(): CompletableFuture<List<RPKAuction>> {
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_AUCTION.ID)
                 .from(RPKIT_AUCTION)
                 .fetch()
-        return results.map { result ->
-            get(RPKAuctionId(result[RPKIT_AUCTION.ID]))
-        }.filterNotNull()
+            results.map { result ->
+                get(RPKAuctionId(result[RPKIT_AUCTION.ID])).join()
+            }.filterNotNull()
+        }
     }
 
-    fun delete(entity: RPKAuction) {
-        val id = entity.id ?: return
-        for (bid in entity.bids) {
-            database.getTable(RPKBidTable::class.java).delete(bid)
-        }
-        database.create
+    fun delete(entity: RPKAuction): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        val bidTable = database.getTable(RPKBidTable::class.java)
+        return CompletableFuture.runAsync {
+            entity.bids.thenAccept { bids ->
+                CompletableFuture.allOf(*bids.map { bidTable.delete(it) }.toTypedArray()).join()
+            }
+            database.create
                 .deleteFrom(RPKIT_AUCTION)
                 .where(RPKIT_AUCTION.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 
 }

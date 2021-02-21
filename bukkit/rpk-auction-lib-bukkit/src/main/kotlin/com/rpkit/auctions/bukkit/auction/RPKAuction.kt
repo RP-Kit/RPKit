@@ -20,6 +20,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents an auction.
@@ -58,7 +59,7 @@ interface RPKAuction {
      * A list of bids made on the auction.
      * This may not be assumed to be sorted in any way, as implementations may order their bids differently.
      */
-    val bids: List<RPKBid>
+    val bids: CompletableFuture<List<RPKBid>>
 
     /**
      * The duration of the auction, in milliseconds.
@@ -106,7 +107,7 @@ interface RPKAuction {
      * @param bid The bid to add
      * @return Whether adding the bid was successful
      */
-    fun addBid(bid: RPKBid): Boolean
+    fun addBid(bid: RPKBid): CompletableFuture<Boolean>
 
     /**
      * Opens bidding on the auction, performing any required setup.

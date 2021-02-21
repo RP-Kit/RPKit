@@ -20,6 +20,7 @@ import com.rpkit.core.service.Service
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides auction-related operations.
@@ -32,7 +33,7 @@ interface RPKAuctionService : Service {
      * @param auction The auction to add
      * @return Whether adding the auction was successful
      */
-    fun addAuction(auction: RPKAuction): Boolean
+    fun addAuction(auction: RPKAuction): CompletableFuture<Boolean>
 
     /**
      * Creates an auction with the given parameters
@@ -62,7 +63,7 @@ interface RPKAuctionService : Service {
         noSellPrice: Int?,
         minimumBidIncrement: Int,
         isBiddingOpen: Boolean = false
-    ): RPKAuction?
+    ): CompletableFuture<RPKAuction?>
 
     /**
      * Updates an auction's state in data storage.
@@ -70,7 +71,7 @@ interface RPKAuctionService : Service {
      * @param auction The auction to update
      * @return Whether updating the auction was successful
      */
-    fun updateAuction(auction: RPKAuction): Boolean
+    fun updateAuction(auction: RPKAuction): CompletableFuture<Boolean>
 
     /**
      * Removes an auction from being tracked by this auction service.
@@ -78,7 +79,7 @@ interface RPKAuctionService : Service {
      * @param auction The auction to update
      * @return Whether removing the auction was successful
      */
-    fun removeAuction(auction: RPKAuction): Boolean
+    fun removeAuction(auction: RPKAuction): CompletableFuture<Boolean>
 
     /**
      * Gets an auction by ID.
@@ -87,13 +88,13 @@ interface RPKAuctionService : Service {
      * @param id The ID of the auction
      * @return The auction, or null if no auction is found with the given ID
      */
-    fun getAuction(id: RPKAuctionId): RPKAuction?
+    fun getAuction(id: RPKAuctionId): CompletableFuture<RPKAuction?>
 
     /**
      * Gets a list of all auctions tracked by this auction service.
      *
      * @return A list of all auctions tracked by this auction service
      */
-    fun getAuctions(): List<RPKAuction>
+    fun getAuctions(): CompletableFuture<List<RPKAuction>>
 
 }
