@@ -24,22 +24,23 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.CompletableFuture
 
 /**
  * Auction service implementation.
  */
 class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuctionService {
 
-    override fun getAuction(id: RPKAuctionId): RPKAuction? {
+    override fun getAuction(id: RPKAuctionId): CompletableFuture<RPKAuction?> {
         return plugin.database.getTable(RPKAuctionTable::class.java)[id]
     }
 
-    override fun addAuction(auction: RPKAuction): Boolean {
+    override fun addAuction(auction: RPKAuction): CompletableFuture<Boolean> {
         val event = RPKBukkitAuctionCreateEvent(auction)
         plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return false
-        plugin.database.getTable(RPKAuctionTable::class.java).insert(event.auction)
-        return true
+        if (event.isCancelled) return CompletableFuture.completedFuture(false)
+        return plugin.database.getTable(RPKAuctionTable::class.java).insert(event.auction)
+            .thenApply { true }
     }
 
     override fun createAuction(
@@ -54,7 +55,7 @@ class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuction
         noSellPrice: Int?,
         minimumBidIncrement: Int,
         isBiddingOpen: Boolean
-    ): RPKAuction? {
+    ): CompletableFuture<RPKAuction?> {
         val auction = RPKAuctionImpl(
             plugin,
             null,
@@ -70,27 +71,27 @@ class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuction
             minimumBidIncrement,
             isBiddingOpen
         )
-        if (!addAuction(auction)) return null
-        return auction
+        return addAuction(auction)
+            .thenApply { success -> if (success) auction else null }
     }
 
-    override fun updateAuction(auction: RPKAuction): Boolean {
+    override fun updateAuction(auction: RPKAuction): CompletableFuture<Boolean> {
         val event = RPKBukkitAuctionUpdateEvent(auction)
         plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return false
-        plugin.database.getTable(RPKAuctionTable::class.java).update(event.auction)
-        return true
+        if (event.isCancelled) return CompletableFuture.completedFuture(false)
+        return plugin.database.getTable(RPKAuctionTable::class.java).update(event.auction)
+            .thenApply { true }
     }
 
-    override fun removeAuction(auction: RPKAuction): Boolean {
+    override fun removeAuction(auction: RPKAuction): CompletableFuture<Boolean> {
         val event = RPKBukkitAuctionDeleteEvent(auction)
         plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return false
-        plugin.database.getTable(RPKAuctionTable::class.java).delete(event.auction)
-        return true
+        if (event.isCancelled) return CompletableFuture.completedFuture(false)
+        return plugin.database.getTable(RPKAuctionTable::class.java).delete(event.auction)
+            .thenApply { true }
     }
 
-    override fun getAuctions(): List<RPKAuction> {
+    override fun getAuctions(): CompletableFuture<List<RPKAuction>> {
         return plugin.database.getTable(RPKAuctionTable::class.java).getAll()
     }
 }

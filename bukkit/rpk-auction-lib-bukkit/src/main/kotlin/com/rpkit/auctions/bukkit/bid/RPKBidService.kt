@@ -18,6 +18,7 @@ package com.rpkit.auctions.bukkit.bid
 import com.rpkit.auctions.bukkit.auction.RPKAuction
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides bid-related operations.
@@ -30,13 +31,13 @@ interface RPKBidService : Service {
      * @param bid The bid to add
      * @return Whether adding the bid was successful
      */
-    fun addBid(bid: RPKBid): Boolean
+    fun addBid(bid: RPKBid): CompletableFuture<Boolean>
 
     fun createBid(
         auction: RPKAuction,
         character: RPKCharacter,
         amount: Int
-    ): RPKBid
+    ): CompletableFuture<RPKBid>
 
     /**
      * Updates a bid in data storage.
@@ -44,7 +45,7 @@ interface RPKBidService : Service {
      * @param bid The bid to update
      * @return Whether updating the bid was successful
      */
-    fun updateBid(bid: RPKBid): Boolean
+    fun updateBid(bid: RPKBid): CompletableFuture<Boolean>
 
     /**
      * Removes a bid.
@@ -52,13 +53,13 @@ interface RPKBidService : Service {
      * @param bid The bid to remove
      * @return Whether removing the bid was successful
      */
-    fun removeBid(bid: RPKBid): Boolean
+    fun removeBid(bid: RPKBid): CompletableFuture<Boolean>
 
     /**
      * Gets a list of all bids made for a particular auction.
      *
      * @param auction The auction to list bids for
      */
-    fun getBids(auction: RPKAuction): List<RPKBid>
+    fun getBids(auction: RPKAuction): CompletableFuture<List<RPKBid>>
 
 }

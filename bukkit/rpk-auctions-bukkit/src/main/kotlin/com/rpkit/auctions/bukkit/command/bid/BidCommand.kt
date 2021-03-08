@@ -83,66 +83,84 @@ class BidCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
                     sender.sendMessage(plugin.messages.noCharacter)
                     return true
                 }
-                val auction = auctionService.getAuction(RPKAuctionId(id))
-                if (auction == null) {
-                    sender.sendMessage(plugin.messages.bidInvalidAuctionNotExistent)
-                    return true
+                auctionService.getAuction(RPKAuctionId(id))
+                    .thenAccept getAuction@{ auction ->
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            if (auction == null) {
+                                sender.sendMessage(plugin.messages.bidInvalidAuctionNotExistent)
+                                return@Runnable
+                            }
+                            if (System.currentTimeMillis() >= auction.endTime) {
+                                auction.closeBidding()
+                                auctionService.updateAuction(auction)
+                            }
+                            if (!auction.isBiddingOpen) {
+                                sender.sendMessage(plugin.messages.bidInvalidAuctionNotOpen)
+                                return@Runnable
+                            }
+                            if (bidAmount > economyService.getBalance(character, auction.currency)) {
+                                sender.sendMessage(plugin.messages.bidInvalidNotEnoughMoney)
+                                return@Runnable
+                            }
+                            auction.bids.thenAccept getBids@{ bids ->
+                                if (bidAmount < (bids.maxByOrNull(RPKBid::amount)?.amount
+                                        ?: auction.startPrice) + auction.minimumBidIncrement) {
+                                    sender.sendMessage(plugin.messages.bidInvalidNotHighEnough.withParameters(
+                                        amount = (bids.maxByOrNull(RPKBid::amount)?.amount ?: auction.startPrice)
+                                                + auction.minimumBidIncrement
+                                    ))
+                                    return@getBids
+                                }
+                                val radius = plugin.config.getInt("auctions.radius")
+                                val auctionLocation = auction.location
+                                if (radius >= 0 && auctionLocation != null && sender.location.distanceSquared(auctionLocation) > radius * radius) {
+                                    sender.sendMessage(plugin.messages.bidInvalidTooFarAway)
+                                    return@getBids
+                                }
+                                val bid = RPKBidImpl(
+                                    auction = auction,
+                                    character = character,
+                                    amount = bidAmount
+                                )
+                                plugin.server.scheduler.runTask(plugin, Runnable {
+                                    auction.addBid(bid).thenAccept addBid@{ bidSuccessful ->
+                                        if (!bidSuccessful) {
+                                            sender.sendMessage(plugin.messages.bidCreateFailed)
+                                        } else {
+                                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                                auctionService.updateAuction(auction).thenAccept updateAuction@{
+                                                    sender.sendMessage(plugin.messages.bidValid.withParameters(
+                                                        currencyAmount = bid.amount,
+                                                        currency = auction.currency,
+                                                        itemType = auction.item.type,
+                                                        itemAmount = auction.item.amount
+                                                    ))
+                                                    auction.bids
+                                                        .thenAccept newBids@{ newBids ->
+                                                            newBids
+                                                                .map(RPKBid::character)
+                                                                .mapNotNull(RPKCharacter::minecraftProfile)
+                                                                .distinct()
+                                                                .filter { it != minecraftProfile }
+                                                                .forEach { bidderMinecraftProfile ->
+                                                                    bidderMinecraftProfile.sendMessage(plugin.messages.bidCreated.withParameters(
+                                                                        auction = bid.auction,
+                                                                        character = bid.character,
+                                                                        currencyAmount = bid.amount,
+                                                                        currency = auction.currency,
+                                                                        itemAmount = auction.item.amount,
+                                                                        itemType = auction.item.type
+                                                                    ))
+                                                                }
+                                                        }
+                                                }
+                                            })
+                                        }
+                                    }
+                                })
+                            }
+                        })
                 }
-                if (System.currentTimeMillis() >= auction.endTime) {
-                    auction.closeBidding()
-                }
-                if (!auction.isBiddingOpen) {
-                    sender.sendMessage(plugin.messages.bidInvalidAuctionNotOpen)
-                    return true
-                }
-                if (bidAmount > economyService.getBalance(character, auction.currency)) {
-                    sender.sendMessage(plugin.messages.bidInvalidNotEnoughMoney)
-                    return true
-                }
-                if (bidAmount < (auction.bids.maxByOrNull(RPKBid::amount)?.amount
-                                ?: auction.startPrice) + auction.minimumBidIncrement) {
-                    sender.sendMessage(plugin.messages.bidInvalidNotHighEnough.withParameters(
-                        amount = (auction.bids.maxByOrNull(RPKBid::amount)?.amount ?: auction.startPrice)
-                                + auction.minimumBidIncrement
-                    ))
-                    return true
-                }
-                val radius = plugin.config.getInt("auctions.radius")
-                val auctionLocation = auction.location
-                if (radius >= 0 && auctionLocation != null && sender.location.distanceSquared(auctionLocation) > radius * radius) {
-                    sender.sendMessage(plugin.messages.bidInvalidTooFarAway)
-                    return true
-                }
-                val bid = RPKBidImpl(
-                        auction = auction,
-                        character = character,
-                        amount = bidAmount
-                )
-                if (!auction.addBid(bid)) {
-                    sender.sendMessage(plugin.messages.bidCreateFailed)
-                }
-                auctionService.updateAuction(auction)
-                sender.sendMessage(plugin.messages.bidValid.withParameters(
-                    currencyAmount = bid.amount,
-                    currency = auction.currency,
-                    itemType = auction.item.type,
-                    itemAmount = auction.item.amount
-                ))
-                auction.bids
-                        .map(RPKBid::character)
-                        .mapNotNull(RPKCharacter::minecraftProfile)
-                        .distinct()
-                        .filter { it != minecraftProfile }
-                        .forEach { bidderMinecraftProfile ->
-                            bidderMinecraftProfile.sendMessage(plugin.messages.bidCreated.withParameters(
-                                auction = bid.auction,
-                                character = bid.character,
-                                currencyAmount = bid.amount,
-                                currency = auction.currency,
-                                itemAmount = auction.item.amount,
-                                itemType = auction.item.type
-                            ))
-                        }
             } catch (exception: NumberFormatException) {
                 sender.sendMessage(plugin.messages.bidInvalidAmountNotANumber)
             }

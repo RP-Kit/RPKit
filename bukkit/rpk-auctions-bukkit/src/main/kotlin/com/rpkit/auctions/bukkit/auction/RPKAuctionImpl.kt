@@ -27,6 +27,7 @@ import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.CompletableFuture
 
 /**
  * Auction implementation.
@@ -47,25 +48,29 @@ class RPKAuctionImpl(
     override var isBiddingOpen: Boolean = false
 ) : RPKAuction {
 
-    override val bids: List<RPKBid>
-        get() = Services[RPKBidService::class.java]?.getBids(this) ?: emptyList()
+    override val bids: CompletableFuture<List<RPKBid>>
+        get() = Services[RPKBidService::class.java]?.getBids(this) ?: CompletableFuture.completedFuture(emptyList())
 
-    override fun addBid(bid: RPKBid): Boolean {
-        if (!isBiddingOpen) return false
-        val highestCurrentBid = bids.maxByOrNull(RPKBid::amount)
-        if ((highestCurrentBid == null && bid.amount >= startPrice + minimumBidIncrement) || (highestCurrentBid != null && bid.amount >= highestCurrentBid.amount + minimumBidIncrement)) {
-            val bidService = Services[RPKBidService::class.java] ?: return false
-            if (!bidService.addBid(bid)) {
-                return false
-            }
-            if (buyOutPrice != null) {
-                if (bid.amount >= buyOutPrice) {
-                    closeBidding()
+    override fun addBid(bid: RPKBid): CompletableFuture<Boolean> {
+        if (!isBiddingOpen) return CompletableFuture.completedFuture(false)
+        return CompletableFuture.supplyAsync {
+            val highestCurrentBid = bids.join().maxByOrNull(RPKBid::amount)
+            if ((highestCurrentBid == null && bid.amount >= startPrice + minimumBidIncrement) || (highestCurrentBid != null && bid.amount >= highestCurrentBid.amount + minimumBidIncrement)) {
+                val bidService = Services[RPKBidService::class.java] ?: return@supplyAsync false
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    bidService.addBid(bid)
+                })
+                if (buyOutPrice != null) {
+                    if (bid.amount >= buyOutPrice) {
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            closeBidding()
+                        })
+                    }
                 }
+                return@supplyAsync true
+            } else {
+                return@supplyAsync false
             }
-            return true
-        } else {
-            return false
         }
     }
 
@@ -85,38 +90,45 @@ class RPKAuctionImpl(
             val event = RPKBukkitAuctionBiddingCloseEvent(this)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
-            val highestBid = bids.maxByOrNull(RPKBid::amount)
-            if (highestBid != null) {
-                if (highestBid.amount > noSellPrice ?: 0) {
-                    val character = highestBid.character
-                    val economyService = Services[RPKEconomyService::class.java]
-                    if (economyService != null) {
-                        economyService.transfer(character, this.character, currency, highestBid.amount)
-                        giveItem(character)
-                        val minecraftProfile = character.minecraftProfile
-                        if (minecraftProfile != null) {
-                            val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
-                            if (bukkitPlayer.isOnline) {
-                                val characterService = Services[RPKCharacterService::class.java]
-                                if (characterService != null) {
-                                    if (characterService.getActiveCharacter(minecraftProfile) == character) {
-                                        bukkitPlayer.player?.sendMessage(plugin.messages.auctionItemReceived.withParameters(
-                                            amount = item.amount,
-                                            itemType = item.type,
-                                            auctionId = id?.value ?: -1
-                                        ))
+            CompletableFuture.runAsync {
+                val highestBid = bids.join().maxByOrNull(RPKBid::amount)
+                if (highestBid != null) {
+                    if (highestBid.amount > noSellPrice ?: 0) {
+                        val character = highestBid.character
+                        val economyService = Services[RPKEconomyService::class.java]
+                        if (economyService != null) {
+                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                economyService.transfer(character, this.character, currency, highestBid.amount)
+                                giveItem(character)
+                                val minecraftProfile = character.minecraftProfile
+                                if (minecraftProfile != null) {
+                                    val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
+                                    if (bukkitPlayer.isOnline) {
+                                        val characterService = Services[RPKCharacterService::class.java]
+                                        if (characterService != null) {
+                                            if (characterService.getActiveCharacter(minecraftProfile) == character) {
+                                                bukkitPlayer.player?.sendMessage(
+                                                    plugin.messages.auctionItemReceived.withParameters(
+                                                        amount = item.amount,
+                                                        itemType = item.type,
+                                                        auctionId = id?.value ?: -1,
+                                                        character = this.character
+                                                    )
+                                                )
+                                            }
+                                        }
                                     }
                                 }
-                            }
+                            })
                         }
+                    } else {
+                        plugin.server.scheduler.runTask(plugin, Runnable { giveItemAndSendMessage() })
                     }
                 } else {
-                    giveItemAndSendMessage()
+                    plugin.server.scheduler.runTask(plugin, Runnable { giveItemAndSendMessage() })
                 }
-            } else {
-                giveItemAndSendMessage()
+                isBiddingOpen = false
             }
-            isBiddingOpen = false
         }
     }
 
@@ -130,7 +142,8 @@ class RPKAuctionImpl(
                     minecraftProfile.sendMessage(plugin.messages.auctionItemReceived.withParameters(
                         amount = item.amount,
                         itemType = item.type,
-                        auctionId = id?.value ?: -1
+                        auctionId = id?.value ?: -1,
+                        character = character
                     ))
                 }
             }
