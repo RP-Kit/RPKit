@@ -99,10 +99,17 @@ class PaymentWithdrawCommand(private val plugin: RPKPaymentsBukkit) : CommandExe
                 sender.sendMessage(plugin.messages["payment-withdraw-invalid-balance"])
                 return true
             }
-            bankService.setBalance(character, currency, bankService.getBalance(character, currency) + amount)
-            paymentGroup.balance = paymentGroup.balance - amount
-            paymentGroupService.updatePaymentGroup(paymentGroup)
-            sender.sendMessage(plugin.messages["payment-withdraw-valid"])
+            bankService.getBalance(character, currency).thenAccept { bankBalance ->
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    bankService.setBalance(character, currency, bankBalance + amount).thenRun {
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            paymentGroup.balance = paymentGroup.balance - amount
+                            paymentGroupService.updatePaymentGroup(paymentGroup)
+                            sender.sendMessage(plugin.messages["payment-withdraw-valid"])
+                        })
+                    }
+                })
+            }
         } catch (exception: NumberFormatException) {
             sender.sendMessage(plugin.messages["payment-withdraw-invalid-amount"])
         }

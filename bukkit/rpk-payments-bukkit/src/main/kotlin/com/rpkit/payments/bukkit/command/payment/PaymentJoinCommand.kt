@@ -29,6 +29,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 /**
  * Payment join command.
@@ -95,7 +96,7 @@ class PaymentJoinCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
         val ownerNotificationMessage = plugin.messages["payment-notification-member-join", mapOf(
                 "member" to character.name,
                 "group" to paymentGroup.name.value,
-                "date" to dateFormat.format(now)
+                "date" to dateFormat.format(now.atZone(ZoneId.systemDefault()))
         )]
         paymentGroup.owners.forEach { owner ->
             if (owner.minecraftProfile?.isOnline == true) {
