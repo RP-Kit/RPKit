@@ -27,6 +27,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
@@ -86,7 +87,7 @@ class PaymentInviteCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
         val notificationMessage = plugin.messages["payment-notification-invite", mapOf(
                 "member" to character.name,
                 "group" to paymentGroup.name.value,
-                "date" to dateFormat.format(now)
+                "date" to dateFormat.format(now.atZone(ZoneId.systemDefault()))
         )]
         if (minecraftProfile.isOnline) { // If online
             minecraftProfile.sendMessage(notificationMessage)

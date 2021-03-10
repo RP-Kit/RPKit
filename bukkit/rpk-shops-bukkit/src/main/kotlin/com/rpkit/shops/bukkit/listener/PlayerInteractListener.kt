@@ -139,14 +139,19 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
                     chestState.blockInventory.addItem(items)
                     economyService.setBalance(customerCharacter, currency, economyService.getBalance(customerCharacter, currency) + price)
                 } else if (ownerCharacter != null) {
-                    if (bankService.getBalance(ownerCharacter, currency) < price) {
-                        event.player.sendMessage(plugin.messages["shop-sell-not-enough-money"])
-                        return
+                    bankService.getBalance(ownerCharacter, currency).thenAccept { bankBalance ->
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            if (bankBalance < price) {
+                                event.player.sendMessage(plugin.messages["shop-sell-not-enough-money"])
+                                return@Runnable
+                            }
+                            event.player.inventory.removeItem(items)
+                            chestState.blockInventory.addItem(items)
+                            bankService.setBalance(ownerCharacter, currency, bankBalance - price).thenAccept {
+                                economyService.setBalance(customerCharacter, currency, economyService.getBalance(customerCharacter, currency) + price)
+                            }
+                        })
                     }
-                    event.player.inventory.removeItem(items)
-                    chestState.blockInventory.addItem(items)
-                    bankService.setBalance(ownerCharacter, currency, bankService.getBalance(ownerCharacter, currency) - price)
-                    economyService.setBalance(customerCharacter, currency, economyService.getBalance(customerCharacter, currency) + price)
                 } else {
                     event.player.sendMessage(plugin.messages["shop-character-invalid"])
                 }

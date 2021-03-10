@@ -77,74 +77,100 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
             if (event.action != Action.LEFT_CLICK_BLOCK) return
             when {
                 sign.getLine(1).equals("withdraw", ignoreCase = true) -> {
-                    when {
-                        economyService.getBalance(character, currency) + sign.getLine(2).toInt() > 1728 -> event.player.sendMessage(plugin.messages["bank-withdraw-invalid-wallet-full"])
-                        sign.getLine(2).toInt() > bankService.getBalance(character, currency) -> event.player.sendMessage(plugin.messages["bank-withdraw-invalid-not-enough-money"])
-                        else -> {
-                            val bankWithdrawEvent = RPKBukkitBankWithdrawEvent(character, currency, sign.getLine(2).toInt())
-                            plugin.server.pluginManager.callEvent(bankWithdrawEvent)
-                            if (!bankWithdrawEvent.isCancelled) {
-                                bankService.setBalance(
-                                        bankWithdrawEvent.character,
-                                        bankWithdrawEvent.currency,
-                                        bankService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency) - bankWithdrawEvent.amount
-                                )
-                                economyService.setBalance(
-                                        bankWithdrawEvent.character,
-                                        bankWithdrawEvent.currency,
-                                        economyService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency) + bankWithdrawEvent.amount
-                                )
-                                event.player.sendMessage(
-                                        plugin.messages["bank-withdraw-valid", mapOf(
-                                            "amount" to bankWithdrawEvent.amount.toString(),
-                                            "currency" to if (bankWithdrawEvent.amount == 1) {
-                                                bankWithdrawEvent.currency.nameSingular
-                                            } else {
-                                                bankWithdrawEvent.currency.namePlural
-                                            },
-                                            "wallet_balance" to economyService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).toString(),
-                                            "bank_balance" to bankService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).toString()
-                                        )]
-                                )
+                    bankService.getBalance(character, currency).thenAccept { bankBalance ->
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            when {
+                                economyService.getBalance(character, currency) + sign.getLine(2).toInt() > 1728 -> event.player.sendMessage(plugin.messages["bank-withdraw-invalid-wallet-full"])
+                                sign.getLine(2).toInt() > bankBalance -> event.player.sendMessage(plugin.messages["bank-withdraw-invalid-not-enough-money"])
+                                else -> {
+                                    val bankWithdrawEvent = RPKBukkitBankWithdrawEvent(character, currency, sign.getLine(2).toInt())
+                                    plugin.server.pluginManager.callEvent(bankWithdrawEvent)
+                                    if (!bankWithdrawEvent.isCancelled) {
+                                        bankService.setBalance(
+                                            bankWithdrawEvent.character,
+                                            bankWithdrawEvent.currency,
+                                            bankBalance - bankWithdrawEvent.amount
+                                        ).thenRun {
+                                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                                economyService.setBalance(
+                                                    bankWithdrawEvent.character,
+                                                    bankWithdrawEvent.currency,
+                                                    economyService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency) + bankWithdrawEvent.amount
+                                                )
+                                                bankService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).thenAccept { newBankBalance ->
+                                                    event.player.sendMessage(
+                                                        plugin.messages["bank-withdraw-valid", mapOf(
+                                                            "amount" to bankWithdrawEvent.amount.toString(),
+                                                            "currency" to if (bankWithdrawEvent.amount == 1) {
+                                                                bankWithdrawEvent.currency.nameSingular
+                                                            } else {
+                                                                bankWithdrawEvent.currency.namePlural
+                                                            },
+                                                            "wallet_balance" to economyService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).toString(),
+                                                            "bank_balance" to newBankBalance.toString()
+                                                        )]
+                                                    )
+                                                }
+                                            })
+                                        }
+                                    }
+                                }
                             }
-                        }
+                        })
                     }
+
                 }
                 sign.getLine(1).equals("deposit", ignoreCase = true) -> {
-                    if (sign.getLine(2).toInt() > economyService.getBalance(character, currency)) {
-                        event.player.sendMessage(plugin.messages["bank-deposit-invalid-not-enough-money"])
-                    } else {
-                        val bankDepositEvent = RPKBukkitBankDepositEvent(character, currency, sign.getLine(2).toInt())
-                        plugin.server.pluginManager.callEvent(bankDepositEvent)
-                        if (!bankDepositEvent.isCancelled) {
-                            bankService.setBalance(
-                                    bankDepositEvent.character,
-                                    bankDepositEvent.currency,
-                                    bankService.getBalance(character, currency) + bankDepositEvent.amount
-                            )
-                            economyService.setBalance(
-                                    bankDepositEvent.character,
-                                    bankDepositEvent.currency,
-                                    economyService.getBalance(character, currency) - bankDepositEvent.amount
-                            )
-                            event.player.sendMessage(plugin.messages["bank-deposit-valid", mapOf(
-                                "amount" to bankDepositEvent.amount.toString(),
-                                "currency" to if (bankDepositEvent.amount == 1)
-                                    bankDepositEvent.currency.nameSingular
-                                else
-                                    bankDepositEvent.currency.namePlural,
-                                "wallet_balance" to economyService.getBalance(bankDepositEvent.character, bankDepositEvent.currency).toString(),
-                                "bank_balance" to bankService.getBalance(bankDepositEvent.character, bankDepositEvent.currency).toString()
-                            )])
-                        }
+                    bankService.getBalance(character, currency).thenAccept { bankBalance ->
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            if (sign.getLine(2).toInt() > economyService.getBalance(character, currency)) {
+                                event.player.sendMessage(plugin.messages["bank-deposit-invalid-not-enough-money"])
+                            } else {
+                                val bankDepositEvent =
+                                    RPKBukkitBankDepositEvent(character, currency, sign.getLine(2).toInt())
+                                plugin.server.pluginManager.callEvent(bankDepositEvent)
+                                if (!bankDepositEvent.isCancelled) {
+                                    bankService.setBalance(
+                                        bankDepositEvent.character,
+                                        bankDepositEvent.currency,
+                                        bankBalance + bankDepositEvent.amount
+                                    ).thenRun {
+                                        plugin.server.scheduler.runTask(plugin, Runnable {
+                                            economyService.setBalance(
+                                                bankDepositEvent.character,
+                                                bankDepositEvent.currency,
+                                                economyService.getBalance(character, currency) - bankDepositEvent.amount
+                                            )
+                                            bankService.getBalance(bankDepositEvent.character, bankDepositEvent.currency).thenAccept { newBankBalance ->
+                                                event.player.sendMessage(
+                                                    plugin.messages["bank-deposit-valid", mapOf(
+                                                        "amount" to bankDepositEvent.amount.toString(),
+                                                        "currency" to if (bankDepositEvent.amount == 1)
+                                                            bankDepositEvent.currency.nameSingular
+                                                        else
+                                                            bankDepositEvent.currency.namePlural,
+                                                        "wallet_balance" to economyService.getBalance(
+                                                            bankDepositEvent.character,
+                                                            bankDepositEvent.currency
+                                                        ).toString(),
+                                                        "bank_balance" to newBankBalance.toString()
+                                                    )]
+                                                )
+                                            }
+                                        })
+                                    }
+                                }
+                            }
+                        })
                     }
                 }
                 sign.getLine(1).equals("balance", ignoreCase = true) -> {
-                    val balance = bankService.getBalance(character, currency)
-                    event.player.sendMessage(plugin.messages["bank-balance-valid", mapOf(
-                            Pair("amount", balance.toString()),
-                            Pair("currency", if (balance == 1) currency.nameSingular else currency.namePlural)
-                    )])
+                    bankService.getBalance(character, currency).thenAccept { balance ->
+                        event.player.sendMessage(plugin.messages["bank-balance-valid", mapOf(
+                            "amount" to balance.toString(),
+                            "currency" to if (balance == 1) currency.nameSingular else currency.namePlural
+                        )])
+                    }
                 }
             }
         } else {

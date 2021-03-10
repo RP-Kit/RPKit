@@ -23,53 +23,64 @@ import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.economy.bukkit.exception.NegativeBalanceException
+import java.util.concurrent.CompletableFuture
 
 /**
  * Bank service implementation.
  */
 class RPKBankServiceImpl(override val plugin: RPKBanksBukkit) : RPKBankService {
 
-    override fun getBalance(character: RPKCharacter, currency: RPKCurrency): Int {
-        return plugin.database.getTable(RPKBankTable::class.java)[character, currency]?.balance ?: 0
+    override fun getBalance(character: RPKCharacter, currency: RPKCurrency): CompletableFuture<Int> {
+        return plugin.database.getTable(RPKBankTable::class.java)[character, currency]
+            .thenApply { bank -> bank?.balance ?: 0}
     }
 
-    override fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int) {
-        if (amount < 0) throw NegativeBalanceException()
-        val bankTable = plugin.database.getTable(RPKBankTable::class.java)
-        var bank = bankTable[character, currency]
-        if (bank != null) {
-            bank.balance = amount
-            bankTable.update(bank)
-        } else {
-            bank = RPKBank(
-                    character,
-                    currency,
-                    amount
-            )
-            bankTable.insert(bank)
+    override fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            if (amount < 0) throw NegativeBalanceException()
+            val bankTable = plugin.database.getTable(RPKBankTable::class.java)
+            bankTable[character, currency].thenAccept { bank ->
+                if (bank != null) {
+                    bank.balance = amount
+                    bankTable.update(bank).join()
+                } else {
+                    bankTable.insert(
+                        RPKBank(
+                            character,
+                            currency,
+                            amount
+                        )
+                    ).join()
+                }
+            }
         }
     }
 
-    override fun deposit(character: RPKCharacter, currency: RPKCurrency, amount: Int) {
-        val economyService = Services[RPKEconomyService::class.java] ?: return
-        if (economyService.getBalance(character, currency) >= amount) {
-            economyService.setBalance(character, currency, economyService.getBalance(character, currency) - amount)
-            setBalance(character, currency, getBalance(character, currency) + amount)
+    override fun deposit(character: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void> {
+        val economyService = Services[RPKEconomyService::class.java] ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            if (economyService.getBalance(character, currency) >= amount) {
+                economyService.setBalance(character, currency, economyService.getBalance(character, currency) - amount)
+                setBalance(character, currency, getBalance(character, currency).join() + amount).join()
+            }
         }
     }
 
-    override fun withdraw(character: RPKCharacter, currency: RPKCurrency, amount: Int) {
-        val economyService = Services[RPKEconomyService::class.java] ?: return
-        if (getBalance(character, currency) >= amount) {
-            economyService.setBalance(character, currency, economyService.getBalance(character, currency) + amount)
-            setBalance(character, currency, getBalance(character, currency) - amount)
+    override fun withdraw(character: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void> {
+        val economyService = Services[RPKEconomyService::class.java] ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            val balance = getBalance(character, currency).join()
+            if (balance >= amount) {
+                economyService.setBalance(character, currency, economyService.getBalance(character, currency) + amount)
+                setBalance(character, currency, balance - amount)
+            }
         }
     }
 
-    override fun getRichestCharacters(currency: RPKCurrency, amount: Int): List<RPKCharacter> {
+    override fun getRichestCharacters(currency: RPKCurrency, amount: Int): CompletableFuture<List<RPKCharacter>> {
         return plugin.database.getTable(RPKBankTable::class.java)
-                .getTop(amount, currency)
-                .map(RPKBank::character)
+            .getTop(amount, currency)
+            .thenApply { banks -> banks.map(RPKBank::character) }
     }
 
 }

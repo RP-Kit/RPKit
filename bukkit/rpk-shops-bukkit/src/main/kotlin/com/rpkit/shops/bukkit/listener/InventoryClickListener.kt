@@ -122,7 +122,11 @@ class InventoryClickListener(val plugin: RPKShopsBukkit) : Listener {
             }
             economyService.setBalance(buyerCharacter, currency, economyService.getBalance(buyerCharacter, currency) - price)
             if (sellerCharacter != null) {
-                bankService.setBalance(sellerCharacter, currency, bankService.getBalance(sellerCharacter, currency) + price)
+                bankService.getBalance(sellerCharacter, currency).thenAccept { bankBalance ->
+                    plugin.server.scheduler.runTask(plugin, Runnable {
+                        bankService.setBalance(sellerCharacter, currency, bankBalance + price)
+                    })
+                }
             }
             buyerBukkitPlayer.inventory.addItem(amtItem)
             chest.blockInventory.removeItem(amtItem)

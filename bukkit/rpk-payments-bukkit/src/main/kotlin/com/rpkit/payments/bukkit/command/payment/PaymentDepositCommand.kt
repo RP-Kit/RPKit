@@ -95,13 +95,18 @@ class PaymentDepositCommand(private val plugin: RPKPaymentsBukkit) : CommandExec
                 sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
                 return true
             }
-            if (bankService.getBalance(character, currency) >= amount) {
-                bankService.setBalance(character, currency, bankService.getBalance(character, currency) - amount)
-                paymentGroup.balance = paymentGroup.balance + amount
-                paymentGroupService.updatePaymentGroup(paymentGroup)
-                sender.sendMessage(plugin.messages["payment-deposit-valid"])
-            } else {
-                sender.sendMessage(plugin.messages["payment-deposit-invalid-balance"])
+            bankService.getBalance(character, currency).thenAccept { bankBalance ->
+                if (bankBalance >= amount) {
+                    bankService.setBalance(character, currency, bankBalance - amount).thenRun {
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            paymentGroup.balance = paymentGroup.balance + amount
+                            paymentGroupService.updatePaymentGroup(paymentGroup)
+                            sender.sendMessage(plugin.messages["payment-deposit-valid"])
+                        })
+                    }
+                } else {
+                    sender.sendMessage(plugin.messages["payment-deposit-invalid-balance"])
+                }
             }
         } catch (exception: NumberFormatException) {
             sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
