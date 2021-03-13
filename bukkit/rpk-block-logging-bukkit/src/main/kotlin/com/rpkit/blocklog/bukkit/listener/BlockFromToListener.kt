@@ -36,8 +36,8 @@ class BlockFromToListener(private val plugin: RPKBlockLoggingBukkit) : Listener 
             plugin.logger.severe("Failed to retrieve block history service, did the plugin load correctly?")
             return
         }
-        val blockHistory = blockHistoryService.getBlockHistory(event.block)
-        val blockChange = RPKBlockChangeImpl(
+        blockHistoryService.getBlockHistory(event.block).thenAccept { blockHistory ->
+            val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
                 time = LocalDateTime.now(),
                 profile = null,
@@ -46,8 +46,11 @@ class BlockFromToListener(private val plugin: RPKBlockLoggingBukkit) : Listener 
                 from = event.toBlock.type,
                 to = event.block.type,
                 reason = "FROM_TO"
-        )
-        blockHistoryService.addBlockChange(blockChange)
+            )
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                blockHistoryService.addBlockChange(blockChange)
+            })
+        }
     }
 
 }

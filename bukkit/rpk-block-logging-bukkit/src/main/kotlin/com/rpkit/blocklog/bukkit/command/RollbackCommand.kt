@@ -68,11 +68,17 @@ class RollbackCommand(private val plugin: RPKBlockLoggingBukkit) : CommandExecut
                     val event = RPKBukkitBlockRollbackEvent(block, time)
                     plugin.server.pluginManager.callEvent(event)
                     if (event.isCancelled) continue
-                    block.type = blockHistoryService.getBlockTypeAtTime(event.block, event.time)
-                    val state = block.state
-                    if (state is InventoryHolder) {
-                        state.inventory.contents = blockHistoryService.getBlockInventoryAtTime(event.block, event.time)
-                        state.update()
+                    blockHistoryService.getBlockTypeAtTime(event.block, event.time).thenAccept { type ->
+                        blockHistoryService.getBlockInventoryAtTime(event.block, event.time).thenAccept { inventoryContents ->
+                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                block.type = type
+                                val state = block.state
+                                if (state is InventoryHolder) {
+                                    state.inventory.contents = inventoryContents
+                                    state.update()
+                                }
+                            })
+                        }
                     }
                 }
             }

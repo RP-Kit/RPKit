@@ -16,6 +16,7 @@
 
 package com.rpkit.blocklog.bukkit.listener
 
+import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockChangeImpl
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.core.service.Services
@@ -26,13 +27,13 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPistonRetractEvent
 import java.time.LocalDateTime
 
-class BlockPistonRetractListener : Listener {
+class BlockPistonRetractListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
 
     @EventHandler(priority = MONITOR)
     fun onBlockPistonRetract(event: BlockPistonRetractEvent) {
         val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
-        val blockHistory = blockHistoryService.getBlockHistory(event.block)
-        val blockChange = RPKBlockChangeImpl(
+        blockHistoryService.getBlockHistory(event.block).thenAccept { blockHistory ->
+            val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
                 time = LocalDateTime.now(),
                 profile = null,
@@ -41,8 +42,11 @@ class BlockPistonRetractListener : Listener {
                 from = event.block.type,
                 to = Material.AIR,
                 reason = "PISTON"
-        )
-        blockHistoryService.addBlockChange(blockChange)
+            )
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                blockHistoryService.addBlockChange(blockChange)
+            })
+        }
     }
 
 }

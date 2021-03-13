@@ -34,8 +34,8 @@ class EntityExplodeListener(private val plugin: RPKBlockLoggingBukkit) : Listene
     fun onEntityExplode(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
             val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
-            val blockHistory = blockHistoryService.getBlockHistory(block)
-            val blockChange = RPKBlockChangeImpl(
+            blockHistoryService.getBlockHistory(block).thenAccept { blockHistory ->
+                val blockChange = RPKBlockChangeImpl(
                     blockHistory = blockHistory,
                     time = LocalDateTime.now(),
                     profile = null,
@@ -44,8 +44,11 @@ class EntityExplodeListener(private val plugin: RPKBlockLoggingBukkit) : Listene
                     from = block.type,
                     to = Material.AIR,
                     reason = "ENTITY_EXPLODE"
-            )
-            blockHistoryService.addBlockChange(blockChange)
+                )
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    blockHistoryService.addBlockChange(blockChange)
+                })
+            }
         }
     }
 

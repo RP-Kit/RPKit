@@ -21,8 +21,8 @@ import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChangeImpl
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.block.BlockState
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -50,8 +50,8 @@ class InventoryClickListener(private val plugin: RPKBlockLoggingBukkit) : Listen
                 val minecraftProfile = minecraftProfileService.getMinecraftProfile(whoClicked)
                 val profile = minecraftProfile?.profile as? RPKProfile
                 val character = if (minecraftProfile == null) null else characterService.getActiveCharacter(minecraftProfile)
-                val blockHistory = blockHistoryService.getBlockHistory(inventoryHolder.block)
-                val blockInventoryChange = RPKBlockInventoryChangeImpl(
+                blockHistoryService.getBlockHistory(inventoryHolder.block).thenAccept { blockHistory ->
+                    val blockInventoryChange = RPKBlockInventoryChangeImpl(
                         blockHistory = blockHistory,
                         time = LocalDateTime.now(),
                         profile = profile,
@@ -60,8 +60,11 @@ class InventoryClickListener(private val plugin: RPKBlockLoggingBukkit) : Listen
                         from = oldContents,
                         to = event.inventory.contents,
                         reason = "CLICK"
-                )
-                blockHistoryService.addBlockInventoryChange(blockInventoryChange)
+                    )
+                    plugin.server.scheduler.runTask(plugin, Runnable {
+                        blockHistoryService.addBlockInventoryChange(blockInventoryChange)
+                    })
+                }
             }
         }.runTaskLater(plugin, 1L) // Scheduled 1 tick later to allow inventory change to take place.
     }

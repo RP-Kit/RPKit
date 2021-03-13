@@ -32,8 +32,8 @@ class EntityBlockFormListener(private val plugin: RPKBlockLoggingBukkit) : Liste
     @EventHandler(priority = MONITOR)
     fun onEntityBlockForm(event: EntityBlockFormEvent) {
         val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
-        val blockHistory = blockHistoryService.getBlockHistory(event.block)
-        val blockChange = RPKBlockChangeImpl(
+        blockHistoryService.getBlockHistory(event.block).thenAccept { blockHistory ->
+            val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
                 time = LocalDateTime.now(),
                 profile = null,
@@ -42,8 +42,12 @@ class EntityBlockFormListener(private val plugin: RPKBlockLoggingBukkit) : Liste
                 from = event.block.type,
                 to = event.newState.type,
                 reason = "ENTITY_FORM"
-        )
-        blockHistoryService.addBlockChange(blockChange)
+            )
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                blockHistoryService.addBlockChange(blockChange)
+            })
+        }
+
     }
 
 }

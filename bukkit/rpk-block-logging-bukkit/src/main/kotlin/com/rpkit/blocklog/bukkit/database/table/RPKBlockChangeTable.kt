@@ -16,12 +16,7 @@
 package com.rpkit.blocklog.bukkit.database.table
 
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
-import com.rpkit.blocklog.bukkit.block.RPKBlockChange
-import com.rpkit.blocklog.bukkit.block.RPKBlockChangeId
-import com.rpkit.blocklog.bukkit.block.RPKBlockChangeImpl
-import com.rpkit.blocklog.bukkit.block.RPKBlockHistory
-import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryId
-import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
+import com.rpkit.blocklog.bukkit.block.*
 import com.rpkit.blocklog.bukkit.database.create
 import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_CHANGE
 import com.rpkit.characters.bukkit.character.RPKCharacterId
@@ -34,6 +29,7 @@ import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.Material
+import java.util.concurrent.CompletableFuture
 
 class RPKBlockChangeTable(private val database: Database, private val plugin: RPKBlockLoggingBukkit) : Table {
 
@@ -48,38 +44,41 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
         null
     }
 
-    fun insert(entity: RPKBlockChange) {
-        database.create
+    fun insert(entity: RPKBlockChange): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_BLOCK_CHANGE,
-                        RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID,
-                        RPKIT_BLOCK_CHANGE.TIME,
-                        RPKIT_BLOCK_CHANGE.PROFILE_ID,
-                        RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID,
-                        RPKIT_BLOCK_CHANGE.CHARACTER_ID,
-                        RPKIT_BLOCK_CHANGE.FROM,
-                        RPKIT_BLOCK_CHANGE.TO,
-                        RPKIT_BLOCK_CHANGE.REASON
+                    RPKIT_BLOCK_CHANGE,
+                    RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID,
+                    RPKIT_BLOCK_CHANGE.TIME,
+                    RPKIT_BLOCK_CHANGE.PROFILE_ID,
+                    RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID,
+                    RPKIT_BLOCK_CHANGE.CHARACTER_ID,
+                    RPKIT_BLOCK_CHANGE.FROM,
+                    RPKIT_BLOCK_CHANGE.TO,
+                    RPKIT_BLOCK_CHANGE.REASON
                 )
                 .values(
-                        entity.blockHistory.id?.value,
-                        entity.time,
-                        entity.profile?.id?.value,
-                        entity.minecraftProfile?.id?.value,
-                        entity.character?.id?.value,
-                        entity.from.toString(),
-                        entity.to.toString(),
-                        entity.reason
+                    entity.blockHistory.id?.value,
+                    entity.time,
+                    entity.profile?.id?.value,
+                    entity.minecraftProfile?.id?.value,
+                    entity.character?.id?.value,
+                    entity.from.toString(),
+                    entity.to.toString(),
+                    entity.reason
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKBlockChangeId(id)
-        cache?.set(id, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKBlockChangeId(id)
+            cache?.set(id, entity)
+        }
     }
 
-    fun update(entity: RPKBlockChange) {
-        val id = entity.id ?: return
-        database.create
+    fun update(entity: RPKBlockChange): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_BLOCK_CHANGE)
                 .set(RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID, entity.blockHistory.id?.value)
                 .set(RPKIT_BLOCK_CHANGE.TIME, entity.time)
@@ -91,62 +90,65 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
                 .set(RPKIT_BLOCK_CHANGE.REASON, entity.reason)
                 .where(RPKIT_BLOCK_CHANGE.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKBlockChangeId): RPKBlockChange? {
+    operator fun get(id: RPKBlockChangeId): CompletableFuture<RPKBlockChange?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
+            return CompletableFuture.completedFuture(cache[id.value])
         } else {
-            val result = database.create
+            return CompletableFuture.supplyAsync {
+                val result = database.create
                     .select(
-                            RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID,
-                            RPKIT_BLOCK_CHANGE.TIME,
-                            RPKIT_BLOCK_CHANGE.PROFILE_ID,
-                            RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID,
-                            RPKIT_BLOCK_CHANGE.CHARACTER_ID,
-                            RPKIT_BLOCK_CHANGE.FROM,
-                            RPKIT_BLOCK_CHANGE.TO,
-                            RPKIT_BLOCK_CHANGE.REASON
+                        RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID,
+                        RPKIT_BLOCK_CHANGE.TIME,
+                        RPKIT_BLOCK_CHANGE.PROFILE_ID,
+                        RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID,
+                        RPKIT_BLOCK_CHANGE.CHARACTER_ID,
+                        RPKIT_BLOCK_CHANGE.FROM,
+                        RPKIT_BLOCK_CHANGE.TO,
+                        RPKIT_BLOCK_CHANGE.REASON
                     )
                     .from(RPKIT_BLOCK_CHANGE)
                     .where(RPKIT_BLOCK_CHANGE.ID.eq(id.value))
-                    .fetchOne() ?: return null
-            val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return null
-            val blockHistoryId = result.get(RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID)
-            val blockHistory = blockHistoryService.getBlockHistory(RPKBlockHistoryId(blockHistoryId))
-            if (blockHistory == null) {
-                database.create
+                    .fetchOne() ?: return@supplyAsync null
+                val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return@supplyAsync null
+                val blockHistoryId = result.get(RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID)
+                val blockHistory = blockHistoryService.getBlockHistory(RPKBlockHistoryId(blockHistoryId)).join()
+                if (blockHistory == null) {
+                    database.create
                         .deleteFrom(RPKIT_BLOCK_CHANGE)
                         .where(RPKIT_BLOCK_CHANGE.ID.eq(id.value))
                         .execute()
-                cache?.remove(id.value)
-                return null
-            }
-            val profileService = Services[RPKProfileService::class.java] ?: return null
-            val profileId = result.get(RPKIT_BLOCK_CHANGE.PROFILE_ID)
-            val profile = if (profileId == null) null else profileService.getProfile(RPKProfileId(profileId))
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return null
-            val minecraftProfileId = result.get(RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID)
-            val minecraftProfile = if (minecraftProfileId == null) {
-                null
-            } else {
-                minecraftProfileService.getMinecraftProfile(RPKMinecraftProfileId(minecraftProfileId))
-            }
-            val characterService = Services[RPKCharacterService::class.java] ?: return null
-            val characterId = result.get(RPKIT_BLOCK_CHANGE.CHARACTER_ID)
-            val character = if (characterId == null) null else characterService.getCharacter(RPKCharacterId(characterId))
-            val fromMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM))
-            val toMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO))
-            if (fromMaterial == null || toMaterial == null) {
-                database.create
+                    cache?.remove(id.value)
+                    return@supplyAsync null
+                }
+                val profileService = Services[RPKProfileService::class.java] ?: return@supplyAsync null
+                val profileId = result.get(RPKIT_BLOCK_CHANGE.PROFILE_ID)
+                val profile = if (profileId == null) null else profileService.getProfile(RPKProfileId(profileId))
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@supplyAsync null
+                val minecraftProfileId = result.get(RPKIT_BLOCK_CHANGE.MINECRAFT_PROFILE_ID)
+                val minecraftProfile = if (minecraftProfileId == null) {
+                    null
+                } else {
+                    minecraftProfileService.getMinecraftProfile(RPKMinecraftProfileId(minecraftProfileId))
+                }
+                val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync null
+                val characterId = result.get(RPKIT_BLOCK_CHANGE.CHARACTER_ID)
+                val character =
+                    if (characterId == null) null else characterService.getCharacter(RPKCharacterId(characterId))
+                val fromMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM))
+                val toMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO))
+                if (fromMaterial == null || toMaterial == null) {
+                    database.create
                         .deleteFrom(RPKIT_BLOCK_CHANGE)
                         .where(RPKIT_BLOCK_CHANGE.ID.eq(id.value))
                         .execute()
-                cache?.remove(id.value)
-                return null
-            }
-            val blockChange = RPKBlockChangeImpl(
+                    cache?.remove(id.value)
+                    return@supplyAsync null
+                }
+                val blockChange = RPKBlockChangeImpl(
                     id,
                     blockHistory,
                     result.get(RPKIT_BLOCK_CHANGE.TIME),
@@ -156,29 +158,35 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
                     fromMaterial,
                     toMaterial,
                     result.get(RPKIT_BLOCK_CHANGE.REASON)
-            )
-            cache?.set(id.value, blockChange)
-            return blockChange
+                )
+                cache?.set(id.value, blockChange)
+                return@supplyAsync blockChange
+            }
         }
     }
 
-    fun get(blockHistory: RPKBlockHistory): List<RPKBlockChange> {
-        val results = database.create
+    fun get(blockHistory: RPKBlockHistory): CompletableFuture<List<RPKBlockChange>> {
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_BLOCK_CHANGE.ID)
                 .from(RPKIT_BLOCK_CHANGE)
                 .where(RPKIT_BLOCK_CHANGE.BLOCK_HISTORY_ID.eq(blockHistory.id?.value))
                 .fetch()
-        return results
+            val futures = results
                 .map { result -> get(RPKBlockChangeId(result[RPKIT_BLOCK_CHANGE.ID])) }
-                .filterNotNull()
+            CompletableFuture.allOf(*futures.toTypedArray()).join()
+            return@supplyAsync futures.mapNotNull(CompletableFuture<RPKBlockChange?>::join)
+        }
     }
 
-    fun delete(entity: RPKBlockChange) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKBlockChange): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_BLOCK_CHANGE)
                 .where(RPKIT_BLOCK_CHANGE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 }

@@ -44,22 +44,25 @@ class InventoryHistoryCommand(private val plugin: RPKBlockLoggingBukkit) : Comma
             sender.sendMessage(plugin.messages["no-block-history-service"])
             return true
         }
-        val blockHistory = blockHistoryService.getBlockHistory(targetBlock)
-        val changes = blockHistory.inventoryChanges
-        if (changes.isEmpty()) {
-            sender.sendMessage(plugin.messages["inventory-history-no-changes"])
-            return true
-        }
-        for (change in changes.sortedBy(RPKBlockInventoryChange::time).take(100)) {
-            sender.sendMessage(plugin.messages["inventory-history-change", mapOf(
-                "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time.atZone(ZoneId.systemDefault())),
-                "profile" to (change.profile?.name?.value ?: "None"),
-                "minecraft_profile" to (change.minecraftProfile?.name ?: "None"),
-                "character" to (change.character?.name ?: "None"),
-                "from" to change.from.contentToString(),
-                "to" to change.to.contentToString(),
-                "reason" to change.reason
-            )])
+        blockHistoryService.getBlockHistory(targetBlock).thenAccept { blockHistory ->
+            blockHistory.inventoryChanges.thenAccept getChanges@{ changes ->
+                if (changes.isEmpty()) {
+                    sender.sendMessage(plugin.messages["inventory-history-no-changes"])
+                    return@getChanges
+                }
+                for (change in changes.sortedBy(RPKBlockInventoryChange::time).take(100)) {
+                    sender.sendMessage(plugin.messages["inventory-history-change", mapOf(
+                        "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time.atZone(ZoneId.systemDefault())),
+                        "profile" to (change.profile?.name?.value ?: "None"),
+                        "minecraft_profile" to (change.minecraftProfile?.name ?: "None"),
+                        "character" to (change.character?.name ?: "None"),
+                        "from" to change.from.contentToString(),
+                        "to" to change.to.contentToString(),
+                        "reason" to change.reason
+                    )])
+                }
+            }
+
         }
         return true
     }

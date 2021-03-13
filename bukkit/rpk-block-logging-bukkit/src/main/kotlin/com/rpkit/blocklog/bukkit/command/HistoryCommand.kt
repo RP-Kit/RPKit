@@ -44,22 +44,27 @@ class HistoryCommand(private val plugin: RPKBlockLoggingBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-block-history-service"])
             return true
         }
-        val blockHistory = blockHistoryService.getBlockHistory(targetBlock)
-        val changes = blockHistory.changes
-        if (changes.isEmpty()) {
-            sender.sendMessage(plugin.messages["history-no-changes"])
-            return true
-        }
-        for (change in changes.sortedBy(RPKBlockChange::time).take(100)) {
-            sender.sendMessage(plugin.messages["history-change", mapOf(
-                "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").format(change.time.atZone(ZoneId.systemDefault())),
-                "profile" to (change.profile?.name?.value ?: "None"),
-                "minecraft_profile" to (change.minecraftProfile?.name ?: "None"),
-                "character" to (change.character?.name ?: "None"),
-                "from" to change.from.toString().toLowerCase().replace('_', ' '),
-                "to" to change.to.toString().toLowerCase().replace('_', ' '),
-                "reason" to change.reason
-            )])
+        blockHistoryService.getBlockHistory(targetBlock).thenAccept { blockHistory ->
+            blockHistory.changes.thenAccept getChanges@{ changes ->
+                if (changes.isEmpty()) {
+                    sender.sendMessage(plugin.messages["history-no-changes"])
+                    return@getChanges
+                }
+                for (change in changes.sortedBy(RPKBlockChange::time).take(100)) {
+                    sender.sendMessage(
+                        plugin.messages["history-change", mapOf(
+                            "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz")
+                                .format(change.time.atZone(ZoneId.systemDefault())),
+                            "profile" to (change.profile?.name?.value ?: "None"),
+                            "minecraft_profile" to (change.minecraftProfile?.name ?: "None"),
+                            "character" to (change.character?.name ?: "None"),
+                            "from" to change.from.toString().toLowerCase().replace('_', ' '),
+                            "to" to change.to.toString().toLowerCase().replace('_', ' '),
+                            "reason" to change.reason
+                        )]
+                    )
+                }
+            }
         }
         return true
     }

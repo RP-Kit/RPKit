@@ -36,8 +36,8 @@ class BlockPistonExtendListener(private val plugin: RPKBlockLoggingBukkit) : Lis
         var block = event.block
         var count = 0
         while (block.type != Material.AIR && count < 12) {
-            val blockHistory = blockHistoryService.getBlockHistory(block)
-            val blockChange = RPKBlockChangeImpl(
+            blockHistoryService.getBlockHistory(block).thenAccept { blockHistory ->
+                val blockChange = RPKBlockChangeImpl(
                     blockHistory = blockHistory,
                     time = LocalDateTime.now(),
                     profile = null,
@@ -46,8 +46,11 @@ class BlockPistonExtendListener(private val plugin: RPKBlockLoggingBukkit) : Lis
                     from = block.type,
                     to = block.getRelative(event.direction.oppositeFace).type,
                     reason = "PISTON"
-            )
-            blockHistoryService.addBlockChange(blockChange)
+                )
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    blockHistoryService.addBlockChange(blockChange)
+                })
+            }
             block = block.getRelative(event.direction)
             count++
         }

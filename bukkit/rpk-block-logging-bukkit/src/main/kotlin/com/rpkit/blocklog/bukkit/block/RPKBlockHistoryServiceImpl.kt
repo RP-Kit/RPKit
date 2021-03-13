@@ -24,91 +24,100 @@ import org.bukkit.block.Block
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 
 class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : RPKBlockHistoryService {
 
-    override fun getBlockHistory(id: RPKBlockHistoryId): RPKBlockHistory? {
+    override fun getBlockHistory(id: RPKBlockHistoryId): CompletableFuture<RPKBlockHistory?> {
         return plugin.database.getTable(RPKBlockHistoryTable::class.java)[id]
     }
 
-    override fun addBlockHistory(blockHistory: RPKBlockHistory) {
-        plugin.database.getTable(RPKBlockHistoryTable::class.java).insert(blockHistory)
+    override fun addBlockHistory(blockHistory: RPKBlockHistory): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKBlockHistoryTable::class.java).insert(blockHistory)
     }
 
-    override fun updateBlockHistory(blockHistory: RPKBlockHistory) {
-        plugin.database.getTable(RPKBlockHistoryTable::class.java).update(blockHistory)
+    override fun updateBlockHistory(blockHistory: RPKBlockHistory): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKBlockHistoryTable::class.java).update(blockHistory)
     }
 
-    override fun removeBlockHistory(blockHistory: RPKBlockHistory) {
-        plugin.database.getTable(RPKBlockHistoryTable::class.java).delete(blockHistory)
+    override fun removeBlockHistory(blockHistory: RPKBlockHistory): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKBlockHistoryTable::class.java).delete(blockHistory)
     }
 
-    override fun getBlockChange(id: RPKBlockChangeId): RPKBlockChange? {
+    override fun getBlockChange(id: RPKBlockChangeId): CompletableFuture<RPKBlockChange?> {
         return plugin.database.getTable(RPKBlockChangeTable::class.java)[id]
     }
 
-    override fun addBlockChange(blockChange: RPKBlockChange) {
-        plugin.database.getTable(RPKBlockChangeTable::class.java).insert(blockChange)
+    override fun addBlockChange(blockChange: RPKBlockChange): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKBlockChangeTable::class.java).insert(blockChange)
     }
 
-    override fun updateBlockChange(blockChange: RPKBlockChange) {
-        plugin.database.getTable(RPKBlockChangeTable::class.java).update(blockChange)
+    override fun updateBlockChange(blockChange: RPKBlockChange): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKBlockChangeTable::class.java).update(blockChange)
     }
 
-    override fun removeBlockChange(blockChange: RPKBlockChange) {
-        plugin.database.getTable(RPKBlockChangeTable::class.java).delete(blockChange)
+    override fun removeBlockChange(blockChange: RPKBlockChange): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKBlockChangeTable::class.java).delete(blockChange)
     }
 
-    override fun getBlockInventoryChange(id: RPKBlockInventoryChangeId): RPKBlockInventoryChange? {
+    override fun getBlockInventoryChange(id: RPKBlockInventoryChangeId): CompletableFuture<RPKBlockInventoryChange?> {
         return plugin.database.getTable(RPKBlockInventoryChangeTable::class.java)[id]
     }
 
-    override fun addBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange) {
-        plugin.database.getTable(RPKBlockInventoryChangeTable::class.java).insert(blockInventoryChange)
+    override fun addBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKBlockInventoryChangeTable::class.java).insert(blockInventoryChange)
     }
 
-    override fun updateBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange) {
-        plugin.database.getTable(RPKBlockInventoryChangeTable::class.java).update(blockInventoryChange)
+    override fun updateBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKBlockInventoryChangeTable::class.java).update(blockInventoryChange)
     }
 
-    override fun removeBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange) {
-        plugin.database.getTable(RPKBlockInventoryChangeTable::class.java).delete(blockInventoryChange)
+    override fun removeBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKBlockInventoryChangeTable::class.java).delete(blockInventoryChange)
     }
 
-    override fun getBlockHistory(block: Block): RPKBlockHistory {
-        var blockHistory = plugin.database.getTable(RPKBlockHistoryTable::class.java).get(block)
-        if (blockHistory == null) {
-            blockHistory = RPKBlockHistoryImpl(
+    override fun getBlockHistory(block: Block): CompletableFuture<RPKBlockHistory> {
+        return CompletableFuture.supplyAsync {
+            var blockHistory = plugin.database.getTable(RPKBlockHistoryTable::class.java).get(block).join()
+            if (blockHistory == null) {
+                blockHistory = RPKBlockHistoryImpl(
                     plugin,
                     world = block.world,
                     x = block.x,
                     y = block.y,
                     z = block.z
-            )
-            addBlockHistory(blockHistory)
+                )
+                addBlockHistory(blockHistory).join()
+            }
+            return@supplyAsync blockHistory
         }
-        return blockHistory
     }
 
-    override fun getBlockTypeAtTime(block: Block, time: LocalDateTime): Material {
-        val history = getBlockHistory(block)
-        var type = block.type
-        history.changes
+    override fun getBlockTypeAtTime(block: Block, time: LocalDateTime): CompletableFuture<Material> {
+        return CompletableFuture.supplyAsync {
+            val history = getBlockHistory(block).join()
+            var type = block.type
+            history.changes
+                .join()
                 .asReversed()
                 .takeWhile { time <= it.time }
                 .forEach { type = it.from }
-        return type
+            return@supplyAsync type
+        }
     }
 
-    override fun getBlockInventoryAtTime(block: Block, time: LocalDateTime): Array<ItemStack> {
-        val history = getBlockHistory(block)
-        var inventoryContents = (block.state as? InventoryHolder)?.inventory?.contents ?: emptyArray<ItemStack>()
-        history.inventoryChanges
+    override fun getBlockInventoryAtTime(block: Block, time: LocalDateTime): CompletableFuture<Array<ItemStack>> {
+        return CompletableFuture.supplyAsync {
+            val history = getBlockHistory(block).join()
+            var inventoryContents = (block.state as? InventoryHolder)?.inventory?.contents ?: emptyArray<ItemStack>()
+            history.inventoryChanges
+                .join()
                 .asReversed()
                 .takeWhile { time <= it.time }
                 .forEach { inventoryContents = it.from }
-        return inventoryContents
+            return@supplyAsync inventoryContents
+        }
     }
 
 }
