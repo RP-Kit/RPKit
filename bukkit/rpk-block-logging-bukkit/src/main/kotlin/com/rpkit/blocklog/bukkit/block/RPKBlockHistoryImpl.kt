@@ -19,6 +19,7 @@ import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.database.table.RPKBlockChangeTable
 import com.rpkit.blocklog.bukkit.database.table.RPKBlockInventoryChangeTable
 import org.bukkit.World
+import java.util.concurrent.CompletableFuture
 
 
 class RPKBlockHistoryImpl(
@@ -30,10 +31,10 @@ class RPKBlockHistoryImpl(
         override val z: Int
 ) : RPKBlockHistory {
 
-    override val changes: List<RPKBlockChange>
+    override val changes: CompletableFuture<List<RPKBlockChange>>
         get() = plugin.database.getTable(RPKBlockChangeTable::class.java).get(this)
 
-    override val inventoryChanges: List<RPKBlockInventoryChange>
+    override val inventoryChanges: CompletableFuture<List<RPKBlockInventoryChange>>
         get() = plugin.database.getTable(RPKBlockInventoryChangeTable::class.java).get(this)
 
 }

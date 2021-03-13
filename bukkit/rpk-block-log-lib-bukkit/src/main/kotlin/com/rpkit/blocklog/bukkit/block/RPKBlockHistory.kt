@@ -16,6 +16,7 @@
 package com.rpkit.blocklog.bukkit.block
 
 import org.bukkit.World
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKBlockHistory {
@@ -25,7 +26,7 @@ interface RPKBlockHistory {
     val x: Int
     val y: Int
     val z: Int
-    val changes: List<RPKBlockChange>
-    val inventoryChanges: List<RPKBlockInventoryChange>
+    val changes: CompletableFuture<List<RPKBlockChange>>
+    val inventoryChanges: CompletableFuture<List<RPKBlockInventoryChange>>
 
 }
