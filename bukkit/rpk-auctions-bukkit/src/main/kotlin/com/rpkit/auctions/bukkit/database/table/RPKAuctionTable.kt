@@ -164,7 +164,7 @@ class RPKAuctionTable(
                 val currency = currencyService.getCurrency(RPKCurrencyName(currencyName))
                 val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync null
                 val characterId = result.get(RPKIT_AUCTION.CHARACTER_ID)
-                val character = characterService.getCharacter(RPKCharacterId(characterId))
+                val character = characterService.getCharacter(RPKCharacterId(characterId)).join()
                 if (currency != null && character != null) {
                     val auction = RPKAuctionImpl(
                         plugin,

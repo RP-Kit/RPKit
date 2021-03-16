@@ -70,7 +70,7 @@ class PaymentDepositCommand(private val plugin: RPKPaymentsBukkit) : CommandExec
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["payment-deposit-invalid-character"])
             return true
@@ -80,36 +80,38 @@ class PaymentDepositCommand(private val plugin: RPKPaymentsBukkit) : CommandExec
             sender.sendMessage(plugin.messages["payment-deposit-invalid-group"])
             return true
         }
-        if (!paymentGroup.owners.contains(character)) {
-            sender.sendMessage(plugin.messages["payment-deposit-invalid-owner"])
-            return true
-        }
-        val currency = paymentGroup.currency
-        if (currency == null) {
-            sender.sendMessage(plugin.messages["payment-deposit-invalid-currency"])
-            return true
-        }
-        try {
-            val amount = args.last().toInt()
-            if (amount <= 0) {
-                sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
-                return true
+        paymentGroup.owners.thenAccept { owners ->
+            if (!owners.contains(character)) {
+                sender.sendMessage(plugin.messages["payment-deposit-invalid-owner"])
+                return@thenAccept
             }
-            bankService.getBalance(character, currency).thenAccept { bankBalance ->
-                if (bankBalance >= amount) {
-                    bankService.setBalance(character, currency, bankBalance - amount).thenRun {
-                        plugin.server.scheduler.runTask(plugin, Runnable {
-                            paymentGroup.balance = paymentGroup.balance + amount
-                            paymentGroupService.updatePaymentGroup(paymentGroup)
-                            sender.sendMessage(plugin.messages["payment-deposit-valid"])
-                        })
-                    }
-                } else {
-                    sender.sendMessage(plugin.messages["payment-deposit-invalid-balance"])
+            val currency = paymentGroup.currency
+            if (currency == null) {
+                sender.sendMessage(plugin.messages["payment-deposit-invalid-currency"])
+                return@thenAccept
+            }
+            try {
+                val amount = args.last().toInt()
+                if (amount <= 0) {
+                    sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
+                    return@thenAccept
                 }
+                bankService.getBalance(character, currency).thenAccept { bankBalance ->
+                    if (bankBalance >= amount) {
+                        bankService.setBalance(character, currency, bankBalance - amount).thenRun {
+                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                paymentGroup.balance = paymentGroup.balance + amount
+                                paymentGroupService.updatePaymentGroup(paymentGroup)
+                                sender.sendMessage(plugin.messages["payment-deposit-valid"])
+                            })
+                        }
+                    } else {
+                        sender.sendMessage(plugin.messages["payment-deposit-invalid-balance"])
+                    }
+                }
+            } catch (exception: NumberFormatException) {
+                sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
             }
-        } catch (exception: NumberFormatException) {
-            sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
         }
         return true
     }

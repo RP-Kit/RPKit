@@ -37,7 +37,7 @@ class EntityDamageListener(private val plugin: RPKUnconsciousnessBukkit) : Liste
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         if (!unconsciousnessService.isUnconscious(character)) return
         event.isCancelled = true
     }

@@ -23,11 +23,7 @@ import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.command.payment.PaymentCommand
-import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupInviteTable
-import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupMemberTable
-import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupOwnerTable
-import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupTable
-import com.rpkit.payments.bukkit.database.table.RPKPaymentNotificationTable
+import com.rpkit.payments.bukkit.database.table.*
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupServiceImpl
 import com.rpkit.payments.bukkit.listener.PlayerJoinListener
@@ -116,7 +112,7 @@ class RPKPaymentsBukkit : RPKBukkitPlugin() {
     }
 
     fun registerListeners() {
-        registerListeners(PlayerJoinListener())
+        registerListeners(PlayerJoinListener(this))
     }
 
 }

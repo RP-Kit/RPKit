@@ -67,13 +67,17 @@ class PaymentRemoveCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
-        if (!paymentGroup.owners.contains(character)) {
-            sender.sendMessage(plugin.messages["payment-remove-invalid-not-an-owner"])
-            return true
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+        paymentGroup.owners.thenAccept { owners ->
+            if (!owners.contains(character)) {
+                sender.sendMessage(plugin.messages["payment-remove-invalid-not-an-owner"])
+                return@thenAccept
+            }
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                paymentGroupService.removePaymentGroup(paymentGroup)
+                sender.sendMessage(plugin.messages["payment-remove-valid"])
+            })
         }
-        paymentGroupService.removePaymentGroup(paymentGroup)
-        sender.sendMessage(plugin.messages["payment-remove-valid"])
         return true
     }
 

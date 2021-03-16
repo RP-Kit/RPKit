@@ -323,7 +323,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
             val bukkitPlayer = context.forWhom as Player
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
                     ?: return AuctionErrorPrompt(plugin.messages.noMinecraftProfile)
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
                     ?: return AuctionErrorPrompt(plugin.messages.noCharacter)
             auctionService.createAuction(
                 bukkitPlayer.inventory.itemInMainHand,

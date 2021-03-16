@@ -42,27 +42,89 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                     val currency = group.currency
                     if (currency != null) {
                         val now = LocalDateTime.now()
-                        group.members.forEach { member ->
-                            if (group.amount < 0) { // Character -> Payment Group, requires balance check on character
-                                bankService.getBalance(member, currency).thenAccept { bankBalance ->
-                                    if (bankBalance >= -group.amount) { // If character has enough money
-                                        bankService.setBalance(member, currency, bankBalance + group.amount).thenRun {
-                                            plugin.server.scheduler.runTask(plugin, Runnable {
-                                                group.balance -= group.amount
-                                                paymentGroupService.updatePaymentGroup(group)
-                                            })
+                        group.members.thenAccept { members ->
+                            members.forEach { member ->
+                                if (group.amount < 0) { // Character -> Payment Group, requires balance check on character
+                                    bankService.getBalance(member, currency).thenAccept { bankBalance ->
+                                        if (bankBalance >= -group.amount) { // If character has enough money
+                                            bankService.setBalance(member, currency, bankBalance + group.amount)
+                                                .thenRun {
+                                                    plugin.server.scheduler.runTask(plugin, Runnable {
+                                                        group.balance -= group.amount
+                                                        paymentGroupService.updatePaymentGroup(group)
+                                                    })
+                                                }
+                                        } else { // If character doesn't have enough money
+                                            // Send notification to member
+                                            val notificationMessage =
+                                                plugin.messages["payment-notification-member-fail-to-pay", mapOf(
+                                                    "member" to member.name,
+                                                    "group" to group.name.value,
+                                                    "date" to dateFormat.format(now.atZone(ZoneId.systemDefault()))
+                                                )]
+                                            if (member.minecraftProfile?.isOnline == true) { // If online
+                                                member.minecraftProfile?.sendMessage(notificationMessage)
+                                            } else { // If offline
+                                                paymentNotificationService.addPaymentNotification(
+                                                    RPKPaymentNotificationImpl(
+                                                        group = group,
+                                                        to = member,
+                                                        character = member,
+                                                        date = now,
+                                                        text = notificationMessage
+                                                    )
+                                                )
+                                            }
+                                            val ownerNotificationMessage =
+                                                plugin.messages["payment-notification-owner-fail-to-pay", mapOf(
+                                                    "member" to member.name,
+                                                    "group" to group.name.value,
+                                                    "date" to dateFormat.format(now.atZone(ZoneId.systemDefault()))
+                                                )]
+                                            group.owners.thenAccept { owners ->
+                                                owners.forEach { owner ->
+                                                    if (owner.minecraftProfile?.isOnline != true) {
+                                                        plugin.server.scheduler.runTask(plugin, Runnable {
+                                                            paymentNotificationService.addPaymentNotification(
+                                                                RPKPaymentNotificationImpl(
+                                                                    group = group,
+                                                                    to = owner,
+                                                                    character = member,
+                                                                    date = now,
+                                                                    text = ownerNotificationMessage
+                                                                )
+                                                            )
+                                                        })
+                                                    } else {
+                                                        owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
+                                                    }
+                                                }
+                                            }
                                         }
-                                    } else { // If character doesn't have enough money
+                                    }
+                                } else if (group.amount > 0) { // Payment Group -> Character, requires balance check on group
+                                    if (group.balance >= group.amount) { // If group has enough money
+                                        bankService.getBalance(member, currency).thenAccept { bankBalance ->
+                                            bankService.setBalance(
+                                                member,
+                                                currency,
+                                                bankBalance + group.amount
+                                            ).thenRun {
+                                                plugin.server.scheduler.runTask(plugin, Runnable {
+                                                    group.balance -= group.amount
+                                                    paymentGroupService.updatePaymentGroup(group)
+                                                })
+                                            }
+                                        }
+                                    } else { // If group doesn't have enough money
                                         // Send notification to member
                                         val notificationMessage =
-                                            plugin.messages["payment-notification-member-fail-to-pay", mapOf(
+                                            plugin.messages["payment-notification-member-fail-to-be-paid", mapOf(
                                                 "member" to member.name,
                                                 "group" to group.name.value,
                                                 "date" to dateFormat.format(now.atZone(ZoneId.systemDefault()))
                                             )]
-                                        if (member.minecraftProfile?.isOnline == true) { // If online
-                                            member.minecraftProfile?.sendMessage(notificationMessage)
-                                        } else { // If offline
+                                        if (member.minecraftProfile?.isOnline != true) { // If offline
                                             paymentNotificationService.addPaymentNotification(
                                                 RPKPaymentNotificationImpl(
                                                     group = group,
@@ -72,91 +134,42 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                                     text = notificationMessage
                                                 )
                                             )
+                                        } else { // If online
+                                            member.minecraftProfile?.sendMessage(notificationMessage)
                                         }
+                                        // Send notification to owners
                                         val ownerNotificationMessage =
-                                            plugin.messages["payment-notification-owner-fail-to-pay", mapOf(
+                                            plugin.messages["payment-notification-owner-fail-to-be-paid", mapOf(
                                                 "member" to member.name,
                                                 "group" to group.name.value,
                                                 "date" to dateFormat.format(now.atZone(ZoneId.systemDefault()))
                                             )]
-                                        group.owners.forEach { owner ->
-                                            if (owner.minecraftProfile?.isOnline != true) {
-                                                paymentNotificationService.addPaymentNotification(
-                                                    RPKPaymentNotificationImpl(
-                                                        group = group,
-                                                        to = owner,
-                                                        character = member,
-                                                        date = now,
-                                                        text = ownerNotificationMessage
-                                                    )
-                                                )
-                                            } else {
-                                                owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
+                                        group.owners.thenAccept { owners ->
+                                            owners.forEach { owner ->
+                                                if (owner.minecraftProfile?.isOnline != true) { // If offline
+                                                    plugin.server.scheduler.runTask(plugin, Runnable {
+                                                        paymentNotificationService.addPaymentNotification(
+                                                            RPKPaymentNotificationImpl(
+                                                                group = group,
+                                                                to = owner,
+                                                                character = member,
+                                                                date = now,
+                                                                text = ownerNotificationMessage
+                                                            )
+                                                        )
+                                                    })
+                                                } else { // If online
+                                                    owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            } else if (group.amount > 0) { // Payment Group -> Character, requires balance check on group
-                                if (group.balance >= group.amount) { // If group has enough money
-                                    bankService.getBalance(member, currency).thenAccept { bankBalance ->
-                                        bankService.setBalance(
-                                            member,
-                                            currency,
-                                            bankBalance + group.amount
-                                        ).thenRun {
-                                            plugin.server.scheduler.runTask(plugin, Runnable {
-                                                group.balance -= group.amount
-                                                paymentGroupService.updatePaymentGroup(group)
-                                            })
-                                        }
-                                    }
-                                } else { // If group doesn't have enough money
-                                    // Send notification to member
-                                    val notificationMessage = plugin.messages["payment-notification-member-fail-to-be-paid", mapOf(
-                                        "member" to member.name,
-                                        "group" to group.name.value,
-                                        "date" to dateFormat.format(now.atZone(ZoneId.systemDefault()))
-                                    )]
-                                    if (member.minecraftProfile?.isOnline != true) { // If offline
-                                        paymentNotificationService.addPaymentNotification(
-                                                RPKPaymentNotificationImpl(
-                                                        group = group,
-                                                        to = member,
-                                                        character = member,
-                                                        date = now,
-                                                        text = notificationMessage
-                                                )
-                                        )
-                                    } else { // If online
-                                        member.minecraftProfile?.sendMessage(notificationMessage)
-                                    }
-                                    // Send notification to owners
-                                    val ownerNotificationMessage = plugin.messages["payment-notification-owner-fail-to-be-paid", mapOf(
-                                        "member" to member.name,
-                                        "group" to group.name.value,
-                                        "date" to dateFormat.format(now.atZone(ZoneId.systemDefault()))
-                                    )]
-                                    group.owners.forEach { owner ->
-                                        if (owner.minecraftProfile?.isOnline != true) { // If offline
-                                            paymentNotificationService.addPaymentNotification(
-                                                    RPKPaymentNotificationImpl(
-                                                            group = group,
-                                                            to = owner,
-                                                            character = member,
-                                                            date = now,
-                                                            text = ownerNotificationMessage
-                                                    )
-                                            )
-                                        } else { // If online
-                                            owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
-                                        }
-                                    }
-                                }
                             }
+                            // Update last payment time to avoid charging again in 1 minute
+                            group.lastPaymentTime = LocalDateTime.now()
+                            paymentGroupService.updatePaymentGroup(group)
                         }
-                        // Update last payment time to avoid charging again in 1 minute
-                        group.lastPaymentTime = LocalDateTime.now()
-                        paymentGroupService.updatePaymentGroup(group)
                     }
                 }
     }

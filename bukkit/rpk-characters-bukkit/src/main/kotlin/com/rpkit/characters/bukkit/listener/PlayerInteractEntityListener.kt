@@ -57,7 +57,7 @@ class PlayerInteractEntityListener(private val plugin: RPKCharactersBukkit) : Li
             event.player.sendMessage(plugin.messages["no-minecraft-profile"])
             return
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             event.player.sendMessage(plugin.messages["no-character-other"])
             return

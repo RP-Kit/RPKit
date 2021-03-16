@@ -137,7 +137,7 @@ class RPKBlockChangeTable(private val database: Database, private val plugin: RP
                 val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync null
                 val characterId = result.get(RPKIT_BLOCK_CHANGE.CHARACTER_ID)
                 val character =
-                    if (characterId == null) null else characterService.getCharacter(RPKCharacterId(characterId))
+                    if (characterId == null) null else characterService.getCharacter(RPKCharacterId(characterId)).join()
                 val fromMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.FROM))
                 val toMaterial = Material.getMaterial(result.get(RPKIT_BLOCK_CHANGE.TO))
                 if (fromMaterial == null || toMaterial == null) {

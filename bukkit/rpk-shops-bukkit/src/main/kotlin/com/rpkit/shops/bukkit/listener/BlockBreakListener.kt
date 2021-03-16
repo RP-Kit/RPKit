@@ -66,11 +66,16 @@ class BlockBreakListener(val plugin: RPKShopsBukkit) : Listener {
                     event.isCancelled = true
                     return
                 }
-                val character = characterService.getActiveCharacter(minecraftProfile)
+                val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
                 val shopCharacter = if (sign.getLine(3).equals("admin", ignoreCase = true)) {
                     null
                 } else {
-                    characterService.getCharacter(RPKCharacterId(sign.getLine(3).toInt()))
+                    // If the person owning the shop is offline, this will return null & the event will be cancelled.
+                    // This is the behaviour we expect because the only case in which the sign could be broken is if
+                    // the person breaking it is the person who owns it, in which case they are online anyway.
+                    // The other case in which this returns null is if the character has been deleted.
+                    // In this case, the shop might as well be removed by anyone since it won't work anyway.
+                    characterService.getPreloadedCharacter(RPKCharacterId(sign.getLine(3).toInt()))
                 }
                 if (character == null) {
                     event.isCancelled = true
@@ -102,8 +107,8 @@ class BlockBreakListener(val plugin: RPKShopsBukkit) : Listener {
                     event.isCancelled = true
                     return
                 }
-                val character = characterService.getActiveCharacter(minecraftProfile)
-                val rentCharacter = characterService.getCharacter(RPKCharacterId(sign.getLine(1).toInt()))
+                val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+                val rentCharacter = characterService.getPreloadedCharacter(RPKCharacterId(sign.getLine(1).toInt()))
                 if (character == null) {
                     event.isCancelled = true
                     return

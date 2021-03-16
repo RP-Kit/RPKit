@@ -19,11 +19,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.database.table.RPKChatGroupInviteTable
 import com.rpkit.chat.bukkit.database.table.RPKChatGroupMemberTable
-import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupInviteEvent
-import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupJoinEvent
-import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupLeaveEvent
-import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupMessageEvent
-import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupUninviteEvent
+import com.rpkit.chat.bukkit.event.chatgroup.*
 import com.rpkit.chat.bukkit.prefix.RPKPrefixService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -104,9 +100,9 @@ class RPKChatGroupImpl(
         val prefixService = Services[RPKPrefixService::class.java]
         val characterService = Services[RPKCharacterService::class.java]
         val chatGroupService = Services[RPKChatGroupService::class.java]
-        val senderCharacter = characterService?.getActiveCharacter(sender)
+        val senderCharacter = characterService?.getPreloadedActiveCharacter(sender)
         members.forEach { receiver ->
-            val receiverCharacter = characterService?.getActiveCharacter(receiver)
+            val receiverCharacter = characterService?.getPreloadedActiveCharacter(receiver)
             val formatString = plugin.config.getString("chat-group.format") ?: return
             var formattedMessage = ChatColor.translateAlternateColorCodes('&', formatString)
             if (formattedMessage.contains("\$message")) {

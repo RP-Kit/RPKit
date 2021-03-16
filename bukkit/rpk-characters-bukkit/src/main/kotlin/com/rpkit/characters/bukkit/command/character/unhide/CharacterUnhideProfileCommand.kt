@@ -55,15 +55,16 @@ class CharacterUnhideProfileCommand(private val plugin: RPKCharactersBukkit) : C
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
         character.isProfileHidden = false
-        characterService.updateCharacter(character)
-        sender.sendMessage(plugin.messages["character-unhide-profile-valid"])
-        character.showCharacterCard(minecraftProfile)
+        characterService.updateCharacter(character).thenRun {
+            sender.sendMessage(plugin.messages["character-unhide-profile-valid"])
+            character.showCharacterCard(minecraftProfile)
+        }
         return true
     }
 

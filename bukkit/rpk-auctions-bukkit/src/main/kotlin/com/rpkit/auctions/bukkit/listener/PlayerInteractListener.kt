@@ -72,7 +72,7 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit) : Listener {
             event.player.sendMessage(plugin.messages.noMinecraftProfile)
             return
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         auctionService.getAuction(RPKAuctionId(sign.getLine(1).toInt())).thenAccept getAuction@{ auction ->
             if (auction == null) {
                 event.player.sendMessage(plugin.messages.bidInvalidAuctionNotExistent)

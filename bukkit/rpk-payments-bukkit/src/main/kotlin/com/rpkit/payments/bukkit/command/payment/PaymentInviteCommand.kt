@@ -71,7 +71,7 @@ class PaymentInviteCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["payment-invite-invalid-character"])
             return true

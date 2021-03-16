@@ -62,7 +62,7 @@ class PrepareItemCraftListener(private val plugin: RPKCraftingSkillBukkit) : Lis
             event.inventory.result = null
             return
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             event.inventory.result = null
             return

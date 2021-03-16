@@ -31,7 +31,7 @@ class DrunkenSlurComponent(val drunkenness: Int) : DirectedPreFormatPipelineComp
         val minecraftProfile = context.senderMinecraftProfile ?: return context
         val characterService = Services[RPKCharacterService::class.java] ?: return context
         val drinkService = Services[RPKDrinkService::class.java] ?: return context
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return context
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return context
         if (drinkService.getDrunkenness(character) >= drunkenness) {
             context.message = context.message.replace(Regex("s([^h])"), "sh$1")
         }

@@ -56,7 +56,7 @@ class InventoryCloseListener : Listener {
                     bukkitPlayer.world.dropItem(bukkitPlayer.location, item)
                 }
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         economyService.setBalance(character, currency, amount)
     }
 

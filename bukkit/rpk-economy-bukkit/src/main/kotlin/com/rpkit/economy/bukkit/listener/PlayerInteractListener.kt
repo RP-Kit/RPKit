@@ -72,7 +72,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                     event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                     return
                 }
-                val character = characterService.getActiveCharacter(minecraftProfile)
+                val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
                 if (character == null) {
                     event.player.sendMessage(plugin.messages["no-character"])
                     return
@@ -121,7 +121,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                     return
                 }
                 val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-                val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+                val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
                 if (economyService.getBalance(character, fromCurrency) - fromAmount < 0) return
                 if (economyService.getBalance(character, toCurrency) + toAmount > 1728) return
                 economyService.setBalance(character, fromCurrency, economyService.getBalance(character, fromCurrency) - fromAmount)
@@ -170,7 +170,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                 return
             }
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-            val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
             if (economyService.getBalance(character, fromCurrency) - fromAmount < 0) return
             if (economyService.getBalance(character, toCurrency) + toAmount > 1728) return
             economyService.setBalance(character, fromCurrency, economyService.getBalance(character, fromCurrency) - fromAmount)

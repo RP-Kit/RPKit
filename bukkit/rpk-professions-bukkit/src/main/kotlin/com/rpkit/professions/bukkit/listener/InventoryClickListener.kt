@@ -47,7 +47,7 @@ class InventoryClickListener(private val plugin: RPKProfessionsBukkit) : Listene
         val bukkitPlayer = event.whoClicked as? Player ?: return
         if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         val item = event.currentItem ?: return
         if (item.amount == 0 || item.type == Material.AIR) return
         val material = item.type

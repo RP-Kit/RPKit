@@ -139,7 +139,7 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
             val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync null
             val characterId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID)
             val character =
-                if (characterId == null) null else characterService.getCharacter(RPKCharacterId(characterId))
+                if (characterId == null) null else characterService.getCharacter(RPKCharacterId(characterId)).join()
             val blockInventoryChange = RPKBlockInventoryChangeImpl(
                 id,
                 blockHistory,

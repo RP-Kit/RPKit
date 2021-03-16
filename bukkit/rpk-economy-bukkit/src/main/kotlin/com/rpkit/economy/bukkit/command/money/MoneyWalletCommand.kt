@@ -26,11 +26,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.ConversationContext
-import org.bukkit.conversations.ConversationFactory
-import org.bukkit.conversations.MessagePrompt
-import org.bukkit.conversations.Prompt
-import org.bukkit.conversations.ValidatingPrompt
+import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
@@ -107,7 +103,7 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
             bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile"])
             return
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             bukkitPlayer.sendMessage(plugin.messages["no-character"])
             return

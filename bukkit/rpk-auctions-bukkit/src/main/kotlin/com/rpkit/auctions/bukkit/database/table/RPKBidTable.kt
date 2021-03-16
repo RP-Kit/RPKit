@@ -108,7 +108,7 @@ class RPKBidTable(
             val auction = auctionService.getAuction(RPKAuctionId(auctionId)).join()
             val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync null
             val characterId = result.get(RPKIT_BID.CHARACTER_ID)
-            val character = characterService.getCharacter(RPKCharacterId(characterId))
+            val character = characterService.getCharacter(RPKCharacterId(characterId)).join()
             if (auction != null && character != null) {
                 val bid = RPKBidImpl(
                     id,

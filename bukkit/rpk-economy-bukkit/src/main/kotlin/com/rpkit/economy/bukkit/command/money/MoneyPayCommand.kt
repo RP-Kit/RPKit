@@ -27,13 +27,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.ConversationContext
-import org.bukkit.conversations.ConversationFactory
-import org.bukkit.conversations.MessagePrompt
-import org.bukkit.conversations.NumericPrompt
-import org.bukkit.conversations.PlayerNamePrompt
-import org.bukkit.conversations.Prompt
-import org.bukkit.conversations.ValidatingPrompt
+import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
 /**
@@ -90,7 +84,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val fromCharacter = characterService.getActiveCharacter(fromMinecraftProfile)
+        val fromCharacter = characterService.getPreloadedActiveCharacter(fromMinecraftProfile)
         if (fromCharacter == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
@@ -109,7 +103,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val toCharacter = characterService.getActiveCharacter(toMinecraftProfile)
+        val toCharacter = characterService.getPreloadedActiveCharacter(toMinecraftProfile)
         if (toCharacter == null) {
             sender.sendMessage(plugin.messages["money-pay-character-invalid-character"])
             return true
@@ -285,9 +279,9 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             val fromBukkitPlayer = context.forWhom as Player
             val fromMinecraftProfile = minecraftProfileService.getMinecraftProfile(fromBukkitPlayer)
                     ?: return plugin.messages["no-minecraft-profile"]
-            val fromCharacter = characterService.getActiveCharacter(fromMinecraftProfile)
+            val fromCharacter = characterService.getPreloadedActiveCharacter(fromMinecraftProfile)
             val toMinecraftProfile = context.getSessionData("minecraft_profile") as RPKMinecraftProfile
-            val toCharacter = characterService.getActiveCharacter(toMinecraftProfile)
+            val toCharacter = characterService.getPreloadedActiveCharacter(toMinecraftProfile)
             val currency = context.getSessionData("currency") as RPKCurrency
             val amount = context.getSessionData("amount") as Int
             if (fromCharacter == null) {

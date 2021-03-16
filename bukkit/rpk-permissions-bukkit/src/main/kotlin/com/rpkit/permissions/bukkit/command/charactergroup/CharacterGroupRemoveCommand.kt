@@ -66,7 +66,7 @@ class CharacterGroupRemoveCommand(private val plugin: RPKPermissionsBukkit) : Co
             sender.sendMessage(plugin.messages.noMinecraftProfileOther)
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages.noCharacter)
             return true

@@ -75,7 +75,7 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
@@ -88,9 +88,10 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             val age = args[0].toInt()
             if (age >= plugin.config.getInt("characters.min-age") && age <= plugin.config.getInt("characters.max-age")) {
                 character.age = age
-                characterService.updateCharacter(character)
-                sender.sendMessage(plugin.messages["character-set-age-valid"])
-                character.showCharacterCard(minecraftProfile)
+                characterService.updateCharacter(character).thenRun {
+                    sender.sendMessage(plugin.messages["character-set-age-valid"])
+                    character.showCharacterCard(minecraftProfile)
+                }
             } else {
                 sender.sendMessage(plugin.messages["character-set-age-invalid-validation"])
             }
@@ -116,7 +117,7 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable)
             context.setSessionData("minecraftProfile", minecraftProfile)
             if (minecraftProfile == null) return false
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             context.setSessionData("character", character)
             return input.toInt() >= plugin.config.getInt("characters.min-age")
                     && input.toInt() <= plugin.config.getInt("characters.max-age")

@@ -19,6 +19,7 @@ package com.rpkit.economy.bukkit.economy
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import com.rpkit.economy.bukkit.currency.RPKCurrency
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides economy related services.
@@ -60,6 +61,6 @@ interface RPKEconomyService : Service {
      * @param amount The amount of characters to get
      * @return A list containing the amount of richest characters in the currency
      */
-    fun getRichestCharacters(currency: RPKCurrency, amount: Int): List<RPKCharacter>
+    fun getRichestCharacters(currency: RPKCurrency, amount: Int): CompletableFuture<List<RPKCharacter>>
 
 }

@@ -16,11 +16,7 @@
 package com.rpkit.players.bukkit.command.profile
 
 import com.rpkit.core.command.RPKCommandExecutor
-import com.rpkit.core.command.result.CommandFailure
-import com.rpkit.core.command.result.CommandResult
-import com.rpkit.core.command.result.CommandSuccess
-import com.rpkit.core.command.result.MissingServiceFailure
-import com.rpkit.core.command.result.NoPermissionFailure
+import com.rpkit.core.command.result.*
 import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
@@ -30,16 +26,17 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftUsername
+import java.util.concurrent.CompletableFuture
 
 class ProfileViewCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
 
     class InvalidTargetFailure : CommandFailure()
 
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfileService)
-            return MissingServiceFailure(RPKMinecraftProfileService::class.java)
+            return CompletableFuture.completedFuture(MissingServiceFailure(RPKMinecraftProfileService::class.java))
         }
         var target: RPKMinecraftProfile? = null
         if (args.isNotEmpty() && sender.hasPermission("rpkit.players.command.profile.view.other")) {
@@ -48,23 +45,23 @@ class ProfileViewCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecu
         if (target == null) {
             if (!sender.hasPermission("rpkit.players.command.profile.view.self")) {
                 sender.sendMessage(plugin.messages.noPermissionProfileViewSelf)
-                return NoPermissionFailure("rpkit.players.command.profile.view.self")
+                return CompletableFuture.completedFuture(NoPermissionFailure("rpkit.players.command.profile.view.self"))
             }
             if (sender is RPKMinecraftProfile) {
                 target = sender
             } else {
                 sender.sendMessage(plugin.messages.profileViewInvalidTarget)
-                return InvalidTargetFailure()
+                return CompletableFuture.completedFuture(InvalidTargetFailure())
             }
         }
         val profile = target.profile
         if (profile !is RPKProfile) {
             if (sender == target) {
                 sender.sendMessage(plugin.messages.noProfileSelf)
-                return NoProfileSelfFailure()
+                return CompletableFuture.completedFuture(NoProfileSelfFailure())
             } else {
                 sender.sendMessage(plugin.messages.noProfileOther)
-                return NoProfileOtherFailure()
+                return CompletableFuture.completedFuture(NoProfileOtherFailure())
             }
         }
         sender.sendMessage(
@@ -73,6 +70,6 @@ class ProfileViewCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecu
                 discriminator = profile.discriminator
             )
         )
-        return CommandSuccess
+        return CompletableFuture.completedFuture(CommandSuccess)
     }
 }

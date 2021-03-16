@@ -21,6 +21,7 @@ import com.rpkit.core.service.Service
 import com.rpkit.permissions.bukkit.group.RPKGroup
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.util.concurrent.CompletableFuture
 
 interface RPKPermissionsService : Service {
 
@@ -58,7 +59,7 @@ interface RPKPermissionsService : Service {
      *
      * @param minecraftProfile The Minecraft profile to assign permissions to
      */
-    fun assignPermissions(minecraftProfile: RPKMinecraftProfile)
+    fun assignPermissions(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void>
 
     /**
      * Unassigns permissions from a player in Minecraft

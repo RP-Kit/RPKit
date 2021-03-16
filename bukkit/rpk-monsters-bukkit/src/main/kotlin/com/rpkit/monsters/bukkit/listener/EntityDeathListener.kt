@@ -48,7 +48,7 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(damager) ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         val experienceService = Services[RPKExperienceService::class.java] ?: return
         val experience = getExperience(event.entity)
         experienceService.setExperience(character, experienceService.getExperience(character) + experience)

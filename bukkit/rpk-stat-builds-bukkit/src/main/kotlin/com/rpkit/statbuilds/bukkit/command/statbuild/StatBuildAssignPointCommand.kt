@@ -73,7 +73,7 @@ class StatBuildAssignPointCommand(private val plugin: RPKStatBuildsBukkit) : Com
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character-self"])
             return true

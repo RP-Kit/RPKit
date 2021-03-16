@@ -98,7 +98,7 @@ class RPKDrinksBukkit : RPKBukkitPlugin() {
                 val characterService = Services[RPKCharacterService::class.java]
                 server.onlinePlayers.forEach { bukkitPlayer ->
                     val minecraftProfile = minecraftProfileService?.getMinecraftProfile(bukkitPlayer) ?: return@forEach
-                    val character = characterService?.getActiveCharacter(minecraftProfile) ?: return@forEach
+                    val character = characterService?.getPreloadedActiveCharacter(minecraftProfile) ?: return@forEach
                     val drunkenness = drinkService.getDrunkenness(character)
                     if (drunkenness > 0) {
                         if (drunkenness > 1000) {

@@ -18,18 +18,14 @@ package com.rpkit.characters.bukkit.command.character.delete
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.bukkit.extension.levenshtein
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.BooleanPrompt
-import org.bukkit.conversations.ConversationContext
-import org.bukkit.conversations.ConversationFactory
-import org.bukkit.conversations.MessagePrompt
-import org.bukkit.conversations.Prompt
-import org.bukkit.conversations.ValidatingPrompt
+import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
 /**
@@ -37,23 +33,10 @@ import org.bukkit.entity.Player
  * Deletes a character.
  */
 class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
-    private val conversationFactory: ConversationFactory
+
     private val confirmationConversationFactory: ConversationFactory
 
     init {
-        conversationFactory = ConversationFactory(plugin)
-                .withModality(true)
-                .withFirstPrompt(CharacterPrompt())
-                .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
-                .addConversationAbandonedListener { event ->
-                    if (!event.gracefulExit()) {
-                        val conversable = event.context.forWhom
-                        if (conversable is Player) {
-                            conversable.sendMessage(plugin.messages["operation-cancelled"])
-                        }
-                    }
-                }
         confirmationConversationFactory = ConversationFactory(plugin)
                 .withModality(true)
                 .withFirstPrompt(ConfirmationPrompt())
@@ -71,165 +54,48 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit) : CommandE
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         if (!sender.hasPermission("rpkit.characters.command.character.delete")) {
-            sender.sendMessage(plugin.messages["no-permission-character-delete"])
+            sender.sendMessage(plugin.messages.noPermissionCharacterDelete)
             return true
         }
         if (args.isEmpty()) {
-            conversationFactory.buildConversation(sender).begin()
+            sender.sendMessage(plugin.messages.characterDeleteUsage)
             return true
         }
         val characterName = args.joinToString(" ")
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
+            sender.sendMessage(plugin.messages.noCharacterService)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
             if (profile is RPKProfile) {
-                var charFound = false
-                // Prioritise exact matches...
-                for (character in characterService.getCharacters(profile)) {
-                    if (character.name.equals(characterName, ignoreCase = true)) {
+                characterService.getCharacters(profile).thenAccept { characters ->
+                    val character = characters.minByOrNull { character -> character.name.levenshtein(characterName) }
+                    if (character != null) {
                         val conversation = confirmationConversationFactory.buildConversation(sender)
                         conversation.context.setSessionData("character_id", character.id)
-                        conversation.begin()
-                        charFound = true
-                        break
+                    } else {
+                        sender.sendMessage(plugin.messages.characterDeleteInvalidCharacter)
                     }
-                }
-                // And fall back to partial matches
-                if (!charFound) {
-                    for (character in characterService.getCharacters(profile)) {
-                        if (character.name.toLowerCase().contains(characterName.toLowerCase())) {
-                            val conversation = confirmationConversationFactory.buildConversation(sender)
-                            conversation.context.setSessionData("character_id", character.id)
-                            conversation.begin()
-                            charFound = true
-                            break
-                        }
-                    }
-                }
-                if (charFound) {
-                    sender.sendMessage(plugin.messages["character-delete-valid"])
-                } else {
-                    sender.sendMessage(plugin.messages["character-delete-invalid-character"])
                 }
             } else {
-                sender.sendMessage(plugin.messages["no-profile"])
+                sender.sendMessage(plugin.messages.noProfile)
             }
         } else {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfile)
         }
         return true
-    }
-
-    private inner class CharacterPrompt : ValidatingPrompt() {
-
-        override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val conversable = context.forWhom
-            if (conversable !is Player) return false
-            val characterService = Services[RPKCharacterService::class.java] ?: return false
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return false
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable)
-            if (minecraftProfile == null) return false
-            val profile = minecraftProfile.profile
-            if (profile !is RPKProfile) return false
-            if (characterService.getCharacters(profile).any { it.name.equals(input, ignoreCase = true) }) {
-                return true
-            }
-            if (characterService.getCharacters(profile).any { it.name.toLowerCase().contains(input.toLowerCase()) }) {
-                return true
-            }
-            return false
-        }
-
-        override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
-            val conversable = context.forWhom
-            if (conversable !is Player) {
-                return END_OF_CONVERSATION
-            }
-            val characterService = Services[RPKCharacterService::class.java]
-            if (characterService == null) {
-                return END_OF_CONVERSATION
-            }
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
-            if (minecraftProfileService == null) {
-                return END_OF_CONVERSATION
-            }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable)
-            if (minecraftProfile == null) {
-                return END_OF_CONVERSATION
-            }
-            val profile = minecraftProfile.profile
-            if (profile !is RPKProfile) {
-                return END_OF_CONVERSATION
-            }
-            var charFound = false
-            // Prioritise exact matches...
-            for (character in characterService.getCharacters(profile)) {
-                if (character.name.equals(input, ignoreCase = true)) {
-                    context.setSessionData("character_id", character.id)
-                    charFound = true
-                    break
-                }
-            }
-            // And fall back to partial matches
-            if (!charFound) {
-                for (character in characterService.getCharacters(profile)) {
-                    if (character.name.toLowerCase().contains(input.toLowerCase())) {
-                        context.setSessionData("character_id", character.id)
-                        break
-                    }
-                }
-            }
-            return ConfirmationPrompt()
-        }
-
-        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            val conversable = context.forWhom
-            if (conversable !is Player) return plugin.messages["not-from-console"]
-            val characterService = Services[RPKCharacterService::class.java]
-            if (characterService == null) return plugin.messages["no-character-service"]
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
-            if (minecraftProfileService == null) return plugin.messages["no-minecraft-profile-service"]
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable)
-            if (minecraftProfile == null) return plugin.messages["no-minecraft-profile"]
-            val profile = minecraftProfile.profile
-            if (profile !is RPKProfile) return plugin.messages["no-profile"]
-            return plugin.messages["character-delete-invalid-character"]
-        }
-
-        override fun getPromptText(context: ConversationContext): String {
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return plugin.messages["no-minecraft-profile-service"]
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
-                    ?: return plugin.messages["no-minecraft-profile"]
-            val profile = minecraftProfile.profile
-            if (profile !is RPKProfile) {
-                return plugin.messages["no-profile"]
-            }
-            val characterService = Services[RPKCharacterService::class.java] ?: return plugin.messages["no-character-service"]
-            val characterListBuilder = StringBuilder()
-            for (character in characterService.getCharacters(profile)) {
-                characterListBuilder.append("\n").append(
-                        plugin.messages["character-list-item", mapOf(
-                            "character" to character.name
-                        )]
-                )
-            }
-            return plugin.messages["character-delete-prompt"] + characterListBuilder.toString()
-        }
-
     }
 
     private inner class ConfirmationPrompt : BooleanPrompt() {
@@ -239,19 +105,22 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit) : CommandE
                 return END_OF_CONVERSATION
             }
             val characterService = Services[RPKCharacterService::class.java] ?: return END_OF_CONVERSATION
-            val character = characterService.getCharacter(RPKCharacterId(context.getSessionData("character_id") as Int))
-            if (character != null) {
-                characterService.removeCharacter(character)
+           characterService.getCharacter(context.getSessionData("character_id") as RPKCharacterId).thenAccept { character ->
+                if (character != null) {
+                    plugin.server.scheduler.runTask(plugin, Runnable {
+                        characterService.removeCharacter(character)
+                    })
+                }
             }
             return CharacterDeletedPrompt()
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return plugin.messages["character-delete-confirmation-invalid-boolean"]
+            return plugin.messages.characterDeleteConfirmationInvalidBoolean
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages["character-delete-confirmation"]
+            return plugin.messages.characterDeleteConfirmation
         }
 
     }
@@ -263,7 +132,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit) : CommandE
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages["character-delete-valid"]
+            return plugin.messages.characterDeleteValid
         }
     }
 

@@ -73,7 +73,7 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
@@ -88,9 +88,10 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
         }
         descriptionBuilder.append(args[args.size - 1])
         character.description = descriptionBuilder.toString()
-        characterService.updateCharacter(character)
-        sender.sendMessage(plugin.messages["character-set-description-valid"])
-        character.showCharacterCard(minecraftProfile)
+        characterService.updateCharacter(character).thenRun {
+            sender.sendMessage(plugin.messages["character-set-description-valid"])
+            character.showCharacterCard(minecraftProfile)
+        }
         return true
     }
 
@@ -115,7 +116,7 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
             val characterService = Services[RPKCharacterService::class.java] ?: return DescriptionSetPrompt()
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable)
             if (minecraftProfile == null) return DescriptionSetPrompt()
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             if (character == null) return DescriptionSetPrompt()
             character.description = context.getSessionData("description") as String
             characterService.updateCharacter(character)
@@ -141,7 +142,7 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
                 }
                 val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
                 if (minecraftProfile != null) {
-                    characterService.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                    characterService.getPreloadedActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
                 }
             }
             return END_OF_CONVERSATION
