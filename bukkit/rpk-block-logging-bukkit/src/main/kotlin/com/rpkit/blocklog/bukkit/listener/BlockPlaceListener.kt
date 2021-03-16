@@ -39,7 +39,7 @@ class BlockPlaceListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
         val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
         val profile = minecraftProfile?.profile as? RPKProfile
-        val character = if (minecraftProfile == null) null else characterService.getActiveCharacter(minecraftProfile)
+        val character = if (minecraftProfile == null) null else characterService.getPreloadedActiveCharacter(minecraftProfile)
         blockHistoryService.getBlockHistory(event.block).thenAccept { blockHistory ->
             val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,

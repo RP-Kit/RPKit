@@ -79,7 +79,7 @@ class ProfessionExperienceRemoveCommand(val plugin: RPKProfessionsBukkit) : Comm
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             if (sender == target) {
                 sender.sendMessage(plugin.messages["no-character-self"])

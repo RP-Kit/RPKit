@@ -141,7 +141,7 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
             val banks = results
                 .mapNotNull { result ->
                     val characterId = result[RPKIT_BANK.CHARACTER_ID]
-                    val character = characterService.getCharacter(RPKCharacterId(characterId))
+                    val character = characterService.getCharacter(RPKCharacterId(characterId)).join()
                     if (character == null) {
                         database.create.deleteFrom(RPKIT_BANK)
                             .where(RPKIT_BANK.CHARACTER_ID.eq(characterId))

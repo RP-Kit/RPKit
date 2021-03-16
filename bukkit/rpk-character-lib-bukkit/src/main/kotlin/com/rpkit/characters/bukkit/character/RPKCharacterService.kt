@@ -21,6 +21,7 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides character-related operations.
@@ -28,13 +29,64 @@ import org.bukkit.inventory.ItemStack
 interface RPKCharacterService : Service {
 
     /**
-     * Gets a character by ID.
-     * If there is no character with the given ID, null is returned.
+     * Gets a pre-loaded character by ID.
+     * If no character is loaded with the given ID, null is returned
      *
      * @param id the ID of the character
      * @return The character, or null if no character is found with the given ID
      */
-    fun getCharacter(id: RPKCharacterId): RPKCharacter?
+    fun getPreloadedCharacter(id: RPKCharacterId): RPKCharacter?
+
+    /**
+     * Loads a character with the given ID.
+     * When ready, the character will also be loaded for retrieval via [getPreloadedCharacter]
+     *
+     * @param id The ID of the character
+     * @return A future that completes once the character has been fetched.
+     */
+    fun loadCharacter(id: RPKCharacterId): CompletableFuture<RPKCharacter?>
+
+    /**
+     * Unloads the character with the given ID.
+     * The character becomes unavailable to [getPreloadedCharacter].
+     *
+     * @param id The ID of the character
+     */
+    fun unloadCharacter(id: RPKCharacterId)
+
+    /**
+     * Gets a character by ID.
+     *
+     * @param id The ID of the character
+     * @return A future returning the character once it has been fetched
+     */
+    fun getCharacter(id: RPKCharacterId): CompletableFuture<RPKCharacter?>
+
+    /**
+     * Gets a Minecraft profile's active character, if said character has been pre-loaded.
+     * If the character is not loaded, null is returned
+     *
+     * @param minecraftProfile The Minecraft profile
+     * @return The Minecraft profile's active character, or null if there is no active character loaded for it.
+     */
+    fun getPreloadedActiveCharacter(minecraftProfile: RPKMinecraftProfile): RPKCharacter?
+
+    /**
+     * Loads an active character.
+     * When ready, the character will becomes available to [getPreloadedActiveCharacter] and [getCharacter]
+     *
+     * @param minecraftProfile The Minecraft profile
+     * @return A future returning the character once it has been fetched
+     */
+    fun loadActiveCharacter(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKCharacter?>
+
+    /**
+     * Unloads the active character for the given Minecraft profile.
+     * The character becomes unavailable to [getPreloadedActiveCharacter] and [getCharacter]
+     *
+     * @param minecraftProfile The Minecraft profile
+     */
+    fun unloadActiveCharacter(minecraftProfile: RPKMinecraftProfile)
 
     /**
      * Gets a Minecraft profile's active character.
@@ -43,7 +95,7 @@ interface RPKCharacterService : Service {
      * @param minecraftProfile The Minecraft profile
      * @return The Minecraft profile's active character or null if the profile does not currently have an active character.
      */
-    fun getActiveCharacter(minecraftProfile: RPKMinecraftProfile): RPKCharacter?
+    fun getActiveCharacter(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKCharacter?>
 
     /**
      * Sets a Minecraft profile's active character.
@@ -52,7 +104,7 @@ interface RPKCharacterService : Service {
      * @param character The character to set. May be null if the profile should be set to have no active character,
      *                  for example if they are moderating without a character
      */
-    fun setActiveCharacter(minecraftProfile: RPKMinecraftProfile, character: RPKCharacter?)
+    fun setActiveCharacter(minecraftProfile: RPKMinecraftProfile, character: RPKCharacter?): CompletableFuture<Void>
 
     /**
      * Gets all characters currently playable by the owner of the given profile.
@@ -60,22 +112,14 @@ interface RPKCharacterService : Service {
      * @param profile The profile
      * @return All characters currently playable by the owner of the given profile.
      */
-    fun getCharacters(profile: RPKProfile): Collection<RPKCharacter>
-
-    /**
-     * Gets all characters with a name similar to the given name.
-     *
-     * @param name The name
-     * @return All characters with a name similar to the given name.
-     */
-    fun getCharacters(name: String): List<RPKCharacter>
+    fun getCharacters(profile: RPKProfile): CompletableFuture<List<RPKCharacter>>
 
     /**
      * Adds a character to be tracked by this character service.
      *
      * @param character The character to add
      */
-    fun addCharacter(character: RPKCharacter)
+    fun addCharacter(character: RPKCharacter): CompletableFuture<Void>
 
     /**
      * Creates a new character. Any parameters not specified are defaulted.
@@ -132,20 +176,20 @@ interface RPKCharacterService : Service {
         isAgeHidden: Boolean? = null,
         isRaceHidden: Boolean? = null,
         isDescriptionHidden: Boolean? = null
-    ): RPKCharacter
+    ): CompletableFuture<RPKCharacter>
 
     /**
      * Removes a character from being tracked by this character service.
      *
      * @param character The character to remove
      */
-    fun removeCharacter(character: RPKCharacter)
+    fun removeCharacter(character: RPKCharacter): CompletableFuture<Void>
 
     /**
      * Updates a character's state in data storage.
      *
      * @param character The character to update
      */
-    fun updateCharacter(character: RPKCharacter)
+    fun updateCharacter(character: RPKCharacter): CompletableFuture<Void>
 
 }

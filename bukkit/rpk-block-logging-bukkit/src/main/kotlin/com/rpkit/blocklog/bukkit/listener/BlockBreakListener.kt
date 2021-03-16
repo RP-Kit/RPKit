@@ -47,7 +47,7 @@ class BlockBreakListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
         val character = if (minecraftProfile == null) {
             null
         } else {
-            characterService?.getActiveCharacter(minecraftProfile)
+            characterService?.getPreloadedActiveCharacter(minecraftProfile)
         }
         blockHistoryService.getBlockHistory(event.block).thenAccept { blockHistory ->
             val blockChange = RPKBlockChangeImpl(

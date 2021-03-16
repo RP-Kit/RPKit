@@ -33,9 +33,16 @@ class PlayerJoinListener : Listener {
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val experienceService = Services[RPKExperienceService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
-        event.player.level = experienceService.getLevel(character)
-        event.player.exp = (experienceService.getExperience(character) - experienceService.getExperienceNeededForLevel(experienceService.getLevel(character))).toFloat() / (experienceService.getExperienceNeededForLevel(experienceService.getLevel(character) + 1) - experienceService.getExperienceNeededForLevel(experienceService.getLevel(character))).toFloat()
+        characterService.getActiveCharacter(minecraftProfile).thenAccept { character ->
+            if (character == null) return@thenAccept
+            event.player.level = experienceService.getLevel(character)
+            event.player.exp =
+                (experienceService.getExperience(character) - experienceService.getExperienceNeededForLevel(
+                    experienceService.getLevel(character)
+                )).toFloat() / (experienceService.getExperienceNeededForLevel(experienceService.getLevel(character) + 1) - experienceService.getExperienceNeededForLevel(
+                    experienceService.getLevel(character)
+                )).toFloat()
+        }
     }
 
 }

@@ -58,7 +58,7 @@ class BlockBreakListener(private val plugin: RPKProfessionsBukkit) : Listener {
             event.isDropItems = false
             return
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             event.isDropItems = false
             return

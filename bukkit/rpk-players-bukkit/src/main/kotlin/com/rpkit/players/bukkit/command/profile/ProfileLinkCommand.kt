@@ -17,11 +17,12 @@
 package com.rpkit.players.bukkit.command.profile
 
 import com.rpkit.core.command.RPKCommandExecutor
-import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.command.result.CommandResult
 import com.rpkit.core.command.result.IncorrectUsageFailure
 import com.rpkit.core.command.result.NoPermissionFailure
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.players.bukkit.RPKPlayersBukkit
+import java.util.concurrent.CompletableFuture
 
 /**
  * Account link command.
@@ -33,10 +34,10 @@ class ProfileLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecu
     private val profileLinkMinecraftCommand = ProfileLinkMinecraftCommand(plugin)
     private val profileLinkDiscordCommand = ProfileLinkDiscordCommand(plugin)
 
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
         if (!sender.hasPermission("rpkit.players.command.profile.link")) {
             sender.sendMessage(plugin.messages.noPermissionProfileLink)
-            return NoPermissionFailure("rpkit.players.command.profile.link")
+            return CompletableFuture.completedFuture(NoPermissionFailure("rpkit.players.command.profile.link"))
         }
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
@@ -49,12 +50,12 @@ class ProfileLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecu
                     profileLinkDiscordCommand.onCommand(sender, newArgs)
                 else -> {
                     sender.sendMessage(plugin.messages.profileLinkUsage)
-                    IncorrectUsageFailure()
+                    CompletableFuture.completedFuture(IncorrectUsageFailure())
                 }
             }
         } else {
             sender.sendMessage(plugin.messages.profileLinkUsage)
-            return IncorrectUsageFailure()
+            return CompletableFuture.completedFuture(IncorrectUsageFailure())
         }
     }
 

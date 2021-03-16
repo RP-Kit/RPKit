@@ -24,6 +24,7 @@ import com.rpkit.payments.bukkit.database.create
 import com.rpkit.payments.bukkit.database.jooq.Tables.RPKIT_PAYMENT_GROUP_MEMBER
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.member.RPKPaymentGroupMember
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents payment group member table.
@@ -48,20 +49,24 @@ class RPKPaymentGroupMemberTable(
                 .execute()
     }
 
-    operator fun get(paymentGroup: RPKPaymentGroup): List<RPKPaymentGroupMember> {
-        val paymentGroupId = paymentGroup.id ?: return emptyList()
-        val results = database.create
+    operator fun get(paymentGroup: RPKPaymentGroup): CompletableFuture<List<RPKPaymentGroupMember>> {
+        val paymentGroupId = paymentGroup.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID)
                 .from(RPKIT_PAYMENT_GROUP_MEMBER)
                 .where(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID.eq(paymentGroupId.value))
                 .fetch()
-        val characterService = Services[RPKCharacterService::class.java] ?: return emptyList()
-        return results.mapNotNull { result ->
-            val character = characterService.getCharacter(RPKCharacterId(result[RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID])) ?: return@mapNotNull null
-            return@mapNotNull RPKPaymentGroupMember(
+            val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync emptyList()
+            return@supplyAsync results.mapNotNull { result ->
+                val character =
+                    characterService.getCharacter(RPKCharacterId(result[RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID])).join()
+                        ?: return@mapNotNull null
+                return@mapNotNull RPKPaymentGroupMember(
                     paymentGroup,
                     character
-            )
+                )
+            }
         }
     }
 

@@ -33,8 +33,8 @@ class LanguageComponent : DirectedPreFormatPipelineComponent, ConfigurationSeria
         val senderMinecraftProfile = context.senderMinecraftProfile ?: return context
         val receiverMinecraftProfile = context.receiverMinecraftProfile
         var message = context.message
-        val senderCharacter = characterService.getActiveCharacter(senderMinecraftProfile) ?: return context
-        val receiverCharacter = characterService.getActiveCharacter(receiverMinecraftProfile) ?: return context
+        val senderCharacter = characterService.getPreloadedActiveCharacter(senderMinecraftProfile) ?: return context
+        val receiverCharacter = characterService.getPreloadedActiveCharacter(receiverMinecraftProfile) ?: return context
         val receiverRace = receiverCharacter.race
         if (!message.startsWith("[") || !message.contains("]")) return context
         val languageName = Regex("\\[([^]]+)]").find(message)?.groupValues?.get(1) ?: return context

@@ -16,6 +16,7 @@
 package com.rpkit.shops.bukkit.listener
 
 import com.rpkit.banks.bukkit.bank.RPKBankService
+import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
@@ -36,6 +37,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.CompletableFuture
 
 /**
  * Inventory click listener for shops.
@@ -79,10 +81,15 @@ class InventoryClickListener(val plugin: RPKShopsBukkit) : Listener {
             event.isCancelled = true
             return
         }
-        val sellerCharacter = if (sign.getLine(3).equals("admin", ignoreCase = true)) {
-            null
+        val sellerCharacterFuture: CompletableFuture<RPKCharacter?>
+        val sellerCharacterPreloaded: RPKCharacter?
+        if (sign.getLine(3).equals("admin", ignoreCase = true)) {
+            sellerCharacterFuture = CompletableFuture.completedFuture(null)
+            sellerCharacterPreloaded = null
         } else {
-            characterService.getCharacter(RPKCharacterId(sign.getLine(3).toInt())) ?: return
+            val characterId = RPKCharacterId(sign.getLine(3).toInt())
+            sellerCharacterFuture = characterService.getCharacter(characterId)
+            sellerCharacterPreloaded = characterService.getPreloadedCharacter(characterId)
         }
         val buyerBukkitPlayer = event.whoClicked as? Player ?: return
         val buyerMinecraftProfile = minecraftProfileService.getMinecraftProfile(buyerBukkitPlayer)
@@ -94,12 +101,12 @@ class InventoryClickListener(val plugin: RPKShopsBukkit) : Listener {
             buyerBukkitPlayer.sendMessage(plugin.messages["rent-ended"])
             return
         }
-        val buyerCharacter = characterService.getActiveCharacter(buyerMinecraftProfile)
+        val buyerCharacter = characterService.getPreloadedActiveCharacter(buyerMinecraftProfile)
         if (buyerCharacter == null) {
             buyerBukkitPlayer.sendMessage(plugin.messages["no-character"])
             return
         }
-        if (buyerCharacter == sellerCharacter) {
+        if (buyerCharacter.id == sellerCharacterPreloaded?.id) {
             return
         }
         event.isCancelled = true
@@ -121,15 +128,17 @@ class InventoryClickListener(val plugin: RPKShopsBukkit) : Listener {
                 return
             }
             economyService.setBalance(buyerCharacter, currency, economyService.getBalance(buyerCharacter, currency) - price)
-            if (sellerCharacter != null) {
-                bankService.getBalance(sellerCharacter, currency).thenAccept { bankBalance ->
-                    plugin.server.scheduler.runTask(plugin, Runnable {
-                        bankService.setBalance(sellerCharacter, currency, bankBalance + price)
-                    })
+            sellerCharacterFuture.thenAccept { sellerCharacter ->
+                if (sellerCharacter != null) {
+                    bankService.getBalance(sellerCharacter, currency).thenAccept { bankBalance ->
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            bankService.setBalance(sellerCharacter, currency, bankBalance + price)
+                        })
+                    }
                 }
+                buyerBukkitPlayer.inventory.addItem(amtItem)
+                chest.blockInventory.removeItem(amtItem)
             }
-            buyerBukkitPlayer.inventory.addItem(amtItem)
-            chest.blockInventory.removeItem(amtItem)
         } else if (sign.getLine(1).startsWith("sell")) {
             event.whoClicked.sendMessage(plugin.messages["no-stealing"])
             event.isCancelled = true

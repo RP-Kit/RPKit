@@ -49,7 +49,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
             event.isCancelled = true
             return
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             event.isCancelled = true
             return

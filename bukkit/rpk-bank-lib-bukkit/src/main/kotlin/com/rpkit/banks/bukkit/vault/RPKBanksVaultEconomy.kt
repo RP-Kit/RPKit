@@ -47,7 +47,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         return if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             val currency = currencyService.defaultCurrency
             if (character != null && currency != null) {
                 economyService.getBalance(character, currency).toDouble()
@@ -102,7 +102,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
@@ -165,7 +165,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             val currency = currencyService.defaultCurrency
             if (character != null) {
                 return if (currency != null) {
@@ -223,7 +223,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             val currency = currencyService.defaultCurrency
             if (character != null) {
                 return if (currency != null) {
@@ -281,7 +281,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
@@ -338,7 +338,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
@@ -399,7 +399,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
@@ -429,7 +429,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val characterService = Services[RPKCharacterService::class.java] ?: return false
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer) ?: return false
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         return character != null
     }
 
@@ -484,7 +484,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
@@ -557,7 +557,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
@@ -625,7 +625,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
         return if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             val currency = currencyService.defaultCurrency
             if (character != null) {
                 if (currency != null) {

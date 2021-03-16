@@ -23,18 +23,19 @@ import com.rpkit.payments.bukkit.event.notification.RPKBukkitPaymentNotification
 import com.rpkit.payments.bukkit.event.notification.RPKBukkitPaymentNotificationUpdateEvent
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 
 class RPKPaymentNotificationServiceImpl(override val plugin: RPKPaymentsBukkit) : RPKPaymentNotificationService {
 
-    override val notifications: List<RPKPaymentNotification>
+    override val notifications: CompletableFuture<List<RPKPaymentNotification>>
         get() = plugin.database.getTable(RPKPaymentNotificationTable::class.java).getAll()
 
-    override fun getPaymentNotification(id: RPKPaymentNotificationId): RPKPaymentNotification? {
+    override fun getPaymentNotification(id: RPKPaymentNotificationId): CompletableFuture<RPKPaymentNotification?> {
         return plugin.database.getTable(RPKPaymentNotificationTable::class.java)[id]
     }
 
-    override fun getPaymentNotificationsFor(character: RPKCharacter): List<RPKPaymentNotification> {
+    override fun getPaymentNotificationsFor(character: RPKCharacter): CompletableFuture<List<RPKPaymentNotification>> {
         return plugin.database.getTable(RPKPaymentNotificationTable::class.java).get(character)
     }
 

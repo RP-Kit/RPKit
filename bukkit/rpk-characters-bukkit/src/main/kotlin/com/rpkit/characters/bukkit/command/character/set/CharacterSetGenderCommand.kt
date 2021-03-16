@@ -69,7 +69,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit) : Comma
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
@@ -79,9 +79,10 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit) : Comma
             return true
         }
         character.gender = args.joinToString(" ")
-        characterService.updateCharacter(character)
-        sender.sendMessage(plugin.messages["character-set-gender-valid"])
-        character.showCharacterCard(minecraftProfile)
+        characterService.updateCharacter(character).thenRun {
+            sender.sendMessage(plugin.messages["character-set-gender-valid"])
+            character.showCharacterCard(minecraftProfile)
+        }
         return true
     }
 
@@ -96,7 +97,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit) : Comma
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return GenderNotSetPrompt()
             val characterService = Services[RPKCharacterService::class.java] ?: return GenderNotSetPrompt()
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return GenderNotSetPrompt()
-            val character = characterService.getActiveCharacter(minecraftProfile) ?: return GenderNotSetPrompt()
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return GenderNotSetPrompt()
             character.gender = input
             characterService.updateCharacter(character)
             return GenderSetPrompt()
@@ -125,7 +126,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit) : Comma
             }
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
             if (minecraftProfile != null) {
-                characterService.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                characterService.getPreloadedActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
             }
             return END_OF_CONVERSATION
         }
@@ -153,7 +154,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit) : Comma
             }
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
             if (minecraftProfile != null) {
-                characterService.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                characterService.getPreloadedActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
             }
             return END_OF_CONVERSATION
         }

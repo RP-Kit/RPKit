@@ -27,11 +27,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.ConversationContext
-import org.bukkit.conversations.ConversationFactory
-import org.bukkit.conversations.MessagePrompt
-import org.bukkit.conversations.Prompt
-import org.bukkit.conversations.ValidatingPrompt
+import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
 /**
@@ -82,7 +78,7 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit) : Command
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         val paymentGroupService = Services[RPKPaymentGroupService::class.java]
         if (paymentGroupService == null) {
             sender.sendMessage(plugin.messages["no-payment-group-service"])
@@ -93,13 +89,15 @@ class PaymentSetCurrencyCommand(private val plugin: RPKPaymentsBukkit) : Command
             sender.sendMessage(plugin.messages["payment-set-currency-invalid-group"])
             return true
         }
-        if (!paymentGroup.owners.contains(character)) {
-            sender.sendMessage(plugin.messages["payment-set-currency-invalid-owner"])
-            return true
+        paymentGroup.owners.thenAccept { owners ->
+            if (!owners.contains(character)) {
+                sender.sendMessage(plugin.messages["payment-set-currency-invalid-owner"])
+                return@thenAccept
+            }
+            val conversation = conversationFactory.buildConversation(sender)
+            conversation.context.setSessionData("payment_group", paymentGroup)
+            conversation.begin()
         }
-        val conversation = conversationFactory.buildConversation(sender)
-        conversation.context.setSessionData("payment_group", paymentGroup)
-        conversation.begin()
         return true
     }
 

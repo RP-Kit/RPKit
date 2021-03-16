@@ -36,7 +36,7 @@ class PlayerItemConsumeListener(private val plugin: RPKDrinksBukkit) : Listener 
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         val drinkEvent = RPKBukkitDrinkEvent(character, drink)
         plugin.server.pluginManager.callEvent(drinkEvent)
         if (drinkEvent.isCancelled) {

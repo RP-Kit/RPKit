@@ -29,6 +29,7 @@ import com.rpkit.skills.bukkit.database.jooq.Tables.RPKIT_SKILL_BINDING
 import com.rpkit.skills.bukkit.skills.RPKSkillBinding
 import com.rpkit.skills.bukkit.skills.RPKSkillName
 import com.rpkit.skills.bukkit.skills.RPKSkillService
+import java.util.concurrent.CompletableFuture
 
 class RPKSkillBindingTable(private val database: Database, private val plugin: RPKSkillsBukkit): Table {
 
@@ -70,41 +71,43 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                 .execute()
     }
 
-    fun get(id: Int): RPKSkillBinding? {
+    fun get(id: Int): CompletableFuture<RPKSkillBinding?> {
         if (cache?.containsKey(id) == true) {
-            return cache[id]
+            return CompletableFuture.completedFuture(cache[id])
         }
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(
-                        RPKIT_SKILL_BINDING.CHARACTER_ID,
-                        RPKIT_SKILL_BINDING.ITEM,
-                        RPKIT_SKILL_BINDING.SKILL_NAME
+                    RPKIT_SKILL_BINDING.CHARACTER_ID,
+                    RPKIT_SKILL_BINDING.ITEM,
+                    RPKIT_SKILL_BINDING.SKILL_NAME
                 )
                 .from(RPKIT_SKILL_BINDING)
                 .where(RPKIT_SKILL_BINDING.ID.eq(id))
-                .fetchOne() ?: return null
-        val characterService = Services[RPKCharacterService::class.java] ?: return null
-        val characterId = result[RPKIT_SKILL_BINDING.CHARACTER_ID]
-        val character = characterService.getCharacter(RPKCharacterId(characterId))
-        val skillService = Services[RPKSkillService::class.java] ?: return null
-        val skillName = result[RPKIT_SKILL_BINDING.SKILL_NAME]
-        val skill = skillService.getSkill(RPKSkillName(skillName))
-        if (character != null && skill != null) {
-            val skillBinding = RPKSkillBinding(
+                .fetchOne() ?: return@supplyAsync null
+            val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync null
+            val characterId = result[RPKIT_SKILL_BINDING.CHARACTER_ID]
+            val character = characterService.getCharacter(RPKCharacterId(characterId)).join()
+            val skillService = Services[RPKSkillService::class.java] ?: return@supplyAsync null
+            val skillName = result[RPKIT_SKILL_BINDING.SKILL_NAME]
+            val skill = skillService.getSkill(RPKSkillName(skillName))
+            if (character != null && skill != null) {
+                val skillBinding = RPKSkillBinding(
                     id,
                     character,
                     result[RPKIT_SKILL_BINDING.ITEM].toItemStack(),
                     skill
-            )
-            cache?.set(id, skillBinding)
-            return skillBinding
-        } else {
-            database.create
+                )
+                cache?.set(id, skillBinding)
+                return@supplyAsync skillBinding
+            } else {
+                database.create
                     .deleteFrom(RPKIT_SKILL_BINDING)
                     .where(RPKIT_SKILL_BINDING.ID.eq(id))
                     .execute()
-            cache?.remove(id)
-            return null
+                cache?.remove(id)
+                return@supplyAsync null
+            }
         }
     }
 

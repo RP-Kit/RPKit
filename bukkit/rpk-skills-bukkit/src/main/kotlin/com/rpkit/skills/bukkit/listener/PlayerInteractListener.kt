@@ -36,7 +36,7 @@ class PlayerInteractListener(private val plugin: RPKSkillsBukkit) : Listener {
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val skillService = Services[RPKSkillService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         val item = event.item ?: return
         val skill = skillService.getSkillBinding(character, item) ?: return
         if (!character.canUse(skill)) {

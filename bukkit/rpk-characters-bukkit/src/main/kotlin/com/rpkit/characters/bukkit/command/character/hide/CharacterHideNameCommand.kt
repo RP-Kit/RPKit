@@ -55,15 +55,16 @@ class CharacterHideNameCommand(private val plugin: RPKCharactersBukkit) : Comman
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
         character.isNameHidden = true
-        characterService.updateCharacter(character)
-        sender.sendMessage(plugin.messages["character-hide-name-valid"])
-        character.showCharacterCard(minecraftProfile)
+        characterService.updateCharacter(character).thenRun {
+            sender.sendMessage(plugin.messages["character-hide-name-valid"])
+            character.showCharacterCard(minecraftProfile)
+        }
         return true
     }
 

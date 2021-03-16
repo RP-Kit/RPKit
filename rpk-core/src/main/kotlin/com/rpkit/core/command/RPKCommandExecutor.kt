@@ -18,9 +18,10 @@ package com.rpkit.core.command
 
 import com.rpkit.core.command.result.CommandResult
 import com.rpkit.core.command.sender.RPKCommandSender
+import java.util.concurrent.CompletableFuture
 
 interface RPKCommandExecutor {
 
-    fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult
+    fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult>
 
 }

@@ -49,7 +49,7 @@ class InventoryClickListener(private val plugin: RPKBlockLoggingBukkit) : Listen
                 val characterService = Services[RPKCharacterService::class.java] ?: return
                 val minecraftProfile = minecraftProfileService.getMinecraftProfile(whoClicked)
                 val profile = minecraftProfile?.profile as? RPKProfile
-                val character = if (minecraftProfile == null) null else characterService.getActiveCharacter(minecraftProfile)
+                val character = if (minecraftProfile == null) null else characterService.getPreloadedActiveCharacter(minecraftProfile)
                 blockHistoryService.getBlockHistory(inventoryHolder.block).thenAccept { blockHistory ->
                     val blockInventoryChange = RPKBlockInventoryChangeImpl(
                         blockHistory = blockHistory,

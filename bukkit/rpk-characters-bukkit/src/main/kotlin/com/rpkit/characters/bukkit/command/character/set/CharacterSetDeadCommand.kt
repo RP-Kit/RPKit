@@ -22,11 +22,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.BooleanPrompt
-import org.bukkit.conversations.ConversationContext
-import org.bukkit.conversations.ConversationFactory
-import org.bukkit.conversations.MessagePrompt
-import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -79,7 +75,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
@@ -91,15 +87,18 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
         val dead = args[0].toBoolean()
         if (dead && sender.hasPermission("rpkit.characters.command.character.set.dead.yes") || !dead && sender.hasPermission("rpkit.characters.command.character.set.dead.no")) {
             character.isDead = dead
-            characterService.updateCharacter(character)
-            sender.sendMessage(plugin.messages["character-set-dead-valid"])
-            character.showCharacterCard(minecraftProfile)
-            if (dead) {
-                sender.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))
-                sender.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 255))
-            } else {
-                sender.removePotionEffect(PotionEffectType.BLINDNESS)
-                sender.removePotionEffect(PotionEffectType.SLOW)
+            characterService.updateCharacter(character).thenRun {
+                sender.sendMessage(plugin.messages["character-set-dead-valid"])
+                character.showCharacterCard(minecraftProfile)
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    if (dead) {
+                        sender.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))
+                        sender.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 255))
+                    } else {
+                        sender.removePotionEffect(PotionEffectType.BLINDNESS)
+                        sender.removePotionEffect(PotionEffectType.SLOW)
+                    }
+                })
             }
         } else {
             sender.sendMessage(plugin.messages["no-permission-character-set-dead-" + if (dead) "yes" else "no"])
@@ -116,7 +115,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return DeadSetPrompt()
             val characterService = Services[RPKCharacterService::class.java] ?: return DeadSetPrompt()
             val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return DeadSetPrompt()
-            val character = characterService.getActiveCharacter(minecraftProfile) ?: return DeadSetPrompt()
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return DeadSetPrompt()
             if (input && conversable.hasPermission("rpkit.characters.command.character.set.dead.yes") || !input && conversable.hasPermission("rpkit.characters.command.character.set.dead.no")) {
                 character.isDead = input
                 characterService.updateCharacter(character)
@@ -160,7 +159,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
                 }
                 val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
                 if (minecraftProfile != null) {
-                    characterService.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                    characterService.getPreloadedActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
                 }
             }
             return Prompt.END_OF_CONVERSATION
@@ -189,7 +188,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
                 }
                 val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
                 if (minecraftProfile != null) {
-                    characterService.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                    characterService.getPreloadedActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
                 }
             }
             return END_OF_CONVERSATION

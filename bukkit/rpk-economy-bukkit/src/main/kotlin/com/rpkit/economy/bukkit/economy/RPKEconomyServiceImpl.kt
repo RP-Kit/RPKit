@@ -23,6 +23,7 @@ import com.rpkit.economy.bukkit.database.table.RPKWalletTable
 import com.rpkit.economy.bukkit.event.economy.RPKBukkitBalanceChangeEvent
 import com.rpkit.economy.bukkit.exception.NegativeBalanceException
 import com.rpkit.economy.bukkit.wallet.RPKWallet
+import java.util.concurrent.CompletableFuture
 
 /**
  * Economy service implementation.
@@ -50,8 +51,10 @@ class RPKEconomyServiceImpl(override val plugin: RPKEconomyBukkit) : RPKEconomyS
         setBalance(to, currency, getBalance(to, currency) + amount)
     }
 
-    override fun getRichestCharacters(currency: RPKCurrency, amount: Int): List<RPKCharacter> {
-        return plugin.database.getTable(RPKWalletTable::class.java).getTop(amount, currency).map(RPKWallet::character)
+    override fun getRichestCharacters(currency: RPKCurrency, amount: Int): CompletableFuture<List<RPKCharacter>> {
+        return plugin.database.getTable(RPKWalletTable::class.java).getTop(amount, currency).thenApply { wallets ->
+            wallets.map(RPKWallet::character)
+        }
     }
 
 }

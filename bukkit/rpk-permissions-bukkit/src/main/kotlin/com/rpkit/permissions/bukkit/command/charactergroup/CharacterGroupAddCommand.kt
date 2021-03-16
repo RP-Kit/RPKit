@@ -66,7 +66,7 @@ class CharacterGroupAddCommand(private val plugin: RPKPermissionsBukkit) : Comma
             sender.sendMessage(plugin.messages.noCharacterService)
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages.noCharacter)
             return true

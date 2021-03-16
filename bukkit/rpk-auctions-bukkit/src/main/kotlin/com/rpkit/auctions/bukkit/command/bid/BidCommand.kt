@@ -78,7 +78,7 @@ class BidCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
                     sender.sendMessage(plugin.messages.noMinecraftProfile)
                     return true
                 }
-                val character = characterService.getActiveCharacter(minecraftProfile)
+                val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
                 if (character == null) {
                     sender.sendMessage(plugin.messages.noCharacter)
                     return true

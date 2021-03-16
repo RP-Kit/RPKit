@@ -84,7 +84,7 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
             if (minecraftProfile == null) {
                 event.player.sendMessage(plugin.messages["no-minecraft-profile"])
             } else {
-                val character = characterService.getActiveCharacter(minecraftProfile)
+                val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
                 if (character == null) {
                     event.player.sendMessage(plugin.messages["no-character"])
                     return
@@ -130,7 +130,7 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                 return
             }
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             if (character == null) {
                 event.player.sendMessage(plugin.messages["no-character"])
                 return

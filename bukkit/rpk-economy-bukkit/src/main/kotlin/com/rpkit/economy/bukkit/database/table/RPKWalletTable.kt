@@ -26,6 +26,7 @@ import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.database.create
 import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_WALLET
 import com.rpkit.economy.bukkit.wallet.RPKWallet
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents the wallet table.
@@ -104,31 +105,34 @@ class RPKWalletTable(
         return wallet
     }
 
-    fun getTop(amount: Int = 5, currency: RPKCurrency): List<RPKWallet> {
-        val currencyName = currency.name
-        val results = database.create
+    fun getTop(amount: Int = 5, currency: RPKCurrency): CompletableFuture<List<RPKWallet>> {
+        return CompletableFuture.supplyAsync {
+            val currencyName = currency.name
+            val results = database.create
                 .select(
-                        RPKIT_WALLET.CHARACTER_ID,
-                        RPKIT_WALLET.BALANCE
+                    RPKIT_WALLET.CHARACTER_ID,
+                    RPKIT_WALLET.BALANCE
                 )
                 .from(RPKIT_WALLET)
                 .where(RPKIT_WALLET.CURRENCY_NAME.eq(currencyName.value))
                 .orderBy(RPKIT_WALLET.BALANCE.desc())
                 .limit(amount)
                 .fetch()
-        val characterService = Services[RPKCharacterService::class.java] ?: return emptyList()
-        return results
+            val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync emptyList()
+            return@supplyAsync results
                 .mapNotNull { result ->
                     val characterId = result[RPKIT_WALLET.CHARACTER_ID]
-                    val character = characterService.getCharacter(RPKCharacterId(characterId)) ?: return@mapNotNull null
+                    val character =
+                        characterService.getCharacter(RPKCharacterId(characterId)).join() ?: return@mapNotNull null
                     val wallet = RPKWallet(
-                            character,
-                            currency,
-                            result[RPKIT_WALLET.BALANCE]
+                        character,
+                        currency,
+                        result[RPKIT_WALLET.BALANCE]
                     )
                     cache?.set(CharacterCurrencyCacheKey(characterId, currencyName.value), wallet)
                     return@mapNotNull wallet
                 }
+        }
     }
 
     fun delete(entity: RPKWallet) {

@@ -59,36 +59,46 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         sender.sendMessage(plugin.messages["payment-list-title"])
         val paymentGroups = paymentGroupService.paymentGroups
-        paymentGroups.filter { it.owners.contains(character) }
-                .forEach {
+
+        paymentGroups.forEach { paymentGroup ->
+            paymentGroup.owners.thenAccept { owners ->
+                if (owners.contains(character)) {
                     sender.sendMessage(
-                            plugin.messages["payment-list-item", mapOf(
-                                "name" to it.name.value,
-                                "rank" to "Owner"
-                            )]
+                        plugin.messages["payment-list-item", mapOf(
+                            "name" to paymentGroup.name.value,
+                            "rank" to "Owner"
+                        )]
                     )
                 }
-        paymentGroups.filter { it.members.contains(character) }
-                .forEach {
+            }
+        }
+        paymentGroups.forEach { paymentGroup ->
+            paymentGroup.members.thenAccept { members ->
+                if (members.contains(character)) {
                     sender.sendMessage(
-                            plugin.messages[".payment-list-item", mapOf(
-                                "name" to it.name.value,
-                                "rank" to "Member"
-                            )]
+                        plugin.messages["payment-list-item", mapOf(
+                            "name" to paymentGroup.name.value,
+                            "rank" to "Member"
+                        )]
                     )
                 }
-        paymentGroups.filter { it.invites.contains(character) }
-                .forEach {
+            }
+        }
+        paymentGroups.forEach { paymentGroup ->
+            paymentGroup.invites.thenAccept { invites ->
+                if (invites.contains(character)) {
                     sender.sendMessage(
-                            plugin.messages["payment-list-item", mapOf(
-                                "name" to it.name.value,
-                                "rank" to "Invited"
-                            )]
+                        plugin.messages["payment-list-item", mapOf(
+                            "name" to paymentGroup.name.value,
+                            "rank" to "Invited"
+                        )]
                     )
                 }
+            }
+        }
         return true
     }
 }

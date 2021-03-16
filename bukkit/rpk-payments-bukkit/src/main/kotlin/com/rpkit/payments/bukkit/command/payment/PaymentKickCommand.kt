@@ -74,7 +74,7 @@ class PaymentKickCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["payment-kick-invalid-character"])
             return true

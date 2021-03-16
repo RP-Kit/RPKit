@@ -34,7 +34,7 @@ class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineCo
         val senderMinecraftProfile = context.senderMinecraftProfile
         val senderProfile = context.senderProfile
         val senderCharacter = if (senderMinecraftProfile != null)
-            characterService?.getActiveCharacter(senderMinecraftProfile)
+            characterService?.getPreloadedActiveCharacter(senderMinecraftProfile)
         else
             null
         val chatChannel = context.chatChannel
