@@ -17,6 +17,7 @@
 package com.rpkit.chat.bukkit.chatchannel.pipeline
 
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
+import java.util.concurrent.CompletableFuture
 
 /**
  * A directed chat channel pipeline component.
@@ -35,6 +36,6 @@ interface DirectedPreFormatPipelineComponent {
      * @param context The message context
      * @return The message context, after modifications performed by the component
      */
-    fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext
+    fun process(context: DirectedPreFormatMessageContext): CompletableFuture<DirectedPreFormatMessageContext>
 
 }

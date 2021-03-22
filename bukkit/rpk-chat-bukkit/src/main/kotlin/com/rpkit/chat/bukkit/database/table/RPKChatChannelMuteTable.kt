@@ -23,6 +23,7 @@ import com.rpkit.chat.bukkit.mute.RPKChatChannelMute
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents the chat channel mute table
@@ -45,57 +46,63 @@ class RPKChatChannelMuteTable(private val database: Database, private val plugin
         null
     }
 
-    fun insert(entity: RPKChatChannelMute) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
+    fun insert(entity: RPKChatChannelMute): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
         val chatChannelName = entity.chatChannel.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_CHAT_CHANNEL_MUTE,
-                        RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID,
-                        RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME
+                    RPKIT_CHAT_CHANNEL_MUTE,
+                    RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID,
+                    RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME
                 )
                 .values(
-                        minecraftProfileId.value,
-                        chatChannelName.value
+                    minecraftProfileId.value,
+                    chatChannelName.value
                 )
                 .execute()
-        cache?.set(MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value), entity)
+            cache?.set(MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value), entity)
+        }
     }
 
-    fun get(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): RPKChatChannelMute? {
-        val minecraftProfileId = minecraftProfile.id ?: return null
+    fun get(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): CompletableFuture<RPKChatChannelMute?> {
+        val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
         val chatChannelName = chatChannel.name
         val cacheKey = MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value)
         if (cache?.containsKey(cacheKey) == true) {
-            return cache[cacheKey]
+            return CompletableFuture.completedFuture(cache[cacheKey])
         }
-        database.create
+        return CompletableFuture.supplyAsync {
+            database.create
                 .select(
-                        RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID,
-                        RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME
+                    RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID,
+                    RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME
                 )
                 .from(RPKIT_CHAT_CHANNEL_MUTE)
                 .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME.eq(chatChannelName.value))
-                .fetchOne() ?: return null
-        val chatChannelMute = RPKChatChannelMute(
+                .fetchOne() ?: return@supplyAsync null
+            val chatChannelMute = RPKChatChannelMute(
                 minecraftProfile,
                 chatChannel
-        )
-        cache?.set(cacheKey, chatChannelMute)
-        return chatChannelMute
+            )
+            cache?.set(cacheKey, chatChannelMute)
+            return@supplyAsync chatChannelMute
+        }
     }
 
-    fun delete(entity: RPKChatChannelMute) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
+    fun delete(entity: RPKChatChannelMute): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
         val chatChannelName = entity.chatChannel.name
         val cacheKey = MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value)
-        database.create
-            .deleteFrom(RPKIT_CHAT_CHANNEL_MUTE)
-            .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-            .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME.eq(chatChannelName.value))
-            .execute()
-        cache?.remove(cacheKey)
+        return CompletableFuture.runAsync {
+            database.create
+                .deleteFrom(RPKIT_CHAT_CHANNEL_MUTE)
+                .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+                .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME.eq(chatChannelName.value))
+                .execute()
+            cache?.remove(cacheKey)
+        }
     }
 
 }

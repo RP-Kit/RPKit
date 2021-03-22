@@ -26,8 +26,9 @@ import org.bukkit.event.HandlerList
 class RPKBukkitChatChannelSwitchEvent(
         override val minecraftProfile: RPKMinecraftProfile,
         override val oldChannel: RPKChatChannel?,
-        override var chatChannel: RPKChatChannel?
-) : RPKBukkitEvent(), RPKChatChannelSwitchEvent, Cancellable {
+        override var chatChannel: RPKChatChannel?,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKChatChannelSwitchEvent, Cancellable {
 
     companion object {
         @JvmStatic

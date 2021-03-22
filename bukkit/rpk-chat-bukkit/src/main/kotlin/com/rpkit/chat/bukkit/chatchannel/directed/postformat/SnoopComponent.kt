@@ -22,6 +22,7 @@ import com.rpkit.chat.bukkit.snooper.RPKSnooperService
 import com.rpkit.core.service.Services
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture
 
 /**
  * Snoop component.
@@ -30,13 +31,19 @@ import org.bukkit.configuration.serialization.SerializableAs
 @SerializableAs("SnoopComponent")
 class SnoopComponent : DirectedPostFormatPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: DirectedPostFormatMessageContext): DirectedPostFormatMessageContext {
-        if (!context.isCancelled) return context
-        val snooperService = Services[RPKSnooperService::class.java] ?: return context
-        if (snooperService.snoopers.contains(context.receiverMinecraftProfile)) {
-            context.receiverMinecraftProfile.sendMessage(*context.message)
+    override fun process(context: DirectedPostFormatMessageContext): CompletableFuture<DirectedPostFormatMessageContext> {
+        if (!context.isCancelled) return CompletableFuture.completedFuture(context)
+        val snooperService = Services[RPKSnooperService::class.java] ?: return CompletableFuture.completedFuture(context)
+        // Since there's no mutation happening here we should be able to just send the messages.
+        // In practice most, if not all servers will have the component as the last one (or at least after any mutations)
+        // There might be some weirdness if mutations to context happen afterwards since context is mutable,
+        // The speed benefit of not blocking the post-format pipeline is probably better though.
+        snooperService.snoopers.thenAccept { snoopers ->
+            if (snoopers.contains(context.receiverMinecraftProfile)) {
+                context.receiverMinecraftProfile.sendMessage(*context.message)
+            }
         }
-        return context
+        return CompletableFuture.completedFuture(context)
     }
 
     override fun serialize(): MutableMap<String, Any> {

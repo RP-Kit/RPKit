@@ -18,6 +18,7 @@ package com.rpkit.chat.bukkit.snooper
 
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides snooper related operations.
@@ -28,21 +29,21 @@ interface RPKSnooperService : Service {
      * A list of all Minecraft profiles who are currently snooping.
      * THis list is immutable, so Minecraft profiles should be added or removed with [addSnooper] and [removeSnooper] respectively.
      */
-    val snoopers: List<RPKMinecraftProfile>
+    val snoopers: CompletableFuture<List<RPKMinecraftProfile>>
 
     /**
      * Adds a snooper. This Minecraft profile is then abel to see messages they would not otherwise see.
      *
      * @param minecraftProfile The Minecraft profile to enable snooping for
      */
-    fun addSnooper(minecraftProfile: RPKMinecraftProfile)
+    fun addSnooper(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void>
 
     /**
      * Removes a snooper. This Minecraft profile then no longer receives messages outside of what they normally see.
      *
      * @param minecraftProfile THe Minecraft profile to disable snooping for
      */
-    fun removeSnooper(minecraftProfile: RPKMinecraftProfile)
+    fun removeSnooper(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void>
 
     /**
      * Checks whether a Minecraft profile is snooping.
@@ -50,6 +51,6 @@ interface RPKSnooperService : Service {
      * @param minecraftProfile The Minecraft profile
      * @return Whether the Minecraft profile is snooping
      */
-    fun isSnooping(minecraftProfile: RPKMinecraftProfile): Boolean
+    fun isSnooping(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Boolean>
 
 }

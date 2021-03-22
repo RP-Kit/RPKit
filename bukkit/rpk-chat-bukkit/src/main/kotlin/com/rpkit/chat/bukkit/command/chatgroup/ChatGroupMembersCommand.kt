@@ -43,22 +43,27 @@ class ChatGroupMembersCommand(private val plugin: RPKChatBukkit) : CommandExecut
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
         }
-        val chatGroup = chatGroupService.getChatGroup(RPKChatGroupName(args[0]))
-        if (chatGroup == null) {
-            sender.sendMessage(plugin.messages["chat-group-members-invalid-chat-group"])
-            return true
-        }
-        sender.sendMessage(plugin.messages["chat-group-members-list-title"])
-        for (player in chatGroup.members) {
-            sender.sendMessage(plugin.messages["chat-group-members-list-item", mapOf(
-                "player" to player.name
-            )])
-        }
-        sender.sendMessage(plugin.messages["chat-group-invitations-list-title"])
-        for (player in chatGroup.invited) {
-            sender.sendMessage(plugin.messages["chat-group-invitations-list-item", mapOf(
-                "player" to player.name
-            )])
+        chatGroupService.getChatGroup(RPKChatGroupName(args[0])).thenAccept { chatGroup ->
+            if (chatGroup == null) {
+                sender.sendMessage(plugin.messages["chat-group-members-invalid-chat-group"])
+                return@thenAccept
+            }
+            sender.sendMessage(plugin.messages["chat-group-members-list-title"])
+            chatGroup.members.thenAccept { members ->
+                for (player in members) {
+                    sender.sendMessage(plugin.messages["chat-group-members-list-item", mapOf(
+                        "player" to player.name
+                    )])
+                }
+            }
+            sender.sendMessage(plugin.messages["chat-group-invitations-list-title"])
+            chatGroup.invited.thenAccept { invited ->
+                for (player in invited) {
+                    sender.sendMessage(plugin.messages["chat-group-invitations-list-item", mapOf(
+                        "player" to player.name
+                    )])
+                }
+            }
         }
         return true
     }

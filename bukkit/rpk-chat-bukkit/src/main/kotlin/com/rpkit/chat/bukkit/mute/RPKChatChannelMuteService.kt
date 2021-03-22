@@ -23,6 +23,7 @@ import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelMuteEvent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelUnmuteEvent
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides chat channel mute related services.
@@ -34,17 +35,21 @@ class RPKChatChannelMuteService(override val plugin: RPKChatBukkit) : Service {
      * @param minecraftProfile The Minecraft profile
      * @param chatChannel The chat channel
      */
-    fun addChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel) {
-        if (!hasMinecraftProfileMutedChatChannel(minecraftProfile, chatChannel)) {
-            val event = RPKBukkitChatChannelMuteEvent(minecraftProfile, chatChannel)
-            plugin.server.pluginManager.callEvent(event)
-            if (event.isCancelled) return
-            plugin.database.getTable(RPKChatChannelMuteTable::class.java).insert(
-                    RPKChatChannelMute(
+    fun addChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): CompletableFuture<Void> {
+        return hasMinecraftProfileMutedChatChannel(minecraftProfile, chatChannel).thenAccept { hasMuted ->
+            if (!hasMuted) {
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    val event = RPKBukkitChatChannelMuteEvent(minecraftProfile, chatChannel)
+                    plugin.server.pluginManager.callEvent(event)
+                    if (event.isCancelled) return@Runnable
+                    plugin.database.getTable(RPKChatChannelMuteTable::class.java).insert(
+                        RPKChatChannelMute(
                             minecraftProfile = event.minecraftProfile,
                             chatChannel = event.chatChannel
+                        )
                     )
-            )
+                })
+            }
         }
     }
 
@@ -53,14 +58,15 @@ class RPKChatChannelMuteService(override val plugin: RPKChatBukkit) : Service {
      * @param minecraftProfile The Minecraft profile
      * @param chatChannel The chat channel
      */
-    fun removeChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel, isAsync: Boolean = false) {
+    fun removeChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel, isAsync: Boolean = false): CompletableFuture<Void> {
         val event = RPKBukkitChatChannelUnmuteEvent(minecraftProfile, chatChannel, isAsync)
         plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
+        if (event.isCancelled) return CompletableFuture.completedFuture(null)
         val chatChannelMuteTable = plugin.database.getTable(RPKChatChannelMuteTable::class.java)
-        val chatChannelMute = chatChannelMuteTable.get(event.minecraftProfile, event.chatChannel)
-        if (chatChannelMute != null) {
-            chatChannelMuteTable.delete(chatChannelMute)
+        return chatChannelMuteTable.get(event.minecraftProfile, event.chatChannel).thenAcceptAsync { chatChannelMute ->
+            if (chatChannelMute != null) {
+                chatChannelMuteTable.delete(chatChannelMute).join()
+            }
         }
     }
 
@@ -71,8 +77,8 @@ class RPKChatChannelMuteService(override val plugin: RPKChatBukkit) : Service {
      * @param chatChannel The chat channel
      * @return Whether the Minecraft profile has muted the chat channel
      */
-    fun hasMinecraftProfileMutedChatChannel(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): Boolean {
-        return plugin.database.getTable(RPKChatChannelMuteTable::class.java).get(minecraftProfile, chatChannel) != null
+    fun hasMinecraftProfileMutedChatChannel(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): CompletableFuture<Boolean> {
+        return plugin.database.getTable(RPKChatChannelMuteTable::class.java).get(minecraftProfile, chatChannel).thenApply { it != null }
     }
 
 }

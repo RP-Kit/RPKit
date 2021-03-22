@@ -26,6 +26,8 @@ import org.bukkit.scheduler.BukkitRunnable
 import org.pircbotx.Configuration
 import org.pircbotx.PircBotX
 import org.pircbotx.delay.StaticDelay
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * IRC service implementation.
@@ -33,7 +35,7 @@ import org.pircbotx.delay.StaticDelay
 class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
 
     private val ircBot: PircBotX
-    private val onlineUsers = mutableListOf<String>()
+    private val onlineUsers = CopyOnWriteArrayList<String>()
 
     init {
         val whitelistValidator = IRCWhitelistValidator()
@@ -111,16 +113,20 @@ class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
     override val nick: RPKIRCNick
         get() = RPKIRCNick(ircBot.nick)
 
-    override fun sendMessage(channel: IRCChannel, message: String) {
-        ircBot.send().message(channel.name, message)
+    override fun sendMessage(channel: IRCChannel, message: String): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            ircBot.sendIRC().message(channel.name, message)
+        }
     }
 
-    override fun sendMessage(user: RPKIRCProfile, message: String) {
-        sendMessage(user.nick, message)
+    override fun sendMessage(user: RPKIRCProfile, message: String): CompletableFuture<Void> {
+        return sendMessage(user.nick, message)
     }
 
-    override fun sendMessage(nick: RPKIRCNick, message: String) {
-        ircBot.send().message(nick.value, message)
+    override fun sendMessage(nick: RPKIRCNick, message: String): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            ircBot.sendIRC().message(nick.value, message)
+        }
     }
 
     override fun isOnline(nick: RPKIRCNick): Boolean {
@@ -151,9 +157,11 @@ class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
         }.runTaskAsynchronously(plugin)
     }
 
-    override fun disconnect() {
-        ircBot.stopBotReconnect()
-        ircBot.sendIRC()?.quitServer(plugin.messages["irc-quit"])
+    override fun disconnect(): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            ircBot.stopBotReconnect()
+            ircBot.sendIRC()?.quitServer(plugin.messages["irc-quit"])
+        }
     }
 
 }

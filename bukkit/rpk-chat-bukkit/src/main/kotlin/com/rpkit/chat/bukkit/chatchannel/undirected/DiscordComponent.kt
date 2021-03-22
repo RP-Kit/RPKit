@@ -23,16 +23,17 @@ import com.rpkit.chat.bukkit.discord.RPKDiscordService
 import com.rpkit.core.service.Services
 import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
+import java.util.concurrent.CompletableFuture
 
 class DiscordComponent(
         val discordChannel: DiscordChannel
 ) : UndirectedPipelineComponent, ConfigurationSerializable {
-    override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
+    override fun process(context: UndirectedMessageContext): CompletableFuture<UndirectedMessageContext> {
         if (!context.isCancelled) {
-            val discordService = Services[RPKDiscordService::class.java] ?: return context
+            val discordService = Services[RPKDiscordService::class.java] ?: return CompletableFuture.completedFuture(context)
             discordService.sendMessage(discordChannel, ChatColor.stripColor(context.message)!!)
         }
-        return context
+        return CompletableFuture.completedFuture(context)
     }
 
     override fun serialize(): MutableMap<String, Any> {
