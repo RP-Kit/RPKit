@@ -54,27 +54,32 @@ class ChatGroupDisbandCommand(private val plugin: RPKChatBukkit) : CommandExecut
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
         }
-        val chatGroup = chatGroupService.getChatGroup(RPKChatGroupName(args[0]))
-        if (chatGroup == null) {
-            sender.sendMessage(plugin.messages["chat-group-disband-invalid-nonexistent"])
-            return true
-        }
-        val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
-        if (senderMinecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-            return true
-        }
-        if (!chatGroup.members.any { memberMinecraftProfile ->
-                    memberMinecraftProfile.id == senderMinecraftProfile.id
-                }) {
-            sender.sendMessage(plugin.messages["chat-group-disband-invalid-not-a-member"])
-        } else {
-            for (minecraftProfile in chatGroup.members) {
-                minecraftProfile.sendMessage(plugin.messages["chat-group-disband-valid", mapOf(
-                    "group" to chatGroup.name.value
-                )])
+        chatGroupService.getChatGroup(RPKChatGroupName(args[0])).thenAccept { chatGroup ->
+            if (chatGroup == null) {
+                sender.sendMessage(plugin.messages["chat-group-disband-invalid-nonexistent"])
+                return@thenAccept
             }
-            chatGroupService.removeChatGroup(chatGroup)
+            val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+            if (senderMinecraftProfile == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                return@thenAccept
+            }
+            chatGroup.members.thenAccept { members ->
+                if (!members.any { memberMinecraftProfile ->
+                        memberMinecraftProfile.id == senderMinecraftProfile.id
+                    }) {
+                    sender.sendMessage(plugin.messages["chat-group-disband-invalid-not-a-member"])
+                } else {
+                    for (minecraftProfile in members) {
+                        minecraftProfile.sendMessage(plugin.messages["chat-group-disband-valid", mapOf(
+                            "group" to chatGroup.name.value
+                        )])
+                    }
+                    plugin.server.scheduler.runTask(plugin, Runnable {
+                        chatGroupService.removeChatGroup(chatGroup)
+                    })
+                }
+            }
         }
         return true
     }

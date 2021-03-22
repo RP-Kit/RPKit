@@ -20,6 +20,7 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPostFormatPipelineComp
 import com.rpkit.chat.bukkit.context.DirectedPostFormatMessageContext
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture
 
 /**
  * Send message component.
@@ -28,10 +29,10 @@ import org.bukkit.configuration.serialization.SerializableAs
 @SerializableAs("SendMessageComponent")
 class SendMessageComponent : DirectedPostFormatPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: DirectedPostFormatMessageContext): DirectedPostFormatMessageContext {
+    override fun process(context: DirectedPostFormatMessageContext): CompletableFuture<DirectedPostFormatMessageContext> {
         if (!context.isCancelled)
             context.receiverMinecraftProfile.sendMessage(*context.message)
-        return context
+        return CompletableFuture.completedFuture(context)
     }
 
     override fun serialize(): MutableMap<String, Any> {

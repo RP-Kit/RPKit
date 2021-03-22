@@ -59,32 +59,46 @@ class SnoopCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
                 sender.sendMessage(plugin.messages["no-permission-snoop-on"])
                 return true
             }
-            if (snooperService.snoopers.contains(minecraftProfile)) {
-                sender.sendMessage(plugin.messages["snoop-already-enabled"])
-                return true
+            snooperService.snoopers.thenAccept { snoopers ->
+                if (snoopers.contains(minecraftProfile)) {
+                    sender.sendMessage(plugin.messages["snoop-already-enabled"])
+                    return@thenAccept
+                }
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    snooperService.addSnooper(minecraftProfile).thenRun {
+                        sender.sendMessage(plugin.messages["snoop-enabled"])
+                    }
+                })
             }
-            snooperService.addSnooper(minecraftProfile)
-            sender.sendMessage(plugin.messages["snoop-enabled"])
+
         } else if (args[0].equals("off", ignoreCase = true)) {
             if (!sender.hasPermission("rpkit.chat.command.snoop.off")) {
                 sender.sendMessage(plugin.messages["no-permission-snoop-off"])
                 return true
             }
-            if (!snooperService.snoopers.contains(minecraftProfile)) {
-                sender.sendMessage(plugin.messages["snoop-already-disabled"])
-                return true
+            snooperService.snoopers.thenAccept { snoopers ->
+                if (!snoopers.contains(minecraftProfile)) {
+                    sender.sendMessage(plugin.messages["snoop-already-disabled"])
+                    return@thenAccept
+                }
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    snooperService.removeSnooper(minecraftProfile).thenRun {
+                        sender.sendMessage(plugin.messages["snoop-disabled"])
+                    }
+                })
             }
-            snooperService.removeSnooper(minecraftProfile)
-            sender.sendMessage(plugin.messages["snoop-disabled"])
+
         } else if (args[0].equals("check", ignoreCase = true)) {
             if (!sender.hasPermission("rpkit.chat.command.snoop.check")) {
                 sender.sendMessage(plugin.messages["no-permission-snoop-check"])
                 return true
             }
-            if (snooperService.snoopers.contains(minecraftProfile)) {
-                sender.sendMessage(plugin.messages["snoop-check-on"])
-            } else {
-                sender.sendMessage(plugin.messages["snoop-check-off"])
+            snooperService.snoopers.thenAccept { snoopers ->
+                if (snoopers.contains(minecraftProfile)) {
+                    sender.sendMessage(plugin.messages["snoop-check-on"])
+                } else {
+                    sender.sendMessage(plugin.messages["snoop-check-off"])
+                }
             }
         } else {
             sender.sendMessage(plugin.messages["snoop-usage"])

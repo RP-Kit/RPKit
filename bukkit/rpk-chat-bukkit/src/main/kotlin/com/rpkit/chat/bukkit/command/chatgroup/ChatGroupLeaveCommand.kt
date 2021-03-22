@@ -50,33 +50,44 @@ class ChatGroupLeaveCommand(private val plugin: RPKChatBukkit) : CommandExecutor
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
         }
-        val chatGroup = chatGroupService.getChatGroup(RPKChatGroupName(args[0]))
-        if (chatGroup == null) {
-            sender.sendMessage(plugin.messages["chat-group-leave-invalid-chat-group"])
-            return true
+        chatGroupService.getChatGroup(RPKChatGroupName(args[0])).thenAccept { chatGroup ->
+            if (chatGroup == null) {
+                sender.sendMessage(plugin.messages["chat-group-leave-invalid-chat-group"])
+                return@thenAccept
+            }
+            if (sender !is Player) {
+                sender.sendMessage(plugin.messages["not-from-console"])
+                return@thenAccept
+            }
+            val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+            if (minecraftProfile == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                return@thenAccept
+            }
+            chatGroup.members.thenAccept getMembers@{ members ->
+                if (members.none { memberMinecraftProfile ->
+                        memberMinecraftProfile.id == minecraftProfile.id
+                    }) {
+                    sender.sendMessage(plugin.messages["chat-group-leave-invalid-not-a-member"])
+                    return@getMembers
+                }
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    chatGroup.removeMember(minecraftProfile).thenRun {
+                        chatGroup.members.thenAccept newMembers@{ newMembers ->
+                            if (newMembers.isEmpty()) {
+                                plugin.server.scheduler.runTask(plugin, Runnable {
+                                    chatGroupService.removeChatGroup(chatGroup)
+                                })
+                            }
+                            sender.sendMessage(plugin.messages["chat-group-leave-valid", mapOf(
+                                "group" to chatGroup.name.value
+                            )])
+                        }
+                    }
+                })
+            }
         }
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
-            return true
-        }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-            return true
-        }
-        if (chatGroup.members.none { memberMinecraftProfile ->
-                    memberMinecraftProfile.id == minecraftProfile.id
-                }) {
-            sender.sendMessage(plugin.messages["chat-group-leave-invalid-not-a-member"])
-            return true
-        }
-        chatGroup.removeMember(minecraftProfile)
-        if (chatGroup.members.isEmpty()) {
-            chatGroupService.removeChatGroup(chatGroup)
-        }
-        sender.sendMessage(plugin.messages["chat-group-leave-valid", mapOf(
-            "group" to chatGroup.name.value
-        )])
+
         return true
     }
 

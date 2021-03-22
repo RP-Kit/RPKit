@@ -16,6 +16,7 @@
 package com.rpkit.chat.bukkit.chatgroup
 
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents a chat group.
@@ -38,27 +39,27 @@ interface RPKChatGroup {
      * A list of all members of the chat group.
      * This list is immutable. members must be added and removed with [addMember] and [removeMember], respectively
      */
-    val members: List<RPKMinecraftProfile>
+    val members: CompletableFuture<List<RPKMinecraftProfile>>
 
     /**
      * A list of all people that have received an invitation to the chat group.
      * This list is immutable, invitations must be added and removed with [invite] and [uninvite], respectively.
      */
-    val invited: List<RPKMinecraftProfile>
+    val invited: CompletableFuture<List<RPKMinecraftProfile>>
 
     /**
      * Adds a member to the chat group.
      *
      * @param minecraftProfile The Minecraft profile to add
      */
-    fun addMember(minecraftProfile: RPKMinecraftProfile)
+    fun addMember(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void>
 
     /**
      * Removes a member from the chat group
      *
      * @param minecraftProfile The Minecraft profile to remove
      */
-    fun removeMember(minecraftProfile: RPKMinecraftProfile)
+    fun removeMember(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void>
 
 
     /**
@@ -66,14 +67,14 @@ interface RPKChatGroup {
      *
      * @param minecraftProfile The Minecraft profile to invite
      */
-    fun invite(minecraftProfile: RPKMinecraftProfile)
+    fun invite(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void>
 
     /**
      * Uninvites a Minecraft profile from the chat group.
      *
      * @param minecraftProfile The Minecraft profile to uninvite
      */
-    fun uninvite(minecraftProfile: RPKMinecraftProfile)
+    fun uninvite(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void>
 
     /**
      * Sends a message to the chat group.
@@ -81,6 +82,6 @@ interface RPKChatGroup {
      * @param sender The Minecraft profile sending the message
      * @param message The message
      */
-    fun sendMessage(sender: RPKMinecraftProfile, message: String)
+    fun sendMessage(sender: RPKMinecraftProfile, message: String): CompletableFuture<Void>
 
 }

@@ -24,11 +24,12 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture
 
 @SerializableAs("UndirectedFormatComponent")
 class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
+    override fun process(context: UndirectedMessageContext): CompletableFuture<UndirectedMessageContext> {
         val characterService = Services[RPKCharacterService::class.java]
         val prefixService = Services[RPKPrefixService::class.java]
         val senderMinecraftProfile = context.senderMinecraftProfile
@@ -67,7 +68,7 @@ class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineCo
             formattedMessage = formattedMessage.replace("\$color", chatColorString).replace("\$colour", chatColorString)
         }
         context.message = formattedMessage
-        return context
+        return CompletableFuture.completedFuture(context)
     }
 
     override fun serialize(): MutableMap<String, Any> {

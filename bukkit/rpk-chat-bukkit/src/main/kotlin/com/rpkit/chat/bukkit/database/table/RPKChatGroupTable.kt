@@ -24,6 +24,7 @@ import com.rpkit.chat.bukkit.database.create
 import com.rpkit.chat.bukkit.database.jooq.Tables.RPKIT_CHAT_GROUP
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents the chat group table.
@@ -52,48 +53,54 @@ class RPKChatGroupTable(private val database: Database, private val plugin: RPKC
         null
     }
 
-    fun insert(entity: RPKChatGroup) {
-        database.create
+    fun insert(entity: RPKChatGroup): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_CHAT_GROUP,
-                        RPKIT_CHAT_GROUP.NAME
+                    RPKIT_CHAT_GROUP,
+                    RPKIT_CHAT_GROUP.NAME
                 )
                 .values(entity.name.value)
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKChatGroupId(id)
-        cache?.set(id, entity)
-        nameCache?.set(entity.name.value, id)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKChatGroupId(id)
+            cache?.set(id, entity)
+            nameCache?.set(entity.name.value, id)
+        }
     }
 
-    fun update(entity: RPKChatGroup) {
-        val id = entity.id ?: return
-        database.create
+    fun update(entity: RPKChatGroup): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_CHAT_GROUP)
                 .set(RPKIT_CHAT_GROUP.NAME, entity.name.value)
                 .where(RPKIT_CHAT_GROUP.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
-        nameCache?.set(entity.name.value, id.value)
+            cache?.set(id.value, entity)
+            nameCache?.set(entity.name.value, id.value)
+        }
     }
 
-    operator fun get(id: RPKChatGroupId): RPKChatGroup? {
+    operator fun get(id: RPKChatGroupId): CompletableFuture<RPKChatGroup?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
+            return CompletableFuture.completedFuture(cache[id.value])
         } else {
-            val result = database.create
+            return CompletableFuture.supplyAsync {
+                val result = database.create
                     .select(RPKIT_CHAT_GROUP.NAME)
                     .from(RPKIT_CHAT_GROUP)
                     .where(RPKIT_CHAT_GROUP.ID.eq(id.value))
-                    .fetchOne() ?: return null
-            val chatGroup = RPKChatGroupImpl(
+                    .fetchOne() ?: return@supplyAsync null
+                val chatGroup = RPKChatGroupImpl(
                     plugin,
                     RPKChatGroupId(id.value),
                     RPKChatGroupName(result.get(RPKIT_CHAT_GROUP.NAME))
-            )
-            cache?.set(id.value, chatGroup)
-            nameCache?.set(chatGroup.name.value, id.value)
-            return chatGroup
+                )
+                cache?.set(id.value, chatGroup)
+                nameCache?.set(chatGroup.name.value, id.value)
+                return@supplyAsync chatGroup
+            }
         }
     }
 
@@ -104,36 +111,40 @@ class RPKChatGroupTable(private val database: Database, private val plugin: RPKC
      * @param name The name
      * @return The chat group, or null if there is no chat group with the given name
      */
-    operator fun get(name: RPKChatGroupName): RPKChatGroup? {
+    operator fun get(name: RPKChatGroupName): CompletableFuture<RPKChatGroup?> {
         if (nameCache?.containsKey(name.value) == true) {
             val chatGroupId = nameCache[name.value]
             if (chatGroupId != null) {
                 return get(RPKChatGroupId(chatGroupId))
             }
         }
-        val result = database.create
-            .select(RPKIT_CHAT_GROUP.ID)
-            .from(RPKIT_CHAT_GROUP)
-            .where(RPKIT_CHAT_GROUP.NAME.eq(name.value))
-            .fetchOne() ?: return null
-        val id = result.get(RPKIT_CHAT_GROUP.ID)
-        val chatGroup = RPKChatGroupImpl(
-            plugin,
-            RPKChatGroupId(id),
-            RPKChatGroupName(name.value)
-        )
-        cache?.set(id, chatGroup)
-        nameCache?.set(name.value, id)
-        return chatGroup
+        return CompletableFuture.supplyAsync {
+            val result = database.create
+                .select(RPKIT_CHAT_GROUP.ID)
+                .from(RPKIT_CHAT_GROUP)
+                .where(RPKIT_CHAT_GROUP.NAME.eq(name.value))
+                .fetchOne() ?: return@supplyAsync null
+            val id = result.get(RPKIT_CHAT_GROUP.ID)
+            val chatGroup = RPKChatGroupImpl(
+                plugin,
+                RPKChatGroupId(id),
+                RPKChatGroupName(name.value)
+            )
+            cache?.set(id, chatGroup)
+            nameCache?.set(name.value, id)
+            return@supplyAsync chatGroup
+        }
     }
 
-    fun delete(entity: RPKChatGroup) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKChatGroup): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_CHAT_GROUP)
                 .where(RPKIT_CHAT_GROUP.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
-        nameCache?.remove(entity.name.value)
+            cache?.remove(id.value)
+            nameCache?.remove(entity.name.value)
+        }
     }
 }

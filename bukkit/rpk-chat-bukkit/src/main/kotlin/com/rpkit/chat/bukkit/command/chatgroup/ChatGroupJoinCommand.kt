@@ -50,37 +50,49 @@ class ChatGroupJoinCommand(private val plugin: RPKChatBukkit) : CommandExecutor 
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
         }
-        val chatGroup = chatGroupService.getChatGroup(RPKChatGroupName(args[0]))
-        if (chatGroup == null) {
-            sender.sendMessage(plugin.messages["chat-group-join-invalid-chat-group"])
-            return true
+        chatGroupService.getChatGroup(RPKChatGroupName(args[0])).thenAccept { chatGroup ->
+            if (chatGroup == null) {
+                sender.sendMessage(plugin.messages["chat-group-join-invalid-chat-group"])
+                return@thenAccept
+            }
+            if (sender !is Player) {
+                sender.sendMessage(plugin.messages["not-from-console"])
+                return@thenAccept
+            }
+            val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+            if (minecraftProfile == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                return@thenAccept
+            }
+            chatGroup.invited.thenAccept getInvited@{ invited ->
+                if (invited.none { invitedMinecraftProfile ->
+                        invitedMinecraftProfile.id == minecraftProfile.id
+                    }) {
+                    sender.sendMessage(plugin.messages["chat-group-join-invalid-no-invite"])
+                    return@getInvited
+                }
+                chatGroup.members.thenAccept { members ->
+                    members.forEach { member ->
+                        member.sendMessage(plugin.messages["chat-group-join-received", mapOf(
+                            "group" to chatGroup.name.value,
+                            "player" to minecraftProfile.name
+                        )])
+                    }
+                    plugin.server.scheduler.runTask(plugin, Runnable {
+                        chatGroup.addMember(minecraftProfile).thenRun {
+                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                chatGroup.uninvite(minecraftProfile).thenRun {
+                                    sender.sendMessage(plugin.messages["chat-group-join-valid", mapOf(
+                                        "group" to chatGroup.name.value
+                                    )])
+                                }
+                            })
+                        }
+                    })
+                }
+
+            }
         }
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
-            return true
-        }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-            return true
-        }
-        if (chatGroup.invited.none { invitedMinecraftProfile ->
-                    invitedMinecraftProfile.id == minecraftProfile.id
-                }) {
-            sender.sendMessage(plugin.messages["chat-group-join-invalid-no-invite"])
-            return true
-        }
-        chatGroup.members.forEach { member ->
-            member.sendMessage(plugin.messages["chat-group-join-received", mapOf(
-                "group" to chatGroup.name.value,
-                "player" to minecraftProfile.name
-            )])
-        }
-        chatGroup.addMember(minecraftProfile)
-        chatGroup.uninvite(minecraftProfile)
-        sender.sendMessage(plugin.messages["chat-group-join-valid", mapOf(
-            "group" to chatGroup.name.value
-        )])
         return true
     }
 

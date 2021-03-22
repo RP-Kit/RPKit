@@ -17,6 +17,7 @@
 package com.rpkit.chat.bukkit.chatchannel.pipeline
 
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
+import java.util.concurrent.CompletableFuture
 
 /**
  * An undirected chat channel pipeline component.
@@ -34,6 +35,6 @@ interface UndirectedPipelineComponent {
      * @param context The message context
      * @return The message context, after modifications performed by the component
      */
-    fun process(context: UndirectedMessageContext): UndirectedMessageContext
+    fun process(context: UndirectedMessageContext): CompletableFuture<UndirectedMessageContext>
 
 }

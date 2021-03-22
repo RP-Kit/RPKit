@@ -25,6 +25,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents the chat channel speaker table
@@ -42,62 +43,71 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
         null
     }
 
-    fun insert(entity: RPKChatChannelSpeaker) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun insert(entity: RPKChatChannelSpeaker): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_CHAT_CHANNEL_SPEAKER,
-                        RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID,
-                        RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME
+                    RPKIT_CHAT_CHANNEL_SPEAKER,
+                    RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID,
+                    RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME
                 )
                 .values(
                     minecraftProfileId.value,
                     entity.chatChannel.name.value
                 )
                 .execute()
-        cache?.set(minecraftProfileId.value, entity)
+            cache?.set(minecraftProfileId.value, entity)
+        }
     }
 
-    fun get(minecraftProfile: RPKMinecraftProfile): RPKChatChannelSpeaker? {
-        val minecraftProfileId = minecraftProfile.id ?: return null
+    fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKChatChannelSpeaker?> {
+        val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
         if (cache?.containsKey(minecraftProfileId.value) == true) {
-            return cache[minecraftProfileId.value]
+            return CompletableFuture.completedFuture(cache[minecraftProfileId.value])
         }
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(
-                        RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME
+                    RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME
                 )
                 .from(RPKIT_CHAT_CHANNEL_SPEAKER)
                 .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-                .fetchOne() ?: return null
-        val chatChannelService = Services[RPKChatChannelService::class.java] ?: return null
-        val chatChannel = chatChannelService.getChatChannel(RPKChatChannelName(result[RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME]))
-                ?: return null
-        val chatChannelSpeaker = RPKChatChannelSpeaker(
+                .fetchOne() ?: return@supplyAsync null
+            val chatChannelService = Services[RPKChatChannelService::class.java] ?: return@supplyAsync null
+            val chatChannel =
+                chatChannelService.getChatChannel(RPKChatChannelName(result[RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME]))
+                    ?: return@supplyAsync null
+            val chatChannelSpeaker = RPKChatChannelSpeaker(
                 minecraftProfile,
                 chatChannel
-        )
-        cache?.set(minecraftProfileId.value, chatChannelSpeaker)
-        return chatChannelSpeaker
+            )
+            cache?.set(minecraftProfileId.value, chatChannelSpeaker)
+            return@supplyAsync chatChannelSpeaker
+        }
     }
 
-    fun update(entity: RPKChatChannelSpeaker) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
-                .update(RPKIT_CHAT_CHANNEL_SPEAKER)
-                .set(RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME, entity.chatChannel.name.value)
-                .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-                .execute()
-        cache?.set(minecraftProfileId.value, entity)
+    fun update(entity: RPKChatChannelSpeaker): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
+                    .update(RPKIT_CHAT_CHANNEL_SPEAKER)
+                    .set(RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME, entity.chatChannel.name.value)
+                    .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+                    .execute()
+            cache?.set(minecraftProfileId.value, entity)
+        }
     }
 
-    fun delete(entity: RPKChatChannelSpeaker) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun delete(entity: RPKChatChannelSpeaker): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_CHAT_CHANNEL_SPEAKER)
                 .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.remove(minecraftProfileId.value)
+            cache?.remove(minecraftProfileId.value)
+        }
     }
 
 }
