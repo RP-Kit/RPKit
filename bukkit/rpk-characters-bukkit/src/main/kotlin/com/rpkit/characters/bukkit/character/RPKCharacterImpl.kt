@@ -33,6 +33,7 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.CompletableFuture
 
 /**
  * Character implementation.
@@ -89,34 +90,40 @@ class RPKCharacterImpl(
     override var isDead = dead
 
     override fun showCharacterCard(minecraftProfile: RPKMinecraftProfile) {
-        val characterCardFieldService = Services[RPKCharacterCardFieldService::class.java]
-        if (characterCardFieldService == null) {
-            minecraftProfile.sendMessage(plugin.messages["no-character-card-field-service"])
-            return
-        }
-        val profile = minecraftProfile.profile
-        for (line in if (profile == this.profile) plugin.messages.getList("character-card-owner") else
-            plugin.messages.getList("character-card-not-owner")) {
-            val messageComponents = mutableListOf<BaseComponent>()
-            var chatColor: ChatColor? = null
-            var chatFormat: ChatColor? = null
-            var i = 0
-            while (i < line.length) {
-                if (line[i] == ChatColor.COLOR_CHAR) {
-                    val colourOrFormat = ChatColor.getByChar(line[i + 1])
-                    if (colourOrFormat?.isColor == true) {
-                        chatColor = colourOrFormat
-                        chatFormat = null
-                    }
-                    if (colourOrFormat?.isFormat == true) chatFormat = colourOrFormat
-                    i += 1
-                } else {
-                    var fieldFound = false
-                    characterCardFieldService.characterCardFields
+        CompletableFuture.runAsync {
+            val characterCardFieldService = Services[RPKCharacterCardFieldService::class.java]
+            if (characterCardFieldService == null) {
+                minecraftProfile.sendMessage(plugin.messages["no-character-card-field-service"])
+                return@runAsync
+            }
+            val profile = minecraftProfile.profile
+            for (line in if (profile == this.profile) plugin.messages.getList("character-card-owner") else
+                plugin.messages.getList("character-card-not-owner")) {
+                val messageComponents = mutableListOf<BaseComponent>()
+                var chatColor: ChatColor? = null
+                var chatFormat: ChatColor? = null
+                var i = 0
+                while (i < line.length) {
+                    if (line[i] == ChatColor.COLOR_CHAR) {
+                        val colourOrFormat = ChatColor.getByChar(line[i + 1])
+                        if (colourOrFormat?.isColor == true) {
+                            chatColor = colourOrFormat
+                            chatFormat = null
+                        }
+                        if (colourOrFormat?.isFormat == true) chatFormat = colourOrFormat
+                        i += 1
+                    } else {
+                        var fieldFound = false
+                        characterCardFieldService.characterCardFields
                             .filter { field -> line.length >= i + "\${${field.name}}".length }
-                            .filter { field -> line.substring(i, i + "\${${field.name}}".length) == "\${${field.name}}" }
+                            .filter { field ->
+                                line.substring(
+                                    i,
+                                    i + "\${${field.name}}".length
+                                ) == "\${${field.name}}"
+                            }
                             .forEach { field ->
-                                val textComponent = TextComponent(field.get(this))
+                                val textComponent = TextComponent(field.get(this).join())
                                 if (chatColor != null) {
                                     textComponent.color = chatColor.asBungee()
                                 }
@@ -131,16 +138,25 @@ class RPKCharacterImpl(
                                 i += "\${${field.name}}".length - 1
                                 fieldFound = true
                             }
-                    if (!fieldFound) {
-                        var editFound = false
-                        characterCardFieldService.characterCardFields
+                        if (!fieldFound) {
+                            var editFound = false
+                            characterCardFieldService.characterCardFields
                                 .filter { field -> line.length >= i + "\${edit(${field.name})}".length }
-                                .filter { field -> line.substring(i, i + "\${edit(${field.name})}".length) == "\${edit(${field.name})}" }
+                                .filter { field ->
+                                    line.substring(
+                                        i,
+                                        i + "\${edit(${field.name})}".length
+                                    ) == "\${edit(${field.name})}"
+                                }
                                 .forEach { field ->
                                     if (minecraftProfile == this.minecraftProfile) {
                                         val editComponent = TextComponent("Edit")
-                                        editComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/character set ${field.name}")
-                                        editComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to change your character's ${field.name}"))
+                                        editComponent.clickEvent =
+                                            ClickEvent(ClickEvent.Action.RUN_COMMAND, "/character set ${field.name}")
+                                        editComponent.hoverEvent = HoverEvent(
+                                            HoverEvent.Action.SHOW_TEXT,
+                                            Text("Click to change your character's ${field.name}")
+                                        )
                                         if (chatColor != null) {
                                             editComponent.color = chatColor.asBungee()
                                         }
@@ -156,23 +172,40 @@ class RPKCharacterImpl(
                                     i += "\${edit(${field.name})}".length - 1
                                     editFound = true
                                 }
-                        if (!editFound) {
-                            var hideFound = false
-                            characterCardFieldService.characterCardFields
+                            if (!editFound) {
+                                var hideFound = false
+                                characterCardFieldService.characterCardFields
                                     .filter { field -> line.length >= i + "\${hide(${field.name})}".length }
-                                    .filter { field -> line.substring(i, i + "\${hide(${field.name})}".length) == "\${hide(${field.name})}" }
+                                    .filter { field ->
+                                        line.substring(
+                                            i,
+                                            i + "\${hide(${field.name})}".length
+                                        ) == "\${hide(${field.name})}"
+                                    }
                                     .filterIsInstance<HideableCharacterCardField>()
                                     .forEach { field ->
                                         if (minecraftProfile == this.minecraftProfile) {
-                                            if (field.isHidden(this)) {
+                                            if (field.isHidden(this).join()) {
                                                 val unhideComponent = TextComponent("Unhide")
-                                                unhideComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/character unhide ${field.name}")
-                                                unhideComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to unhide your character's ${field.name}"))
+                                                unhideComponent.clickEvent = ClickEvent(
+                                                    ClickEvent.Action.RUN_COMMAND,
+                                                    "/character unhide ${field.name}"
+                                                )
+                                                unhideComponent.hoverEvent = HoverEvent(
+                                                    HoverEvent.Action.SHOW_TEXT,
+                                                    Text("Click to unhide your character's ${field.name}")
+                                                )
                                                 messageComponents.add(unhideComponent)
                                             } else {
                                                 val hideComponent = TextComponent("Hide")
-                                                hideComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/character hide ${field.name}")
-                                                hideComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to hide your character's ${field.name}"))
+                                                hideComponent.clickEvent = ClickEvent(
+                                                    ClickEvent.Action.RUN_COMMAND,
+                                                    "/character hide ${field.name}"
+                                                )
+                                                hideComponent.hoverEvent = HoverEvent(
+                                                    HoverEvent.Action.SHOW_TEXT,
+                                                    Text("Click to hide your character's ${field.name}")
+                                                )
                                                 messageComponents.add(hideComponent)
                                             }
                                             if (chatColor != null) {
@@ -181,34 +214,37 @@ class RPKCharacterImpl(
                                             if (chatFormat != null) {
                                                 messageComponents.last().isObfuscated = chatFormat == ChatColor.MAGIC
                                                 messageComponents.last().isBold = chatFormat == ChatColor.BOLD
-                                                messageComponents.last().isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
-                                                messageComponents.last().isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                                messageComponents.last().isStrikethrough =
+                                                    chatFormat == ChatColor.STRIKETHROUGH
+                                                messageComponents.last().isUnderlined =
+                                                    chatFormat == ChatColor.UNDERLINE
                                                 messageComponents.last().isItalic = chatFormat == ChatColor.ITALIC
                                             }
                                         }
                                         i += "\${hide(${field.name})}".length - 1
                                         hideFound = true
                                     }
-                            if (!hideFound) {
-                                val textComponent = TextComponent(Character.toString(line[i]))
-                                if (chatColor != null) {
-                                    textComponent.color = chatColor.asBungee()
+                                if (!hideFound) {
+                                    val textComponent = TextComponent(Character.toString(line[i]))
+                                    if (chatColor != null) {
+                                        textComponent.color = chatColor.asBungee()
+                                    }
+                                    if (chatFormat != null) {
+                                        textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
+                                        textComponent.isBold = chatFormat == ChatColor.BOLD
+                                        textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                        textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                        textComponent.isItalic = chatFormat == ChatColor.ITALIC
+                                    }
+                                    messageComponents.add(textComponent)
                                 }
-                                if (chatFormat != null) {
-                                    textComponent.isObfuscated = chatFormat == ChatColor.MAGIC
-                                    textComponent.isBold = chatFormat == ChatColor.BOLD
-                                    textComponent.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
-                                    textComponent.isUnderlined = chatFormat == ChatColor.UNDERLINE
-                                    textComponent.isItalic = chatFormat == ChatColor.ITALIC
-                                }
-                                messageComponents.add(textComponent)
                             }
                         }
                     }
+                    i++
                 }
-                i++
+                minecraftProfile.sendMessage(*messageComponents.toTypedArray())
             }
-            minecraftProfile.sendMessage(*messageComponents.toTypedArray())
         }
     }
 

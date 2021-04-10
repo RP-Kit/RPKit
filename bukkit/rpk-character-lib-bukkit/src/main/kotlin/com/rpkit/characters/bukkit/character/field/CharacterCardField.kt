@@ -17,6 +17,7 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents a character card field.
@@ -37,6 +38,6 @@ interface CharacterCardField {
      * @param character The character
      * @return The value of the character card field for the character
      */
-    fun get(character: RPKCharacter): String
+    fun get(character: RPKCharacter): CompletableFuture<String>
 
 }

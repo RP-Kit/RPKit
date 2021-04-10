@@ -68,44 +68,52 @@ class SkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor {
         if (args.isEmpty()) {
             sender.sendMessage(plugin.messages["skill-list-title"])
             skillService.skills
-                    .filter { skill -> character.canUse(skill) }
-                    .forEach { skill ->
-                        sender.sendMessage(plugin.messages["skill-list-item", mapOf(
-                            "skill" to skill.name.value
-                        )])
+                    .map { skill -> skill to character.canUse(skill) }
+                    .forEach { (skill, canUseFuture) ->
+                        canUseFuture.thenAccept { canUse ->
+                            if (canUse) {
+                                sender.sendMessage(
+                                    plugin.messages["skill-list-item", mapOf(
+                                        "skill" to skill.name.value
+                                    )]
+                                )
+                            }
+                        }
                     }
             return true
         }
         val skill = skillService.getSkill(RPKSkillName(args[0]))
         if (skill != null) {
-            if (character.canUse(skill)) {
-                if (character.mana >= skill.manaCost) {
-                    if (skillService.getSkillCooldown(character, skill) <= 0) {
-                        character.use(skill)
-                        skillService.setSkillCooldown(character, skill, skill.cooldown)
-                        character.mana -= skill.manaCost
-                        characterService.updateCharacter(character)
-                        sender.sendMessage(plugin.messages["skill-valid", mapOf(
-                            "skill" to skill.name.value
-                        )])
+            character.canUse(skill).thenAccept { canUse ->
+                if (canUse) {
+                    if (character.mana >= skill.manaCost) {
+                        if (skillService.getSkillCooldown(character, skill) <= 0) {
+                            character.use(skill)
+                            skillService.setSkillCooldown(character, skill, skill.cooldown)
+                            character.mana -= skill.manaCost
+                            characterService.updateCharacter(character)
+                            sender.sendMessage(plugin.messages["skill-valid", mapOf(
+                                "skill" to skill.name.value
+                            )])
+                        } else {
+                            sender.sendMessage(plugin.messages["skill-invalid-on-cooldown", mapOf(
+                                "skill" to skill.name.value,
+                                "cooldown" to skillService.getSkillCooldown(character, skill).toString()
+                            )])
+                        }
                     } else {
-                        sender.sendMessage(plugin.messages["skill-invalid-on-cooldown", mapOf(
+                        sender.sendMessage(plugin.messages["skill-invalid-not-enough-mana", mapOf(
                             "skill" to skill.name.value,
-                            "cooldown" to skillService.getSkillCooldown(character, skill).toString()
+                            "mana_cost" to skill.manaCost.toString(),
+                            "mana" to character.mana.toString(),
+                            "max_mana" to character.maxMana.toString()
                         )])
                     }
                 } else {
-                    sender.sendMessage(plugin.messages["skill-invalid-not-enough-mana", mapOf(
-                        "skill" to skill.name.value,
-                        "mana_cost" to skill.manaCost.toString(),
-                        "mana" to character.mana.toString(),
-                        "max_mana" to character.maxMana.toString()
+                    sender.sendMessage(plugin.messages["skill-invalid-unmet-prerequisites", mapOf(
+                        "skill" to skill.name.value
                     )])
                 }
-            } else {
-                sender.sendMessage(plugin.messages["skill-invalid-unmet-prerequisites", mapOf(
-                    "skill" to skill.name.value
-                )])
             }
         } else {
             sender.sendMessage(plugin.messages["skill-invalid-skill"])

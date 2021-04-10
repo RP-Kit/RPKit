@@ -19,14 +19,17 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.field.CharacterCardField
 import com.rpkit.classes.bukkit.classes.RPKClassService
 import com.rpkit.core.service.Services
+import java.util.concurrent.CompletableFuture
 
 
 class ClassField : CharacterCardField {
 
     override val name = "class"
 
-    override fun get(character: RPKCharacter): String {
-        return Services[RPKClassService::class.java]?.getClass(character)?.name?.value ?: "unset"
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return Services[RPKClassService::class.java]?.getClass(character)?.thenApply {
+            it?.name?.value ?: "unset"
+        } ?: CompletableFuture.completedFuture("unset")
     }
 
 }

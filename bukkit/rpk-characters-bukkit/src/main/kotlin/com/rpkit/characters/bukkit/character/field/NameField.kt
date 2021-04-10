@@ -17,6 +17,7 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 /**
  * Character card field for name.
@@ -24,16 +25,23 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 class NameField : HideableCharacterCardField {
 
     override val name = "name"
-    override fun get(character: RPKCharacter): String {
-        return if (isHidden(character)) "[HIDDEN]" else character.name
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return isHidden(character).thenApply { hidden ->
+            if (hidden) {
+                "[HIDDEN]"
+            } else {
+                character.name
+            }
+        }
     }
 
-    override fun isHidden(character: RPKCharacter): Boolean {
-        return character.isNameHidden
+    override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
+        return CompletableFuture.completedFuture(character.isNameHidden)
     }
 
-    override fun setHidden(character: RPKCharacter, hidden: Boolean) {
+    override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         character.isNameHidden = hidden
+        return CompletableFuture.completedFuture(null)
     }
 
 }

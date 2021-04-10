@@ -29,6 +29,7 @@ import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import java.util.concurrent.CompletableFuture
 
 
 class RPKStatImplTests : WordSpec({
@@ -36,8 +37,8 @@ class RPKStatImplTests : WordSpec({
     val statVariables = listOf(object : RPKStatVariable {
         override val name = RPKStatVariableName("level")
 
-        override fun get(character: RPKCharacter): Double {
-            return 5.toDouble()
+        override fun get(character: RPKCharacter): CompletableFuture<Double> {
+            return CompletableFuture.completedFuture(5.toDouble())
         }
 
     })
@@ -51,7 +52,7 @@ class RPKStatImplTests : WordSpec({
             val testServicesDelegate = mockk<ServicesDelegate>()
             every { testServicesDelegate[RPKExpressionService::class.java] } returns RPKExpressionServiceImpl(plugin)
             Services.delegate = testServicesDelegate
-            stat.get(character, statVariables) shouldBe 15
+            stat.get(character, statVariables).join() shouldBe 15
         }
     }
 })

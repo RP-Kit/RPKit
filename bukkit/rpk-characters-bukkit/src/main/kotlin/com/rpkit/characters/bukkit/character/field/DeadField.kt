@@ -17,6 +17,7 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 /**
  * A character card field for dead.
@@ -24,8 +25,8 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 class DeadField : CharacterCardField {
 
     override val name = "dead"
-    override fun get(character: RPKCharacter): String {
-        return character.isDead.toString()
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return CompletableFuture.completedFuture(character.isDead.toString())
     }
 
 

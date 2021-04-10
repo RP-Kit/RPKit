@@ -16,23 +16,30 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 
 class ProfileField : HideableCharacterCardField {
 
     override val name = "profile"
-    override fun get(character: RPKCharacter): String {
-        if (isHidden(character)) return "[HIDDEN]"
-        val profile = character.profile ?: return "unset"
-        return profile.name.value
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return isHidden(character).thenApply { hidden ->
+            if (hidden) {
+                "[HIDDEN]"
+            } else {
+                val profile = character.profile ?: return@thenApply "unset"
+                profile.name.value
+            }
+        }
     }
 
-    override fun isHidden(character: RPKCharacter): Boolean {
-        return character.isProfileHidden
+    override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
+        return CompletableFuture.completedFuture(character.isProfileHidden)
     }
 
-    override fun setHidden(character: RPKCharacter, hidden: Boolean) {
+    override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         character.isProfileHidden = hidden
+        return CompletableFuture.completedFuture(null)
     }
 
 }

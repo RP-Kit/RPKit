@@ -16,6 +16,7 @@
 package com.rpkit.stats.bukkit.stat
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents a stat variable.
@@ -30,8 +31,7 @@ interface RPKStatVariable {
 
     /**
      * Gets the value of the variable for the given character.
-     * This may be any numerical type.
      */
-    fun get(character: RPKCharacter): Double
+    fun get(character: RPKCharacter): CompletableFuture<Double>
 
 }

@@ -39,6 +39,7 @@ import com.rpkit.stats.bukkit.stat.RPKStatVariableService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
+import java.util.concurrent.CompletableFuture
 
 
 class RPKClassesBukkit : RPKBukkitPlugin() {
@@ -112,10 +113,15 @@ class RPKClassesBukkit : RPKBukkitPlugin() {
                             statVariableService.addStatVariable(object : RPKStatVariable {
                                 override val name = RPKStatVariableName(statVariableName)
 
-                                override fun get(character: RPKCharacter): Double {
-                                    val `class` = classService.getClass(character)
-                                    return `class`?.getStatVariableValue(this, classService.getLevel(character, `class`))?.toDouble()
+                                override fun get(character: RPKCharacter): CompletableFuture<Double> {
+                                    return CompletableFuture.supplyAsync {
+                                        val `class` = classService.getClass(character).join()
+                                        return@supplyAsync `class`?.getStatVariableValue(
+                                            this,
+                                            classService.getLevel(character, `class`).join()
+                                        )?.toDouble()
                                             ?: 0.0
+                                    }
                                 }
                             })
                         }

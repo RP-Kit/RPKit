@@ -23,6 +23,7 @@ import com.rpkit.statbuilds.bukkit.database.create
 import com.rpkit.statbuilds.bukkit.database.jooq.Tables.RPKIT_CHARACTER_STAT_POINTS
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttribute
 import com.rpkit.statbuilds.bukkit.statbuild.RPKCharacterStatPoints
+import java.util.concurrent.CompletableFuture
 
 class RPKCharacterStatPointsTable(private val database: Database, private val plugin: RPKStatBuildsBukkit) : Table {
 
@@ -42,62 +43,70 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
         null
     }
 
-    fun insert(entity: RPKCharacterStatPoints) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKCharacterStatPoints): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_CHARACTER_STAT_POINTS,
-                        RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID,
-                        RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE,
-                        RPKIT_CHARACTER_STAT_POINTS.POINTS
+                    RPKIT_CHARACTER_STAT_POINTS,
+                    RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID,
+                    RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE,
+                    RPKIT_CHARACTER_STAT_POINTS.POINTS
                 )
                 .values(
-                        characterId.value,
-                        entity.statAttribute.name.value,
-                        entity.points
+                    characterId.value,
+                    entity.statAttribute.name.value,
+                    entity.points
                 )
                 .execute()
+        }
     }
 
-    fun update(entity: RPKCharacterStatPoints) {
-        val characterId = entity.character.id ?: return
-        val statAttributeName = entity.statAttribute.name
-        database.create
+    fun update(entity: RPKCharacterStatPoints): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            val statAttributeName = entity.statAttribute.name
+            database.create
                 .update(RPKIT_CHARACTER_STAT_POINTS)
                 .set(RPKIT_CHARACTER_STAT_POINTS.POINTS, entity.points)
                 .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(statAttributeName.value))
                 .execute()
-        cache?.set(CharacterStatAttributeCacheKey(characterId.value, statAttributeName.value), entity)
+            cache?.set(CharacterStatAttributeCacheKey(characterId.value, statAttributeName.value), entity)
+        }
     }
 
-    operator fun get(character: RPKCharacter, statAttribute: RPKStatAttribute): RPKCharacterStatPoints? {
-        val characterId = character.id ?: return null
+    operator fun get(character: RPKCharacter, statAttribute: RPKStatAttribute): CompletableFuture<RPKCharacterStatPoints?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
         val cacheKey = CharacterStatAttributeCacheKey(characterId.value, statAttribute.name.value)
-        if (cache?.containsKey(cacheKey) == true) return cache[cacheKey]
-        val result = database.create
-            .select(RPKIT_CHARACTER_STAT_POINTS.POINTS)
-            .from(RPKIT_CHARACTER_STAT_POINTS)
-            .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
-            .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(statAttribute.name.value))
-            .fetchOne() ?: return null
-        val characterStatPoints = RPKCharacterStatPoints(
-            character,
-            statAttribute,
-            result[RPKIT_CHARACTER_STAT_POINTS.POINTS]
-        )
-        cache?.set(cacheKey, characterStatPoints)
-        return characterStatPoints
+        if (cache?.containsKey(cacheKey) == true) return CompletableFuture.completedFuture(cache[cacheKey])
+        return CompletableFuture.supplyAsync {
+            val result = database.create
+                .select(RPKIT_CHARACTER_STAT_POINTS.POINTS)
+                .from(RPKIT_CHARACTER_STAT_POINTS)
+                .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(statAttribute.name.value))
+                .fetchOne() ?: return@supplyAsync null
+            val characterStatPoints = RPKCharacterStatPoints(
+                character,
+                statAttribute,
+                result[RPKIT_CHARACTER_STAT_POINTS.POINTS]
+            )
+            cache?.set(cacheKey, characterStatPoints)
+            return@supplyAsync characterStatPoints
+        }
     }
 
-    fun delete(entity: RPKCharacterStatPoints) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun delete(entity: RPKCharacterStatPoints): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_CHARACTER_STAT_POINTS)
                 .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(entity.statAttribute.name.value))
                 .execute()
-        cache?.remove(CharacterStatAttributeCacheKey(characterId.value, entity.statAttribute.name.value))
+            cache?.remove(CharacterStatAttributeCacheKey(characterId.value, entity.statAttribute.name.value))
+        }
     }
 
 }
