@@ -21,15 +21,26 @@ import com.rpkit.characters.bukkit.character.field.CharacterCardField
 import com.rpkit.core.service.Services
 import com.rpkit.experience.bukkit.RPKExperienceBukkit
 import com.rpkit.experience.bukkit.experience.RPKExperienceService
+import java.util.concurrent.CompletableFuture
 
 
 class ExperienceField(private val plugin: RPKExperienceBukkit) : CharacterCardField {
 
     override val name = "experience"
 
-    override fun get(character: RPKCharacter): String {
-        val experienceService = Services[RPKExperienceService::class.java] ?: return ""
-        return "${(experienceService.getExperience(character) - experienceService.getExperienceNeededForLevel(experienceService.getLevel(character)))}/${experienceService.getExperienceNeededForLevel(experienceService.getLevel(character) + 1) - experienceService.getExperienceNeededForLevel(experienceService.getLevel(character))}"
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return CompletableFuture.supplyAsync {
+            val experienceService =
+                Services[RPKExperienceService::class.java] ?: return@supplyAsync ""
+            val characterExperience = experienceService.getExperience(character).join()
+            val characterLevel = experienceService.getLevel(character).join()
+            val currentExperience =
+                (characterExperience - experienceService.getExperienceNeededForLevel(characterLevel))
+            val nextLevelExperience =
+                experienceService.getExperienceNeededForLevel(characterLevel + 1) -
+                        experienceService.getExperienceNeededForLevel(characterLevel)
+            return@supplyAsync "$currentExperience/$nextLevelExperience"
+        }
     }
 
 }

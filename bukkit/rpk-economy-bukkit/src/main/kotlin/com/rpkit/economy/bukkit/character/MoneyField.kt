@@ -23,6 +23,7 @@ import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.database.table.RPKMoneyHiddenTable
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
+import java.util.concurrent.CompletableFuture
 
 /**
  * Character card field for money.
@@ -31,34 +32,39 @@ import com.rpkit.economy.bukkit.economy.RPKEconomyService
 class MoneyField(val plugin: RPKEconomyBukkit) : HideableCharacterCardField {
 
     override val name = "money"
-    override fun get(character: RPKCharacter): String {
-        return if (isHidden(character)) {
-            "[HIDDEN]"
-        } else {
-            val economyService = Services[RPKEconomyService::class.java] ?: return plugin.messages["no-economy-service"]
-            val currencyService = Services[RPKCurrencyService::class.java] ?: return plugin.messages["no-currency-service"]
-            currencyService.currencies
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return isHidden(character).thenApply { hidden ->
+            if (hidden) {
+                "[HIDDEN]"
+            } else {
+                val economyService = Services[RPKEconomyService::class.java] ?: return@thenApply plugin.messages["no-economy-service"]
+                val currencyService = Services[RPKCurrencyService::class.java] ?: return@thenApply plugin.messages["no-currency-service"]
+                currencyService.currencies
                     .joinToString(", ") { currency ->
                         val balance = economyService.getBalance(character, currency)
                         "$balance ${if (balance == 1) currency.nameSingular else currency.namePlural}"
                     }
+            }
         }
     }
 
-    override fun isHidden(character: RPKCharacter): Boolean {
-        return plugin.database.getTable(RPKMoneyHiddenTable::class.java).get(character) != null
+    override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
+        return plugin.database.getTable(RPKMoneyHiddenTable::class.java)[character].thenApply { it != null }
     }
 
-    override fun setHidden(character: RPKCharacter, hidden: Boolean) {
+    override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         val moneyHiddenTable = plugin.database.getTable(RPKMoneyHiddenTable::class.java)
-        if (hidden) {
-            if (moneyHiddenTable.get(character) == null) {
-                moneyHiddenTable.insert(RPKMoneyHidden(character = character))
+        return if (hidden) {
+            moneyHiddenTable[character].thenAcceptAsync { moneyHidden ->
+                if (moneyHidden == null) {
+                    moneyHiddenTable.insert(RPKMoneyHidden(character = character)).join()
+                }
             }
         } else {
-            val moneyHidden = moneyHiddenTable.get(character)
-            if (moneyHidden != null) {
-                moneyHiddenTable.delete(moneyHidden)
+            moneyHiddenTable[character].thenAccept { moneyHidden ->
+                if (moneyHidden != null) {
+                    moneyHiddenTable.delete(moneyHidden).join()
+                }
             }
         }
     }

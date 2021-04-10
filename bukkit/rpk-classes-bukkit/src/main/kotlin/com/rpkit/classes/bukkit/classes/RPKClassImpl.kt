@@ -22,6 +22,7 @@ import com.rpkit.skills.bukkit.skills.RPKSkillType
 import com.rpkit.skills.bukkit.skills.RPKSkillTypeName
 import com.rpkit.skills.bukkit.skills.RPKSkillTypeService
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
+import java.util.concurrent.CompletableFuture
 
 
 class RPKClassImpl(
@@ -57,14 +58,16 @@ class RPKClassImpl(
                 .mapNotNull { (skillType, points) -> if (skillType == null) null else skillType to points }
                 .toMap()
 
-    override fun hasPrerequisites(character: RPKCharacter): Boolean {
-        val classService = Services[RPKClassService::class.java] ?: return false
-        for ((`class`, level) in prerequisites) {
-            if (classService.getLevel(character, `class`) < level) {
-                return false
+    override fun hasPrerequisites(character: RPKCharacter): CompletableFuture<Boolean> {
+        val classService = Services[RPKClassService::class.java] ?: return CompletableFuture.completedFuture(false)
+        return CompletableFuture.supplyAsync {
+            for ((`class`, level) in prerequisites) {
+                if (classService.getLevel(character, `class`).join() < level) {
+                    return@supplyAsync false
+                }
             }
+            return@supplyAsync true
         }
-        return true
     }
 
     override fun getSkillPoints(skillType: RPKSkillType, level: Int): Int {

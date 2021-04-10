@@ -35,13 +35,14 @@ class PlayerJoinListener : Listener {
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
         characterService.getActiveCharacter(minecraftProfile).thenAccept { character ->
             if (character == null) return@thenAccept
-            event.player.level = experienceService.getLevel(character)
-            event.player.exp =
-                (experienceService.getExperience(character) - experienceService.getExperienceNeededForLevel(
-                    experienceService.getLevel(character)
-                )).toFloat() / (experienceService.getExperienceNeededForLevel(experienceService.getLevel(character) + 1) - experienceService.getExperienceNeededForLevel(
-                    experienceService.getLevel(character)
-                )).toFloat()
+            experienceService.getLevel(character).thenAccept { characterLevel ->
+                experienceService.getExperience(character).thenAccept { characterExperience ->
+                    event.player.level = characterLevel
+                    event.player.exp =
+                        (characterExperience - experienceService.getExperienceNeededForLevel(characterLevel)).toFloat() /
+                                (experienceService.getExperienceNeededForLevel(characterLevel + 1) - experienceService.getExperienceNeededForLevel(characterLevel)).toFloat()
+                }
+            }
         }
     }
 

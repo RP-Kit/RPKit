@@ -17,17 +17,18 @@ package com.rpkit.classes.bukkit.classes
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKClassService : Service {
 
     val classes: List<RPKClass>
     fun getClass(name: RPKClassName): RPKClass?
-    fun getClass(character: RPKCharacter): RPKClass?
-    fun setClass(character: RPKCharacter, `class`: RPKClass)
-    fun getLevel(character: RPKCharacter, `class`: RPKClass): Int
-    fun setLevel(character: RPKCharacter, `class`: RPKClass, level: Int)
-    fun getExperience(character: RPKCharacter, `class`: RPKClass): Int
-    fun setExperience(character: RPKCharacter, `class`: RPKClass, experience: Int)
+    fun getClass(character: RPKCharacter): CompletableFuture<RPKClass?>
+    fun setClass(character: RPKCharacter, `class`: RPKClass): CompletableFuture<Void>
+    fun getLevel(character: RPKCharacter, `class`: RPKClass): CompletableFuture<Int>
+    fun setLevel(character: RPKCharacter, `class`: RPKClass, level: Int): CompletableFuture<Void>
+    fun getExperience(character: RPKCharacter, `class`: RPKClass): CompletableFuture<Int>
+    fun setExperience(character: RPKCharacter, `class`: RPKClass, experience: Int): CompletableFuture<Void>
 
 }

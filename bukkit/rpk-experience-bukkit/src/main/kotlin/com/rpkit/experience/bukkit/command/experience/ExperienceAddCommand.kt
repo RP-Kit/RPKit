@@ -72,8 +72,10 @@ class ExperienceAddCommand(private val plugin: RPKExperienceBukkit) : CommandExe
                 sender.sendMessage(plugin.messages["experience-add-experience-invalid-negative"])
                 return true
             }
-            experienceService.setExperience(character, experienceService.getExperience(character) + experience)
-            sender.sendMessage(plugin.messages["experience-add-valid"])
+            experienceService.getExperience(character).thenAccept { characterExperience ->
+                experienceService.setExperience(character, characterExperience + experience)
+                sender.sendMessage(plugin.messages["experience-add-valid"])
+            }
         } catch (exception: NumberFormatException) {
             sender.sendMessage(plugin.messages["experience-add-experience-invalid-number"])
         }

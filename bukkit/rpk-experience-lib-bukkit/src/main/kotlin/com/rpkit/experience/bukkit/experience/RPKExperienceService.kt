@@ -18,6 +18,7 @@ package com.rpkit.experience.bukkit.experience
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides experience related operations.
@@ -30,7 +31,7 @@ interface RPKExperienceService : Service {
      * @param character The character
      * @return The level
      */
-    fun getLevel(character: RPKCharacter): Int
+    fun getLevel(character: RPKCharacter): CompletableFuture<Int>
 
     /**
      * Sets the level of a character.
@@ -38,7 +39,7 @@ interface RPKExperienceService : Service {
      * @param character The character
      * @return The level
      */
-    fun setLevel(character: RPKCharacter, level: Int)
+    fun setLevel(character: RPKCharacter, level: Int): CompletableFuture<Void>
 
     /**
      * Gets the total experience earned of a character since its creation.
@@ -46,7 +47,7 @@ interface RPKExperienceService : Service {
      * @param character The character
      * @return The total experience earned by the character since its creation
      */
-    fun getExperience(character: RPKCharacter): Int
+    fun getExperience(character: RPKCharacter): CompletableFuture<Int>
 
     /**
      * Sets a character's total experience.
@@ -54,7 +55,7 @@ interface RPKExperienceService : Service {
      * @param character The character
      * @param experience The amount of experience to set
      */
-    fun setExperience(character: RPKCharacter, experience: Int)
+    fun setExperience(character: RPKCharacter, experience: Int): CompletableFuture<Void>
 
     /**
      * Gets the amount of experience required to reach a level.

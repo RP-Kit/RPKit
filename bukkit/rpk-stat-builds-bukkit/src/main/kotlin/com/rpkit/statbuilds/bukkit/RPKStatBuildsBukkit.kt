@@ -105,7 +105,9 @@ class RPKStatBuildsBukkit : RPKBukkitPlugin() {
                 statVariableService.addStatVariable(object : RPKStatVariable {
                     override val name = RPKStatVariableName(statAttribute.name.value)
                     override fun get(character: RPKCharacter) =
-                            statBuildService.getStatPoints(character, statAttribute).toDouble()
+                            statBuildService.getStatPoints(character, statAttribute).thenApply { statPoints ->
+                                statPoints.toDouble()
+                            }
                 })
             }
         }

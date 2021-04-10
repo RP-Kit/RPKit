@@ -17,6 +17,7 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 /**
  * Character card field for max health.
@@ -24,8 +25,8 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 class MaxHealthField : CharacterCardField {
 
     override val name = "max_health"
-    override fun get(character: RPKCharacter): String {
-        return character.maxHealth.toString()
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return CompletableFuture.completedFuture(character.maxHealth.toString())
     }
 
 }

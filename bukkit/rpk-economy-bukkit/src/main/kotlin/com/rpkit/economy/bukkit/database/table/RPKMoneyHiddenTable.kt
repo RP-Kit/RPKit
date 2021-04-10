@@ -22,6 +22,7 @@ import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.character.RPKMoneyHidden
 import com.rpkit.economy.bukkit.database.create
 import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_MONEY_HIDDEN
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents the money hidden table.
@@ -42,18 +43,20 @@ class RPKMoneyHiddenTable(
         null
     }
 
-    fun insert(entity: RPKMoneyHidden) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKMoneyHidden): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_MONEY_HIDDEN,
-                        RPKIT_MONEY_HIDDEN.CHARACTER_ID
+                    RPKIT_MONEY_HIDDEN,
+                    RPKIT_MONEY_HIDDEN.CHARACTER_ID
                 )
                 .values(
                     characterId.value
                 )
                 .execute()
-        characterCache?.set(characterId.value, entity)
+            characterCache?.set(characterId.value, entity)
+        }
     }
 
     /**
@@ -63,29 +66,32 @@ class RPKMoneyHiddenTable(
      * @param character The character
      * @return The money hidden instance, or null if there is no money hidden instance for the character
      */
-    operator fun get(character: RPKCharacter): RPKMoneyHidden? {
-        val characterId = character.id ?: return null
+    operator fun get(character: RPKCharacter): CompletableFuture<RPKMoneyHidden?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
         if (characterCache?.containsKey(characterId.value) == true) {
-            return characterCache[characterId.value]
-        } else {
+            return CompletableFuture.completedFuture(characterCache[characterId.value])
+        }
+        return CompletableFuture.supplyAsync {
             database.create
-                    .select(RPKIT_MONEY_HIDDEN.CHARACTER_ID)
-                    .from(RPKIT_MONEY_HIDDEN)
-                    .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId.value))
-                    .fetchOne() ?: return null
+                .select(RPKIT_MONEY_HIDDEN.CHARACTER_ID)
+                .from(RPKIT_MONEY_HIDDEN)
+                .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId.value))
+                .fetchOne() ?: return@supplyAsync null
             val moneyHidden = RPKMoneyHidden(character)
             characterCache?.set(characterId.value, moneyHidden)
-            return moneyHidden
+            return@supplyAsync moneyHidden
         }
     }
 
-    fun delete(entity: RPKMoneyHidden) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun delete(entity: RPKMoneyHidden): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_MONEY_HIDDEN)
                 .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        characterCache?.remove(characterId.value)
+            characterCache?.remove(characterId.value)
+        }
     }
 
 }

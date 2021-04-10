@@ -22,6 +22,7 @@ import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.character.RPKProfessionHidden
 import com.rpkit.professions.bukkit.database.create
 import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_PROFESSION_HIDDEN
+import java.util.concurrent.CompletableFuture
 
 
 class RPKProfessionHiddenTable(
@@ -40,41 +41,47 @@ class RPKProfessionHiddenTable(
         null
     }
 
-    fun insert(entity: RPKProfessionHidden) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKProfessionHidden): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_PROFESSION_HIDDEN,
-                        RPKIT_PROFESSION_HIDDEN.CHARACTER_ID
+                    RPKIT_PROFESSION_HIDDEN,
+                    RPKIT_PROFESSION_HIDDEN.CHARACTER_ID
                 )
                 .values(
                     characterId.value
                 )
                 .execute()
-        characterCache?.set(characterId.value, entity)
+            characterCache?.set(characterId.value, entity)
+        }
     }
 
-    operator fun get(character: RPKCharacter): RPKProfessionHidden? {
-        val characterId = character.id ?: return null
+    operator fun get(character: RPKCharacter): CompletableFuture<RPKProfessionHidden?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
         if (characterCache?.containsKey(characterId.value) == true) {
-            return characterCache[characterId.value]
+            return CompletableFuture.completedFuture(characterCache[characterId.value])
         }
-        database.create
+        return CompletableFuture.supplyAsync {
+            database.create
                 .select(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID)
                 .from(RPKIT_PROFESSION_HIDDEN)
                 .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(characterId.value))
-                .fetchOne() ?: return null
-        val professionHidden = RPKProfessionHidden(character)
-        characterCache?.set(characterId.value, professionHidden)
-        return professionHidden
+                .fetchOne() ?: return@supplyAsync null
+            val professionHidden = RPKProfessionHidden(character)
+            characterCache?.set(characterId.value, professionHidden)
+            return@supplyAsync professionHidden
+        }
     }
 
-    fun delete(entity: RPKProfessionHidden) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun delete(entity: RPKProfessionHidden): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_PROFESSION_HIDDEN)
                 .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        characterCache?.remove(characterId.value)
+            characterCache?.remove(characterId.value)
+        }
     }
 }

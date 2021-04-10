@@ -45,10 +45,12 @@ class RPKBukkitCharacterDeleteListener(private val plugin: RPKProfessionsBukkit)
         }
 
         val professionHiddenTable = plugin.database.getTable(RPKProfessionHiddenTable::class.java)
-        val professionHidden = professionHiddenTable[event.character]
-        if (professionHidden != null) {
-            professionHiddenTable.delete(professionHidden)
+        professionHiddenTable[event.character].thenAccept { professionHidden ->
+            if (professionHidden != null) {
+                professionHiddenTable.delete(professionHidden)
+            }
         }
+
     }
 
 }

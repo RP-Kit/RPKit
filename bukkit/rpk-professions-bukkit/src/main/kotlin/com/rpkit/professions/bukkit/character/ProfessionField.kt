@@ -23,36 +23,42 @@ import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.database.table.RPKProfessionHiddenTable
 import com.rpkit.professions.bukkit.profession.RPKProfession
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
+import java.util.concurrent.CompletableFuture
 
 
 class ProfessionField(val plugin: RPKProfessionsBukkit) : HideableCharacterCardField {
 
     override val name = "profession"
 
-    override fun get(character: RPKCharacter): String {
-        return if (isHidden(character)) {
-            "[HIDDEN]"
-        } else {
-            val professionService = Services[RPKProfessionService::class.java]
-            if (professionService == null) return plugin.messages["no-profession-service"]
-            professionService.getProfessions(character).map(RPKProfession::name).joinToString(", ")
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return isHidden(character).thenApply { hidden ->
+            if (hidden) {
+                "[HIDDEN]"
+            } else {
+                val professionService = Services[RPKProfessionService::class.java]
+                    ?: return@thenApply plugin.messages["no-profession-service"]
+                return@thenApply professionService.getProfessions(character).map(RPKProfession::name).joinToString(", ")
+            }
         }
     }
 
-    override fun isHidden(character: RPKCharacter): Boolean {
-        return plugin.database.getTable(RPKProfessionHiddenTable::class.java).get(character) != null
+    override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
+        return plugin.database.getTable(RPKProfessionHiddenTable::class.java)[character].thenApply { it != null }
     }
 
-    override fun setHidden(character: RPKCharacter, hidden: Boolean) {
+    override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         val professionHiddenTable = plugin.database.getTable(RPKProfessionHiddenTable::class.java)
-        if (hidden) {
-            if (professionHiddenTable.get(character) == null) {
-                professionHiddenTable.insert(RPKProfessionHidden(character = character))
+        return if (hidden) {
+            professionHiddenTable[character].thenAcceptAsync { professionHidden ->
+                if (professionHidden == null) {
+                    professionHiddenTable.insert(RPKProfessionHidden(character = character)).join()
+                }
             }
         } else {
-            val professionHidden = professionHiddenTable.get(character)
-            if (professionHidden != null) {
-                professionHiddenTable.delete(professionHidden)
+            professionHiddenTable[character].thenAcceptAsync { professionHidden ->
+                if (professionHidden != null) {
+                    professionHiddenTable.delete(professionHidden).join()
+                }
             }
         }
     }

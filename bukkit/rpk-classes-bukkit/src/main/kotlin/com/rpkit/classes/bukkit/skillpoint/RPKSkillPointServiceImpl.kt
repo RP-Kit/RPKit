@@ -22,17 +22,20 @@ import com.rpkit.classes.bukkit.classes.RPKClassService
 import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkillPointService
 import com.rpkit.skills.bukkit.skills.RPKSkillType
+import java.util.concurrent.CompletableFuture
 
 
 class RPKSkillPointServiceImpl(override val plugin: RPKClassesBukkit) : RPKSkillPointService {
 
-    override fun getSkillPoints(character: RPKCharacter, skillType: RPKSkillType): Int {
-        val classService = Services[RPKClassService::class.java] ?: return 0
-        val `class` = classService.getClass(character)
-        if (`class` != null) {
-            return `class`.getSkillPoints(skillType, classService.getLevel(character, `class`))
+    override fun getSkillPoints(character: RPKCharacter, skillType: RPKSkillType): CompletableFuture<Int> {
+        val classService = Services[RPKClassService::class.java] ?: return CompletableFuture.completedFuture(0)
+        return classService.getClass(character).thenApplyAsync { `class` ->
+            if (`class` != null) {
+                return@thenApplyAsync `class`.getSkillPoints(skillType, classService.getLevel(character, `class`).join())
+            } else {
+                return@thenApplyAsync 0
+            }
         }
-        return 0
     }
 
 }

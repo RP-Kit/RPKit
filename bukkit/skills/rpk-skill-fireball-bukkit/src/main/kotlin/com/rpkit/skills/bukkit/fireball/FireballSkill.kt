@@ -17,13 +17,10 @@ package com.rpkit.skills.bukkit.fireball
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Services
-import com.rpkit.skills.bukkit.skills.RPKSkill
-import com.rpkit.skills.bukkit.skills.RPKSkillName
-import com.rpkit.skills.bukkit.skills.RPKSkillPointService
-import com.rpkit.skills.bukkit.skills.RPKSkillTypeName
-import com.rpkit.skills.bukkit.skills.RPKSkillTypeService
+import com.rpkit.skills.bukkit.skills.*
 import org.bukkit.Bukkit
 import org.bukkit.entity.Fireball
+import java.util.concurrent.CompletableFuture
 
 class FireballSkill(private val plugin: RPKFireballSkillBukkit) : RPKSkill {
 
@@ -39,10 +36,11 @@ class FireballSkill(private val plugin: RPKFireballSkillBukkit) : RPKSkill {
         bukkitOnlinePlayer?.launchProjectile(Fireball::class.java)
     }
 
-    override fun canUse(character: RPKCharacter): Boolean {
-        val skillTypeService = Services[RPKSkillTypeService::class.java] ?: return false
-        val skillPointService = Services[RPKSkillPointService::class.java] ?: return false
-        return plugin.config.getConfigurationSection("requirements")
+    override fun canUse(character: RPKCharacter): CompletableFuture<Boolean> {
+        return CompletableFuture.supplyAsync {
+            val skillTypeService = Services[RPKSkillTypeService::class.java] ?: return@supplyAsync false
+            val skillPointService = Services[RPKSkillPointService::class.java] ?: return@supplyAsync false
+            return@supplyAsync plugin.config.getConfigurationSection("requirements")
                 ?.getKeys(false)
                 ?.mapNotNull { skillTypeName ->
                     val skillType = skillTypeService.getSkillType(RPKSkillTypeName(skillTypeName))
@@ -54,7 +52,8 @@ class FireballSkill(private val plugin: RPKFireballSkillBukkit) : RPKSkill {
                     }
                 }
                 ?.all { (skillType, requiredPoints) ->
-                    skillPointService.getSkillPoints(character, skillType) >= requiredPoints
+                    skillPointService.getSkillPoints(character, skillType).join() >= requiredPoints
                 } ?: false
+        }
     }
 }

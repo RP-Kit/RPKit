@@ -16,6 +16,7 @@
 package com.rpkit.stats.bukkit.stat
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents a stat.
@@ -39,6 +40,6 @@ interface RPKStat {
      * @param variables A list containing all variables required to get the stat.
      *                  Usually [RPKStatVariableService.statVariables]
      */
-    fun get(character: RPKCharacter, variables: List<RPKStatVariable>): Int
+    fun get(character: RPKCharacter, variables: List<RPKStatVariable>): CompletableFuture<Int>
 
 }
