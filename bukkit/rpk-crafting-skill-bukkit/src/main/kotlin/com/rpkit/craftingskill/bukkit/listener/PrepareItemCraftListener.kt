@@ -72,7 +72,7 @@ class PrepareItemCraftListener(private val plugin: RPKCraftingSkillBukkit) : Lis
             event.inventory.result = null
             return
         }
-        val craftingSkill = craftingSkillService.getCraftingExperience(character, RPKCraftingAction.CRAFT, material)
+        val craftingSkill = craftingSkillService.getPreloadedCraftingExperience(character, RPKCraftingAction.CRAFT, material)
         val quality = craftingSkillService.getQualityFor(RPKCraftingAction.CRAFT, material, craftingSkill)
         val amount = craftingSkillService.getAmountFor(RPKCraftingAction.CRAFT, material, craftingSkill)
         val item = event.inventory.result ?: return

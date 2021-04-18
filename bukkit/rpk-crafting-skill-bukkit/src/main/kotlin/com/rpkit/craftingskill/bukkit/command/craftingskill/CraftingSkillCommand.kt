@@ -91,7 +91,7 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : Command
             sender.sendMessage(plugin.messages["no-crafting-skill-service"])
             return true
         }
-        val totalExperience = craftingSkillService.getCraftingExperience(character, action, material)
+        val totalExperience = craftingSkillService.getPreloadedCraftingExperience(character, action, material)
         val maxExperience = plugin.config.getConfigurationSection("$actionConfigSectionName.$material")
             ?.getKeys(false)
             ?.map(String::toInt)
