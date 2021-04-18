@@ -28,8 +28,9 @@ class RPKBukkitCharacterDeleteListener(private val plugin: RPKCraftingSkillBukki
     @EventHandler
     fun onCharacterDelete(event: RPKBukkitCharacterDeleteEvent) {
         val craftingExperienceTable = plugin.database.getTable(RPKCraftingExperienceTable::class.java)
-        craftingExperienceTable.get(event.character)
-                .forEach { craftingExperienceTable.delete(it) }
+        craftingExperienceTable[event.character].thenAccept { craftingExperienceValues ->
+            craftingExperienceValues.forEach { craftingExperienceTable.delete(it) }
+        }
     }
 
 }

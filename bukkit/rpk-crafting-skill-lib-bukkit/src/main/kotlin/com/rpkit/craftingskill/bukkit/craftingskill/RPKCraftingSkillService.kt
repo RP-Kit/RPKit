@@ -20,12 +20,16 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
 import org.bukkit.Material
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKCraftingSkillService : Service {
 
-    fun getCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material): Int
-    fun setCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material, experience: Int)
+    fun getCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material): CompletableFuture<Int>
+    fun getPreloadedCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material): Int
+    fun loadCraftingExperience(character: RPKCharacter): CompletableFuture<Void>
+    fun unloadCraftingExperience(character: RPKCharacter)
+    fun setCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material, experience: Int): CompletableFuture<Void>
     fun getQualityFor(action: RPKCraftingAction, material: Material, experience: Int): RPKItemQuality?
     fun getAmountFor(action: RPKCraftingAction, material: Material, experience: Int): Double
 }

@@ -57,10 +57,9 @@ class CraftItemListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
             return
         }
         val itemType = event.recipe.result.type
-        val craftingExperience = craftingSkillService.getCraftingExperience(character, CRAFT, itemType)
+        val craftingExperience = craftingSkillService.getPreloadedCraftingExperience(character, CRAFT, itemType)
         var amountCrafted = getAmountCrafted(event)
-        val craftingSkill = craftingSkillService.getCraftingExperience(character, CRAFT, itemType)
-        val amount = craftingSkillService.getAmountFor(CRAFT, itemType, craftingSkill)
+        val amount = craftingSkillService.getAmountFor(CRAFT, itemType, craftingExperience)
         if (amount > 1) {
             amountCrafted *= amount.roundToInt()
         } else if (amount < 1) {

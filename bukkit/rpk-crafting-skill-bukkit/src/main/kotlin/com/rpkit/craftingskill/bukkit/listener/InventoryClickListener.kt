@@ -50,7 +50,7 @@ class InventoryClickListener(private val plugin: RPKCraftingSkillBukkit) : Liste
         val item = event.currentItem ?: return
         if (item.amount == 0 || item.type == Material.AIR) return
         val material = item.type
-        val craftingSkill = craftingSkillService.getCraftingExperience(character, RPKCraftingAction.SMELT, material)
+        val craftingSkill = craftingSkillService.getPreloadedCraftingExperience(character, RPKCraftingAction.SMELT, material)
         val quality = craftingSkillService.getQualityFor(RPKCraftingAction.SMELT, material, craftingSkill)
         val amount = craftingSkillService.getAmountFor(RPKCraftingAction.SMELT, material, craftingSkill) * item.amount
         if (quality != null) {
