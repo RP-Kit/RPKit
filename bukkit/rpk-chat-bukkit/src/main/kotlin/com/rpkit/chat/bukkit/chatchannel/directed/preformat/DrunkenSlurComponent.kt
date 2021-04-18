@@ -33,15 +33,17 @@ class DrunkenSlurComponent(val drunkenness: Int) : DirectedPreFormatPipelineComp
         val characterService = Services[RPKCharacterService::class.java] ?: return CompletableFuture.completedFuture(context)
         val drinkService = Services[RPKDrinkService::class.java] ?: return CompletableFuture.completedFuture(context)
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return CompletableFuture.completedFuture(context)
-        if (drinkService.getDrunkenness(character) >= drunkenness) {
-            context.message = context.message.replace(Regex("s([^h])"), "sh$1")
+        return CompletableFuture.supplyAsync {
+            if (drinkService.getDrunkenness(character).join() >= drunkenness) {
+                context.message = context.message.replace(Regex("s([^h])"), "sh$1")
+            }
+            return@supplyAsync context
         }
-        return CompletableFuture.completedFuture(context)
     }
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-                Pair("drunkenness", drunkenness)
+            "drunkenness" to drunkenness
         )
     }
 
@@ -49,7 +51,7 @@ class DrunkenSlurComponent(val drunkenness: Int) : DirectedPreFormatPipelineComp
         @JvmStatic
         fun deserialize(serialized: MutableMap<String, Any>): DrunkenSlurComponent {
             return DrunkenSlurComponent(
-                    serialized["drunkenness"] as Int
+                serialized["drunkenness"] as Int
             )
         }
     }

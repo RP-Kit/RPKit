@@ -18,14 +18,15 @@ package com.rpkit.drink.bukkit.drink
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKDrinkService : Service {
 
     val drinks: List<RPKDrink>
 
-    fun getDrunkenness(character: RPKCharacter): Int
-    fun setDrunkenness(character: RPKCharacter, drunkenness: Int)
+    fun getDrunkenness(character: RPKCharacter): CompletableFuture<Int>
+    fun setDrunkenness(character: RPKCharacter, drunkenness: Int): CompletableFuture<Void>
     fun getDrink(name: RPKDrinkName): RPKDrink?
     fun getDrink(item: ItemStack): RPKDrink?
 

@@ -26,6 +26,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.ShapelessRecipe
+import java.util.concurrent.CompletableFuture
 
 
 class RPKDrinkServiceImpl(override val plugin: RPKDrinksBukkit) : RPKDrinkService {
@@ -52,22 +53,24 @@ class RPKDrinkServiceImpl(override val plugin: RPKDrinksBukkit) : RPKDrinkServic
             }
             ?: listOf()
 
-    override fun getDrunkenness(character: RPKCharacter): Int {
-        return plugin.database.getTable(RPKDrunkennessTable::class.java).get(character)?.drunkenness ?: 0
+    override fun getDrunkenness(character: RPKCharacter): CompletableFuture<Int> {
+        return plugin.database.getTable(RPKDrunkennessTable::class.java)[character].thenApply { it?.drunkenness ?: 0 }
     }
 
-    override fun setDrunkenness(character: RPKCharacter, drunkenness: Int) {
-        val event = RPKBukkitDrunkennessChangeEvent(character, getDrunkenness(character), drunkenness)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val drunkennessTable = plugin.database.getTable(RPKDrunkennessTable::class.java)
-        var charDrunkenness = drunkennessTable.get(character)
-        if (charDrunkenness != null) {
-            charDrunkenness.drunkenness = drunkenness
-            drunkennessTable.update(charDrunkenness)
-        } else {
-            charDrunkenness = RPKDrunkenness(character = character, drunkenness = drunkenness)
-            drunkennessTable.insert(charDrunkenness)
+    override fun setDrunkenness(character: RPKCharacter, drunkenness: Int): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitDrunkennessChangeEvent(character, getDrunkenness(character).join(), drunkenness, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val drunkennessTable = plugin.database.getTable(RPKDrunkennessTable::class.java)
+            var charDrunkenness = drunkennessTable[character].join()
+            if (charDrunkenness != null) {
+                charDrunkenness.drunkenness = drunkenness
+                drunkennessTable.update(charDrunkenness).join()
+            } else {
+                charDrunkenness = RPKDrunkenness(character = character, drunkenness = drunkenness)
+                drunkennessTable.insert(charDrunkenness).join()
+            }
         }
     }
 

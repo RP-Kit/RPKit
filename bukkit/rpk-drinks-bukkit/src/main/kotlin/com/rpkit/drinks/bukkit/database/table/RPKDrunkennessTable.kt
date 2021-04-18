@@ -22,6 +22,7 @@ import com.rpkit.drinks.bukkit.RPKDrinksBukkit
 import com.rpkit.drinks.bukkit.database.create
 import com.rpkit.drinks.bukkit.database.jooq.Tables.RPKIT_DRUNKENNESS
 import com.rpkit.drinks.bukkit.drink.RPKDrunkenness
+import java.util.concurrent.CompletableFuture
 
 
 class RPKDrunkennessTable(private val database: Database, private val plugin: RPKDrinksBukkit) : Table {
@@ -37,61 +38,68 @@ class RPKDrunkennessTable(private val database: Database, private val plugin: RP
         null
     }
 
-    fun insert(entity: RPKDrunkenness) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKDrunkenness): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_DRUNKENNESS,
-                        RPKIT_DRUNKENNESS.CHARACTER_ID,
-                        RPKIT_DRUNKENNESS.DRUNKENNESS
+                    RPKIT_DRUNKENNESS,
+                    RPKIT_DRUNKENNESS.CHARACTER_ID,
+                    RPKIT_DRUNKENNESS.DRUNKENNESS
                 )
                 .values(
-                        characterId.value,
-                        entity.drunkenness
+                    characterId.value,
+                    entity.drunkenness
                 )
                 .execute()
-        cache?.set(characterId.value, entity)
+            cache?.set(characterId.value, entity)
+        }
     }
 
-    fun update(entity: RPKDrunkenness) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun update(entity: RPKDrunkenness): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_DRUNKENNESS)
                 .set(RPKIT_DRUNKENNESS.DRUNKENNESS, entity.drunkenness)
                 .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.set(characterId.value, entity)
-    }
-
-    operator fun get(character: RPKCharacter): RPKDrunkenness? {
-        val characterId = character.id ?: return null
-        if (cache?.containsKey(characterId.value) == true) {
-            return cache[characterId.value]
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_DRUNKENNESS.CHARACTER_ID,
-                            RPKIT_DRUNKENNESS.DRUNKENNESS
-                    )
-                    .from(RPKIT_DRUNKENNESS)
-                    .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId.value))
-                    .fetchOne() ?: return null
-            val drunkenness = RPKDrunkenness(
-                    character,
-                    result.get(RPKIT_DRUNKENNESS.DRUNKENNESS)
-            )
-            cache?.set(characterId.value, drunkenness)
-            return drunkenness
+            cache?.set(characterId.value, entity)
         }
     }
 
-    fun delete(entity: RPKDrunkenness) {
-        val characterId = entity.character.id ?: return
-        database.create
+    operator fun get(character: RPKCharacter): CompletableFuture<RPKDrunkenness?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
+        if (cache?.containsKey(characterId.value) == true) {
+            return CompletableFuture.completedFuture(cache[characterId.value])
+        }
+        return CompletableFuture.supplyAsync {
+            val result = database.create
+                .select(
+                    RPKIT_DRUNKENNESS.CHARACTER_ID,
+                    RPKIT_DRUNKENNESS.DRUNKENNESS
+                )
+                .from(RPKIT_DRUNKENNESS)
+                .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId.value))
+                .fetchOne() ?: return@supplyAsync null
+            val drunkenness = RPKDrunkenness(
+                character,
+                result.get(RPKIT_DRUNKENNESS.DRUNKENNESS)
+            )
+            cache?.set(characterId.value, drunkenness)
+            return@supplyAsync drunkenness
+        }
+    }
+
+    fun delete(entity: RPKDrunkenness): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_DRUNKENNESS)
                 .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.remove(characterId.value)
+            cache?.remove(characterId.value)
+        }
     }
 
 }
