@@ -43,7 +43,9 @@ class PlayerItemConsumeListener(private val plugin: RPKDrinksBukkit) : Listener 
             event.isCancelled = true
             return
         }
-        drinkService.setDrunkenness(drinkEvent.character, drinkService.getDrunkenness(drinkEvent.character) + drinkEvent.drink.drunkenness)
+        drinkService.getDrunkenness(drinkEvent.character).thenAccept { characterDrunkenness ->
+            drinkService.setDrunkenness(drinkEvent.character, characterDrunkenness + drinkEvent.drink.drunkenness)
+        }
     }
 
 }
