@@ -101,7 +101,7 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
                 .map { currency ->
                     plugin.messages["money-view-valid-list-item", mapOf(
                         "currency" to currency.name.value,
-                        "balance" to economyService.getBalance(character, currency).toString()
+                        "balance" to economyService.getPreloadedBalance(character, currency).toString()
                     )]
                 }
                 .toTypedArray()

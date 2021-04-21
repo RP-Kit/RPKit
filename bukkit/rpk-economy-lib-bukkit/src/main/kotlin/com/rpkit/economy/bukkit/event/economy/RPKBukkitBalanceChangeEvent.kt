@@ -27,8 +27,9 @@ class RPKBukkitBalanceChangeEvent(
         override val character: RPKCharacter,
         override val currency: RPKCurrency,
         override val oldBalance: Int,
-        override var newBalance: Int
-) : RPKBukkitEvent(), RPKBalanceChangeEvent, Cancellable {
+        override var newBalance: Int,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKBalanceChangeEvent, Cancellable {
 
     companion object {
         @JvmStatic

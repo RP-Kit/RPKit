@@ -33,7 +33,28 @@ interface RPKEconomyService : Service {
      * @param currency The currency to get the character's balance of
      * @return The balance of the character in the currency
      */
-    fun getBalance(character: RPKCharacter, currency: RPKCurrency): Int
+    fun getBalance(character: RPKCharacter, currency: RPKCurrency): CompletableFuture<Int>
+
+    /**
+     * Gets the preloaded balance of a character
+     *
+     * @param character The character to get the balance of
+     * @param currency The currency to get the character's balance of
+     * @return If loaded, the balance of the character in the currency, otherwise null
+     */
+    fun getPreloadedBalance(character: RPKCharacter, currency: RPKCurrency): Int?
+
+    /**
+     * Loads the balances of a character
+     *
+     * @return A [CompletableFuture] that completes once the balances have been loaded
+     */
+    fun loadBalances(character: RPKCharacter): CompletableFuture<Void>
+
+    /**
+     * Unloads the balances of a character
+     */
+    fun unloadBalances(character: RPKCharacter)
 
     /**
      * Sets the balance of the character in the given currency to the given amount.
@@ -42,7 +63,7 @@ interface RPKEconomyService : Service {
      * @param currency The currency to set the balance in
      * @param amount The amount to set the balance to
      */
-    fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int)
+    fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void>
 
     /**
      * Transfers money from one character to another.
@@ -52,7 +73,7 @@ interface RPKEconomyService : Service {
      * @param currency The currency to transfer money in
      * @param amount The amount to transfer
      */
-    fun transfer(from: RPKCharacter, to: RPKCharacter, currency: RPKCurrency, amount: Int)
+    fun transfer(from: RPKCharacter, to: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void>
 
     /**
      * Gets the richest characters in a particular currency

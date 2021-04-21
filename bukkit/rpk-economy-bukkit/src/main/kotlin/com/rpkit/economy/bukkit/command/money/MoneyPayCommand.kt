@@ -134,11 +134,21 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
                 sender.sendMessage(plugin.messages["money-pay-player-invalid-player-distance"])
                 return true
             }
-            if (economyService.getBalance(fromCharacter, currency) < amount) {
+            val fromWalletBalance = economyService.getPreloadedBalance(fromCharacter, currency)
+            if (fromWalletBalance == null) {
+                sender.sendMessage(plugin.messages.noPreloadedBalanceSelf)
+                return true
+            }
+            if (fromWalletBalance < amount) {
                 sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-balance"])
                 return true
             }
-            if (economyService.getBalance(toCharacter, currency) + amount > 1728) {
+            val toWalletBalance = economyService.getPreloadedBalance(toCharacter, currency)
+            if (toWalletBalance == null) {
+                sender.sendMessage(plugin.messages.noPreloadedBalanceOther.withParameters(character = toCharacter))
+                return true
+            }
+            if (toWalletBalance + amount > 1728) {
                 sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-limit"])
                 return true
             }
@@ -296,10 +306,14 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             if (fromBukkitPlayer.location.distanceSquared(toBukkitPlayer.location) > plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
                 return plugin.messages["money-pay-player-invalid-player-distance"]
             }
-            if (economyService.getBalance(fromCharacter, currency) < amount) {
+            val fromWalletBalance = economyService.getPreloadedBalance(fromCharacter, currency)
+                ?: return plugin.messages.noPreloadedBalanceSelf
+            if (fromWalletBalance < amount) {
                 return plugin.messages["money-pay-amount-invalid-amount-balance"]
             }
-            if (economyService.getBalance(toCharacter, currency) + amount > 1728) {
+            val toWalletBalance = economyService.getPreloadedBalance(toCharacter, currency)
+                ?: return plugin.messages.noPreloadedBalanceOther.withParameters(character = toCharacter)
+            if (toWalletBalance + amount > 1728) {
                 return plugin.messages["money-pay-amount-invalid-amount-limit"]
             }
             economyService.transfer(fromCharacter, toCharacter, currency, amount)

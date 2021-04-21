@@ -79,11 +79,13 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
                 sign.getLine(1).equals("withdraw", ignoreCase = true) -> {
                     bankService.getBalance(character, currency).thenAccept { bankBalance ->
                         plugin.server.scheduler.runTask(plugin, Runnable {
+                            val walletBalance = economyService.getPreloadedBalance(character, currency)
                             when {
-                                economyService.getBalance(character, currency) + sign.getLine(2).toInt() > 1728 -> event.player.sendMessage(plugin.messages["bank-withdraw-invalid-wallet-full"])
+                                walletBalance == null -> event.player.sendMessage(plugin.messages.noPreloadedBalance)
+                                walletBalance + sign.getLine(2).toInt() > 1728 -> event.player.sendMessage(plugin.messages["bank-withdraw-invalid-wallet-full"])
                                 sign.getLine(2).toInt() > bankBalance -> event.player.sendMessage(plugin.messages["bank-withdraw-invalid-not-enough-money"])
                                 else -> {
-                                    val bankWithdrawEvent = RPKBukkitBankWithdrawEvent(character, currency, sign.getLine(2).toInt())
+                                    val bankWithdrawEvent = RPKBukkitBankWithdrawEvent(character, currency, sign.getLine(2).toInt(), true)
                                     plugin.server.pluginManager.callEvent(bankWithdrawEvent)
                                     if (!bankWithdrawEvent.isCancelled) {
                                         bankService.setBalance(
@@ -91,13 +93,23 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
                                             bankWithdrawEvent.currency,
                                             bankBalance - bankWithdrawEvent.amount
                                         ).thenRun {
-                                            plugin.server.scheduler.runTask(plugin, Runnable {
-                                                economyService.setBalance(
+                                            val newWalletBalance = economyService.getPreloadedBalance(
+                                                bankWithdrawEvent.character,
+                                                bankWithdrawEvent.currency
+                                            )
+                                            if (newWalletBalance == null) {
+                                                event.player.sendMessage(plugin.messages.noPreloadedBalance)
+                                                return@thenRun
+                                            }
+                                            economyService.setBalance(
+                                                bankWithdrawEvent.character,
+                                                bankWithdrawEvent.currency,
+                                                newWalletBalance + bankWithdrawEvent.amount
+                                            ).thenRun {
+                                                bankService.getBalance(
                                                     bankWithdrawEvent.character,
-                                                    bankWithdrawEvent.currency,
-                                                    economyService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency) + bankWithdrawEvent.amount
-                                                )
-                                                bankService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).thenAccept { newBankBalance ->
+                                                    bankWithdrawEvent.currency
+                                                ).thenAccept { newBankBalance ->
                                                     event.player.sendMessage(
                                                         plugin.messages["bank-withdraw-valid", mapOf(
                                                             "amount" to bankWithdrawEvent.amount.toString(),
@@ -106,12 +118,15 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
                                                             } else {
                                                                 bankWithdrawEvent.currency.namePlural
                                                             },
-                                                            "wallet_balance" to economyService.getBalance(bankWithdrawEvent.character, bankWithdrawEvent.currency).toString(),
+                                                            "wallet_balance" to economyService.getBalance(
+                                                                bankWithdrawEvent.character,
+                                                                bankWithdrawEvent.currency
+                                                            ).toString(),
                                                             "bank_balance" to newBankBalance.toString()
                                                         )]
                                                     )
                                                 }
-                                            })
+                                            }
                                         }
                                     }
                                 }
@@ -121,13 +136,18 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
 
                 }
                 sign.getLine(1).equals("deposit", ignoreCase = true) -> {
-                    bankService.getBalance(character, currency).thenAccept { bankBalance ->
+                    bankService.getBalance(character, currency).thenAcceptAsync { bankBalance ->
                         plugin.server.scheduler.runTask(plugin, Runnable {
-                            if (sign.getLine(2).toInt() > economyService.getBalance(character, currency)) {
+                            val walletBalance = economyService.getPreloadedBalance(character, currency)
+                            if (walletBalance == null) {
+                                event.player.sendMessage(plugin.messages.noPreloadedBalance)
+                                return@Runnable
+                            }
+                            if (sign.getLine(2).toInt() > walletBalance) {
                                 event.player.sendMessage(plugin.messages["bank-deposit-invalid-not-enough-money"])
                             } else {
                                 val bankDepositEvent =
-                                    RPKBukkitBankDepositEvent(character, currency, sign.getLine(2).toInt())
+                                    RPKBukkitBankDepositEvent(character, currency, sign.getLine(2).toInt(), true)
                                 plugin.server.pluginManager.callEvent(bankDepositEvent)
                                 if (!bankDepositEvent.isCancelled) {
                                     bankService.setBalance(
@@ -135,11 +155,16 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
                                         bankDepositEvent.currency,
                                         bankBalance + bankDepositEvent.amount
                                     ).thenRun {
-                                        plugin.server.scheduler.runTask(plugin, Runnable {
+                                        plugin.server.scheduler.runTask(plugin, Runnable deposit@{
+                                            val newWalletBalance = economyService.getPreloadedBalance(character, currency)
+                                            if (newWalletBalance == null) {
+                                                event.player.sendMessage(plugin.messages.noPreloadedBalance)
+                                                return@deposit
+                                            }
                                             economyService.setBalance(
                                                 bankDepositEvent.character,
                                                 bankDepositEvent.currency,
-                                                economyService.getBalance(character, currency) - bankDepositEvent.amount
+                                                newWalletBalance - bankDepositEvent.amount
                                             )
                                             bankService.getBalance(bankDepositEvent.character, bankDepositEvent.currency).thenAccept { newBankBalance ->
                                                 event.player.sendMessage(

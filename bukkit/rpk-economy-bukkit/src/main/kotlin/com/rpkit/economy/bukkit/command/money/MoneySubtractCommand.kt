@@ -15,29 +15,17 @@
 
 package com.rpkit.economy.bukkit.command.money
 
-import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
-import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
-import com.rpkit.players.bukkit.profile.RPKProfileName
-import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.ConversationContext
-import org.bukkit.conversations.ConversationFactory
-import org.bukkit.conversations.MessagePrompt
-import org.bukkit.conversations.NumericPrompt
-import org.bukkit.conversations.Prompt
-import org.bukkit.conversations.StringPrompt
-import org.bukkit.conversations.ValidatingPrompt
 import org.bukkit.entity.Player
 
 /**
@@ -123,7 +111,12 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit) : CommandExecutor {
                     sender.sendMessage(plugin.messages.moneySubtractAmountInvalidAmountNegative)
                     return@thenAccept
                 }
-                economyService.setBalance(character, currency, economyService.getBalance(character, currency) - amount)
+                val walletBalance = economyService.getPreloadedBalance(character, currency)
+                if (walletBalance == null) {
+                    sender.sendMessage(plugin.messages.noPreloadedBalanceOther.withParameters(character = character))
+                    return@thenAccept
+                }
+                economyService.setBalance(character, currency, walletBalance - amount)
                 sender.sendMessage(plugin.messages.moneySubtractAmountValid)
                 sender.sendMessage(plugin.messages.moneySubtractValid)
             } catch (exception: NumberFormatException) {

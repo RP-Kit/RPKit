@@ -59,9 +59,11 @@ class RPKBankServiceImpl(override val plugin: RPKBanksBukkit) : RPKBankService {
     override fun deposit(character: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void> {
         val economyService = Services[RPKEconomyService::class.java] ?: return CompletableFuture.completedFuture(null)
         return CompletableFuture.runAsync {
-            if (economyService.getBalance(character, currency) >= amount) {
-                economyService.setBalance(character, currency, economyService.getBalance(character, currency) - amount)
-                setBalance(character, currency, getBalance(character, currency).join() + amount).join()
+            val walletBalance = economyService.getBalance(character, currency).join()
+            if (walletBalance >= amount) {
+                economyService.setBalance(character, currency, walletBalance - amount).join()
+                val bankBalance = getBalance(character, currency).join()
+                setBalance(character, currency, bankBalance + amount).join()
             }
         }
     }
@@ -69,10 +71,11 @@ class RPKBankServiceImpl(override val plugin: RPKBanksBukkit) : RPKBankService {
     override fun withdraw(character: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void> {
         val economyService = Services[RPKEconomyService::class.java] ?: return CompletableFuture.completedFuture(null)
         return CompletableFuture.runAsync {
-            val balance = getBalance(character, currency).join()
-            if (balance >= amount) {
-                economyService.setBalance(character, currency, economyService.getBalance(character, currency) + amount)
-                setBalance(character, currency, balance - amount)
+            val bankBalance = getBalance(character, currency).join()
+            if (bankBalance >= amount) {
+                val walletBalance = economyService.getBalance(character, currency).join()
+                economyService.setBalance(character, currency, walletBalance + amount).join()
+                setBalance(character, currency, bankBalance - amount)
             }
         }
     }

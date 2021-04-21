@@ -98,7 +98,12 @@ class BidCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
                                 sender.sendMessage(plugin.messages.bidInvalidAuctionNotOpen)
                                 return@Runnable
                             }
-                            if (bidAmount > economyService.getBalance(character, auction.currency)) {
+                            val walletBalance = economyService.getPreloadedBalance(character, auction.currency)
+                            if (walletBalance == null) {
+                                sender.sendMessage(plugin.messages.noPreloadedBalance)
+                                return@Runnable
+                            }
+                            if (bidAmount > walletBalance) {
                                 sender.sendMessage(plugin.messages.bidInvalidNotEnoughMoney)
                                 return@Runnable
                             }

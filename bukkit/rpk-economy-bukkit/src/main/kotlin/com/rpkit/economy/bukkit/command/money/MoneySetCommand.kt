@@ -110,9 +110,10 @@ class MoneySetCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
                     sender.sendMessage(plugin.messages.moneySetAmountInvalidAmountLimit)
                     return@thenAccept
                 }
-                economyService.setBalance(character, currency, amount)
-                sender.sendMessage(plugin.messages.moneySetAmountValid)
-                sender.sendMessage(plugin.messages.moneySetValid)
+                economyService.setBalance(character, currency, amount).thenRun {
+                    sender.sendMessage(plugin.messages.moneySetAmountValid)
+                    sender.sendMessage(plugin.messages.moneySetValid)
+                }
             } catch (exception: NumberFormatException) {
                 sender.sendMessage(plugin.messages.moneySetAmountInvalidAmountNumber)
             }

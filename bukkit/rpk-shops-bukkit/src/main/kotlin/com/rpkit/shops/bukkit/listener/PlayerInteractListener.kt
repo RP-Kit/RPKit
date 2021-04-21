@@ -141,34 +141,43 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
                             event.player.sendMessage(plugin.messages["no-bank-service"])
                             return@Runnable
                         }
-                        if (isAdminShop) {
-                            event.player.inventory.removeItem(items)
-                            chestState.blockInventory.addItem(items)
-                            economyService.setBalance(
-                                customerCharacter,
-                                currency,
-                                economyService.getBalance(customerCharacter, currency) + price
-                            )
-                        } else if (ownerCharacter != null) {
-                            bankService.getBalance(ownerCharacter, currency).thenAccept { bankBalance ->
-                                plugin.server.scheduler.runTask(plugin, Runnable balanceAvailable@{
-                                    if (bankBalance < price) {
-                                        event.player.sendMessage(plugin.messages["shop-sell-not-enough-money"])
-                                        return@balanceAvailable
-                                    }
-                                    event.player.inventory.removeItem(items)
-                                    chestState.blockInventory.addItem(items)
-                                    bankService.setBalance(ownerCharacter, currency, bankBalance - price).thenAccept {
-                                        economyService.setBalance(
-                                            customerCharacter,
-                                            currency,
-                                            economyService.getBalance(customerCharacter, currency) + price
-                                        )
-                                    }
-                                })
+                        val walletBalance = economyService.getPreloadedBalance(customerCharacter, currency)
+                        if (walletBalance == null) {
+                            event.player.sendMessage(plugin.messages.noPreloadedBalance)
+                            return@Runnable
+                        }
+                        when {
+                            isAdminShop -> {
+                                event.player.inventory.removeItem(items)
+                                chestState.blockInventory.addItem(items)
+                                economyService.setBalance(
+                                    customerCharacter,
+                                    currency,
+                                    walletBalance + price
+                                )
                             }
-                        } else {
-                            event.player.sendMessage(plugin.messages["shop-character-invalid"])
+                            ownerCharacter != null -> {
+                                bankService.getBalance(ownerCharacter, currency).thenAccept { bankBalance ->
+                                    plugin.server.scheduler.runTask(plugin, Runnable balanceAvailable@{
+                                        if (bankBalance < price) {
+                                            event.player.sendMessage(plugin.messages["shop-sell-not-enough-money"])
+                                            return@balanceAvailable
+                                        }
+                                        event.player.inventory.removeItem(items)
+                                        chestState.blockInventory.addItem(items)
+                                        bankService.setBalance(ownerCharacter, currency, bankBalance - price).thenAccept {
+                                            economyService.setBalance(
+                                                customerCharacter,
+                                                currency,
+                                                walletBalance + price
+                                            )
+                                        }
+                                    })
+                                }
+                            }
+                            else -> {
+                                event.player.sendMessage(plugin.messages["shop-character-invalid"])
+                            }
                         }
                     })
                 }

@@ -17,38 +17,79 @@
 package com.rpkit.economy.bukkit.economy
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrency
+import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.database.table.RPKWalletTable
 import com.rpkit.economy.bukkit.event.economy.RPKBukkitBalanceChangeEvent
 import com.rpkit.economy.bukkit.exception.NegativeBalanceException
 import com.rpkit.economy.bukkit.wallet.RPKWallet
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Economy service implementation.
  */
 class RPKEconomyServiceImpl(override val plugin: RPKEconomyBukkit) : RPKEconomyService {
 
-    override fun getBalance(character: RPKCharacter, currency: RPKCurrency): Int {
-        return plugin.database.getTable(RPKWalletTable::class.java).get(character, currency)?.balance ?: currency.defaultAmount
+    private val balance: MutableMap<Int, MutableMap<RPKCurrency, Int>> = ConcurrentHashMap()
+
+    override fun getPreloadedBalance(character: RPKCharacter, currency: RPKCurrency): Int? {
+        val characterId = character.id?.value ?: return null
+        return balance[characterId]?.get(currency)
     }
 
-    override fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int) {
-        val event = RPKBukkitBalanceChangeEvent(character, currency, getBalance(character, currency), amount)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        if (event.newBalance < 0) throw NegativeBalanceException()
-        val walletTable = plugin.database.getTable(RPKWalletTable::class.java)
-        val wallet = walletTable.get(event.character, event.currency)
-                ?: RPKWallet(event.character, event.currency, event.newBalance).also { walletTable.insert(it) }
-        wallet.balance = event.newBalance
-        walletTable.update(wallet)
+    override fun loadBalances(character: RPKCharacter): CompletableFuture<Void> {
+        val characterId = character.id?.value ?: return CompletableFuture.completedFuture(null)
+        val currencyService = Services[RPKCurrencyService::class.java] ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            val characterBalances = balance[characterId] ?: ConcurrentHashMap()
+            currencyService.currencies.forEach { currency ->
+                characterBalances[currency] = getBalance(character, currency).join()
+            }
+            balance[characterId] = characterBalances
+        }
     }
 
-    override fun transfer(from: RPKCharacter, to: RPKCharacter, currency: RPKCurrency, amount: Int) {
-        setBalance(from, currency, getBalance(from, currency) - amount)
-        setBalance(to, currency, getBalance(to, currency) + amount)
+    override fun unloadBalances(character: RPKCharacter) {
+        val characterId = character.id?.value ?: return
+        balance.remove(characterId)
+    }
+
+    override fun getBalance(character: RPKCharacter, currency: RPKCurrency): CompletableFuture<Int> {
+        val preloadedBalance = getPreloadedBalance(character, currency)
+        if (preloadedBalance != null) return CompletableFuture.completedFuture(preloadedBalance)
+        return plugin.database.getTable(RPKWalletTable::class.java).get(character, currency).thenApply { it?.balance ?: currency.defaultAmount }
+    }
+
+    override fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitBalanceChangeEvent(character, currency, getBalance(character, currency).join(), amount, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            if (event.newBalance < 0) throw NegativeBalanceException()
+            val walletTable = plugin.database.getTable(RPKWalletTable::class.java)
+            walletTable.get(event.character, event.currency).thenAcceptAsync { fetchedWallet ->
+                val wallet = fetchedWallet ?: RPKWallet(event.character, event.currency, event.newBalance).also { walletTable.insert(it).join() }
+                wallet.balance = event.newBalance
+                walletTable.update(wallet).join()
+                val characterId = event.character.id?.value
+                if (characterId != null) {
+                    val characterBalances = balance[characterId]
+                    if (characterBalances != null) {
+                        characterBalances[currency] = amount
+                    }
+                }
+            }.join()
+        }
+    }
+
+    override fun transfer(from: RPKCharacter, to: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            setBalance(from, currency, getBalance(from, currency).join() - amount).join()
+            setBalance(to, currency, getBalance(to, currency).join() + amount).join()
+        }
     }
 
     override fun getRichestCharacters(currency: RPKCurrency, amount: Int): CompletableFuture<List<RPKCharacter>> {

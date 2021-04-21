@@ -26,7 +26,8 @@ import org.bukkit.event.HandlerList
 class RPKBukkitBankDepositEvent(
         override var character: RPKCharacter,
         override var currency: RPKCurrency,
-        override var amount: Int
+        override var amount: Int,
+        isAsync: Boolean
 ) : RPKBukkitEvent(), RPKBankDepositEvent, Cancellable {
 
     companion object {
