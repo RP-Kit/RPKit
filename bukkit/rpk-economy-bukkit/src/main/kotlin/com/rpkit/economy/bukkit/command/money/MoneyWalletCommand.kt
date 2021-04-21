@@ -112,9 +112,14 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
         val coin = currency.item
         val coinStack = ItemStack(coin)
         coinStack.amount = 64
-        val remainder = (economyService.getBalance(character, currency) % 64)
+        val walletBalance = economyService.getPreloadedBalance(character, currency)
+        if (walletBalance == null) {
+            bukkitPlayer.sendMessage(plugin.messages.noPreloadedBalanceSelf)
+            return
+        }
+        val remainder = (walletBalance % 64)
         var i = 0
-        while (i < economyService.getBalance(character, currency)) {
+        while (i < walletBalance) {
             val leftover = wallet.addItem(coinStack)
             if (leftover.isNotEmpty()) {
                 bukkitPlayer.world.dropItem(bukkitPlayer.location, leftover.values.iterator().next())

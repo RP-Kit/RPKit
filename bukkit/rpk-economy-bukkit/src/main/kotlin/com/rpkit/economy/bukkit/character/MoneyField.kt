@@ -41,7 +41,7 @@ class MoneyField(val plugin: RPKEconomyBukkit) : HideableCharacterCardField {
                 val currencyService = Services[RPKCurrencyService::class.java] ?: return@thenApply plugin.messages["no-currency-service"]
                 currencyService.currencies
                     .joinToString(", ") { currency ->
-                        val balance = economyService.getBalance(character, currency)
+                        val balance = economyService.getPreloadedBalance(character, currency)
                         "$balance ${if (balance == 1) currency.nameSingular else currency.namePlural}"
                     }
             }

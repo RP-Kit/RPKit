@@ -123,11 +123,16 @@ class InventoryClickListener(val plugin: RPKShopsBukkit) : Listener {
                 buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-shop-items"])
                 return
             }
-            if (economyService.getBalance(buyerCharacter, currency) < price) {
+            val walletBalance = economyService.getPreloadedBalance(buyerCharacter, currency)
+            if (walletBalance == null) {
+                buyerBukkitPlayer.sendMessage(plugin.messages.noPreloadedBalance)
+                return
+            }
+            if (walletBalance < price) {
                 buyerBukkitPlayer.sendMessage(plugin.messages["not-enough-money"])
                 return
             }
-            economyService.setBalance(buyerCharacter, currency, economyService.getBalance(buyerCharacter, currency) - price)
+            economyService.setBalance(buyerCharacter, currency, walletBalance - price)
             sellerCharacterFuture.thenAccept { sellerCharacter ->
                 if (sellerCharacter != null) {
                     bankService.getBalance(sellerCharacter, currency).thenAccept { bankBalance ->

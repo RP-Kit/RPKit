@@ -151,6 +151,7 @@ class AuctionsMessages(plugin: RPKAuctionsBukkit) : BukkitMessages(plugin) {
     val bidCreateFailed = get("bid-create-failed")
     val bidUpdateFailed = get("bid-update-failed")
     val bidDeleteFailed = get("bid-delete-failed")
+    val noPreloadedBalance = get("no-preloaded-balance")
     val noMinecraftProfileService = get("no-minecraft-profile-service")
     val noCharacterService = get("no-character-service")
     val noCurrencyService = get("no-currency-service")

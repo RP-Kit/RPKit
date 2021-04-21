@@ -33,10 +33,7 @@ import com.rpkit.economy.bukkit.database.table.RPKMoneyHiddenTable
 import com.rpkit.economy.bukkit.database.table.RPKWalletTable
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyServiceImpl
-import com.rpkit.economy.bukkit.listener.InventoryClickListener
-import com.rpkit.economy.bukkit.listener.InventoryCloseListener
-import com.rpkit.economy.bukkit.listener.PlayerInteractListener
-import com.rpkit.economy.bukkit.listener.SignChangeListener
+import com.rpkit.economy.bukkit.listener.*
 import com.rpkit.economy.bukkit.messages.EconomyMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
@@ -117,19 +114,22 @@ class RPKEconomyBukkit : RPKBukkitPlugin() {
         registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("money")?.setExecutor(MoneyCommand(this))
         getCommand("pay")?.setExecutor(MoneyPayCommand(this))
         getCommand("wallet")?.setExecutor(MoneyWalletCommand(this))
         getCommand("currency")?.setExecutor(CurrencyCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
-                InventoryClickListener(this),
-                InventoryCloseListener(),
-                PlayerInteractListener(this),
-                SignChangeListener(this)
+            InventoryClickListener(),
+            InventoryCloseListener(),
+            PlayerInteractListener(this),
+            SignChangeListener(this),
+            AsyncPlayerPreLoginListener(),
+            CharacterSwitchListener(),
+            PlayerQuitListener()
         )
     }
 

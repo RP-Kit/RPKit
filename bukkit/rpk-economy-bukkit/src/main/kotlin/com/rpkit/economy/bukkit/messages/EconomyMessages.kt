@@ -15,6 +15,7 @@
 
 package com.rpkit.economy.bukkit.messages
 
+import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.bukkit.message.BukkitMessages
 import com.rpkit.core.message.ParameterizedMessage
 import com.rpkit.core.message.to
@@ -26,6 +27,12 @@ class EconomyMessages(plugin: RPKEconomyBukkit) : BukkitMessages(plugin) {
     class CurrencyListItemMessage(private val message: ParameterizedMessage) {
         fun withParameters(currency: RPKCurrency) = message.withParameters(
             "currency" to currency.name.value
+        )
+    }
+
+    class NoPreloadedBalanceOtherMessage(private val message: ParameterizedMessage) {
+        fun withParameters(character: RPKCharacter) = message.withParameters(
+            "character" to character.name
         )
     }
 
@@ -153,6 +160,8 @@ class EconomyMessages(plugin: RPKEconomyBukkit) : BukkitMessages(plugin) {
     val recipientNoCharacter = get("recipient-no-character")
     val noProfile = get("no-profile")
     val noMinecraftProfile = get("no-minecraft-profile")
+    val noPreloadedBalanceSelf = get("no-preloaded-balance-self")
+    val noPreloadedBalanceOther = getParameterized("no-preloaded-balance-other").let(::NoPreloadedBalanceOtherMessage)
     val noEconomyService = get("no-economy-service")
     val noCurrencyService = get("no-currency-service")
     val noMinecraftProfileService = get("no-minecraft-profile-service")
