@@ -239,7 +239,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit) : CommandE
                 return END_OF_CONVERSATION
             }
             val characterService = Services[RPKCharacterService::class.java] ?: return END_OF_CONVERSATION
-            val character = characterService.getCharacter(RPKCharacterId(context.getSessionData("character_id") as Int))
+            val character = characterService.getCharacter(context.getSessionData("character_id") as RPKCharacterId)
             if (character != null) {
                 characterService.removeCharacter(character)
             }
