@@ -21,23 +21,28 @@ import com.rpkit.essentials.bukkit.database.table.RPKPreviousLocationTable
 import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Location
+import java.util.concurrent.CompletableFuture
 
 
 class RPKLocationHistoryServiceImpl(override val plugin: RPKEssentialsBukkit) : RPKLocationHistoryService {
 
-    override fun getPreviousLocation(minecraftProfile: RPKMinecraftProfile): Location? {
-        return plugin.database.getTable(RPKPreviousLocationTable::class.java).get(minecraftProfile)?.location
+    override fun getPreviousLocation(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Location?> {
+        return plugin.database.getTable(RPKPreviousLocationTable::class.java)[minecraftProfile].thenApply {
+            it?.location
+        }
     }
 
-    override fun setPreviousLocation(minecraftProfile: RPKMinecraftProfile, location: Location) {
-        val previousLocationTable = plugin.database.getTable(RPKPreviousLocationTable::class.java)
-        var previousLocation = previousLocationTable[minecraftProfile]
-        if (previousLocation != null) {
-            previousLocation.location = location
-            previousLocationTable.update(previousLocation)
-        } else {
-            previousLocation = RPKPreviousLocation(minecraftProfile = minecraftProfile, location = location)
-            previousLocationTable.insert(previousLocation)
+    override fun setPreviousLocation(minecraftProfile: RPKMinecraftProfile, location: Location): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val previousLocationTable = plugin.database.getTable(RPKPreviousLocationTable::class.java)
+            var previousLocation = previousLocationTable[minecraftProfile].join()
+            if (previousLocation != null) {
+                previousLocation.location = location
+                previousLocationTable.update(previousLocation).join()
+            } else {
+                previousLocation = RPKPreviousLocation(minecraftProfile = minecraftProfile, location = location)
+                previousLocationTable.insert(previousLocation).join()
+            }
         }
     }
 

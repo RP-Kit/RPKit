@@ -20,24 +20,27 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.database.table.RPKTrackingDisabledTable
 import com.rpkit.tracking.bukkit.tracking.RPKTrackingService
+import java.util.concurrent.CompletableFuture
 
 
 class RPKTrackingServiceImpl(override val plugin: RPKEssentialsBukkit) : RPKTrackingService {
 
-    override fun isTrackable(character: RPKCharacter): Boolean {
-        return plugin.database.getTable(RPKTrackingDisabledTable::class.java)[character] == null
+    override fun isTrackable(character: RPKCharacter): CompletableFuture<Boolean> {
+        return plugin.database.getTable(RPKTrackingDisabledTable::class.java)[character].thenApply { it == null }
     }
 
-    override fun setTrackable(character: RPKCharacter, trackable: Boolean) {
-        val trackingDisabledTable = plugin.database.getTable(RPKTrackingDisabledTable::class.java)
-        val trackingDisabled = trackingDisabledTable[character]
-        if (trackingDisabled != null) {
-            if (trackable) {
-                trackingDisabledTable.delete(trackingDisabled)
-            }
-        } else {
-            if (!trackable) {
-                trackingDisabledTable.insert(RPKTrackingDisabled(character))
+    override fun setTrackable(character: RPKCharacter, trackable: Boolean): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val trackingDisabledTable = plugin.database.getTable(RPKTrackingDisabledTable::class.java)
+            val trackingDisabled = trackingDisabledTable[character].join()
+            if (trackingDisabled != null) {
+                if (trackable) {
+                    trackingDisabledTable.delete(trackingDisabled).join()
+                }
+            } else {
+                if (!trackable) {
+                    trackingDisabledTable.insert(RPKTrackingDisabled(character)).join()
+                }
             }
         }
     }

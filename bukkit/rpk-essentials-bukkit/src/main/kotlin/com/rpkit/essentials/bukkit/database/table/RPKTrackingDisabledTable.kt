@@ -22,6 +22,7 @@ import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.database.create
 import com.rpkit.essentials.bukkit.database.jooq.Tables.RPKIT_TRACKING_DISABLED
 import com.rpkit.essentials.bukkit.tracking.RPKTrackingDisabled
+import java.util.concurrent.CompletableFuture
 
 
 class RPKTrackingDisabledTable(private val database: Database, private val plugin: RPKEssentialsBukkit) : Table {
@@ -37,43 +38,49 @@ class RPKTrackingDisabledTable(private val database: Database, private val plugi
         null
     }
 
-    fun insert(entity: RPKTrackingDisabled) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKTrackingDisabled): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_TRACKING_DISABLED,
-                        RPKIT_TRACKING_DISABLED.CHARACTER_ID
+                    RPKIT_TRACKING_DISABLED,
+                    RPKIT_TRACKING_DISABLED.CHARACTER_ID
                 )
                 .values(
                     characterId.value
                 )
                 .execute()
-        cache?.set(characterId.value, entity)
+            cache?.set(characterId.value, entity)
+        }
     }
 
-    operator fun get(character: RPKCharacter): RPKTrackingDisabled? {
-        val characterId = character.id ?: return null
+    operator fun get(character: RPKCharacter): CompletableFuture<RPKTrackingDisabled?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
         if (cache?.containsKey(characterId.value) == true) {
-            return cache[characterId.value]
+            return CompletableFuture.completedFuture(cache[characterId.value])
         }
-        database.create
+        return CompletableFuture.supplyAsync {
+            database.create
                 .select(
-                        RPKIT_TRACKING_DISABLED.CHARACTER_ID
+                    RPKIT_TRACKING_DISABLED.CHARACTER_ID
                 )
                 .from(RPKIT_TRACKING_DISABLED)
                 .where(RPKIT_TRACKING_DISABLED.CHARACTER_ID.eq(characterId.value))
-                .fetchOne() ?: return null
-        val trackingEnabled = RPKTrackingDisabled(character)
-        cache?.set(characterId.value, trackingEnabled)
-        return trackingEnabled
+                .fetchOne() ?: return@supplyAsync null
+            val trackingEnabled = RPKTrackingDisabled(character)
+            cache?.set(characterId.value, trackingEnabled)
+            return@supplyAsync trackingEnabled
+        }
     }
 
-    fun delete(entity: RPKTrackingDisabled) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun delete(entity: RPKTrackingDisabled): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_TRACKING_DISABLED)
                 .where(RPKIT_TRACKING_DISABLED.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.remove(characterId.value)
+            cache?.remove(characterId.value)
+        }
     }
 }

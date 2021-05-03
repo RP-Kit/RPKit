@@ -19,6 +19,7 @@ package com.rpkit.locationhistory.bukkit.locationhistory
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Location
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides history of locations of players, used with commands such as /back.
@@ -33,7 +34,7 @@ interface RPKLocationHistoryService : Service {
      * @param minecraftProfile The Minecraft profile
      * @return The Minecraft profile's previous location
      */
-    fun getPreviousLocation(minecraftProfile: RPKMinecraftProfile): Location?
+    fun getPreviousLocation(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Location?>
 
     /**
      * Sets the previous location of the Minecraft profile.
@@ -42,6 +43,6 @@ interface RPKLocationHistoryService : Service {
      * @param minecraftProfile The Minecraft profile
      * @param location The location to set the previous location to
      */
-    fun setPreviousLocation(minecraftProfile: RPKMinecraftProfile, location: Location)
+    fun setPreviousLocation(minecraftProfile: RPKMinecraftProfile, location: Location): CompletableFuture<Void>
 
 }
