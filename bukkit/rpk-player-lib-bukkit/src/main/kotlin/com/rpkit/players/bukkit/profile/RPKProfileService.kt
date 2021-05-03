@@ -26,6 +26,7 @@ interface RPKProfileService : Service {
     fun updateProfile(profile: RPKProfile): CompletableFuture<Void>
     fun removeProfile(profile: RPKProfile): CompletableFuture<Void>
     fun createProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator? = null, password: String? = null): CompletableFuture<RPKProfile>
+    fun createAndLoadProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator? = null, password: String? = null): CompletableFuture<RPKProfile>
     fun createThinProfile(name: RPKProfileName): RPKThinProfile
     fun generateDiscriminatorFor(name: RPKProfileName): CompletableFuture<RPKProfileDiscriminator>
     fun getPreloadedProfile(id: RPKProfileId): RPKProfile?

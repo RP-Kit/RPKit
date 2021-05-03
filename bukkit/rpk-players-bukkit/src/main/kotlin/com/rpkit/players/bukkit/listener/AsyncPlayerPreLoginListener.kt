@@ -57,18 +57,20 @@ class AsyncPlayerPreLoginListener(private val plugin: RPKPlayersBukkit) : Listen
         val profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
             val profileName = RPKProfileName(event.name)
-            profileService.generateDiscriminatorFor(profileName).thenAccept { discriminator ->
-                profileService.createProfile(
+            profileService.generateDiscriminatorFor(profileName).thenAcceptAsync { discriminator ->
+                profileService.createAndLoadProfile(
                     profileName,
                     discriminator
-                ).thenAccept { newProfile ->
+                ).thenAcceptAsync { newProfile ->
                     minecraftProfile.profile = newProfile
-                    minecraftProfileService.updateMinecraftProfile(minecraftProfile)
-                }
-            }
+                    minecraftProfileService.updateMinecraftProfile(minecraftProfile).join()
+                }.join()
+            }.join()
         } else {
-            minecraftProfile.profile = profile
-            minecraftProfileService.updateMinecraftProfile(minecraftProfile)
+            val profileId = profile.id
+            if (profileId != null) {
+                profileService.loadProfile(profileId).join()
+            }
         }
     }
 }

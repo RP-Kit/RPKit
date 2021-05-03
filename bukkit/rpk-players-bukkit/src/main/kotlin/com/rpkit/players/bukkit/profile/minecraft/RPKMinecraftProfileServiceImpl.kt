@@ -78,6 +78,7 @@ class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RP
         }
         minecraftProfilesByMinecraftUsername.remove(minecraftProfile.minecraftUsername.value)
         minecraftProfilesByUuid.remove(minecraftProfile.minecraftUUID)
+        plugin.logger.info("Unloaded Minecraft profile for user ${minecraftProfile.minecraftUUID}")
     }
 
     override fun getMinecraftProfile(id: RPKMinecraftProfileId): CompletableFuture<RPKMinecraftProfile?> {
@@ -150,6 +151,7 @@ class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RP
             }
             minecraftProfilesByMinecraftUsername[minecraftProfile.minecraftUsername.value] = minecraftProfile
             minecraftProfilesByUuid[minecraftProfile.minecraftUUID] = minecraftProfile
+            plugin.logger.info("Created and loaded Minecraft profile for user ${minecraftProfile.minecraftUUID}")
             return@supplyAsync minecraftProfile
         }
     }
@@ -166,6 +168,7 @@ class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RP
             }
             minecraftProfilesByMinecraftUsername[minecraftProfile.minecraftUsername.value] = minecraftProfile
             minecraftProfilesByUuid[minecraftUUID] = minecraftProfile
+            plugin.logger.info("Created and loaded Minecraft profile for user $minecraftUUID")
             return@supplyAsync minecraftProfile
         }
     }

@@ -104,6 +104,19 @@ class RPKProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKProfileS
         }
     }
 
+    override fun createAndLoadProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator?, password: String?): CompletableFuture<RPKProfile> {
+        return CompletableFuture.supplyAsync {
+            val profile = createProfile(name, discriminator, password).join()
+            val profileId = profile.id
+            if (profileId != null) {
+                profilesById[profileId.value] = profile
+            }
+            profilesByTag[profile.name + profile.discriminator] = profile
+            plugin.logger.info("Created and loaded profile ${profile.name}#${profile.discriminator}" + if (profileId != null) " (${profileId})" else "")
+            return@supplyAsync profile
+        }
+    }
+
     override fun createThinProfile(name: RPKProfileName): RPKThinProfile {
         return RPKThinProfileImpl(name)
     }
