@@ -40,10 +40,13 @@ class PlayerJoinListener(private val plugin: RPKEssentialsBukkit) : Listener {
             val joinMessage = event.joinMessage
             if (joinMessage != null) {
                 plugin.server.onlinePlayers.mapNotNull { player -> minecraftProfileService.getPreloadedMinecraftProfile(player) }
-                        .filter { minecraftProfile -> logMessageService.isLogMessagesEnabled(minecraftProfile) }
-                        .forEach { minecraftProfile ->
-                            minecraftProfile.sendMessage(joinMessage)
+                    .forEach { minecraftProfile ->
+                        logMessageService.isLogMessagesEnabled(minecraftProfile).thenAccept { isLogMessagesEnabled ->
+                            if (isLogMessagesEnabled) {
+                                minecraftProfile.sendMessage(joinMessage)
+                            }
                         }
+                    }
             }
             event.joinMessage = null
         }

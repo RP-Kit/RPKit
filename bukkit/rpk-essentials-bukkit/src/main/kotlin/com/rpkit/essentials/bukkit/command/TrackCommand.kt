@@ -71,32 +71,36 @@ class TrackCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-character-other"])
             return true
         }
-        if (!trackingService.isTrackable(character)) {
-            sender.sendMessage(plugin.messages["track-invalid-untrackable"])
-            bukkitPlayer.sendMessage(plugin.messages["track-untrackable-notification", mapOf(
-                "player" to sender.name
-            )])
-            return true
-        }
-        val itemRequirement = plugin.config.getItemStack("track-command.item-requirement")
-        if (itemRequirement != null && !bukkitPlayer.inventory.containsAtLeast(itemRequirement, itemRequirement.amount)) {
-                sender.sendMessage(plugin.messages["track-invalid-item", mapOf(
+        trackingService.isTrackable(character).thenAccept { isTrackable ->
+            if (!isTrackable) {
+                sender.sendMessage(plugin.messages["track-invalid-untrackable"])
+                bukkitPlayer.sendMessage(plugin.messages["track-untrackable-notification", mapOf(
+                    "player" to sender.name
+                )])
+                return@thenAccept
+            }
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                val itemRequirement = plugin.config.getItemStack("track-command.item-requirement")
+                if (itemRequirement != null && !bukkitPlayer.inventory.containsAtLeast(itemRequirement, itemRequirement.amount)) {
+                    sender.sendMessage(plugin.messages["track-invalid-item", mapOf(
                         "amount" to itemRequirement.amount.toString(),
                         "type" to itemRequirement.type.toString().toLowerCase().replace('_', ' ')
+                    )])
+                    return@Runnable
+                }
+                val maximumDistance = plugin.config.getInt("track-command.maximum-distance")
+                val distanceSquared = bukkitPlayer.location.distanceSquared(sender.location)
+                if (maximumDistance >= 0 && distanceSquared > maximumDistance * maximumDistance) {
+                    sender.sendMessage(plugin.messages["track-invalid-distance"])
+                    return@Runnable
+                }
+                sender.compassTarget = bukkitPlayer.location
+                sender.sendMessage(plugin.messages["track-valid", mapOf(
+                    "player" to minecraftProfile.name,
+                    "character" to if (character.isNameHidden) "[HIDDEN]" else character.name
                 )])
-                return true
-            }
-        val maximumDistance = plugin.config.getInt("track-command.maximum-distance")
-        val distanceSquared = bukkitPlayer.location.distanceSquared(sender.location)
-        if (maximumDistance >= 0 && distanceSquared > maximumDistance * maximumDistance) {
-                sender.sendMessage(plugin.messages["track-invalid-distance"])
-                return true
-            }
-        sender.compassTarget = bukkitPlayer.location
-        sender.sendMessage(plugin.messages["track-valid", mapOf(
-                "player" to minecraftProfile.name,
-                "character" to if (character.isNameHidden) "[HIDDEN]" else character.name
-        )])
+            })
+        }
         return true
     }
 
