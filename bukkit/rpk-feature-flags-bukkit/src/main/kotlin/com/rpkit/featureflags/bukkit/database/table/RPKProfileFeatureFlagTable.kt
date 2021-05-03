@@ -25,6 +25,7 @@ import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlag
 import com.rpkit.featureflags.bukkit.featureflag.RPKProfileFeatureFlag
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
+import java.util.concurrent.CompletableFuture
 
 
 class RPKProfileFeatureFlagTable(private val database: Database, private val plugin: RPKFeatureFlagsBukkit) : Table {
@@ -38,68 +39,76 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
         )
     } else null
 
-    fun insert(entity: RPKProfileFeatureFlag) {
-        val profileId = entity.profile.id ?: return
-        database.create
+    fun insert(entity: RPKProfileFeatureFlag): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_PROFILE_FEATURE_FLAG,
-                        RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID,
-                        RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME,
-                        RPKIT_PROFILE_FEATURE_FLAG.ENABLED
+                    RPKIT_PROFILE_FEATURE_FLAG,
+                    RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID,
+                    RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME,
+                    RPKIT_PROFILE_FEATURE_FLAG.ENABLED
                 )
                 .values(
-                        profileId.value,
-                        entity.featureFlag.name.value,
-                        entity.isEnabled
+                    profileId.value,
+                    entity.featureFlag.name.value,
+                    entity.isEnabled
                 )
                 .execute()
+        }
     }
 
-    fun update(entity: RPKProfileFeatureFlag) {
-        val profileId = entity.profile.id ?: return
-        database.create
+    fun update(entity: RPKProfileFeatureFlag): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_PROFILE_FEATURE_FLAG)
                 .set(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID, profileId.value)
                 .set(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME, entity.featureFlag.name.value)
                 .set(RPKIT_PROFILE_FEATURE_FLAG.ENABLED, entity.isEnabled)
                 .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profileId.value))
                 .execute()
-    }
-
-    fun get(profile: RPKProfile, featureFlag: RPKFeatureFlag): RPKProfileFeatureFlag? {
-        if (cache?.containsKey(featureFlag.name.value) == true) {
-            return cache[featureFlag.name.value]
         }
-        val profileId = profile.id ?: return null
-        val result = database.create
-            .select(
-                RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID,
-                RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME,
-                RPKIT_PROFILE_FEATURE_FLAG.ENABLED
-            )
-            .from(RPKIT_PROFILE_FEATURE_FLAG)
-            .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profileId.value))
-            .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(featureFlag.name.value))
-            .fetchOne() ?: return null
-        Services[RPKProfileService::class.java]
-            ?: return null
-        val profileFeatureFlag = RPKProfileFeatureFlag(
-            profile,
-            featureFlag,
-            result.get(RPKIT_PROFILE_FEATURE_FLAG.ENABLED)
-        )
-        cache?.set(featureFlag.name.value, profileFeatureFlag)
-        return profileFeatureFlag
     }
 
-    fun delete(entity: RPKProfileFeatureFlag) {
-        val profileId = entity.profile.id ?: return
-        database.create
+    fun get(profile: RPKProfile, featureFlag: RPKFeatureFlag): CompletableFuture<RPKProfileFeatureFlag?> {
+        if (cache?.containsKey(featureFlag.name.value) == true) {
+            return CompletableFuture.completedFuture(cache[featureFlag.name.value])
+        }
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.supplyAsync {
+            val result = database.create
+                .select(
+                    RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID,
+                    RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME,
+                    RPKIT_PROFILE_FEATURE_FLAG.ENABLED
+                )
+                .from(RPKIT_PROFILE_FEATURE_FLAG)
+                .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profileId.value))
+                .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(featureFlag.name.value))
+                .fetchOne() ?: return@supplyAsync null
+            Services[RPKProfileService::class.java]
+                ?: return@supplyAsync null
+            val profileFeatureFlag = RPKProfileFeatureFlag(
+                profile,
+                featureFlag,
+                result.get(RPKIT_PROFILE_FEATURE_FLAG.ENABLED)
+            )
+            cache?.set(featureFlag.name.value, profileFeatureFlag)
+            return@supplyAsync profileFeatureFlag
+        }
+    }
+
+    fun delete(entity: RPKProfileFeatureFlag): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_PROFILE_FEATURE_FLAG)
                 .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profileId.value))
                 .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(entity.featureFlag.name.value))
                 .execute()
-        cache?.remove(entity.featureFlag.name.value)
+            cache?.remove(entity.featureFlag.name.value)
+        }
     }
 
 }

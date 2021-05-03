@@ -16,11 +16,12 @@
 package com.rpkit.featureflags.bukkit.featureflag
 
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKFeatureFlag {
     val name: RPKFeatureFlagName
     var isEnabledByDefault: Boolean
-    fun isEnabledFor(profile: RPKProfile): Boolean
-    fun setEnabledFor(profile: RPKProfile, enabled: Boolean)
+    fun isEnabledFor(profile: RPKProfile): CompletableFuture<Boolean>
+    fun setEnabledFor(profile: RPKProfile, enabled: Boolean): CompletableFuture<Void>
 }
