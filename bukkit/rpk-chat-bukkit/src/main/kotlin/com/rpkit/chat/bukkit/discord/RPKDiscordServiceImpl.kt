@@ -22,6 +22,7 @@ import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.discord.DiscordUserId
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfile
+import java.util.concurrent.CompletableFuture
 
 class RPKDiscordServiceImpl(override val plugin: RPKChatBukkit) : RPKDiscordService {
 
@@ -62,13 +63,13 @@ class RPKDiscordServiceImpl(override val plugin: RPKChatBukkit) : RPKDiscordServ
         setMessageAsProfileLinkRequest(message.id, profile)
     }
 
-    override fun getMessageProfileLink(messageId: Long): RPKProfile? {
-        val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profileId = profileLinkMessages[messageId] ?: return null
+    override fun getMessageProfileLink(messageId: Long): CompletableFuture<RPKProfile?> {
+        val profileService = Services[RPKProfileService::class.java] ?: return CompletableFuture.completedFuture(null)
+        val profileId = profileLinkMessages[messageId] ?: return CompletableFuture.completedFuture(null)
         return profileService.getProfile(RPKProfileId(profileId))
     }
 
-    override fun getMessageProfileLink(message: DiscordMessage): RPKProfile? {
+    override fun getMessageProfileLink(message: DiscordMessage): CompletableFuture<RPKProfile?> {
         return getMessageProfileLink(message.id)
     }
 

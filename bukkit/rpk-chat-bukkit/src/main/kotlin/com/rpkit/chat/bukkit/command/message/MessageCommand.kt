@@ -50,7 +50,7 @@ class MessageCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
         }
-        val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val senderMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (senderMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -84,7 +84,7 @@ class MessageCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
                     sender.sendMessage(plugin.messages["message-invalid-target"])
                     return@thenAccept
                 }
-                val receiverMinecraftProfile = minecraftProfileService.getMinecraftProfile(receiver)
+                val receiverMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(receiver)
                 if (receiverMinecraftProfile == null) {
                     sender.sendMessage(plugin.messages["no-minecraft-profile"])
                     return@thenAccept

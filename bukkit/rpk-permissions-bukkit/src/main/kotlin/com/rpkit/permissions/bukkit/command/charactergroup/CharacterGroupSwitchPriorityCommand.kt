@@ -53,79 +53,80 @@ class CharacterGroupSwitchPriorityCommand(private val plugin: RPKPermissionsBukk
             sender.sendMessage(plugin.messages.characterGroupSwitchPriorityInvalidProfileName)
             return CompletableFuture.completedFuture(IncorrectUsageFailure())
         }
-        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
-        if (profile == null) {
-            sender.sendMessage(plugin.messages.characterGroupSwitchPriorityInvalidProfile)
-            return CompletableFuture.completedFuture(InvalidTargetProfileFailure())
-        }
-        val characterService = Services[RPKCharacterService::class.java]
-        if (characterService == null) {
-            sender.sendMessage(plugin.messages.noCharacterService)
-            return CompletableFuture.completedFuture(MissingServiceFailure(RPKCharacterService::class.java))
-        }
-        return characterService.getCharacters(profile).thenApply { characters ->
-            if (characters.isEmpty()) {
-                sender.sendMessage(plugin.messages.noCharacter)
-                return@thenApply NoCharacterFailure()
+        return profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator)).thenApplyAsync getProfile@{ profile ->
+            if (profile == null) {
+                sender.sendMessage(plugin.messages.characterGroupSwitchPriorityInvalidProfile)
+                return@getProfile InvalidTargetProfileFailure()
             }
-            val character = characters.minByOrNull { args.drop(1).dropLast(2).joinToString(" ").levenshtein(it.name) }
-            if (character == null) {
-                sender.sendMessage(plugin.messages.noCharacter)
-                return@thenApply NoCharacterFailure()
+            val characterService = Services[RPKCharacterService::class.java]
+            if (characterService == null) {
+                sender.sendMessage(plugin.messages.noCharacterService)
+                return@getProfile MissingServiceFailure(RPKCharacterService::class.java)
             }
-            val groupService = Services[RPKGroupService::class.java]
-            if (groupService == null) {
-                sender.sendMessage(plugin.messages.noGroupService)
-                return@thenApply MissingServiceFailure(RPKGroupService::class.java)
-            }
-            val group1 = groupService.getGroup(RPKGroupName(args[2]))
-            if (group1 == null) {
-                sender.sendMessage(
-                    plugin.messages.characterGroupSwitchPriorityInvalidGroup.withParameters(
-                        groupName = args[2]
+            return@getProfile characterService.getCharacters(profile).thenApplyAsync getCharacters@{ characters ->
+                if (characters.isEmpty()) {
+                    sender.sendMessage(plugin.messages.noCharacter)
+                    return@getCharacters NoCharacterFailure()
+                }
+                val character = characters.minByOrNull { args.drop(1).dropLast(2).joinToString(" ").levenshtein(it.name) }
+                if (character == null) {
+                    sender.sendMessage(plugin.messages.noCharacter)
+                    return@getCharacters NoCharacterFailure()
+                }
+                val groupService = Services[RPKGroupService::class.java]
+                if (groupService == null) {
+                    sender.sendMessage(plugin.messages.noGroupService)
+                    return@getCharacters MissingServiceFailure(RPKGroupService::class.java)
+                }
+                val group1 = groupService.getGroup(RPKGroupName(args[2]))
+                if (group1 == null) {
+                    sender.sendMessage(
+                        plugin.messages.characterGroupSwitchPriorityInvalidGroup.withParameters(
+                            groupName = args[2]
+                        )
                     )
-                )
-                return@thenApply InvalidGroupFailure()
-            }
-            val group2 = groupService.getGroup(RPKGroupName(args[3]))
-            if (group2 == null) {
-                sender.sendMessage(
-                    plugin.messages.characterGroupSwitchPriorityInvalidGroup.withParameters(
-                        groupName = args[3]
+                    return@getCharacters InvalidGroupFailure()
+                }
+                val group2 = groupService.getGroup(RPKGroupName(args[3]))
+                if (group2 == null) {
+                    sender.sendMessage(
+                        plugin.messages.characterGroupSwitchPriorityInvalidGroup.withParameters(
+                            groupName = args[3]
+                        )
                     )
-                )
-                return@thenApply InvalidGroupFailure()
-            }
-            val group1Priority = groupService.getGroupPriority(character, group1)
-            if (group1Priority == null) {
+                    return@getCharacters InvalidGroupFailure()
+                }
+                val group1Priority = groupService.getGroupPriority(character, group1)
+                if (group1Priority == null) {
+                    sender.sendMessage(
+                        plugin.messages.characterGroupSwitchPriorityInvalidGroupNotPresent.withParameters(
+                            character = character,
+                            group = group1
+                        )
+                    )
+                    return@getCharacters GroupNotPresentFailure(group1)
+                }
+                val group2Priority = groupService.getGroupPriority(character, group2)
+                if (group2Priority == null) {
+                    sender.sendMessage(
+                        plugin.messages.characterGroupSwitchPriorityInvalidGroupNotPresent.withParameters(
+                            character = character,
+                            group = group2
+                        )
+                    )
+                    return@getCharacters GroupNotPresentFailure(group2)
+                }
+                groupService.setGroupPriority(character, group1, group2Priority)
+                groupService.setGroupPriority(character, group2, group1Priority)
                 sender.sendMessage(
-                    plugin.messages.characterGroupSwitchPriorityInvalidGroupNotPresent.withParameters(
+                    plugin.messages.characterGroupSwitchPriorityValid.withParameters(
                         character = character,
-                        group = group1
+                        group1 = group1,
+                        group2 = group2
                     )
                 )
-                return@thenApply GroupNotPresentFailure(group1)
-            }
-            val group2Priority = groupService.getGroupPriority(character, group2)
-            if (group2Priority == null) {
-                sender.sendMessage(
-                    plugin.messages.characterGroupSwitchPriorityInvalidGroupNotPresent.withParameters(
-                        character = character,
-                        group = group2
-                    )
-                )
-                return@thenApply GroupNotPresentFailure(group2)
-            }
-            groupService.setGroupPriority(character, group1, group2Priority)
-            groupService.setGroupPriority(character, group2, group1Priority)
-            sender.sendMessage(
-                plugin.messages.characterGroupSwitchPriorityValid.withParameters(
-                    character = character,
-                    group1 = group1,
-                    group2 = group2
-                )
-            )
-            return@thenApply CommandSuccess
+                return@getCharacters CommandSuccess
+            }.join()
         }
     }
 

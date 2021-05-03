@@ -68,7 +68,7 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit) : Command
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -106,7 +106,7 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit) : Command
             if (conversable !is Player) return NameSetPrompt()
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return NameSetPrompt()
             val characterService = Services[RPKCharacterService::class.java] ?: return NameSetPrompt()
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return NameSetPrompt()
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(conversable) ?: return NameSetPrompt()
             val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return NameSetPrompt()
             if (input == null) return NameSetPrompt()
             character.name = input
@@ -131,7 +131,7 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit) : Command
                 conversable.sendMessage(plugin.messages["no-character-service"])
                 return END_OF_CONVERSATION
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(context.forWhom as Player)
             if (minecraftProfile != null) {
                 characterService.getPreloadedActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
             }

@@ -44,7 +44,7 @@ class ProfileHandler {
         val profileService = Services[RPKProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Profile service not found"))
-        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
+        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
         return Response(OK)
@@ -58,7 +58,7 @@ class ProfileHandler {
         val profileService = Services[RPKProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Profile service not found"))
-        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
+        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
         if (profile != request.authenticatedProfile) {
@@ -67,7 +67,7 @@ class ProfileHandler {
         }
         val newName = RPKProfileName(profilePutRequest.name)
         profile.name = newName
-        profile.discriminator = profileService.generateDiscriminatorFor(newName)
+        profile.discriminator = profileService.generateDiscriminatorFor(newName).join()
         profile.setPassword(profilePutRequest.password.toCharArray())
         profileService.updateProfile(profile)
         return Response(NO_CONTENT)
@@ -80,7 +80,7 @@ class ProfileHandler {
         val profileService = Services[RPKProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Profile service not found"))
-        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
+        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
         if (profile != request.authenticatedProfile) {
@@ -90,7 +90,7 @@ class ProfileHandler {
         val newName = profilePatchRequest.name?.let(::RPKProfileName)
         if (newName != null) {
             profile.name = newName
-            profile.discriminator = profileService.generateDiscriminatorFor(newName)
+            profile.discriminator = profileService.generateDiscriminatorFor(newName).join()
         }
         if (profilePatchRequest.password != null) {
             profile.setPassword(profilePatchRequest.password.toCharArray())
@@ -105,7 +105,7 @@ class ProfileHandler {
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Profile service not found"))
         val profilePostRequest = ProfilePostRequest.lens(request)
-        val profile = profileService.createProfile(RPKProfileName(profilePostRequest.name))
+        val profile = profileService.createProfile(RPKProfileName(profilePostRequest.name)).join()
         if (profilePostRequest.password != null) {
             profile.setPassword(profilePostRequest.password.toCharArray())
             profileService.updateProfile(profile)
@@ -120,7 +120,7 @@ class ProfileHandler {
         val profileService = Services[RPKProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Profile service not found"))
-        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
+        val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
         if (profile != request.authenticatedProfile) {

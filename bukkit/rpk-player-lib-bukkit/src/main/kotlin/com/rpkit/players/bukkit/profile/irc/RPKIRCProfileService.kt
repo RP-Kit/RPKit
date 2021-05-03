@@ -18,19 +18,20 @@ package com.rpkit.players.bukkit.profile.irc
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfile
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKIRCProfileService : Service {
 
-    fun getIRCProfile(id: RPKIRCProfileId): RPKIRCProfile?
-    fun getIRCProfile(nick: RPKIRCNick): RPKIRCProfile?
-    fun getIRCProfiles(profile: RPKProfile): List<RPKIRCProfile>
-    fun addIRCProfile(profile: RPKIRCProfile)
+    fun getIRCProfile(id: RPKIRCProfileId): CompletableFuture<RPKIRCProfile?>
+    fun getIRCProfile(nick: RPKIRCNick): CompletableFuture<RPKIRCProfile?>
+    fun getIRCProfiles(profile: RPKProfile): CompletableFuture<List<RPKIRCProfile>>
+    fun addIRCProfile(profile: RPKIRCProfile): CompletableFuture<Void>
     fun createIRCProfile(
         profile: RPKThinProfile,
         nick: RPKIRCNick
-    ): RPKIRCProfile
-    fun updateIRCProfile(profile: RPKIRCProfile)
-    fun removeIRCProfile(profile: RPKIRCProfile)
+    ): CompletableFuture<RPKIRCProfile>
+    fun updateIRCProfile(profile: RPKIRCProfile): CompletableFuture<Void>
+    fun removeIRCProfile(profile: RPKIRCProfile): CompletableFuture<Void>
 
 }

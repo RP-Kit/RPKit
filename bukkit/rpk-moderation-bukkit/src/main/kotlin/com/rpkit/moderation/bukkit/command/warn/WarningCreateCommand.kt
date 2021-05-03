@@ -53,12 +53,12 @@ class WarningCreateCommand(private val plugin: RPKModerationBukkit) : CommandExe
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val targetMinecraftProfile = minecraftProfileService.getMinecraftProfile(targetPlayer)
+        val targetMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(targetPlayer)
         if (targetMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val issuerMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val issuerMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (issuerMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true

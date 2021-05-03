@@ -70,7 +70,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -114,7 +114,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
             if (conversable !is Player) return DeadSetPrompt()
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return DeadSetPrompt()
             val characterService = Services[RPKCharacterService::class.java] ?: return DeadSetPrompt()
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return DeadSetPrompt()
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(conversable) ?: return DeadSetPrompt()
             val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return DeadSetPrompt()
             if (input && conversable.hasPermission("rpkit.characters.command.character.set.dead.yes") || !input && conversable.hasPermission("rpkit.characters.command.character.set.dead.no")) {
                 character.isDead = input
@@ -157,7 +157,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
                     conversable.sendMessage(plugin.messages["no-character-service"])
                     return END_OF_CONVERSATION
                 }
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(context.forWhom as Player)
                 if (minecraftProfile != null) {
                     characterService.getPreloadedActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
                 }
@@ -186,7 +186,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
                     conversable.sendMessage(plugin.messages["no-character-service"])
                     return END_OF_CONVERSATION
                 }
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(context.forWhom as Player)
                 if (minecraftProfile != null) {
                     characterService.getPreloadedActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
                 }

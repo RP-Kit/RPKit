@@ -61,7 +61,7 @@ class BlockBreakListener(val plugin: RPKShopsBukkit) : Listener {
                     event.isCancelled = true
                     return
                 }
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
                 if (minecraftProfile == null) {
                     event.isCancelled = true
                     return
@@ -102,7 +102,7 @@ class BlockBreakListener(val plugin: RPKShopsBukkit) : Listener {
                     event.isCancelled = true
                     return
                 }
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
                 if (minecraftProfile == null) {
                     event.isCancelled = true
                     return

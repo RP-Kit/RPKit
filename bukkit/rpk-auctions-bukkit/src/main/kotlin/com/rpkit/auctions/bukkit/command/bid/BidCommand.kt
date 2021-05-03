@@ -73,7 +73,7 @@ class BidCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
                     sender.sendMessage(plugin.messages.noAuctionService)
                     return true
                 }
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
                 if (minecraftProfile == null) {
                     sender.sendMessage(plugin.messages.noMinecraftProfile)
                     return true

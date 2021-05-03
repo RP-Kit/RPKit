@@ -126,9 +126,9 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                     .fetchOne() ?: return null
             val profileService = Services[RPKProfileService::class.java]
             val issuerId = result[RPKIT_TICKET.ISSUER_ID]
-            val issuer = if (issuerId == null) null else profileService?.getProfile(RPKProfileId(issuerId))
+            val issuer = if (issuerId == null) null else profileService?.getProfile(RPKProfileId(issuerId))?.join()
             val resolverId = result[RPKIT_TICKET.RESOLVER_ID]
-            val resolver = if (resolverId == null) null else profileService?.getProfile(RPKProfileId(resolverId))
+            val resolver = if (resolverId == null) null else profileService?.getProfile(RPKProfileId(resolverId))?.join()
             val worldName = result[RPKIT_TICKET.WORLD]
             val world = if (worldName == null) null else plugin.server.getWorld(worldName)
             val x = result[RPKIT_TICKET.X]

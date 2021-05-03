@@ -79,7 +79,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-currency-service"])
             return true
         }
-        val fromMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val fromMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (fromMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -98,7 +98,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["money-pay-player-invalid-player-offline"])
             return true
         }
-        val toMinecraftProfile = minecraftProfileService.getMinecraftProfile(toBukkitPlayer)
+        val toMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(toBukkitPlayer)
         if (toMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -287,7 +287,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             val characterService = Services[RPKCharacterService::class.java] ?: return plugin.messages["no-character-service"]
             val economyService = Services[RPKEconomyService::class.java] ?: return plugin.messages["no-economy-service"]
             val fromBukkitPlayer = context.forWhom as Player
-            val fromMinecraftProfile = minecraftProfileService.getMinecraftProfile(fromBukkitPlayer)
+            val fromMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(fromBukkitPlayer)
                     ?: return plugin.messages["no-minecraft-profile"]
             val fromCharacter = characterService.getPreloadedActiveCharacter(fromMinecraftProfile)
             val toMinecraftProfile = context.getSessionData("minecraft_profile") as RPKMinecraftProfile

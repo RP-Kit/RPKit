@@ -42,7 +42,7 @@ class BlockIgniteListener(private val plugin: RPKBlockLoggingBukkit) : Listener 
             return
         }
         val player = event.player
-        val minecraftProfile = if (player == null) null else minecraftProfileService?.getMinecraftProfile(player)
+        val minecraftProfile = if (player == null) null else minecraftProfileService?.getPreloadedMinecraftProfile(player)
         val profile = minecraftProfile?.profile as? RPKProfile
         val character = if (minecraftProfile == null) null else characterService?.getPreloadedActiveCharacter(minecraftProfile)
         blockHistoryService.getBlockHistory(event.block).thenAccept { blockHistory ->

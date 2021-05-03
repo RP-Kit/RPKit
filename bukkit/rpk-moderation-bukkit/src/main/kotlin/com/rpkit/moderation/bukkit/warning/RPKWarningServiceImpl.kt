@@ -24,6 +24,7 @@ import com.rpkit.moderation.bukkit.event.warning.RPKBukkitWarningUpdateEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 
 class RPKWarningServiceImpl(override val plugin: RPKModerationBukkit) : RPKWarningService {
@@ -36,18 +37,23 @@ class RPKWarningServiceImpl(override val plugin: RPKModerationBukkit) : RPKWarni
         return plugin.database.getTable(RPKWarningTable::class.java).get(profile)
     }
 
-    override fun addWarning(warning: RPKWarning) {
-        val event = RPKBukkitWarningCreateEvent(warning)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val warningTable = plugin.database.getTable(RPKWarningTable::class.java)
-        warningTable.insert(event.warning)
-        // After adding warnings we want to execute any commands for that amount of warnings
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        for (minecraftProfile in minecraftProfileService.getMinecraftProfiles(event.warning.profile)) {
-            val command = plugin.config.getString("warnings.${warningTable.get(event.warning.profile).size}")?.replace("\$player", minecraftProfile.name)
-            if (command != null) {
-                plugin.server.dispatchCommand(plugin.server.consoleSender, command)
+    override fun addWarning(warning: RPKWarning): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitWarningCreateEvent(warning, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val warningTable = plugin.database.getTable(RPKWarningTable::class.java)
+            warningTable.insert(event.warning)
+            // After adding warnings we want to execute any commands for that amount of warnings
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@runAsync
+            for (minecraftProfile in minecraftProfileService.getMinecraftProfiles(event.warning.profile).join()) {
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    val command = plugin.config.getString("warnings.${warningTable.get(event.warning.profile).size}")
+                        ?.replace("\${player}", minecraftProfile.name)
+                    if (command != null) {
+                        plugin.server.dispatchCommand(plugin.server.consoleSender, command)
+                    }
+                })
             }
         }
     }

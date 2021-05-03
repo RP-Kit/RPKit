@@ -59,7 +59,7 @@ class CharacterNewCommand(private val plugin: RPKCharactersBukkit) : CommandExec
             sender.sendMessage(plugin.messages.noNewCharacterCooldownService)
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true

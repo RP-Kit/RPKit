@@ -61,7 +61,7 @@ class CharacterSwitchCommand(private val plugin: RPKCharactersBukkit) : CommandE
             sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true

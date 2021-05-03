@@ -98,7 +98,7 @@ class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit) : List
         val statService = Services[RPKStatService::class.java] ?: return 0.0
         val statVariableService = Services[RPKStatVariableService::class.java] ?: return 0.0
         val expressionService = Services[RPKExpressionService::class.java] ?: return 0.0
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(player) ?: return 0.0
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(player) ?: return 0.0
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return 0.0
         val expression = expressionService.createExpression(plugin.config.getString("stats.$type.$stat") ?: return 0.0)
         val statVariables = statVariableService.statVariables

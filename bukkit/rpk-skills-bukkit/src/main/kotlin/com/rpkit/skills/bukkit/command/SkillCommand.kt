@@ -55,7 +55,7 @@ class SkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-skill-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true

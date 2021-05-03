@@ -74,16 +74,17 @@ class ProfileLinkDiscordCommand(private val plugin: RPKPlayersBukkit) : RPKComma
             sender.sendMessage(plugin.messages.noDiscordProfileService)
             return CompletableFuture.completedFuture(MissingServiceFailure(RPKDiscordProfileService::class.java))
         }
-        val discordProfile = discordProfileService.getDiscordProfile(discordId)
-        discordService.sendMessage(
+        return discordProfileService.getDiscordProfile(discordId).thenApply { discordProfile ->
+            discordService.sendMessage(
                 discordProfile,
                 "There was a request to link this account to profile ${profile.name}. " +
                         "Press tick to accept this request."
-        ) { message ->
-            message.addReaction(DiscordReaction.unicode("\u2705"))
-            discordService.setMessageAsProfileLinkRequest(message, profile)
+            ) { message ->
+                message.addReaction(DiscordReaction.unicode("\u2705"))
+                discordService.setMessageAsProfileLinkRequest(message, profile)
+            }
+            sender.sendMessage(plugin.messages.profileLinkDiscordValid)
+            return@thenApply CommandSuccess
         }
-        sender.sendMessage(plugin.messages.profileLinkDiscordValid)
-        return CompletableFuture.completedFuture(CommandSuccess)
     }
 }

@@ -59,7 +59,7 @@ class ChatGroupInviteCommand(private val plugin: RPKChatBukkit) : CommandExecuto
                 sender.sendMessage(plugin.messages["not-from-console"])
                 return@thenAccept
             }
-            val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+            val senderMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
             if (senderMinecraftProfile == null) {
                 sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 return@thenAccept
@@ -76,7 +76,7 @@ class ChatGroupInviteCommand(private val plugin: RPKChatBukkit) : CommandExecuto
                     sender.sendMessage(plugin.messages["chat-group-invite-invalid-player"])
                     return@getMembers
                 }
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
                 if (minecraftProfile == null) {
                     sender.sendMessage(plugin.messages["no-minecraft-profile"])
                     return@getMembers

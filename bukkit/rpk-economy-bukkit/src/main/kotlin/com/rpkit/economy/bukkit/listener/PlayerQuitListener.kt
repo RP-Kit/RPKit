@@ -15,11 +15,14 @@ class PlayerQuitListener : Listener {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val economyService = Services[RPKEconomyService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile).thenAccept { character ->
-            if (character == null) return@thenAccept
-            economyService.unloadBalances(character)
+        minecraftProfileService.getMinecraftProfile(event.player).thenAccept getMinecraftProfile@{ minecraftProfile ->
+            if (minecraftProfile == null) return@getMinecraftProfile
+            characterService.getActiveCharacter(minecraftProfile).thenAccept getCharacter@{ character ->
+                if (character == null) return@getCharacter
+                economyService.unloadBalances(character)
+            }
         }
+
     }
 
 }

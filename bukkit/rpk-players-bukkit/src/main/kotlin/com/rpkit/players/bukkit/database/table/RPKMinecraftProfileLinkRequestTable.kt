@@ -25,55 +25,63 @@ import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileLinkRequest
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileLinkRequestImpl
+import java.util.concurrent.CompletableFuture
 
 class RPKMinecraftProfileLinkRequestTable(
         private val database: Database
 ) : Table {
 
-    fun insert(entity: RPKMinecraftProfileLinkRequest) {
-        val profileId = entity.profile.id ?: return
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun insert(entity: RPKMinecraftProfileLinkRequest): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_MINECRAFT_PROFILE_LINK_REQUEST,
-                        RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.PROFILE_ID,
-                        RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.MINECRAFT_PROFILE_ID
+                    RPKIT_MINECRAFT_PROFILE_LINK_REQUEST,
+                    RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.PROFILE_ID,
+                    RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.MINECRAFT_PROFILE_ID
                 )
                 .values(
                     profileId.value,
                     minecraftProfileId.value
                 )
                 .execute()
+        }
     }
 
-    fun get(minecraftProfile: RPKMinecraftProfile): List<RPKMinecraftProfileLinkRequest> {
-        val minecraftProfileId = minecraftProfile.id ?: return emptyList()
-        val results = database.create
+    fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<List<RPKMinecraftProfileLinkRequest>> {
+        val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(
-                        RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.PROFILE_ID,
-                        RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.MINECRAFT_PROFILE_ID
+                    RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.PROFILE_ID,
+                    RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.MINECRAFT_PROFILE_ID
                 )
                 .from(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST)
                 .where(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .fetch()
-        val profileService = Services[RPKProfileService::class.java] ?: return emptyList()
-        return results.mapNotNull { result ->
-            val profile = profileService.getProfile(RPKProfileId(result[RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.PROFILE_ID]))
-                    ?: return@mapNotNull null
-            RPKMinecraftProfileLinkRequestImpl(
-                profile,
-                minecraftProfile
-            )
+            val profileService = Services[RPKProfileService::class.java] ?: return@supplyAsync emptyList()
+            return@supplyAsync results.mapNotNull { result ->
+                val profile =
+                    profileService.getProfile(RPKProfileId(result[RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.PROFILE_ID]))
+                        .join() ?: return@mapNotNull null
+                RPKMinecraftProfileLinkRequestImpl(
+                    profile,
+                    minecraftProfile
+                )
+            }
         }
     }
 
-    fun delete(entity: RPKMinecraftProfileLinkRequest) {
-        val profileId = entity.profile.id ?: return
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun delete(entity: RPKMinecraftProfileLinkRequest): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST)
                 .where(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.PROFILE_ID.eq(profileId.value))
                 .and(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
+        }
     }
 }

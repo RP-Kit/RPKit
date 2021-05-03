@@ -128,13 +128,13 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
             }
             val profileService = Services[RPKProfileService::class.java] ?: return@supplyAsync null
             val profileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID)
-            val profile = if (profileId == null) null else profileService.getProfile(RPKProfileId(profileId))
+            val profile = if (profileId == null) null else profileService.getProfile(RPKProfileId(profileId)).join()
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@supplyAsync null
             val minecraftProfileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID)
             val minecraftProfile = if (minecraftProfileId == null) {
                 null
             } else {
-                minecraftProfileService.getMinecraftProfile(RPKMinecraftProfileId(minecraftProfileId))
+                minecraftProfileService.getMinecraftProfile(RPKMinecraftProfileId(minecraftProfileId)).join()
             }
             val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync null
             val characterId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID)

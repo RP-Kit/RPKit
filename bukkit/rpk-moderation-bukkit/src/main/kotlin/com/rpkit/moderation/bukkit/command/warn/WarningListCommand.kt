@@ -57,7 +57,7 @@ class WarningListCommand(private val plugin: RPKModerationBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["no-warning-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(player)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true

@@ -108,7 +108,7 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
                         event.player.sendMessage(plugin.messages["no-minecraft-profile-service"])
                         return@thenAccept
                     }
-                    val customerMinecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+                    val customerMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
                     if (customerMinecraftProfile == null) {
                         event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                         return@thenAccept
@@ -203,7 +203,7 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-currency-service"])
                 return
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
             if (minecraftProfile == null) {
                 event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                 return

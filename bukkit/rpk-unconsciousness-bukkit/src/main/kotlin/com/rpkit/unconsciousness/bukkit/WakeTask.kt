@@ -28,7 +28,7 @@ class WakeTask(private val plugin: RPKUnconsciousnessBukkit) : BukkitRunnable() 
         val characterService = Services[RPKCharacterService::class.java]
         val unconsciousnessService = Services[RPKUnconsciousnessService::class.java]
         plugin.server.onlinePlayers.forEach { bukkitPlayer ->
-            val minecraftProfile = minecraftProfileService?.getMinecraftProfile(bukkitPlayer)
+            val minecraftProfile = minecraftProfileService?.getPreloadedMinecraftProfile(bukkitPlayer)
             if (minecraftProfile != null) {
                 val character = characterService?.getPreloadedActiveCharacter(minecraftProfile)
                 if (character != null) {

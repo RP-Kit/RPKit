@@ -67,7 +67,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                     event.player.sendMessage(plugin.messages["no-economy-service"])
                     return
                 }
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
                 if (minecraftProfile == null) {
                     event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                     return
@@ -130,7 +130,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                     event.player.sendMessage(plugin.messages["no-economy-service"])
                     return
                 }
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
                 val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
                 val walletBalanceFromCurrency = economyService.getPreloadedBalance(character, fromCurrency)
                 if (walletBalanceFromCurrency == null) {
@@ -189,7 +189,7 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-economy-service"])
                 return
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
             val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
             val walletBalanceFromCurrency = economyService.getPreloadedBalance(character, fromCurrency)
             if (walletBalanceFromCurrency == null) {

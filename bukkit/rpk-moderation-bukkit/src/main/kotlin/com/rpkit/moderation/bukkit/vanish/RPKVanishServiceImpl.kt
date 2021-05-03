@@ -53,10 +53,13 @@ class RPKVanishServiceImpl(override val plugin: RPKModerationBukkit) : RPKVanish
         val target = plugin.server.getPlayer(minecraftProfile.minecraftUUID) ?: return
         if (vanished) {
             for (observer in plugin.server.onlinePlayers) {
-                val observerMinecraftProfile = minecraftProfileService.getMinecraftProfile(observer)
-                if (observerMinecraftProfile != null) {
-                    if (!canSee(observerMinecraftProfile, minecraftProfile)) {
-                        observer.hidePlayer(plugin, target)
+                minecraftProfileService.getMinecraftProfile(observer).thenAccept { observerMinecraftProfile ->
+                    if (observerMinecraftProfile != null) {
+                        if (!canSee(observerMinecraftProfile, minecraftProfile)) {
+                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                observer.hidePlayer(plugin, target)
+                            })
+                        }
                     }
                 }
             }

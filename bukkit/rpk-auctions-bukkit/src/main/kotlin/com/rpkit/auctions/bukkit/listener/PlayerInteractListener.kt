@@ -67,7 +67,7 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit) : Listener {
             event.player.sendMessage(plugin.messages.noAuctionService)
             return
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
         if (minecraftProfile == null) {
             event.player.sendMessage(plugin.messages.noMinecraftProfile)
             return

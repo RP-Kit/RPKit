@@ -28,6 +28,7 @@ import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
 import org.pircbotx.Channel
 import org.pircbotx.PircBotX
 import org.pircbotx.User
+import java.util.concurrent.CompletableFuture
 
 class IRCWhitelistValidator {
 
@@ -81,30 +82,31 @@ class IRCWhitelistValidator {
             )
             return
         }
-        val ircProfile = ircProfileService.getIRCProfile(nick)
-            ?: ircProfileService.createIRCProfile(
+        CompletableFuture.runAsync {
+            val ircProfile = ircProfileService.getIRCProfile(nick).join() ?: ircProfileService.createIRCProfile(
                 profileService.createThinProfile(RPKProfileName(nick.value)),
                 nick
-            )
-        val profile = ircProfile.profile
-        if (profile !is RPKProfile) {
-            kick(
-                bot,
-                channel,
-                nick.value,
-                "${channel.name} is whitelisted, but this IRC account has not been linked to a profile.",
-                "${nick.value} attempted to join, but their IRC account was not linked to a profile."
-            )
-            return
-        }
-        if (!profile.hasPermission("rpkit.chat.listen.${chatChannel.name.value}")) {
-            kick(
-                bot,
-                channel,
-                nick.value,
-                "${channel.name} is whitelisted, you do not have permission to view it.",
-                "${nick.value} attempted to join, but does not have permission to view the channel."
-            )
+            ).join()
+            val profile = ircProfile.profile
+            if (profile !is RPKProfile) {
+                kick(
+                    bot,
+                    channel,
+                    nick.value,
+                    "${channel.name} is whitelisted, but this IRC account has not been linked to a profile.",
+                    "${nick.value} attempted to join, but their IRC account was not linked to a profile."
+                )
+                return@runAsync
+            }
+            if (!profile.hasPermission("rpkit.chat.listen.${chatChannel.name.value}")) {
+                kick(
+                    bot,
+                    channel,
+                    nick.value,
+                    "${channel.name} is whitelisted, you do not have permission to view it.",
+                    "${nick.value} attempted to join, but does not have permission to view the channel."
+                )
+            }
         }
     }
 

@@ -76,7 +76,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit) : CommandE
             sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
             if (profile is RPKProfile) {

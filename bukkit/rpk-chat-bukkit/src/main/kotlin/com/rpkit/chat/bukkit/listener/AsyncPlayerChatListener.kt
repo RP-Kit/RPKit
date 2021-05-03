@@ -38,7 +38,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
         event.isCancelled = true
         val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
             chatChannelService.getMinecraftProfileChannel(minecraftProfile).thenAcceptAsync { chatChannel ->

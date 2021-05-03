@@ -56,30 +56,34 @@ class ProfileDenyLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandE
                     sender.sendMessage(plugin.messages.noMinecraftProfileService)
                     return CompletableFuture.completedFuture(MissingServiceFailure(RPKMinecraftProfileService::class.java))
                 }
-                val linkRequests = minecraftProfileService.getMinecraftProfileLinkRequests(sender).toMutableList()
-                val linkRequest = linkRequests.firstOrNull { request -> request.profile.id?.value == id }
-                if (linkRequest == null) {
-                    sender.sendMessage(plugin.messages.profileDenyLinkInvalidRequest)
-                    return CompletableFuture.completedFuture(InvalidRequestFailure())
+                return minecraftProfileService.getMinecraftProfileLinkRequests(sender).thenApplyAsync { immutableLinkRequests ->
+                    val linkRequests = immutableLinkRequests.toMutableList()
+                    val linkRequest = linkRequests.firstOrNull { request -> request.profile.id?.value == id }
+                    if (linkRequest == null) {
+                        sender.sendMessage(plugin.messages.profileDenyLinkInvalidRequest)
+                        return@thenApplyAsync InvalidRequestFailure()
+                    }
+                    minecraftProfileService.removeMinecraftProfileLinkRequest(linkRequest)
+                    linkRequests.remove(linkRequest)
+                    if (linkRequests.isNotEmpty()) {
+                        sender.sendMessage(plugin.messages.profileDenyLinkValid)
+                        return@thenApplyAsync CommandSuccess
+                    }
+                    // If they no longer have any link requests pending, we can create a new profile for them based on their
+                    // Minecraft profile.
+                    val profileService = Services[RPKProfileService::class.java]
+                    if (profileService == null) {
+                        sender.sendMessage(plugin.messages.noProfileService)
+                        return@thenApplyAsync MissingServiceFailure(RPKProfileService::class.java)
+                    }
+                    return@thenApplyAsync profileService.createProfile(RPKProfileName(sender.name))
+                        .thenApply createProfile@{ profile ->
+                            sender.profile = profile
+                            minecraftProfileService.updateMinecraftProfile(sender)
+                            sender.sendMessage(plugin.messages.profileDenyLinkProfileCreated)
+                            return@createProfile CommandSuccess
+                        }.join()
                 }
-                minecraftProfileService.removeMinecraftProfileLinkRequest(linkRequest)
-                linkRequests.remove(linkRequest)
-                if (linkRequests.isNotEmpty()) {
-                    sender.sendMessage(plugin.messages.profileDenyLinkValid)
-                    return CompletableFuture.completedFuture(CommandSuccess)
-                }
-                // If they no longer have any link requests pending, we can create a new profile for them based on their
-                // Minecraft profile.
-                val profileService = Services[RPKProfileService::class.java]
-                if (profileService == null) {
-                    sender.sendMessage(plugin.messages.noProfileService)
-                    return CompletableFuture.completedFuture(MissingServiceFailure(RPKProfileService::class.java))
-                }
-                val profile = profileService.createProfile(RPKProfileName(sender.name))
-                sender.profile = profile
-                minecraftProfileService.updateMinecraftProfile(sender)
-                sender.sendMessage(plugin.messages.profileDenyLinkProfileCreated)
-                return CompletableFuture.completedFuture(CommandSuccess)
             }
             else -> {
                 sender.sendMessage(plugin.messages.profileDenyLinkInvalidType)

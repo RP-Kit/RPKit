@@ -43,7 +43,7 @@ class PlayerInteractListener(private val plugin: RPKSelectionBukkit) : Listener 
                 bukkitPlayer.sendMessage(plugin.messages["no-selection-service"])
                 return
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer) ?: return
             val selection = selectionService.getSelection(minecraftProfile)
             val clickedBlock = event.clickedBlock ?: return
             when (event.action) {

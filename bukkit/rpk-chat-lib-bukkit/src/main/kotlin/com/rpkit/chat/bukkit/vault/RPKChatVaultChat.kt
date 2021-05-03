@@ -19,8 +19,8 @@ package com.rpkit.chat.bukkit.vault
 import com.rpkit.chat.bukkit.RPKChatLibBukkit
 import com.rpkit.chat.bukkit.prefix.RPKPrefixService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.permission.Permission
 
@@ -62,7 +62,7 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         val prefixService = Services[RPKPrefixService::class.java]
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileService?.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService?.getPreloadedMinecraftProfile(bukkitOfflinePlayer)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
             if (profile is RPKProfile) {

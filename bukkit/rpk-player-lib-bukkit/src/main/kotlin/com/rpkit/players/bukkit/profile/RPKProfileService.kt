@@ -16,16 +16,21 @@
 package com.rpkit.players.bukkit.profile
 
 import com.rpkit.core.service.Service
+import java.util.concurrent.CompletableFuture
 
 interface RPKProfileService : Service {
 
-    fun getProfile(id: RPKProfileId): RPKProfile?
-    fun getProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator): RPKProfile?
-    fun addProfile(profile: RPKProfile)
-    fun updateProfile(profile: RPKProfile)
-    fun removeProfile(profile: RPKProfile)
-    fun createProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator = generateDiscriminatorFor(name), password: String? = null): RPKProfile
+    fun getProfile(id: RPKProfileId): CompletableFuture<RPKProfile?>
+    fun getProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator): CompletableFuture<RPKProfile?>
+    fun addProfile(profile: RPKProfile): CompletableFuture<Void>
+    fun updateProfile(profile: RPKProfile): CompletableFuture<Void>
+    fun removeProfile(profile: RPKProfile): CompletableFuture<Void>
+    fun createProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator? = null, password: String? = null): CompletableFuture<RPKProfile>
     fun createThinProfile(name: RPKProfileName): RPKThinProfile
-    fun generateDiscriminatorFor(name: RPKProfileName): RPKProfileDiscriminator
+    fun generateDiscriminatorFor(name: RPKProfileName): CompletableFuture<RPKProfileDiscriminator>
+    fun getPreloadedProfile(id: RPKProfileId): RPKProfile?
+    fun getPreloadedProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator): RPKProfile?
+    fun loadProfile(id: RPKProfileId): CompletableFuture<RPKProfile?>
+    fun unloadProfile(profile: RPKProfile)
 
 }

@@ -71,6 +71,7 @@ class RPKChatGroupInviteTable(private val database: Database) : Table {
                         Services[RPKMinecraftProfileService::class.java] ?: return@mapNotNull null
                     val minecraftProfile = minecraftProfileService
                         .getMinecraftProfile(RPKMinecraftProfileId(result[RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID]))
+                        .join()
                         ?: return@mapNotNull null
                     return@mapNotNull RPKChatGroupInvite(
                         chatGroup,

@@ -56,7 +56,7 @@ class GroupRemoveCommand(private val plugin: RPKPermissionsBukkit) : CommandExec
             sender.sendMessage(plugin.messages.groupRemoveInvalidPlayer)
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfileOther)
             return true

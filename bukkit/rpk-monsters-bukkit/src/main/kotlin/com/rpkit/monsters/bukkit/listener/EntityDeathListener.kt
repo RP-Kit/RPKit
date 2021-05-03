@@ -46,7 +46,7 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
         val damager = lastDamageEvent.damager
         if (damager !is Player) return
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(damager) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(damager) ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         val experienceService = Services[RPKExperienceService::class.java] ?: return

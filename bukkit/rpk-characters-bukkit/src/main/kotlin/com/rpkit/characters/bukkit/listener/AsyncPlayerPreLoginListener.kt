@@ -18,8 +18,10 @@ class AsyncPlayerPreLoginListener(private val plugin: RPKCharactersBukkit) : Lis
             return
         }
         val characterService = Services[RPKCharacterService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.uniqueId) ?: minecraftProfileService.createMinecraftProfile(event.uniqueId)
-        characterService.loadActiveCharacter(minecraftProfile).join()
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.uniqueId).join()
+        if (minecraftProfile != null) {
+            characterService.loadActiveCharacter(minecraftProfile).join()
+        }
     }
 
 }

@@ -116,7 +116,7 @@ class RPKPermissionsBukkit : RPKBukkitPlugin() {
     fun registerListeners() {
         registerListeners(
                 PlayerJoinListener(),
-                PlayerQuitListener(),
+                PlayerQuitListener(this),
                 RPKBukkitCharacterSwitchListener()
         )
     }

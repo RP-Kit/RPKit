@@ -66,7 +66,7 @@ class DistanceCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
             sender.sendMessage(plugin.messages["no-tracking-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true

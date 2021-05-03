@@ -53,8 +53,8 @@ class RPKChatChannelImpl(
 
     override val speakers: CompletableFuture<List<RPKMinecraftProfile>>
         get() = plugin.server.onlinePlayers
-                .mapNotNull { player -> Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfile(player) }
-                .map { minecraftProfile -> minecraftProfile to Services[RPKChatChannelSpeakerService::class.java]?.getMinecraftProfileChannel(minecraftProfile) }
+            .mapNotNull { player -> Services[RPKMinecraftProfileService::class.java]?.getPreloadedMinecraftProfile(player) }
+            .map { minecraftProfile -> minecraftProfile to Services[RPKChatChannelSpeakerService::class.java]?.getMinecraftProfileChannel(minecraftProfile) }
             .fold(listOf<CompletableFuture<RPKMinecraftProfile?>>()) { futures, (minecraftProfile, channelFuture) ->
                 futures + (channelFuture?.thenApply { channel -> if (channel == this) minecraftProfile else null } ?: CompletableFuture.completedFuture(null))
             }
@@ -68,7 +68,7 @@ class RPKChatChannelImpl(
     override val listeners: CompletableFuture<List<RPKMinecraftProfile>>
         get() = plugin.server.onlinePlayers
             .filter { player -> player.hasPermission("rpkit.chat.listen.${name.value}") }
-            .mapNotNull { player -> Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfile(player) }
+            .mapNotNull { player -> Services[RPKMinecraftProfileService::class.java]?.getPreloadedMinecraftProfile(player) }
             .map { minecraftProfile -> minecraftProfile to Services[RPKChatChannelMuteService::class.java]?.hasMinecraftProfileMutedChatChannel(minecraftProfile, this) }
             .fold(listOf<CompletableFuture<RPKMinecraftProfile?>>()) { futures, (minecraftProfile, mutedFuture) ->
                 futures + (mutedFuture?.thenApply { muted -> if (!muted) minecraftProfile else null } ?: CompletableFuture.completedFuture(null))

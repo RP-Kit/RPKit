@@ -29,6 +29,6 @@ class RPKBukkitMinecraftProfileCommandSenderResolver : RPKBukkitCommandSenderRes
     override fun resolve(bukkitCommandSender: CommandSender): RPKCommandSender? {
         if (bukkitCommandSender !is Player) return null
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return null
-        return minecraftProfileService.getMinecraftProfile(bukkitCommandSender)
+        return minecraftProfileService.getPreloadedMinecraftProfile(bukkitCommandSender)
     }
 }

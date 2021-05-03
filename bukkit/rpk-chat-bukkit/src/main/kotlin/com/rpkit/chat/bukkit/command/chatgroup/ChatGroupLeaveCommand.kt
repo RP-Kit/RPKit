@@ -59,7 +59,7 @@ class ChatGroupLeaveCommand(private val plugin: RPKChatBukkit) : CommandExecutor
                 sender.sendMessage(plugin.messages["not-from-console"])
                 return@thenAccept
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
             if (minecraftProfile == null) {
                 sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 return@thenAccept

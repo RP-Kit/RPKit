@@ -107,7 +107,7 @@ class RPKConsumablePurchaseTable(private val database: Database, private val plu
             return null
         }
         val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profile = profileService.getProfile(RPKProfileId(result[RPKIT_PURCHASE.PROFILE_ID]))
+        val profile = profileService.getProfile(RPKProfileId(result[RPKIT_PURCHASE.PROFILE_ID])).join()
         if (profile == null) {
             database.create
                     .deleteFrom(RPKIT_PURCHASE)

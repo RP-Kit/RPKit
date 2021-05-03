@@ -54,7 +54,7 @@ class PaymentListCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true

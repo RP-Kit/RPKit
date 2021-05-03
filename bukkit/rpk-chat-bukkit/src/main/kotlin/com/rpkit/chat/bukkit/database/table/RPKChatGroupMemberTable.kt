@@ -99,6 +99,7 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
                         Services[RPKMinecraftProfileService::class.java] ?: return@mapNotNull null
                     val minecraftProfile = minecraftProfileService
                         .getMinecraftProfile(RPKMinecraftProfileId(result[RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID]))
+                        .join()
                         ?: return@mapNotNull null
                     RPKChatGroupMember(
                         chatGroup,

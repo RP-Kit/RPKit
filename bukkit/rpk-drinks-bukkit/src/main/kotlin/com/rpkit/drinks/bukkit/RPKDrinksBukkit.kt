@@ -97,7 +97,7 @@ class RPKDrinksBukkit : RPKBukkitPlugin() {
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 val characterService = Services[RPKCharacterService::class.java]
                 server.onlinePlayers.forEach { bukkitPlayer ->
-                    val minecraftProfile = minecraftProfileService?.getMinecraftProfile(bukkitPlayer) ?: return@forEach
+                    val minecraftProfile = minecraftProfileService?.getPreloadedMinecraftProfile(bukkitPlayer) ?: return@forEach
                     val character = characterService?.getPreloadedActiveCharacter(minecraftProfile) ?: return@forEach
                     drinkService.getDrunkenness(character).thenAccept { drunkenness ->
                         server.scheduler.runTask(this@RPKDrinksBukkit, Runnable {

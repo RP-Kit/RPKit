@@ -47,7 +47,7 @@ class ProfileLinkMinecraftCommand(private val plugin: RPKPlayersBukkit) : RPKCom
             sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return CompletableFuture.completedFuture(MissingServiceFailure(RPKMinecraftProfileService::class.java))
         }
-        var minecraftProfile = minecraftProfileService.getMinecraftProfile(minecraftUsername)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(minecraftUsername)
         if (minecraftProfile != null) {
             sender.sendMessage(plugin.messages.profileLinkMinecraftInvalidMinecraftProfile)
             return CompletableFuture.completedFuture(InvalidTargetMinecraftProfileFailure())
@@ -61,9 +61,11 @@ class ProfileLinkMinecraftCommand(private val plugin: RPKPlayersBukkit) : RPKCom
             sender.sendMessage(plugin.messages.noProfileSelf)
             return CompletableFuture.completedFuture(NoProfileSelfFailure())
         }
-        minecraftProfile = minecraftProfileService.createMinecraftProfile(minecraftUsername)
-        minecraftProfileService.createMinecraftProfileLinkRequest(profile, minecraftProfile)
-        sender.sendMessage(plugin.messages.profileLinkMinecraftValid)
-        return CompletableFuture.completedFuture(CommandSuccess)
+        return minecraftProfileService.createMinecraftProfile(minecraftUsername).thenApplyAsync { createdMinecraftProfile ->
+            minecraftProfileService.createMinecraftProfileLinkRequest(profile, createdMinecraftProfile).thenApply createLinkRequest@{ linkRequest ->
+                sender.sendMessage(plugin.messages.profileLinkMinecraftValid)
+                return@createLinkRequest CommandSuccess
+            }.join()
+        }
     }
 }

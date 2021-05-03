@@ -48,7 +48,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val economyService = Services[RPKEconomyService::class.java] ?: return 0.0
         val currencyService = Services[RPKCurrencyService::class.java] ?: return 0.0
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         return if (minecraftProfile != null) {
             val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
@@ -103,7 +103,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
             val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
@@ -166,7 +166,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
             val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
@@ -224,7 +224,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
             val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
@@ -282,7 +282,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
             val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
@@ -339,7 +339,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no currency service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
             val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
@@ -400,7 +400,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
             val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
@@ -431,7 +431,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return false
         val characterService = Services[RPKCharacterService::class.java] ?: return false
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer) ?: return false
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join() ?: return false
         val character = characterService.getActiveCharacter(minecraftProfile).join()
         return character != null
     }
@@ -485,7 +485,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no currency service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
             val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
@@ -558,7 +558,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
             val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
@@ -626,7 +626,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         return if (minecraftProfile != null) {
             val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency

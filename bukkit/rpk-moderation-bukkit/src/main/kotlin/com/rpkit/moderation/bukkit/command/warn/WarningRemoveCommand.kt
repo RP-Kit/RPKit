@@ -19,8 +19,8 @@ package com.rpkit.moderation.bukkit.command.warn
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.warning.RPKWarningService
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -46,7 +46,7 @@ class WarningRemoveCommand(private val plugin: RPKModerationBukkit) : CommandExe
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val targetMinecraftProfile = minecraftProfileService.getMinecraftProfile(targetPlayer)
+        val targetMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(targetPlayer)
         if (targetMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true

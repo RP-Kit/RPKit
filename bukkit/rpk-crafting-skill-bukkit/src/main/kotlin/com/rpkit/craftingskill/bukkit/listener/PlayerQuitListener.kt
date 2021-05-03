@@ -16,10 +16,12 @@ class PlayerQuitListener(private val plugin: RPKCraftingSkillBukkit) : Listener 
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val craftingSkillService = Services[RPKCraftingSkillService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        characterService.getActiveCharacter(minecraftProfile).thenAccept { character ->
-            if (character == null) return@thenAccept
-            craftingSkillService.unloadCraftingExperience(character)
+        minecraftProfileService.getMinecraftProfile(event.player).thenAccept getMinecraftProfile@{ minecraftProfile ->
+            if (minecraftProfile == null) return@getMinecraftProfile
+            characterService.getActiveCharacter(minecraftProfile).thenAccept getActiveCharacter@{ character ->
+                if (character == null) return@getActiveCharacter
+                craftingSkillService.unloadCraftingExperience(character)
+            }
         }
     }
 

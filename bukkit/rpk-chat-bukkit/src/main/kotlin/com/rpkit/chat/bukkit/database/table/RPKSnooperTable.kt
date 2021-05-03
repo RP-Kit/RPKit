@@ -114,6 +114,7 @@ class RPKSnooperTable(
             return@supplyAsync results.mapNotNull { result ->
                 val minecraftProfile =
                     minecraftProfileService.getMinecraftProfile(RPKMinecraftProfileId(result.get(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)))
+                        .join()
                         ?: return@mapNotNull null
                 return@mapNotNull RPKSnooper(minecraftProfile)
             }

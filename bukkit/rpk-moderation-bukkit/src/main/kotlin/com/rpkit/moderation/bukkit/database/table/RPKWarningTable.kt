@@ -92,8 +92,8 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                 .where(RPKIT_WARNING.ID.eq(id.value))
                 .fetchOne() ?: return null
         val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profile = profileService.getProfile(RPKProfileId(result[RPKIT_WARNING.PROFILE_ID]))
-        val issuer = profileService.getProfile(RPKProfileId(result[RPKIT_WARNING.ISSUER_ID]))
+        val profile = profileService.getProfile(RPKProfileId(result[RPKIT_WARNING.PROFILE_ID])).join()
+        val issuer = profileService.getProfile(RPKProfileId(result[RPKIT_WARNING.ISSUER_ID])).join()
         if (profile != null && issuer != null) {
             val warning = RPKWarningImpl(
                     id,
