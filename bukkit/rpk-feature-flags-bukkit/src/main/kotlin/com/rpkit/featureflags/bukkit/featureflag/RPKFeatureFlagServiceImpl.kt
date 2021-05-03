@@ -19,6 +19,7 @@ import com.rpkit.featureflags.bukkit.RPKFeatureFlagsBukkit
 import com.rpkit.featureflags.bukkit.database.table.RPKProfileFeatureFlagTable
 import com.rpkit.featureflags.bukkit.event.featureflag.RPKBukkitFeatureFlagSetEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.util.concurrent.CompletableFuture
 
 
 class RPKFeatureFlagServiceImpl(override val plugin: RPKFeatureFlagsBukkit) : RPKFeatureFlagService {
@@ -39,22 +40,24 @@ class RPKFeatureFlagServiceImpl(override val plugin: RPKFeatureFlagsBukkit) : RP
         featureFlags.remove(featureFlag.name.value)
     }
 
-    override fun setFeatureFlag(profile: RPKProfile, featureFlag: RPKFeatureFlag, enabled: Boolean) {
-        val event = RPKBukkitFeatureFlagSetEvent(profile, featureFlag, enabled)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val profileFeatureFlagTable = plugin.database.getTable(RPKProfileFeatureFlagTable::class.java)
-        var profileFeatureFlag = profileFeatureFlagTable.get(event.profile, event.featureFlag)
-        if (profileFeatureFlag == null) {
-            profileFeatureFlag = RPKProfileFeatureFlag(
+    override fun setFeatureFlag(profile: RPKProfile, featureFlag: RPKFeatureFlag, enabled: Boolean): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitFeatureFlagSetEvent(profile, featureFlag, enabled, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val profileFeatureFlagTable = plugin.database.getTable(RPKProfileFeatureFlagTable::class.java)
+            var profileFeatureFlag = profileFeatureFlagTable.get(event.profile, event.featureFlag).join()
+            if (profileFeatureFlag == null) {
+                profileFeatureFlag = RPKProfileFeatureFlag(
                     profile = event.profile,
                     featureFlag = event.featureFlag,
                     isEnabled = event.enabled
-            )
-            profileFeatureFlagTable.insert(profileFeatureFlag)
-        } else {
-            profileFeatureFlag.isEnabled = event.enabled
-            profileFeatureFlagTable.update(profileFeatureFlag)
+                )
+                profileFeatureFlagTable.insert(profileFeatureFlag).join()
+            } else {
+                profileFeatureFlag.isEnabled = event.enabled
+                profileFeatureFlagTable.update(profileFeatureFlag).join()
+            }
         }
     }
 
