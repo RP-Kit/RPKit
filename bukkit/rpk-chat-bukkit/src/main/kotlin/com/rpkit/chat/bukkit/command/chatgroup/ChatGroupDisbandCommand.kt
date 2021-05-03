@@ -59,7 +59,7 @@ class ChatGroupDisbandCommand(private val plugin: RPKChatBukkit) : CommandExecut
                 sender.sendMessage(plugin.messages["chat-group-disband-invalid-nonexistent"])
                 return@thenAccept
             }
-            val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+            val senderMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
             if (senderMinecraftProfile == null) {
                 sender.sendMessage(plugin.messages["no-minecraft-profile"])
                 return@thenAccept

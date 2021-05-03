@@ -39,7 +39,7 @@ class GroupSwitchPriorityCommand(private val plugin: RPKPermissionsBukkit) : RPK
             sender.sendMessage(plugin.messages.groupSwitchPriorityInvalidTarget)
             return CompletableFuture.completedFuture(InvalidTargetMinecraftProfileFailure())
         }
-        val targetMinecraftProfile = minecraftProfileService.getMinecraftProfile(targetBukkitPlayer)
+        val targetMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(targetBukkitPlayer)
         if (targetMinecraftProfile == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfileOther)
             return CompletableFuture.completedFuture(NoMinecraftProfileOtherFailure())

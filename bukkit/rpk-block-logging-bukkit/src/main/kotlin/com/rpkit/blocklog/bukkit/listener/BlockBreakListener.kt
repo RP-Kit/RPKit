@@ -42,7 +42,7 @@ class BlockBreakListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
             plugin.logger.severe("Failed to retrieve block history service, did the plugin load correctly?")
             return
         }
-        val minecraftProfile = minecraftProfileService?.getMinecraftProfile(event.player)
+        val minecraftProfile = minecraftProfileService?.getPreloadedMinecraftProfile(event.player)
         val profile = minecraftProfile?.profile as? RPKProfile
         val character = if (minecraftProfile == null) {
             null

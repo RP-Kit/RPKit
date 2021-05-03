@@ -41,7 +41,7 @@ class BlockBreakListener(private val plugin: RPKCraftingSkillBukkit) : Listener 
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val craftingSkillService = Services[RPKCraftingSkillService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer) ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         event.isDropItems = false
         for (item in event.block.getDrops(event.player.inventory.itemInMainHand)) {

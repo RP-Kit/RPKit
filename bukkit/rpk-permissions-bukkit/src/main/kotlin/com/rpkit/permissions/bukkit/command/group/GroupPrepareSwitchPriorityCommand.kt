@@ -41,7 +41,7 @@ class GroupPrepareSwitchPriorityCommand(private val plugin: RPKPermissionsBukkit
             sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(player)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfileOther)
             return true

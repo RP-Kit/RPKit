@@ -44,7 +44,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
             event.isCancelled = true
             return
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
         if (minecraftProfile == null) {
             event.isCancelled = true
             return

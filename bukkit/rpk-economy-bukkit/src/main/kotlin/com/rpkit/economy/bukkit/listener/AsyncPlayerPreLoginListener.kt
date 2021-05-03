@@ -15,11 +15,9 @@ class AsyncPlayerPreLoginListener : Listener {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val economyService = Services[RPKEconomyService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.uniqueId) ?: return
-        characterService.getActiveCharacter(minecraftProfile).thenAcceptAsync { character ->
-            if (character == null) return@thenAcceptAsync
-            economyService.loadBalances(character).join()
-        }.join()
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.uniqueId).join() ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile).join() ?: return
+        economyService.loadBalances(character).join()
     }
 
 }

@@ -53,7 +53,7 @@ class BlockBreakListener(private val plugin: RPKProfessionsBukkit) : Listener {
             event.isDropItems = false
             return
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             event.isDropItems = false
             return

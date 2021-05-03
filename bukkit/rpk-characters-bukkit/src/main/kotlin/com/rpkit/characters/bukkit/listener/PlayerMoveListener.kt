@@ -33,7 +33,7 @@ class PlayerMoveListener(private val plugin: RPKCharactersBukkit) : Listener {
     fun onPlayerMove(event: PlayerMoveEvent) {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null || !character.isDead) return
         if (event.from.blockX == event.to?.blockX && event.from.blockZ == event.to?.blockZ) return

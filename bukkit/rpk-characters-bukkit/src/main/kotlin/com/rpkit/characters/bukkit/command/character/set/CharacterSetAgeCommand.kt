@@ -70,7 +70,7 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -114,7 +114,7 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             context.setSessionData("characterService", characterService)
             val conversable = context.forWhom
             if (conversable !is Player) return false
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(conversable)
             context.setSessionData("minecraftProfile", minecraftProfile)
             if (minecraftProfile == null) return false
             val character = characterService.getPreloadedActiveCharacter(minecraftProfile)

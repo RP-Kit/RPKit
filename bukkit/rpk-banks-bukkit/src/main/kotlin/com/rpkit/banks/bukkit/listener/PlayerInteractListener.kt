@@ -70,7 +70,7 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
             event.player.sendMessage(plugin.messages["no-bank-service"])
             return
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         val currency = currencyService.getCurrency(RPKCurrencyName(sign.getLine(3))) ?: return
         if (event.action != RIGHT_CLICK_BLOCK) {

@@ -33,7 +33,7 @@ class PlayerDeathListener : Listener {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.entity) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.entity) ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         unconsciousnessService.setUnconscious(character, true)
         event.entity.setBedSpawnLocation(null, true)

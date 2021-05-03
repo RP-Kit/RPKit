@@ -53,7 +53,7 @@ class WakeCommand(private val plugin: RPKUnconsciousnessBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-unconsciousness-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(target)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-other", mapOf(
                     "player" to target.name

@@ -21,56 +21,65 @@ import com.rpkit.players.bukkit.event.githubprofile.RPKBukkitGitHubProfileCreate
 import com.rpkit.players.bukkit.event.githubprofile.RPKBukkitGitHubProfileDeleteEvent
 import com.rpkit.players.bukkit.event.githubprofile.RPKBukkitGitHubProfileUpdateEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.util.concurrent.CompletableFuture
 
 
 class RPKGitHubProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKGitHubProfileService {
 
-    override fun getGitHubProfile(id: RPKGitHubProfileId): RPKGitHubProfile? {
+    override fun getGitHubProfile(id: RPKGitHubProfileId): CompletableFuture<RPKGitHubProfile?> {
         return plugin.database.getTable(RPKGitHubProfileTable::class.java)[id]
     }
 
-    override fun getGitHubProfile(name: RPKGitHubUsername): RPKGitHubProfile? {
+    override fun getGitHubProfile(name: RPKGitHubUsername): CompletableFuture<RPKGitHubProfile?> {
         return plugin.database.getTable(RPKGitHubProfileTable::class.java)[name]
     }
 
-    override fun getGitHubProfiles(profile: RPKProfile): List<RPKGitHubProfile> {
+    override fun getGitHubProfiles(profile: RPKProfile): CompletableFuture<List<RPKGitHubProfile>> {
         return plugin.database.getTable(RPKGitHubProfileTable::class.java).get(profile)
     }
 
-    override fun addGitHubProfile(profile: RPKGitHubProfile) {
-        val event = RPKBukkitGitHubProfileCreateEvent(profile)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKGitHubProfileTable::class.java).insert(event.githubProfile)
+    override fun addGitHubProfile(profile: RPKGitHubProfile): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitGitHubProfileCreateEvent(profile, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKGitHubProfileTable::class.java).insert(event.githubProfile).join()
+        }
     }
 
     override fun createGitHubProfile(
         profile: RPKProfile,
         name: RPKGitHubUsername,
         oauthToken: String
-    ): RPKGitHubProfile {
-        val gitHubProfile = RPKGitHubProfileImpl(
-            null,
-            profile,
-            name,
-            oauthToken
-        )
-        addGitHubProfile(gitHubProfile)
-        return gitHubProfile
+    ): CompletableFuture<RPKGitHubProfile> {
+        return CompletableFuture.supplyAsync {
+            val gitHubProfile = RPKGitHubProfileImpl(
+                null,
+                profile,
+                name,
+                oauthToken
+            )
+            addGitHubProfile(gitHubProfile).join()
+            return@supplyAsync gitHubProfile
+        }
     }
 
-    override fun updateGitHubProfile(profile: RPKGitHubProfile) {
-        val event = RPKBukkitGitHubProfileUpdateEvent(profile)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKGitHubProfileTable::class.java).update(event.githubProfile)
+    override fun updateGitHubProfile(profile: RPKGitHubProfile): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitGitHubProfileUpdateEvent(profile, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKGitHubProfileTable::class.java).update(event.githubProfile).join()
+        }
     }
 
-    override fun removeGitHubProfile(profile: RPKGitHubProfile) {
-        val event = RPKBukkitGitHubProfileDeleteEvent(profile)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKGitHubProfileTable::class.java).delete(event.githubProfile)
+    override fun removeGitHubProfile(profile: RPKGitHubProfile): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitGitHubProfileDeleteEvent(profile, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKGitHubProfileTable::class.java).delete(event.githubProfile).join()
+        }
     }
 
 }

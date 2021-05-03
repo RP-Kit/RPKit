@@ -46,7 +46,7 @@ class PrepareItemCraftListener(private val plugin: RPKProfessionsBukkit) : Liste
             return
         }
         if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             event.inventory.result = null
             return

@@ -30,16 +30,16 @@ class GroupViewCommand(private val plugin: RPKPermissionsBukkit) : CommandExecut
             return true
         }
 
-        var playerUUID = sender.uniqueId;
-
-        if (args.isNotEmpty()) {
-            val player = plugin.server.getPlayer(args[0]);
-            if (player != null) {
-                playerUUID = player.uniqueId;
+        val player = if (args.isNotEmpty()) {
+            val target = plugin.server.getPlayer(args[0])
+            if (target != null) {
+                target
             } else {
                 sender.sendMessage(plugin.messages.groupViewInvalidPlayer)
                 return true
             }
+        } else {
+            sender
         }
 
         val groupService = Services[RPKGroupService::class.java]
@@ -54,7 +54,7 @@ class GroupViewCommand(private val plugin: RPKPermissionsBukkit) : CommandExecut
             return true
         }
 
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(playerUUID)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(player)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfileSelf)
             return true

@@ -71,7 +71,7 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-shop-count-service"])
                 return
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
             if (minecraftProfile == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-minecraft-profile"])
@@ -160,7 +160,7 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-currency-service"])
                 return
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
             if (minecraftProfile == null) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["no-minecraft-profile"])

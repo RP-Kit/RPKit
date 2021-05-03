@@ -25,7 +25,6 @@ import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupAssignProfileEvent
 import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupUnassignCharacterEvent
 import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupUnassignProfileEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
@@ -79,8 +78,12 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
                     )
             )
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-            minecraftProfileService.getMinecraftProfiles(event.profile).forEach { minecraftProfile ->
-                minecraftProfile.assignPermissions()
+            minecraftProfileService.getMinecraftProfiles(event.profile).thenAccept { minecraftProfiles ->
+                minecraftProfiles.forEach { minecraftProfile ->
+                    plugin.server.scheduler.runTask(plugin, Runnable {
+                        minecraftProfile.assignPermissions()
+                    })
+                }
             }
         }
     }
@@ -110,8 +113,12 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
         val minecraftProfile = event.character.minecraftProfile ?: return
         val profile = minecraftProfile.profile
         if (profile !is RPKProfile) return
-        minecraftProfileService.getMinecraftProfiles(profile).forEach { profileMinecraftProfile ->
-            profileMinecraftProfile.assignPermissions()
+        minecraftProfileService.getMinecraftProfiles(profile).thenAccept { minecraftProfiles ->
+            minecraftProfiles.forEach { profileMinecraftProfile ->
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    profileMinecraftProfile.assignPermissions()
+                })
+            }
         }
     }
 
@@ -135,8 +142,12 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
                 ?: return
         profileGroupTable.delete(profileGroup)
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        minecraftProfileService.getMinecraftProfiles(event.profile).forEach { minecraftProfile ->
-            minecraftProfile.assignPermissions()
+        minecraftProfileService.getMinecraftProfiles(event.profile).thenAccept { minecraftProfiles ->
+            minecraftProfiles.forEach { minecraftProfile ->
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    minecraftProfile.assignPermissions()
+                })
+            }
         }
     }
 
@@ -152,8 +163,12 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
         val minecraftProfile = event.character.minecraftProfile ?: return
         val profile = minecraftProfile.profile
         if (profile !is RPKProfile) return
-        minecraftProfileService.getMinecraftProfiles(profile).forEach { profileMinecraftProfile ->
-            profileMinecraftProfile.assignPermissions()
+        minecraftProfileService.getMinecraftProfiles(profile).thenAccept { minecraftProfiles ->
+            minecraftProfiles.forEach { profileMinecraftProfile ->
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    profileMinecraftProfile.assignPermissions()
+                })
+            }
         }
     }
 
@@ -173,7 +188,13 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
         profileGroup.priority = priority
         profileGroupTable.update(profileGroup)
         Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfiles(profile)
-            ?.forEach(RPKMinecraftProfile::assignPermissions)
+            ?.thenAccept { minecraftProfiles ->
+                minecraftProfiles.forEach { minecraftProfile ->
+                    plugin.server.scheduler.runTask(plugin, Runnable {
+                        minecraftProfile.assignPermissions()
+                    })
+                }
+            }
     }
 
     override fun getGroups(character: RPKCharacter): List<RPKGroup> {

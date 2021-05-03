@@ -21,15 +21,12 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.create
 import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_MINECRAFT_PROFILE
-import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileId
-import com.rpkit.players.bukkit.profile.RPKProfileName
-import com.rpkit.players.bukkit.profile.RPKProfileService
-import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
+import com.rpkit.players.bukkit.profile.*
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileImpl
-import java.util.UUID
+import java.util.*
+import java.util.concurrent.CompletableFuture
 
 
 class RPKMinecraftProfileTable(private val database: Database, private val plugin: RPKPlayersBukkit) : Table {
@@ -56,114 +53,128 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
         null
     }
 
-    fun insert(entity: RPKMinecraftProfile) {
+    fun insert(entity: RPKMinecraftProfile): CompletableFuture<Void> {
         val profile = entity.profile
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_MINECRAFT_PROFILE,
-                        RPKIT_MINECRAFT_PROFILE.PROFILE_ID,
-                        RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID
+                    RPKIT_MINECRAFT_PROFILE,
+                    RPKIT_MINECRAFT_PROFILE.PROFILE_ID,
+                    RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID
                 )
                 .values(
-                        if (profile is RPKProfile) {
-                            profile.id?.value
-                        } else {
-                            null
-                        },
-                        entity.minecraftUUID.toString()
+                    if (profile is RPKProfile) {
+                        profile.id?.value
+                    } else {
+                        null
+                    },
+                    entity.minecraftUUID.toString()
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKMinecraftProfileId(id)
-        cache?.set(id, entity)
-        minecraftUUIDCache?.set(entity.minecraftUUID, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKMinecraftProfileId(id)
+            cache?.set(id, entity)
+            minecraftUUIDCache?.set(entity.minecraftUUID, entity)
+        }
     }
 
-    fun update(entity: RPKMinecraftProfile) {
+    fun update(entity: RPKMinecraftProfile): CompletableFuture<Void> {
         val profile = entity.profile
-        val id = entity.id ?: return
-        database.create
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_MINECRAFT_PROFILE)
                 .set(
-                        RPKIT_MINECRAFT_PROFILE.PROFILE_ID,
-                        if (profile is RPKProfile) {
-                            profile.id?.value
-                        } else {
-                            null
-                        }
+                    RPKIT_MINECRAFT_PROFILE.PROFILE_ID,
+                    if (profile is RPKProfile) {
+                        profile.id?.value
+                    } else {
+                        null
+                    }
                 )
                 .set(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID, entity.minecraftUUID.toString())
                 .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
-        minecraftUUIDCache?.set(entity.minecraftUUID, entity)
-    }
-
-    operator fun get(id: RPKMinecraftProfileId): RPKMinecraftProfile? {
-        if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_MINECRAFT_PROFILE.PROFILE_ID,
-                            RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID
-                    )
-                    .from(RPKIT_MINECRAFT_PROFILE)
-                    .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id.value))
-                    .fetchOne() ?: return null
-            val profileService = Services[RPKProfileService::class.java]
-            val profileId = result.get(RPKIT_MINECRAFT_PROFILE.PROFILE_ID)
-            val profile = if (profileId != null && profileService != null) {
-                profileService.getProfile(RPKProfileId(profileId))
-            } else {
-                null
-            } ?: RPKThinProfileImpl(
-                    RPKProfileName(plugin.server.getOfflinePlayer(
-                            UUID.fromString(result.get(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID))
-                    ).name ?: "Unknown Minecraft user")
-            )
-            val minecraftProfile = RPKMinecraftProfileImpl(
-                    id,
-                    profile,
-                    UUID.fromString(result.get(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID))
-            )
-            cache?.set(id.value, minecraftProfile)
-            minecraftUUIDCache?.set(minecraftProfile.minecraftUUID, minecraftProfile)
-            return minecraftProfile
+            cache?.set(id.value, entity)
+            minecraftUUIDCache?.set(entity.minecraftUUID, entity)
         }
     }
 
-    fun get(profile: RPKProfile): List<RPKMinecraftProfile> {
-        val profileId = profile.id ?: return emptyList()
-        val results = database.create
+    operator fun get(id: RPKMinecraftProfileId): CompletableFuture<RPKMinecraftProfile?> {
+        if (cache?.containsKey(id.value) == true) {
+            return CompletableFuture.completedFuture(cache[id.value])
+        } else {
+            return CompletableFuture.supplyAsync {
+                val result = database.create
+                    .select(
+                        RPKIT_MINECRAFT_PROFILE.PROFILE_ID,
+                        RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID
+                    )
+                    .from(RPKIT_MINECRAFT_PROFILE)
+                    .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id.value))
+                    .fetchOne() ?: return@supplyAsync null
+                val profileService = Services[RPKProfileService::class.java]
+                val profileId = result.get(RPKIT_MINECRAFT_PROFILE.PROFILE_ID)
+                val profile = if (profileId != null && profileService != null) {
+                    profileService.getProfile(RPKProfileId(profileId)).join()
+                } else {
+                    null
+                } ?: RPKThinProfileImpl(
+                    RPKProfileName(
+                        plugin.server.getOfflinePlayer(
+                            UUID.fromString(result.get(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID))
+                        ).name ?: "Unknown Minecraft user"
+                    )
+                )
+                val minecraftProfile = RPKMinecraftProfileImpl(
+                    id,
+                    profile,
+                    UUID.fromString(result.get(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID))
+                )
+                cache?.set(id.value, minecraftProfile)
+                minecraftUUIDCache?.set(minecraftProfile.minecraftUUID, minecraftProfile)
+                return@supplyAsync minecraftProfile
+            }
+        }
+    }
+
+    fun get(profile: RPKProfile): CompletableFuture<List<RPKMinecraftProfile>> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_MINECRAFT_PROFILE.ID)
                 .from(RPKIT_MINECRAFT_PROFILE)
                 .where(RPKIT_MINECRAFT_PROFILE.PROFILE_ID.eq(profileId.value))
                 .fetch()
-        return results.map { result ->
-            get(RPKMinecraftProfileId(result.get(RPKIT_MINECRAFT_PROFILE.ID)))
-        }.filterNotNull()
+            val futures = results.map { result -> get(RPKMinecraftProfileId(result[RPKIT_MINECRAFT_PROFILE.ID])) }
+            CompletableFuture.allOf(*futures.toTypedArray()).join()
+            return@supplyAsync futures.mapNotNull(CompletableFuture<RPKMinecraftProfile?>::join)
+        }
     }
 
-    fun get(minecraftUUID: UUID): RPKMinecraftProfile? {
+    operator fun get(minecraftUUID: UUID): CompletableFuture<RPKMinecraftProfile?> {
         if (minecraftUUIDCache?.containsKey(minecraftUUID) == true) {
-            return minecraftUUIDCache[minecraftUUID]
+            return CompletableFuture.completedFuture(minecraftUUIDCache[minecraftUUID])
         }
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_MINECRAFT_PROFILE.ID)
                 .from(RPKIT_MINECRAFT_PROFILE)
                 .where(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID.eq(minecraftUUID.toString()))
-                .fetchOne() ?: return null
-        return get(RPKMinecraftProfileId(result.get(RPKIT_MINECRAFT_PROFILE.ID)))
+                .fetchOne() ?: return@supplyAsync null
+            return@supplyAsync get(RPKMinecraftProfileId(result.get(RPKIT_MINECRAFT_PROFILE.ID))).join()
+        }
     }
 
-    fun delete(entity: RPKMinecraftProfile) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKMinecraftProfile): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_MINECRAFT_PROFILE)
                 .where(RPKIT_MINECRAFT_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
-        minecraftUUIDCache?.remove(entity.minecraftUUID)
+            cache?.remove(id.value)
+            minecraftUUIDCache?.remove(entity.minecraftUUID)
+        }
     }
 }

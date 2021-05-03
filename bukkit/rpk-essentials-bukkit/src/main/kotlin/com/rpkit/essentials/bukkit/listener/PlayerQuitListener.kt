@@ -34,7 +34,7 @@ class PlayerQuitListener(private val plugin: RPKEssentialsBukkit) : Listener {
         val quitMessage = event.quitMessage
         if (quitMessage != null) {
             plugin.server.onlinePlayers
-                    .mapNotNull { player -> minecraftProfileService.getMinecraftProfile(player) }
+                    .mapNotNull { player -> minecraftProfileService.getPreloadedMinecraftProfile(player) }
                     .filter { minecraftProfile -> logMessageService.isLogMessagesEnabled(minecraftProfile) }
                     .forEach { minecraftProfile ->
                         minecraftProfile.sendMessage(quitMessage)

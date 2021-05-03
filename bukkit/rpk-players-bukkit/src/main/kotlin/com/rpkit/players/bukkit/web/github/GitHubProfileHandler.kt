@@ -44,7 +44,7 @@ class GitHubProfileHandler {
         val githubProfileService = Services[RPKGitHubProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("GitHub profile service not found"))
-        val githubProfile = githubProfileService.getGitHubProfile(RPKGitHubUsername(name))
+        val githubProfile = githubProfileService.getGitHubProfile(RPKGitHubUsername(name)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("GitHub profile not found"))
         return Response(OK)
@@ -59,10 +59,10 @@ class GitHubProfileHandler {
         val githubProfileService = Services[RPKGitHubProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("GitHub profile service not found"))
-        val profile = profileService.getProfile(RPKProfileId(profileId))
+        val profile = profileService.getProfile(RPKProfileId(profileId)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
-        val githubProfiles = githubProfileService.getGitHubProfiles(profile)
+        val githubProfiles = githubProfileService.getGitHubProfiles(profile).join()
         return Response(OK)
             .with(GitHubProfileResponse.listLens of githubProfiles.map(RPKGitHubProfile::toGitHubProfileResponse))
     }

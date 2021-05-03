@@ -58,9 +58,11 @@ class ProfileSetNameCommand(private val plugin: RPKPlayersBukkit) : RPKCommandEx
             return CompletableFuture.completedFuture(MissingServiceFailure(RPKProfileService::class.java))
         }
         profile.name = name
-        profile.discriminator = profileService.generateDiscriminatorFor(name)
-        profileService.updateProfile(profile)
-        sender.sendMessage(plugin.messages.profileSetNameValid.withParameters(name = name))
+        profileService.generateDiscriminatorFor(name).thenAccept { discriminator ->
+            profile.discriminator = discriminator
+            profileService.updateProfile(profile)
+            sender.sendMessage(plugin.messages.profileSetNameValid.withParameters(name = name))
+        }
         return CompletableFuture.completedFuture(CommandSuccess)
     }
 }

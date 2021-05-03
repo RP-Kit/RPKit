@@ -44,7 +44,7 @@ class IRCProfileHandler {
         val ircProfileService = Services[RPKIRCProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("IRC profile service not found"))
-        val ircProfile = ircProfileService.getIRCProfile(RPKIRCNick(nick))
+        val ircProfile = ircProfileService.getIRCProfile(RPKIRCNick(nick)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("IRC profile not found"))
         return Response(OK)
@@ -59,10 +59,10 @@ class IRCProfileHandler {
         val ircProfileService = Services[RPKIRCProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("IRC profile service not found"))
-        val profile = profileService.getProfile(RPKProfileId(profileId))
+        val profile = profileService.getProfile(RPKProfileId(profileId)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("IRC profile not found"))
-        val ircProfiles = ircProfileService.getIRCProfiles(profile)
+        val ircProfiles = ircProfileService.getIRCProfiles(profile).join()
         return Response(OK)
             .with(IRCProfileResponse.listLens of ircProfiles.map(RPKIRCProfile::toIRCProfileResponse))
     }

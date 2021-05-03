@@ -69,7 +69,7 @@ class PaymentKickCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["payment-kick-invalid-player"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true

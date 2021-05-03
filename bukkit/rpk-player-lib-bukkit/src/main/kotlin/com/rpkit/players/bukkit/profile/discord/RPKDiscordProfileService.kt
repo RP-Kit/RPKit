@@ -18,18 +18,19 @@ package com.rpkit.players.bukkit.profile.discord
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfile
+import java.util.concurrent.CompletableFuture
 
 interface RPKDiscordProfileService : Service {
 
-    fun getDiscordProfile(id: RPKDiscordProfileId): RPKDiscordProfile?
-    fun getDiscordProfile(discordUserId: DiscordUserId): RPKDiscordProfile
-    fun getDiscordProfiles(profile: RPKProfile): List<RPKDiscordProfile>
-    fun addDiscordProfile(profile: RPKDiscordProfile)
+    fun getDiscordProfile(id: RPKDiscordProfileId): CompletableFuture<RPKDiscordProfile?>
+    fun getDiscordProfile(discordUserId: DiscordUserId): CompletableFuture<RPKDiscordProfile>
+    fun getDiscordProfiles(profile: RPKProfile): CompletableFuture<List<RPKDiscordProfile>>
+    fun addDiscordProfile(profile: RPKDiscordProfile): CompletableFuture<Void>
     fun createDiscordProfile(
         profile: RPKThinProfile,
         discordId: DiscordUserId
-    ): RPKDiscordProfile
-    fun updateDiscordProfile(profile: RPKDiscordProfile)
-    fun removeDiscordProfile(profile: RPKDiscordProfile)
+    ): CompletableFuture<RPKDiscordProfile>
+    fun updateDiscordProfile(profile: RPKDiscordProfile): CompletableFuture<Void>
+    fun removeDiscordProfile(profile: RPKDiscordProfile): CompletableFuture<Void>
 
 }

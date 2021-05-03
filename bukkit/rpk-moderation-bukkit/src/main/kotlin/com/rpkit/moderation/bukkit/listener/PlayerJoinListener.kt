@@ -31,22 +31,32 @@ class PlayerJoinListener(private val plugin: RPKModerationBukkit) : Listener {
     fun onPlayerJoin(event: PlayerJoinEvent) {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val vanishService = Services[RPKVanishService::class.java] ?: return
-        val observer = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        plugin.server.onlinePlayers
-                .filter { player -> event.player != player }
-                .forEach { player ->
-                    val target = minecraftProfileService.getMinecraftProfile(player)
-                    if (target != null) {
-                        if (!vanishService.canSee(observer, target)) {
-                            event.player.hidePlayer(plugin, player)
+        minecraftProfileService.getMinecraftProfile(event.player).thenAccept { observer ->
+            if (observer == null) return@thenAccept
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                plugin.server.onlinePlayers
+                    .filter { player -> event.player != player }
+                    .forEach { player ->
+                        minecraftProfileService.getMinecraftProfile(player).thenAccept { target ->
+                            if (target != null) {
+                                if (!vanishService.canSee(observer, target)) {
+                                    plugin.server.scheduler.runTask(plugin, Runnable {
+                                        event.player.hidePlayer(plugin, player)
+                                    })
+                                }
+                                if (!vanishService.canSee(target, observer)) {
+                                    plugin.server.scheduler.runTask(plugin, Runnable {
+                                        player.hidePlayer(plugin, event.player)
+                                    })
+                                }
+                            }
                         }
-                        if (!vanishService.canSee(target, observer)) {
-                            player.hidePlayer(plugin, event.player)
-                        }
+
                     }
+                if (vanishService.isVanished(observer)) {
+                    event.player.sendMessage(plugin.messages["vanish-invisible"])
                 }
-        if (vanishService.isVanished(observer)) {
-            event.player.sendMessage(plugin.messages["vanish-invisible"])
+            })
         }
     }
 

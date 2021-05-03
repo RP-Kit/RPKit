@@ -238,14 +238,14 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 val raceService = Services[RPKRaceService::class.java]
                 val profileId = result[RPKIT_CHARACTER.PROFILE_ID]
-                val profile = if (profileId == null) null else profileService?.getProfile(RPKProfileId(profileId))
+                val profile = if (profileId == null) null else profileService?.getProfile(RPKProfileId(profileId))?.join()
                 val minecraftProfileId = result[RPKIT_CHARACTER.MINECRAFT_PROFILE_ID]
                 val minecraftProfile = if (minecraftProfileId == null) {
                     null
                 } else {
                     minecraftProfileService?.getMinecraftProfile(
                         RPKMinecraftProfileId(minecraftProfileId)
-                    )
+                    )?.join()
                 }
                 val raceName = result[RPKIT_CHARACTER.RACE_NAME]
                 val race = if (raceName == null) null else raceService?.getRace(RPKRaceName(raceName))

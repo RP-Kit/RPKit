@@ -18,6 +18,7 @@ package com.rpkit.moderation.bukkit.warning
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides warning-related functionality
@@ -45,7 +46,7 @@ interface RPKWarningService : Service {
      *
      * @param warning The warning to add
      */
-    fun addWarning(warning: RPKWarning)
+    fun addWarning(warning: RPKWarning): CompletableFuture<Void>
 
     fun createWarning(
         reason: String,

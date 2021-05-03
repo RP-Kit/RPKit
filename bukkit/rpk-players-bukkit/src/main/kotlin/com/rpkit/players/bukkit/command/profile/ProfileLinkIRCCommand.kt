@@ -78,18 +78,19 @@ class ProfileLinkIRCCommand(private val plugin: RPKPlayersBukkit) : RPKCommandEx
             sender.sendMessage(plugin.messages.noIrcProfileService)
             return CompletableFuture.completedFuture(MissingServiceFailure(RPKIRCProfileService::class.java))
         }
-        val ircProfile = ircProfileService.getIRCProfile(nick)
-        if (ircProfile != null && ircProfile.profile is RPKProfile) {
-            sender.sendMessage(plugin.messages.profileLinkIrcInvalidAlreadyLinked)
-            return CompletableFuture.completedFuture(IRCProfileAlreadyLinkedFailure(ircProfile))
+        return ircProfileService.getIRCProfile(nick).thenApply { ircProfile ->
+            if (ircProfile != null && ircProfile.profile is RPKProfile) {
+                sender.sendMessage(plugin.messages.profileLinkIrcInvalidAlreadyLinked)
+                return@thenApply IRCProfileAlreadyLinkedFailure(ircProfile)
+            }
+            if (ircProfile == null) {
+                ircProfileService.createIRCProfile(profile, nick)
+            } else {
+                ircProfile.profile = profile
+                ircProfileService.updateIRCProfile(ircProfile)
+            }
+            sender.sendMessage(plugin.messages.profileLinkIrcValid)
+            return@thenApply CommandSuccess
         }
-        if (ircProfile == null) {
-            ircProfileService.createIRCProfile(profile, nick)
-        } else {
-            ircProfile.profile = profile
-            ircProfileService.updateIRCProfile(ircProfile)
-        }
-        sender.sendMessage(plugin.messages.profileLinkIrcValid)
-        return CompletableFuture.completedFuture(CommandSuccess)
     }
 }

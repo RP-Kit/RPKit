@@ -36,7 +36,7 @@ class PlayerJoinListener(val plugin: RPKCharactersBukkit) : Listener {
         if (!plugin.config.getBoolean("characters.set-player-display-name")) return
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             characterService.loadActiveCharacter(minecraftProfile).thenAccept { loadedCharacter ->

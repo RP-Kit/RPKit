@@ -22,54 +22,63 @@ import com.rpkit.players.bukkit.event.ircprofile.RPKBukkitIRCProfileDeleteEvent
 import com.rpkit.players.bukkit.event.ircprofile.RPKBukkitIRCProfileUpdateEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfile
+import java.util.concurrent.CompletableFuture
 
 
 class RPKIRCProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKIRCProfileService {
 
-    override fun getIRCProfile(id: RPKIRCProfileId): RPKIRCProfile? {
+    override fun getIRCProfile(id: RPKIRCProfileId): CompletableFuture<RPKIRCProfile?> {
         return plugin.database.getTable(RPKIRCProfileTable::class.java)[id]
     }
 
-    override fun getIRCProfile(nick: RPKIRCNick): RPKIRCProfile? {
+    override fun getIRCProfile(nick: RPKIRCNick): CompletableFuture<RPKIRCProfile?> {
         return plugin.database.getTable(RPKIRCProfileTable::class.java).get(nick)
     }
 
-    override fun getIRCProfiles(profile: RPKProfile): List<RPKIRCProfile> {
+    override fun getIRCProfiles(profile: RPKProfile): CompletableFuture<List<RPKIRCProfile>> {
         return plugin.database.getTable(RPKIRCProfileTable::class.java).get(profile)
     }
 
-    override fun addIRCProfile(profile: RPKIRCProfile) {
-        val event = RPKBukkitIRCProfileCreateEvent(profile, !plugin.server.isPrimaryThread)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKIRCProfileTable::class.java).insert(event.ircProfile)
+    override fun addIRCProfile(profile: RPKIRCProfile): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitIRCProfileCreateEvent(profile, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKIRCProfileTable::class.java).insert(event.ircProfile).join()
+        }
     }
 
     override fun createIRCProfile(
         profile: RPKThinProfile,
         nick: RPKIRCNick
-    ): RPKIRCProfile {
-        val ircProfile = RPKIRCProfileImpl(
-            null,
-            profile,
-            nick
-        )
-        addIRCProfile(ircProfile)
-        return ircProfile
+    ): CompletableFuture<RPKIRCProfile> {
+        return CompletableFuture.supplyAsync {
+            val ircProfile = RPKIRCProfileImpl(
+                null,
+                profile,
+                nick
+            )
+            addIRCProfile(ircProfile).join()
+            return@supplyAsync ircProfile
+        }
     }
 
-    override fun updateIRCProfile(profile: RPKIRCProfile) {
-        val event = RPKBukkitIRCProfileUpdateEvent(profile, !plugin.server.isPrimaryThread)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKIRCProfileTable::class.java).update(event.ircProfile)
+    override fun updateIRCProfile(profile: RPKIRCProfile): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitIRCProfileUpdateEvent(profile, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKIRCProfileTable::class.java).update(event.ircProfile).join()
+        }
     }
 
-    override fun removeIRCProfile(profile: RPKIRCProfile) {
-        val event = RPKBukkitIRCProfileDeleteEvent(profile, !plugin.server.isPrimaryThread)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKIRCProfileTable::class.java).delete(event.ircProfile)
+    override fun removeIRCProfile(profile: RPKIRCProfile): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitIRCProfileDeleteEvent(profile, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKIRCProfileTable::class.java).delete(event.ircProfile).join()
+        }
     }
 
 }

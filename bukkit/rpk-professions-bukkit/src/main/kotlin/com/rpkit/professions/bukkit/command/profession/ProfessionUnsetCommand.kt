@@ -69,7 +69,7 @@ class ProfessionUnsetCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(target)
         if (minecraftProfile == null) {
             if (target == sender) {
                 sender.sendMessage(plugin.messages["no-minecraft-profile-self"])

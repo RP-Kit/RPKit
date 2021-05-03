@@ -57,7 +57,7 @@ class PrepareItemCraftListener(private val plugin: RPKCraftingSkillBukkit) : Lis
             event.inventory.result = null
             return
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             event.inventory.result = null
             return

@@ -56,7 +56,7 @@ class ExperienceSetCommand(private val plugin: RPKExperienceBukkit) : CommandExe
             sender.sendMessage(plugin.messages["experience-set-player-invalid-player"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true

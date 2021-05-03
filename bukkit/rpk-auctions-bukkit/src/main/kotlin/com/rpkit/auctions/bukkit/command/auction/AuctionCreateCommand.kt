@@ -73,12 +73,12 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
             sender.sendMessage(plugin.messages.noCurrencyService)
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character != null) {
             conversationFactory.buildConversation(sender).begin()
         } else {
@@ -321,7 +321,7 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
             val auctionService = Services[RPKAuctionService::class.java]
                     ?: return AuctionErrorPrompt(plugin.messages.noAuctionService)
             val bukkitPlayer = context.forWhom as Player
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
                     ?: return AuctionErrorPrompt(plugin.messages.noMinecraftProfile)
             val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
                     ?: return AuctionErrorPrompt(plugin.messages.noCharacter)

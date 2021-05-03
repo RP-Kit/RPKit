@@ -56,7 +56,7 @@ class GroupAddCommand(private val plugin: RPKPermissionsBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages.groupAddInvalidPlayer)
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfileOther)
             return true

@@ -92,7 +92,7 @@ class InventoryClickListener(val plugin: RPKShopsBukkit) : Listener {
             sellerCharacterPreloaded = characterService.getPreloadedCharacter(characterId)
         }
         val buyerBukkitPlayer = event.whoClicked as? Player ?: return
-        val buyerMinecraftProfile = minecraftProfileService.getMinecraftProfile(buyerBukkitPlayer)
+        val buyerMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(buyerBukkitPlayer)
         if (buyerMinecraftProfile == null) {
             event.whoClicked.sendMessage(plugin.messages["no-minecraft-profile"])
             return

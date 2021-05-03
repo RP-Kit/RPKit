@@ -46,7 +46,7 @@ class ToggleLogMessagesCommand(private val plugin: RPKEssentialsBukkit) : Comman
             sender.sendMessage(plugin.messages["no-log-message-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true

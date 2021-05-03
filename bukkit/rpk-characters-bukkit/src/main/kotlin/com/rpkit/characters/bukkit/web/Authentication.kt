@@ -39,7 +39,7 @@ val Request.authenticatedProfile: RPKProfile?
             if (it.size < 2) return@let null
             val name = it[0]
             val discriminator = it[1].toIntOrNull() ?: return@let null
-            Services[RPKProfileService::class.java]?.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))
+            Services[RPKProfileService::class.java]?.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator))?.join()
         }
 
 fun authenticated() = ServerFilters.BasicAuth("rpkit", ::authenticate)
@@ -50,6 +50,6 @@ private fun authenticate(credentials: Credentials): Boolean {
     if (parts.size < 2) return false
     val name = parts[0]
     val discriminator = parts[1].toIntOrNull() ?: return false
-    val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator)) ?: return false
+    val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator)).join() ?: return false
     return profile.checkPassword(credentials.password.toCharArray())
 }

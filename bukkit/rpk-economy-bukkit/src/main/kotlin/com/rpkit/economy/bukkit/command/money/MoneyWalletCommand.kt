@@ -98,7 +98,7 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
             bukkitPlayer.sendMessage(plugin.messages["no-economy-service"])
             return
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile"])
             return

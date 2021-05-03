@@ -19,9 +19,10 @@ package com.rpkit.permissions.bukkit.group
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.permissions.RPKPermissionsService
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 
 fun RPKProfile.addGroup(group: RPKGroup) {
     Services[RPKGroupService::class.java]?.addGroup(this, group)
@@ -69,8 +70,8 @@ fun RPKMinecraftProfile.assignPermissions() {
     Services[RPKPermissionsService::class.java]?.assignPermissions(this)
 }
 
-fun RPKMinecraftProfile.unassignPermissions() {
-    Services[RPKPermissionsService::class.java]?.unassignPermissions(this)
+fun RPKMinecraftProfile.unassignPermissions(bukkitPlayer: Player) {
+    Services[RPKPermissionsService::class.java]?.unassignPermissions(this, bukkitPlayer)
 }
 
 fun RPKGroup.hasPermission(node: String, default: Boolean): Boolean {

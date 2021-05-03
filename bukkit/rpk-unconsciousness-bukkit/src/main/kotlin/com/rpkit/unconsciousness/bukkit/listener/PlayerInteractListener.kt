@@ -33,7 +33,7 @@ class PlayerInteractListener : Listener {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer) ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         if (!unconsciousnessService.isUnconscious(character)) return
         event.isCancelled = true

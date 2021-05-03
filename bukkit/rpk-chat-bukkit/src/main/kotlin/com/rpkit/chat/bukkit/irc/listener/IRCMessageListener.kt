@@ -26,6 +26,7 @@ import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.MessageEvent
+import java.util.concurrent.CompletableFuture
 
 /**
  * IRC message listener.
@@ -42,14 +43,16 @@ class IRCMessageListener(private val plugin: RPKChatBukkit) : ListenerAdapter() 
         val ircProfileService = Services[RPKIRCProfileService::class.java] ?: return
         // According to PircBotX documentation, user can be null if the hostmask doesn't match a user at creation time.
         val user = event.user ?: return
-        val senderIRCProfile = ircProfileService.getIRCProfile(RPKIRCNick(user.nick)) ?: ircProfileService.createIRCProfile(
-            profileService.createThinProfile(RPKProfileName(user.nick)),
-            RPKIRCNick(user.nick)
-        )
-        val senderProfile = senderIRCProfile.profile
-        val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
-        val chatChannel = chatChannelService.getChatChannelFromIRCChannel(IRCChannel(event.channel.name))
-        chatChannel?.sendMessage(
+        CompletableFuture.runAsync {
+            val senderIRCProfile = ircProfileService.getIRCProfile(RPKIRCNick(user.nick)).join()
+                ?: ircProfileService.createIRCProfile(
+                    profileService.createThinProfile(RPKProfileName(user.nick)),
+                    RPKIRCNick(user.nick)
+                ).join()
+            val senderProfile = senderIRCProfile.profile
+            val chatChannelService = Services[RPKChatChannelService::class.java] ?: return@runAsync
+            val chatChannel = chatChannelService.getChatChannelFromIRCChannel(IRCChannel(event.channel.name))
+            chatChannel?.sendMessage(
                 senderProfile,
                 null,
                 event.message,
@@ -57,7 +60,8 @@ class IRCMessageListener(private val plugin: RPKChatBukkit) : ListenerAdapter() 
                 chatChannel.format,
                 chatChannel.directedPostFormatPipeline,
                 chatChannel.undirectedPipeline.filter { it !is IRCComponent }
-        )
+            )
+        }
     }
 
 }

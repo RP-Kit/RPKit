@@ -66,7 +66,7 @@ class PaymentInviteCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
             return true
         }
         val bukkitPlayer = plugin.server.getOfflinePlayer(args.last())
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true

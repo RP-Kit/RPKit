@@ -17,6 +17,7 @@
 package com.rpkit.permissions.bukkit.listener
 
 import com.rpkit.core.service.Services
+import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.unassignPermissions
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
@@ -27,13 +28,19 @@ import org.bukkit.event.player.PlayerQuitEvent
 /**
  * Player quit listener for unassigning permissions.
  */
-class PlayerQuitListener : Listener {
+class PlayerQuitListener(private val plugin: RPKPermissionsBukkit) : Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerQuit(event: PlayerQuitEvent) {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        minecraftProfile.unassignPermissions()
+        minecraftProfileService.getMinecraftProfile(event.player).thenAccept { minecraftProfile ->
+            if (minecraftProfile != null) {
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    minecraftProfile.unassignPermissions(event.player)
+                })
+            }
+        }
+
     }
 
 }

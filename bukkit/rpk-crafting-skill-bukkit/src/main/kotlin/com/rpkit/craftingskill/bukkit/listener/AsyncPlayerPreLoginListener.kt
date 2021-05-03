@@ -16,7 +16,7 @@ class AsyncPlayerPreLoginListener(private val plugin: RPKCraftingSkillBukkit) : 
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val craftingSkillService = Services[RPKCraftingSkillService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.uniqueId) ?: return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.uniqueId).join() ?: return
         val character = characterService.getActiveCharacter(minecraftProfile).join() ?: return
         craftingSkillService.loadCraftingExperience(character).join()
     }

@@ -35,9 +35,10 @@ class PlayerJoinListener(private val plugin: RPKPaymentsBukkit) : Listener {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val paymentNotificationService = Services[RPKPaymentNotificationService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        characterService.loadActiveCharacter(minecraftProfile).thenAccept { character ->
-            if (character != null) {
+        minecraftProfileService.getMinecraftProfile(event.player).thenAccept getMinecraftProfile@{ minecraftProfile ->
+            if (minecraftProfile == null) return@getMinecraftProfile
+            characterService.loadActiveCharacter(minecraftProfile).thenAccept loadActiveCharacter@{ character ->
+                if (character == null) return@loadActiveCharacter
                 paymentNotificationService.getPaymentNotificationsFor(character).thenAccept { notifications ->
                     notifications.forEach { notification ->
                         plugin.server.scheduler.runTask(plugin, Runnable {
@@ -48,6 +49,7 @@ class PlayerJoinListener(private val plugin: RPKPaymentsBukkit) : Listener {
                 }
             }
         }
+
     }
 
 }

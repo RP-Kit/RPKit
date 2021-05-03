@@ -182,7 +182,7 @@ class CharacterHandler {
         val characterService = Services[RPKCharacterService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Character service not found"))
-        val profile = profileService.getProfile(RPKProfileId(profileId))
+        val profile = profileService.getProfile(RPKProfileId(profileId)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
         val characters = characterService.getCharacters(profile).join()

@@ -67,7 +67,7 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
         }
         event.isCancelled = true
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
         if (minecraftProfile == null) {
             event.player.sendMessage(plugin.messages["no-minecraft-profile"])
             return

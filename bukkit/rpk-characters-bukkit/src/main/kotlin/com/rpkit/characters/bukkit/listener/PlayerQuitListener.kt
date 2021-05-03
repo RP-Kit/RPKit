@@ -14,8 +14,11 @@ class PlayerQuitListener : Listener {
     fun onPlayerQuit(event: PlayerQuitEvent) {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        characterService.unloadActiveCharacter(minecraftProfile)
+        minecraftProfileService.getMinecraftProfile(event.player).thenAccept { minecraftProfile ->
+            if (minecraftProfile == null) return@thenAccept
+            characterService.unloadActiveCharacter(minecraftProfile)
+        }
+
     }
 
 }

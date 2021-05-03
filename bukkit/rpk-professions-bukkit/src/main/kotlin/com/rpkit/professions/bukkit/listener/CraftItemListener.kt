@@ -42,7 +42,7 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit) : Listener {
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
             val characterService = Services[RPKCharacterService::class.java] ?: return
             val professionService = Services[RPKProfessionService::class.java] ?: return
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
             if (minecraftProfile == null) {
                 event.isCancelled = true
                 bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile"])

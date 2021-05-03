@@ -64,7 +64,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit) : Comma
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -96,7 +96,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit) : Comma
             if (conversable !is Player) return GenderSetPrompt()
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return GenderNotSetPrompt()
             val characterService = Services[RPKCharacterService::class.java] ?: return GenderNotSetPrompt()
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return GenderNotSetPrompt()
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(conversable) ?: return GenderNotSetPrompt()
             val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return GenderNotSetPrompt()
             character.gender = input
             characterService.updateCharacter(character)
@@ -124,7 +124,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit) : Comma
                 conversable.sendMessage(plugin.messages["no-character-service"])
                 return END_OF_CONVERSATION
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(context.forWhom as Player)
             if (minecraftProfile != null) {
                 characterService.getPreloadedActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
             }
@@ -152,7 +152,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit) : Comma
                 conversable.sendMessage(plugin.messages["no-character-service"])
                 return END_OF_CONVERSATION
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(context.forWhom as Player)
             if (minecraftProfile != null) {
                 characterService.getPreloadedActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
             }

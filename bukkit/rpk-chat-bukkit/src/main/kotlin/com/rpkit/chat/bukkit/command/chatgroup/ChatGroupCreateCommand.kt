@@ -64,7 +64,7 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit) : CommandExecuto
                 return@thenAccept
             }
             chatGroupService.createChatGroup(RPKChatGroupName(args[0])).thenAccept createChatGroup@{ chatGroup ->
-                val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+                val senderMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
                 if (senderMinecraftProfile == null) {
                     sender.sendMessage(plugin.messages["no-minecraft-profile"])
                     return@createChatGroup

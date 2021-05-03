@@ -65,7 +65,7 @@ class ProfessionExperienceAddCommand(val plugin: RPKProfessionsBukkit) : Command
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(target)
         if (minecraftProfile == null) {
             if (sender == target) {
                 sender.sendMessage(plugin.messages["no-minecraft-profile-self"])

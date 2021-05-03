@@ -72,7 +72,7 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages.moneySubtractProfileInvalidProfile)
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages.noProfile)
             return true

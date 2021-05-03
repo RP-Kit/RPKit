@@ -1,5 +1,5 @@
 warnings:
-  3: "ban $player Reached 3 warnings"
+  3: "ban ${player} Reached 3 warnings"
 caching:
   rpkit_ticket:
     id:

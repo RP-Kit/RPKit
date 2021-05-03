@@ -47,7 +47,7 @@ class InventoryClickListener(private val plugin: RPKBlockLoggingBukkit) : Listen
             override fun run() {
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
                 val characterService = Services[RPKCharacterService::class.java] ?: return
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(whoClicked)
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(whoClicked)
                 val profile = minecraftProfile?.profile as? RPKProfile
                 val character = if (minecraftProfile == null) null else characterService.getPreloadedActiveCharacter(minecraftProfile)
                 blockHistoryService.getBlockHistory(inventoryHolder.block).thenAccept { blockHistory ->

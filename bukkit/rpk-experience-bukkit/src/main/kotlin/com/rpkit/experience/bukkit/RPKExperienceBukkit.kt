@@ -104,7 +104,7 @@ class RPKExperienceBukkit : RPKBukkitPlugin() {
     }
 
     fun registerListeners() {
-        registerListeners(PlayerExpChangeListener(), PlayerJoinListener())
+        registerListeners(PlayerExpChangeListener(), PlayerJoinListener(this))
     }
 
     fun registerCommands() {

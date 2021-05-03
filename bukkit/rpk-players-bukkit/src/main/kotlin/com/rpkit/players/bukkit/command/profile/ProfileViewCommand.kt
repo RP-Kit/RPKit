@@ -38,38 +38,40 @@ class ProfileViewCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecu
             sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return CompletableFuture.completedFuture(MissingServiceFailure(RPKMinecraftProfileService::class.java))
         }
-        var target: RPKMinecraftProfile? = null
-        if (args.isNotEmpty() && sender.hasPermission("rpkit.players.command.profile.view.other")) {
-            target = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(args[0]))
-        }
-        if (target == null) {
-            if (!sender.hasPermission("rpkit.players.command.profile.view.self")) {
-                sender.sendMessage(plugin.messages.noPermissionProfileViewSelf)
-                return CompletableFuture.completedFuture(NoPermissionFailure("rpkit.players.command.profile.view.self"))
+        return CompletableFuture.supplyAsync {
+            var target: RPKMinecraftProfile? = null
+            if (args.isNotEmpty() && sender.hasPermission("rpkit.players.command.profile.view.other")) {
+                target = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(args[0])).join()
             }
-            if (sender is RPKMinecraftProfile) {
-                target = sender
-            } else {
-                sender.sendMessage(plugin.messages.profileViewInvalidTarget)
-                return CompletableFuture.completedFuture(InvalidTargetFailure())
+            if (target == null) {
+                if (!sender.hasPermission("rpkit.players.command.profile.view.self")) {
+                    sender.sendMessage(plugin.messages.noPermissionProfileViewSelf)
+                    return@supplyAsync NoPermissionFailure("rpkit.players.command.profile.view.self")
+                }
+                if (sender is RPKMinecraftProfile) {
+                    target = sender
+                } else {
+                    sender.sendMessage(plugin.messages.profileViewInvalidTarget)
+                    return@supplyAsync InvalidTargetFailure()
+                }
             }
-        }
-        val profile = target.profile
-        if (profile !is RPKProfile) {
-            if (sender == target) {
-                sender.sendMessage(plugin.messages.noProfileSelf)
-                return CompletableFuture.completedFuture(NoProfileSelfFailure())
-            } else {
-                sender.sendMessage(plugin.messages.noProfileOther)
-                return CompletableFuture.completedFuture(NoProfileOtherFailure())
+            val profile = target.profile
+            if (profile !is RPKProfile) {
+                if (sender == target) {
+                    sender.sendMessage(plugin.messages.noProfileSelf)
+                    return@supplyAsync NoProfileSelfFailure()
+                } else {
+                    sender.sendMessage(plugin.messages.noProfileOther)
+                    return@supplyAsync NoProfileOtherFailure()
+                }
             }
-        }
-        sender.sendMessage(
-            plugin.messages.profileViewValid.withParameters(
-                name = profile.name,
-                discriminator = profile.discriminator
+            sender.sendMessage(
+                plugin.messages.profileViewValid.withParameters(
+                    name = profile.name,
+                    discriminator = profile.discriminator
+                )
             )
-        )
-        return CompletableFuture.completedFuture(CommandSuccess)
+            return@supplyAsync CommandSuccess
+        }
     }
 }

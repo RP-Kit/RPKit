@@ -19,14 +19,12 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.travel.bukkit.RPKTravelBukkit
 import com.rpkit.warp.bukkit.event.warp.RPKBukkitWarpUseEvent
-import com.rpkit.warp.bukkit.warp.RPKWarp
 import com.rpkit.warp.bukkit.warp.RPKWarpName
 import com.rpkit.warp.bukkit.warp.RPKWarpService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import java.util.ArrayList
 
 class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
@@ -55,7 +53,7 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
                 sender.sendMessage(plugin.messages.noMinecraftProfileService)
                 return true
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
             if (minecraftProfile == null) {
                 sender.sendMessage(plugin.messages.noMinecraftProfile)
                 return true

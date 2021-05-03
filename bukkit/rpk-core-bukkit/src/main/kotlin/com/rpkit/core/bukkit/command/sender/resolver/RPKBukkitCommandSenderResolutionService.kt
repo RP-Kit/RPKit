@@ -18,9 +18,9 @@ package com.rpkit.core.bukkit.command.sender.resolver
 
 import com.rpkit.core.bukkit.RPKCoreBukkit
 import com.rpkit.core.command.sender.RPKCommandSender
-import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Service
 import org.bukkit.command.CommandSender
+import java.util.concurrent.CompletableFuture
 
 class RPKBukkitCommandSenderResolutionService(override val plugin: RPKCoreBukkit) : Service {
 

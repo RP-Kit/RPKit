@@ -61,17 +61,20 @@ class ProfileConfirmLinkCommand(private val plugin: RPKPlayersBukkit) : RPKComma
                     sender.sendMessage(plugin.messages.profileConfirmLinkInvalidAlreadyLinked)
                     return CompletableFuture.completedFuture(AlreadyLinkedFailure(profile))
                 }
-                val linkRequests = minecraftProfileService.getMinecraftProfileLinkRequests(sender)
-                val linkRequest = linkRequests.firstOrNull { request -> request.profile.id?.value == id }
-                if (linkRequest == null) {
-                    sender.sendMessage(plugin.messages.profileConfirmLinkInvalidRequest)
-                    return CompletableFuture.completedFuture(InvalidRequestFailure())
+                return minecraftProfileService.getMinecraftProfileLinkRequests(sender).thenApplyAsync { linkRequests ->
+                    val linkRequest = linkRequests.firstOrNull { request -> request.profile.id?.value == id }
+                    if (linkRequest == null) {
+                        sender.sendMessage(plugin.messages.profileConfirmLinkInvalidRequest)
+                        return@thenApplyAsync InvalidRequestFailure()
+                    }
+                    sender.profile = linkRequest.profile
+                    minecraftProfileService.updateMinecraftProfile(sender).join()
+                    minecraftProfileService.removeMinecraftProfileLinkRequest(linkRequest).join()
+                    minecraftProfileService.loadMinecraftProfile(sender.minecraftUUID).join()
+                    sender.sendMessage(plugin.messages.profileConfirmLinkValid)
+                    return@thenApplyAsync CommandSuccess
                 }
-                sender.profile = linkRequest.profile
-                minecraftProfileService.updateMinecraftProfile(sender)
-                minecraftProfileService.removeMinecraftProfileLinkRequest(linkRequest)
-                sender.sendMessage(plugin.messages.profileConfirmLinkValid)
-                return CompletableFuture.completedFuture(CommandSuccess)
+
             }
             else -> {
                 sender.sendMessage(plugin.messages.profileConfirmLinkInvalidType)

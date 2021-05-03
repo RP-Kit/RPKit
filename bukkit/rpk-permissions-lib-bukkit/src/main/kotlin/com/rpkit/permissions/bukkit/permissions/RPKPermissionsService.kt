@@ -19,8 +19,9 @@ package com.rpkit.permissions.bukkit.permissions
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import com.rpkit.permissions.bukkit.group.RPKGroup
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import org.bukkit.entity.Player
 import java.util.concurrent.CompletableFuture
 
 interface RPKPermissionsService : Service {
@@ -66,6 +67,6 @@ interface RPKPermissionsService : Service {
      *
      * @param minecraftProfile
      */
-    fun unassignPermissions(minecraftProfile: RPKMinecraftProfile)
+    fun unassignPermissions(minecraftProfile: RPKMinecraftProfile, bukkitPlayer: Player)
 
 }

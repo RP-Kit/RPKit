@@ -80,7 +80,7 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-economy-service"])
                 return
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
             if (minecraftProfile == null) {
                 event.player.sendMessage(plugin.messages["no-minecraft-profile"])
             } else {
@@ -130,7 +130,7 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-economy-service"])
                 return
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
             if (minecraftProfile == null) {
                 event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                 return

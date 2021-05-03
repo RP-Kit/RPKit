@@ -24,6 +24,7 @@ import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.groups
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import org.bukkit.entity.Player
 import org.bukkit.permissions.PermissionAttachment
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
@@ -138,15 +139,12 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
         }
     }
 
-    override fun unassignPermissions(minecraftProfile: RPKMinecraftProfile) {
-        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
-        if (bukkitPlayer != null) {
-            val minecraftProfileId = minecraftProfile.id ?: return
-            val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
-            if (permissionsAttachment != null) {
-                bukkitPlayer.removeAttachment(permissionsAttachment)
-                permissionsAttachments.remove(minecraftProfileId.value)
-            }
+    override fun unassignPermissions(minecraftProfile: RPKMinecraftProfile, bukkitPlayer: Player) {
+        val minecraftProfileId = minecraftProfile.id ?: return
+        val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
+        if (permissionsAttachment != null) {
+            bukkitPlayer.removeAttachment(permissionsAttachment)
+            permissionsAttachments.remove(minecraftProfileId.value)
         }
     }
 
