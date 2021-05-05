@@ -19,6 +19,7 @@ package com.rpkit.languages.bukkit.characterlanguage
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import com.rpkit.languages.bukkit.language.RPKLanguage
+import java.util.concurrent.CompletableFuture
 
 interface RPKCharacterLanguageService : Service {
 
@@ -32,7 +33,7 @@ interface RPKCharacterLanguageService : Service {
      * @param language The language
      * @return The character's understanding of a language. Minimum 0, maximum 100.
      */
-    fun getCharacterLanguageUnderstanding(character: RPKCharacter, language: RPKLanguage): Float
+    fun getCharacterLanguageUnderstanding(character: RPKCharacter, language: RPKLanguage): CompletableFuture<Float>
 
     /**
      * Sets a character's understanding of a language. The understanding must be a float, with a minimum value of 0 and
@@ -43,6 +44,6 @@ interface RPKCharacterLanguageService : Service {
      * @param language The language
      * @param understanding The character's understanding of the language. Minimum 0, maximum 100.
      */
-    fun setCharacterLanguageUnderstanding(character: RPKCharacter, language: RPKLanguage, understanding: Float)
+    fun setCharacterLanguageUnderstanding(character: RPKCharacter, language: RPKLanguage, understanding: Float): CompletableFuture<Void>
 
 }

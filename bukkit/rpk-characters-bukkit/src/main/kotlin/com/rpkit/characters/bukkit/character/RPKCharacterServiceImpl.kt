@@ -257,26 +257,30 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
     }
 
     override fun removeCharacter(character: RPKCharacter): CompletableFuture<Void> {
-        val event = RPKBukkitCharacterDeleteEvent(character, !plugin.server.isPrimaryThread)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(null)
-        val minecraftProfile = event.character.minecraftProfile
-        if (minecraftProfile != null) {
-            if (getActiveCharacter(minecraftProfile) == event.character) {
-                setActiveCharacter(minecraftProfile, null)
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitCharacterDeleteEvent(character, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val minecraftProfile = event.character.minecraftProfile
+            if (minecraftProfile != null) {
+                if (getActiveCharacter(minecraftProfile).join() == event.character) {
+                    setActiveCharacter(minecraftProfile, null).join()
+                }
             }
+            plugin.database.getTable(RPKCharacterTable::class.java).delete(event.character).join()
         }
-        return plugin.database.getTable(RPKCharacterTable::class.java).delete(event.character)
     }
 
     override fun updateCharacter(character: RPKCharacter): CompletableFuture<Void> {
-        if (plugin.config.getBoolean("characters.delete-character-on-death") && character.isDead) {
-            return removeCharacter(character)
-        } else {
-            val event = RPKBukkitCharacterUpdateEvent(character, !plugin.server.isPrimaryThread)
-            plugin.server.pluginManager.callEvent(event)
-            if (event.isCancelled) return CompletableFuture.completedFuture(null)
-            return plugin.database.getTable(RPKCharacterTable::class.java).update(event.character)
+        return CompletableFuture.runAsync {
+            if (plugin.config.getBoolean("characters.delete-character-on-death") && character.isDead) {
+                removeCharacter(character).join()
+            } else {
+                val event = RPKBukkitCharacterUpdateEvent(character, true)
+                plugin.server.pluginManager.callEvent(event)
+                if (event.isCancelled) return@runAsync
+                plugin.database.getTable(RPKCharacterTable::class.java).update(event.character).join()
+            }
         }
     }
 

@@ -46,16 +46,18 @@ class LanguageComponent : DirectedPreFormatPipelineComponent, ConfigurationSeria
                 ""
         )
         val characterLanguageService = Services[RPKCharacterLanguageService::class.java] ?: return CompletableFuture.completedFuture(context)
-        val senderUnderstanding = characterLanguageService.getCharacterLanguageUnderstanding(senderCharacter, language)
-        val receiverUnderstanding = characterLanguageService.getCharacterLanguageUnderstanding(receiverCharacter, language)
-        context.message = "[${language.name.value}] ${language.apply(message, senderUnderstanding, receiverUnderstanding)}"
-        if (receiverRace != null) {
-            characterLanguageService.setCharacterLanguageUnderstanding(
-                    receiverCharacter,
-                    language,
-                    receiverUnderstanding + language.randomUnderstandingIncrement(receiverRace))
-        }
-        return CompletableFuture.completedFuture(context)
+        return characterLanguageService.getCharacterLanguageUnderstanding(senderCharacter, language)
+            .thenCombineAsync(characterLanguageService.getCharacterLanguageUnderstanding(receiverCharacter, language)) { senderUnderstanding, receiverUnderstanding ->
+                context.message = "[${language.name.value}] ${language.apply(message, senderUnderstanding, receiverUnderstanding)}"
+                if (receiverRace != null) {
+                    characterLanguageService.setCharacterLanguageUnderstanding(
+                        receiverCharacter,
+                        language,
+                        receiverUnderstanding + language.randomUnderstandingIncrement(receiverRace)
+                    ).join()
+                }
+                return@thenCombineAsync context
+            }
     }
 
     override fun serialize(): MutableMap<String, Any> {
