@@ -24,28 +24,29 @@ class RPKLanguageServiceImpl(override val plugin: RPKLanguagesBukkit) : RPKLangu
             ?.map { languageName ->
                 RPKLanguageImpl(
                         RPKLanguageName(languageName),
-                        plugin.config.getConfigurationSection("languages.$languageName.default-race-understanding")
-                                ?.getKeys(false)
-                                ?.map { race -> Pair(race, plugin.config.getDouble("languages.$languageName.default-race-understanding.$race").toFloat()) }
-                                ?.toMap()
-                                ?: emptyMap(),
-                        plugin.config.getConfigurationSection("languages.$languageName.understanding-increment")
-                                ?.getKeys(false)
-                                ?.map { race -> Pair(race, plugin.config.getDouble("languages.$languageName.understanding-increment.$race.minimum").toFloat()) }
-                                ?.toMap()
-                                ?: emptyMap(),
-                        plugin.config.getConfigurationSection("languages.$languageName.understanding-increment")
-                                ?.getKeys(false)
-                                ?.map { race -> Pair(race, plugin.config.getDouble("languages.$languageName.understanding-increment.$race.maximum").toFloat()) }
-                                ?.toMap()
-                                ?: emptyMap(),
-                        plugin.config.getConfigurationSection("languages.$languageName.cypher")
-                                ?.getKeys(false)
-                                ?.map { key ->
-                                    Pair(key, plugin.config.getString("languages.$languageName.cypher.$key") ?: key)
-                                }
-                                ?.toMap()
-                                ?: emptyMap()
+                    plugin.config.getConfigurationSection("languages.$languageName.default-race-understanding")
+                        ?.getKeys(false)
+                        ?.associate { race ->
+                            race to plugin.config.getDouble("languages.$languageName.default-race-understanding.$race")
+                                .toFloat()
+                        } ?: emptyMap(),
+                    plugin.config.getConfigurationSection("languages.$languageName.understanding-increment")
+                        ?.getKeys(false)
+                        ?.associate { race ->
+                            race to plugin.config.getDouble("languages.$languageName.understanding-increment.$race.minimum")
+                                .toFloat()
+                        } ?: emptyMap(),
+                    plugin.config.getConfigurationSection("languages.$languageName.understanding-increment")
+                        ?.getKeys(false)
+                        ?.associate { race ->
+                            race to plugin.config.getDouble("languages.$languageName.understanding-increment.$race.maximum")
+                                .toFloat()
+                        } ?: emptyMap(),
+                    plugin.config.getConfigurationSection("languages.$languageName.cypher")
+                        ?.getKeys(false)
+                        ?.associate { key ->
+                            key to (plugin.config.getString("languages.$languageName.cypher.$key") ?: key)
+                        } ?: emptyMap()
                 )
             }
             ?: emptyList()
