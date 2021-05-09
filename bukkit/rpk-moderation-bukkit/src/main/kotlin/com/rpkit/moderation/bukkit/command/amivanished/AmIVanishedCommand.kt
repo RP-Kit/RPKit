@@ -51,10 +51,12 @@ class AmIVanishedCommand(private val plugin: RPKModerationBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        if (vanishService.isVanished(minecraftProfile)) {
-            sender.sendMessage(plugin.messages["amivanished-vanished"])
-        } else {
-            sender.sendMessage(plugin.messages["amivanished-unvanished"])
+        vanishService.isVanished(minecraftProfile).thenAccept { isVanished ->
+            if (isVanished) {
+                sender.sendMessage(plugin.messages["amivanished-vanished"])
+            } else {
+                sender.sendMessage(plugin.messages["amivanished-unvanished"])
+            }
         }
         return true
     }

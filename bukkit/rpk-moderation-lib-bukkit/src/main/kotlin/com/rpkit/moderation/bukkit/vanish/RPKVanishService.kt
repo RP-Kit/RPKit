@@ -18,6 +18,7 @@ package com.rpkit.moderation.bukkit.vanish
 
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides vanish related functionality
@@ -30,7 +31,7 @@ interface RPKVanishService : Service {
      * @param minecraftProfile The player to check
      * @return Whether the player is currently vanished
      */
-    fun isVanished(minecraftProfile: RPKMinecraftProfile): Boolean
+    fun isVanished(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Boolean>
 
     /**
      * Sets whether a player is vanished.
@@ -38,7 +39,7 @@ interface RPKVanishService : Service {
      * @param minecraftProfile The player
      * @param vanished Whether the player should be vanished
      */
-    fun setVanished(minecraftProfile: RPKMinecraftProfile, vanished: Boolean)
+    fun setVanished(minecraftProfile: RPKMinecraftProfile, vanished: Boolean): CompletableFuture<Void>
 
     /**
      * Checks if a player is able to see another player. This takes into account whether the player is vanished or not,
@@ -48,6 +49,6 @@ interface RPKVanishService : Service {
      * @param target The player being observed
      * @return Whether the observing player can currently see the target player
      */
-    fun canSee(observer: RPKMinecraftProfile, target: RPKMinecraftProfile): Boolean
+    fun canSee(observer: RPKMinecraftProfile, target: RPKMinecraftProfile): CompletableFuture<Boolean>
 
 }
