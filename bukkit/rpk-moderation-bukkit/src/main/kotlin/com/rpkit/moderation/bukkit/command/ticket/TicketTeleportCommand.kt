@@ -46,18 +46,21 @@ class TicketTeleportCommand(private val plugin: RPKModerationBukkit) : CommandEx
             return true
         }
         try {
-            val ticket = ticketService.getTicket(RPKTicketId(args[0].toInt()))
-            if (ticket == null) {
-                sender.sendMessage(plugin.messages["ticket-teleport-invalid-ticket"])
-                return true
+            ticketService.getTicket(RPKTicketId(args[0].toInt())).thenAccept { ticket ->
+                if (ticket == null) {
+                    sender.sendMessage(plugin.messages["ticket-teleport-invalid-ticket"])
+                    return@thenAccept
+                }
+                val location = ticket.location
+                if (location == null) {
+                    sender.sendMessage(plugin.messages["ticket-teleport-invalid-location"])
+                    return@thenAccept
+                }
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    sender.teleport(location)
+                    sender.sendMessage(plugin.messages["ticket-teleport-valid"])
+                })
             }
-            val location = ticket.location
-            if (location == null) {
-                sender.sendMessage(plugin.messages["ticket-teleport-invalid-location"])
-                return true
-            }
-            sender.teleport(location)
-            sender.sendMessage(plugin.messages["ticket-teleport-valid"])
         } catch (exception: NumberFormatException) {
             sender.sendMessage(plugin.messages["ticket-teleport-usage"])
         }

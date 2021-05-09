@@ -27,6 +27,7 @@ import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
 import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import org.bukkit.Location
+import java.util.concurrent.CompletableFuture
 
 
 class RPKTicketTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
@@ -42,48 +43,51 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
         null
     }
 
-    fun insert(entity: RPKTicket) {
-        val issuerId = entity.issuer.id ?: return
-        database.create
+    fun insert(entity: RPKTicket): CompletableFuture<Void> {
+        val issuerId = entity.issuer.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_TICKET,
-                        RPKIT_TICKET.REASON,
-                        RPKIT_TICKET.ISSUER_ID,
-                        RPKIT_TICKET.RESOLVER_ID,
-                        RPKIT_TICKET.WORLD,
-                        RPKIT_TICKET.X,
-                        RPKIT_TICKET.Y,
-                        RPKIT_TICKET.Z,
-                        RPKIT_TICKET.YAW,
-                        RPKIT_TICKET.PITCH,
-                        RPKIT_TICKET.OPEN_DATE,
-                        RPKIT_TICKET.CLOSE_DATE,
-                        RPKIT_TICKET.CLOSED
+                    RPKIT_TICKET,
+                    RPKIT_TICKET.REASON,
+                    RPKIT_TICKET.ISSUER_ID,
+                    RPKIT_TICKET.RESOLVER_ID,
+                    RPKIT_TICKET.WORLD,
+                    RPKIT_TICKET.X,
+                    RPKIT_TICKET.Y,
+                    RPKIT_TICKET.Z,
+                    RPKIT_TICKET.YAW,
+                    RPKIT_TICKET.PITCH,
+                    RPKIT_TICKET.OPEN_DATE,
+                    RPKIT_TICKET.CLOSE_DATE,
+                    RPKIT_TICKET.CLOSED
                 )
                 .values(
-                        entity.reason,
-                        issuerId.value,
-                        entity.resolver?.id?.value,
-                        entity.location?.world?.name,
-                        entity.location?.x,
-                        entity.location?.y,
-                        entity.location?.z,
-                        entity.location?.yaw?.toDouble(),
-                        entity.location?.pitch?.toDouble(),
-                        entity.openDate,
-                        entity.closeDate,
-                        entity.isClosed
+                    entity.reason,
+                    issuerId.value,
+                    entity.resolver?.id?.value,
+                    entity.location?.world?.name,
+                    entity.location?.x,
+                    entity.location?.y,
+                    entity.location?.z,
+                    entity.location?.yaw?.toDouble(),
+                    entity.location?.pitch?.toDouble(),
+                    entity.openDate,
+                    entity.closeDate,
+                    entity.isClosed
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKTicketId(id)
-        cache?.set(id, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKTicketId(id)
+            cache?.set(id, entity)
+        }
     }
 
-    fun update(entity: RPKTicket) {
-        val ticketId = entity.id ?: return
-        val issuerId = entity.issuer.id ?: return
-        database.create
+    fun update(entity: RPKTicket): CompletableFuture<Void> {
+        val ticketId = entity.id ?: return CompletableFuture.completedFuture(null)
+        val issuerId = entity.issuer.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_TICKET)
                 .set(RPKIT_TICKET.REASON, entity.reason)
                 .set(RPKIT_TICKET.ISSUER_ID, issuerId.value)
@@ -99,36 +103,39 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .set(RPKIT_TICKET.CLOSED, entity.isClosed)
                 .where(RPKIT_TICKET.ID.eq(ticketId.value))
                 .execute()
-        cache?.set(ticketId.value, entity)
+            cache?.set(ticketId.value, entity)
+        }
     }
 
-    operator fun get(id: RPKTicketId): RPKTicket? {
+    operator fun get(id: RPKTicketId): CompletableFuture<RPKTicket?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
-        } else {
+            return CompletableFuture.completedFuture(cache[id.value])
+        }
+        return CompletableFuture.supplyAsync {
             val result = database.create
-                    .select(
-                            RPKIT_TICKET.REASON,
-                            RPKIT_TICKET.ISSUER_ID,
-                            RPKIT_TICKET.RESOLVER_ID,
-                            RPKIT_TICKET.WORLD,
-                            RPKIT_TICKET.X,
-                            RPKIT_TICKET.Y,
-                            RPKIT_TICKET.Z,
-                            RPKIT_TICKET.YAW,
-                            RPKIT_TICKET.PITCH,
-                            RPKIT_TICKET.OPEN_DATE,
-                            RPKIT_TICKET.CLOSE_DATE,
-                            RPKIT_TICKET.CLOSED
-                    )
-                    .from(RPKIT_TICKET)
-                    .where(RPKIT_TICKET.ID.eq(id.value))
-                    .fetchOne() ?: return null
+                .select(
+                    RPKIT_TICKET.REASON,
+                    RPKIT_TICKET.ISSUER_ID,
+                    RPKIT_TICKET.RESOLVER_ID,
+                    RPKIT_TICKET.WORLD,
+                    RPKIT_TICKET.X,
+                    RPKIT_TICKET.Y,
+                    RPKIT_TICKET.Z,
+                    RPKIT_TICKET.YAW,
+                    RPKIT_TICKET.PITCH,
+                    RPKIT_TICKET.OPEN_DATE,
+                    RPKIT_TICKET.CLOSE_DATE,
+                    RPKIT_TICKET.CLOSED
+                )
+                .from(RPKIT_TICKET)
+                .where(RPKIT_TICKET.ID.eq(id.value))
+                .fetchOne() ?: return@supplyAsync null
             val profileService = Services[RPKProfileService::class.java]
             val issuerId = result[RPKIT_TICKET.ISSUER_ID]
             val issuer = if (issuerId == null) null else profileService?.getProfile(RPKProfileId(issuerId))?.join()
             val resolverId = result[RPKIT_TICKET.RESOLVER_ID]
-            val resolver = if (resolverId == null) null else profileService?.getProfile(RPKProfileId(resolverId))?.join()
+            val resolver =
+                if (resolverId == null) null else profileService?.getProfile(RPKProfileId(resolverId))?.join()
             val worldName = result[RPKIT_TICKET.WORLD]
             val world = if (worldName == null) null else plugin.server.getWorld(worldName)
             val x = result[RPKIT_TICKET.X]
@@ -138,64 +145,74 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
             val pitch = result[RPKIT_TICKET.PITCH]
             if (issuer != null) {
                 val ticket = RPKTicketImpl(
-                        RPKTicketId(id.value),
-                        result[RPKIT_TICKET.REASON],
-                        issuer,
-                        resolver,
-                        if (world == null || x == null || y == null || z == null || yaw == null || pitch == null) {
-                            null
-                        } else {
-                            Location(
-                                    world,
-                                    x,
-                                    y,
-                                    z,
-                                    yaw.toFloat(),
-                                    pitch.toFloat()
-                            )
-                        },
-                        result[RPKIT_TICKET.OPEN_DATE],
-                        result[RPKIT_TICKET.CLOSE_DATE],
-                        result[RPKIT_TICKET.CLOSED]
+                    RPKTicketId(id.value),
+                    result[RPKIT_TICKET.REASON],
+                    issuer,
+                    resolver,
+                    if (world == null || x == null || y == null || z == null || yaw == null || pitch == null) {
+                        null
+                    } else {
+                        Location(
+                            world,
+                            x,
+                            y,
+                            z,
+                            yaw.toFloat(),
+                            pitch.toFloat()
+                        )
+                    },
+                    result[RPKIT_TICKET.OPEN_DATE],
+                    result[RPKIT_TICKET.CLOSE_DATE],
+                    result[RPKIT_TICKET.CLOSED]
                 )
                 cache?.set(id.value, ticket)
-                return ticket
+                return@supplyAsync ticket
             } else {
                 database.create
-                        .deleteFrom(RPKIT_TICKET)
-                        .where(RPKIT_TICKET.ID.eq(id.value))
-                        .execute()
+                    .deleteFrom(RPKIT_TICKET)
+                    .where(RPKIT_TICKET.ID.eq(id.value))
+                    .execute()
                 cache?.remove(id.value)
-                return null
+                return@supplyAsync null
             }
         }
     }
 
-    fun delete(entity: RPKTicket) {
-        val ticketId = entity.id ?: return
-        database.create
+    fun delete(entity: RPKTicket): CompletableFuture<Void> {
+        val ticketId = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_TICKET)
                 .where(RPKIT_TICKET.ID.eq(ticketId.value))
                 .execute()
-        cache?.remove(ticketId.value)
+            cache?.remove(ticketId.value)
+        }
     }
 
-    fun getOpenTickets(): List<RPKTicket> {
-        val results = database.create
+    fun getOpenTickets(): CompletableFuture<List<RPKTicket>> {
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_TICKET.ID)
                 .from(RPKIT_TICKET)
                 .where(RPKIT_TICKET.CLOSED.eq(false))
                 .fetch()
-        return results.map { get(RPKTicketId(it[RPKIT_TICKET.ID])) }.filterNotNull()
+            val ticketFutures = results.map { get(RPKTicketId(it[RPKIT_TICKET.ID])) }
+            CompletableFuture.allOf(*ticketFutures.toTypedArray()).join()
+            return@supplyAsync ticketFutures.mapNotNull(CompletableFuture<RPKTicket?>::join)
+        }
     }
 
-    fun getClosedTickets(): List<RPKTicket> {
-        val results = database.create
+    fun getClosedTickets(): CompletableFuture<List<RPKTicket>> {
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_TICKET.ID)
                 .from(RPKIT_TICKET)
                 .where(RPKIT_TICKET.CLOSED.eq(true))
                 .fetch()
-        return results.map { get(RPKTicketId(it[RPKIT_TICKET.ID])) }.filterNotNull()
+            val ticketFutures = results.map { get(RPKTicketId(it[RPKIT_TICKET.ID])) }
+            CompletableFuture.allOf(*ticketFutures.toTypedArray()).join()
+            return@supplyAsync ticketFutures.mapNotNull(CompletableFuture<RPKTicket?>::join)
+        }
     }
 
 }

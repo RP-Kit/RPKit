@@ -31,7 +31,7 @@ interface RPKWarningService : Service {
      * @param id The ID
      * @return The warning
      */
-    fun getWarning(id: RPKWarningId): RPKWarning?
+    fun getWarning(id: RPKWarningId): CompletableFuture<RPKWarning?>
 
     /**
      * Gets warnings issued to a player.
@@ -39,7 +39,7 @@ interface RPKWarningService : Service {
      * @param profile The profile of the player
      * @return A list of warnings issued to the player
      */
-    fun getWarnings(profile: RPKProfile): List<RPKWarning>
+    fun getWarnings(profile: RPKProfile): CompletableFuture<List<RPKWarning>>
 
     /**
      * Adds a warning.
@@ -53,20 +53,20 @@ interface RPKWarningService : Service {
         profile: RPKProfile,
         issuer: RPKProfile,
         time: LocalDateTime
-    ): RPKWarning
+    ): CompletableFuture<RPKWarning>
 
     /**
      * Removes a warning.
      *
      * @param warning The warning to remove
      */
-    fun removeWarning(warning: RPKWarning)
+    fun removeWarning(warning: RPKWarning): CompletableFuture<Void>
 
     /**
      * Updates a warning
      *
      * @param warning the warning to update
      */
-    fun updateWarning(warning: RPKWarning)
+    fun updateWarning(warning: RPKWarning): CompletableFuture<Void>
 
 }

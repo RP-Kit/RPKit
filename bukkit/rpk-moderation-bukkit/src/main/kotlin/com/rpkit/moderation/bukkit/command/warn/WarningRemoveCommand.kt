@@ -61,21 +61,23 @@ class WarningRemoveCommand(private val plugin: RPKModerationBukkit) : CommandExe
             sender.sendMessage(plugin.messages["no-warning-service"])
             return true
         }
-        val warnings = warningService.getWarnings(targetProfile)
-        try {
-            val warningIndex = args[1].toInt()
-            if (warningIndex > warnings.size) {
+        warningService.getWarnings(targetProfile).thenAccept { warnings ->
+            try {
+                val warningIndex = args[1].toInt()
+                if (warningIndex > warnings.size) {
+                    sender.sendMessage(plugin.messages["warning-remove-invalid-index"])
+                    return@thenAccept
+                }
+                val warning = warnings[warningIndex - 1]
+                warningService.removeWarning(warning)
+                sender.sendMessage(plugin.messages["warning-remove-valid"])
+                return@thenAccept
+            } catch (exception: NumberFormatException) {
                 sender.sendMessage(plugin.messages["warning-remove-invalid-index"])
-                return true
+                return@thenAccept
             }
-            val warning = warnings[warningIndex - 1]
-            warningService.removeWarning(warning)
-            sender.sendMessage(plugin.messages["warning-remove-valid"])
-            return true
-        } catch (exception: NumberFormatException) {
-            sender.sendMessage(plugin.messages["warning-remove-invalid-index"])
-            return true
         }
+        return true
     }
 
 }

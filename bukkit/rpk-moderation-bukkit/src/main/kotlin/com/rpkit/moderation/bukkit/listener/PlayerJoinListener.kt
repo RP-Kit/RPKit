@@ -39,22 +39,28 @@ class PlayerJoinListener(private val plugin: RPKModerationBukkit) : Listener {
                     .forEach { player ->
                         minecraftProfileService.getMinecraftProfile(player).thenAccept { target ->
                             if (target != null) {
-                                if (!vanishService.canSee(observer, target)) {
-                                    plugin.server.scheduler.runTask(plugin, Runnable {
-                                        event.player.hidePlayer(plugin, player)
-                                    })
+                                vanishService.canSee(observer, target).thenAccept { canSee ->
+                                    if (!canSee) {
+                                        plugin.server.scheduler.runTask(plugin, Runnable {
+                                            event.player.hidePlayer(plugin, player)
+                                        })
+                                    }
                                 }
-                                if (!vanishService.canSee(target, observer)) {
-                                    plugin.server.scheduler.runTask(plugin, Runnable {
-                                        player.hidePlayer(plugin, event.player)
-                                    })
+                                vanishService.canSee(target, observer).thenAccept { canSee ->
+                                    if (!canSee) {
+                                        plugin.server.scheduler.runTask(plugin, Runnable {
+                                            player.hidePlayer(plugin, event.player)
+                                        })
+                                    }
                                 }
                             }
                         }
 
                     }
-                if (vanishService.isVanished(observer)) {
-                    event.player.sendMessage(plugin.messages["vanish-invisible"])
+                vanishService.isVanished(observer).thenAccept { isVanished ->
+                    if (isVanished) {
+                        event.player.sendMessage(plugin.messages["vanish-invisible"])
+                    }
                 }
             })
         }

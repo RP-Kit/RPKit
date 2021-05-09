@@ -69,11 +69,12 @@ class TicketCreateCommand(private val plugin: RPKModerationBukkit) : CommandExec
                 profile,
                 sender.location
         )
-        ticketService.addTicket(ticket)
-        sender.sendMessage(plugin.messages["ticket-create-valid", mapOf(
-            "id" to ticket.id.toString(),
-            "reason" to reason
-        )])
+        ticketService.addTicket(ticket).thenRun {
+            sender.sendMessage(plugin.messages["ticket-create-valid", mapOf(
+                "id" to ticket.id?.value.toString(),
+                "reason" to reason
+            )])
+        }
         return true
     }
 

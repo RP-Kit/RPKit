@@ -80,21 +80,24 @@ class WarningCreateCommand(private val plugin: RPKModerationBukkit) : CommandExe
             return true
         }
         val warning = RPKWarningImpl(warningReason, targetProfile, issuerProfile)
-        warningService.addWarning(warning)
-        sender.sendMessage(plugin.messages["warning-create-valid", mapOf(
-            "reason" to warningReason,
-            "issuer" to issuerProfile.name.value,
-            "profile" to targetProfile.name.value,
-            "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time),
-            "index" to warningService.getWarnings(targetProfile).size.toString()
-        )])
-        targetPlayer.sendMessage(plugin.messages["warning-received", mapOf(
-            "reason" to warningReason,
-            "issuer" to issuerProfile.name.value,
-            "profile" to targetProfile.name.value,
-            "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time),
-            "index" to warningService.getWarnings(targetProfile).size.toString()
-        )])
+        warningService.addWarning(warning).thenRun {
+            warningService.getWarnings(targetProfile).thenAccept { warnings ->
+                sender.sendMessage(plugin.messages["warning-create-valid", mapOf(
+                    "reason" to warningReason,
+                    "issuer" to issuerProfile.name.value,
+                    "profile" to targetProfile.name.value,
+                    "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time),
+                    "index" to warnings.size.toString()
+                )])
+                targetPlayer.sendMessage(plugin.messages["warning-received", mapOf(
+                    "reason" to warningReason,
+                    "issuer" to issuerProfile.name.value,
+                    "profile" to targetProfile.name.value,
+                    "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time),
+                    "index" to warnings.size.toString()
+                )])
+            }
+        }
         return true
     }
 
