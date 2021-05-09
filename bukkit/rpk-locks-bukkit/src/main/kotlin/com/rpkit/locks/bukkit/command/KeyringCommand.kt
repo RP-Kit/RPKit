@@ -62,10 +62,13 @@ class KeyringCommand(private val plugin: RPKLocksBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
-        val keyring = keyringService.getKeyring(character)
-        val inventory = plugin.server.createInventory(null, 27, "Keyring")
-        inventory.contents = keyring.toTypedArray()
-        sender.openInventory(inventory)
+        keyringService.getKeyring(character).thenAccept { keyring ->
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                val inventory = plugin.server.createInventory(null, 27, "Keyring")
+                inventory.contents = keyring.toTypedArray()
+                sender.openInventory(inventory)
+            })
+        }
         return true
     }
 }

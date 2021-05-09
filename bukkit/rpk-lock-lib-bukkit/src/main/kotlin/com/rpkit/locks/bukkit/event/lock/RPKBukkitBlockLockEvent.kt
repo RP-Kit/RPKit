@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitBlockLockEvent(
-        override val block: Block
-) : RPKBukkitEvent(), RPKBlockLockEvent, Cancellable {
+        override val block: Block,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKBlockLockEvent, Cancellable {
 
     companion object {
         @JvmStatic

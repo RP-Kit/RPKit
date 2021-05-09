@@ -1,4 +1,4 @@
-block-locked: '&cThe \$block appears to be locked. You would need the key to get in.'
+block-locked: '&cThe ${block} appears to be locked. You would need the key to get in.'
 crafting-no-keys: '&cYou may not use keys as a substitute for iron ingots.'
 keyring-invalid-item: '&cYou may not place non-key items on your keyring.'
 lock-successful: '&aBlock locked. You''ve been given the key. Please take good care of it.'

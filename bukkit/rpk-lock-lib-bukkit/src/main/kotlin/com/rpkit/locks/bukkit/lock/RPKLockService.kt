@@ -20,6 +20,7 @@ import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides lock related operations.
@@ -46,7 +47,7 @@ interface RPKLockService : Service {
      * @param block The block
      * @param locked Whether the block should be locked
      */
-    fun setLocked(block: Block, locked: Boolean)
+    fun setLocked(block: Block, locked: Boolean): CompletableFuture<Void>
 
     /**
      * Checks whether a Minecraft profile is currently locking a block.
@@ -76,7 +77,7 @@ interface RPKLockService : Service {
      * @param minecraftProfile The Minecraft profile
      * @param unclaiming Whether the Minecraft profile should be unclaiming
      */
-    fun setUnclaiming(minecraftProfile: RPKMinecraftProfile, unclaiming: Boolean)
+    fun setUnclaiming(minecraftProfile: RPKMinecraftProfile, unclaiming: Boolean): CompletableFuture<Void>
 
     /**
      * Checks whether a Minecraft profile is currently getting a key.
@@ -96,7 +97,7 @@ interface RPKLockService : Service {
      * @param minecraftProfile The Minecraft profile
      * @param gettingKey Whether the Minecraft profile should be getting a key
      */
-    fun setGettingKey(minecraftProfile: RPKMinecraftProfile, gettingKey: Boolean)
+    fun setGettingKey(minecraftProfile: RPKMinecraftProfile, gettingKey: Boolean): CompletableFuture<Void>
 
     /**
      * Gets the key item for a block, complete with location-specific lore.

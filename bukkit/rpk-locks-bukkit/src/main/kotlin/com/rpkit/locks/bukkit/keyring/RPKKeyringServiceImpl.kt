@@ -20,25 +20,52 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.database.table.RPKKeyringTable
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 
 class RPKKeyringServiceImpl(override val plugin: RPKLocksBukkit) : RPKKeyringService {
-    override fun getKeyring(character: RPKCharacter): MutableList<ItemStack> {
-        return plugin.database.getTable(RPKKeyringTable::class.java)[character]?.items?.toMutableList()
-                ?: mutableListOf()
+
+    private val keyrings = ConcurrentHashMap<Int, MutableList<ItemStack>>()
+
+    override fun getKeyring(character: RPKCharacter): CompletableFuture<MutableList<ItemStack>> {
+        val preloadedKeyring = getPreloadedKeyring(character)
+        if (preloadedKeyring != null) return CompletableFuture.completedFuture(preloadedKeyring)
+        return plugin.database.getTable(RPKKeyringTable::class.java)[character].thenApply {
+            it?.items?.toMutableList() ?: mutableListOf()
+        }
     }
 
-    override fun setKeyring(character: RPKCharacter, items: MutableList<ItemStack>) {
+    override fun setKeyring(character: RPKCharacter, items: MutableList<ItemStack>): CompletableFuture<Void> {
         val keyringTable = plugin.database.getTable(RPKKeyringTable::class.java)
-        var keyring = keyringTable.get(character)
-        if (keyring == null) {
-            keyring = RPKKeyring(character = character, items = items)
-            keyringTable.insert(keyring)
-        } else {
-            keyring.items.clear()
-            keyring.items.addAll(items)
-            keyringTable.update(keyring)
+        return keyringTable[character].thenAcceptAsync { keyring ->
+            if (keyring == null) {
+                keyringTable.insert(RPKKeyring(character = character, items = items)).join()
+            } else {
+                keyring.items.clear()
+                keyring.items.addAll(items)
+                keyringTable.update(keyring).join()
+            }
+            character.id?.value?.let { keyrings[it] = items }
         }
+    }
+
+    override fun loadKeyring(character: RPKCharacter): CompletableFuture<MutableList<ItemStack>> {
+        plugin.logger.info("Loading keyring for character ${character.name} (${character.id?.value})...")
+        return plugin.database.getTable(RPKKeyringTable::class.java)[character].thenApply { keyring ->
+            val items = keyring?.items ?: mutableListOf()
+            character.id?.value?.let { keyrings[it] = items }
+            plugin.logger.info("Loaded keyring for character ${character.name} (${character.id?.value})")
+            return@thenApply items
+        }
+    }
+
+    override fun unloadKeyring(character: RPKCharacter) {
+        character.id?.value?.let { keyrings.remove(it) }
+    }
+
+    override fun getPreloadedKeyring(character: RPKCharacter): MutableList<ItemStack>? {
+        return character.id?.value?.let { keyrings[it] }
     }
 
 }

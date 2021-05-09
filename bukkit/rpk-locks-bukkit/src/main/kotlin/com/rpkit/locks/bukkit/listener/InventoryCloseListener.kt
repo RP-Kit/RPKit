@@ -39,10 +39,8 @@ class InventoryCloseListener(private val plugin: RPKLocksBukkit) : Listener {
         if (bukkitPlayer !is Player) return
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer) ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
-        val keyring = keyringService.getKeyring(character)
-        keyring.clear()
-        keyring.addAll(event.inventory.contents.filterNotNull())
-        keyringService.setKeyring(character, keyring)
+        val contents = event.inventory.contents.filterNotNull()
+        keyringService.setKeyring(character, contents.toMutableList())
     }
 
 }

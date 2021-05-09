@@ -29,6 +29,9 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.concurrent.CopyOnWriteArrayList
 
 
 class RPKLockServiceImpl(override val plugin: RPKLocksBukkit) : RPKLockService {
@@ -38,28 +41,50 @@ class RPKLockServiceImpl(override val plugin: RPKLocksBukkit) : RPKLockService {
     val keyItem: ItemStack = plugin.config.getItemStack("key-item")
             ?: ItemStack(Material.IRON_INGOT).withDisplayName("Key")
 
+    private data class LockedBlockKey(
+        val world: String,
+        val x: Int,
+        val y: Int,
+        val z: Int
+    )
+
+    private val lockedBlocks = CopyOnWriteArrayList<LockedBlockKey>()
+    private val unclaiming = CopyOnWriteArrayList<Int>()
+    private val gettingKey = CopyOnWriteArrayList<Int>()
+
+    private fun Block.toLockedBlockKey() = LockedBlockKey(world.name, x, y, z)
+
     override fun isLocked(block: Block): Boolean {
-        return plugin.database.getTable(RPKLockedBlockTable::class.java).get(block) != null
+        return lockedBlocks.contains(block.toLockedBlockKey())
     }
 
-    override fun setLocked(block: Block, locked: Boolean) {
+    override fun setLocked(block: Block, locked: Boolean): CompletableFuture<Void> = runAsync {
         val lockedBlockTable = plugin.database.getTable(RPKLockedBlockTable::class.java)
         if (locked) {
-            val event = RPKBukkitBlockLockEvent(block)
+            val event = RPKBukkitBlockLockEvent(block, true)
             plugin.server.pluginManager.callEvent(event)
-            if (event.isCancelled) return
-            val lockedBlock = lockedBlockTable.get(event.block)
+            if (event.isCancelled) return@runAsync
+            val lockedBlock = lockedBlockTable[event.block].join()
             if (lockedBlock == null) {
-                lockedBlockTable.insert(RPKLockedBlock(block = event.block))
+                lockedBlockTable.insert(RPKLockedBlock(block = event.block)).join()
+                lockedBlocks.add(block.toLockedBlockKey())
             }
         } else {
-            val event = RPKBukkitBlockUnlockEvent(block)
+            val event = RPKBukkitBlockUnlockEvent(block, true)
             plugin.server.pluginManager.callEvent(event)
-            if (event.isCancelled) return
-            val lockedBlock = lockedBlockTable.get(event.block)
+            if (event.isCancelled) return@runAsync
+            val lockedBlock = lockedBlockTable[event.block].join()
             if (lockedBlock != null) {
-                lockedBlockTable.delete(lockedBlock)
+                lockedBlockTable.delete(lockedBlock).join()
+                lockedBlocks.remove(block.toLockedBlockKey())
             }
+        }
+    }
+
+    private fun loadLockedBlocks() {
+        plugin.database.getTable(RPKLockedBlockTable::class.java).getAll().thenAccept { blocks ->
+            lockedBlocks.addAll(blocks.map { it.block.toLockedBlockKey() })
+            plugin.logger.info("Loaded locked blocks")
         }
     }
 
@@ -75,40 +100,60 @@ class RPKLockServiceImpl(override val plugin: RPKLocksBukkit) : RPKLockService {
     }
 
     override fun isUnclaiming(minecraftProfile: RPKMinecraftProfile): Boolean {
-        return plugin.database.getTable(RPKPlayerUnclaimingTable::class.java)[minecraftProfile] != null
+        return minecraftProfile.id?.value?.let { unclaiming.contains(it) } ?: false
     }
 
-    override fun setUnclaiming(minecraftProfile: RPKMinecraftProfile, unclaiming: Boolean) {
-        val playerUnclaimingTable = plugin.database.getTable(RPKPlayerUnclaimingTable::class.java)
-        if (unclaiming) {
-            val playerUnclaiming = playerUnclaimingTable[minecraftProfile]
-            if (playerUnclaiming == null) {
-                playerUnclaimingTable.insert(RPKPlayerUnclaiming(minecraftProfile = minecraftProfile))
-            }
-        } else {
-            val playerUnclaiming = playerUnclaimingTable[minecraftProfile]
-            if (playerUnclaiming != null) {
-                playerUnclaimingTable.delete(playerUnclaiming)
+    override fun setUnclaiming(minecraftProfile: RPKMinecraftProfile, unclaiming: Boolean): CompletableFuture<Void> {
+        return runAsync {
+            val playerUnclaimingTable = plugin.database.getTable(RPKPlayerUnclaimingTable::class.java)
+            if (unclaiming) {
+                val playerUnclaiming = playerUnclaimingTable[minecraftProfile].join()
+                if (playerUnclaiming == null) {
+                    playerUnclaimingTable.insert(RPKPlayerUnclaiming(minecraftProfile = minecraftProfile)).join()
+                    minecraftProfile.id?.value?.let { this.unclaiming.add(it) }
+                }
+            } else {
+                val playerUnclaiming = playerUnclaimingTable[minecraftProfile].join()
+                if (playerUnclaiming != null) {
+                    playerUnclaimingTable.delete(playerUnclaiming).join()
+                    minecraftProfile.id?.value?.let { this.unclaiming.remove(it) }
+                }
             }
         }
     }
 
-    override fun isGettingKey(minecraftProfile: RPKMinecraftProfile): Boolean {
-        return plugin.database.getTable(RPKPlayerGettingKeyTable::class.java).get(minecraftProfile) != null
+    private fun loadUnclaiming() {
+        plugin.database.getTable(RPKPlayerUnclaimingTable::class.java).getAll().thenAccept { unclaimingPlayers ->
+            unclaiming.addAll(unclaimingPlayers.mapNotNull { it.minecraftProfile.id?.value })
+            plugin.logger.info("Loaded unclaiming players")
+        }
     }
 
-    override fun setGettingKey(minecraftProfile: RPKMinecraftProfile, gettingKey: Boolean) {
+    override fun isGettingKey(minecraftProfile: RPKMinecraftProfile): Boolean {
+        return minecraftProfile.id?.value?.let { gettingKey.contains(it) } ?: false
+    }
+
+    override fun setGettingKey(minecraftProfile: RPKMinecraftProfile, gettingKey: Boolean): CompletableFuture<Void> = runAsync {
         val playerGettingKeyTable = plugin.database.getTable(RPKPlayerGettingKeyTable::class.java)
         if (gettingKey) {
-            val playerGettingKey = playerGettingKeyTable.get(minecraftProfile)
+            val playerGettingKey = playerGettingKeyTable[minecraftProfile].join()
             if (playerGettingKey == null) {
-                playerGettingKeyTable.insert(RPKPlayerGettingKey(minecraftProfile = minecraftProfile))
+                playerGettingKeyTable.insert(RPKPlayerGettingKey(minecraftProfile = minecraftProfile)).join()
+                minecraftProfile.id?.value?.let { this.gettingKey.add(it) }
             }
         } else {
-            val playerGettingKey = playerGettingKeyTable.get(minecraftProfile)
+            val playerGettingKey = playerGettingKeyTable[minecraftProfile].join()
             if (playerGettingKey != null) {
-                playerGettingKeyTable.delete(playerGettingKey)
+                playerGettingKeyTable.delete(playerGettingKey).join()
+                minecraftProfile.id?.value?.let { this.gettingKey.remove(it) }
             }
+        }
+    }
+
+    private fun loadGettingKey() {
+        plugin.database.getTable(RPKPlayerGettingKeyTable::class.java).getAll().thenAccept { playersGettingKey ->
+            gettingKey.addAll(playersGettingKey.mapNotNull { it.minecraftProfile.id?.value})
+            plugin.logger.info("Loaded players getting key")
         }
     }
 
@@ -121,6 +166,12 @@ class RPKLockServiceImpl(override val plugin: RPKLocksBukkit) : RPKLockService {
         val key = ItemStack(item)
                 .withoutLoreMatching("\\w+,-?\\d+,-?\\d+,-?\\d+")
         return key.isSimilar(keyItem)
+    }
+
+    fun loadData() {
+        loadLockedBlocks()
+        loadGettingKey()
+        loadUnclaiming()
     }
 
 }
