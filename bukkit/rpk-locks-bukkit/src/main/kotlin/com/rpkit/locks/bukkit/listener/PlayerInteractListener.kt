@@ -90,11 +90,14 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
         } else if (lockService.isUnclaiming(minecraftProfile)) {
             if (block != null) {
                 if (hasKey(character, block)) {
-                    lockService.setLocked(block, false)
-                    event.player.sendMessage(plugin.messages["unlock-successful"])
-                    removeKey(character, block)
-                    event.player.inventory.addItem(lockService.lockItem)
-                    event.player.updateInventory()
+                    lockService.setLocked(block, false).thenRun {
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            event.player.sendMessage(plugin.messages["unlock-successful"])
+                            removeKey(character, block)
+                            event.player.inventory.addItem(lockService.lockItem)
+                            event.player.updateInventory()
+                        })
+                    }
                 } else {
                     event.player.sendMessage(plugin.messages["unlock-invalid-no-key"])
                 }
@@ -134,11 +137,12 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
             val bukkitPlayer = offlineBukkitPlayer.player
             if (bukkitPlayer != null) {
                 val inventory = bukkitPlayer.inventory
-                if (keyringService.getKeyring(character)
-                        .any { it.isSimilar(lockService.getKeyFor(block)) }) { return true }
-                if (inventory.contents
+                val inventoryContents = inventory.contents
+                return keyringService.getPreloadedKeyring(character)
+                        ?.any { it.isSimilar(lockService.getKeyFor(block)) } ?: false
+                            || inventoryContents
                         .filterNotNull()
-                        .any { it.isSimilar(lockService.getKeyFor(block)) }) return true
+                        .any { it.isSimilar(lockService.getKeyFor(block)) }
             }
         }
         return false
@@ -147,20 +151,22 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
     private fun removeKey(character: RPKCharacter, block: Block) {
         val lockService = Services[RPKLockService::class.java] ?: return
         val keyringService = Services[RPKKeyringService::class.java] ?: return
-        val keyring = keyringService.getKeyring(character)
-        val iterator = keyring.iterator()
-        while (iterator.hasNext()) {
-            val key = iterator.next()
-            if (key.isSimilar(lockService.getKeyFor(block))) {
-                if (key.amount > 1) {
-                    key.amount = key.amount - 1
-                } else {
-                    iterator.remove()
+        val keyring = keyringService.getPreloadedKeyring(character)
+        if (keyring != null) {
+            val iterator = keyring.iterator()
+            while (iterator.hasNext()) {
+                val key = iterator.next()
+                if (key.isSimilar(lockService.getKeyFor(block))) {
+                    if (key.amount > 1) {
+                        key.amount = key.amount - 1
+                    } else {
+                        iterator.remove()
+                    }
+                    return
                 }
-                return
             }
+            keyringService.setKeyring(character, keyring)
         }
-        keyringService.setKeyring(character, keyring)
         val minecraftProfile = character.minecraftProfile
         if (minecraftProfile != null) {
             val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
@@ -178,6 +184,5 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
                 }
             }
         }
-
     }
 }

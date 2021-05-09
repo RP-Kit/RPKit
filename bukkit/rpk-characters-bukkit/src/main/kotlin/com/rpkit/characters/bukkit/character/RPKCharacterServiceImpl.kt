@@ -112,11 +112,11 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
     }
 
     override fun setActiveCharacter(minecraftProfile: RPKMinecraftProfile, character: RPKCharacter?): CompletableFuture<Void> {
-        return getActiveCharacter(minecraftProfile).thenAccept { oldCharacter ->
+        return getActiveCharacter(minecraftProfile).thenAcceptAsync { oldCharacter ->
+            val event = RPKBukkitCharacterSwitchEvent(minecraftProfile, oldCharacter, character, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@thenAcceptAsync
             plugin.server.scheduler.runTask(plugin, Runnable {
-                val event = RPKBukkitCharacterSwitchEvent(minecraftProfile, oldCharacter, character, !plugin.server.isPrimaryThread)
-                plugin.server.pluginManager.callEvent(event)
-                if (event.isCancelled) return@Runnable
                 val newCharacter = event.character
                 if (oldCharacter != null) {
                     oldCharacter.minecraftProfile = null

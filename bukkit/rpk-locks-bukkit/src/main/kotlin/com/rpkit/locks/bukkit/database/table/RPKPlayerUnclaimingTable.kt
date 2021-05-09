@@ -17,11 +17,16 @@ package com.rpkit.locks.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.database.create
 import com.rpkit.locks.bukkit.database.jooq.Tables.RPKIT_PLAYER_UNCLAIMING
+import com.rpkit.locks.bukkit.database.jooq.tables.records.RpkitPlayerUnclaimingRecord
 import com.rpkit.locks.bukkit.lock.RPKPlayerUnclaiming
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import java.util.concurrent.CompletableFuture
 
 
 class RPKPlayerUnclaimingTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
@@ -37,43 +42,64 @@ class RPKPlayerUnclaimingTable(private val database: Database, private val plugi
         null
     }
 
-    fun insert(entity: RPKPlayerUnclaiming) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun insert(entity: RPKPlayerUnclaiming): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_PLAYER_UNCLAIMING,
-                        RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID
+                    RPKIT_PLAYER_UNCLAIMING,
+                    RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID
                 )
                 .values(
-                        minecraftProfileId.value
+                    minecraftProfileId.value
                 )
                 .execute()
-        cache?.set(minecraftProfileId.value, entity)
-    }
-
-    operator fun get(minecraftProfile: RPKMinecraftProfile): RPKPlayerUnclaiming? {
-        val minecraftProfileId = minecraftProfile.id ?: return null
-        if (cache?.containsKey(minecraftProfileId.value) == true) {
-            return cache[minecraftProfileId.value]
-        } else {
-            database.create
-                    .select(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID)
-                    .from(RPKIT_PLAYER_UNCLAIMING)
-                    .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-                    .fetchOne() ?: return null
-            val playerUnclaiming = RPKPlayerUnclaiming(minecraftProfile)
-            cache?.set(minecraftProfileId.value, playerUnclaiming)
-            return playerUnclaiming
+            cache?.set(minecraftProfileId.value, entity)
         }
     }
 
-    fun delete(entity: RPKPlayerUnclaiming) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    operator fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKPlayerUnclaiming?> {
+        val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        if (cache?.containsKey(minecraftProfileId.value) == true) {
+            return CompletableFuture.completedFuture(cache[minecraftProfileId.value])
+        } else {
+            return CompletableFuture.supplyAsync {
+                database.create
+                    .select(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID)
+                    .from(RPKIT_PLAYER_UNCLAIMING)
+                    .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+                    .fetchOne() ?: return@supplyAsync null
+                val playerUnclaiming = RPKPlayerUnclaiming(minecraftProfile)
+                cache?.set(minecraftProfileId.value, playerUnclaiming)
+                return@supplyAsync playerUnclaiming
+            }
+        }
+    }
+
+    fun getAll(): CompletableFuture<List<RPKPlayerUnclaiming>> {
+        return CompletableFuture.supplyAsync {
+            database.create
+                .selectFrom(RPKIT_PLAYER_UNCLAIMING)
+                .fetch()
+                .map { it.toDomain() }
+        }
+    }
+
+    fun delete(entity: RPKPlayerUnclaiming): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_PLAYER_UNCLAIMING)
                 .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.remove(minecraftProfileId.value)
+            cache?.remove(minecraftProfileId.value)
+        }
     }
+
+    private fun RpkitPlayerUnclaimingRecord.toDomain() = Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfile(
+        RPKMinecraftProfileId(minecraftProfileId)
+    )?.thenApply { minecraftProfile ->
+        minecraftProfile?.let { RPKPlayerUnclaiming(minecraftProfile = it) }
+    }?.join()
 
 }

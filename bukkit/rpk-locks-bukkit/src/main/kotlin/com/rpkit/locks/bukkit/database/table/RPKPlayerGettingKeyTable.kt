@@ -17,11 +17,16 @@ package com.rpkit.locks.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.database.create
 import com.rpkit.locks.bukkit.database.jooq.Tables.RPKIT_PLAYER_GETTING_KEY
+import com.rpkit.locks.bukkit.database.jooq.tables.records.RpkitPlayerGettingKeyRecord
 import com.rpkit.locks.bukkit.lock.RPKPlayerGettingKey
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import java.util.concurrent.CompletableFuture
 
 
 class RPKPlayerGettingKeyTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
@@ -37,43 +42,63 @@ class RPKPlayerGettingKeyTable(private val database: Database, private val plugi
         null
     }
 
-    fun insert(entity: RPKPlayerGettingKey) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun insert(entity: RPKPlayerGettingKey): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_PLAYER_GETTING_KEY,
-                        RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID
+                    RPKIT_PLAYER_GETTING_KEY,
+                    RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID
                 )
                 .values(minecraftProfileId.value)
                 .execute()
-        cache?.set(minecraftProfileId.value, entity)
-    }
-
-    operator fun get(minecraftProfile: RPKMinecraftProfile): RPKPlayerGettingKey? {
-        val minecraftProfileId = minecraftProfile.id ?: return null
-        if (cache?.containsKey(minecraftProfileId.value) == true) {
-            return cache[minecraftProfileId.value]
-        } else {
-            database.create
-                    .select(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID)
-                    .from(RPKIT_PLAYER_GETTING_KEY)
-                    .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-                    .fetchOne() ?: return null
-            val playerGettingKey = RPKPlayerGettingKey(
-                    minecraftProfile
-            )
-            cache?.set(minecraftProfileId.value, playerGettingKey)
-            return playerGettingKey
+            cache?.set(minecraftProfileId.value, entity)
         }
     }
 
-    fun delete(entity: RPKPlayerGettingKey) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    operator fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKPlayerGettingKey?> {
+        val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        if (cache?.containsKey(minecraftProfileId.value) == true) {
+            return CompletableFuture.completedFuture(cache[minecraftProfileId.value])
+        }
+        return CompletableFuture.supplyAsync {
+            database.create
+                .select(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID)
+                .from(RPKIT_PLAYER_GETTING_KEY)
+                .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+                .fetchOne() ?: return@supplyAsync null
+            val playerGettingKey = RPKPlayerGettingKey(
+                minecraftProfile
+            )
+            cache?.set(minecraftProfileId.value, playerGettingKey)
+            return@supplyAsync playerGettingKey
+        }
+    }
+
+    fun getAll(): CompletableFuture<List<RPKPlayerGettingKey>> {
+        return CompletableFuture.supplyAsync {
+            database.create
+                .selectFrom(RPKIT_PLAYER_GETTING_KEY)
+                .fetch()
+                .map { it.toDomain() }
+        }
+    }
+
+    fun delete(entity: RPKPlayerGettingKey): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
                 .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.remove(minecraftProfileId.value)
+            cache?.remove(minecraftProfileId.value)
+        }
     }
+
+    private fun RpkitPlayerGettingKeyRecord.toDomain() = Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfile(
+        RPKMinecraftProfileId(minecraftProfileId)
+    )?.thenApply { minecraftProfile ->
+        minecraftProfile?.let { RPKPlayerGettingKey(minecraftProfile = it) }
+    }?.join()
 
 }
