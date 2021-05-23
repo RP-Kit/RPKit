@@ -16,12 +16,18 @@
 package com.rpkit.statbuilds.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
 import com.rpkit.statbuilds.bukkit.database.create
 import com.rpkit.statbuilds.bukkit.database.jooq.Tables.RPKIT_CHARACTER_STAT_POINTS
+import com.rpkit.statbuilds.bukkit.database.jooq.tables.records.RpkitCharacterStatPointsRecord
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttribute
+import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeName
+import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
 import com.rpkit.statbuilds.bukkit.statbuild.RPKCharacterStatPoints
 import java.util.concurrent.CompletableFuture
 
@@ -97,6 +103,17 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
         }
     }
 
+    operator fun get(character: RPKCharacter): CompletableFuture<List<RPKCharacterStatPoints>> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.supplyAsync {
+            database.create
+                .selectFrom(RPKIT_CHARACTER_STAT_POINTS)
+                .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
+                .fetch()
+                .map { it.toDomain() }
+        }
+    }
+
     fun delete(entity: RPKCharacterStatPoints): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         return CompletableFuture.runAsync {
@@ -107,6 +124,18 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
                 .execute()
             cache?.remove(CharacterStatAttributeCacheKey(characterId.value, entity.statAttribute.name.value))
         }
+    }
+
+    private fun RpkitCharacterStatPointsRecord.toDomain(): RPKCharacterStatPoints? {
+        val character = Services[RPKCharacterService::class.java]?.getCharacter(RPKCharacterId(characterId))?.join() ?: return null
+        val statAttribute = Services[RPKStatAttributeService::class.java]?.getStatAttribute(
+            RPKStatAttributeName(statAttribute)
+        ) ?: return null
+        return RPKCharacterStatPoints(
+            character,
+            statAttribute,
+            points
+        )
     }
 
 }

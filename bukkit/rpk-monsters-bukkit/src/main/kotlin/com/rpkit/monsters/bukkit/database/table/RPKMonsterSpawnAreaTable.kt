@@ -22,8 +22,11 @@ import com.rpkit.monsters.bukkit.RPKMonstersBukkit
 import com.rpkit.monsters.bukkit.database.create
 import com.rpkit.monsters.bukkit.database.jooq.Tables.RPKIT_MONSTER_SPAWN_AREA
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnArea
+import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaId
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaImpl
+import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaMonster
 import org.bukkit.Location
+import java.util.concurrent.CompletableFuture
 
 
 class RPKMonsterSpawnAreaTable(private val database: Database, private val plugin: RPKMonstersBukkit) : Table {
@@ -42,60 +45,65 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
     private val allSpawnAreas = mutableSetOf<RPKMonsterSpawnArea>()
     private var allFetched = false
 
-    fun insert(entity: RPKMonsterSpawnArea) {
-        database.create
+    fun insert(entity: RPKMonsterSpawnArea): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_MONSTER_SPAWN_AREA,
-                        RPKIT_MONSTER_SPAWN_AREA.WORLD,
-                        RPKIT_MONSTER_SPAWN_AREA.MIN_X,
-                        RPKIT_MONSTER_SPAWN_AREA.MIN_Y,
-                        RPKIT_MONSTER_SPAWN_AREA.MIN_Z,
-                        RPKIT_MONSTER_SPAWN_AREA.MAX_X,
-                        RPKIT_MONSTER_SPAWN_AREA.MAX_Y,
-                        RPKIT_MONSTER_SPAWN_AREA.MAX_Z
+                    RPKIT_MONSTER_SPAWN_AREA,
+                    RPKIT_MONSTER_SPAWN_AREA.WORLD,
+                    RPKIT_MONSTER_SPAWN_AREA.MIN_X,
+                    RPKIT_MONSTER_SPAWN_AREA.MIN_Y,
+                    RPKIT_MONSTER_SPAWN_AREA.MIN_Z,
+                    RPKIT_MONSTER_SPAWN_AREA.MAX_X,
+                    RPKIT_MONSTER_SPAWN_AREA.MAX_Y,
+                    RPKIT_MONSTER_SPAWN_AREA.MAX_Z
                 )
                 .values(
-                        entity.minPoint.world?.name,
-                        entity.minPoint.blockX,
-                        entity.minPoint.blockY,
-                        entity.minPoint.blockZ,
-                        entity.maxPoint.blockX,
-                        entity.maxPoint.blockY,
-                        entity.maxPoint.blockZ
+                    entity.minPoint.world?.name,
+                    entity.minPoint.blockX,
+                    entity.minPoint.blockY,
+                    entity.minPoint.blockZ,
+                    entity.maxPoint.blockX,
+                    entity.maxPoint.blockY,
+                    entity.maxPoint.blockZ
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.set(id, entity)
-        if (!allSpawnAreas.contains(entity)) {
-            allSpawnAreas.add(entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKMonsterSpawnAreaId(id)
+            cache?.set(id, entity)
+            if (!allSpawnAreas.contains(entity)) {
+                allSpawnAreas.add(entity)
+            }
         }
     }
 
-    fun update(entity: RPKMonsterSpawnArea) {
-        val id = entity.id ?: return
-        database.create
-                .update(RPKIT_MONSTER_SPAWN_AREA)
-                .set(RPKIT_MONSTER_SPAWN_AREA.WORLD, entity.minPoint.world?.name)
-                .set(RPKIT_MONSTER_SPAWN_AREA.MIN_X, entity.minPoint.blockX)
-                .set(RPKIT_MONSTER_SPAWN_AREA.MIN_Y, entity.minPoint.blockY)
-                .set(RPKIT_MONSTER_SPAWN_AREA.MIN_Z, entity.minPoint.blockZ)
-                .set(RPKIT_MONSTER_SPAWN_AREA.MAX_X, entity.maxPoint.blockX)
-                .set(RPKIT_MONSTER_SPAWN_AREA.MAX_Y, entity.maxPoint.blockY)
-                .set(RPKIT_MONSTER_SPAWN_AREA.MAX_Z, entity.maxPoint.blockZ)
-                .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(id))
-                .execute()
-        cache?.set(id, entity)
-        if (!allSpawnAreas.contains(entity)) {
-            allSpawnAreas.add(entity)
+    fun update(entity: RPKMonsterSpawnArea): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
+            .update(RPKIT_MONSTER_SPAWN_AREA)
+            .set(RPKIT_MONSTER_SPAWN_AREA.WORLD, entity.minPoint.world?.name)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MIN_X, entity.minPoint.blockX)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MIN_Y, entity.minPoint.blockY)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MIN_Z, entity.minPoint.blockZ)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MAX_X, entity.maxPoint.blockX)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MAX_Y, entity.maxPoint.blockY)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MAX_Z, entity.maxPoint.blockZ)
+            .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(id.value))
+            .execute()
+            cache?.set(id.value, entity)
+            if (!allSpawnAreas.contains(entity)) {
+                allSpawnAreas.add(entity)
+            }
         }
     }
 
-    operator fun get(id: Int): RPKMonsterSpawnArea? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKMonsterSpawnAreaId): CompletableFuture<RPKMonsterSpawnArea?> {
+        if (cache?.containsKey(id.value) == true) {
+            return CompletableFuture.completedFuture(cache[id.value])
         }
-        val result = database.create.select(
+        return CompletableFuture.supplyAsync {
+            val result = database.create.select(
                 RPKIT_MONSTER_SPAWN_AREA.WORLD,
                 RPKIT_MONSTER_SPAWN_AREA.MIN_X,
                 RPKIT_MONSTER_SPAWN_AREA.MIN_Y,
@@ -103,52 +111,68 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
                 RPKIT_MONSTER_SPAWN_AREA.MAX_X,
                 RPKIT_MONSTER_SPAWN_AREA.MAX_Y,
                 RPKIT_MONSTER_SPAWN_AREA.MAX_Z
-        )
+            )
                 .from(RPKIT_MONSTER_SPAWN_AREA)
-                .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(id))
-                .fetchOne() ?: return null
-        val world = plugin.server.getWorld(result[RPKIT_MONSTER_SPAWN_AREA.WORLD])
-        val monsterSpawnArea = RPKMonsterSpawnAreaImpl(
+                .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(id.value))
+                .fetchOne() ?: return@supplyAsync null
+            val world = plugin.server.getWorld(result[RPKIT_MONSTER_SPAWN_AREA.WORLD])
+            val allowedMonsters = database.getTable(RPKMonsterSpawnAreaMonsterTable::class.java).get(id).join()
+            val minLevels = allowedMonsters.associate { monsterSpawnAreaMonster ->
+                monsterSpawnAreaMonster.entityType to monsterSpawnAreaMonster.minLevel
+            }.toMutableMap()
+            val maxLevels = allowedMonsters.associate { monsterSpawnAreaMonster ->
+                monsterSpawnAreaMonster.entityType to monsterSpawnAreaMonster.maxLevel
+            }.toMutableMap()
+            val monsterSpawnArea = RPKMonsterSpawnAreaImpl(
                 plugin,
                 id,
                 Location(
-                        world,
-                        result[RPKIT_MONSTER_SPAWN_AREA.MIN_X].toDouble(),
-                        result[RPKIT_MONSTER_SPAWN_AREA.MIN_Y].toDouble(),
-                        result[RPKIT_MONSTER_SPAWN_AREA.MIN_Z].toDouble()
+                    world,
+                    result[RPKIT_MONSTER_SPAWN_AREA.MIN_X].toDouble(),
+                    result[RPKIT_MONSTER_SPAWN_AREA.MIN_Y].toDouble(),
+                    result[RPKIT_MONSTER_SPAWN_AREA.MIN_Z].toDouble()
                 ),
                 Location(
-                        world,
-                        result[RPKIT_MONSTER_SPAWN_AREA.MAX_X].toDouble(),
-                        result[RPKIT_MONSTER_SPAWN_AREA.MAX_Y].toDouble(),
-                        result[RPKIT_MONSTER_SPAWN_AREA.MAX_Z].toDouble()
-                )
-        )
-        cache?.set(id, monsterSpawnArea)
-        if (!allSpawnAreas.contains(monsterSpawnArea)) {
-            allSpawnAreas.add(monsterSpawnArea)
+                    world,
+                    result[RPKIT_MONSTER_SPAWN_AREA.MAX_X].toDouble(),
+                    result[RPKIT_MONSTER_SPAWN_AREA.MAX_Y].toDouble(),
+                    result[RPKIT_MONSTER_SPAWN_AREA.MAX_Z].toDouble()
+                ),
+                allowedMonsters.mapTo(mutableSetOf(), RPKMonsterSpawnAreaMonster::entityType),
+                minLevels,
+                maxLevels
+            )
+            cache?.set(id.value, monsterSpawnArea)
+            if (!allSpawnAreas.contains(monsterSpawnArea)) {
+                allSpawnAreas.add(monsterSpawnArea)
+            }
+            return@supplyAsync monsterSpawnArea
         }
-        return monsterSpawnArea
     }
 
-    fun getAll(): List<RPKMonsterSpawnArea> {
-        if (allFetched) return allSpawnAreas.toList()
-        val results = database.create
+    fun getAll(): CompletableFuture<List<RPKMonsterSpawnArea>> {
+        if (allFetched) return CompletableFuture.completedFuture(allSpawnAreas.toList())
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_MONSTER_SPAWN_AREA.ID)
                 .from(RPKIT_MONSTER_SPAWN_AREA)
                 .fetch()
-        val spawnAreas = results.mapNotNull { get(it[RPKIT_MONSTER_SPAWN_AREA.ID]) }
-        allSpawnAreas.addAll(spawnAreas)
-        allFetched = true
-        return allSpawnAreas.toList()
+            val spawnAreaFutures = results.mapNotNull { get(RPKMonsterSpawnAreaId(it[RPKIT_MONSTER_SPAWN_AREA.ID])) }
+            CompletableFuture.allOf(*spawnAreaFutures.toTypedArray()).join()
+            allSpawnAreas.addAll(spawnAreaFutures.mapNotNull(CompletableFuture<RPKMonsterSpawnArea?>::join))
+            allFetched = true
+            return@supplyAsync allSpawnAreas.toList()
+        }
     }
 
-    fun delete(entity: RPKMonsterSpawnArea) {
-        database.create
+    fun delete(entity: RPKMonsterSpawnArea): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_MONSTER_SPAWN_AREA)
-                .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(entity.id))
+                .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(entity.id?.value))
                 .execute()
-        database.getTable(RPKMonsterSpawnAreaMonsterTable::class.java).delete(entity)
-        allSpawnAreas.remove(entity)
+            entity.id?.let { database.getTable(RPKMonsterSpawnAreaMonsterTable::class.java).delete(it).join() }
+            allSpawnAreas.remove(entity)
+        }
     }
 }

@@ -26,6 +26,9 @@ import com.rpkit.skills.bukkit.skills.RPKSkillPointService
 import com.rpkit.statbuilds.bukkit.command.statattribute.StatAttributeCommand
 import com.rpkit.statbuilds.bukkit.command.statbuild.StatBuildCommand
 import com.rpkit.statbuilds.bukkit.database.table.RPKCharacterStatPointsTable
+import com.rpkit.statbuilds.bukkit.listener.AsyncPlayerPreLoginListener
+import com.rpkit.statbuilds.bukkit.listener.PlayerQuitListener
+import com.rpkit.statbuilds.bukkit.listener.RPKCharacterSwitchListener
 import com.rpkit.statbuilds.bukkit.messages.StatBuildsMessages
 import com.rpkit.statbuilds.bukkit.skillpoint.RPKSkillPointServiceImpl
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
@@ -105,19 +108,26 @@ class RPKStatBuildsBukkit : RPKBukkitPlugin() {
                 statVariableService.addStatVariable(object : RPKStatVariable {
                     override val name = RPKStatVariableName(statAttribute.name.value)
                     override fun get(character: RPKCharacter) =
-                            statBuildService.getStatPoints(character, statAttribute).thenApply { statPoints ->
-                                statPoints.toDouble()
-                            }
+                            statBuildService.getPreloadedStatPoints(character, statAttribute)?.toDouble() ?: 0.0
                 })
             }
         }
 
         registerCommands()
+        registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("statbuild")?.setExecutor(StatBuildCommand(this))
         getCommand("statattribute")?.setExecutor(StatAttributeCommand(this))
+    }
+
+    private fun registerListeners() {
+        registerListeners(
+            AsyncPlayerPreLoginListener(),
+            PlayerQuitListener(),
+            RPKCharacterSwitchListener()
+        )
     }
 
 }

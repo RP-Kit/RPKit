@@ -24,6 +24,9 @@ import com.rpkit.classes.bukkit.classes.RPKClassServiceImpl
 import com.rpkit.classes.bukkit.command.`class`.ClassCommand
 import com.rpkit.classes.bukkit.database.table.RPKCharacterClassTable
 import com.rpkit.classes.bukkit.database.table.RPKClassExperienceTable
+import com.rpkit.classes.bukkit.listener.AsyncPlayerPreLoginListener
+import com.rpkit.classes.bukkit.listener.PlayerQuitListener
+import com.rpkit.classes.bukkit.listener.RPKCharacterSwitchListener
 import com.rpkit.classes.bukkit.messages.ClassesMessages
 import com.rpkit.classes.bukkit.skillpoint.RPKSkillPointServiceImpl
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
@@ -39,7 +42,6 @@ import com.rpkit.stats.bukkit.stat.RPKStatVariableService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
-import java.util.concurrent.CompletableFuture
 
 
 class RPKClassesBukkit : RPKBukkitPlugin() {
@@ -113,15 +115,13 @@ class RPKClassesBukkit : RPKBukkitPlugin() {
                             statVariableService.addStatVariable(object : RPKStatVariable {
                                 override val name = RPKStatVariableName(statVariableName)
 
-                                override fun get(character: RPKCharacter): CompletableFuture<Double> {
-                                    return CompletableFuture.supplyAsync {
-                                        val `class` = classService.getClass(character).join()
-                                        return@supplyAsync `class`?.getStatVariableValue(
-                                            this,
-                                            classService.getLevel(character, `class`).join()
-                                        )?.toDouble()
-                                            ?: 0.0
-                                    }
+                                override fun get(character: RPKCharacter): Double {
+                                    val `class` = classService.getPreloadedClass(character)
+                                    return `class`?.getStatVariableValue(
+                                        this,
+                                        classService.getLevel(character, `class`).join()
+                                    )?.toDouble()
+                                        ?: 0.0
                                 }
                             })
                         }
@@ -133,10 +133,19 @@ class RPKClassesBukkit : RPKBukkitPlugin() {
         }
 
         registerCommands()
+        registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("class")?.setExecutor(ClassCommand(this))
+    }
+
+    private fun registerListeners() {
+        registerListeners(
+            AsyncPlayerPreLoginListener(),
+            PlayerQuitListener(),
+            RPKCharacterSwitchListener()
+        )
     }
 
 }

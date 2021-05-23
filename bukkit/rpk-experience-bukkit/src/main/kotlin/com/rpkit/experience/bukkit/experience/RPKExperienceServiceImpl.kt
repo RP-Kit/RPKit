@@ -22,18 +22,17 @@ import com.rpkit.experience.bukkit.RPKExperienceBukkit
 import com.rpkit.experience.bukkit.database.table.RPKExperienceTable
 import com.rpkit.experience.bukkit.event.experience.RPKBukkitExperienceChangeEvent
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 
 class RPKExperienceServiceImpl(override val plugin: RPKExperienceBukkit) : RPKExperienceService {
 
+    private val experience = ConcurrentHashMap<Int, Int>()
+
     override fun getLevel(character: RPKCharacter): CompletableFuture<Int> {
         return CompletableFuture.supplyAsync {
             val experience = getExperience(character).join()
-            var level = 1
-            while (level + 1 <= plugin.config.getInt("levels.max-level") && getExperienceNeededForLevel(level + 1) <= experience) {
-                level++
-            }
-            return@supplyAsync level
+            return@supplyAsync getLevel(experience)
         }
     }
 
@@ -42,6 +41,8 @@ class RPKExperienceServiceImpl(override val plugin: RPKExperienceBukkit) : RPKEx
     }
 
     override fun getExperience(character: RPKCharacter): CompletableFuture<Int> {
+        val preloadedExperience = getPreloadedExperience(character)
+        if (preloadedExperience != null) return CompletableFuture.completedFuture(preloadedExperience)
         return CompletableFuture.supplyAsync {
             val experienceTable = plugin.database.getTable(RPKExperienceTable::class.java)
             val experienceValue = experienceTable[character]
@@ -83,7 +84,12 @@ class RPKExperienceServiceImpl(override val plugin: RPKExperienceBukkit) : RPKEx
                                 }
                             }
                         })
-
+                        if (minecraftProfile.isOnline) {
+                            val characterId = character.id
+                            if (characterId != null) {
+                                this.experience[characterId.value] = experience
+                            }
+                        }
                     }
                 }
 
@@ -97,6 +103,43 @@ class RPKExperienceServiceImpl(override val plugin: RPKExperienceBukkit) : RPKEx
         return expression.parseInt(mapOf(
             "level" to level.toDouble()
         )) ?: Int.MAX_VALUE
+    }
+
+    override fun loadExperience(character: RPKCharacter): CompletableFuture<Int> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(0)
+        val preloadedExperience = experience[characterId.value]
+        if (preloadedExperience != null) return CompletableFuture.completedFuture(preloadedExperience)
+        val experienceFuture = plugin.database.getTable(RPKExperienceTable::class.java)[character]
+        plugin.logger.info("Loading experience for character ${character.name} (${characterId.value})...")
+        experienceFuture.thenAccept { experience ->
+            if (experience == null) return@thenAccept
+            this.experience[characterId.value] = experience.value
+            plugin.logger.info("Loaded experience for character ${character.name} (${characterId.value}): ${experience.value}")
+        }
+        return experienceFuture.thenApply { it?.value }
+    }
+
+    override fun unloadExperience(character: RPKCharacter) {
+        val characterId = character.id ?: return
+        experience.remove(characterId.value)
+        plugin.logger.info("Unloaded experience for character ${character.name} (${characterId.value})")
+    }
+
+    override fun getPreloadedExperience(character: RPKCharacter): Int? {
+        val characterId = character.id ?: return null
+        return experience[characterId.value]
+    }
+
+    override fun getPreloadedLevel(character: RPKCharacter): Int? {
+        return getPreloadedExperience(character)?.let(::getLevel)
+    }
+
+    private fun getLevel(experience: Int): Int {
+        var level = 1
+        while (level + 1 <= plugin.config.getInt("levels.max-level") && getExperienceNeededForLevel(level + 1) <= experience) {
+            level++
+        }
+        return level
     }
 
 }

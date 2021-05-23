@@ -89,20 +89,19 @@ class StatBuildAssignPointCommand(private val plugin: RPKStatBuildsBukkit) : Com
                 return@getUnassignedStatPoints
             }
             statBuildService.getStatPoints(character, statAttribute).thenAccept getStatPoints@{ assignedStatPoints ->
-                statBuildService.getMaxStatPoints(character, statAttribute).thenAccept getMaxStatPoints@{ maxStatPoints ->
-                    if (assignedStatPoints + points > maxStatPoints) {
-                        sender.sendMessage(plugin.messages["stat-build-assign-point-invalid-points-too-many-in-stat"])
-                        return@getMaxStatPoints
-                    }
-                    statBuildService.setStatPoints(character, statAttribute, assignedStatPoints + points)
-                    sender.sendMessage(plugin.messages["stat-build-assign-point-valid", mapOf(
-                        "character" to character.name,
-                        "stat_attribute" to statAttribute.name.value,
-                        "points" to points.toString(),
-                        "total_points" to statBuildService.getStatPoints(character, statAttribute).toString(),
-                        "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
-                    )])
+                val maxStatPoints = statBuildService.getMaxStatPoints(character, statAttribute)
+                if (assignedStatPoints + points > maxStatPoints) {
+                    sender.sendMessage(plugin.messages["stat-build-assign-point-invalid-points-too-many-in-stat"])
+                    return@getStatPoints
                 }
+                statBuildService.setStatPoints(character, statAttribute, assignedStatPoints + points)
+                sender.sendMessage(plugin.messages["stat-build-assign-point-valid", mapOf(
+                    "character" to character.name,
+                    "stat_attribute" to statAttribute.name.value,
+                    "points" to points.toString(),
+                    "total_points" to statBuildService.getStatPoints(character, statAttribute).toString(),
+                    "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
+                )])
             }
 
         }

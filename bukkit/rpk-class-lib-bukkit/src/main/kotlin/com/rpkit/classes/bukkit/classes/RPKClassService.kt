@@ -26,9 +26,16 @@ interface RPKClassService : Service {
     fun getClass(name: RPKClassName): RPKClass?
     fun getClass(character: RPKCharacter): CompletableFuture<RPKClass?>
     fun setClass(character: RPKCharacter, `class`: RPKClass): CompletableFuture<Void>
+    fun getPreloadedClass(character: RPKCharacter): RPKClass?
+    fun loadClass(character: RPKCharacter): CompletableFuture<RPKClass?>
+    fun unloadClass(character: RPKCharacter)
     fun getLevel(character: RPKCharacter, `class`: RPKClass): CompletableFuture<Int>
     fun setLevel(character: RPKCharacter, `class`: RPKClass, level: Int): CompletableFuture<Void>
+    fun getPreloadedLevel(character: RPKCharacter, `class`: RPKClass): Int?
     fun getExperience(character: RPKCharacter, `class`: RPKClass): CompletableFuture<Int>
     fun setExperience(character: RPKCharacter, `class`: RPKClass, experience: Int): CompletableFuture<Void>
+    fun getPreloadedExperience(character: RPKCharacter, `class`: RPKClass): Int?
+    fun loadExperience(character: RPKCharacter, `class`: RPKClass): CompletableFuture<Int>
+    fun unloadExperience(character: RPKCharacter, `class`: RPKClass)
 
 }

@@ -18,17 +18,18 @@ package com.rpkit.monsters.bukkit.monsterspawnarea
 
 import org.bukkit.Location
 import org.bukkit.entity.EntityType
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKMonsterSpawnArea {
 
-    var id: Int?
+    var id: com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaId?
     val minPoint: Location
     val maxPoint: Location
     val allowedMonsters: Set<EntityType>
     fun getMinLevel(entityType: EntityType): Int
     fun getMaxLevel(entityType: EntityType): Int
-    fun addMonster(entityType: EntityType, minLevel: Int, maxLevel: Int)
-    fun removeMonster(entityType: EntityType)
+    fun addMonster(entityType: EntityType, minLevel: Int, maxLevel: Int): CompletableFuture<Void>
+    fun removeMonster(entityType: EntityType): CompletableFuture<Void>
 
 }

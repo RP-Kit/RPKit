@@ -19,12 +19,16 @@ package com.rpkit.monsters.bukkit.monsterspawnarea
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
 import com.rpkit.monsters.bukkit.database.table.RPKMonsterSpawnAreaTable
 import org.bukkit.Location
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CopyOnWriteArrayList
 
 
 class RPKMonsterSpawnAreaServiceImpl(override val plugin: RPKMonstersBukkit) : RPKMonsterSpawnAreaService {
 
+    private val spawnAreas = CopyOnWriteArrayList<RPKMonsterSpawnArea>()
+
     override fun getSpawnArea(location: Location): RPKMonsterSpawnArea? {
-        return plugin.database.getTable(RPKMonsterSpawnAreaTable::class.java).getAll().firstOrNull { spawnArea ->
+        return spawnAreas.firstOrNull { spawnArea ->
             location.world == spawnArea.minPoint.world
                     && location.x >= spawnArea.minPoint.x
                     && location.y >= spawnArea.minPoint.y
@@ -35,12 +39,24 @@ class RPKMonsterSpawnAreaServiceImpl(override val plugin: RPKMonstersBukkit) : R
         }
     }
 
-    override fun addSpawnArea(monsterSpawnArea: RPKMonsterSpawnArea) {
-        plugin.database.getTable(RPKMonsterSpawnAreaTable::class.java).insert(monsterSpawnArea)
+    override fun addSpawnArea(monsterSpawnArea: RPKMonsterSpawnArea): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKMonsterSpawnAreaTable::class.java).insert(monsterSpawnArea).thenRun {
+            spawnAreas.add(monsterSpawnArea)
+        }
     }
 
-    override fun removeSpawnArea(monsterSpawnArea: RPKMonsterSpawnArea) {
-        plugin.database.getTable(RPKMonsterSpawnAreaTable::class.java).delete(monsterSpawnArea)
+    override fun removeSpawnArea(monsterSpawnArea: RPKMonsterSpawnArea): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKMonsterSpawnAreaTable::class.java).delete(monsterSpawnArea).thenRun {
+            spawnAreas.remove(monsterSpawnArea)
+        }
+    }
+
+    fun loadSpawnAreas() {
+        plugin.database.getTable(RPKMonsterSpawnAreaTable::class.java).getAll().thenAccept {
+            spawnAreas.clear()
+            spawnAreas.addAll(it)
+            plugin.logger.info("Loaded monster spawn areas")
+        }
     }
 
 }

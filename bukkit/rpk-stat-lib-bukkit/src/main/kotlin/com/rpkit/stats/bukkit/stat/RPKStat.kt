@@ -40,6 +40,6 @@ interface RPKStat {
      * @param variables A list containing all variables required to get the stat.
      *                  Usually [RPKStatVariableService.statVariables]
      */
-    fun get(character: RPKCharacter, variables: List<RPKStatVariable>): CompletableFuture<Int>
+    fun get(character: RPKCharacter, variables: List<RPKStatVariable>): Int
 
 }

@@ -56,7 +56,7 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
                 experienceService.getLevel(character).thenAccept sendExperienceAndDropMoney@{ characterLevel ->
                     damager.sendMessage(plugin.messages["experience-gained", mapOf(
                         "experience_gained" to experience.toString(),
-                        "experience" to (characterExperience - experienceService.getExperienceNeededForLevel(characterLevel)).toString(),
+                        "experience" to (characterExperience + experience - experienceService.getExperienceNeededForLevel(characterLevel)).toString(),
                         "required_experience" to experienceService.getExperienceNeededForLevel(characterLevel + 1).toString()
                     )])
                     val currencyService = Services[RPKCurrencyService::class.java] ?: return@sendExperienceAndDropMoney

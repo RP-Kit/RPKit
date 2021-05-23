@@ -24,7 +24,6 @@ import com.rpkit.stats.bukkit.messages.StatsMessages
 import com.rpkit.stats.bukkit.stat.*
 import org.bstats.bukkit.Metrics
 import org.bukkit.attribute.Attribute
-import java.util.concurrent.CompletableFuture
 
 /**
  * RPK stats plugin default implementation.
@@ -47,75 +46,74 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
         Services[RPKStatService::class.java] = statService
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = RPKStatVariableName("minecraftLevel")
-            override fun get(character: RPKCharacter): CompletableFuture<Double> {
+            override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 if (minecraftProfile != null) {
-                    return CompletableFuture.completedFuture(server.getPlayer(minecraftProfile.minecraftUUID)?.level?.toDouble() ?: 0.0)
+                    return server.getPlayer(minecraftProfile.minecraftUUID)?.level?.toDouble() ?: 0.0
                 }
-                return CompletableFuture.completedFuture(0.0)
+                return 0.0
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = RPKStatVariableName("characterAge")
-            override fun get(character: RPKCharacter): CompletableFuture<Double> {
-                return CompletableFuture.completedFuture(character.age.toDouble())
+            override fun get(character: RPKCharacter): Double {
+                return character.age.toDouble()
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = RPKStatVariableName("characterHealth")
-            override fun get(character: RPKCharacter): CompletableFuture<Double> {
+            override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
                     if (Services[RPKCharacterService::class.java]?.getActiveCharacter(minecraftProfile) == character) {
                         val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
-                        CompletableFuture.completedFuture(bukkitPlayer?.health ?: character.health)
+                        bukkitPlayer?.health ?: character.health
                     } else {
-                        CompletableFuture.completedFuture(character.health)
+                        character.health
                     }
                 } else {
-                    CompletableFuture.completedFuture(character.health)
+                    character.health
                 }
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = RPKStatVariableName("characterMaxHealth")
-            override fun get(character: RPKCharacter): CompletableFuture<Double> {
+            override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
                     if (Services[RPKCharacterService::class.java]?.getActiveCharacter(minecraftProfile) == character) {
                         val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
                         if (bukkitPlayer != null) {
-                            CompletableFuture.completedFuture(bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: character.maxHealth)
+                            bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: character.maxHealth
                         } else {
-                            CompletableFuture.completedFuture(character.maxHealth)
+                            character.maxHealth
                         }
                     } else {
-                        CompletableFuture.completedFuture(character.maxHealth)
+                        character.maxHealth
                     }
                 } else {
-                    CompletableFuture.completedFuture(character.maxHealth)
+                    character.maxHealth
                 }
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = RPKStatVariableName("characterMana")
-            override fun get(character: RPKCharacter): CompletableFuture<Double> {
-                return CompletableFuture.completedFuture(character.mana.toDouble())
+            override fun get(character: RPKCharacter): Double {
+                return character.mana.toDouble()
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = RPKStatVariableName("characterMaxMana")
-            override fun get(character: RPKCharacter): CompletableFuture<Double> {
-                return CompletableFuture.completedFuture(character.maxMana.toDouble())
+            override fun get(character: RPKCharacter): Double {
+                return character.maxMana.toDouble()
             }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = RPKStatVariableName("characterFoodLevel")
-            override fun get(character: RPKCharacter): CompletableFuture<Double> {
+            override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
-                return CompletableFuture.supplyAsync {
-                    if (minecraftProfile != null) {
-                        if (Services[RPKCharacterService::class.java]?.getActiveCharacter(minecraftProfile)?.join() == character) {
+                return if (minecraftProfile != null) {
+                        if (Services[RPKCharacterService::class.java]?.getPreloadedActiveCharacter(minecraftProfile) == character) {
                             val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
                             bukkitPlayer?.foodLevel?.toDouble() ?: character.foodLevel.toDouble()
                         } else {
@@ -125,19 +123,18 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
                         character.foodLevel.toDouble()
                     }
                 }
-            }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = RPKStatVariableName("characterThirstLevel")
-            override fun get(character: RPKCharacter): CompletableFuture<Double> {
-                return CompletableFuture.completedFuture(character.thirstLevel.toDouble())
+            override fun get(character: RPKCharacter): Double {
+                return character.thirstLevel.toDouble()
             }
         })
 
         registerCommands()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("stats")?.setExecutor(StatsCommand(this))
     }
 
