@@ -25,8 +25,9 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitPaymentGroupMemberRemoveEvent(
         override val paymentGroup: RPKPaymentGroup,
-        override val character: RPKCharacter
-) : RPKBukkitEvent(), RPKPaymentGroupMemberRemoveEvent, Cancellable {
+        override val character: RPKCharacter,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKPaymentGroupMemberRemoveEvent, Cancellable {
 
     companion object {
         @JvmStatic

@@ -33,20 +33,22 @@ class RPKPaymentGroupOwnerTable(
         private val database: Database
 ) : Table {
 
-    fun insert(entity: RPKPaymentGroupOwner) {
-        val paymentGroupId = entity.paymentGroup.id ?: return
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKPaymentGroupOwner): CompletableFuture<Void> {
+        val paymentGroupId = entity.paymentGroup.id ?: return CompletableFuture.completedFuture(null)
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_PAYMENT_GROUP_OWNER,
-                        RPKIT_PAYMENT_GROUP_OWNER.PAYMENT_GROUP_ID,
-                        RPKIT_PAYMENT_GROUP_OWNER.CHARACTER_ID
+                    RPKIT_PAYMENT_GROUP_OWNER,
+                    RPKIT_PAYMENT_GROUP_OWNER.PAYMENT_GROUP_ID,
+                    RPKIT_PAYMENT_GROUP_OWNER.CHARACTER_ID
                 )
                 .values(
-                        paymentGroupId.value,
-                        characterId.value
+                    paymentGroupId.value,
+                    characterId.value
                 )
                 .execute()
+        }
     }
 
     operator fun get(paymentGroup: RPKPaymentGroup): CompletableFuture<List<RPKPaymentGroupOwner>> {

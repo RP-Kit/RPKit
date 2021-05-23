@@ -53,7 +53,7 @@ interface RPKPaymentNotificationService : Service {
      *
      * @param paymentNotification The payment notification to add
      */
-    fun addPaymentNotification(paymentNotification: RPKPaymentNotification)
+    fun addPaymentNotification(paymentNotification: RPKPaymentNotification): CompletableFuture<Void>
 
     fun createPaymentNotification(
         group: RPKPaymentGroup,
@@ -61,20 +61,20 @@ interface RPKPaymentNotificationService : Service {
         character: RPKCharacter,
         date: LocalDateTime,
         text: String
-    ): RPKPaymentNotification
+    ): CompletableFuture<RPKPaymentNotification>
 
     /**
      * Removes a payment notification from being tracked by this payment notification service.
      *
      * @param paymentNotification The payment notification to remove
      */
-    fun removePaymentNotification(paymentNotification: RPKPaymentNotification)
+    fun removePaymentNotification(paymentNotification: RPKPaymentNotification): CompletableFuture<Void>
 
     /**
      * Updates a payment notification's state in data storage.
      *
      * @param paymentNotification The payment notification to update
      */
-    fun updatePaymentNotification(paymentNotification: RPKPaymentNotification)
+    fun updatePaymentNotification(paymentNotification: RPKPaymentNotification): CompletableFuture<Void>
 
 }

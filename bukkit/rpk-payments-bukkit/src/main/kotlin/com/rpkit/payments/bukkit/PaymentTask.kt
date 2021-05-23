@@ -36,8 +36,8 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
         if (paymentGroupService == null) return
         if (bankService == null) return
         if (paymentNotificationService == null) return
-        paymentGroupService.paymentGroups
-                .filter { group -> group.lastPaymentTime + group.interval < LocalDateTime.now() }
+        paymentGroupService.paymentGroups.thenAccept { paymentGroups ->
+            paymentGroups.filter { group -> group.lastPaymentTime + group.interval < LocalDateTime.now() }
                 .forEach { group ->
                     val currency = group.currency
                     if (currency != null) {
@@ -49,10 +49,8 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                         if (bankBalance >= -group.amount) { // If character has enough money
                                             bankService.setBalance(member, currency, bankBalance + group.amount)
                                                 .thenRun {
-                                                    plugin.server.scheduler.runTask(plugin, Runnable {
-                                                        group.balance -= group.amount
-                                                        paymentGroupService.updatePaymentGroup(group)
-                                                    })
+                                                    group.balance -= group.amount
+                                                    paymentGroupService.updatePaymentGroup(group)
                                                 }
                                         } else { // If character doesn't have enough money
                                             // Send notification to member
@@ -84,17 +82,15 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                             group.owners.thenAccept { owners ->
                                                 owners.forEach { owner ->
                                                     if (owner.minecraftProfile?.isOnline != true) {
-                                                        plugin.server.scheduler.runTask(plugin, Runnable {
-                                                            paymentNotificationService.addPaymentNotification(
-                                                                RPKPaymentNotificationImpl(
-                                                                    group = group,
-                                                                    to = owner,
-                                                                    character = member,
-                                                                    date = now,
-                                                                    text = ownerNotificationMessage
-                                                                )
+                                                        paymentNotificationService.addPaymentNotification(
+                                                            RPKPaymentNotificationImpl(
+                                                                group = group,
+                                                                to = owner,
+                                                                character = member,
+                                                                date = now,
+                                                                text = ownerNotificationMessage
                                                             )
-                                                        })
+                                                        )
                                                     } else {
                                                         owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
                                                     }
@@ -110,10 +106,8 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                                 currency,
                                                 bankBalance + group.amount
                                             ).thenRun {
-                                                plugin.server.scheduler.runTask(plugin, Runnable {
-                                                    group.balance -= group.amount
-                                                    paymentGroupService.updatePaymentGroup(group)
-                                                })
+                                                group.balance -= group.amount
+                                                paymentGroupService.updatePaymentGroup(group)
                                             }
                                         }
                                     } else { // If group doesn't have enough money
@@ -147,17 +141,15 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                         group.owners.thenAccept { owners ->
                                             owners.forEach { owner ->
                                                 if (owner.minecraftProfile?.isOnline != true) { // If offline
-                                                    plugin.server.scheduler.runTask(plugin, Runnable {
-                                                        paymentNotificationService.addPaymentNotification(
-                                                            RPKPaymentNotificationImpl(
-                                                                group = group,
-                                                                to = owner,
-                                                                character = member,
-                                                                date = now,
-                                                                text = ownerNotificationMessage
-                                                            )
+                                                    paymentNotificationService.addPaymentNotification(
+                                                        RPKPaymentNotificationImpl(
+                                                            group = group,
+                                                            to = owner,
+                                                            character = member,
+                                                            date = now,
+                                                            text = ownerNotificationMessage
                                                         )
-                                                    })
+                                                    )
                                                 } else { // If online
                                                     owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
                                                 }
@@ -172,6 +164,7 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                         }
                     }
                 }
+        }
     }
 
 }

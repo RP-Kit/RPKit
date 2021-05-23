@@ -118,7 +118,7 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
                                                             } else {
                                                                 bankWithdrawEvent.currency.namePlural
                                                             },
-                                                            "wallet_balance" to economyService.getBalance(
+                                                            "wallet_balance" to economyService.getPreloadedBalance(
                                                                 bankWithdrawEvent.character,
                                                                 bankWithdrawEvent.currency
                                                             ).toString(),
@@ -174,7 +174,7 @@ class PlayerInteractListener(private val plugin: RPKBanksBukkit) : Listener {
                                                             bankDepositEvent.currency.nameSingular
                                                         else
                                                             bankDepositEvent.currency.namePlural,
-                                                        "wallet_balance" to economyService.getBalance(
+                                                        "wallet_balance" to economyService.getPreloadedBalance(
                                                             bankDepositEvent.character,
                                                             bankDepositEvent.currency
                                                         ).toString(),

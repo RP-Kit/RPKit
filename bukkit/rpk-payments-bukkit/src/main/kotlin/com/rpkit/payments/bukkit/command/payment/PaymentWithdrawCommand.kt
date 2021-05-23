@@ -75,44 +75,42 @@ class PaymentWithdrawCommand(private val plugin: RPKPaymentsBukkit) : CommandExe
             sender.sendMessage(plugin.messages["payment-withdraw-invalid-character"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.dropLast(1).joinToString(" ")))
-        if (paymentGroup == null) {
-            sender.sendMessage(plugin.messages[".payment-withdraw-invalid-group"])
-            return true
-        }
-        paymentGroup.owners.thenAccept { owners ->
-            if (!owners.contains(character)) {
-                sender.sendMessage(plugin.messages["payment-withdraw-invalid-owner"])
-                return@thenAccept
+        paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.dropLast(1).joinToString(" "))).thenAccept getPaymentGroup@{ paymentGroup ->
+            if (paymentGroup == null) {
+                sender.sendMessage(plugin.messages[".payment-withdraw-invalid-group"])
+                return@getPaymentGroup
             }
-            val currency = paymentGroup.currency
-            if (currency == null) {
-                sender.sendMessage(plugin.messages["payment-withdraw-invalid-currency"])
-                return@thenAccept
-            }
-            try {
-                val amount = args.last().toInt()
-                if (amount <= 0) {
-                    sender.sendMessage(plugin.messages["payment-withdraw-invalid-amount"])
+            paymentGroup.owners.thenAccept { owners ->
+                if (!owners.contains(character)) {
+                    sender.sendMessage(plugin.messages["payment-withdraw-invalid-owner"])
                     return@thenAccept
                 }
-                if (paymentGroup.balance < amount) {
-                    sender.sendMessage(plugin.messages["payment-withdraw-invalid-balance"])
+                val currency = paymentGroup.currency
+                if (currency == null) {
+                    sender.sendMessage(plugin.messages["payment-withdraw-invalid-currency"])
                     return@thenAccept
                 }
-                bankService.getBalance(character, currency).thenAccept { bankBalance ->
-                    plugin.server.scheduler.runTask(plugin, Runnable {
+                try {
+                    val amount = args.last().toInt()
+                    if (amount <= 0) {
+                        sender.sendMessage(plugin.messages["payment-withdraw-invalid-amount"])
+                        return@thenAccept
+                    }
+                    if (paymentGroup.balance < amount) {
+                        sender.sendMessage(plugin.messages["payment-withdraw-invalid-balance"])
+                        return@thenAccept
+                    }
+                    bankService.getBalance(character, currency).thenAccept { bankBalance ->
                         bankService.setBalance(character, currency, bankBalance + amount).thenRun {
-                            plugin.server.scheduler.runTask(plugin, Runnable {
-                                paymentGroup.balance = paymentGroup.balance - amount
-                                paymentGroupService.updatePaymentGroup(paymentGroup)
+                            paymentGroup.balance = paymentGroup.balance - amount
+                            paymentGroupService.updatePaymentGroup(paymentGroup).thenRun {
                                 sender.sendMessage(plugin.messages["payment-withdraw-valid"])
-                            })
+                            }
                         }
-                    })
+                    }
+                } catch (exception: NumberFormatException) {
+                    sender.sendMessage(plugin.messages["payment-withdraw-invalid-amount"])
                 }
-            } catch (exception: NumberFormatException) {
-                sender.sendMessage(plugin.messages["payment-withdraw-invalid-amount"])
             }
         }
         return true

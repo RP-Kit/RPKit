@@ -39,11 +39,13 @@ class RPKPaymentNotificationServiceImpl(override val plugin: RPKPaymentsBukkit) 
         return plugin.database.getTable(RPKPaymentNotificationTable::class.java).get(character)
     }
 
-    override fun addPaymentNotification(paymentNotification: RPKPaymentNotification) {
-        val event = RPKBukkitPaymentNotificationCreateEvent(paymentNotification)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKPaymentNotificationTable::class.java).insert(event.paymentNotification)
+    override fun addPaymentNotification(paymentNotification: RPKPaymentNotification): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentNotificationCreateEvent(paymentNotification, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKPaymentNotificationTable::class.java).insert(event.paymentNotification).join()
+        }
     }
 
     override fun createPaymentNotification(
@@ -52,7 +54,7 @@ class RPKPaymentNotificationServiceImpl(override val plugin: RPKPaymentsBukkit) 
         character: RPKCharacter,
         date: LocalDateTime,
         text: String
-    ): RPKPaymentNotification {
+    ): CompletableFuture<RPKPaymentNotification> {
         val paymentNotification = RPKPaymentNotificationImpl(
             null,
             group,
@@ -61,22 +63,25 @@ class RPKPaymentNotificationServiceImpl(override val plugin: RPKPaymentsBukkit) 
             date,
             text
         )
-        addPaymentNotification(paymentNotification)
-        return paymentNotification
+        return addPaymentNotification(paymentNotification).thenApply { paymentNotification }
     }
 
-    override fun removePaymentNotification(paymentNotification: RPKPaymentNotification) {
-        val event = RPKBukkitPaymentNotificationDeleteEvent(paymentNotification)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKPaymentNotificationTable::class.java).delete(event.paymentNotification)
+    override fun removePaymentNotification(paymentNotification: RPKPaymentNotification): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentNotificationDeleteEvent(paymentNotification, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKPaymentNotificationTable::class.java).delete(event.paymentNotification).join()
+        }
     }
 
-    override fun updatePaymentNotification(paymentNotification: RPKPaymentNotification) {
-        val event = RPKBukkitPaymentNotificationUpdateEvent(paymentNotification)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKPaymentNotificationTable::class.java).update(event.paymentNotification)
+    override fun updatePaymentNotification(paymentNotification: RPKPaymentNotification): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentNotificationUpdateEvent(paymentNotification, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKPaymentNotificationTable::class.java).update(event.paymentNotification).join()
+        }
     }
 
 }

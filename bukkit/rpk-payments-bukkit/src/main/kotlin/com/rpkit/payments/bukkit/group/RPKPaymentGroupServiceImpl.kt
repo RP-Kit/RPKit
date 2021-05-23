@@ -23,28 +23,31 @@ import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupDeleteEvent
 import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupUpdateEvent
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 /**
  * Payment group service implementation.
  */
 class RPKPaymentGroupServiceImpl(override val plugin: RPKPaymentsBukkit) : RPKPaymentGroupService {
 
-    override val paymentGroups: List<RPKPaymentGroup>
+    override val paymentGroups: CompletableFuture<List<RPKPaymentGroup>>
         get() = plugin.database.getTable(RPKPaymentGroupTable::class.java).getAll()
 
-    override fun getPaymentGroup(id: RPKPaymentGroupId): RPKPaymentGroup? {
+    override fun getPaymentGroup(id: RPKPaymentGroupId): CompletableFuture<RPKPaymentGroup?> {
         return plugin.database.getTable(RPKPaymentGroupTable::class.java)[id]
     }
 
-    override fun getPaymentGroup(name: RPKPaymentGroupName): RPKPaymentGroup? {
+    override fun getPaymentGroup(name: RPKPaymentGroupName): CompletableFuture<RPKPaymentGroup?> {
         return plugin.database.getTable(RPKPaymentGroupTable::class.java).get(name)
     }
 
-    override fun addPaymentGroup(paymentGroup: RPKPaymentGroup) {
-        val event = RPKBukkitPaymentGroupCreateEvent(paymentGroup)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKPaymentGroupTable::class.java).insert(event.paymentGroup)
+    override fun addPaymentGroup(paymentGroup: RPKPaymentGroup): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentGroupCreateEvent(paymentGroup, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKPaymentGroupTable::class.java).insert(event.paymentGroup).join()
+        }
     }
 
     override fun createPaymentGroup(
@@ -54,7 +57,7 @@ class RPKPaymentGroupServiceImpl(override val plugin: RPKPaymentsBukkit) : RPKPa
         interval: Duration,
         lastPaymentTime: LocalDateTime,
         balance: Int
-    ): RPKPaymentGroup {
+    ): CompletableFuture<RPKPaymentGroup> {
         val paymentGroup = RPKPaymentGroupImpl(
             plugin,
             null,
@@ -65,22 +68,25 @@ class RPKPaymentGroupServiceImpl(override val plugin: RPKPaymentsBukkit) : RPKPa
             lastPaymentTime,
             balance
         )
-        addPaymentGroup(paymentGroup)
-        return paymentGroup
+        return addPaymentGroup(paymentGroup).thenApply { paymentGroup }
     }
 
-    override fun removePaymentGroup(paymentGroup: RPKPaymentGroup) {
-        val event = RPKBukkitPaymentGroupDeleteEvent(paymentGroup)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKPaymentGroupTable::class.java).delete(event.paymentGroup)
+    override fun removePaymentGroup(paymentGroup: RPKPaymentGroup): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentGroupDeleteEvent(paymentGroup, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKPaymentGroupTable::class.java).delete(event.paymentGroup).join()
+        }
     }
 
-    override fun updatePaymentGroup(paymentGroup: RPKPaymentGroup) {
-        val event = RPKBukkitPaymentGroupUpdateEvent(paymentGroup)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKPaymentGroupTable::class.java).update(event.paymentGroup)
+    override fun updatePaymentGroup(paymentGroup: RPKPaymentGroup): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentGroupUpdateEvent(paymentGroup, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKPaymentGroupTable::class.java).update(event.paymentGroup).join()
+        }
     }
 
 }

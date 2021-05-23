@@ -29,6 +29,7 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroupImpl
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
 import java.time.Duration
 import java.time.temporal.ChronoUnit.MILLIS
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents payment group table.
@@ -49,34 +50,37 @@ class RPKPaymentGroupTable(
         null
     }
 
-    fun insert(entity: RPKPaymentGroup) {
-        database.create
+    fun insert(entity: RPKPaymentGroup): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_PAYMENT_GROUP,
-                        RPKIT_PAYMENT_GROUP.NAME,
-                        RPKIT_PAYMENT_GROUP.AMOUNT,
-                        RPKIT_PAYMENT_GROUP.CURRENCY_NAME,
-                        RPKIT_PAYMENT_GROUP.INTERVAL,
-                        RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME,
-                        RPKIT_PAYMENT_GROUP.BALANCE
+                    RPKIT_PAYMENT_GROUP,
+                    RPKIT_PAYMENT_GROUP.NAME,
+                    RPKIT_PAYMENT_GROUP.AMOUNT,
+                    RPKIT_PAYMENT_GROUP.CURRENCY_NAME,
+                    RPKIT_PAYMENT_GROUP.INTERVAL,
+                    RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME,
+                    RPKIT_PAYMENT_GROUP.BALANCE
                 )
                 .values(
-                        entity.name.value,
-                        entity.amount,
-                        entity.currency?.name?.value,
-                        entity.interval.toMillis(),
-                        entity.lastPaymentTime,
-                        entity.balance
+                    entity.name.value,
+                    entity.amount,
+                    entity.currency?.name?.value,
+                    entity.interval.toMillis(),
+                    entity.lastPaymentTime,
+                    entity.balance
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKPaymentGroupId(id)
-        cache?.set(id, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKPaymentGroupId(id)
+            cache?.set(id, entity)
+        }
     }
 
-    fun update(entity: RPKPaymentGroup) {
-        val id = entity.id ?: return
-        database.create
+    fun update(entity: RPKPaymentGroup): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_PAYMENT_GROUP)
                 .set(RPKIT_PAYMENT_GROUP.NAME, entity.name.value)
                 .set(RPKIT_PAYMENT_GROUP.AMOUNT, entity.amount)
@@ -86,29 +90,32 @@ class RPKPaymentGroupTable(
                 .set(RPKIT_PAYMENT_GROUP.BALANCE, entity.balance)
                 .where(RPKIT_PAYMENT_GROUP.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKPaymentGroupId): RPKPaymentGroup? {
+    operator fun get(id: RPKPaymentGroupId): CompletableFuture<RPKPaymentGroup?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
+            return CompletableFuture.completedFuture(cache[id.value])
         } else {
-            val result = database.create
+            return CompletableFuture.supplyAsync {
+                val result = database.create
                     .select(
-                            RPKIT_PAYMENT_GROUP.NAME,
-                            RPKIT_PAYMENT_GROUP.AMOUNT,
-                            RPKIT_PAYMENT_GROUP.CURRENCY_NAME,
-                            RPKIT_PAYMENT_GROUP.INTERVAL,
-                            RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME,
-                            RPKIT_PAYMENT_GROUP.BALANCE
+                        RPKIT_PAYMENT_GROUP.NAME,
+                        RPKIT_PAYMENT_GROUP.AMOUNT,
+                        RPKIT_PAYMENT_GROUP.CURRENCY_NAME,
+                        RPKIT_PAYMENT_GROUP.INTERVAL,
+                        RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME,
+                        RPKIT_PAYMENT_GROUP.BALANCE
                     )
                     .from(RPKIT_PAYMENT_GROUP)
                     .where(RPKIT_PAYMENT_GROUP.ID.eq(id.value))
-                    .fetchOne() ?: return null
-            val currencyService = Services[RPKCurrencyService::class.java] ?: return null
-            val currencyName = result.get(RPKIT_PAYMENT_GROUP.CURRENCY_NAME)
-            val currency = if (currencyName == null) null else currencyService.getCurrency(RPKCurrencyName(currencyName))
-            val paymentGroup = RPKPaymentGroupImpl(
+                    .fetchOne() ?: return@supplyAsync null
+                val currencyService = Services[RPKCurrencyService::class.java] ?: return@supplyAsync null
+                val currencyName = result.get(RPKIT_PAYMENT_GROUP.CURRENCY_NAME)
+                val currency =
+                    if (currencyName == null) null else currencyService.getCurrency(RPKCurrencyName(currencyName))
+                val paymentGroup = RPKPaymentGroupImpl(
                     plugin,
                     id,
                     RPKPaymentGroupName(result.get(RPKIT_PAYMENT_GROUP.NAME)),
@@ -117,37 +124,45 @@ class RPKPaymentGroupTable(
                     Duration.of(result.get(RPKIT_PAYMENT_GROUP.INTERVAL), MILLIS),
                     result.get(RPKIT_PAYMENT_GROUP.LAST_PAYMENT_TIME),
                     result.get(RPKIT_PAYMENT_GROUP.BALANCE)
-            )
-            cache?.set(id.value, paymentGroup)
-            return paymentGroup
+                )
+                cache?.set(id.value, paymentGroup)
+                return@supplyAsync paymentGroup
+            }
         }
     }
 
-    fun get(name: RPKPaymentGroupName): RPKPaymentGroup? {
-        val result = database.create
+    fun get(name: RPKPaymentGroupName): CompletableFuture<RPKPaymentGroup?> {
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_PAYMENT_GROUP.ID)
                 .from(RPKIT_PAYMENT_GROUP)
                 .where(RPKIT_PAYMENT_GROUP.NAME.eq(name.value))
-                .fetchOne() ?: return null
-        return get(RPKPaymentGroupId(result.get(RPKIT_PAYMENT_GROUP.ID)))
+                .fetchOne() ?: return@supplyAsync null
+            return@supplyAsync get(RPKPaymentGroupId(result.get(RPKIT_PAYMENT_GROUP.ID))).join()
+        }
     }
 
-    fun getAll(): List<RPKPaymentGroup> {
-        val results = database.create
+    fun getAll(): CompletableFuture<List<RPKPaymentGroup>> {
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_PAYMENT_GROUP.ID)
                 .from(RPKIT_PAYMENT_GROUP)
                 .fetch()
-        return results.map { result -> get(RPKPaymentGroupId(result.get(RPKIT_PAYMENT_GROUP.ID))) }
-                .filterNotNull()
+            val paymentGroupFutures = results.map { result -> get(RPKPaymentGroupId(result.get(RPKIT_PAYMENT_GROUP.ID))) }
+            CompletableFuture.allOf(*paymentGroupFutures.toTypedArray()).join()
+            return@supplyAsync paymentGroupFutures.mapNotNull(CompletableFuture<RPKPaymentGroup?>::join)
+        }
     }
 
-    fun delete(entity: RPKPaymentGroup) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKPaymentGroup): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_PAYMENT_GROUP)
                 .where(RPKIT_PAYMENT_GROUP.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 
 }
