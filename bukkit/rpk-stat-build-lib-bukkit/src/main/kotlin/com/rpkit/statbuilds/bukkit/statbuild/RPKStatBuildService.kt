@@ -25,7 +25,10 @@ interface RPKStatBuildService : Service {
 
     fun getStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): CompletableFuture<Int>
     fun setStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute, amount: Int): CompletableFuture<Void>
-    fun getMaxStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): CompletableFuture<Int>
+    fun getPreloadedStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int?
+    fun loadStatPoints(character: RPKCharacter): CompletableFuture<Void>
+    fun unloadStatPoints(character: RPKCharacter)
+    fun getMaxStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int
     fun getTotalStatPoints(character: RPKCharacter): CompletableFuture<Int>
     fun getUnassignedStatPoints(character: RPKCharacter): CompletableFuture<Int>
     fun getAssignedStatPoints(character: RPKCharacter): CompletableFuture<Int>

@@ -24,10 +24,15 @@ import com.rpkit.statbuilds.bukkit.database.table.RPKCharacterStatPointsTable
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttribute
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 class RPKStatBuildServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKStatBuildService {
 
+    private val statPoints = ConcurrentHashMap<Int, ConcurrentHashMap<String, Int>>()
+
     override fun getStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): CompletableFuture<Int> {
+        val preloadedStatPoints = getPreloadedStatPoints(character, statAttribute)
+        if (preloadedStatPoints != null) return CompletableFuture.completedFuture(preloadedStatPoints)
         return plugin.database.getTable(RPKCharacterStatPointsTable::class.java)[character, statAttribute].thenApply { statPoints ->
             statPoints?.points ?: 0
         }
@@ -46,19 +51,48 @@ class RPKStatBuildServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKSta
                 characterStatPoints.points = amount
                 characterStatPointsTable.update(characterStatPoints).join()
             }
+            if (character.minecraftProfile?.isOnline == true) {
+                val characterId = character.id
+                if (characterId != null) {
+                    val preloadedCharacterStatPoints = statPoints[characterId.value] ?: ConcurrentHashMap()
+                    preloadedCharacterStatPoints[statAttribute.name.value] = amount
+                    statPoints[characterId.value] = preloadedCharacterStatPoints
+                }
+            }
         }
     }
 
-    override fun getMaxStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): CompletableFuture<Int> {
-        val expressionService = Services[RPKExpressionService::class.java] ?: return CompletableFuture.completedFuture(0)
-        val expression = expressionService.createExpression(plugin.config.getString("stat-attributes.${statAttribute.name}.max-points") ?: return CompletableFuture.completedFuture(0))
-        return CompletableFuture.supplyAsync {
-            return@supplyAsync expression.parseInt(
+    override fun getPreloadedStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int? {
+        return character.id?.value?.let { characterId -> statPoints[characterId]?.get(statAttribute.name.value) }
+    }
+
+    override fun loadStatPoints(character: RPKCharacter): CompletableFuture<Void> {
+        plugin.logger.info("Loading stat points for character ${character.name} (${character.id?.value})...")
+        return plugin.database.getTable(RPKCharacterStatPointsTable::class.java)[character].thenAccept { characterStatPoints ->
+            character.id?.value?.let { characterId ->
+                statPoints[characterId] = ConcurrentHashMap(characterStatPoints.associate { characterStatAttributePoints ->
+                    characterStatAttributePoints.statAttribute.name.value to characterStatAttributePoints.points
+                })
+                plugin.logger.info("Loaded stat points for character ${character.name} (${characterId})")
+            }
+        }
+    }
+
+    override fun unloadStatPoints(character: RPKCharacter) {
+        character.id?.value?.let { characterId ->
+            statPoints.remove(characterId)
+            plugin.logger.info("Unloaded stat points for character ${character.name} (${characterId})")
+        }
+    }
+
+    override fun getMaxStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int {
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
+        val expression = expressionService.createExpression(plugin.config.getString("stat-attributes.${statAttribute.name}.max-points") ?: return 0)
+        return expression.parseInt(
                 mapOf(
                     "level" to (Services[RPKExperienceService::class.java]?.getLevel(character)?.join()?.toDouble() ?: 1.0)
                 )
             ) ?: 0
-        }
     }
 
     override fun getTotalStatPoints(character: RPKCharacter): CompletableFuture<Int> {

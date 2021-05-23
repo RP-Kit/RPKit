@@ -29,8 +29,7 @@ import com.rpkit.experience.bukkit.command.experience.ExperienceCommand
 import com.rpkit.experience.bukkit.database.table.RPKExperienceTable
 import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import com.rpkit.experience.bukkit.experience.RPKExperienceServiceImpl
-import com.rpkit.experience.bukkit.listener.PlayerExpChangeListener
-import com.rpkit.experience.bukkit.listener.PlayerJoinListener
+import com.rpkit.experience.bukkit.listener.*
 import com.rpkit.experience.bukkit.messages.ExperienceMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
@@ -103,11 +102,17 @@ class RPKExperienceBukkit : RPKBukkitPlugin() {
         registerCommands()
     }
 
-    fun registerListeners() {
-        registerListeners(PlayerExpChangeListener(), PlayerJoinListener(this))
+    private fun registerListeners() {
+        registerListeners(
+            PlayerExpChangeListener(),
+            PlayerJoinListener(this),
+            AsyncPlayerPreLoginListener(),
+            PlayerQuitListener(),
+            RPKCharacterSwitchListener(this)
+        )
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("experience")?.setExecutor(ExperienceCommand(this))
     }
 

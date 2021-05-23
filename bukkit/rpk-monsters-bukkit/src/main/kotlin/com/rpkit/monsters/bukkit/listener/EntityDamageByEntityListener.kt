@@ -102,7 +102,7 @@ class EntityDamageByEntityListener(private val plugin: RPKMonstersBukkit) : List
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return 0.0
         val expression = expressionService.createExpression(plugin.config.getString("stats.$type.$stat") ?: return 0.0)
         val statVariables = statVariableService.statVariables
-        return expression.parseDouble(statService.stats.map { it.name.value to it.get(character, statVariables) }.toMap()) ?: 0.0
+        return expression.parseDouble(statService.stats.associate { it.name.value to it.get(character, statVariables) }) ?: 0.0
     }
 
     private fun getEntityStat(entity: LivingEntity, type: String, stat: String): Double {

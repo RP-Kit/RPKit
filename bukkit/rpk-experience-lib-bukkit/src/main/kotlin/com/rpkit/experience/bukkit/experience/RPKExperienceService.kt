@@ -63,5 +63,9 @@ interface RPKExperienceService : Service {
      * @param level The level
      */
     fun getExperienceNeededForLevel(level: Int): Int
+    fun loadExperience(character: RPKCharacter): CompletableFuture<Int>
+    fun unloadExperience(character: RPKCharacter)
+    fun getPreloadedExperience(character: RPKCharacter): Int?
+    fun getPreloadedLevel(character: RPKCharacter): Int?
 
 }

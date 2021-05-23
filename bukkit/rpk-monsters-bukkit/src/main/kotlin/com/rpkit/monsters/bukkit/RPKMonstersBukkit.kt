@@ -100,7 +100,9 @@ class RPKMonstersBukkit : RPKBukkitPlugin() {
 
         Services[RPKMonsterExperienceService::class.java] = RPKMonsterExperienceServiceImpl(this)
         Services[RPKMonsterLevelService::class.java] = RPKMonsterLevelServiceImpl(this)
-        Services[RPKMonsterSpawnAreaService::class.java] = RPKMonsterSpawnAreaServiceImpl(this)
+        val monsterSpawnAreaService = RPKMonsterSpawnAreaServiceImpl(this)
+        monsterSpawnAreaService.loadSpawnAreas()
+        Services[RPKMonsterSpawnAreaService::class.java] = monsterSpawnAreaService
         val monsterStatService = RPKMonsterStatServiceImpl(this)
         Services[RPKMonsterStatService::class.java] = monsterStatService
         Services[RPKMonsterStatServiceImpl::class.java] = monsterStatService

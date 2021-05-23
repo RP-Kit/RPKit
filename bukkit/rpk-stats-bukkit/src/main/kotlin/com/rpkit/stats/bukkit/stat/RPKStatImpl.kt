@@ -18,7 +18,6 @@ package com.rpkit.stats.bukkit.stat
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.service.Services
-import java.util.concurrent.CompletableFuture
 
 /**
  * Stat implementation.
@@ -27,13 +26,11 @@ class RPKStatImpl(
         override val name: RPKStatName,
         override val formula: String
 ) : RPKStat {
-    override fun get(character: RPKCharacter, variables: List<RPKStatVariable>): CompletableFuture<Int> {
-        val expressionService = Services[RPKExpressionService::class.java] ?: return CompletableFuture.completedFuture(0)
+    override fun get(character: RPKCharacter, variables: List<RPKStatVariable>): Int {
+        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
         val expression = expressionService.createExpression(formula)
-        return CompletableFuture.supplyAsync {
-            expression.parseInt(variables.map { variable ->
-                variable.name.value to variable.get(character).join()
-            }.toMap()) ?: 0
-        }
+        return expression.parseInt(variables.associate { variable ->
+            variable.name.value to variable.get(character)
+        }) ?: 0
     }
 }
