@@ -41,10 +41,8 @@ class PlayerJoinListener(private val plugin: RPKPaymentsBukkit) : Listener {
                 if (character == null) return@loadActiveCharacter
                 paymentNotificationService.getPaymentNotificationsFor(character).thenAccept { notifications ->
                     notifications.forEach { notification ->
-                        plugin.server.scheduler.runTask(plugin, Runnable {
-                            event.player.sendMessage(notification.text)
-                            paymentNotificationService.removePaymentNotification(notification)
-                        })
+                        event.player.sendMessage(notification.text)
+                        paymentNotificationService.removePaymentNotification(notification)
                     }
                 }
             }

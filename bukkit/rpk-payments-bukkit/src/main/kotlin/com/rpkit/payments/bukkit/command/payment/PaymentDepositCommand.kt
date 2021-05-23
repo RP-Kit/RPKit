@@ -75,42 +75,42 @@ class PaymentDepositCommand(private val plugin: RPKPaymentsBukkit) : CommandExec
             sender.sendMessage(plugin.messages["payment-deposit-invalid-character"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.dropLast(1).joinToString(" ")))
-        if (paymentGroup == null) {
-            sender.sendMessage(plugin.messages["payment-deposit-invalid-group"])
-            return true
-        }
-        paymentGroup.owners.thenAccept { owners ->
-            if (!owners.contains(character)) {
-                sender.sendMessage(plugin.messages["payment-deposit-invalid-owner"])
-                return@thenAccept
+        paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.dropLast(1).joinToString(" "))).thenAccept getPaymentGroup@{ paymentGroup ->
+            if (paymentGroup == null) {
+                sender.sendMessage(plugin.messages["payment-deposit-invalid-group"])
+                return@getPaymentGroup
             }
-            val currency = paymentGroup.currency
-            if (currency == null) {
-                sender.sendMessage(plugin.messages["payment-deposit-invalid-currency"])
-                return@thenAccept
-            }
-            try {
-                val amount = args.last().toInt()
-                if (amount <= 0) {
-                    sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
-                    return@thenAccept
+            paymentGroup.owners.thenAccept getOwners@{ owners ->
+                if (!owners.contains(character)) {
+                    sender.sendMessage(plugin.messages["payment-deposit-invalid-owner"])
+                    return@getOwners
                 }
-                bankService.getBalance(character, currency).thenAccept { bankBalance ->
-                    if (bankBalance >= amount) {
-                        bankService.setBalance(character, currency, bankBalance - amount).thenRun {
-                            plugin.server.scheduler.runTask(plugin, Runnable {
-                                paymentGroup.balance = paymentGroup.balance + amount
-                                paymentGroupService.updatePaymentGroup(paymentGroup)
-                                sender.sendMessage(plugin.messages["payment-deposit-valid"])
-                            })
-                        }
-                    } else {
-                        sender.sendMessage(plugin.messages["payment-deposit-invalid-balance"])
+                val currency = paymentGroup.currency
+                if (currency == null) {
+                    sender.sendMessage(plugin.messages["payment-deposit-invalid-currency"])
+                    return@getOwners
+                }
+                try {
+                    val amount = args.last().toInt()
+                    if (amount <= 0) {
+                        sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
+                        return@getOwners
                     }
+                    bankService.getBalance(character, currency).thenAccept { bankBalance ->
+                        if (bankBalance >= amount) {
+                            bankService.setBalance(character, currency, bankBalance - amount).thenRun {
+                                paymentGroup.balance = paymentGroup.balance + amount
+                                paymentGroupService.updatePaymentGroup(paymentGroup).thenRun {
+                                    sender.sendMessage(plugin.messages["payment-deposit-valid"])
+                                }
+                            }
+                        } else {
+                            sender.sendMessage(plugin.messages["payment-deposit-invalid-balance"])
+                        }
+                    }
+                } catch (exception: NumberFormatException) {
+                    sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
                 }
-            } catch (exception: NumberFormatException) {
-                sender.sendMessage(plugin.messages["payment-deposit-invalid-amount"])
             }
         }
         return true

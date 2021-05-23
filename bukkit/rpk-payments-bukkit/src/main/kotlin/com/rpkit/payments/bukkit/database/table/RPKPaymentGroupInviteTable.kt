@@ -33,20 +33,22 @@ class RPKPaymentGroupInviteTable(
         private val database: Database
 ) : Table {
 
-    fun insert(entity: RPKPaymentGroupInvite) {
-        val paymentGroupId = entity.paymentGroup.id ?: return
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKPaymentGroupInvite): CompletableFuture<Void> {
+        val paymentGroupId = entity.paymentGroup.id ?: return CompletableFuture.completedFuture(null)
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_PAYMENT_GROUP_INVITE,
-                        RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID,
-                        RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID
+                    RPKIT_PAYMENT_GROUP_INVITE,
+                    RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID,
+                    RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID
                 )
                 .values(
-                        paymentGroupId.value,
-                        characterId.value
+                    paymentGroupId.value,
+                    characterId.value
                 )
                 .execute()
+        }
     }
 
     operator fun get(paymentGroup: RPKPaymentGroup): CompletableFuture<List<RPKPaymentGroupInvite>> {
@@ -68,14 +70,16 @@ class RPKPaymentGroupInviteTable(
         }
     }
 
-    fun delete(entity: RPKPaymentGroupInvite) {
-        val paymentGroupId = entity.paymentGroup.id ?: return
-        val characterId = entity.character.id ?: return
-        database.create
+    fun delete(entity: RPKPaymentGroupInvite): CompletableFuture<Void> {
+        val paymentGroupId = entity.paymentGroup.id ?: return CompletableFuture.completedFuture(null)
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_PAYMENT_GROUP_INVITE)
                 .where(RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID.eq(paymentGroupId.value))
                 .and(RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID.eq(characterId.value))
                 .execute()
+        }
     }
 
 }

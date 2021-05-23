@@ -82,19 +82,20 @@ class PaymentSetAmountCommand(private val plugin: RPKPaymentsBukkit) : CommandEx
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" ")))
-        if (paymentGroup == null) {
-            sender.sendMessage(plugin.messages["payment-set-amount-invalid-group"])
-            return true
-        }
-        paymentGroup.owners.thenAccept { owners ->
-            if (!owners.contains(character)) {
-                sender.sendMessage(plugin.messages["payment-set-amount-invalid-owner"])
-                return@thenAccept
+        paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" "))).thenAccept getPaymentGroup@{ paymentGroup ->
+            if (paymentGroup == null) {
+                sender.sendMessage(plugin.messages["payment-set-amount-invalid-group"])
+                return@getPaymentGroup
             }
-            val conversation = conversationFactory.buildConversation(sender)
-            conversation.context.setSessionData("payment_group", paymentGroup)
-            conversation.begin()
+            paymentGroup.owners.thenAccept { owners ->
+                if (!owners.contains(character)) {
+                    sender.sendMessage(plugin.messages["payment-set-amount-invalid-owner"])
+                    return@thenAccept
+                }
+                val conversation = conversationFactory.buildConversation(sender)
+                conversation.context.setSessionData("payment_group", paymentGroup)
+                conversation.begin()
+            }
         }
         return true
     }

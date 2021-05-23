@@ -82,39 +82,40 @@ class PaymentSetNameCommand(private val plugin: RPKPaymentsBukkit) : CommandExec
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" ")))
-        if (paymentGroup == null) {
-            sender.sendMessage(plugin.messages["payment-set-name-invalid-group"])
-            return true
-        }
-        paymentGroup.owners.thenAccept { owners ->
-            if (!owners.contains(character)) {
-                sender.sendMessage(plugin.messages["payment-set-name-invalid-owner"])
-                return@thenAccept
+        paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" "))).thenAccept getPaymentGroup@{ paymentGroup ->
+            if (paymentGroup == null) {
+                sender.sendMessage(plugin.messages["payment-set-name-invalid-group"])
+                return@getPaymentGroup
             }
-            val conversation = conversationFactory.buildConversation(sender)
-            conversation.context.setSessionData("payment_group", paymentGroup)
-            conversation.begin()
+            paymentGroup.owners.thenAccept { owners ->
+                if (!owners.contains(character)) {
+                    sender.sendMessage(plugin.messages["payment-set-name-invalid-owner"])
+                    return@thenAccept
+                }
+                val conversation = conversationFactory.buildConversation(sender)
+                conversation.context.setSessionData("payment_group", paymentGroup)
+                conversation.begin()
+            }
         }
         return true
     }
 
-    private inner class NamePrompt : ValidatingPrompt() {
+    private inner class NamePrompt : StringPrompt() {
 
-        override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            val paymentGroupService = Services[RPKPaymentGroupService::class.java] ?: return false
-            return paymentGroupService.getPaymentGroup(RPKPaymentGroupName(input)) == null
-        }
-
-        override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return plugin.messages["payment-set-name-invalid-name-already-exists"]
-        }
-
-        override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
+        override fun acceptInput(context: ConversationContext, input: String?): Prompt {
             val paymentGroupService = Services[RPKPaymentGroupService::class.java] ?: return END_OF_CONVERSATION
             val paymentGroup = context.getSessionData("payment_group") as RPKPaymentGroup
-            paymentGroup.name = RPKPaymentGroupName(input)
-            paymentGroupService.updatePaymentGroup(paymentGroup)
+            val name = RPKPaymentGroupName(input ?: "")
+            paymentGroupService.getPaymentGroup(name).thenAccept { existingPaymentGroup ->
+                if (existingPaymentGroup == null) {
+                    paymentGroup.name = name
+                    paymentGroupService.updatePaymentGroup(paymentGroup)
+                } else {
+                    plugin.server.scheduler.runTask(plugin, Runnable {
+                        (context.forWhom as? Player)?.sendMessage(plugin.messages["payment-set-name-invalid-name-already-exists"])
+                    })
+                }
+            }
             return NameSetPrompt()
         }
 

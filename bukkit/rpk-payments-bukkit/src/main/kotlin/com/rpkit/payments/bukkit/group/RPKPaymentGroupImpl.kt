@@ -55,62 +55,74 @@ class RPKPaymentGroupImpl(
         get() = plugin.database.getTable(RPKPaymentGroupInviteTable::class.java)[this]
             .thenApply { it.map { owner -> owner.character } }
 
-    override fun addOwner(character: RPKCharacter) {
-        val event = RPKBukkitPaymentGroupOwnerAddEvent(this, character)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKPaymentGroupOwnerTable::class.java).insert(RPKPaymentGroupOwner(paymentGroup = event.paymentGroup, character = event.character))
+    override fun addOwner(character: RPKCharacter): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentGroupOwnerAddEvent(this, character, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKPaymentGroupOwnerTable::class.java)
+                .insert(RPKPaymentGroupOwner(paymentGroup = event.paymentGroup, character = event.character)).join()
+        }
     }
 
     override fun removeOwner(character: RPKCharacter): CompletableFuture<Void> {
-        val event = RPKBukkitPaymentGroupOwnerRemoveEvent(this, character)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(null)
         return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentGroupOwnerRemoveEvent(this, character, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
             val ownerTable = plugin.database.getTable(RPKPaymentGroupOwnerTable::class.java)
             val owner =
-                ownerTable[event.paymentGroup].thenApply { owners -> owners.firstOrNull { it.character == event.character } }.join()
+                ownerTable[event.paymentGroup].thenApply { owners -> owners.firstOrNull { it.character == event.character } }
+                    .join()
             if (owner != null) {
                 ownerTable.delete(owner).join()
             }
         }
     }
 
-    override fun addMember(character: RPKCharacter) {
-        val event = RPKBukkitPaymentGroupMemberAddEvent(this, character)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKPaymentGroupMemberTable::class.java).insert(RPKPaymentGroupMember(paymentGroup = event.paymentGroup, character = event.character))
+    override fun addMember(character: RPKCharacter): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentGroupMemberAddEvent(this, character, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKPaymentGroupMemberTable::class.java)
+                .insert(RPKPaymentGroupMember(paymentGroup = event.paymentGroup, character = event.character)).join()
+        }
     }
 
     override fun removeMember(character: RPKCharacter): CompletableFuture<Void> {
-        val event = RPKBukkitPaymentGroupMemberRemoveEvent(this, character)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(null)
-        val memberTable = plugin.database.getTable(RPKPaymentGroupMemberTable::class.java)
-        return memberTable[event.paymentGroup].thenAccept { members ->
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentGroupMemberRemoveEvent(this, character, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val memberTable = plugin.database.getTable(RPKPaymentGroupMemberTable::class.java)
+            val members = memberTable[event.paymentGroup].join()
             val member = members.firstOrNull { it.character == event.character }
             if (member != null) {
-                memberTable.delete(member)
+                memberTable.delete(member).join()
             }
         }
     }
 
-    override fun addInvite(character: RPKCharacter) {
-        val event = RPKBukkitPaymentGroupInviteEvent(this, character)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKPaymentGroupInviteTable::class.java).insert(RPKPaymentGroupInvite(paymentGroup = event.paymentGroup, character = event.character))
+    override fun addInvite(character: RPKCharacter): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentGroupInviteEvent(this, character, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKPaymentGroupInviteTable::class.java)
+                .insert(RPKPaymentGroupInvite(paymentGroup = event.paymentGroup, character = event.character)).join()
+        }
     }
 
     override fun removeInvite(character: RPKCharacter): CompletableFuture<Void> {
-        val event = RPKBukkitPaymentGroupUninviteEvent(this, character)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(null)
-        return plugin.database.getTable(RPKPaymentGroupInviteTable::class.java)[event.paymentGroup].thenAccept { invites ->
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPaymentGroupUninviteEvent(this, character, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val invites = plugin.database.getTable(RPKPaymentGroupInviteTable::class.java)[event.paymentGroup].join()
             val invite = invites.firstOrNull { it.character == event.character }
             if (invite != null) {
-                plugin.database.getTable(RPKPaymentGroupInviteTable::class.java).delete(invite)
+                plugin.database.getTable(RPKPaymentGroupInviteTable::class.java).delete(invite).join()
             }
         }
     }

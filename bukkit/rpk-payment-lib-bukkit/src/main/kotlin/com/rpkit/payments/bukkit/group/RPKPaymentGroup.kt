@@ -96,7 +96,7 @@ interface RPKPaymentGroup {
      *
      * @param character The owner to add
      */
-    fun addOwner(character: RPKCharacter)
+    fun addOwner(character: RPKCharacter): CompletableFuture<Void>
 
     /**
      * Removes an owner from the payment group.
@@ -110,7 +110,7 @@ interface RPKPaymentGroup {
      *
      * @param character The member to add
      */
-    fun addMember(character: RPKCharacter)
+    fun addMember(character: RPKCharacter): CompletableFuture<Void>
 
     /**
      * Removes a member from the payment group.
@@ -124,7 +124,7 @@ interface RPKPaymentGroup {
      *
      * @param character The character to invite
      */
-    fun addInvite(character: RPKCharacter)
+    fun addInvite(character: RPKCharacter): CompletableFuture<Void>
 
     /**
      * Uninvites a character from the payment group.
