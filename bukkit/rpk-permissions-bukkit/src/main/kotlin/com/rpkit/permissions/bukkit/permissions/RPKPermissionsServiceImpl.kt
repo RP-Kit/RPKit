@@ -43,7 +43,7 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
     override fun hasPermission(group: RPKGroup, node: String, default: Boolean): Boolean {
         var hasPermission = default
         for (inheritedGroup in group.inheritance) {
-            hasPermission = hasPermission(inheritedGroup, node, default)
+            hasPermission = hasPermission(inheritedGroup, node, hasPermission)
         }
         if (node in group.allow) {
             hasPermission = true
