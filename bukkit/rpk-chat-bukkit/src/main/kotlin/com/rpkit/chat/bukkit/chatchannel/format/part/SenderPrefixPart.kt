@@ -24,62 +24,68 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture.supplyAsync
 
 @SerializableAs("SenderPrefixPart")
 class SenderPrefixPart(
-        font: String? = null,
-        color: String? = null,
-        isBold: Boolean? = null,
-        isItalic: Boolean? = null,
-        isUnderlined: Boolean? = null,
-        isStrikethrough: Boolean? = null,
-        isObfuscated: Boolean? = null,
-        insertion: String? = null,
-        hover: HoverAction? = null,
-        click: ClickAction? = null
+    font: String? = null,
+    color: String? = null,
+    isBold: Boolean? = null,
+    isItalic: Boolean? = null,
+    isUnderlined: Boolean? = null,
+    isStrikethrough: Boolean? = null,
+    isObfuscated: Boolean? = null,
+    insertion: String? = null,
+    hover: HoverAction? = null,
+    click: ClickAction? = null
 ) : GenericTextPart(
-        font,
-        color,
-        isBold,
-        isItalic,
-        isUnderlined,
-        isStrikethrough,
-        isObfuscated,
-        insertion,
-        hover,
-        click
+    font,
+    color,
+    isBold,
+    isItalic,
+    isUnderlined,
+    isStrikethrough,
+    isObfuscated,
+    insertion,
+    hover,
+    click
 ), ConfigurationSerializable {
 
-    override fun getText(context: DirectedPreFormatMessageContext) = (context.senderProfile as? RPKProfile)
-            ?.let { Services[RPKPrefixService::class.java]?.getPrefix(it) }
-            ?: ""
+    override fun getText(context: DirectedPreFormatMessageContext) = supplyAsync {
+        val prefixService = Services[RPKPrefixService::class.java] ?: return@supplyAsync ""
+        val profile = context.senderProfile
+        if (profile is RPKProfile) {
+            return@supplyAsync prefixService.getPrefix(profile).join()
+        }
+        return@supplyAsync ""
+    }
 
     override fun serialize() = mutableMapOf(
-            "font" to font,
-            "color" to color,
-            "bold" to isBold,
-            "italic" to isItalic,
-            "underlined" to isUnderlined,
-            "strikethrough" to isStrikethrough,
-            "obfuscated" to isObfuscated,
-            "insertion" to insertion,
-            "hover" to hover,
-            "click" to click
+        "font" to font,
+        "color" to color,
+        "bold" to isBold,
+        "italic" to isItalic,
+        "underlined" to isUnderlined,
+        "strikethrough" to isStrikethrough,
+        "obfuscated" to isObfuscated,
+        "insertion" to insertion,
+        "hover" to hover,
+        "click" to click
     )
 
     companion object {
         @JvmStatic
         fun deserialize(serialized: Map<String, Any>) = SenderPrefixPart(
-                serialized["font"] as? String,
-                serialized["color"] as? String,
-                serialized["bold"] as? Boolean,
-                serialized["italic"] as? Boolean,
-                serialized["underlined"] as? Boolean,
-                serialized["strikethrough"] as? Boolean,
-                serialized["obfuscated"] as? Boolean,
-                serialized["insertion"] as? String,
-                serialized["hover"] as? HoverAction,
-                serialized["click"] as? ClickAction
+            serialized["font"] as? String,
+            serialized["color"] as? String,
+            serialized["bold"] as? Boolean,
+            serialized["italic"] as? Boolean,
+            serialized["underlined"] as? Boolean,
+            serialized["strikethrough"] as? Boolean,
+            serialized["obfuscated"] as? Boolean,
+            serialized["insertion"] as? String,
+            serialized["hover"] as? HoverAction,
+            serialized["click"] as? ClickAction
         )
     }
 }

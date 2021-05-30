@@ -21,13 +21,14 @@ import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ClickEvent.Action.OPEN_URL
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture.completedFuture
 
 @SerializableAs("OpenURLClickAction")
 class OpenURLClickAction(val url: String) : ClickAction, ConfigurationSerializable {
-    override fun toClickEvent(context: DirectedPreFormatMessageContext) = ClickEvent(
+    override fun toClickEvent(context: DirectedPreFormatMessageContext) = completedFuture(ClickEvent(
             OPEN_URL,
             url
-    )
+    ))
 
     override fun serialize() = mutableMapOf(
             "url" to url

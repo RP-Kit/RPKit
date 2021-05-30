@@ -96,7 +96,7 @@ class CharacterGroupSwitchPriorityCommand(private val plugin: RPKPermissionsBukk
                     )
                     return@getCharacters InvalidGroupFailure()
                 }
-                val group1Priority = groupService.getGroupPriority(character, group1)
+                val group1Priority = groupService.getGroupPriority(character, group1).join()
                 if (group1Priority == null) {
                     sender.sendMessage(
                         plugin.messages.characterGroupSwitchPriorityInvalidGroupNotPresent.withParameters(
@@ -106,7 +106,7 @@ class CharacterGroupSwitchPriorityCommand(private val plugin: RPKPermissionsBukk
                     )
                     return@getCharacters GroupNotPresentFailure(group1)
                 }
-                val group2Priority = groupService.getGroupPriority(character, group2)
+                val group2Priority = groupService.getGroupPriority(character, group2).join()
                 if (group2Priority == null) {
                     sender.sendMessage(
                         plugin.messages.characterGroupSwitchPriorityInvalidGroupNotPresent.withParameters(
@@ -116,8 +116,8 @@ class CharacterGroupSwitchPriorityCommand(private val plugin: RPKPermissionsBukk
                     )
                     return@getCharacters GroupNotPresentFailure(group2)
                 }
-                groupService.setGroupPriority(character, group1, group2Priority)
-                groupService.setGroupPriority(character, group2, group1Priority)
+                groupService.setGroupPriority(character, group1, group2Priority).join()
+                groupService.setGroupPriority(character, group2, group1Priority).join()
                 sender.sendMessage(
                     plugin.messages.characterGroupSwitchPriorityValid.withParameters(
                         character = character,

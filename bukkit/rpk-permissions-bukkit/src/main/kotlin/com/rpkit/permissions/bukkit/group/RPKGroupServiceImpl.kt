@@ -28,6 +28,8 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Group service implementation.
@@ -35,6 +37,8 @@ import org.bukkit.permissions.PermissionDefault
 class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupService {
 
     override val groups: List<RPKGroup> = plugin.config.getList("groups") as List<RPKGroupImpl>
+    private val profileGroups = ConcurrentHashMap<Int, List<RPKProfileGroup>>()
+    private val characterGroups = ConcurrentHashMap<Int, List<RPKCharacterGroup>>()
 
     init {
         groups.forEach { group ->
@@ -65,154 +69,228 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
         return groups.firstOrNull { group -> group.name.value == name.value }
     }
 
-    override fun addGroup(profile: RPKProfile, group: RPKGroup, priority: Int) {
-        if (!profile.groups.contains(group)) {
-            val event = RPKBukkitGroupAssignProfileEvent(group, profile, priority)
+    override fun addGroup(profile: RPKProfile, group: RPKGroup, priority: Int): CompletableFuture<Void> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            if (!profile.groups.join().contains(group)) {
+                val event = RPKBukkitGroupAssignProfileEvent(group, profile, priority, true)
+                plugin.server.pluginManager.callEvent(event)
+                if (event.isCancelled) return@runAsync
+                val profileGroup = RPKProfileGroup(
+                    event.profile,
+                    event.group,
+                    event.priority
+                )
+                plugin.database.getTable(RPKProfileGroupTable::class.java).insert(profileGroup).join()
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@runAsync
+                minecraftProfileService.getMinecraftProfiles(event.profile).thenAccept { minecraftProfiles ->
+                    minecraftProfiles.forEach { minecraftProfile ->
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            if (minecraftProfile.isOnline) {
+                                val profileGroups = this.profileGroups[profileId.value]
+                                    ?.plus(profileGroup)
+                                    ?.toSet()
+                                    ?.sortedBy(RPKProfileGroup::priority)
+                                    ?: listOf(profileGroup)
+                                this.profileGroups[profileId.value] = profileGroups
+                                minecraftProfile.assignPermissions()
+                            }
+                        })
+                    }
+                }.join()
+            }
+        }
+    }
+
+    override fun addGroup(profile: RPKProfile, group: RPKGroup): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            addGroup(
+                profile,
+                group,
+                plugin.database.getTable(RPKProfileGroupTable::class.java).get(profile).join()
+                    .minByOrNull(RPKProfileGroup::priority)?.priority?.minus(1) ?: 0
+            ).join()
+        }
+    }
+
+    override fun removeGroup(profile: RPKProfile, group: RPKGroup): CompletableFuture<Void> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitGroupUnassignProfileEvent(group, profile, true)
             plugin.server.pluginManager.callEvent(event)
-            if (event.isCancelled) return
-            plugin.database.getTable(RPKProfileGroupTable::class.java).insert(
-                    RPKProfileGroup(
-                            event.profile,
-                            event.group,
-                            event.priority
-                    )
-            )
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+            if (event.isCancelled) return@runAsync
+            val profileGroupTable = plugin.database.getTable(RPKProfileGroupTable::class.java)
+            val profileGroup =
+                profileGroupTable.get(event.profile).join().firstOrNull { profileGroup -> profileGroup.group == event.group }
+                    ?: return@runAsync
+            profileGroupTable.delete(profileGroup).join()
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@runAsync
             minecraftProfileService.getMinecraftProfiles(event.profile).thenAccept { minecraftProfiles ->
                 minecraftProfiles.forEach { minecraftProfile ->
                     plugin.server.scheduler.runTask(plugin, Runnable {
-                        minecraftProfile.assignPermissions()
+                        if (minecraftProfile.isOnline) {
+                            val profileGroups = this.profileGroups[profileId.value]?.minus(profileGroup) ?: listOf(profileGroup)
+                            this.profileGroups[profileId.value] = profileGroups
+                            minecraftProfile.assignPermissions()
+                        }
                     })
                 }
-            }
+            }.join()
         }
     }
 
-    override fun addGroup(profile: RPKProfile, group: RPKGroup) {
-        addGroup(
-                profile,
-                group,
-                plugin.database.getTable(RPKProfileGroupTable::class.java).get(profile)
-                        .minByOrNull(RPKProfileGroup::priority)?.priority?.minus(1) ?: 0
-        )
+    override fun getGroups(profile: RPKProfile): CompletableFuture<List<RPKGroup>> {
+        val preloadedGroups = getPreloadedGroups(profile)
+        if (preloadedGroups != null) return CompletableFuture.completedFuture(preloadedGroups)
+        return plugin.database.getTable(RPKProfileGroupTable::class.java).get(profile).thenApply { it.map(RPKProfileGroup::group) }
     }
 
-    override fun addGroup(character: RPKCharacter, group: RPKGroup, priority: Int) {
-        if (character.groups.contains(group)) return
-        val event = RPKBukkitGroupAssignCharacterEvent(group, character, priority)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKCharacterGroupTable::class.java).insert(
-                RPKCharacterGroup(
-                        event.character,
-                        event.group,
-                        event.priority
-                )
-        )
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = event.character.minecraftProfile ?: return
-        val profile = minecraftProfile.profile
-        if (profile !is RPKProfile) return
-        minecraftProfileService.getMinecraftProfiles(profile).thenAccept { minecraftProfiles ->
-            minecraftProfiles.forEach { profileMinecraftProfile ->
-                plugin.server.scheduler.runTask(plugin, Runnable {
-                    profileMinecraftProfile.assignPermissions()
-                })
-            }
+    override fun getPreloadedGroups(profile: RPKProfile): List<RPKGroup>? {
+        val profileId = profile.id ?: return null
+        return profileGroups[profileId.value]?.map(RPKProfileGroup::group)
+    }
+
+    override fun loadGroups(profile: RPKProfile): CompletableFuture<List<RPKGroup>> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(null)
+        if (profileGroups.containsKey(profileId.value)) return CompletableFuture.completedFuture(profileGroups[profileId.value]?.map(RPKProfileGroup::group))
+        plugin.logger.info("Loading groups for profile ${profile.name + profile.discriminator} (${profileId.value})...")
+        return CompletableFuture.supplyAsync {
+            val profileGroups = plugin.database.getTable(RPKProfileGroupTable::class.java).get(profile).join()
+            this.profileGroups[profileId.value] = profileGroups
+            plugin.logger.info("Loaded groups for profile ${profile.name + profile.discriminator} (${profileId.value}): ${profileGroups.joinToString(", ") { it.group.name.value }}")
+            return@supplyAsync profileGroups.map(RPKProfileGroup::group)
         }
     }
 
-    override fun addGroup(character: RPKCharacter, group: RPKGroup) {
-        addGroup(
+    override fun unloadGroups(profile: RPKProfile) {
+        val profileId = profile.id ?: return
+        profileGroups.remove(profileId.value)
+        plugin.logger.info("Unloaded groups for profile ${profile.name + profile.discriminator} (${profile.id})")
+    }
+
+    override fun getGroupPriority(profile: RPKProfile, group: RPKGroup): CompletableFuture<Int?> {
+        val profileGroupTable = plugin.database.getTable(RPKProfileGroupTable::class.java)
+        return profileGroupTable[profile, group].thenApply { it?.priority }
+    }
+
+    override fun setGroupPriority(profile: RPKProfile, group: RPKGroup, priority: Int): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val profileGroupTable = plugin.database.getTable(RPKProfileGroupTable::class.java)
+            val profileGroup = profileGroupTable[profile, group].join() ?: return@runAsync
+            profileGroup.priority = priority
+            profileGroupTable.update(profileGroup).join()
+            Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfiles(profile)
+                ?.thenAccept { minecraftProfiles ->
+                    minecraftProfiles.forEach { minecraftProfile ->
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            if (minecraftProfile.isOnline) {
+                                minecraftProfile.assignPermissions()
+                            }
+                        })
+                    }
+                }?.join()
+        }
+    }
+
+    override fun addGroup(character: RPKCharacter, group: RPKGroup, priority: Int): CompletableFuture<Void> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            if (character.groups.join().contains(group)) return@runAsync
+            val event = RPKBukkitGroupAssignCharacterEvent(group, character, priority, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val characterGroup = RPKCharacterGroup(
+                event.character,
+                event.group,
+                event.priority
+            )
+            plugin.database.getTable(RPKCharacterGroupTable::class.java).insert(characterGroup).join()
+            val minecraftProfile = event.character.minecraftProfile ?: return@runAsync
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                if (minecraftProfile.isOnline) {
+                    val characterGroups = this.characterGroups[characterId.value]?.plus(characterGroup) ?: listOf(characterGroup)
+                    this.characterGroups[characterId.value] = characterGroups
+                    minecraftProfile.assignPermissions()
+                }
+            })
+        }
+    }
+
+    override fun addGroup(character: RPKCharacter, group: RPKGroup): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            addGroup(
                 character,
                 group,
-                plugin.database.getTable(RPKCharacterGroupTable::class.java).get(character)
-                        .minByOrNull(RPKCharacterGroup::priority)?.priority?.minus(1) ?: 0
-        )
+                plugin.database.getTable(RPKCharacterGroupTable::class.java).get(character).join()
+                    .minByOrNull(RPKCharacterGroup::priority)?.priority?.minus(1) ?: 0
+            ).join()
+        }
     }
 
-
-
-    override fun removeGroup(profile: RPKProfile, group: RPKGroup) {
-        val event = RPKBukkitGroupUnassignProfileEvent(group, profile)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val profileGroupTable = plugin.database.getTable(RPKProfileGroupTable::class.java)
-        val profileGroup = profileGroupTable.get(event.profile).firstOrNull { profileGroup -> profileGroup.group == event.group }
-                ?: return
-        profileGroupTable.delete(profileGroup)
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        minecraftProfileService.getMinecraftProfiles(event.profile).thenAccept { minecraftProfiles ->
-            minecraftProfiles.forEach { minecraftProfile ->
-                plugin.server.scheduler.runTask(plugin, Runnable {
+    override fun removeGroup(character: RPKCharacter, group: RPKGroup): CompletableFuture<Void> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitGroupUnassignCharacterEvent(group, character, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val characterGroupTable = plugin.database.getTable(RPKCharacterGroupTable::class.java)
+            val characterGroup = characterGroupTable.get(event.character).join()
+                .firstOrNull { characterGroup -> characterGroup.group == event.group }
+                ?: return@runAsync
+            characterGroupTable.delete(characterGroup).join()
+            val minecraftProfile = event.character.minecraftProfile ?: return@runAsync
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                if (minecraftProfile.isOnline) {
+                    val characterGroups = this.characterGroups[characterId.value]?.minus(characterGroup) ?: listOf(characterGroup)
+                    this.characterGroups[characterId.value] = characterGroups
                     minecraftProfile.assignPermissions()
-                })
-            }
-        }
-    }
-
-    override fun removeGroup(character: RPKCharacter, group: RPKGroup) {
-        val event = RPKBukkitGroupUnassignCharacterEvent(group, character)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val characterGroupTable = plugin.database.getTable(RPKCharacterGroupTable::class.java)
-        val characterGroup = characterGroupTable.get(event.character).firstOrNull { characterGroup -> characterGroup.group == event.group }
-                ?: return
-        characterGroupTable.delete(characterGroup)
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = event.character.minecraftProfile ?: return
-        val profile = minecraftProfile.profile
-        if (profile !is RPKProfile) return
-        minecraftProfileService.getMinecraftProfiles(profile).thenAccept { minecraftProfiles ->
-            minecraftProfiles.forEach { profileMinecraftProfile ->
-                plugin.server.scheduler.runTask(plugin, Runnable {
-                    profileMinecraftProfile.assignPermissions()
-                })
-            }
-        }
-    }
-
-    override fun getGroups(profile: RPKProfile): List<RPKGroup> {
-        return plugin.database.getTable(RPKProfileGroupTable::class.java).get(profile).map(RPKProfileGroup::group)
-    }
-
-    override fun getGroupPriority(profile: RPKProfile, group: RPKGroup): Int? {
-        val profileGroupTable = plugin.database.getTable(RPKProfileGroupTable::class.java)
-        val profileGroup = profileGroupTable[profile, group] ?: return null
-        return profileGroup.priority
-    }
-
-    override fun setGroupPriority(profile: RPKProfile, group: RPKGroup, priority: Int) {
-        val profileGroupTable = plugin.database.getTable(RPKProfileGroupTable::class.java)
-        val profileGroup = profileGroupTable[profile, group] ?: return
-        profileGroup.priority = priority
-        profileGroupTable.update(profileGroup)
-        Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfiles(profile)
-            ?.thenAccept { minecraftProfiles ->
-                minecraftProfiles.forEach { minecraftProfile ->
-                    plugin.server.scheduler.runTask(plugin, Runnable {
-                        minecraftProfile.assignPermissions()
-                    })
                 }
-            }
+            })
+        }
     }
 
-    override fun getGroups(character: RPKCharacter): List<RPKGroup> {
-        return plugin.database.getTable(RPKCharacterGroupTable::class.java).get(character).map(RPKCharacterGroup::group)
+    override fun getPreloadedGroups(character: RPKCharacter): List<RPKGroup>? {
+        val characterId = character.id ?: return null
+        return characterGroups[characterId.value]?.map(RPKCharacterGroup::group)
     }
 
-    override fun getGroupPriority(character: RPKCharacter, group: RPKGroup): Int? {
+    override fun loadGroups(character: RPKCharacter): CompletableFuture<List<RPKGroup>> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
+        if (characterGroups.containsKey(characterId.value)) return CompletableFuture.completedFuture(characterGroups[characterId.value]?.map(RPKCharacterGroup::group))
+        plugin.logger.info("Loading groups for character ${character.name} (${characterId.value})...")
+        return CompletableFuture.supplyAsync {
+            val characterGroups = plugin.database.getTable(RPKCharacterGroupTable::class.java).get(character).join()
+            this.characterGroups[characterId.value] = characterGroups
+            plugin.logger.info("Loaded groups for character ${character.name} (${characterId.value}): ${characterGroups.joinToString(", ") { it.group.name.value }}")
+            return@supplyAsync characterGroups.map(RPKCharacterGroup::group)
+        }
+    }
+
+    override fun unloadGroups(character: RPKCharacter) {
+        val characterId = character.id ?: return
+        characterGroups.remove(characterId.value)
+        plugin.logger.info("Unloaded groups for character ${character.name} (${characterId.value})")
+    }
+
+    override fun getGroups(character: RPKCharacter): CompletableFuture<List<RPKGroup>> {
+        val preloadedGroups = getPreloadedGroups(character)
+        if (preloadedGroups != null) return CompletableFuture.completedFuture(preloadedGroups)
+        return plugin.database.getTable(RPKCharacterGroupTable::class.java).get(character).thenApply { it.map(RPKCharacterGroup::group) }
+    }
+
+    override fun getGroupPriority(character: RPKCharacter, group: RPKGroup): CompletableFuture<Int?> {
         val characterGroupTable = plugin.database.getTable(RPKCharacterGroupTable::class.java)
-        val characterGroup = characterGroupTable[character, group] ?: return null
-        return characterGroup.priority
+        return characterGroupTable[character, group].thenApply { it?.priority }
     }
 
-    override fun setGroupPriority(character: RPKCharacter, group: RPKGroup, priority: Int) {
+    override fun setGroupPriority(character: RPKCharacter, group: RPKGroup, priority: Int): CompletableFuture<Void> {
         val characterGroupTable = plugin.database.getTable(RPKCharacterGroupTable::class.java)
-        val characterGroup = characterGroupTable[character, group] ?: return
-        characterGroup.priority = priority
-        characterGroupTable.update(characterGroup)
-        character.minecraftProfile?.assignPermissions()
+        return characterGroupTable[character, group].thenAccept { characterGroup ->
+            if (characterGroup == null) return@thenAccept
+            characterGroup.priority = priority
+            characterGroupTable.update(characterGroup)
+            character.minecraftProfile?.assignPermissions()
+        }
     }
 
 }

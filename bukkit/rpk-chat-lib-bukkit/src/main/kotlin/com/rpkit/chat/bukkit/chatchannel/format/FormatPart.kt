@@ -18,9 +18,10 @@ package com.rpkit.chat.bukkit.chatchannel.format
 
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import net.md_5.bungee.api.chat.BaseComponent
+import java.util.concurrent.CompletableFuture
 
 interface FormatPart {
 
-    fun toChatComponents(context: DirectedPreFormatMessageContext): Array<BaseComponent>
+    fun toChatComponents(context: DirectedPreFormatMessageContext): CompletableFuture<Array<BaseComponent>>
 
 }

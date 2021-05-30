@@ -22,6 +22,7 @@ import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroup
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.groups
+import com.rpkit.permissions.bukkit.group.preloadedGroups
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.entity.Player
@@ -42,7 +43,7 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
     override fun hasPermission(group: RPKGroup, node: String, default: Boolean): Boolean {
         var hasPermission = default
         for (inheritedGroup in group.inheritance) {
-            hasPermission = hasPermission(inheritedGroup, node)
+            hasPermission = hasPermission(inheritedGroup, node, default)
         }
         if (node in group.allow) {
             hasPermission = true
@@ -53,40 +54,43 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
         return hasPermission
     }
 
-    override fun hasPermission(profile: RPKProfile, node: String): Boolean {
+    override fun hasPermission(profile: RPKProfile, node: String): CompletableFuture<Boolean> {
         var hasPermission = plugin.server.pluginManager.getPermission(node)?.default?.getValue(false) ?: false
-        val groupService = Services[RPKGroupService::class.java] ?: return hasPermission
-        val groups = groupService.getGroups(profile)
-        if (groups.isEmpty()) {
-            hasPermission = hasPermission(defaultGroup, node, hasPermission)
-        } else {
-            for (group in groups) {
-                hasPermission = hasPermission(group, node, hasPermission)
+        val groupService = Services[RPKGroupService::class.java] ?: return CompletableFuture.completedFuture(hasPermission)
+        return groupService.getGroups(profile).thenApply { groups ->
+            if (groups.isEmpty()) {
+                hasPermission = hasPermission(defaultGroup, node, hasPermission)
+            } else {
+                for (group in groups) {
+                    hasPermission = hasPermission(group, node, hasPermission)
+                }
             }
+            return@thenApply hasPermission
         }
-        return hasPermission
     }
 
-    override fun hasPermission(character: RPKCharacter, node: String): Boolean {
+    override fun hasPermission(character: RPKCharacter, node: String): CompletableFuture<Boolean> {
         var hasPermission = plugin.server.pluginManager.getPermission(node)?.default?.getValue(false) ?: false
         val minecraftProfile = character.minecraftProfile
-        if (minecraftProfile != null) {
-            val profile = minecraftProfile.profile
-            if (profile is RPKProfile) {
-                hasPermission = hasPermission(profile, node)
+        return CompletableFuture.supplyAsync {
+            if (minecraftProfile != null) {
+                val profile = minecraftProfile.profile
+                if (profile is RPKProfile) {
+                    hasPermission = hasPermission(profile, node).join()
+                }
             }
+            for (group in character.groups.join()) {
+                hasPermission = hasPermission(group, node, hasPermission)
+            }
+            return@supplyAsync hasPermission
         }
-        for (group in character.groups) {
-            hasPermission = hasPermission(group, node, hasPermission)
-        }
-        return hasPermission
     }
 
-    override fun assignPermissions(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void> {
+    override fun assignPermissions(minecraftProfile: RPKMinecraftProfile) {
         val minecraftProfileId = minecraftProfile.id
                 ?: throw IllegalStateException("Minecraft profile has not yet been inserted into the database.")
         val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
-            ?: return CompletableFuture.completedFuture(null)
+            ?: return
         val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
         if (permissionsAttachment == null) {
             permissionsAttachments[minecraftProfileId.value] = bukkitPlayer.addAttachment(plugin)
@@ -97,20 +101,23 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
         val groups = mutableListOf<RPKGroup>()
         val profile = minecraftProfile.profile
         if (profile is RPKProfile) {
-            groups.addAll(profile.groups)
+            profile.preloadedGroups?.let { groups.addAll(it) }
         }
-        val characterService = Services[RPKCharacterService::class.java] ?: return CompletableFuture.completedFuture(null)
-        return characterService.getActiveCharacter(minecraftProfile).thenAccept { character ->
-            if (character != null) {
-                groups.addAll(character.groups)
+        val characterService =
+            Services[RPKCharacterService::class.java] ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+        if (character != null) {
+            character.preloadedGroups?.let {
+                groups.removeAll(it) // If groups are assigned due to the profile, make sure them being assigned to the character increases their priority
+                groups.addAll(it)
             }
-            if (groups.isEmpty()) {
-                assignGroupPermissions(minecraftProfile, defaultGroup, mutableListOf())
-            } else {
-                val assignedGroups = mutableListOf<RPKGroup>()
-                for (group in groups) {
-                    assignGroupPermissions(minecraftProfile, group, assignedGroups)
-                }
+        }
+        if (groups.isEmpty()) {
+            assignGroupPermissions(minecraftProfile, defaultGroup, mutableListOf())
+        } else {
+            val assignedGroups = mutableListOf<RPKGroup>()
+            for (group in groups) {
+                assignGroupPermissions(minecraftProfile, group, assignedGroups)
             }
         }
     }

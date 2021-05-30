@@ -44,7 +44,7 @@ class RPKPermissionsVaultPermissions(private val plugin: RPKPermissionsLibBukkit
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return false
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)).join() ?: return false
         val profile = minecraftProfile.profile as? RPKProfile ?: return false
-        return profile.hasPermission(permission)
+        return profile.hasPermission(permission).join()
     }
 
     override fun playerAdd(worldName: String, playerName: String, permission: String): Boolean {
@@ -81,7 +81,7 @@ class RPKPermissionsVaultPermissions(private val plugin: RPKPermissionsLibBukkit
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)).join() ?: return false
         val profile = minecraftProfile.profile as? RPKProfile ?: return false
         val group = groupService.getGroup(RPKGroupName(groupName)) ?: return false
-        return profile.groups.map(RPKGroup::name).contains(group.name)
+        return profile.groups.join().map(RPKGroup::name).contains(group.name)
     }
 
     override fun playerAddGroup(worldName: String, playerName: String, groupName: String): Boolean {
@@ -117,7 +117,7 @@ class RPKPermissionsVaultPermissions(private val plugin: RPKPermissionsLibBukkit
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return emptyArray()
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)).join() ?: return emptyArray()
         val profile = minecraftProfile.profile as? RPKProfile ?: return emptyArray()
-        return profile.groups.map { group -> group.name.value }.toTypedArray()
+        return profile.groups.join().map { group -> group.name.value }.toTypedArray()
     }
 
     override fun getPrimaryGroup(worldName: String, playerName: String): String? {
@@ -127,7 +127,7 @@ class RPKPermissionsVaultPermissions(private val plugin: RPKPermissionsLibBukkit
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return null
         val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)).join() ?: return null
         val profile = minecraftProfile.profile as? RPKProfile ?: return null
-        return profile.groups[0].name.value
+        return profile.groups.join()[0].name.value
     }
 
     override fun getGroups(): Array<String> {

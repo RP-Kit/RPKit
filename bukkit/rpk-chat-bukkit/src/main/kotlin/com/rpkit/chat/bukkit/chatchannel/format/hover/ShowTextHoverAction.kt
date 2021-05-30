@@ -23,13 +23,16 @@ import net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT
 import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture.supplyAsync
 
 @SerializableAs("ShowTextHoverAction")
 class ShowTextHoverAction(val text: List<FormatPart>) : HoverAction, ConfigurationSerializable {
-    override fun toHoverEvent(context: DirectedPreFormatMessageContext) = HoverEvent(
+    override fun toHoverEvent(context: DirectedPreFormatMessageContext) = supplyAsync {
+        HoverEvent(
             SHOW_TEXT,
-            Text(text.flatMap { it.toChatComponents(context).toList() }.toTypedArray())
-    )
+            Text(text.flatMap { it.toChatComponents(context).join().toList() }.toTypedArray())
+        )
+    }
 
     override fun serialize() = mutableMapOf(
             "text" to text

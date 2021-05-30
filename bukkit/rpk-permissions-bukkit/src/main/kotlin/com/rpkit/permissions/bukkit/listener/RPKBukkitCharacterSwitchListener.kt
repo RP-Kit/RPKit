@@ -17,6 +17,8 @@
 package com.rpkit.permissions.bukkit.listener
 
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterSwitchEvent
+import com.rpkit.core.service.Services
+import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.assignPermissions
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -25,6 +27,9 @@ class RPKBukkitCharacterSwitchListener : Listener {
 
     @EventHandler
     fun onCharacterSwitch(event: RPKBukkitCharacterSwitchEvent) {
+        val groupService = Services[RPKGroupService::class.java] ?: return
+        event.fromCharacter?.let { groupService.unloadGroups(it) }
+        event.character?.let { groupService.loadGroups(it).join() }
         event.minecraftProfile.assignPermissions()
     }
 

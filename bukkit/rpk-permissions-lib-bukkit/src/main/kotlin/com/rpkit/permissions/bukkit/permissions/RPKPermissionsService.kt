@@ -48,19 +48,19 @@ interface RPKPermissionsService : Service {
     /**
      * Checks whether a profile has a permissions node
      */
-    fun hasPermission(profile: RPKProfile, node: String): Boolean
+    fun hasPermission(profile: RPKProfile, node: String): CompletableFuture<Boolean>
 
     /**
      * Checks whether a character has a permissions node
      */
-    fun hasPermission(character: RPKCharacter, node: String): Boolean
+    fun hasPermission(character: RPKCharacter, node: String): CompletableFuture<Boolean>
 
     /**
      * Assigns permissions to a player in Minecraft
      *
      * @param minecraftProfile The Minecraft profile to assign permissions to
      */
-    fun assignPermissions(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void>
+    fun assignPermissions(minecraftProfile: RPKMinecraftProfile)
 
     /**
      * Unassigns permissions from a player in Minecraft

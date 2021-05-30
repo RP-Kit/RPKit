@@ -18,7 +18,8 @@ package com.rpkit.chat.bukkit.chatchannel.format.click
 
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import net.md_5.bungee.api.chat.ClickEvent
+import java.util.concurrent.CompletableFuture
 
 interface ClickAction {
-    fun toClickEvent(context: DirectedPreFormatMessageContext): ClickEvent
+    fun toClickEvent(context: DirectedPreFormatMessageContext): CompletableFuture<ClickEvent>
 }

@@ -65,7 +65,7 @@ class CharacterGroupViewCommand(private val plugin: RPKPermissionsBukkit) : Comm
                 sender.sendMessage(plugin.messages.noCharacterService)
                 return@getProfile
             }
-            characterService.getCharacters(profile).thenAccept getCharacters@{ characters ->
+            characterService.getCharacters(profile).thenAcceptAsync getCharacters@{ characters ->
                 if (characters.isEmpty()) {
                     sender.sendMessage(plugin.messages.noCharacter)
                     return@getCharacters
@@ -80,7 +80,7 @@ class CharacterGroupViewCommand(private val plugin: RPKPermissionsBukkit) : Comm
                         character = character
                     )
                 )
-                for (group in groupService.getGroups(character)) {
+                for (group in groupService.getGroups(character).join()) {
                     val message = plugin.messages.groupViewItem.withParameters(group = group)
                     val messageComponents = mutableListOf<BaseComponent>()
                     var chatColor: ChatColor? = null
