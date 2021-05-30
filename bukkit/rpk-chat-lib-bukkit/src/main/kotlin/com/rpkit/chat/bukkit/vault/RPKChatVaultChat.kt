@@ -59,6 +59,9 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
     }
 
     override fun getPlayerPrefix(world: String, playerName: String): String {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (getPlayerPrefix)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         val prefixService = Services[RPKPrefixService::class.java]
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
@@ -66,7 +69,7 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
             if (profile is RPKProfile) {
-                return prefixService?.getPrefix(profile) ?: ""
+                return prefixService?.getPrefix(profile)?.join() ?: ""
             }
         }
         return ""

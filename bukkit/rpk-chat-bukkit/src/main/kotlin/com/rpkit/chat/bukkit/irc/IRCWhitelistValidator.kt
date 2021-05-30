@@ -98,7 +98,7 @@ class IRCWhitelistValidator {
                 )
                 return@runAsync
             }
-            if (!profile.hasPermission("rpkit.chat.listen.${chatChannel.name.value}")) {
+            if (!profile.hasPermission("rpkit.chat.listen.${chatChannel.name.value}").join()) {
                 kick(
                     bot,
                     channel,

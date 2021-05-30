@@ -68,67 +68,72 @@ class CharacterGroupPrepareSwitchPriorityCommand(private val plugin: RPKPermissi
                     return@getCharacters
                 }
                 val group1 = args.last()
-                character.groups.forEach { group ->
-                    val message = plugin.messages.groupViewItem.withParameters(group = group)
-                    val messageComponents = mutableListOf<BaseComponent>()
-                    var chatColor: ChatColor? = null
-                    var chatFormat: ChatColor? = null
-                    var messageBuffer = StringBuilder()
-                    var i = 0
-                    while (i < message.length) {
-                        if (message[i] == COLOR_CHAR) {
-                            appendComponent(messageComponents, messageBuffer, chatColor, chatFormat)
-                            messageBuffer = StringBuilder()
-                            if (message[i + 1] == 'x') {
-                                chatColor =
-                                    ChatColor.of("#${message[i + 2]}${message[i + 4]}${message[i + 6]}${message[i + 8]}${message[i + 10]}${message[i + 12]}")
-                                i += 13
+                character.groups.thenAccept getCharacterGroups@{ characterGroups ->
+                    characterGroups.forEach { group ->
+                        val message = plugin.messages.groupViewItem.withParameters(group = group)
+                        val messageComponents = mutableListOf<BaseComponent>()
+                        var chatColor: ChatColor? = null
+                        var chatFormat: ChatColor? = null
+                        var messageBuffer = StringBuilder()
+                        var i = 0
+                        while (i < message.length) {
+                            if (message[i] == COLOR_CHAR) {
+                                appendComponent(messageComponents, messageBuffer, chatColor, chatFormat)
+                                messageBuffer = StringBuilder()
+                                if (message[i + 1] == 'x') {
+                                    chatColor =
+                                        ChatColor.of("#${message[i + 2]}${message[i + 4]}${message[i + 6]}${message[i + 8]}${message[i + 10]}${message[i + 12]}")
+                                    i += 13
+                                } else {
+                                    val colorOrFormat = ChatColor.getByChar(message[i + 1])
+                                    if (colorOrFormat?.color != null) {
+                                        chatColor = colorOrFormat
+                                        chatFormat = null
+                                    }
+                                    if (colorOrFormat?.color == null) {
+                                        chatFormat = colorOrFormat
+                                    }
+                                    if (colorOrFormat == ChatColor.RESET) {
+                                        chatColor = null
+                                        chatFormat = null
+                                    }
+                                    i += 2
+                                }
+                            } else if (message.substring(
+                                    i,
+                                    (i + "\${reorder}".length).coerceAtMost(message.length)
+                                ) == "\${reorder}"
+                            ) {
+                                val reorderButton = TextComponent("\u292d").also {
+                                    if (chatColor != null) {
+                                        it.color = chatColor
+                                    }
+                                    if (chatFormat != null) {
+                                        it.isObfuscated = chatFormat == ChatColor.MAGIC
+                                        it.isBold = chatFormat == ChatColor.BOLD
+                                        it.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
+                                        it.isUnderlined = chatFormat == ChatColor.UNDERLINE
+                                        it.isItalic = chatFormat == ChatColor.ITALIC
+                                    }
+                                }
+                                reorderButton.hoverEvent =
+                                    HoverEvent(
+                                        SHOW_TEXT,
+                                        listOf(Text("Click to switch $group1 with ${group.name.value}"))
+                                    )
+                                reorderButton.clickEvent = ClickEvent(
+                                    RUN_COMMAND,
+                                    "/charactergroup switchpriority $profileName $characterName $group1 ${group.name.value}"
+                                )
+                                messageComponents.add(reorderButton)
+                                i += "\${reorder}".length
                             } else {
-                                val colorOrFormat = ChatColor.getByChar(message[i + 1])
-                                if (colorOrFormat?.color != null) {
-                                    chatColor = colorOrFormat
-                                    chatFormat = null
-                                }
-                                if (colorOrFormat?.color == null) {
-                                    chatFormat = colorOrFormat
-                                }
-                                if (colorOrFormat == ChatColor.RESET) {
-                                    chatColor = null
-                                    chatFormat = null
-                                }
-                                i += 2
+                                messageBuffer.append(message[i++])
                             }
-                        } else if (message.substring(
-                                i,
-                                (i + "\${reorder}".length).coerceAtMost(message.length)
-                            ) == "\${reorder}"
-                        ) {
-                            val reorderButton = TextComponent("\u292d").also {
-                                if (chatColor != null) {
-                                    it.color = chatColor
-                                }
-                                if (chatFormat != null) {
-                                    it.isObfuscated = chatFormat == ChatColor.MAGIC
-                                    it.isBold = chatFormat == ChatColor.BOLD
-                                    it.isStrikethrough = chatFormat == ChatColor.STRIKETHROUGH
-                                    it.isUnderlined = chatFormat == ChatColor.UNDERLINE
-                                    it.isItalic = chatFormat == ChatColor.ITALIC
-                                }
-                            }
-                            reorderButton.hoverEvent =
-                                HoverEvent(SHOW_TEXT, listOf(Text("Click to switch $group1 with ${group.name.value}")))
-                            reorderButton.clickEvent = ClickEvent(
-                                RUN_COMMAND,
-                                "/charactergroup switchpriority $profileName $characterName $group1 ${group.name.value}"
-                            )
-                            messageComponents.add(reorderButton)
-                            i += "\${reorder}".length
-                        } else {
-                            messageBuffer.append(message[i++])
                         }
+                        appendComponent(messageComponents, messageBuffer, chatColor, chatFormat)
+                        sender.spigot().sendMessage(*messageComponents.toTypedArray())
                     }
-                    appendComponent(messageComponents, messageBuffer, chatColor, chatFormat)
-                    sender.spigot().sendMessage(*messageComponents.toTypedArray())
                 }
             }
         }

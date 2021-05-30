@@ -18,7 +18,8 @@ package com.rpkit.chat.bukkit.chatchannel.format.hover
 
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import net.md_5.bungee.api.chat.HoverEvent
+import java.util.concurrent.CompletableFuture
 
 interface HoverAction {
-    fun toHoverEvent(context: DirectedPreFormatMessageContext): HoverEvent
+    fun toHoverEvent(context: DirectedPreFormatMessageContext): CompletableFuture<HoverEvent>
 }

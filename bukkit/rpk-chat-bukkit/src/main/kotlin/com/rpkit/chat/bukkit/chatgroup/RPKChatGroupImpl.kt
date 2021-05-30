@@ -127,7 +127,7 @@ class RPKChatGroupImpl(
                 if (formattedMessage.contains("\${sender-prefix}")) {
                     val profile = sender.profile
                     formattedMessage = if (profile is RPKProfile) {
-                        formattedMessage.replace("\${sender-prefix}", prefixService?.getPrefix(profile) ?: "")
+                        formattedMessage.replace("\${sender-prefix}", prefixService?.getPrefix(profile)?.join() ?: "")
                     } else {
                         formattedMessage.replace("\${sender-prefix}", "")
                     }

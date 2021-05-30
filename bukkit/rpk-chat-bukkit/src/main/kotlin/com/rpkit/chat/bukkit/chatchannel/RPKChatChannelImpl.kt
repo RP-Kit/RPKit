@@ -153,7 +153,7 @@ class RPKChatChannelImpl(
                         preFormatContext.senderProfile,
                         preFormatContext.senderMinecraftProfile,
                         listener,
-                        format.flatMap { part -> part.toChatComponents(preFormatContext).toList() }.toTypedArray(),
+                        format.flatMap { part -> part.toChatComponents(preFormatContext).join().toList() }.toTypedArray(),
                         preFormatContext.isCancelled
                     )
                     directedPostFormatPipeline.forEach { component ->

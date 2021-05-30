@@ -18,6 +18,7 @@ package com.rpkit.chat.bukkit.prefix
 
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides prefix related operations.
@@ -36,7 +37,7 @@ interface RPKPrefixService : Service {
      * @param profile The profile
      * @return The profile's full prefix
      */
-    fun getPrefix(profile: RPKProfile): String
+    fun getPrefix(profile: RPKProfile): CompletableFuture<String>
 
     /**
      * Gets a prefix by name.

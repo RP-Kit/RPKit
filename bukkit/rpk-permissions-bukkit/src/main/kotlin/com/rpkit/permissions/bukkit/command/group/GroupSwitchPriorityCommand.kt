@@ -68,30 +68,38 @@ class GroupSwitchPriorityCommand(private val plugin: RPKPermissionsBukkit) : RPK
             ))
             return CompletableFuture.completedFuture(InvalidGroupFailure())
         }
-        val group1Priority = groupService.getGroupPriority(targetProfile, group1)
-        if (group1Priority == null) {
-            sender.sendMessage(plugin.messages.groupSwitchPriorityInvalidGroupNotPresent.withParameters(
-                profile = targetProfile,
-                group = group1
-            ))
-            return CompletableFuture.completedFuture(GroupNotPresentFailure(group1))
+        return CompletableFuture.supplyAsync {
+            val group1Priority = groupService.getGroupPriority(targetProfile, group1).join()
+            if (group1Priority == null) {
+                sender.sendMessage(
+                    plugin.messages.groupSwitchPriorityInvalidGroupNotPresent.withParameters(
+                        profile = targetProfile,
+                        group = group1
+                    )
+                )
+                return@supplyAsync GroupNotPresentFailure(group1)
+            }
+            val group2Priority = groupService.getGroupPriority(targetProfile, group2).join()
+            if (group2Priority == null) {
+                sender.sendMessage(
+                    plugin.messages.groupSwitchPriorityInvalidGroupNotPresent.withParameters(
+                        profile = targetProfile,
+                        group = group2
+                    )
+                )
+                return@supplyAsync GroupNotPresentFailure(group2)
+            }
+            groupService.setGroupPriority(targetProfile, group1, group2Priority).join()
+            groupService.setGroupPriority(targetProfile, group2, group1Priority).join()
+            sender.sendMessage(
+                plugin.messages.groupSwitchPriorityValid.withParameters(
+                    profile = targetProfile,
+                    group1 = group1,
+                    group2 = group2
+                )
+            )
+            return@supplyAsync CommandSuccess
         }
-        val group2Priority = groupService.getGroupPriority(targetProfile, group2)
-        if (group2Priority == null) {
-            sender.sendMessage(plugin.messages.groupSwitchPriorityInvalidGroupNotPresent.withParameters(
-                profile = targetProfile,
-                group = group2
-            ))
-            return CompletableFuture.completedFuture(GroupNotPresentFailure(group2))
-        }
-        groupService.setGroupPriority(targetProfile, group1, group2Priority)
-        groupService.setGroupPriority(targetProfile, group2, group1Priority)
-        sender.sendMessage(plugin.messages.groupSwitchPriorityValid.withParameters(
-            profile = targetProfile,
-            group1 = group1,
-            group2 = group2
-        ))
-        return CompletableFuture.completedFuture(CommandSuccess)
     }
 
 }

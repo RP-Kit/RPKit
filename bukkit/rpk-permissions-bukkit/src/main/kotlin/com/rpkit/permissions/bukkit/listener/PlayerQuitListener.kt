@@ -16,9 +16,13 @@
 
 package com.rpkit.permissions.bukkit.listener
 
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
+import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.unassignPermissions
+import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -33,10 +37,24 @@ class PlayerQuitListener(private val plugin: RPKPermissionsBukkit) : Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerQuit(event: PlayerQuitEvent) {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java]
+        val groupService = Services[RPKGroupService::class.java] ?: return
         minecraftProfileService.getMinecraftProfile(event.player).thenAccept { minecraftProfile ->
             if (minecraftProfile != null) {
                 plugin.server.scheduler.runTask(plugin, Runnable {
                     minecraftProfile.unassignPermissions(event.player)
+                    val profile = minecraftProfile.profile
+                    if (profile is RPKProfile) {
+                        minecraftProfileService.getMinecraftProfiles(profile).thenAccept { minecraftProfiles ->
+                            if (minecraftProfiles.none(RPKMinecraftProfile::isOnline)) {
+                                groupService.unloadGroups(profile)
+                            }
+                        }
+                    }
+                    characterService?.getActiveCharacter(minecraftProfile)?.thenAccept getCharacter@{ character ->
+                        if (character == null) return@getCharacter
+                        groupService.unloadGroups(character)
+                    }
                 })
             }
         }

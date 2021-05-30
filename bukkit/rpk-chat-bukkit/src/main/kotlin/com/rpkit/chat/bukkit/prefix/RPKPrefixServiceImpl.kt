@@ -23,6 +23,7 @@ import com.rpkit.chat.bukkit.event.prefix.RPKBukkitPrefixUpdateEvent
 import com.rpkit.permissions.bukkit.group.hasPermission
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.ChatColor
+import java.util.concurrent.CompletableFuture
 
 /**
  * Prefix service implementation.
@@ -65,12 +66,14 @@ class RPKPrefixServiceImpl(override val plugin: RPKChatBukkit) : RPKPrefixServic
         return prefixes.firstOrNull { prefix -> prefix.name == name }
     }
 
-    override fun getPrefix(profile: RPKProfile): String {
-        val prefixBuilder = StringBuilder()
-        prefixes
-                .filter { profile.hasPermission("rpkit.chat.prefix.${it.name}") }
+    override fun getPrefix(profile: RPKProfile): CompletableFuture<String> {
+        return CompletableFuture.supplyAsync {
+            val prefixBuilder = StringBuilder()
+            prefixes
+                .filter { profile.hasPermission("rpkit.chat.prefix.${it.name}").join() }
                 .forEach { prefixBuilder.append(it.prefix).append(' ') }
-        return prefixBuilder.toString()
+            return@supplyAsync prefixBuilder.toString()
+        }
     }
 
 }

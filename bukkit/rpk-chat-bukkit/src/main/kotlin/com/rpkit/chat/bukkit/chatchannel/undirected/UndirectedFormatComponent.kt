@@ -25,50 +25,57 @@ import net.md_5.bungee.api.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.supplyAsync
 
 @SerializableAs("UndirectedFormatComponent")
 class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: UndirectedMessageContext): CompletableFuture<UndirectedMessageContext> {
-        val characterService = Services[RPKCharacterService::class.java]
-        val prefixService = Services[RPKPrefixService::class.java]
-        val senderMinecraftProfile = context.senderMinecraftProfile
-        val senderProfile = context.senderProfile
-        val senderCharacter = if (senderMinecraftProfile != null)
-            characterService?.getPreloadedActiveCharacter(senderMinecraftProfile)
-        else
-            null
-        val chatChannel = context.chatChannel
-        var formattedMessage = ChatColor.translateAlternateColorCodes('&', formatString)
-        if (formattedMessage.contains("\$message")) {
-            formattedMessage = formattedMessage.replace("\$message", context.message)
-        }
-        if (formattedMessage.contains("\$sender-prefix")) {
-            formattedMessage = if (senderProfile is RPKProfile) {
-                formattedMessage.replace("\$sender-prefix", prefixService?.getPrefix(senderProfile) ?: "")
-            } else {
-                formattedMessage.replace("\$sender-prefix", "")
+        return supplyAsync {
+            val characterService = Services[RPKCharacterService::class.java]
+            val prefixService = Services[RPKPrefixService::class.java]
+            val senderMinecraftProfile = context.senderMinecraftProfile
+            val senderProfile = context.senderProfile
+            val senderCharacter = if (senderMinecraftProfile != null)
+                characterService?.getActiveCharacter(senderMinecraftProfile)?.join()
+            else
+                null
+            val chatChannel = context.chatChannel
+            var formattedMessage = ChatColor.translateAlternateColorCodes('&', formatString)
+            if (formattedMessage.contains("\$message")) {
+                formattedMessage = formattedMessage.replace("\$message", context.message)
             }
-        }
-        if (formattedMessage.contains("\$sender-player")) {
-            formattedMessage = formattedMessage.replace("\$sender-player", senderProfile.name.value)
-        }
-        if (formattedMessage.contains("\$sender-character")) {
-            if (senderCharacter != null) {
-                formattedMessage = formattedMessage.replace("\$sender-character", if (senderCharacter.isNameHidden) "(HIDDEN ${senderCharacter.name.hashCode()})" else senderCharacter.name)
-            } else {
-                context.isCancelled = true
+            if (formattedMessage.contains("\$sender-prefix")) {
+                formattedMessage = if (senderProfile is RPKProfile) {
+                    formattedMessage.replace("\$sender-prefix", prefixService?.getPrefix(senderProfile)?.join() ?: "")
+                } else {
+                    formattedMessage.replace("\$sender-prefix", "")
+                }
             }
+            if (formattedMessage.contains("\$sender-player")) {
+                formattedMessage = formattedMessage.replace("\$sender-player", senderProfile.name.value)
+            }
+            if (formattedMessage.contains("\$sender-character")) {
+                if (senderCharacter != null) {
+                    formattedMessage = formattedMessage.replace(
+                        "\$sender-character",
+                        if (senderCharacter.isNameHidden) "(HIDDEN ${senderCharacter.name.hashCode()})" else senderCharacter.name
+                    )
+                } else {
+                    context.isCancelled = true
+                }
+            }
+            if (formattedMessage.contains("\$channel")) {
+                formattedMessage = formattedMessage.replace("\$channel", chatChannel.name.value)
+            }
+            if (formattedMessage.contains("\$color") || formattedMessage.contains("\$colour")) {
+                val chatColorString = ChatColor.of(chatChannel.color).toString()
+                formattedMessage =
+                    formattedMessage.replace("\$color", chatColorString).replace("\$colour", chatColorString)
+            }
+            context.message = formattedMessage
+            return@supplyAsync context
         }
-        if (formattedMessage.contains("\$channel")) {
-            formattedMessage = formattedMessage.replace("\$channel", chatChannel.name.value)
-        }
-        if (formattedMessage.contains("\$color") || formattedMessage.contains("\$colour")) {
-            val chatColorString = ChatColor.of(chatChannel.color).toString()
-            formattedMessage = formattedMessage.replace("\$color", chatColorString).replace("\$colour", chatColorString)
-        }
-        context.message = formattedMessage
-        return CompletableFuture.completedFuture(context)
     }
 
     override fun serialize(): MutableMap<String, Any> {
