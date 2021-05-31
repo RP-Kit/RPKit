@@ -18,6 +18,7 @@ package com.rpkit.unconsciousness.bukkit.unconsciousness
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides unconsciousness-related operations
@@ -30,7 +31,7 @@ interface RPKUnconsciousnessService : Service {
      * @param character The character
      * @return Whether the character is unconscious
      */
-    fun isUnconscious(character: RPKCharacter): Boolean
+    fun isUnconscious(character: RPKCharacter): CompletableFuture<Boolean>
 
     /**
      * Sets whether a character is unconscious
@@ -38,6 +39,6 @@ interface RPKUnconsciousnessService : Service {
      * @param character The character
      * @param unconscious Whether the character should be unconscious
      */
-    fun setUnconscious(character: RPKCharacter, unconscious: Boolean)
+    fun setUnconscious(character: RPKCharacter, unconscious: Boolean): CompletableFuture<Void>
 
 }

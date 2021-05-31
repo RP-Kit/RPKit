@@ -36,9 +36,9 @@ class EntityTargetListener(private val plugin: RPKUnconsciousnessBukkit) : Liste
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(target) ?: return
-        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
-        if (!unconsciousnessService.isUnconscious(character)) return
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target) ?: return
+        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        if (!unconsciousnessService.isUnconscious(character).join()) return
         event.isCancelled = true
     }
 
