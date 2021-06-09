@@ -19,8 +19,10 @@ import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.database.table.RPKBlockChangeTable
 import com.rpkit.blocklog.bukkit.database.table.RPKBlockHistoryTable
 import com.rpkit.blocklog.bukkit.database.table.RPKBlockInventoryChangeTable
+import com.rpkit.core.bukkit.location.toBukkitBlock
+import com.rpkit.core.location.RPKBlockLocation
 import org.bukkit.Material
-import org.bukkit.block.Block
+import org.bukkit.Material.AIR
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 import java.time.LocalDateTime
@@ -77,7 +79,7 @@ class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : R
         return plugin.database.getTable(RPKBlockInventoryChangeTable::class.java).delete(blockInventoryChange)
     }
 
-    override fun getBlockHistory(block: Block): CompletableFuture<RPKBlockHistory> {
+    override fun getBlockHistory(block: RPKBlockLocation): CompletableFuture<RPKBlockHistory> {
         return CompletableFuture.supplyAsync {
             var blockHistory = plugin.database.getTable(RPKBlockHistoryTable::class.java).get(block).join()
             if (blockHistory == null) {
@@ -94,10 +96,11 @@ class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : R
         }
     }
 
-    override fun getBlockTypeAtTime(block: Block, time: LocalDateTime): CompletableFuture<Material> {
+    override fun getBlockTypeAtTime(block: RPKBlockLocation, time: LocalDateTime): CompletableFuture<Material> {
+        val currentType = block.toBukkitBlock()?.type ?: AIR
         return CompletableFuture.supplyAsync {
             val history = getBlockHistory(block).join()
-            var type = block.type
+            var type = currentType
             history.changes
                 .join()
                 .asReversed()
@@ -107,10 +110,11 @@ class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : R
         }
     }
 
-    override fun getBlockInventoryAtTime(block: Block, time: LocalDateTime): CompletableFuture<Array<ItemStack>> {
+    override fun getBlockInventoryAtTime(block: RPKBlockLocation, time: LocalDateTime): CompletableFuture<Array<ItemStack>> {
+        val bukkitBlock = block.toBukkitBlock()
         return CompletableFuture.supplyAsync {
             val history = getBlockHistory(block).join()
-            var inventoryContents = (block.state as? InventoryHolder)?.inventory?.contents ?: emptyArray<ItemStack>()
+            var inventoryContents = (bukkitBlock?.state as? InventoryHolder)?.inventory?.contents ?: emptyArray<ItemStack>()
             history.inventoryChanges
                 .join()
                 .asReversed()

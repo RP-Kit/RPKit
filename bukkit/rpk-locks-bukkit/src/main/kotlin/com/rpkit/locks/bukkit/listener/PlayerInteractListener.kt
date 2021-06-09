@@ -18,6 +18,7 @@ package com.rpkit.locks.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
 import com.rpkit.core.service.Services
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.keyring.RPKKeyringService
@@ -63,7 +64,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
         xLoop@ for (x in clickedBlock.x - 1..clickedBlock.x + 1) {
             for (y in clickedBlock.y - 1..clickedBlock.y + 1) {
                 for (z in clickedBlock.z - 1..clickedBlock.z + 1) {
-                    if (lockService.isLocked(clickedBlock.world.getBlockAt(x, y, z))) {
+                    if (lockService.isLocked(clickedBlock.world.getBlockAt(x, y, z).toRPKBlockLocation())) {
                         block = clickedBlock.world.getBlockAt(x, y, z)
                         break@xLoop
                     }
@@ -80,8 +81,8 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
             } else {
                 event.player.inventory.itemInMainHand.amount = event.player.inventory.itemInMainHand.amount - 1
             }
-            lockService.setLocked(clickedBlock, true)
-            for (item in event.player.inventory.addItem(lockService.getKeyFor(clickedBlock)).values) {
+            lockService.setLocked(clickedBlock.toRPKBlockLocation(), true)
+            for (item in event.player.inventory.addItem(lockService.getKeyFor(clickedBlock.toRPKBlockLocation())).values) {
                 event.player.world.dropItem(event.player.location, item)
             }
             event.player.updateInventory()
@@ -90,7 +91,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
         } else if (lockService.isUnclaiming(minecraftProfile)) {
             if (block != null) {
                 if (hasKey(character, block)) {
-                    lockService.setLocked(block, false).thenRun {
+                    lockService.setLocked(block.toRPKBlockLocation(), false).thenRun {
                         plugin.server.scheduler.runTask(plugin, Runnable {
                             event.player.sendMessage(plugin.messages["unlock-successful"])
                             removeKey(character, block)
@@ -110,7 +111,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
             if (block == null) {
                 event.player.sendMessage(plugin.messages["get-key-invalid-not-locked"])
             } else {
-                for (item in event.player.inventory.addItem(lockService.getKeyFor(block)).values) {
+                for (item in event.player.inventory.addItem(lockService.getKeyFor(block.toRPKBlockLocation())).values) {
                     event.player.world.dropItem(event.player.location, item)
                 }
                 event.player.updateInventory()
@@ -139,10 +140,10 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
                 val inventory = bukkitPlayer.inventory
                 val inventoryContents = inventory.contents
                 return keyringService.getPreloadedKeyring(character)
-                        ?.any { it.isSimilar(lockService.getKeyFor(block)) } ?: false
+                        ?.any { it.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation())) } ?: false
                             || inventoryContents
                         .filterNotNull()
-                        .any { it.isSimilar(lockService.getKeyFor(block)) }
+                        .any { it.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation())) }
             }
         }
         return false
@@ -156,7 +157,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
             val iterator = keyring.iterator()
             while (iterator.hasNext()) {
                 val key = iterator.next()
-                if (key.isSimilar(lockService.getKeyFor(block))) {
+                if (key.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation()))) {
                     if (key.amount > 1) {
                         key.amount = key.amount - 1
                     } else {
@@ -175,7 +176,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
                 val inventory = bukkitPlayer.inventory
                 val inventoryContents = inventory.contents
                 for (key in inventoryContents) {
-                    if (key.isSimilar(lockService.getKeyFor(block))) {
+                    if (key.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation()))) {
                         val oneKey = ItemStack(key)
                         oneKey.amount = 1
                         inventory.removeItem(oneKey)

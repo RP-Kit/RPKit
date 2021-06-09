@@ -17,8 +17,8 @@ package com.rpkit.auctions.bukkit.auction
 
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.economy.bukkit.currency.RPKCurrency
-import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.CompletableFuture
 
@@ -47,7 +47,7 @@ interface RPKAuction {
      * How close a player must be to the location is currently implementation-defined.
      * If the auction is global, this may be null.
      */
-    val location: Location?
+    val location: RPKLocation?
 
     /**
      * The character running the auction.

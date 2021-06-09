@@ -15,6 +15,7 @@
 
 package com.rpkit.travel.bukkit.command
 
+import com.rpkit.core.bukkit.location.toBukkitLocation
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.travel.bukkit.RPKTravelBukkit
@@ -61,7 +62,7 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             val event = RPKBukkitWarpUseEvent(warp, minecraftProfile)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return true
-            sender.teleport(event.warp.location)
+            event.warp.location.toBukkitLocation()?.let { sender.teleport(it) }
             sender.sendMessage(plugin.messages.warpValid.withParameters(warp = event.warp))
         } else {
             if (warpService.warps.isEmpty()) {

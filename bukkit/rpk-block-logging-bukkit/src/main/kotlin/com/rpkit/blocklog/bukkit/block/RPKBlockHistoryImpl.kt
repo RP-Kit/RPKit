@@ -18,14 +18,13 @@ package com.rpkit.blocklog.bukkit.block
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.database.table.RPKBlockChangeTable
 import com.rpkit.blocklog.bukkit.database.table.RPKBlockInventoryChangeTable
-import org.bukkit.World
 import java.util.concurrent.CompletableFuture
 
 
 class RPKBlockHistoryImpl(
         private val plugin: RPKBlockLoggingBukkit,
         override var id: RPKBlockHistoryId? = null,
-        override val world: World,
+        override val world: String,
         override val x: Int,
         override val y: Int,
         override val z: Int

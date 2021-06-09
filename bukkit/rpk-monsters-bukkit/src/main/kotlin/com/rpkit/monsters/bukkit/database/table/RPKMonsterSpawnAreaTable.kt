@@ -18,6 +18,7 @@ package com.rpkit.monsters.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
 import com.rpkit.monsters.bukkit.database.create
 import com.rpkit.monsters.bukkit.database.jooq.Tables.RPKIT_MONSTER_SPAWN_AREA
@@ -25,7 +26,6 @@ import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnArea
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaId
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaImpl
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaMonster
-import org.bukkit.Location
 import java.util.concurrent.CompletableFuture
 
 
@@ -59,13 +59,13 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
                     RPKIT_MONSTER_SPAWN_AREA.MAX_Z
                 )
                 .values(
-                    entity.minPoint.world?.name,
-                    entity.minPoint.blockX,
-                    entity.minPoint.blockY,
-                    entity.minPoint.blockZ,
-                    entity.maxPoint.blockX,
-                    entity.maxPoint.blockY,
-                    entity.maxPoint.blockZ
+                    entity.minPoint.world,
+                    entity.minPoint.x,
+                    entity.minPoint.y,
+                    entity.minPoint.z,
+                    entity.maxPoint.x,
+                    entity.maxPoint.y,
+                    entity.maxPoint.z
                 )
                 .execute()
             val id = database.create.lastID().toInt()
@@ -82,13 +82,13 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
         return CompletableFuture.runAsync {
             database.create
             .update(RPKIT_MONSTER_SPAWN_AREA)
-            .set(RPKIT_MONSTER_SPAWN_AREA.WORLD, entity.minPoint.world?.name)
-            .set(RPKIT_MONSTER_SPAWN_AREA.MIN_X, entity.minPoint.blockX)
-            .set(RPKIT_MONSTER_SPAWN_AREA.MIN_Y, entity.minPoint.blockY)
-            .set(RPKIT_MONSTER_SPAWN_AREA.MIN_Z, entity.minPoint.blockZ)
-            .set(RPKIT_MONSTER_SPAWN_AREA.MAX_X, entity.maxPoint.blockX)
-            .set(RPKIT_MONSTER_SPAWN_AREA.MAX_Y, entity.maxPoint.blockY)
-            .set(RPKIT_MONSTER_SPAWN_AREA.MAX_Z, entity.maxPoint.blockZ)
+            .set(RPKIT_MONSTER_SPAWN_AREA.WORLD, entity.minPoint.world)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MIN_X, entity.minPoint.x)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MIN_Y, entity.minPoint.y)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MIN_Z, entity.minPoint.z)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MAX_X, entity.maxPoint.x)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MAX_Y, entity.maxPoint.y)
+            .set(RPKIT_MONSTER_SPAWN_AREA.MAX_Z, entity.maxPoint.z)
             .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(id.value))
             .execute()
             cache?.set(id.value, entity)
@@ -115,7 +115,6 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
                 .from(RPKIT_MONSTER_SPAWN_AREA)
                 .where(RPKIT_MONSTER_SPAWN_AREA.ID.eq(id.value))
                 .fetchOne() ?: return@supplyAsync null
-            val world = plugin.server.getWorld(result[RPKIT_MONSTER_SPAWN_AREA.WORLD])
             val allowedMonsters = database.getTable(RPKMonsterSpawnAreaMonsterTable::class.java).get(id).join()
             val minLevels = allowedMonsters.associate { monsterSpawnAreaMonster ->
                 monsterSpawnAreaMonster.entityType to monsterSpawnAreaMonster.minLevel
@@ -126,17 +125,17 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
             val monsterSpawnArea = RPKMonsterSpawnAreaImpl(
                 plugin,
                 id,
-                Location(
-                    world,
-                    result[RPKIT_MONSTER_SPAWN_AREA.MIN_X].toDouble(),
-                    result[RPKIT_MONSTER_SPAWN_AREA.MIN_Y].toDouble(),
-                    result[RPKIT_MONSTER_SPAWN_AREA.MIN_Z].toDouble()
+                RPKBlockLocation(
+                    result[RPKIT_MONSTER_SPAWN_AREA.WORLD],
+                    result[RPKIT_MONSTER_SPAWN_AREA.MIN_X],
+                    result[RPKIT_MONSTER_SPAWN_AREA.MIN_Y],
+                    result[RPKIT_MONSTER_SPAWN_AREA.MIN_Z]
                 ),
-                Location(
-                    world,
-                    result[RPKIT_MONSTER_SPAWN_AREA.MAX_X].toDouble(),
-                    result[RPKIT_MONSTER_SPAWN_AREA.MAX_Y].toDouble(),
-                    result[RPKIT_MONSTER_SPAWN_AREA.MAX_Z].toDouble()
+                RPKBlockLocation(
+                    result[RPKIT_MONSTER_SPAWN_AREA.WORLD],
+                    result[RPKIT_MONSTER_SPAWN_AREA.MAX_X],
+                    result[RPKIT_MONSTER_SPAWN_AREA.MAX_Y],
+                    result[RPKIT_MONSTER_SPAWN_AREA.MAX_Z]
                 ),
                 allowedMonsters.mapTo(mutableSetOf(), RPKMonsterSpawnAreaMonster::entityType),
                 minLevels,

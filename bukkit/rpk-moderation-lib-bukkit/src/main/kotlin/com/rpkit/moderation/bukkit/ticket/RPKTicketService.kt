@@ -15,9 +15,9 @@
 
 package com.rpkit.moderation.bukkit.ticket
 
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
-import org.bukkit.Location
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
 
@@ -59,7 +59,7 @@ interface RPKTicketService : Service {
         reason: String,
         issuer: RPKProfile,
         resolver: RPKProfile?,
-        location: Location?,
+        location: RPKLocation?,
         openDate: LocalDateTime,
         closeDate: LocalDateTime?,
         isClosed: Boolean

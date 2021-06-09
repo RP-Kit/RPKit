@@ -21,6 +21,8 @@ import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.core.bukkit.location.toRPKLocation
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
@@ -31,7 +33,6 @@ import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
-import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.CompletableFuture
 
@@ -50,7 +51,7 @@ class RPKCharacterImpl(
             ?.let { Services[RPKRaceService::class.java]?.getRace(RPKRaceName(it)) },
     description: String = plugin.config.getString("characters.defaults.description") ?: "",
     dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
-    override var location: Location = Bukkit.getWorlds()[0].spawnLocation,
+    override var location: RPKLocation = Bukkit.getWorlds()[0].spawnLocation.toRPKLocation(),
     override var inventoryContents: Array<ItemStack> = (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack>).toTypedArray(),
     override var helmet: ItemStack? = plugin.config.getItemStack("characters.defaults.helmet"),
     override var chestplate: ItemStack? = plugin.config.getItemStack("characters.defaults.chestplate"),

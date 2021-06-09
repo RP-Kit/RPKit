@@ -17,11 +17,11 @@
 package com.rpkit.locks.bukkit.event.lock
 
 import com.rpkit.core.event.RPKEvent
-import org.bukkit.block.Block
+import com.rpkit.core.location.RPKBlockLocation
 
 
 interface RPKBlockUnlockEvent : RPKEvent {
 
-    val block: Block
+    val block: RPKBlockLocation
 
 }

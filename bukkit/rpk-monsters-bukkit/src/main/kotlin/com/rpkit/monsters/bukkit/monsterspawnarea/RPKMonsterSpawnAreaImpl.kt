@@ -16,10 +16,10 @@
 
 package com.rpkit.monsters.bukkit.monsterspawnarea
 
+import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.monsters.bukkit.RPKMonstersBukkit
 import com.rpkit.monsters.bukkit.database.table.RPKMonsterSpawnAreaMonsterTable
 import com.rpkit.monsters.bukkit.database.table.RPKMonsterSpawnAreaTable
-import org.bukkit.Location
 import org.bukkit.entity.EntityType
 import java.util.concurrent.CompletableFuture
 
@@ -27,8 +27,8 @@ import java.util.concurrent.CompletableFuture
 class RPKMonsterSpawnAreaImpl(
     private val plugin: RPKMonstersBukkit,
     override var id: RPKMonsterSpawnAreaId? = null,
-    override val minPoint: Location,
-    override val maxPoint: Location,
+    override val minPoint: RPKBlockLocation,
+    override val maxPoint: RPKBlockLocation,
     override val allowedMonsters: MutableSet<EntityType>,
     private val minLevels: MutableMap<EntityType, Int>,
     private val maxLevels: MutableMap<EntityType, Int>
@@ -37,8 +37,8 @@ class RPKMonsterSpawnAreaImpl(
     constructor(
         plugin: RPKMonstersBukkit,
         id: RPKMonsterSpawnAreaId? = null,
-        minPoint: Location,
-        maxPoint: Location
+        minPoint: RPKBlockLocation,
+        maxPoint: RPKBlockLocation
     ): this(plugin, id, minPoint, maxPoint, mutableSetOf(), mutableMapOf(), mutableMapOf())
 
     @Synchronized

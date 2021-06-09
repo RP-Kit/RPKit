@@ -15,6 +15,7 @@
 
 package com.rpkit.travel.bukkit.command
 
+import com.rpkit.core.bukkit.location.toRPKLocation
 import com.rpkit.core.service.Services
 import com.rpkit.travel.bukkit.RPKTravelBukkit
 import com.rpkit.travel.bukkit.warp.RPKWarpImpl
@@ -24,6 +25,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import kotlin.math.roundToInt
 
 class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
@@ -49,14 +51,14 @@ class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages.setWarpInvalidNameAlreadyInUse)
             return true
         }
-        val warp = RPKWarpImpl(name = RPKWarpName(args[0]), location = sender.location)
+        val warp = RPKWarpImpl(name = RPKWarpName(args[0]), location = sender.location.toRPKLocation())
         warpService.addWarp(warp)
         sender.sendMessage(plugin.messages.setWarpValid.withParameters(
             warp = warp,
-            world = warp.location.world!!,
-            x = warp.location.blockX,
-            y = warp.location.blockY,
-            z = warp.location.blockZ
+            world = plugin.server.getWorld(warp.location.world)!!,
+            x = warp.location.x.roundToInt(),
+            y = warp.location.y.roundToInt(),
+            z = warp.location.z.roundToInt()
         ))
         return true
     }

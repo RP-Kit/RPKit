@@ -44,7 +44,7 @@ class TicketListClosedCommand(private val plugin: RPKModerationBukkit) : Command
                 sender.sendMessage(plugin.messages["ticket-list-item", mapOf(
                     "id" to ticket.id?.value.toString(),
                     "reason" to ticket.reason,
-                    "location" to "${ticket.location?.world} ${ticket.location?.blockX}, ${ticket.location?.blockY}, ${ticket.location?.blockZ}",
+                    "location" to "${ticket.location?.world} ${ticket.location?.x}, ${ticket.location?.y}, ${ticket.location?.z}",
                     "issuer" to ticket.issuer.name.value,
                     "resolver" to (ticket.resolver?.name?.value ?: "none"),
                     "open_date" to dateTimeFormatter.format(ticket.openDate),

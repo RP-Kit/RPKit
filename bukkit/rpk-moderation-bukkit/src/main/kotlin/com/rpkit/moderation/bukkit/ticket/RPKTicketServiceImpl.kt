@@ -15,6 +15,7 @@
 
 package com.rpkit.moderation.bukkit.ticket
 
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.database.table.RPKTicketTable
 import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketCreateEvent
@@ -53,7 +54,7 @@ class RPKTicketServiceImpl(override val plugin: RPKModerationBukkit) : RPKTicket
         reason: String,
         issuer: RPKProfile,
         resolver: RPKProfile?,
-        location: Location?,
+        location: RPKLocation?,
         openDate: LocalDateTime,
         closeDate: LocalDateTime?,
         isClosed: Boolean

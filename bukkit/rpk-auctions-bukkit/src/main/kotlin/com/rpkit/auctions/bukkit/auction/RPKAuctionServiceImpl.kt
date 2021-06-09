@@ -21,6 +21,7 @@ import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionCreateEvent
 import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionDeleteEvent
 import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionUpdateEvent
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.core.bukkit.location.toRPKLocation
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
@@ -61,7 +62,7 @@ class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuction
             null,
             item,
             currency,
-            location,
+            location?.toRPKLocation(),
             character,
             duration,
             endTime,

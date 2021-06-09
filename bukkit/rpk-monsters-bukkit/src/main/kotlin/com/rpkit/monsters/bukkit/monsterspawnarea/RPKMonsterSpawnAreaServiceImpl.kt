@@ -29,7 +29,7 @@ class RPKMonsterSpawnAreaServiceImpl(override val plugin: RPKMonstersBukkit) : R
 
     override fun getSpawnArea(location: Location): RPKMonsterSpawnArea? {
         return spawnAreas.firstOrNull { spawnArea ->
-            location.world == spawnArea.minPoint.world
+            location.world?.name == spawnArea.minPoint.world
                     && location.x >= spawnArea.minPoint.x
                     && location.y >= spawnArea.minPoint.y
                     && location.z >= spawnArea.minPoint.z

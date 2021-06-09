@@ -18,6 +18,7 @@ package com.rpkit.blocklog.bukkit.command
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChange
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
 import com.rpkit.core.service.Services
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -44,7 +45,7 @@ class InventoryHistoryCommand(private val plugin: RPKBlockLoggingBukkit) : Comma
             sender.sendMessage(plugin.messages["no-block-history-service"])
             return true
         }
-        blockHistoryService.getBlockHistory(targetBlock).thenAccept { blockHistory ->
+        blockHistoryService.getBlockHistory(targetBlock.toRPKBlockLocation()).thenAccept { blockHistory ->
             blockHistory.inventoryChanges.thenAccept getChanges@{ changes ->
                 if (changes.isEmpty()) {
                     sender.sendMessage(plugin.messages["inventory-history-no-changes"])

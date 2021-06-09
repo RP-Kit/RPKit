@@ -18,12 +18,12 @@ package com.rpkit.locks.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.database.create
 import com.rpkit.locks.bukkit.database.jooq.Tables.RPKIT_LOCKED_BLOCK
 import com.rpkit.locks.bukkit.database.jooq.tables.records.RpkitLockedBlockRecord
 import com.rpkit.locks.bukkit.lock.RPKLockedBlock
-import org.bukkit.block.Block
 import java.util.concurrent.CompletableFuture
 
 
@@ -48,7 +48,7 @@ class RPKLockedBlockTable(private val database: Database, private val plugin: RP
 
     fun insert(entity: RPKLockedBlock): CompletableFuture<Void> {
         val block = entity.block
-        val cacheKey = BlockCacheKey(block.world.name, block.x, block.y, block.z)
+        val cacheKey = BlockCacheKey(block.world, block.x, block.y, block.z)
         return CompletableFuture.runAsync {
             database.create
                 .insertInto(
@@ -59,7 +59,7 @@ class RPKLockedBlockTable(private val database: Database, private val plugin: RP
                     RPKIT_LOCKED_BLOCK.Z
                 )
                 .values(
-                    block.world.name,
+                    block.world,
                     block.x,
                     block.y,
                     block.z
@@ -69,8 +69,8 @@ class RPKLockedBlockTable(private val database: Database, private val plugin: RP
         }
     }
 
-    operator fun get(block: Block): CompletableFuture<RPKLockedBlock?> {
-        val cacheKey = BlockCacheKey(block.world.name, block.x, block.y, block.z)
+    operator fun get(block: RPKBlockLocation): CompletableFuture<RPKLockedBlock?> {
+        val cacheKey = BlockCacheKey(block.world, block.x, block.y, block.z)
         if (cache?.containsKey(cacheKey) == true) {
             return CompletableFuture.completedFuture(cache[cacheKey])
         }
@@ -83,7 +83,7 @@ class RPKLockedBlockTable(private val database: Database, private val plugin: RP
                     RPKIT_LOCKED_BLOCK.Z
                 )
                 .from(RPKIT_LOCKED_BLOCK)
-                .where(RPKIT_LOCKED_BLOCK.WORLD.eq(block.world.name))
+                .where(RPKIT_LOCKED_BLOCK.WORLD.eq(block.world))
                 .and(RPKIT_LOCKED_BLOCK.X.eq(block.x))
                 .and(RPKIT_LOCKED_BLOCK.Y.eq(block.y))
                 .and(RPKIT_LOCKED_BLOCK.Z.eq(block.z))
@@ -103,20 +103,19 @@ class RPKLockedBlockTable(private val database: Database, private val plugin: RP
         }
     }
 
-    private fun RpkitLockedBlockRecord.toDomain(): RPKLockedBlock? {
-        val world = plugin.server.getWorld(world) ?: return null
+    private fun RpkitLockedBlockRecord.toDomain(): RPKLockedBlock {
         return RPKLockedBlock(
-            block = world.getBlockAt(x, y, z)
+            block = RPKBlockLocation(world, x, y, z)
         )
     }
 
     fun delete(entity: RPKLockedBlock): CompletableFuture<Void> {
         val block = entity.block
-        val cacheKey = BlockCacheKey(block.world.name, block.x, block.y, block.z)
+        val cacheKey = BlockCacheKey(block.world, block.x, block.y, block.z)
         return CompletableFuture.runAsync {
             database.create
                 .deleteFrom(RPKIT_LOCKED_BLOCK)
-                .where(RPKIT_LOCKED_BLOCK.WORLD.eq(block.world.name))
+                .where(RPKIT_LOCKED_BLOCK.WORLD.eq(block.world))
                 .and(RPKIT_LOCKED_BLOCK.X.eq(block.x))
                 .and(RPKIT_LOCKED_BLOCK.Y.eq(block.y))
                 .and(RPKIT_LOCKED_BLOCK.Z.eq(block.z))

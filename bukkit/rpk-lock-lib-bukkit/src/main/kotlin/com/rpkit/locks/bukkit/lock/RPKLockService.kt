@@ -16,9 +16,9 @@
 
 package com.rpkit.locks.bukkit.lock
 
+import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.CompletableFuture
 
@@ -39,7 +39,7 @@ interface RPKLockService : Service {
      * @param block The block
      * @return Whether the block is locked
      */
-    fun isLocked(block: Block): Boolean
+    fun isLocked(block: RPKBlockLocation): Boolean
 
     /**
      * Sets a block to be locked.
@@ -47,7 +47,7 @@ interface RPKLockService : Service {
      * @param block The block
      * @param locked Whether the block should be locked
      */
-    fun setLocked(block: Block, locked: Boolean): CompletableFuture<Void>
+    fun setLocked(block: RPKBlockLocation, locked: Boolean): CompletableFuture<Void>
 
     /**
      * Checks whether a Minecraft profile is currently locking a block.
@@ -105,7 +105,7 @@ interface RPKLockService : Service {
      * @param block The block to get the key item for
      * @return The key item
      */
-    fun getKeyFor(block: Block): ItemStack
+    fun getKeyFor(block: RPKBlockLocation): ItemStack
 
     /**
      * Checks whether an item is a key

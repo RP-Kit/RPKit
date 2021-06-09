@@ -22,6 +22,7 @@ import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.bukkit.location.toBukkitLocation
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -117,7 +118,7 @@ class BidCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
                                     return@getBids
                                 }
                                 val radius = plugin.config.getInt("auctions.radius")
-                                val auctionLocation = auction.location
+                                val auctionLocation = auction.location?.toBukkitLocation()
                                 if (radius >= 0 && auctionLocation != null && sender.location.distanceSquared(auctionLocation) > radius * radius) {
                                     sender.sendMessage(plugin.messages.bidInvalidTooFarAway)
                                     return@getBids

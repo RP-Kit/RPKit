@@ -16,39 +16,40 @@
 
 package com.rpkit.selection.bukkit.selection
 
+import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import org.bukkit.World
-import org.bukkit.block.Block
 import kotlin.math.max
 import kotlin.math.min
 
 interface RPKSelection {
 
     val minecraftProfile: RPKMinecraftProfile
-    var world: World
-    val minimumPoint: Block
-        get() = world.getBlockAt(
-                min(point1.x, point2.x),
-                min(point1.y, point2.y),
-                min(point1.z, point2.z)
+    var world: String
+    val minimumPoint: RPKBlockLocation
+        get() = RPKBlockLocation(
+            world,
+            min(point1.x, point2.x),
+            min(point1.y, point2.y),
+            min(point1.z, point2.z)
         )
 
-    val maximumPoint: Block
-        get() = world.getBlockAt(
-                max(point1.x, point2.x),
-                max(point1.y, point2.y),
-                max(point1.z, point2.z)
+    val maximumPoint: RPKBlockLocation
+        get() = RPKBlockLocation(
+            world,
+            max(point1.x, point2.x),
+            max(point1.y, point2.y),
+            max(point1.z, point2.z)
         )
 
-    var point1: Block
-    var point2: Block
-    val blocks: Iterable<Block>
+    var point1: RPKBlockLocation
+    var point2: RPKBlockLocation
+    val blocks: Iterable<RPKBlockLocation>
         get() {
-            val blocks = mutableListOf<Block>()
+            val blocks = mutableListOf<RPKBlockLocation>()
             for (x in minimumPoint.x..maximumPoint.x) {
                 for (y in minimumPoint.y..maximumPoint.y) {
                     for (z in minimumPoint.z..maximumPoint.z) {
-                        val block = world.getBlockAt(x, y, z)
+                        val block = RPKBlockLocation(world, x, y, z)
                         if (contains(block)) {
                             blocks.add(block)
                         }
@@ -58,6 +59,6 @@ interface RPKSelection {
             return blocks
         }
 
-    fun contains(block: Block): Boolean
+    fun contains(block: RPKBlockLocation): Boolean
 
 }

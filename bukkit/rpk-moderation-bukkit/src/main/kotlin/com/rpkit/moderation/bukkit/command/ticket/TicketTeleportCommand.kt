@@ -15,6 +15,7 @@
 
 package com.rpkit.moderation.bukkit.command.ticket
 
+import com.rpkit.core.bukkit.location.toBukkitLocation
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.ticket.RPKTicketId
@@ -57,7 +58,7 @@ class TicketTeleportCommand(private val plugin: RPKModerationBukkit) : CommandEx
                     return@thenAccept
                 }
                 plugin.server.scheduler.runTask(plugin, Runnable {
-                    sender.teleport(location)
+                    location.toBukkitLocation()?.let { sender.teleport(it) }
                     sender.sendMessage(plugin.messages["ticket-teleport-valid"])
                 })
             }
