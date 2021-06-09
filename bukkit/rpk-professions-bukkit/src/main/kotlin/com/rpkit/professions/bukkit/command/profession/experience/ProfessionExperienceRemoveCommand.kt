@@ -108,14 +108,17 @@ class ProfessionExperienceRemoveCommand(val plugin: RPKProfessionsBukkit) : Comm
             sender.sendMessage(plugin.messages["profession-experience-remove-invalid-profession"])
             return true
         }
-        professionService.setProfessionExperience(character, profession, professionService.getProfessionExperience(character, profession) - exp)
-        sender.sendMessage(plugin.messages["profession-experience-remove-valid", mapOf(
-                "player" to minecraftProfile.name,
-                "character" to if (!character.isNameHidden) character.name else "[HIDDEN]",
-                "profession" to profession.name.value,
-                "total_experience" to professionService.getProfessionExperience(character, profession).toString(),
-                "removed_experience" to exp.toString()
-        )])
+        professionService.getProfessionExperience(character, profession).thenAccept { professionExperience ->
+            professionService.setProfessionExperience(character, profession, professionExperience - exp).thenRun {
+                sender.sendMessage(plugin.messages["profession-experience-remove-valid", mapOf(
+                    "player" to minecraftProfile.name,
+                    "character" to if (!character.isNameHidden) character.name else "[HIDDEN]",
+                    "profession" to profession.name.value,
+                    "total_experience" to (professionExperience - exp).toString(),
+                    "removed_experience" to exp.toString()
+                )])
+            }
+        }
         return true
     }
 

@@ -108,14 +108,20 @@ class ProfessionExperienceAddCommand(val plugin: RPKProfessionsBukkit) : Command
             sender.sendMessage(plugin.messages["profession-experience-add-invalid-profession"])
             return true
         }
-        professionService.setProfessionExperience(character, profession, professionService.getProfessionExperience(character, profession) + exp)
-        sender.sendMessage(plugin.messages["profession-experience-add-valid", mapOf(
-                "player" to minecraftProfile.name,
-                "character" to if (!character.isNameHidden) character.name else "[HIDDEN]",
-                "profession" to profession.name.value,
-                "total_experience" to professionService.getProfessionExperience(character, profession).toString(),
-                "received_experience" to exp.toString()
-        )])
+        professionService.getProfessionExperience(character, profession).thenAccept { professionExperience ->
+            professionService.setProfessionExperience(character, profession, professionExperience + exp).thenRun {
+                sender.sendMessage(
+                    plugin.messages["profession-experience-add-valid", mapOf(
+                        "player" to minecraftProfile.name,
+                        "character" to if (!character.isNameHidden) character.name else "[HIDDEN]",
+                        "profession" to profession.name.value,
+                        "total_experience" to professionService.getProfessionExperience(character, profession)
+                            .toString(),
+                        "received_experience" to exp.toString()
+                    )]
+                )
+            }
+        }
         return true
     }
 

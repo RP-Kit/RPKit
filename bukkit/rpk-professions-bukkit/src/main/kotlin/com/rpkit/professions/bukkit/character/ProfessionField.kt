@@ -21,7 +21,6 @@ import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
 import com.rpkit.core.service.Services
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.database.table.RPKProfessionHiddenTable
-import com.rpkit.professions.bukkit.profession.RPKProfession
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
 import java.util.concurrent.CompletableFuture
 
@@ -31,13 +30,15 @@ class ProfessionField(val plugin: RPKProfessionsBukkit) : HideableCharacterCardF
     override val name = "profession"
 
     override fun get(character: RPKCharacter): CompletableFuture<String> {
-        return isHidden(character).thenApply { hidden ->
+        return isHidden(character).thenApplyAsync { hidden ->
             if (hidden) {
                 "[HIDDEN]"
             } else {
                 val professionService = Services[RPKProfessionService::class.java]
-                    ?: return@thenApply plugin.messages["no-profession-service"]
-                return@thenApply professionService.getProfessions(character).map(RPKProfession::name).joinToString(", ")
+                    ?: return@thenApplyAsync plugin.messages["no-profession-service"]
+                return@thenApplyAsync professionService.getProfessions(character)
+                    .join()
+                    .joinToString(", ") { profession -> profession.name.value }
             }
         }
     }
