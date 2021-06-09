@@ -24,10 +24,12 @@ import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterUpdateEvent
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.core.bukkit.location.toBukkitLocation
+import com.rpkit.core.bukkit.location.toRPKLocation
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import org.bukkit.Location
 import org.bukkit.attribute.Attribute
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
@@ -128,7 +130,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                         oldCharacter.chestplate = bukkitPlayer.inventory.chestplate
                         oldCharacter.leggings = bukkitPlayer.inventory.leggings
                         oldCharacter.boots = bukkitPlayer.inventory.boots
-                        oldCharacter.location = bukkitPlayer.location
+                        oldCharacter.location = bukkitPlayer.location.toRPKLocation()
                         oldCharacter.health = bukkitPlayer.health
                         oldCharacter.foodLevel = bukkitPlayer.foodLevel
                         if (oldCharacter.isDead) {
@@ -152,7 +154,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                         bukkitPlayer.inventory.chestplate = newCharacter.chestplate
                         bukkitPlayer.inventory.leggings = newCharacter.leggings
                         bukkitPlayer.inventory.boots = newCharacter.boots
-                        bukkitPlayer.teleport(newCharacter.location)
+                        newCharacter.location.toBukkitLocation()?.let { bukkitPlayer.teleport(it) }
                         bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.baseValue = newCharacter.maxHealth
                         bukkitPlayer.health = newCharacter.health
                         bukkitPlayer.foodLevel = newCharacter.foodLevel
@@ -201,7 +203,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         race: RPKRace?,
         description: String?,
         isDead: Boolean?,
-        location: Location?,
+        location: RPKLocation?,
         inventoryContents: Array<ItemStack>?,
         helmet: ItemStack?,
         chestplate: ItemStack?,
@@ -232,7 +234,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                 ?.let { Services[RPKRaceService::class.java]?.getRace(RPKRaceName(it)) },
             description ?: plugin.config.getString("characters.defaults.description") ?: "",
             isDead ?: plugin.config.getBoolean("characters.defaults.dead"),
-            location ?: plugin.server.worlds[0].spawnLocation,
+            location ?: plugin.server.worlds[0].spawnLocation.toRPKLocation(),
             inventoryContents
                 ?: (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack>)
                     .toTypedArray(),

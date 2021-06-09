@@ -20,6 +20,7 @@ import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockChangeImpl
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -49,7 +50,7 @@ class BlockBreakListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
         } else {
             characterService?.getPreloadedActiveCharacter(minecraftProfile)
         }
-        blockHistoryService.getBlockHistory(event.block).thenAccept { blockHistory ->
+        blockHistoryService.getBlockHistory(event.block.toRPKBlockLocation()).thenAccept { blockHistory ->
             val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
                 time = LocalDateTime.now(),

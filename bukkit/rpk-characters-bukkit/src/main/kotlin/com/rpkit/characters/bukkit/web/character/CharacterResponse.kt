@@ -70,7 +70,7 @@ fun RPKCharacter.toCharacterResponse() = CharacterResponse(
     race?.name?.value,
     description,
     isDead,
-    location.world?.name,
+    location.world,
     location.x,
     location.y,
     location.z,

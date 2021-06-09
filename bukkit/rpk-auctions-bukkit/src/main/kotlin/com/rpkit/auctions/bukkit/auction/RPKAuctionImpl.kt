@@ -22,10 +22,10 @@ import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionBiddingCloseEvent
 import com.rpkit.auctions.bukkit.event.auction.RPKBukkitAuctionBiddingOpenEvent
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
-import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.CompletableFuture
 
@@ -37,7 +37,7 @@ class RPKAuctionImpl(
     override var id: RPKAuctionId? = null,
     override val item: ItemStack,
     override val currency: RPKCurrency,
-    override val location: Location?,
+    override val location: RPKLocation?,
     override val character: RPKCharacter,
     override val duration: Long,
     override val endTime: Long,

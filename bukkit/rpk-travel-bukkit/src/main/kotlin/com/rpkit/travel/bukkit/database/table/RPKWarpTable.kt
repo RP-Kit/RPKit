@@ -17,13 +17,13 @@ package com.rpkit.travel.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.travel.bukkit.RPKTravelBukkit
 import com.rpkit.travel.bukkit.database.create
 import com.rpkit.travel.bukkit.database.jooq.Tables.RPKIT_WARP
 import com.rpkit.travel.bukkit.warp.RPKWarpImpl
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import com.rpkit.warp.bukkit.warp.RPKWarpName
-import org.bukkit.Location
 
 
 class RPKWarpTable(private val database: Database, private val plugin: RPKTravelBukkit) : Table {
@@ -53,7 +53,7 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                 )
                 .values(
                         entity.name.value,
-                        entity.location.world?.name,
+                        entity.location.world,
                         entity.location.x,
                         entity.location.y,
                         entity.location.z,
@@ -67,7 +67,7 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
     fun update(entity: RPKWarp) {
         database.create
                 .update(RPKIT_WARP)
-                .set(RPKIT_WARP.WORLD, entity.location.world?.name)
+                .set(RPKIT_WARP.WORLD, entity.location.world)
                 .set(RPKIT_WARP.X, entity.location.x)
                 .set(RPKIT_WARP.Y, entity.location.y)
                 .set(RPKIT_WARP.Z, entity.location.z)
@@ -97,8 +97,8 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                     .fetchOne() ?: return null
             val warp = RPKWarpImpl(
                     RPKWarpName(result.get(RPKIT_WARP.NAME)),
-                    Location(
-                            plugin.server.getWorld(result.get(RPKIT_WARP.WORLD)),
+                    RPKLocation(
+                            result.get(RPKIT_WARP.WORLD),
                             result.get(RPKIT_WARP.X),
                             result.get(RPKIT_WARP.Y),
                             result.get(RPKIT_WARP.Z),
@@ -127,8 +127,8 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
         return results.mapNotNull { result ->
             RPKWarpImpl(
                     RPKWarpName(result.get(RPKIT_WARP.NAME)),
-                    Location(
-                            plugin.server.getWorld(result.get(RPKIT_WARP.WORLD)),
+                    RPKLocation(
+                            result.get(RPKIT_WARP.WORLD),
                             result.get(RPKIT_WARP.X),
                             result.get(RPKIT_WARP.Y),
                             result.get(RPKIT_WARP.Z),

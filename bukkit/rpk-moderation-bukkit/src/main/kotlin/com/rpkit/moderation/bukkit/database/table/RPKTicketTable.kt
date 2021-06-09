@@ -17,6 +17,7 @@ package com.rpkit.moderation.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.database.create
@@ -26,7 +27,6 @@ import com.rpkit.moderation.bukkit.ticket.RPKTicketId
 import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
 import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
-import org.bukkit.Location
 import java.util.concurrent.CompletableFuture
 
 
@@ -66,7 +66,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                     entity.reason,
                     issuerId.value,
                     entity.resolver?.id?.value,
-                    entity.location?.world?.name,
+                    entity.location?.world,
                     entity.location?.x,
                     entity.location?.y,
                     entity.location?.z,
@@ -92,7 +92,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .set(RPKIT_TICKET.REASON, entity.reason)
                 .set(RPKIT_TICKET.ISSUER_ID, issuerId.value)
                 .set(RPKIT_TICKET.RESOLVER_ID, entity.resolver?.id?.value)
-                .set(RPKIT_TICKET.WORLD, entity.location?.world?.name)
+                .set(RPKIT_TICKET.WORLD, entity.location?.world)
                 .set(RPKIT_TICKET.X, entity.location?.x)
                 .set(RPKIT_TICKET.Y, entity.location?.y)
                 .set(RPKIT_TICKET.Z, entity.location?.z)
@@ -137,7 +137,6 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
             val resolver =
                 if (resolverId == null) null else profileService?.getProfile(RPKProfileId(resolverId))?.join()
             val worldName = result[RPKIT_TICKET.WORLD]
-            val world = if (worldName == null) null else plugin.server.getWorld(worldName)
             val x = result[RPKIT_TICKET.X]
             val y = result[RPKIT_TICKET.Y]
             val z = result[RPKIT_TICKET.Z]
@@ -149,11 +148,11 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                     result[RPKIT_TICKET.REASON],
                     issuer,
                     resolver,
-                    if (world == null || x == null || y == null || z == null || yaw == null || pitch == null) {
+                    if (worldName == null || x == null || y == null || z == null || yaw == null || pitch == null) {
                         null
                     } else {
-                        Location(
-                            world,
+                        RPKLocation(
+                            worldName,
                             x,
                             y,
                             z,

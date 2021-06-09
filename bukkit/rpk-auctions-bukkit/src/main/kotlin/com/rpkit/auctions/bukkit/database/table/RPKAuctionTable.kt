@@ -29,10 +29,10 @@ import com.rpkit.core.bukkit.extension.toByteArray
 import com.rpkit.core.bukkit.extension.toItemStack
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
-import org.bukkit.Location
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -81,7 +81,7 @@ class RPKAuctionTable(
                 .values(
                     entity.item.toByteArray(),
                     currencyName.value,
-                    entity.location?.world?.name,
+                    entity.location?.world,
                     entity.location?.x,
                     entity.location?.y,
                     entity.location?.z,
@@ -112,7 +112,7 @@ class RPKAuctionTable(
                 .update(RPKIT_AUCTION)
                 .set(RPKIT_AUCTION.ITEM, entity.item.toByteArray())
                 .set(RPKIT_AUCTION.CURRENCY_NAME, currencyName.value)
-                .set(RPKIT_AUCTION.WORLD, entity.location?.world?.name)
+                .set(RPKIT_AUCTION.WORLD, entity.location?.world)
                 .set(RPKIT_AUCTION.X, entity.location?.x)
                 .set(RPKIT_AUCTION.Y, entity.location?.y)
                 .set(RPKIT_AUCTION.Z, entity.location?.z)
@@ -171,8 +171,8 @@ class RPKAuctionTable(
                         id,
                         result.get(RPKIT_AUCTION.ITEM).toItemStack(),
                         currency,
-                        Location(
-                            plugin.server.getWorld(result.get(RPKIT_AUCTION.WORLD)),
+                        RPKLocation(
+                            result.get(RPKIT_AUCTION.WORLD),
                             result.get(RPKIT_AUCTION.X),
                             result.get(RPKIT_AUCTION.Y),
                             result.get(RPKIT_AUCTION.Z),

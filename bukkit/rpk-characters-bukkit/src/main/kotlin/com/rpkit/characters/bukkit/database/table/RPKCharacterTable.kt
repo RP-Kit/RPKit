@@ -28,12 +28,12 @@ import com.rpkit.core.bukkit.extension.toItemStack
 import com.rpkit.core.bukkit.extension.toItemStackArray
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
-import org.bukkit.Location
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -109,7 +109,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                     entity.race?.name?.value,
                     entity.description,
                     entity.isDead,
-                    entity.location.world?.name,
+                    entity.location.world,
                     entity.location.x,
                     entity.location.y,
                     entity.location.z,
@@ -157,7 +157,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .set(RPKIT_CHARACTER.RACE_NAME, entity.race?.name?.value)
                 .set(RPKIT_CHARACTER.DESCRIPTION, entity.description)
                 .set(RPKIT_CHARACTER.DEAD, entity.isDead)
-                .set(RPKIT_CHARACTER.WORLD, entity.location.world?.name)
+                .set(RPKIT_CHARACTER.WORLD, entity.location.world)
                 .set(RPKIT_CHARACTER.X, entity.location.x)
                 .set(RPKIT_CHARACTER.Y, entity.location.y)
                 .set(RPKIT_CHARACTER.Z, entity.location.z)
@@ -260,8 +260,8 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                     race = race,
                     description = result[RPKIT_CHARACTER.DESCRIPTION],
                     dead = result[RPKIT_CHARACTER.DEAD],
-                    location = Location(
-                        plugin.server.getWorld(result[RPKIT_CHARACTER.WORLD]),
+                    location = RPKLocation(
+                        result[RPKIT_CHARACTER.WORLD],
                         result[RPKIT_CHARACTER.X],
                         result[RPKIT_CHARACTER.Y],
                         result[RPKIT_CHARACTER.Z],

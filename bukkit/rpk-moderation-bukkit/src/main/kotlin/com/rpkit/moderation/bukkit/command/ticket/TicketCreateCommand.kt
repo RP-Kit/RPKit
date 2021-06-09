@@ -16,6 +16,7 @@
 
 package com.rpkit.moderation.bukkit.command.ticket
 
+import com.rpkit.core.bukkit.location.toRPKLocation
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
@@ -67,7 +68,7 @@ class TicketCreateCommand(private val plugin: RPKModerationBukkit) : CommandExec
         val ticket = RPKTicketImpl(
                 reason,
                 profile,
-                sender.location
+                sender.location.toRPKLocation()
         )
         ticketService.addTicket(ticket).thenRun {
             sender.sendMessage(plugin.messages["ticket-create-valid", mapOf(

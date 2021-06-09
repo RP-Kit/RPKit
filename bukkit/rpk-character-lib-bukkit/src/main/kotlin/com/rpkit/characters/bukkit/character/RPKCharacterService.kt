@@ -16,10 +16,10 @@
 package com.rpkit.characters.bukkit.character
 
 import com.rpkit.characters.bukkit.race.RPKRace
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.CompletableFuture
 
@@ -158,7 +158,7 @@ interface RPKCharacterService : Service {
         race: RPKRace? = null,
         description: String? = null,
         isDead: Boolean? = null,
-        location: Location? = null,
+        location: RPKLocation? = null,
         inventoryContents: Array<ItemStack>? = null,
         helmet: ItemStack? = null,
         chestplate: ItemStack? = null,

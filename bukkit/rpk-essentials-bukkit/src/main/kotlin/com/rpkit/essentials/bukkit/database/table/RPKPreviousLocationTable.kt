@@ -17,12 +17,12 @@ package com.rpkit.essentials.bukkit.database.table
 
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.database.create
 import com.rpkit.essentials.bukkit.database.jooq.Tables.RPKIT_PREVIOUS_LOCATION
 import com.rpkit.essentials.bukkit.locationhistory.RPKPreviousLocation
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import org.bukkit.Location
 import java.util.concurrent.CompletableFuture
 
 
@@ -55,7 +55,7 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
                 )
                 .values(
                     minecraftProfileId.value,
-                    entity.location.world?.name,
+                    entity.location.world,
                     entity.location.x,
                     entity.location.y,
                     entity.location.z,
@@ -73,7 +73,7 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
             database.create
                 .update(RPKIT_PREVIOUS_LOCATION)
                 .set(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID, minecraftProfileId.value)
-                .set(RPKIT_PREVIOUS_LOCATION.WORLD, entity.location.world?.name)
+                .set(RPKIT_PREVIOUS_LOCATION.WORLD, entity.location.world)
                 .set(RPKIT_PREVIOUS_LOCATION.X, entity.location.x)
                 .set(RPKIT_PREVIOUS_LOCATION.Y, entity.location.y)
                 .set(RPKIT_PREVIOUS_LOCATION.Z, entity.location.z)
@@ -106,8 +106,8 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
                 .fetchOne() ?: return@supplyAsync null
             val previousLocation = RPKPreviousLocation(
                 minecraftProfile,
-                Location(
-                    plugin.server.getWorld(result.get(RPKIT_PREVIOUS_LOCATION.WORLD)),
+                RPKLocation(
+                    result.get(RPKIT_PREVIOUS_LOCATION.WORLD),
                     result.get(RPKIT_PREVIOUS_LOCATION.X),
                     result.get(RPKIT_PREVIOUS_LOCATION.Y),
                     result.get(RPKIT_PREVIOUS_LOCATION.Z),

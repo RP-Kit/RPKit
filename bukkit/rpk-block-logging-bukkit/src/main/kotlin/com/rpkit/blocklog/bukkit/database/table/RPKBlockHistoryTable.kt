@@ -23,7 +23,7 @@ import com.rpkit.blocklog.bukkit.database.create
 import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_HISTORY
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import org.bukkit.block.Block
+import com.rpkit.core.location.RPKBlockLocation
 import java.util.concurrent.CompletableFuture
 
 
@@ -51,7 +51,7 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                     RPKIT_BLOCK_HISTORY.Z
                 )
                 .values(
-                    entity.world.name,
+                    entity.world,
                     entity.x,
                     entity.y,
                     entity.z
@@ -68,7 +68,7 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
             val id = entity.id ?: return@runAsync
             database.create
                 .update(RPKIT_BLOCK_HISTORY)
-                .set(RPKIT_BLOCK_HISTORY.WORLD, entity.world.name)
+                .set(RPKIT_BLOCK_HISTORY.WORLD, entity.world)
                 .set(RPKIT_BLOCK_HISTORY.X, entity.x)
                 .set(RPKIT_BLOCK_HISTORY.Y, entity.y)
                 .set(RPKIT_BLOCK_HISTORY.Z, entity.z)
@@ -93,22 +93,13 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                     .from(RPKIT_BLOCK_HISTORY)
                     .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
                     .fetchOne() ?: return@supplyAsync null
-                val world = plugin.server.getWorld(result.get(RPKIT_BLOCK_HISTORY.WORLD))
-                if (world == null) {
-                    database.create
-                        .deleteFrom(RPKIT_BLOCK_HISTORY)
-                        .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
-                        .execute()
-                    cache?.remove(id.value)
-                    return@supplyAsync null
-                }
                 val blockHistory = RPKBlockHistoryImpl(
                     plugin,
                     id,
-                    world,
-                    result.get(RPKIT_BLOCK_HISTORY.X),
-                    result.get(RPKIT_BLOCK_HISTORY.Y),
-                    result.get(RPKIT_BLOCK_HISTORY.Z)
+                    result[RPKIT_BLOCK_HISTORY.WORLD],
+                    result[RPKIT_BLOCK_HISTORY.X],
+                    result[RPKIT_BLOCK_HISTORY.Y],
+                    result[RPKIT_BLOCK_HISTORY.Z]
                 )
                 cache?.set(id.value, blockHistory)
                 return@supplyAsync blockHistory
@@ -116,12 +107,12 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
         }
     }
 
-    fun get(block: Block): CompletableFuture<RPKBlockHistory?> {
+    fun get(block: RPKBlockLocation): CompletableFuture<RPKBlockHistory?> {
         return CompletableFuture.supplyAsync {
             val result = database.create
                 .select(RPKIT_BLOCK_HISTORY.ID)
                 .from(RPKIT_BLOCK_HISTORY)
-                .where(RPKIT_BLOCK_HISTORY.WORLD.eq(block.world.name))
+                .where(RPKIT_BLOCK_HISTORY.WORLD.eq(block.world))
                 .and(RPKIT_BLOCK_HISTORY.X.eq(block.x))
                 .and(RPKIT_BLOCK_HISTORY.Y.eq(block.y))
                 .and(RPKIT_BLOCK_HISTORY.Z.eq(block.z))

@@ -15,9 +15,9 @@
 
 package com.rpkit.blocklog.bukkit.block
 
+import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.core.service.Service
 import org.bukkit.Material
-import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
@@ -37,8 +37,8 @@ interface RPKBlockHistoryService : Service {
     fun addBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void>
     fun updateBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void>
     fun removeBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void>
-    fun getBlockHistory(block: Block): CompletableFuture<RPKBlockHistory>
-    fun getBlockTypeAtTime(block: Block, time: LocalDateTime): CompletableFuture<Material>
-    fun getBlockInventoryAtTime(block: Block, time: LocalDateTime): CompletableFuture<Array<ItemStack>>
+    fun getBlockHistory(block: RPKBlockLocation): CompletableFuture<RPKBlockHistory>
+    fun getBlockTypeAtTime(block: RPKBlockLocation, time: LocalDateTime): CompletableFuture<Material>
+    fun getBlockInventoryAtTime(block: RPKBlockLocation, time: LocalDateTime): CompletableFuture<Array<ItemStack>>
 
 }

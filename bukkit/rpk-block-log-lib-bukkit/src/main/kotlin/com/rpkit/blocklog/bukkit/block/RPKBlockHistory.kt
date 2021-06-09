@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture
 interface RPKBlockHistory {
 
     var id: RPKBlockHistoryId?
-    val world: World
+    val world: String
     val x: Int
     val y: Int
     val z: Int

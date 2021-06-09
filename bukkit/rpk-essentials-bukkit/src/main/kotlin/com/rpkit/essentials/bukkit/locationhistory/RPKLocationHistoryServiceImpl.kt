@@ -16,6 +16,8 @@
 
 package com.rpkit.essentials.bukkit.locationhistory
 
+import com.rpkit.core.bukkit.location.toBukkitLocation
+import com.rpkit.core.bukkit.location.toRPKLocation
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.database.table.RPKPreviousLocationTable
 import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryService
@@ -28,7 +30,7 @@ class RPKLocationHistoryServiceImpl(override val plugin: RPKEssentialsBukkit) : 
 
     override fun getPreviousLocation(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Location?> {
         return plugin.database.getTable(RPKPreviousLocationTable::class.java)[minecraftProfile].thenApply {
-            it?.location
+            it?.location?.toBukkitLocation()
         }
     }
 
@@ -37,10 +39,10 @@ class RPKLocationHistoryServiceImpl(override val plugin: RPKEssentialsBukkit) : 
             val previousLocationTable = plugin.database.getTable(RPKPreviousLocationTable::class.java)
             var previousLocation = previousLocationTable[minecraftProfile].join()
             if (previousLocation != null) {
-                previousLocation.location = location
+                previousLocation.location = location.toRPKLocation()
                 previousLocationTable.update(previousLocation).join()
             } else {
-                previousLocation = RPKPreviousLocation(minecraftProfile = minecraftProfile, location = location)
+                previousLocation = RPKPreviousLocation(minecraftProfile = minecraftProfile, location = location.toRPKLocation())
                 previousLocationTable.insert(previousLocation).join()
             }
         }

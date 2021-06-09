@@ -20,6 +20,7 @@ import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockChangeImpl
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -45,7 +46,7 @@ class BlockIgniteListener(private val plugin: RPKBlockLoggingBukkit) : Listener 
         val minecraftProfile = if (player == null) null else minecraftProfileService?.getPreloadedMinecraftProfile(player)
         val profile = minecraftProfile?.profile as? RPKProfile
         val character = if (minecraftProfile == null) null else characterService?.getPreloadedActiveCharacter(minecraftProfile)
-        blockHistoryService.getBlockHistory(event.block).thenAccept { blockHistory ->
+        blockHistoryService.getBlockHistory(event.block.toRPKBlockLocation()).thenAccept { blockHistory ->
             val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
                 time = LocalDateTime.now(),

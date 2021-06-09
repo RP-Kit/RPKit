@@ -20,6 +20,7 @@ import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.blocklog.bukkit.block.RPKBlockInventoryChangeImpl
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -49,7 +50,7 @@ class InventoryDragListener(private val plugin: RPKBlockLoggingBukkit) : Listene
                 val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(whoClicked)
                 val profile = minecraftProfile?.profile as? RPKProfile
                 val character = if (minecraftProfile == null) null else characterService.getPreloadedActiveCharacter(minecraftProfile)
-                blockHistoryService.getBlockHistory(inventoryHolder.block).thenAccept { blockHistory ->
+                blockHistoryService.getBlockHistory(inventoryHolder.block.toRPKBlockLocation()).thenAccept { blockHistory ->
                     val blockInventoryChange = RPKBlockInventoryChangeImpl(
                         blockHistory = blockHistory,
                         time = LocalDateTime.now(),

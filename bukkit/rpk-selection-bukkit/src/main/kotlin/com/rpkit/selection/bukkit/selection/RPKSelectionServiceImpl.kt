@@ -16,26 +16,32 @@
 
 package com.rpkit.selection.bukkit.selection
 
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.selection.bukkit.RPKSelectionBukkit
 import com.rpkit.selection.bukkit.database.table.RPKSelectionTable
+import org.bukkit.World
+import java.util.concurrent.CompletableFuture
 
 
 class RPKSelectionServiceImpl(override val plugin: RPKSelectionBukkit) : RPKSelectionService {
 
-    override fun getSelection(minecraftProfile: RPKMinecraftProfile): RPKSelection {
-        var selection = plugin.database.getTable(RPKSelectionTable::class.java).get(minecraftProfile)
-        if (selection != null) return selection
-        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
-                ?: throw IllegalArgumentException("Invalid Minecraft profile")
-        val world = bukkitPlayer.world
-        selection = RPKSelectionImpl(minecraftProfile, world, world.getBlockAt(world.spawnLocation), world.getBlockAt(world.spawnLocation))
-        plugin.database.getTable(RPKSelectionTable::class.java).insert(selection)
-        return selection
+    override fun getSelection(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKSelection?> {
+        return plugin.database.getTable(RPKSelectionTable::class.java)[minecraftProfile]
     }
 
-    override fun updateSelection(selection: RPKSelection) {
-        plugin.database.getTable(RPKSelectionTable::class.java).update(selection)
+    override fun createSelection(minecraftProfile: RPKMinecraftProfile, world: World): CompletableFuture<RPKSelection> {
+        val selection = RPKSelectionImpl(
+            minecraftProfile,
+            world.name,
+            world.spawnLocation.toRPKBlockLocation(),
+            world.spawnLocation.toRPKBlockLocation()
+        )
+        return plugin.database.getTable(RPKSelectionTable::class.java).insert(selection).thenApply { selection }
+    }
+
+    override fun updateSelection(selection: RPKSelection): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKSelectionTable::class.java).update(selection)
     }
 
 }

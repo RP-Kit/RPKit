@@ -15,12 +15,12 @@
 
 package com.rpkit.warp.bukkit.warp
 
-import org.bukkit.Location
+import com.rpkit.core.location.RPKLocation
 
 
 interface RPKWarp {
 
     val name: RPKWarpName
-    val location: Location
+    val location: RPKLocation
 
 }

@@ -16,11 +16,11 @@
 
 package com.rpkit.essentials.bukkit.locationhistory
 
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import org.bukkit.Location
 
 
 class RPKPreviousLocation(
         val minecraftProfile: RPKMinecraftProfile,
-        var location: Location
+        var location: RPKLocation
 )

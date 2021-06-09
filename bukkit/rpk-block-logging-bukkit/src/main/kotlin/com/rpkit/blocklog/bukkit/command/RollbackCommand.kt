@@ -19,6 +19,7 @@ package com.rpkit.blocklog.bukkit.command
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.blocklog.bukkit.event.blocklog.RPKBukkitBlockRollbackEvent
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
 import com.rpkit.core.service.Services
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -68,8 +69,8 @@ class RollbackCommand(private val plugin: RPKBlockLoggingBukkit) : CommandExecut
                     val event = RPKBukkitBlockRollbackEvent(block, time)
                     plugin.server.pluginManager.callEvent(event)
                     if (event.isCancelled) continue
-                    blockHistoryService.getBlockTypeAtTime(event.block, event.time).thenAccept { type ->
-                        blockHistoryService.getBlockInventoryAtTime(event.block, event.time).thenAccept { inventoryContents ->
+                    blockHistoryService.getBlockTypeAtTime(event.block.toRPKBlockLocation(), event.time).thenAccept { type ->
+                        blockHistoryService.getBlockInventoryAtTime(event.block.toRPKBlockLocation(), event.time).thenAccept { inventoryContents ->
                             plugin.server.scheduler.runTask(plugin, Runnable {
                                 block.type = type
                                 val state = block.state
