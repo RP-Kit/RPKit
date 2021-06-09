@@ -106,26 +106,31 @@ class ProfessionUnsetCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor
             sender.sendMessage(plugin.messages["profession-unset-invalid-profession"])
             return true
         }
-        if (!professionService.getProfessions(character).contains(profession)) {
-            sender.sendMessage(plugin.messages["profession-unset-invalid-not-using-profession"])
-            return true
-        }
-        if (target == sender) {
-            val professionChangeCooldown = professionService.getProfessionChangeCooldown(character)
-            if (!professionChangeCooldown.isZero) {
-                sender.sendMessage(plugin.messages["profession-unset-invalid-on-cooldown", mapOf(
+        professionService.getProfessions(character).thenAcceptAsync { characterProfessions ->
+            if (!characterProfessions.contains(profession)) {
+                sender.sendMessage(plugin.messages["profession-unset-invalid-not-using-profession"])
+                return@thenAcceptAsync
+            }
+            if (target == sender) {
+                val professionChangeCooldown = professionService.getProfessionChangeCooldown(character).join()
+                if (!professionChangeCooldown.isZero) {
+                    sender.sendMessage(plugin.messages["profession-unset-invalid-on-cooldown", mapOf(
                         "cooldown_days" to professionChangeCooldown.toDays().toString(),
                         "cooldown_hours" to (professionChangeCooldown.toHours() % 24).toString(),
                         "cooldown_minutes" to (professionChangeCooldown.toMinutes() % 60).toString(),
                         "cooldown_seconds" to (professionChangeCooldown.seconds % 60).toString()
-                )])
-                return true
+                    )])
+                    return@thenAcceptAsync
+                }
+            }
+            professionService.removeProfession(character, profession).thenRun {
+                sender.sendMessage(
+                    plugin.messages["profession-unset-valid", mapOf(
+                        "profession" to profession.name.value
+                    )]
+                )
             }
         }
-        professionService.removeProfession(character, profession)
-        sender.sendMessage(plugin.messages["profession-unset-valid", mapOf(
-                "profession" to profession.name.value
-        )])
         return true
     }
 

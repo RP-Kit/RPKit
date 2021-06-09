@@ -63,9 +63,13 @@ class BlockBreakListener(private val plugin: RPKProfessionsBukkit) : Listener {
             event.isDropItems = false
             return
         }
-        val professions = professionService.getProfessions(character)
+        val professions = professionService.getPreloadedProfessions(character)
+        if (professions == null) {
+            event.isDropItems = false
+            return
+        }
         val professionLevels = professions
-                .associateWith { profession -> professionService.getProfessionLevel(character, profession) }
+            .associateWith { profession -> professionService.getPreloadedProfessionLevel(character, profession) ?: 1 }
         val itemsToDrop = mutableListOf<ItemStack>()
         for (item in event.block.getDrops(event.player.inventory.itemInMainHand)) {
             val material = item.type
@@ -93,19 +97,22 @@ class BlockBreakListener(private val plugin: RPKProfessionsBukkit) : Listener {
             professions.forEach { profession ->
                 val receivedExperience = plugin.config.getInt("professions.${profession.name.value}.experience.items.mining.$material", 0) * item.amount
                 if (receivedExperience > 0) {
-                    professionService.setProfessionExperience(character, profession, professionService.getProfessionExperience(character, profession) + receivedExperience)
-                    val level = professionService.getProfessionLevel(character, profession)
-                    val experience = professionService.getProfessionExperience(character, profession)
-                    event.player.sendMessage(plugin.messages["mine-experience", mapOf(
-                            "profession" to profession.name.value,
-                            "level" to level.toString(),
-                            "received_experience" to receivedExperience.toString(),
-                            "experience" to (experience - profession.getExperienceNeededForLevel(level)).toString(),
-                            "next_level_experience" to (profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)).toString(),
-                            "total_experience" to experience.toString(),
-                            "total_next_level_experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
-                            "material" to material.toString().toLowerCase().replace('_', ' ')
-                    )])
+                    professionService.getProfessionExperience(character, profession).thenAccept { characterProfessionExperience ->
+                        professionService.setProfessionExperience(character, profession, characterProfessionExperience + receivedExperience).thenRunAsync {
+                            val level = professionService.getProfessionLevel(character, profession).join()
+                            val experience = professionService.getProfessionExperience(character, profession).join()
+                            event.player.sendMessage(plugin.messages.mineExperience.withParameters(
+                                profession = profession,
+                                level = level,
+                                receivedExperience = receivedExperience,
+                                experience = experience - profession.getExperienceNeededForLevel(level),
+                                nextLevelExperience = profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level),
+                                totalExperience = experience,
+                                totalNextLevelExperience = profession.getExperienceNeededForLevel(level + 1),
+                                material = material
+                            ))
+                        }
+                    }
                 }
             }
         }

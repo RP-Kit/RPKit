@@ -35,7 +35,7 @@ class RPKProfessionImpl(
             RPKCraftingAction.SMELT -> "smelting"
             RPKCraftingAction.MINE -> "mining"
         }
-        return plugin.config.getDouble("professions.$name.$actionConfigSectionName.$level.$material.amount",
+        return plugin.config.getDouble("professions.${name.value}.$actionConfigSectionName.$level.$material.amount",
                 if (level > 1)
                     getAmountFor(action, material, level - 1)
                 else
@@ -50,7 +50,7 @@ class RPKProfessionImpl(
             RPKCraftingAction.MINE -> "mining"
         }
         val itemQualityService = Services[RPKItemQualityService::class.java] ?: return null
-        val itemQualityName = plugin.config.getString("professions.$name.$actionConfigSectionName.$level.$material.quality")
+        val itemQualityName = plugin.config.getString("professions.${name.value}.$actionConfigSectionName.$level.$material.quality")
                 ?: when {
                     level > 1 -> return getQualityFor(action, material, level - 1)
                     else -> plugin.config.getString("default.$actionConfigSectionName.$material.quality")
@@ -61,7 +61,7 @@ class RPKProfessionImpl(
 
     override fun getExperienceNeededForLevel(level: Int): Int {
         val expressionService = Services[RPKExpressionService::class.java] ?: return Int.MAX_VALUE
-        val expression = expressionService.createExpression(plugin.config.getString("professions.$name.experience.formula") ?: return Int.MAX_VALUE)
+        val expression = expressionService.createExpression(plugin.config.getString("professions.${name.value}.experience.formula") ?: return Int.MAX_VALUE)
         return expression.parseInt(mapOf(
             "level" to level.toDouble()
         )) ?: Int.MAX_VALUE
@@ -73,6 +73,6 @@ class RPKProfessionImpl(
             RPKCraftingAction.SMELT -> "smelting"
             RPKCraftingAction.MINE -> "mining"
         }
-        return plugin.config.getInt("professions.$name.experience.items.$actionConfigSectionName.$material")
+        return plugin.config.getInt("professions.${name.value}.experience.items.$actionConfigSectionName.$material")
     }
 }

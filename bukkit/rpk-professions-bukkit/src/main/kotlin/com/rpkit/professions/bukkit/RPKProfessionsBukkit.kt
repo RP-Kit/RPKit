@@ -29,11 +29,7 @@ import com.rpkit.professions.bukkit.database.table.RPKCharacterProfessionChangeC
 import com.rpkit.professions.bukkit.database.table.RPKCharacterProfessionExperienceTable
 import com.rpkit.professions.bukkit.database.table.RPKCharacterProfessionTable
 import com.rpkit.professions.bukkit.database.table.RPKProfessionHiddenTable
-import com.rpkit.professions.bukkit.listener.BlockBreakListener
-import com.rpkit.professions.bukkit.listener.CraftItemListener
-import com.rpkit.professions.bukkit.listener.InventoryClickListener
-import com.rpkit.professions.bukkit.listener.PrepareItemCraftListener
-import com.rpkit.professions.bukkit.listener.RPKBukkitCharacterDeleteListener
+import com.rpkit.professions.bukkit.listener.*
 import com.rpkit.professions.bukkit.messages.ProfessionsMessages
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
 import com.rpkit.professions.bukkit.profession.RPKProfessionServiceImpl
@@ -115,11 +111,14 @@ class RPKProfessionsBukkit : RPKBukkitPlugin() {
 
     fun registerListeners() {
         registerListeners(
-                BlockBreakListener(this),
-                CraftItemListener(this),
-                InventoryClickListener(this),
-                PrepareItemCraftListener(this),
-                RPKBukkitCharacterDeleteListener(this)
+            BlockBreakListener(this),
+            CraftItemListener(this),
+            InventoryClickListener(this),
+            PrepareItemCraftListener(this),
+            RPKBukkitCharacterDeleteListener(this),
+            AsyncPlayerPreLoginListener(),
+            PlayerQuitListener(),
+            RPKCharacterSwitchListener()
         )
     }
 
