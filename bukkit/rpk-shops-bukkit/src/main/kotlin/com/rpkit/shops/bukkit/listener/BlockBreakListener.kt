@@ -89,8 +89,9 @@ class BlockBreakListener(val plugin: RPKShopsBukkit) : Listener {
                     event.isCancelled = true
                     return
                 }
-                val shopCount = shopCountService.getShopCount(character)
-                shopCountService.setShopCount(character, shopCount - 1)
+                shopCountService.getShopCount(character).thenAccept { shopCount ->
+                    shopCountService.setShopCount(character, shopCount - 1)
+                }
             } else if (sign.getLine(0) == "$GREEN[rent]") {
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {

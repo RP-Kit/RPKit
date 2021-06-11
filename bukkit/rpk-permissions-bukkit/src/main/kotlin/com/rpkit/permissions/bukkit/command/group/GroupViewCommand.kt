@@ -21,10 +21,6 @@ import org.bukkit.entity.Player
 class GroupViewCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages.notFromConsole)
-            return true
-        }
         if (!sender.hasPermission("rpkit.permissions.command.group.view")) {
             sender.sendMessage(plugin.messages.noPermissionGroupView)
             return true
@@ -38,8 +34,11 @@ class GroupViewCommand(private val plugin: RPKPermissionsBukkit) : CommandExecut
                 sender.sendMessage(plugin.messages.groupViewInvalidPlayer)
                 return true
             }
-        } else {
+        } else if (sender is Player) {
             sender
+        } else {
+            sender.sendMessage(plugin.messages.notFromConsole)
+            return true
         }
 
         val groupService = Services[RPKGroupService::class.java]

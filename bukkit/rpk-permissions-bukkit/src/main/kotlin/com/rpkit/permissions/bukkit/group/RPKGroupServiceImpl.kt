@@ -126,11 +126,13 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
             profileGroupTable.delete(profileGroup).join()
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@runAsync
             minecraftProfileService.getMinecraftProfiles(event.profile).thenAccept { minecraftProfiles ->
+                if (minecraftProfiles.any { it.isOnline }) {
+                    val profileGroups = this.profileGroups[profileId.value]?.filter { it.group != event.group } ?: listOf()
+                    this.profileGroups[profileId.value] = profileGroups
+                }
                 minecraftProfiles.forEach { minecraftProfile ->
                     plugin.server.scheduler.runTask(plugin, Runnable {
                         if (minecraftProfile.isOnline) {
-                            val profileGroups = this.profileGroups[profileId.value]?.minus(profileGroup) ?: listOf(profileGroup)
-                            this.profileGroups[profileId.value] = profileGroups
                             minecraftProfile.assignPermissions()
                         }
                     })
@@ -239,10 +241,12 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
                 ?: return@runAsync
             characterGroupTable.delete(characterGroup).join()
             val minecraftProfile = event.character.minecraftProfile ?: return@runAsync
+            if (minecraftProfile.isOnline) {
+                val characterGroups = this.characterGroups[characterId.value]?.filter { it.group != event.group } ?: listOf()
+                this.characterGroups[characterId.value] = characterGroups
+            }
             plugin.server.scheduler.runTask(plugin, Runnable {
                 if (minecraftProfile.isOnline) {
-                    val characterGroups = this.characterGroups[characterId.value]?.minus(characterGroup) ?: listOf(characterGroup)
-                    this.characterGroups[characterId.value] = characterGroups
                     minecraftProfile.assignPermissions()
                 }
             })

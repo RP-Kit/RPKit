@@ -83,16 +83,16 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-character"])
                 return
             }
-            val shopCount = shopCountService.getShopCount(character)
-            if (shopCount >= plugin.config.getInt("shops.limit") && !event.player.hasPermission("rpkit.shops.sign.shop.nolimit")) {
+            val shopCount = shopCountService.getPreloadedShopCount(character)
+            if (shopCount == null || shopCount >= plugin.config.getInt("shops.limit") && !event.player.hasPermission("rpkit.shops.sign.shop.nolimit")) {
                 event.player.sendMessage(plugin.messages["no-permission-shop-limit"])
                 event.block.breakNaturally()
                 return
             }
             if ((event.getLine(1)?.matches(Regex("buy\\s+\\d+")) != true
-                            || (event.getLine(1)?.matches(Regex("sell\\s+\\d+\\s+.+")) == true
-                            && Material.matchMaterial(event.getLine(1)?.replace(Regex("sell\\s+\\d+\\s+"), "")
-                            ?: "") != null))) {
+                        && !(event.getLine(1)?.matches(Regex("sell\\s+\\d+\\s+.+")) == true
+                        && Material.matchMaterial(event.getLine(1)?.replace(Regex("sell\\s+\\d+\\s+"), "")
+                    ?: "") != null))) {
                 event.block.breakNaturally()
                 event.player.sendMessage(plugin.messages["shop-line-1-invalid"])
                 return
@@ -134,7 +134,7 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
                 }
             }
             if (!event.getLine(3).equals("admin", ignoreCase = true)) {
-                shopCountService.setShopCount(character, shopCountService.getShopCount(character) + 1)
+                shopCountService.setShopCount(character, shopCount + 1)
             }
         } else if (event.getLine(0) == "[rent]") {
             if (!event.player.hasPermission("rpkit.shops.sign.rent")) {
