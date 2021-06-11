@@ -24,10 +24,7 @@ import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
 import com.rpkit.shops.bukkit.command.RestockCommand
 import com.rpkit.shops.bukkit.database.table.RPKShopCountTable
-import com.rpkit.shops.bukkit.listener.BlockBreakListener
-import com.rpkit.shops.bukkit.listener.InventoryClickListener
-import com.rpkit.shops.bukkit.listener.PlayerInteractListener
-import com.rpkit.shops.bukkit.listener.SignChangeListener
+import com.rpkit.shops.bukkit.listener.*
 import com.rpkit.shops.bukkit.messages.ShopsMessages
 import com.rpkit.shops.bukkit.shopcount.RPKShopCountService
 import com.rpkit.shops.bukkit.shopcount.RPKShopCountServiceImpl
@@ -101,10 +98,13 @@ class RPKShopsBukkit : RPKBukkitPlugin() {
 
     fun registerListeners() {
         registerListeners(
-                SignChangeListener(this),
-                BlockBreakListener(this),
-                PlayerInteractListener(this),
-                InventoryClickListener(this)
+            SignChangeListener(this),
+            BlockBreakListener(this),
+            PlayerInteractListener(this),
+            InventoryClickListener(this),
+            AsyncPlayerPreLoginListener(),
+            RPKCharacterSwitchListener(),
+            PlayerQuitListener()
         )
     }
 
