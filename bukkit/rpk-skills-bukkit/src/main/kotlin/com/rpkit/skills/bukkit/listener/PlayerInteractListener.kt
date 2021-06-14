@@ -38,7 +38,7 @@ class PlayerInteractListener(private val plugin: RPKSkillsBukkit) : Listener {
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         val item = event.item ?: return
-        val skill = skillService.getSkillBinding(character, item) ?: return
+        val skill = skillService.getPreloadedSkillBinding(character, item) ?: return
         character.canUse(skill).thenAccept { canUse ->
             if (!canUse) {
                 event.player.sendMessage(plugin.messages["skill-invalid-unmet-prerequisites", mapOf(
@@ -55,23 +55,28 @@ class PlayerInteractListener(private val plugin: RPKSkillsBukkit) : Listener {
                 )])
                 return@thenAccept
             }
-            if (skillService.getSkillCooldown(character, skill) > 0) {
+            val preloadedSkillCooldown = skillService.getPreloadedSkillCooldown(character, skill) ?: 0
+            if (preloadedSkillCooldown > 0) {
                 event.player.sendMessage(plugin.messages["skill-invalid-on-cooldown", mapOf(
                     "skill" to skill.name.value,
-                    "cooldown" to skillService.getSkillCooldown(character, skill).toString()
+                    "cooldown" to skillService.getPreloadedSkillCooldown(character, skill).toString()
                 )])
                 return@thenAccept
             }
-            character.use(skill)
-            skillService.setSkillCooldown(character, skill, skill.cooldown)
-            character.mana -= skill.manaCost
-            characterService.updateCharacter(character).thenRun {
-                event.player.sendMessage(
-                    plugin.messages["skill-valid", mapOf(
-                        "skill" to skill.name.value
-                    )]
-                )
+            skillService.setSkillCooldown(character, skill, skill.cooldown).thenRun {
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    character.use(skill)
+                })
+                character.mana -= skill.manaCost
+                characterService.updateCharacter(character).thenRun {
+                    event.player.sendMessage(
+                        plugin.messages["skill-valid", mapOf(
+                            "skill" to skill.name.value
+                        )]
+                    )
+                }
             }
+
         }
     }
 

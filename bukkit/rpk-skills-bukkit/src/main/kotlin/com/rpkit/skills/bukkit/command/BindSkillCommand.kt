@@ -73,16 +73,19 @@ class BindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor {
             return true
         }
         val item = sender.inventory.itemInMainHand
-        if (skillService.getSkillBinding(character, item) != null) {
+        if (skillService.getPreloadedSkillBinding(character, item) != null) {
             sender.sendMessage(plugin.messages["bind-skill-invalid-binding-already-exists"])
             return true
         }
-        skillService.setSkillBinding(character, item, skill)
-        sender.sendMessage(plugin.messages["bind-skill-valid", mapOf(
-                "character" to character.name,
-                "item" to item.type.toString().toLowerCase().replace('_', ' '),
-                "skill" to skill.name.value
-        )])
+        skillService.setSkillBinding(character, item, skill).thenRun {
+            sender.sendMessage(
+                plugin.messages["bind-skill-valid", mapOf(
+                    "character" to character.name,
+                    "item" to item.type.toString().toLowerCase().replace('_', ' '),
+                    "skill" to skill.name.value
+                )]
+            )
+        }
         return true
     }
 }
