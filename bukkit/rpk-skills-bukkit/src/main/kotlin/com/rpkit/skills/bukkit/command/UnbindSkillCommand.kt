@@ -62,17 +62,20 @@ class UnbindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor 
             return true
         }
         val item = sender.inventory.itemInMainHand
-        val skill = skillService.getSkillBinding(character, item)
+        val skill = skillService.getPreloadedSkillBinding(character, item)
         if (skill == null) {
             sender.sendMessage(plugin.messages["unbind-skill-invalid-no-binding"])
             return true
         }
-        skillService.setSkillBinding(character, item, null)
-        sender.sendMessage(plugin.messages["unbind-skill-valid", mapOf(
-                "character" to character.name,
-                "item" to item.type.toString().toLowerCase().replace('_', ' '),
-                "skill" to skill.name.value
-        )])
+        skillService.setSkillBinding(character, item, null).thenRun {
+            sender.sendMessage(
+                plugin.messages["unbind-skill-valid", mapOf(
+                    "character" to character.name,
+                    "item" to item.type.toString().toLowerCase().replace('_', ' '),
+                    "skill" to skill.name.value
+                )]
+            )
+        }
         return true
     }
 }

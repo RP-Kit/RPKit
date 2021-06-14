@@ -44,31 +44,35 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
         null
     }
 
-    fun insert(entity: RPKSkillBinding) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKSkillBinding): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_SKILL_BINDING,
-                        RPKIT_SKILL_BINDING.CHARACTER_ID,
-                        RPKIT_SKILL_BINDING.ITEM,
-                        RPKIT_SKILL_BINDING.SKILL_NAME
+                    RPKIT_SKILL_BINDING,
+                    RPKIT_SKILL_BINDING.CHARACTER_ID,
+                    RPKIT_SKILL_BINDING.ITEM,
+                    RPKIT_SKILL_BINDING.SKILL_NAME
                 )
                 .values(
-                        characterId.value,
-                        entity.item.toByteArray(),
-                        entity.skill.name.value
+                    characterId.value,
+                    entity.item.toByteArray(),
+                    entity.skill.name.value
                 )
                 .execute()
+        }
     }
 
-    fun update(entity: RPKSkillBinding) {
-        val characterId = entity.character.id ?: return
-        database.create.update(RPKIT_SKILL_BINDING)
+    fun update(entity: RPKSkillBinding): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create.update(RPKIT_SKILL_BINDING)
                 .set(RPKIT_SKILL_BINDING.CHARACTER_ID, characterId.value)
                 .set(RPKIT_SKILL_BINDING.ITEM, entity.item.toByteArray())
                 .set(RPKIT_SKILL_BINDING.SKILL_NAME, entity.skill.name.value)
                 .where(RPKIT_SKILL_BINDING.ID.eq(entity.id))
                 .execute()
+        }
     }
 
     fun get(id: Int): CompletableFuture<RPKSkillBinding?> {
@@ -111,44 +115,48 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
         }
     }
 
-    fun get(character: RPKCharacter): List<RPKSkillBinding> {
-        val characterId = character.id ?: return emptyList()
-        val results = database.create
+    fun get(character: RPKCharacter): CompletableFuture<List<RPKSkillBinding>> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(
-                        RPKIT_SKILL_BINDING.ID,
-                        RPKIT_SKILL_BINDING.CHARACTER_ID,
-                        RPKIT_SKILL_BINDING.ITEM,
-                        RPKIT_SKILL_BINDING.SKILL_NAME
+                    RPKIT_SKILL_BINDING.ID,
+                    RPKIT_SKILL_BINDING.CHARACTER_ID,
+                    RPKIT_SKILL_BINDING.ITEM,
+                    RPKIT_SKILL_BINDING.SKILL_NAME
                 )
                 .from(RPKIT_SKILL_BINDING)
                 .where(RPKIT_SKILL_BINDING.CHARACTER_ID.eq(characterId.value))
-                .fetch() ?: return emptyList()
-        val skillService = Services[RPKSkillService::class.java] ?: return emptyList()
-        return results.mapNotNull { result ->
-            val skillName = result[RPKIT_SKILL_BINDING.SKILL_NAME]
-            val skill = skillService.getSkill(RPKSkillName(skillName))
-            if (skill != null) {
-                val id = result[RPKIT_SKILL_BINDING.ID]
-                val skillBinding = RPKSkillBinding(
+                .fetch()
+            val skillService = Services[RPKSkillService::class.java] ?: return@supplyAsync emptyList()
+            return@supplyAsync results.mapNotNull { result ->
+                val skillName = result[RPKIT_SKILL_BINDING.SKILL_NAME]
+                val skill = skillService.getSkill(RPKSkillName(skillName))
+                if (skill != null) {
+                    val id = result[RPKIT_SKILL_BINDING.ID]
+                    val skillBinding = RPKSkillBinding(
                         id,
                         character,
                         result[RPKIT_SKILL_BINDING.ITEM].toItemStack(),
                         skill
-                )
-                cache?.set(id, skillBinding)
-                skillBinding
-            } else {
-                null
+                    )
+                    cache?.set(id, skillBinding)
+                    skillBinding
+                } else {
+                    null
+                }
             }
         }
     }
 
-    fun delete(entity: RPKSkillBinding) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun delete(entity: RPKSkillBinding): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_SKILL_BINDING)
                 .where(RPKIT_SKILL_BINDING.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_SKILL_BINDING.ITEM.eq(entity.item.toByteArray()))
                 .execute()
+        }
     }
 }

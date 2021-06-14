@@ -87,18 +87,25 @@ class SkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor {
             character.canUse(skill).thenAccept { canUse ->
                 if (canUse) {
                     if (character.mana >= skill.manaCost) {
-                        if (skillService.getSkillCooldown(character, skill) <= 0) {
-                            character.use(skill)
-                            skillService.setSkillCooldown(character, skill, skill.cooldown)
-                            character.mana -= skill.manaCost
-                            characterService.updateCharacter(character)
-                            sender.sendMessage(plugin.messages["skill-valid", mapOf(
-                                "skill" to skill.name.value
-                            )])
+                        val skillCooldown = skillService.getPreloadedSkillCooldown(character, skill)
+                        if (skillCooldown == null || skillCooldown <= 0) {
+                            skillService.setSkillCooldown(character, skill, skill.cooldown).thenRun {
+                                plugin.server.scheduler.runTask(plugin, Runnable {
+                                    character.use(skill)
+                                })
+                                character.mana -= skill.manaCost
+                                characterService.updateCharacter(character).thenRun {
+                                    sender.sendMessage(
+                                        plugin.messages["skill-valid", mapOf(
+                                            "skill" to skill.name.value
+                                        )]
+                                    )
+                                }
+                            }
                         } else {
                             sender.sendMessage(plugin.messages["skill-invalid-on-cooldown", mapOf(
                                 "skill" to skill.name.value,
-                                "cooldown" to skillService.getSkillCooldown(character, skill).toString()
+                                "cooldown" to skillService.getPreloadedSkillCooldown(character, skill).toString()
                             )])
                         }
                     } else {
