@@ -28,27 +28,33 @@ import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItem
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 
 class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchaseService {
 
-    override fun getPurchases(profile: RPKProfile): List<RPKPurchase> {
+    override fun getPurchases(profile: RPKProfile): CompletableFuture<List<RPKPurchase>> {
         return plugin.database.getTable(RPKPurchaseTable::class.java).get(profile)
     }
 
-    override fun getPurchase(id: RPKPurchaseId): RPKPurchase? {
+    override fun getPurchase(id: RPKPurchaseId): CompletableFuture<RPKPurchase?> {
         return plugin.database.getTable(RPKPurchaseTable::class.java)[id]
     }
 
-    override fun addPurchase(purchase: RPKPurchase) {
-        val event = RPKBukkitPurchaseCreateEvent(purchase)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val eventPurchase = event.purchase
-        when (eventPurchase) {
-            is RPKConsumablePurchase -> plugin.database.getTable(RPKConsumablePurchaseTable::class.java).insert(eventPurchase)
-            is RPKPermanentPurchase -> plugin.database.getTable(RPKPermanentPurchaseTable::class.java).insert(eventPurchase)
-            is RPKTimedPurchase -> plugin.database.getTable(RPKTimedPurchaseTable::class.java).insert(eventPurchase)
+    override fun addPurchase(purchase: RPKPurchase): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPurchaseCreateEvent(purchase, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val eventPurchase = event.purchase
+            when (eventPurchase) {
+                is RPKConsumablePurchase -> plugin.database.getTable(RPKConsumablePurchaseTable::class.java)
+                    .insert(eventPurchase).join()
+                is RPKPermanentPurchase -> plugin.database.getTable(RPKPermanentPurchaseTable::class.java)
+                    .insert(eventPurchase).join()
+                is RPKTimedPurchase -> plugin.database.getTable(RPKTimedPurchaseTable::class.java)
+                    .insert(eventPurchase).join()
+            }
         }
     }
 
@@ -57,7 +63,7 @@ class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchase
         profile: RPKProfile,
         purchaseDate: LocalDateTime,
         remainingUses: Int
-    ): RPKConsumablePurchase {
+    ): CompletableFuture<RPKConsumablePurchase> {
         val purchase = RPKConsumablePurchaseImpl(
             null,
             storeItem,
@@ -65,61 +71,68 @@ class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchase
             profile,
             purchaseDate
         )
-        addPurchase(purchase)
-        return purchase
+        return addPurchase(purchase).thenApply { purchase }
     }
 
     override fun createPermanentPurchase(
         storeItem: RPKPermanentStoreItem,
         profile: RPKProfile,
         purchaseDate: LocalDateTime
-    ): RPKPermanentPurchase {
+    ): CompletableFuture<RPKPermanentPurchase> {
         val purchase = RPKPermanentPurchaseImpl(
             null,
             storeItem,
             profile,
             purchaseDate
         )
-        addPurchase(purchase)
-        return purchase
+        return addPurchase(purchase).thenApply { purchase }
     }
 
     override fun createTimedPurchase(
         storeItem: RPKTimedStoreItem,
         profile: RPKProfile,
         purchaseDate: LocalDateTime
-    ): RPKTimedPurchase {
+    ): CompletableFuture<RPKTimedPurchase> {
         val purchase = RPKTimedPurchaseImpl(
             null,
             storeItem,
             profile,
             purchaseDate
         )
-        addPurchase(purchase)
-        return purchase
+        return addPurchase(purchase).thenApply { purchase }
     }
 
-    override fun updatePurchase(purchase: RPKPurchase) {
-        val event = RPKBukkitPurchaseUpdateEvent(purchase)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val eventPurchase = event.purchase
-        when (eventPurchase) {
-            is RPKConsumablePurchase -> plugin.database.getTable(RPKConsumablePurchaseTable::class.java).update(eventPurchase)
-            is RPKPermanentPurchase -> plugin.database.getTable(RPKPermanentPurchaseTable::class.java).update(eventPurchase)
-            is RPKTimedPurchase -> plugin.database.getTable(RPKTimedPurchaseTable::class.java).update(eventPurchase)
+    override fun updatePurchase(purchase: RPKPurchase): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPurchaseUpdateEvent(purchase, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val eventPurchase = event.purchase
+            when (eventPurchase) {
+                is RPKConsumablePurchase -> plugin.database.getTable(RPKConsumablePurchaseTable::class.java)
+                    .update(eventPurchase).join()
+                is RPKPermanentPurchase -> plugin.database.getTable(RPKPermanentPurchaseTable::class.java)
+                    .update(eventPurchase).join()
+                is RPKTimedPurchase -> plugin.database.getTable(RPKTimedPurchaseTable::class.java)
+                    .update(eventPurchase).join()
+            }
         }
     }
 
-    override fun removePurchase(purchase: RPKPurchase) {
-        val event = RPKBukkitPurchaseDeleteEvent(purchase)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val eventPurchase = event.purchase
-        when (eventPurchase) {
-            is RPKConsumablePurchase -> plugin.database.getTable(RPKConsumablePurchaseTable::class.java).delete(eventPurchase)
-            is RPKPermanentPurchase -> plugin.database.getTable(RPKPermanentPurchaseTable::class.java).delete(eventPurchase)
-            is RPKTimedPurchase -> plugin.database.getTable(RPKTimedPurchaseTable::class.java).delete(eventPurchase)
+    override fun removePurchase(purchase: RPKPurchase): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitPurchaseDeleteEvent(purchase, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val eventPurchase = event.purchase
+            when (eventPurchase) {
+                is RPKConsumablePurchase -> plugin.database.getTable(RPKConsumablePurchaseTable::class.java)
+                    .delete(eventPurchase).join()
+                is RPKPermanentPurchase -> plugin.database.getTable(RPKPermanentPurchaseTable::class.java)
+                    .delete(eventPurchase).join()
+                is RPKTimedPurchase -> plugin.database.getTable(RPKTimedPurchaseTable::class.java)
+                    .delete(eventPurchase).join()
+            }
         }
     }
 

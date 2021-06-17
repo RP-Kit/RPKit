@@ -28,8 +28,10 @@ import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_TIMED_PURCHASE
 import com.rpkit.store.bukkit.purchase.RPKPurchaseId
 import com.rpkit.store.bukkit.purchase.RPKTimedPurchase
 import com.rpkit.store.bukkit.purchase.RPKTimedPurchaseImpl
+import com.rpkit.store.bukkit.storeitem.RPKStoreItemId
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
 import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItem
+import java.util.concurrent.CompletableFuture
 
 
 class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBukkit) : Table {
@@ -45,98 +47,110 @@ class RPKTimedPurchaseTable(private val database: Database, plugin: RPKStoresBuk
         null
     }
 
-    fun insert(entity: RPKTimedPurchase) {
-        val id = database.getTable(RPKPurchaseTable::class.java).insert(entity) ?: return
-        database.create
+    fun insert(entity: RPKTimedPurchase): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val id = database.getTable(RPKPurchaseTable::class.java).insert(entity).join() ?: return@runAsync
+            database.create
                 .insertInto(
-                        RPKIT_TIMED_PURCHASE,
-                        RPKIT_TIMED_PURCHASE.PURCHASE_ID
+                    RPKIT_TIMED_PURCHASE,
+                    RPKIT_TIMED_PURCHASE.PURCHASE_ID
                 )
                 .values(
-                        id.value
+                    id.value
                 )
                 .execute()
-        entity.id = id
-        cache?.set(id.value, entity)
+            entity.id = id
+            cache?.set(id.value, entity)
+        }
     }
 
-    fun update(entity: RPKTimedPurchase) {
-        val id = entity.id ?: return
-        database.getTable(RPKPurchaseTable::class.java).update(entity)
-        cache?.set(id.value, entity)
+    fun update(entity: RPKTimedPurchase): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.getTable(RPKPurchaseTable::class.java).update(entity).join()
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKPurchaseId): RPKTimedPurchase? {
-        val result = database.create
+    operator fun get(id: RPKPurchaseId): CompletableFuture<RPKTimedPurchase?> {
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(
-                        RPKIT_PURCHASE.STORE_ITEM_ID,
-                        RPKIT_PURCHASE.PROFILE_ID,
-                        RPKIT_PURCHASE.PURCHASE_DATE,
-                        RPKIT_TIMED_PURCHASE.PURCHASE_ID
+                    RPKIT_PURCHASE.STORE_ITEM_ID,
+                    RPKIT_PURCHASE.PROFILE_ID,
+                    RPKIT_PURCHASE.PURCHASE_DATE,
+                    RPKIT_TIMED_PURCHASE.PURCHASE_ID
                 )
                 .from(RPKIT_TIMED_PURCHASE)
                 .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .and(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(RPKIT_PURCHASE.ID))
-                .fetchOne() ?: return null
-        val storeItemService = Services[RPKStoreItemService::class.java] ?: return null
-        val storeItem = storeItemService.getStoreItem(result[RPKIT_PURCHASE.STORE_ITEM_ID]) as? RPKTimedStoreItem
-        if (storeItem == null) {
-            database.create
+                .fetchOne() ?: return@supplyAsync null
+            val storeItemService = Services[RPKStoreItemService::class.java] ?: return@supplyAsync null
+            val storeItem = storeItemService.getStoreItem(RPKStoreItemId(result[RPKIT_PURCHASE.STORE_ITEM_ID])).join() as? RPKTimedStoreItem
+            if (storeItem == null) {
+                database.create
                     .deleteFrom(RPKIT_PURCHASE)
                     .where(RPKIT_PURCHASE.ID.eq(id.value))
                     .execute()
-            database.create
+                database.create
                     .deleteFrom(RPKIT_TIMED_PURCHASE)
                     .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id.value))
                     .execute()
-            cache?.remove(id.value)
-            return null
-        }
-        val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profile = profileService.getProfile(RPKProfileId(result[RPKIT_PURCHASE.PROFILE_ID])).join()
-        if (profile == null) {
-            database.create
+                cache?.remove(id.value)
+                return@supplyAsync null
+            }
+            val profileService = Services[RPKProfileService::class.java] ?: return@supplyAsync null
+            val profile = profileService.getProfile(RPKProfileId(result[RPKIT_PURCHASE.PROFILE_ID])).join()
+            if (profile == null) {
+                database.create
                     .deleteFrom(RPKIT_PURCHASE)
                     .where(RPKIT_PURCHASE.ID.eq(id.value))
                     .execute()
-            database.create
+                database.create
                     .deleteFrom(RPKIT_TIMED_PURCHASE)
                     .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id.value))
                     .execute()
-            cache?.remove(id.value)
-            return null
-        }
-        val timedPurchase = RPKTimedPurchaseImpl(
+                cache?.remove(id.value)
+                return@supplyAsync null
+            }
+            val timedPurchase = RPKTimedPurchaseImpl(
                 id,
                 storeItem,
                 profile,
                 result[RPKIT_PURCHASE.PURCHASE_DATE]
-        )
-        cache?.set(id.value, timedPurchase)
-        return timedPurchase
+            )
+            cache?.set(id.value, timedPurchase)
+            return@supplyAsync timedPurchase
+        }
     }
 
-    fun get(profile: RPKProfile): List<RPKTimedPurchase> {
-        val profileId = profile.id ?: return emptyList()
-        val result = database.create
+    fun get(profile: RPKProfile): CompletableFuture<List<RPKTimedPurchase>> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_TIMED_PURCHASE.PURCHASE_ID)
                 .from(
-                        RPKIT_PURCHASE,
-                        RPKIT_TIMED_PURCHASE
+                    RPKIT_PURCHASE,
+                    RPKIT_TIMED_PURCHASE
                 )
                 .where(RPKIT_PURCHASE.ID.eq(RPKIT_TIMED_PURCHASE.ID))
                 .and(RPKIT_PURCHASE.PROFILE_ID.eq(profileId.value))
                 .fetch()
-        return result.mapNotNull { row -> get(RPKPurchaseId(row[RPKIT_TIMED_PURCHASE.PURCHASE_ID])) }
+            val purchaseFutures = result.map { row -> get(RPKPurchaseId(row[RPKIT_TIMED_PURCHASE.PURCHASE_ID])) }
+            CompletableFuture.allOf(*purchaseFutures.toTypedArray()).join()
+            return@supplyAsync purchaseFutures.mapNotNull(CompletableFuture<RPKTimedPurchase?>::join)
+        }
     }
 
-    fun delete(entity: RPKTimedPurchase) {
-        val id = entity.id ?: return
-        database.getTable(RPKPurchaseTable::class.java).delete(entity)
-        database.create
+    fun delete(entity: RPKTimedPurchase): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.getTable(RPKPurchaseTable::class.java).delete(entity).join()
+            database.create
                 .deleteFrom(RPKIT_TIMED_PURCHASE)
                 .where(RPKIT_TIMED_PURCHASE.PURCHASE_ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 }
