@@ -39,11 +39,12 @@ class PlayerInteractListener(private val plugin: RPKTravelBukkit) : Listener {
             event.player.sendMessage(plugin.messages.noWarpService)
             return
         }
-        val warp = warpService.getWarp(RPKWarpName(sign.getLine(1)))
-        if (warp != null) {
-            warp.location.toBukkitLocation()?.let { event.player.teleport(it) }
-        } else {
-            event.player.sendMessage(plugin.messages.warpInvalidWarp)
+        warpService.getWarp(RPKWarpName(sign.getLine(1))).thenAccept { warp ->
+            if (warp != null) {
+                warp.location.toBukkitLocation()?.let { event.player.teleport(it) }
+            } else {
+                event.player.sendMessage(plugin.messages.warpInvalidWarp)
+            }
         }
     }
 

@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitWarpUpdateEvent(
-        override val warp: RPKWarp
-) : RPKBukkitEvent(), RPKWarpUpdateEvent, Cancellable {
+        override val warp: RPKWarp,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKWarpUpdateEvent, Cancellable {
 
     companion object {
         @JvmStatic

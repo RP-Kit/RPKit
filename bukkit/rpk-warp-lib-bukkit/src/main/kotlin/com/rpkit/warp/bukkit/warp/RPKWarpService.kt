@@ -17,15 +17,16 @@ package com.rpkit.warp.bukkit.warp
 
 import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Service
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKWarpService : Service {
 
-    val warps: List<RPKWarp>
-    fun getWarp(name: RPKWarpName): RPKWarp?
-    fun addWarp(warp: RPKWarp)
-    fun createWarp(name: RPKWarpName, location: RPKLocation): RPKWarp
-    fun updateWarp(warp: RPKWarp)
-    fun removeWarp(warp: RPKWarp)
+    val warps: CompletableFuture<List<RPKWarp>>
+    fun getWarp(name: RPKWarpName): CompletableFuture<RPKWarp?>
+    fun addWarp(warp: RPKWarp): CompletableFuture<Void>
+    fun createWarp(name: RPKWarpName, location: RPKLocation): CompletableFuture<RPKWarp>
+    fun updateWarp(warp: RPKWarp): CompletableFuture<Void>
+    fun removeWarp(warp: RPKWarp): CompletableFuture<Void>
 
 }

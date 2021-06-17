@@ -24,6 +24,7 @@ import com.rpkit.travel.bukkit.database.jooq.Tables.RPKIT_WARP
 import com.rpkit.travel.bukkit.warp.RPKWarpImpl
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import com.rpkit.warp.bukkit.warp.RPKWarpName
+import java.util.concurrent.CompletableFuture
 
 
 class RPKWarpTable(private val database: Database, private val plugin: RPKTravelBukkit) : Table {
@@ -39,33 +40,36 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
         null
     }
 
-    fun insert(entity: RPKWarp) {
-        database.create
+    fun insert(entity: RPKWarp): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_WARP,
-                        RPKIT_WARP.NAME,
-                        RPKIT_WARP.WORLD,
-                        RPKIT_WARP.X,
-                        RPKIT_WARP.Y,
-                        RPKIT_WARP.Z,
-                        RPKIT_WARP.YAW,
-                        RPKIT_WARP.PITCH
+                    RPKIT_WARP,
+                    RPKIT_WARP.NAME,
+                    RPKIT_WARP.WORLD,
+                    RPKIT_WARP.X,
+                    RPKIT_WARP.Y,
+                    RPKIT_WARP.Z,
+                    RPKIT_WARP.YAW,
+                    RPKIT_WARP.PITCH
                 )
                 .values(
-                        entity.name.value,
-                        entity.location.world,
-                        entity.location.x,
-                        entity.location.y,
-                        entity.location.z,
-                        entity.location.yaw.toDouble(),
-                        entity.location.pitch.toDouble()
+                    entity.name.value,
+                    entity.location.world,
+                    entity.location.x,
+                    entity.location.y,
+                    entity.location.z,
+                    entity.location.yaw.toDouble(),
+                    entity.location.pitch.toDouble()
                 )
                 .execute()
-        cache?.set(entity.name.value, entity)
+            cache?.set(entity.name.value, entity)
+        }
     }
 
-    fun update(entity: RPKWarp) {
-        database.create
+    fun update(entity: RPKWarp): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_WARP)
                 .set(RPKIT_WARP.WORLD, entity.location.world)
                 .set(RPKIT_WARP.X, entity.location.x)
@@ -75,45 +79,17 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                 .set(RPKIT_WARP.PITCH, entity.location.pitch.toDouble())
                 .where(RPKIT_WARP.NAME.eq(entity.name.value))
                 .execute()
-        cache?.set(entity.name.value, entity)
-    }
-
-    operator fun get(name: String): RPKWarp? {
-        if (cache?.containsKey(name) == true) {
-            return cache[name]
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_WARP.NAME,
-                            RPKIT_WARP.WORLD,
-                            RPKIT_WARP.X,
-                            RPKIT_WARP.Y,
-                            RPKIT_WARP.Z,
-                            RPKIT_WARP.YAW,
-                            RPKIT_WARP.PITCH
-                    )
-                    .from(RPKIT_WARP)
-                    .where(RPKIT_WARP.NAME.eq(name))
-                    .fetchOne() ?: return null
-            val warp = RPKWarpImpl(
-                    RPKWarpName(result.get(RPKIT_WARP.NAME)),
-                    RPKLocation(
-                            result.get(RPKIT_WARP.WORLD),
-                            result.get(RPKIT_WARP.X),
-                            result.get(RPKIT_WARP.Y),
-                            result.get(RPKIT_WARP.Z),
-                            result.get(RPKIT_WARP.YAW).toFloat(),
-                            result.get(RPKIT_WARP.PITCH).toFloat()
-                    )
-            )
-            cache?.set(name, warp)
-            return warp
+            cache?.set(entity.name.value, entity)
         }
     }
 
-    fun getAll(): List<RPKWarp> {
-        val results = database.create
-                .select(
+    operator fun get(name: String): CompletableFuture<RPKWarp?> {
+        if (cache?.containsKey(name) == true) {
+            return CompletableFuture.completedFuture(cache[name])
+        } else {
+            return CompletableFuture.supplyAsync {
+                val result = database.create
+                    .select(
                         RPKIT_WARP.NAME,
                         RPKIT_WARP.WORLD,
                         RPKIT_WARP.X,
@@ -121,30 +97,65 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                         RPKIT_WARP.Z,
                         RPKIT_WARP.YAW,
                         RPKIT_WARP.PITCH
-                )
-                .from(RPKIT_WARP)
-                .fetch()
-        return results.mapNotNull { result ->
-            RPKWarpImpl(
+                    )
+                    .from(RPKIT_WARP)
+                    .where(RPKIT_WARP.NAME.eq(name))
+                    .fetchOne() ?: return@supplyAsync null
+                val warp = RPKWarpImpl(
                     RPKWarpName(result.get(RPKIT_WARP.NAME)),
                     RPKLocation(
-                            result.get(RPKIT_WARP.WORLD),
-                            result.get(RPKIT_WARP.X),
-                            result.get(RPKIT_WARP.Y),
-                            result.get(RPKIT_WARP.Z),
-                            result.get(RPKIT_WARP.YAW).toFloat(),
-                            result.get(RPKIT_WARP.PITCH).toFloat()
+                        result.get(RPKIT_WARP.WORLD),
+                        result.get(RPKIT_WARP.X),
+                        result.get(RPKIT_WARP.Y),
+                        result.get(RPKIT_WARP.Z),
+                        result.get(RPKIT_WARP.YAW).toFloat(),
+                        result.get(RPKIT_WARP.PITCH).toFloat()
                     )
-            )
+                )
+                cache?.set(name, warp)
+                return@supplyAsync warp
+            }
         }
     }
 
-    fun delete(entity: RPKWarp) {
-        database.create
+    fun getAll(): CompletableFuture<List<RPKWarp>> {
+        return CompletableFuture.supplyAsync {
+            val results = database.create
+                .select(
+                    RPKIT_WARP.NAME,
+                    RPKIT_WARP.WORLD,
+                    RPKIT_WARP.X,
+                    RPKIT_WARP.Y,
+                    RPKIT_WARP.Z,
+                    RPKIT_WARP.YAW,
+                    RPKIT_WARP.PITCH
+                )
+                .from(RPKIT_WARP)
+                .fetch()
+            return@supplyAsync results.mapNotNull { result ->
+                RPKWarpImpl(
+                    RPKWarpName(result.get(RPKIT_WARP.NAME)),
+                    RPKLocation(
+                        result.get(RPKIT_WARP.WORLD),
+                        result.get(RPKIT_WARP.X),
+                        result.get(RPKIT_WARP.Y),
+                        result.get(RPKIT_WARP.Z),
+                        result.get(RPKIT_WARP.YAW).toFloat(),
+                        result.get(RPKIT_WARP.PITCH).toFloat()
+                    )
+                )
+            }
+        }
+    }
+
+    fun delete(entity: RPKWarp): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_WARP)
                 .where(RPKIT_WARP.NAME.eq(entity.name.value))
                 .execute()
-        cache?.remove(entity.name.value)
+            cache?.remove(entity.name.value)
+        }
     }
 
 }

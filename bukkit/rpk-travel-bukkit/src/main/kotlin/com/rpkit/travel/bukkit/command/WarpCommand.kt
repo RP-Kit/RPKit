@@ -44,50 +44,55 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             return true
         }
         if (args.isNotEmpty()) {
-            val warp = warpService.getWarp(RPKWarpName(args[0].toLowerCase()))
-            if (warp == null) {
-                sender.sendMessage(plugin.messages.warpInvalidWarp)
-                return true
-            }
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
-            if (minecraftProfileService == null) {
-                sender.sendMessage(plugin.messages.noMinecraftProfileService)
-                return true
-            }
-            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
-            if (minecraftProfile == null) {
-                sender.sendMessage(plugin.messages.noMinecraftProfile)
-                return true
-            }
-            val event = RPKBukkitWarpUseEvent(warp, minecraftProfile)
-            plugin.server.pluginManager.callEvent(event)
-            if (event.isCancelled) return true
-            event.warp.location.toBukkitLocation()?.let { sender.teleport(it) }
-            sender.sendMessage(plugin.messages.warpValid.withParameters(warp = event.warp))
-        } else {
-            if (warpService.warps.isEmpty()) {
-                sender.sendMessage(plugin.messages.warpListInvalidEmpty)
-                return true
-            }
-            sender.sendMessage(plugin.messages.warpListTitle)
-            val warps = warpService.warps.map { warp -> warp.name.value }
-            val warpMessages = ArrayList<String>()
-            var warpsBuilder = StringBuilder()
-            for (i in warps.indices) {
-                warpsBuilder.append(warps[i]).append(", ")
-                if ((i + 1) % 10 == 0) {
-                    if (i == warps.size - 1) {
-                        warpsBuilder.delete(warpsBuilder.length - 2, warpsBuilder.length)
-                    }
-                    warpMessages.add(warpsBuilder.toString())
-                    warpsBuilder = StringBuilder()
+            warpService.getWarp(RPKWarpName(args[0].toLowerCase())).thenAccept { warp ->
+                if (warp == null) {
+                    sender.sendMessage(plugin.messages.warpInvalidWarp)
+                    return@thenAccept
                 }
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+                if (minecraftProfileService == null) {
+                    sender.sendMessage(plugin.messages.noMinecraftProfileService)
+                    return@thenAccept
+                }
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
+                if (minecraftProfile == null) {
+                    sender.sendMessage(plugin.messages.noMinecraftProfile)
+                    return@thenAccept
+                }
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    val event = RPKBukkitWarpUseEvent(warp, minecraftProfile)
+                    plugin.server.pluginManager.callEvent(event)
+                    if (event.isCancelled) return@Runnable
+                    event.warp.location.toBukkitLocation()?.let { sender.teleport(it) }
+                    sender.sendMessage(plugin.messages.warpValid.withParameters(warp = event.warp))
+                })
             }
-            if (warpsBuilder.isNotEmpty()) {
-                warpMessages.add(warpsBuilder.delete(warpsBuilder.length - 2, warpsBuilder.length).toString())
-            }
-            for (message in warpMessages) {
-                sender.sendMessage(plugin.messages.warpListItem.withParameters(warps = message))
+        } else {
+            warpService.warps.thenAccept { warps ->
+                if (warps.isEmpty()) {
+                    sender.sendMessage(plugin.messages.warpListInvalidEmpty)
+                    return@thenAccept
+                }
+                sender.sendMessage(plugin.messages.warpListTitle)
+                val warpNames = warps.map { warp -> warp.name.value }
+                val warpMessages = ArrayList<String>()
+                var warpsBuilder = StringBuilder()
+                for (i in warpNames.indices) {
+                    warpsBuilder.append(warpNames[i]).append(", ")
+                    if ((i + 1) % 10 == 0) {
+                        if (i == warpNames.size - 1) {
+                            warpsBuilder.delete(warpsBuilder.length - 2, warpsBuilder.length)
+                        }
+                        warpMessages.add(warpsBuilder.toString())
+                        warpsBuilder = StringBuilder()
+                    }
+                }
+                if (warpsBuilder.isNotEmpty()) {
+                    warpMessages.add(warpsBuilder.delete(warpsBuilder.length - 2, warpsBuilder.length).toString())
+                }
+                for (message in warpMessages) {
+                    sender.sendMessage(plugin.messages.warpListItem.withParameters(warps = message))
+                }
             }
         }
         return true
