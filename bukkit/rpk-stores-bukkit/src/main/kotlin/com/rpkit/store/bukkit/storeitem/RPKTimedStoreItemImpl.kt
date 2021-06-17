@@ -20,7 +20,7 @@ import java.time.Duration
 
 
 class RPKTimedStoreItemImpl(
-        override var id: Int? = null,
+        override var id: RPKStoreItemId? = null,
         override val duration: Duration,
         override val plugin: String,
         override val identifier: String,

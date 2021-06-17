@@ -27,7 +27,7 @@ interface RPKStoreItem {
      * Guaranteed to be unique.
      * Null if it has not yet been inserted into the database.
      */
-    var id: Int?
+    var id: RPKStoreItemId?
 
     /**
      * The plugin providing the store item

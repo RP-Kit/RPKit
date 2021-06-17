@@ -22,9 +22,11 @@ import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.database.create
 import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_STORE_ITEM
 import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_TIMED_STORE_ITEM
+import com.rpkit.store.bukkit.storeitem.RPKStoreItemId
 import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItemImpl
 import java.time.Duration
+import java.util.concurrent.CompletableFuture
 
 
 class RPKTimedStoreItemTable(
@@ -43,74 +45,82 @@ class RPKTimedStoreItemTable(
         null
     }
 
-    fun insert(entity: RPKTimedStoreItem) {
-        val id = database.getTable(RPKStoreItemTable::class.java).insert(entity)
-        database.create
+    fun insert(entity: RPKTimedStoreItem): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val id = database.getTable(RPKStoreItemTable::class.java).insert(entity).join()
+            database.create
                 .insertInto(
-                        RPKIT_TIMED_STORE_ITEM,
-                        RPKIT_TIMED_STORE_ITEM.STORE_ITEM_ID,
-                        RPKIT_TIMED_STORE_ITEM.DURATION
+                    RPKIT_TIMED_STORE_ITEM,
+                    RPKIT_TIMED_STORE_ITEM.STORE_ITEM_ID,
+                    RPKIT_TIMED_STORE_ITEM.DURATION
                 )
                 .values(
-                        id,
-                        entity.duration.seconds
+                    id.value,
+                    entity.duration.seconds
                 )
                 .execute()
-        entity.id = id
-        cache?.set(id, entity)
+            entity.id = id
+            cache?.set(id.value, entity)
+        }
     }
 
-    fun update(entity: RPKTimedStoreItem) {
-        val id = entity.id ?: return
-        database.getTable(RPKStoreItemTable::class.java).update(entity)
-        database.create
+    fun update(entity: RPKTimedStoreItem): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.getTable(RPKStoreItemTable::class.java).update(entity).join()
+            database.create
                 .update(RPKIT_TIMED_STORE_ITEM)
                 .set(RPKIT_TIMED_STORE_ITEM.DURATION, entity.duration.seconds)
-                .where(RPKIT_TIMED_STORE_ITEM.STORE_ITEM_ID.eq(id))
+                .where(RPKIT_TIMED_STORE_ITEM.STORE_ITEM_ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: Int): RPKTimedStoreItem? {
-        if (cache?.containsKey(id) == true) {
-            return cache[id]
+    operator fun get(id: RPKStoreItemId): CompletableFuture<RPKTimedStoreItem?> {
+        if (cache?.containsKey(id.value) == true) {
+            return CompletableFuture.completedFuture(cache[id.value])
         } else {
-            val result = database.create
+            return CompletableFuture.supplyAsync {
+                val result = database.create
                     .select(
-                            RPKIT_STORE_ITEM.PLUGIN,
-                            RPKIT_STORE_ITEM.IDENTIFIER,
-                            RPKIT_STORE_ITEM.DESCRIPTION,
-                            RPKIT_STORE_ITEM.COST,
-                            RPKIT_TIMED_STORE_ITEM.DURATION
+                        RPKIT_STORE_ITEM.PLUGIN,
+                        RPKIT_STORE_ITEM.IDENTIFIER,
+                        RPKIT_STORE_ITEM.DESCRIPTION,
+                        RPKIT_STORE_ITEM.COST,
+                        RPKIT_TIMED_STORE_ITEM.DURATION
                     )
                     .from(
-                            RPKIT_STORE_ITEM,
-                            RPKIT_TIMED_STORE_ITEM
+                        RPKIT_STORE_ITEM,
+                        RPKIT_TIMED_STORE_ITEM
                     )
-                    .where(RPKIT_STORE_ITEM.ID.eq(id))
+                    .where(RPKIT_STORE_ITEM.ID.eq(id.value))
                     .and(RPKIT_STORE_ITEM.ID.eq(RPKIT_TIMED_STORE_ITEM.ID))
-                    .fetchOne() ?: return null
-            val storeItem = RPKTimedStoreItemImpl(
+                    .fetchOne() ?: return@supplyAsync null
+                val storeItem = RPKTimedStoreItemImpl(
                     id,
                     Duration.ofSeconds(result[RPKIT_TIMED_STORE_ITEM.DURATION]),
                     result[RPKIT_STORE_ITEM.PLUGIN],
                     result[RPKIT_STORE_ITEM.IDENTIFIER],
                     result[RPKIT_STORE_ITEM.DESCRIPTION],
                     result[RPKIT_STORE_ITEM.COST]
-            )
-            cache?.set(id, storeItem)
-            return storeItem
+                )
+                cache?.set(id.value, storeItem)
+                return@supplyAsync storeItem
+            }
         }
     }
 
-    fun delete(entity: RPKTimedStoreItem) {
-        val id = entity.id ?: return
-        database.getTable(RPKStoreItemTable::class.java).delete(entity)
-        database.create
+    fun delete(entity: RPKTimedStoreItem): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.getTable(RPKStoreItemTable::class.java).delete(entity).join()
+            database.create
                 .deleteFrom(RPKIT_TIMED_STORE_ITEM)
-                .where(RPKIT_TIMED_STORE_ITEM.ID.eq(id))
+                .where(RPKIT_TIMED_STORE_ITEM.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+            cache?.remove(id.value)
+        }
     }
 
 }
