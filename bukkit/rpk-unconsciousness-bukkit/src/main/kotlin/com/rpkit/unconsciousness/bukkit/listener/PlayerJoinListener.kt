@@ -36,7 +36,7 @@ class PlayerJoinListener : Listener {
         val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer) ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
-        if (unconsciousnessService.isUnconscious(character)) return
+        if (unconsciousnessService.getPreloadedUnconsciousness(character)) return
         event.player.removePotionEffect(BLINDNESS)
     }
 

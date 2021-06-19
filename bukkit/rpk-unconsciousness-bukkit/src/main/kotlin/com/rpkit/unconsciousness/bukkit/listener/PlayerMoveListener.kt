@@ -35,7 +35,7 @@ class PlayerMoveListener : Listener {
         val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
-        if (!unconsciousnessService.isUnconscious(character)) return
+        if (!unconsciousnessService.getPreloadedUnconsciousness(character)) return
         if (event.from.blockX == event.to?.blockX && event.from.blockZ == event.to?.blockZ) return
         event.player.teleport(Location(
                 event.from.world,

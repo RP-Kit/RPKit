@@ -38,7 +38,7 @@ class PlayerCommandPreprocessListener(private val plugin: RPKUnconsciousnessBukk
         val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer) ?: return
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
-        if (!unconsciousnessService.isUnconscious(character)) return
+        if (!unconsciousnessService.getPreloadedUnconsciousness(character)) return
         if (plugin.config.getStringList("allowed-commands")
                         .map { command -> "/$command" }
                         .contains(event.message.split(Regex("\\s+"))[0])) return

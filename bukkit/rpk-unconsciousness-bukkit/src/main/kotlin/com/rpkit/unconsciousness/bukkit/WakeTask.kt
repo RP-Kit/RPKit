@@ -32,7 +32,7 @@ class WakeTask(private val plugin: RPKUnconsciousnessBukkit) : BukkitRunnable() 
             if (minecraftProfile != null) {
                 val character = characterService?.getPreloadedActiveCharacter(minecraftProfile)
                 if (character != null) {
-                    if (unconsciousnessService?.isUnconscious(character) == false && !character.isDead) {
+                    if (unconsciousnessService?.getPreloadedUnconsciousness(character) == false && !character.isDead) {
                         bukkitPlayer.removePotionEffect(BLINDNESS)
                     }
                 }
