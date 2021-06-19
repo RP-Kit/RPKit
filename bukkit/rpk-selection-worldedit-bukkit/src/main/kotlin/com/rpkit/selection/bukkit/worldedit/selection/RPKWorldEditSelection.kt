@@ -17,6 +17,7 @@
 package com.rpkit.selection.bukkit.worldedit.selection
 
 import com.rpkit.core.bukkit.location.toBukkitBlock
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
 import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.selection.bukkit.selection.RPKSelection
@@ -46,18 +47,23 @@ class RPKWorldEditSelection(
                     world.spawnLocation.blockZ
                 )
             } else {
-                val world = BukkitAdapter.adapt(session.selectionWorld)
-                val primaryPosition = try {
-                    session.getRegionSelector(session.selectionWorld).primaryPosition.toVector3()
-                } catch (exception: IncompleteRegionException) {
-                    BukkitAdapter.adapt(world.spawnLocation).toVector()
+                val selectionWorld = session.selectionWorld
+                if (selectionWorld != null) {
+                    val world = BukkitAdapter.adapt(selectionWorld)
+                    val primaryPosition = try {
+                        session.getRegionSelector(selectionWorld).primaryPosition.toVector3()
+                    } catch (exception: IncompleteRegionException) {
+                        BukkitAdapter.adapt(world.spawnLocation).toVector()
+                    }
+                    RPKBlockLocation(
+                        world.name,
+                        floor(primaryPosition.x).toInt(),
+                        floor(primaryPosition.y).toInt(),
+                        floor(primaryPosition.z).toInt()
+                    )
+                } else {
+                    Bukkit.getWorlds()[0].spawnLocation.toRPKBlockLocation()
                 }
-                RPKBlockLocation(
-                    world.name,
-                    floor(primaryPosition.x).toInt(),
-                    floor(primaryPosition.y).toInt(),
-                    floor(primaryPosition.z).toInt()
-                )
             }
         }
         set(value) {
@@ -84,18 +90,23 @@ class RPKWorldEditSelection(
                     world.spawnLocation.blockZ
                 )
             } else {
-                val world = BukkitAdapter.adapt(session.selectionWorld)
-                val secondaryPosition = try {
-                    (session.getRegionSelector(session.selectionWorld) as? CuboidRegionSelector)?.region?.pos2?.toVector3()
-                } catch (exception: IncompleteRegionException) {
-                    null
-                } ?: BukkitAdapter.adapt(world.spawnLocation).toVector()
-                RPKBlockLocation(
-                    world.name,
-                    floor(secondaryPosition.x).toInt(),
-                    floor(secondaryPosition.y).toInt(),
-                    floor(secondaryPosition.z).toInt()
-                )
+                val selectionWorld = session.selectionWorld
+                if (selectionWorld != null) {
+                    val world = BukkitAdapter.adapt(session.selectionWorld)
+                    val secondaryPosition = try {
+                        (session.getRegionSelector(session.selectionWorld) as? CuboidRegionSelector)?.region?.pos2?.toVector3()
+                    } catch (exception: IncompleteRegionException) {
+                        null
+                    } ?: BukkitAdapter.adapt(world.spawnLocation).toVector()
+                    RPKBlockLocation(
+                        world.name,
+                        floor(secondaryPosition.x).toInt(),
+                        floor(secondaryPosition.y).toInt(),
+                        floor(secondaryPosition.z).toInt()
+                    )
+                } else {
+                    Bukkit.getWorlds()[0].spawnLocation.toRPKBlockLocation()
+                }
             }
         }
         set(value) {
@@ -112,7 +123,7 @@ class RPKWorldEditSelection(
         }
 
     override var world: String
-        get() = (BukkitAdapter.adapt(session?.selectionWorld) ?: Bukkit.getWorlds()[0]).name
+        get() = (session?.selectionWorld?.let { BukkitAdapter.adapt(it) } ?: Bukkit.getWorlds()[0]).name
         set(value) {
 
         }
