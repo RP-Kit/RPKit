@@ -98,7 +98,7 @@ class RPKEssentialsBukkit : RPKBukkitPlugin() {
                             "SQLITE" -> "com/rpkit/essentials/migrations/sqlite"
                             else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
                         },
-                        "flyway_schema_history_players"
+                        "flyway_schema_history_essentials"
                 ),
                 classLoader
         )
