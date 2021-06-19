@@ -98,7 +98,7 @@ class RPKCharacterImpl(
                 return@runAsync
             }
             val profile = minecraftProfile.profile
-            for (line in if (profile == this.profile) plugin.messages.getList("character-card-owner") else
+            for (line in if ((profile as? RPKProfile)?.id?.value == this.profile?.id?.value) plugin.messages.getList("character-card-owner") else
                 plugin.messages.getList("character-card-not-owner")) {
                 val messageComponents = mutableListOf<BaseComponent>()
                 var chatColor: ChatColor? = null
@@ -150,7 +150,7 @@ class RPKCharacterImpl(
                                     ) == "\${edit(${field.name})}"
                                 }
                                 .forEach { field ->
-                                    if (minecraftProfile == this.minecraftProfile) {
+                                    if (minecraftProfile.id?.value == this.minecraftProfile?.id?.value) {
                                         val editComponent = TextComponent("Edit")
                                         editComponent.clickEvent =
                                             ClickEvent(ClickEvent.Action.RUN_COMMAND, "/character set ${field.name}")
@@ -185,7 +185,7 @@ class RPKCharacterImpl(
                                     }
                                     .filterIsInstance<HideableCharacterCardField>()
                                     .forEach { field ->
-                                        if (minecraftProfile == this.minecraftProfile) {
+                                        if (minecraftProfile.id?.value == this.minecraftProfile?.id?.value) {
                                             if (field.isHidden(this).join()) {
                                                 val unhideComponent = TextComponent("Unhide")
                                                 unhideComponent.clickEvent = ClickEvent(
