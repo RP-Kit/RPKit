@@ -86,6 +86,6 @@ interface RPKIRCService : Service {
     /**
      * Disconnects from the IRC server
      */
-    fun disconnect(): CompletableFuture<Void>
+    fun disconnect()
 
 }

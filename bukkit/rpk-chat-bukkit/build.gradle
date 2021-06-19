@@ -65,7 +65,7 @@ shadowJar {
         include(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7"))
         include(dependency("org.jetbrains.kotlin:kotlin-reflect"))
         include(dependency("org.bstats:bstats-bukkit"))
-        include(dependency("org.pircbotx:pircbotx"))
+        include(dependency("com.github.pircbotx:pircbotx"))
         include(dependency("org.jooq:jooq"))
         include(dependency("org.reactivestreams:reactive-streams"))
         include(dependency("javax.xml.bind:jaxb-api"))
@@ -82,6 +82,9 @@ shadowJar {
         include(dependency("com.fasterxml.jackson.core:jackson-databind"))
         include(dependency("com.fasterxml.jackson.core:jackson-annotations"))
         include(dependency("com.fasterxml.jackson.core:jackson-core"))
+        include(dependency("org.apache.commons:commons-lang3"))
+        include(dependency("commons-codec:commons-codec"))
+        include(dependency("com.google.guava:guava"))
 
     }
 
@@ -103,7 +106,9 @@ shadowJar {
     relocate "org.reactivestreams", "com.rpkit.chat.bukkit.shadow.impl.org.reactivestreams"
     relocate "javax.xml.bind", "com.rpkit.chat.bukkit.shadow.impl.javax.xml.bind"
     relocate "javax.activation", "com.rpkit.chat.bukkit.shadow.impl.javax.activation"
-    relocate "org.pircbotx", "com.rpkit.chat.bukkit.shadow.impl.org.pircbotx"
+    relocate "com.github.pircbotx", "com.rpkit.chat.bukkit.shadow.impl.com.github.pircbotx"
+    relocate "com.google.common", "com.rpkit.chat.bukkit.shadow.impl.com.google.common"
+    relocate "com.google.thirdparty", "com.rpkit.chat.bukkit.shadow.impl.com.google.thirdparty"
 
     mergeServiceFiles()
 
