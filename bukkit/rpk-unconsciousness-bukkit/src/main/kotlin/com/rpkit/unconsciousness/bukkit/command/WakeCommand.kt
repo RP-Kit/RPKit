@@ -67,16 +67,21 @@ class WakeCommand(private val plugin: RPKUnconsciousnessBukkit) : CommandExecuto
             )])
             return true
         }
-        if (!unconsciousnessService.isUnconscious(character)) {
-            sender.sendMessage(plugin.messages["wake-already-awake", mapOf(
+        unconsciousnessService.isUnconscious(character).thenAccept { isUnconscious ->
+            if (!isUnconscious) {
+                sender.sendMessage(plugin.messages["wake-already-awake", mapOf(
                     "character" to character.name
-            )])
-            return true
+                )])
+                return@thenAccept
+            }
+            unconsciousnessService.setUnconscious(character, false).thenRun {
+                sender.sendMessage(
+                    plugin.messages["wake-success", mapOf(
+                        "character" to character.name
+                    )]
+                )
+            }
         }
-        unconsciousnessService.setUnconscious(character, false)
-        sender.sendMessage(plugin.messages["wake-success", mapOf(
-                "character" to character.name
-        )])
         return true
     }
 }

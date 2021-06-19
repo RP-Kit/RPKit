@@ -24,16 +24,7 @@ import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
 import com.rpkit.unconsciousness.bukkit.command.WakeCommand
 import com.rpkit.unconsciousness.bukkit.database.table.RPKUnconsciousStateTable
-import com.rpkit.unconsciousness.bukkit.listener.EntityDamageByEntityListener
-import com.rpkit.unconsciousness.bukkit.listener.EntityDamageListener
-import com.rpkit.unconsciousness.bukkit.listener.EntityTargetListener
-import com.rpkit.unconsciousness.bukkit.listener.PlayerCommandPreprocessListener
-import com.rpkit.unconsciousness.bukkit.listener.PlayerDeathListener
-import com.rpkit.unconsciousness.bukkit.listener.PlayerInteractEntityListener
-import com.rpkit.unconsciousness.bukkit.listener.PlayerInteractListener
-import com.rpkit.unconsciousness.bukkit.listener.PlayerJoinListener
-import com.rpkit.unconsciousness.bukkit.listener.PlayerMoveListener
-import com.rpkit.unconsciousness.bukkit.listener.PlayerRespawnListener
+import com.rpkit.unconsciousness.bukkit.listener.*
 import com.rpkit.unconsciousness.bukkit.messages.UnconsciousnessMessages
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessServiceImpl
@@ -114,16 +105,19 @@ class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
 
     fun registerListeners() {
         registerListeners(
-                PlayerDeathListener(),
-                PlayerRespawnListener(this),
-                PlayerMoveListener(),
-                PlayerInteractEntityListener(this),
-                PlayerCommandPreprocessListener(this),
-                EntityDamageListener(this),
-                EntityTargetListener(this),
-                PlayerJoinListener(),
-                PlayerInteractListener(),
-                EntityDamageByEntityListener(this)
+            PlayerDeathListener(),
+            PlayerRespawnListener(this),
+            PlayerMoveListener(),
+            PlayerInteractEntityListener(),
+            PlayerCommandPreprocessListener(this),
+            EntityDamageListener(),
+            EntityTargetListener(),
+            PlayerJoinListener(),
+            PlayerInteractListener(),
+            EntityDamageByEntityListener(),
+            AsyncPlayerPreLoginListener(),
+            RPKCharacterSwitchListener(),
+            PlayerQuitListener()
         )
     }
 
