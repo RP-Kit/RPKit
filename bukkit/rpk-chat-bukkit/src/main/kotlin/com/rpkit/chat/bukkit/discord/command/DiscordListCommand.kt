@@ -19,13 +19,15 @@ package com.rpkit.chat.bukkit.discord.command
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.utils.MarkdownSanitizer
 import org.bukkit.entity.Player
 
 class DiscordListCommand(private val plugin: RPKChatBukkit) : DiscordCommand("list") {
     override fun execute(channel: TextChannel, sender: User, command: DiscordCommand, label: String, args: List<String>) {
         channel
-                .sendMessage("Online players: " +
-                        plugin.server.onlinePlayers.joinToString(", ", transform = Player::getName))
-                .queue()
+            .sendMessage(
+                MarkdownSanitizer.escape("Online players: " +
+                    plugin.server.onlinePlayers.joinToString(", ", transform = Player::getName)))
+            .queue()
     }
 }
