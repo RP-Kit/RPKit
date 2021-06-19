@@ -22,18 +22,19 @@ import com.rpkit.chat.bukkit.irc.command.IRCVerifyCommand
 import com.rpkit.chat.bukkit.irc.listener.*
 import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
-import org.bukkit.scheduler.BukkitRunnable
 import org.pircbotx.Configuration
 import org.pircbotx.PircBotX
 import org.pircbotx.delay.StaticDelay
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.concurrent.thread
 
 /**
  * IRC service implementation.
  */
 class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
 
+    private var ircBotThread: Thread? = null
     private val ircBot: PircBotX
     private val onlineUsers = CopyOnWriteArrayList<String>()
 
@@ -146,22 +147,24 @@ class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
     }
 
     override fun joinChannel(ircChannel: IRCChannel) {
-        ircBot.send().joinChannel(ircChannel.name)
+        ircBot.sendIRC().joinChannel(ircChannel.name)
     }
 
     override fun connect() {
-        object : BukkitRunnable() {
-            override fun run() {
+        if (ircBotThread == null) {
+            ircBotThread = thread(name = "RPKit Chat IRC Bot") {
                 ircBot.startBot()
             }
-        }.runTaskAsynchronously(plugin)
+        }
     }
 
-    override fun disconnect(): CompletableFuture<Void> {
-        return CompletableFuture.runAsync {
-            ircBot.stopBotReconnect()
-            ircBot.sendIRC()?.quitServer(plugin.messages["irc-quit"])
+    override fun disconnect() {
+        ircBot.stopBotReconnect()
+        ircBot.sendIRC()?.quitServer(plugin.messages["irc-quit"])
+        if (ircBot.isConnected) {
+            ircBot.close()
         }
+        ircBotThread?.join()
     }
 
 }
