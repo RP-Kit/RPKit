@@ -46,13 +46,6 @@ caching:
     minecraft_profile_id:
       enabled: true
       size: 20
-  rpkit_gender:
-    id:
-      enabled: true
-      size: 10
-    name:
-      enabled: true
-      size: 10
   rpkit_new_character_cooldown:
     profile_id:
       enabled: true
