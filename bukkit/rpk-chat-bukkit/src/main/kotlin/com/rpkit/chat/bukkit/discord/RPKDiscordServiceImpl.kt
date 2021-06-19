@@ -77,4 +77,8 @@ class RPKDiscordServiceImpl(override val plugin: RPKChatBukkit) : RPKDiscordServ
         return discordServer?.getChannel(name)
     }
 
+    override fun disconnect() {
+        discordServer?.disconnect()
+    }
+
 }
