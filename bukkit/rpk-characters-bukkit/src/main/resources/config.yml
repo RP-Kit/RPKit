@@ -50,10 +50,3 @@ caching:
     profile_id:
       enabled: true
       size: 20
-  rpkit_race:
-    id:
-      enabled: true
-      size: 20
-    name:
-      enabled: true
-      size: 20
