@@ -154,4 +154,8 @@ class DiscordServer(
                 ?.let(::DiscordChannel)
     }
 
+    fun disconnect() {
+        jda.shutdown()
+    }
+
 }

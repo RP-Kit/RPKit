@@ -33,5 +33,6 @@ interface RPKDiscordService : Service {
     fun getMessageProfileLink(messageId: Long): CompletableFuture<RPKProfile?>
     fun getMessageProfileLink(message: DiscordMessage): CompletableFuture<RPKProfile?>
     fun getDiscordChannel(name: String): DiscordChannel?
+    fun disconnect()
 
 }

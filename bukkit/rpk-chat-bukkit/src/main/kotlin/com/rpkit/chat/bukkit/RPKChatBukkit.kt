@@ -23,26 +23,10 @@ import com.rpkit.chat.bukkit.chatchannel.directed.preformat.DrunkenSlurComponent
 import com.rpkit.chat.bukkit.chatchannel.directed.preformat.GarbleComponent
 import com.rpkit.chat.bukkit.chatchannel.directed.preformat.LanguageComponent
 import com.rpkit.chat.bukkit.chatchannel.directed.preformat.RadiusFilterComponent
-import com.rpkit.chat.bukkit.chatchannel.format.click.CopyToClipboardClickAction
-import com.rpkit.chat.bukkit.chatchannel.format.click.OpenFileClickAction
-import com.rpkit.chat.bukkit.chatchannel.format.click.OpenURLClickAction
-import com.rpkit.chat.bukkit.chatchannel.format.click.RunCommandClickAction
-import com.rpkit.chat.bukkit.chatchannel.format.click.SuggestCommandClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.*
 import com.rpkit.chat.bukkit.chatchannel.format.hover.ShowTextHoverAction
-import com.rpkit.chat.bukkit.chatchannel.format.part.ChannelPart
-import com.rpkit.chat.bukkit.chatchannel.format.part.MessagePart
-import com.rpkit.chat.bukkit.chatchannel.format.part.ReceiverCharacterNamePart
-import com.rpkit.chat.bukkit.chatchannel.format.part.ReceiverPrefixPart
-import com.rpkit.chat.bukkit.chatchannel.format.part.ReceiverProfileNamePart
-import com.rpkit.chat.bukkit.chatchannel.format.part.SenderCharacterNamePart
-import com.rpkit.chat.bukkit.chatchannel.format.part.SenderPrefixPart
-import com.rpkit.chat.bukkit.chatchannel.format.part.SenderProfileNamePart
-import com.rpkit.chat.bukkit.chatchannel.format.part.TextPart
-import com.rpkit.chat.bukkit.chatchannel.undirected.DiscordComponent
-import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
-import com.rpkit.chat.bukkit.chatchannel.undirected.LogComponent
-import com.rpkit.chat.bukkit.chatchannel.undirected.UndirectedFormatComponent
-import com.rpkit.chat.bukkit.chatchannel.undirected.WebComponent
+import com.rpkit.chat.bukkit.chatchannel.format.part.*
+import com.rpkit.chat.bukkit.chatchannel.undirected.*
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupServiceImpl
 import com.rpkit.chat.bukkit.command.chatchannel.ChatChannelCommand
@@ -53,13 +37,7 @@ import com.rpkit.chat.bukkit.command.mute.MuteCommand
 import com.rpkit.chat.bukkit.command.reply.ReplyCommand
 import com.rpkit.chat.bukkit.command.snoop.SnoopCommand
 import com.rpkit.chat.bukkit.command.unmute.UnmuteCommand
-import com.rpkit.chat.bukkit.database.table.RPKChatChannelMuteTable
-import com.rpkit.chat.bukkit.database.table.RPKChatChannelSpeakerTable
-import com.rpkit.chat.bukkit.database.table.RPKChatGroupInviteTable
-import com.rpkit.chat.bukkit.database.table.RPKChatGroupMemberTable
-import com.rpkit.chat.bukkit.database.table.RPKChatGroupTable
-import com.rpkit.chat.bukkit.database.table.RPKLastUsedChatGroupTable
-import com.rpkit.chat.bukkit.database.table.RPKSnooperTable
+import com.rpkit.chat.bukkit.database.table.*
 import com.rpkit.chat.bukkit.discord.RPKDiscordService
 import com.rpkit.chat.bukkit.discord.RPKDiscordServiceImpl
 import com.rpkit.chat.bukkit.irc.RPKIRCService
@@ -223,6 +201,9 @@ class RPKChatBukkit : RPKBukkitPlugin() {
     override fun onDisable() {
         if (config.getBoolean("irc.enabled")) {
             Services[RPKIRCService::class.java]?.disconnect()
+        }
+        if (config.getBoolean("discord.enabled")) {
+            Services[RPKDiscordService::class.java]?.disconnect()
         }
     }
 
