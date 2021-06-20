@@ -36,7 +36,7 @@ class ProfessionExperienceViewCommand(val plugin: RPKProfessionsBukkit) : Comman
         var argsOffset = 0
         val target = if (sender.hasPermission("rpkit.professions.command.profession.experience.view.other")) {
             when {
-                args.size > 2 -> {
+                args.size >= 2 -> {
                     val player = plugin.server.getPlayer(args[0])
                     if (player == null) {
                         sender.sendMessage(plugin.messages["profession-experience-view-invalid-player-not-online"])
