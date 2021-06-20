@@ -23,7 +23,11 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftUsername
 import net.milkbowl.vault.permission.Permission
 
-class RPKPermissionsVaultPermissions(private val plugin: RPKPermissionsLibBukkit) : Permission() {
+class RPKPermissionsVaultPermissions(plugin: RPKPermissionsLibBukkit) : Permission() {
+
+    init {
+        this.plugin = plugin
+    }
     
     override fun getName(): String {
         return "rpk-permissions"
