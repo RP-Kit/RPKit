@@ -64,6 +64,7 @@ character-switch-prompt: '&fWhat is the name of the character you would like to 
 character-switch-invalid-character: '&cYou do not have a character by that name.'
 character-switch-invalid-character-other-account: '&cThat character is currently being played on another account.'
 character-switch-valid: '&aCharacter switched.'
+character-switch-usage: '&cUsage: /character switch [name]'
 character-new-valid: '&aCharacter created.'
 character-new-invalid-cooldown: '&cYou may not create another character until the cooldown has passed.'
 character-delete-prompt: '&fWhat is the name of the character you would like to delete? &7(Type cancel to cancel)'

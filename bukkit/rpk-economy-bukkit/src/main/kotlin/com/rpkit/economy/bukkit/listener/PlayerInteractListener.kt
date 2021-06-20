@@ -137,13 +137,19 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                     event.player.sendMessage(plugin.messages.noPreloadedBalanceSelf)
                     return
                 }
-                if (walletBalanceFromCurrency - fromAmount < 0) return
+                if (walletBalanceFromCurrency - fromAmount < 0) {
+                    event.player.sendMessage(plugin.messages.exchangeInvalidWalletBalanceTooLow)
+                    return
+                }
                 val walletBalanceToCurrency = economyService.getPreloadedBalance(character, toCurrency)
                 if (walletBalanceToCurrency == null) {
                     event.player.sendMessage(plugin.messages.noPreloadedBalanceSelf)
                     return
                 }
-                if (walletBalanceToCurrency + toAmount > 1728) return
+                if (walletBalanceToCurrency + toAmount > 1728) {
+                    event.player.sendMessage(plugin.messages.exchangeInvalidWalletBalanceTooHigh)
+                    return
+                }
                 economyService.setBalance(character, fromCurrency, walletBalanceFromCurrency - fromAmount)
                 economyService.setBalance(character, toCurrency, walletBalanceToCurrency + toAmount)
                 var rate = fromAmount.toDouble() / toAmount.toDouble()
@@ -196,13 +202,19 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                 event.player.sendMessage(plugin.messages.noPreloadedBalanceSelf)
                 return
             }
-            if (walletBalanceFromCurrency - fromAmount < 0) return
+            if (walletBalanceFromCurrency - fromAmount < 0) {
+                event.player.sendMessage(plugin.messages.exchangeInvalidWalletBalanceTooLow)
+                return
+            }
             val walletBalanceToCurrency = economyService.getPreloadedBalance(character, toCurrency)
             if (walletBalanceToCurrency == null) {
                 event.player.sendMessage(plugin.messages.noPreloadedBalanceSelf)
                 return
             }
-            if (walletBalanceToCurrency + toAmount > 1728) return
+            if (walletBalanceToCurrency + toAmount > 1728) {
+                event.player.sendMessage(plugin.messages.exchangeInvalidWalletBalanceTooHigh)
+                return
+            }
             economyService.setBalance(character, fromCurrency, walletBalanceFromCurrency - fromAmount)
             economyService.setBalance(character, toCurrency, walletBalanceToCurrency + toAmount)
             var rate = toAmount.toDouble() / fromAmount.toDouble()
