@@ -37,11 +37,13 @@ class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuction
     }
 
     override fun addAuction(auction: RPKAuction): CompletableFuture<Boolean> {
-        val event = RPKBukkitAuctionCreateEvent(auction)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(false)
-        return plugin.database.getTable(RPKAuctionTable::class.java).insert(event.auction)
-            .thenApply { true }
+        return CompletableFuture.supplyAsync {
+            val event = RPKBukkitAuctionCreateEvent(auction, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@supplyAsync false
+            return@supplyAsync plugin.database.getTable(RPKAuctionTable::class.java).insert(event.auction)
+                .thenApply { true }.join()
+        }
     }
 
     override fun createAuction(
@@ -77,19 +79,23 @@ class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuction
     }
 
     override fun updateAuction(auction: RPKAuction): CompletableFuture<Boolean> {
-        val event = RPKBukkitAuctionUpdateEvent(auction)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(false)
-        return plugin.database.getTable(RPKAuctionTable::class.java).update(event.auction)
-            .thenApply { true }
+        return CompletableFuture.supplyAsync {
+            val event = RPKBukkitAuctionUpdateEvent(auction, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@supplyAsync false
+            return@supplyAsync plugin.database.getTable(RPKAuctionTable::class.java).update(event.auction)
+                .thenApply { true }.join()
+        }
     }
 
     override fun removeAuction(auction: RPKAuction): CompletableFuture<Boolean> {
-        val event = RPKBukkitAuctionDeleteEvent(auction)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(false)
-        return plugin.database.getTable(RPKAuctionTable::class.java).delete(event.auction)
-            .thenApply { true }
+        return CompletableFuture.supplyAsync {
+            val event = RPKBukkitAuctionDeleteEvent(auction, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@supplyAsync false
+            return@supplyAsync plugin.database.getTable(RPKAuctionTable::class.java).delete(event.auction)
+                .thenApply { true }.join()
+        }
     }
 
     override fun getAuctions(): CompletableFuture<List<RPKAuction>> {

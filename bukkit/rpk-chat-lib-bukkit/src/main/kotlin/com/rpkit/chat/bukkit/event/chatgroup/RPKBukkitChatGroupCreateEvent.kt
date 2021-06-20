@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitChatGroupCreateEvent(
-        override val chatGroup: RPKChatGroup
-) : RPKBukkitEvent(), RPKChatGroupCreateEvent, Cancellable {
+        override val chatGroup: RPKChatGroup,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKChatGroupCreateEvent, Cancellable {
 
     companion object {
         @JvmStatic

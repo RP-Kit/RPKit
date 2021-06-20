@@ -32,28 +32,24 @@ class RPKSnooperServiceImpl(override val plugin: RPKChatBukkit) : RPKSnooperServ
         get() = plugin.database.getTable(RPKSnooperTable::class.java).getAll().thenApply { it.map(RPKSnooper::minecraftProfile) }
 
     override fun addSnooper(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void> {
-        return snoopers.thenAccept { snoopers ->
+        return snoopers.thenAcceptAsync { snoopers ->
             if (!snoopers.contains(minecraftProfile)) {
-                plugin.server.scheduler.runTask(plugin, Runnable {
-                    val event = RPKBukkitSnoopingBeginEvent(minecraftProfile)
-                    plugin.server.pluginManager.callEvent(event)
-                    if (event.isCancelled) return@Runnable
-                    plugin.database.getTable(RPKSnooperTable::class.java).insert(RPKSnooper(minecraftProfile = minecraftProfile))
-                })
+                val event = RPKBukkitSnoopingBeginEvent(minecraftProfile, true)
+                plugin.server.pluginManager.callEvent(event)
+                if (event.isCancelled) return@thenAcceptAsync
+                plugin.database.getTable(RPKSnooperTable::class.java).insert(RPKSnooper(minecraftProfile = minecraftProfile)).join()
             }
         }
     }
 
     override fun removeSnooper(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void> {
         val snooperTable = plugin.database.getTable(RPKSnooperTable::class.java)
-        return snooperTable.get(minecraftProfile).thenAccept { snooper ->
+        return snooperTable.get(minecraftProfile).thenAcceptAsync { snooper ->
             if (snooper != null) {
-                plugin.server.scheduler.runTask(plugin, Runnable {
-                    val event = RPKBukkitSnoopingEndEvent(minecraftProfile)
-                    plugin.server.pluginManager.callEvent(event)
-                    if (event.isCancelled) return@Runnable
-                    snooperTable.delete(snooper)
-                })
+                val event = RPKBukkitSnoopingEndEvent(minecraftProfile, true)
+                plugin.server.pluginManager.callEvent(event)
+                if (event.isCancelled) return@thenAcceptAsync
+                snooperTable.delete(snooper).join()
             }
         }
     }

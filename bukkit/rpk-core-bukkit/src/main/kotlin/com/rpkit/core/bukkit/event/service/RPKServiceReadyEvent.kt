@@ -19,7 +19,7 @@ package com.rpkit.core.bukkit.event.service
 import com.rpkit.core.event.RPKEvent
 import com.rpkit.core.service.Service
 
-interface RPKServiceServiceReadyEvent : RPKEvent {
+interface RPKServiceReadyEvent : RPKEvent {
 
     val service: Service
 

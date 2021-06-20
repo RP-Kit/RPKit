@@ -45,7 +45,7 @@ class RPKTicketImpl(
     )
 
     override fun close(resolver: RPKProfile) {
-        val event = RPKBukkitTicketCloseEvent(resolver, this)
+        val event = RPKBukkitTicketCloseEvent(resolver, this, false)
         Bukkit.getServer().pluginManager.callEvent(event)
         if (event.isCancelled) return
         isClosed = true

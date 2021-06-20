@@ -17,6 +17,8 @@ package com.rpkit.featureflags.bukkit.featureflag
 
 import com.rpkit.featureflags.bukkit.RPKFeatureFlagsBukkit
 import com.rpkit.featureflags.bukkit.database.table.RPKProfileFeatureFlagTable
+import com.rpkit.featureflags.bukkit.event.featureflag.RPKBukkitFeatureFlagCreateEvent
+import com.rpkit.featureflags.bukkit.event.featureflag.RPKBukkitFeatureFlagDeleteEvent
 import com.rpkit.featureflags.bukkit.event.featureflag.RPKBukkitFeatureFlagSetEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
@@ -30,14 +32,24 @@ class RPKFeatureFlagServiceImpl(override val plugin: RPKFeatureFlagsBukkit) : RP
         return featureFlags[name.value]
     }
 
-    override fun createFeatureFlag(name: RPKFeatureFlagName, isEnabledByDefault: Boolean): RPKFeatureFlag {
+    override fun createFeatureFlag(name: RPKFeatureFlagName, isEnabledByDefault: Boolean): RPKFeatureFlag? {
         val featureFlag = RPKFeatureFlagImpl(plugin, name, isEnabledByDefault)
-        featureFlags[name.value] = featureFlag
-        return featureFlag
+        val event = RPKBukkitFeatureFlagCreateEvent(featureFlag, false)
+        plugin.server.pluginManager.callEvent(event)
+        return if (!event.isCancelled) {
+            featureFlags[name.value] = featureFlag
+            featureFlag
+        } else {
+            null
+        }
     }
 
     override fun removeFeatureFlag(featureFlag: RPKFeatureFlag) {
-        featureFlags.remove(featureFlag.name.value)
+        val event = RPKBukkitFeatureFlagDeleteEvent(featureFlag, false)
+        plugin.server.pluginManager.callEvent(event)
+        if (!event.isCancelled) {
+            featureFlags.remove(featureFlag.name.value)
+        }
     }
 
     override fun setFeatureFlag(profile: RPKProfile, featureFlag: RPKFeatureFlag, enabled: Boolean): CompletableFuture<Void> {

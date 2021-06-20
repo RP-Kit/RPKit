@@ -39,7 +39,7 @@ class RPKPrefixServiceImpl(override val plugin: RPKChatBukkit) : RPKPrefixServic
             ?: emptyList()
 
     override fun addPrefix(prefix: RPKPrefix) {
-        val event = RPKBukkitPrefixCreateEvent(prefix)
+        val event = RPKBukkitPrefixCreateEvent(prefix, false)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.config.set("prefixes.${event.prefix.name}", event.prefix.prefix)
@@ -47,7 +47,7 @@ class RPKPrefixServiceImpl(override val plugin: RPKChatBukkit) : RPKPrefixServic
     }
 
     override fun updatePrefix(prefix: RPKPrefix) {
-        val event = RPKBukkitPrefixUpdateEvent(prefix)
+        val event = RPKBukkitPrefixUpdateEvent(prefix, false)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.config.set("prefixes.${event.prefix.name}", event.prefix.prefix)
@@ -55,7 +55,7 @@ class RPKPrefixServiceImpl(override val plugin: RPKChatBukkit) : RPKPrefixServic
     }
 
     override fun removePrefix(prefix: RPKPrefix) {
-        val event = RPKBukkitPrefixDeleteEvent(prefix)
+        val event = RPKBukkitPrefixDeleteEvent(prefix, false)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
         plugin.config.set("prefixes.${event.prefix.name}", null)

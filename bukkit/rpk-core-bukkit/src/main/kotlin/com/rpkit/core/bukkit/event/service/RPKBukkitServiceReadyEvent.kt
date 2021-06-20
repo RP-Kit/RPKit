@@ -20,7 +20,10 @@ import com.rpkit.core.bukkit.event.RPKBukkitEvent
 import com.rpkit.core.service.Service
 import org.bukkit.event.HandlerList
 
-class RPKBukkitServiceServiceReadyEvent(override val service: Service) : RPKBukkitEvent(), RPKServiceServiceReadyEvent {
+class RPKBukkitServiceReadyEvent(
+    override val service: Service,
+    isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKServiceReadyEvent {
 
     companion object {
         @JvmStatic

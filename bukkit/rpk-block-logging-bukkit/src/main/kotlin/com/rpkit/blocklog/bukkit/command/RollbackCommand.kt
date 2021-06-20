@@ -66,7 +66,7 @@ class RollbackCommand(private val plugin: RPKBlockLoggingBukkit) : CommandExecut
             for (y in (sender.location.blockY - radius)..(sender.location.blockY + radius)) {
                 for (z in (sender.location.blockZ - radius)..(sender.location.blockZ + radius)) {
                     val block = sender.world.getBlockAt(x, y, z)
-                    val event = RPKBukkitBlockRollbackEvent(block, time)
+                    val event = RPKBukkitBlockRollbackEvent(block, time, false)
                     plugin.server.pluginManager.callEvent(event)
                     if (event.isCancelled) continue
                     blockHistoryService.getBlockTypeAtTime(event.block.toRPKBlockLocation(), event.time).thenAccept { type ->

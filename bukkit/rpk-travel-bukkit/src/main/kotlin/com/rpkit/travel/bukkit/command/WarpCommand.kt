@@ -44,25 +44,25 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             return true
         }
         if (args.isNotEmpty()) {
-            warpService.getWarp(RPKWarpName(args[0].toLowerCase())).thenAccept { warp ->
+            warpService.getWarp(RPKWarpName(args[0].toLowerCase())).thenAcceptAsync { warp ->
                 if (warp == null) {
                     sender.sendMessage(plugin.messages.warpInvalidWarp)
-                    return@thenAccept
+                    return@thenAcceptAsync
                 }
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
                     sender.sendMessage(plugin.messages.noMinecraftProfileService)
-                    return@thenAccept
+                    return@thenAcceptAsync
                 }
                 val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
                 if (minecraftProfile == null) {
                     sender.sendMessage(plugin.messages.noMinecraftProfile)
-                    return@thenAccept
+                    return@thenAcceptAsync
                 }
+                val event = RPKBukkitWarpUseEvent(warp, minecraftProfile, true)
+                plugin.server.pluginManager.callEvent(event)
+                if (event.isCancelled) return@thenAcceptAsync
                 plugin.server.scheduler.runTask(plugin, Runnable {
-                    val event = RPKBukkitWarpUseEvent(warp, minecraftProfile)
-                    plugin.server.pluginManager.callEvent(event)
-                    if (event.isCancelled) return@Runnable
                     event.warp.location.toBukkitLocation()?.let { sender.teleport(it) }
                     sender.sendMessage(plugin.messages.warpValid.withParameters(warp = event.warp))
                 })

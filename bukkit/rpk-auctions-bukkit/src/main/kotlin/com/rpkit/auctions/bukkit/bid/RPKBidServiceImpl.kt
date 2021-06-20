@@ -30,11 +30,13 @@ import java.util.concurrent.CompletableFuture
 class RPKBidServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKBidService {
 
     override fun addBid(bid: RPKBid): CompletableFuture<Boolean> {
-        val event = RPKBukkitBidCreateEvent(bid)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(false)
-        return plugin.database.getTable(RPKBidTable::class.java).insert(event.bid)
-            .thenApply { true }
+        return CompletableFuture.supplyAsync {
+            val event = RPKBukkitBidCreateEvent(bid, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@supplyAsync false
+            return@supplyAsync plugin.database.getTable(RPKBidTable::class.java).insert(event.bid)
+                .thenApply { true }.join()
+        }
     }
 
     override fun createBid(auction: RPKAuction, character: RPKCharacter, amount: Int): CompletableFuture<RPKBid> {
@@ -49,19 +51,23 @@ class RPKBidServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKBidService 
     }
 
     override fun updateBid(bid: RPKBid): CompletableFuture<Boolean> {
-        val event = RPKBukkitBidUpdateEvent(bid)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(false)
-        return plugin.database.getTable(RPKBidTable::class.java).update(event.bid)
-            .thenApply { true }
+        return CompletableFuture.supplyAsync {
+            val event = RPKBukkitBidUpdateEvent(bid, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@supplyAsync false
+            return@supplyAsync plugin.database.getTable(RPKBidTable::class.java).update(event.bid)
+                .thenApply { true }.join()
+        }
     }
 
     override fun removeBid(bid: RPKBid): CompletableFuture<Boolean> {
-        val event = RPKBukkitBidDeleteEvent(bid)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(false)
-        return plugin.database.getTable(RPKBidTable::class.java).delete(event.bid)
-            .thenApply { true }
+        return CompletableFuture.supplyAsync {
+            val event = RPKBukkitBidDeleteEvent(bid, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@supplyAsync false
+            return@supplyAsync plugin.database.getTable(RPKBidTable::class.java).delete(event.bid)
+                .thenApply { true }.join()
+        }
     }
 
     override fun getBids(auction: RPKAuction): CompletableFuture<List<RPKBid>> {

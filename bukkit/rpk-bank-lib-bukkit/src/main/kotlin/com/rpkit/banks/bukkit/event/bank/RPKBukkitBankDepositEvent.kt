@@ -28,7 +28,7 @@ class RPKBukkitBankDepositEvent(
         override var currency: RPKCurrency,
         override var amount: Int,
         isAsync: Boolean
-) : RPKBukkitEvent(), RPKBankDepositEvent, Cancellable {
+) : RPKBukkitEvent(isAsync), RPKBankDepositEvent, Cancellable {
 
     companion object {
         @JvmStatic

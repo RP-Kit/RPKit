@@ -128,42 +128,38 @@ class BidCommand(private val plugin: RPKAuctionsBukkit) : CommandExecutor {
                                     character = character,
                                     amount = bidAmount
                                 )
-                                plugin.server.scheduler.runTask(plugin, Runnable {
-                                    auction.addBid(bid).thenAccept addBid@{ bidSuccessful ->
-                                        if (!bidSuccessful) {
-                                            sender.sendMessage(plugin.messages.bidCreateFailed)
-                                        } else {
-                                            plugin.server.scheduler.runTask(plugin, Runnable {
-                                                auctionService.updateAuction(auction).thenAccept updateAuction@{
-                                                    sender.sendMessage(plugin.messages.bidValid.withParameters(
-                                                        currencyAmount = bid.amount,
-                                                        currency = auction.currency,
-                                                        itemType = auction.item.type,
-                                                        itemAmount = auction.item.amount
-                                                    ))
-                                                    auction.bids
-                                                        .thenAccept newBids@{ newBids ->
-                                                            newBids
-                                                                .map(RPKBid::character)
-                                                                .mapNotNull(RPKCharacter::minecraftProfile)
-                                                                .distinct()
-                                                                .filter { it != minecraftProfile }
-                                                                .forEach { bidderMinecraftProfile ->
-                                                                    bidderMinecraftProfile.sendMessage(plugin.messages.bidCreated.withParameters(
-                                                                        auction = bid.auction,
-                                                                        character = bid.character,
-                                                                        currencyAmount = bid.amount,
-                                                                        currency = auction.currency,
-                                                                        itemAmount = auction.item.amount,
-                                                                        itemType = auction.item.type
-                                                                    ))
-                                                                }
+                                auction.addBid(bid).thenAccept addBid@{ bidSuccessful ->
+                                    if (!bidSuccessful) {
+                                        sender.sendMessage(plugin.messages.bidCreateFailed)
+                                    } else {
+                                        auctionService.updateAuction(auction).thenAccept updateAuction@{
+                                            sender.sendMessage(plugin.messages.bidValid.withParameters(
+                                                currencyAmount = bid.amount,
+                                                currency = auction.currency,
+                                                itemType = auction.item.type,
+                                                itemAmount = auction.item.amount
+                                            ))
+                                            auction.bids
+                                                .thenAccept newBids@{ newBids ->
+                                                    newBids
+                                                        .map(RPKBid::character)
+                                                        .mapNotNull(RPKCharacter::minecraftProfile)
+                                                        .distinct()
+                                                        .filter { it != minecraftProfile }
+                                                        .forEach { bidderMinecraftProfile ->
+                                                            bidderMinecraftProfile.sendMessage(plugin.messages.bidCreated.withParameters(
+                                                                auction = bid.auction,
+                                                                character = bid.character,
+                                                                currencyAmount = bid.amount,
+                                                                currency = auction.currency,
+                                                                itemAmount = auction.item.amount,
+                                                                itemType = auction.item.type
+                                                            ))
                                                         }
                                                 }
-                                            })
                                         }
                                     }
-                                })
+                                }
                             }
                         })
                 }
