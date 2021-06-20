@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture
 interface RPKFeatureFlagService : Service {
 
     fun getFeatureFlag(name: RPKFeatureFlagName): RPKFeatureFlag?
-    fun createFeatureFlag(name: RPKFeatureFlagName, isEnabledByDefault: Boolean): RPKFeatureFlag
+    fun createFeatureFlag(name: RPKFeatureFlagName, isEnabledByDefault: Boolean): RPKFeatureFlag?
     fun removeFeatureFlag(featureFlag: RPKFeatureFlag)
     fun setFeatureFlag(profile: RPKProfile, featureFlag: RPKFeatureFlag, enabled: Boolean): CompletableFuture<Void>
 

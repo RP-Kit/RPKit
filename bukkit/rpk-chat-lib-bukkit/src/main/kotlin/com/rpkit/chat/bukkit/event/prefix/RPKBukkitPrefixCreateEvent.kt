@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitPrefixCreateEvent(
-        override val prefix: RPKPrefix
-) : RPKBukkitEvent(), RPKPrefixCreateEvent, Cancellable {
+        override val prefix: RPKPrefix,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKPrefixCreateEvent, Cancellable {
 
     companion object {
         @JvmStatic

@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitPrefixDeleteEvent(
-        override val prefix: RPKPrefix
-) : RPKBukkitEvent(), RPKPrefixDeleteEvent, Cancellable {
+        override val prefix: RPKPrefix,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKPrefixDeleteEvent, Cancellable {
 
     companion object {
         @JvmStatic

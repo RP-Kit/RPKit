@@ -47,7 +47,7 @@ class RPKChatGroupImpl(
     override fun addMember(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void> {
         return members.thenAcceptAsync { members ->
             if (!members.any { memberMinecraftProfile -> memberMinecraftProfile.id == minecraftProfile.id }) {
-                val event = RPKBukkitChatGroupJoinEvent(minecraftProfile, this)
+                val event = RPKBukkitChatGroupJoinEvent(minecraftProfile, this, true)
                 plugin.server.pluginManager.callEvent(event)
                 if (event.isCancelled) return@thenAcceptAsync
                 plugin.database.getTable(RPKChatGroupMemberTable::class.java).insert(
@@ -61,105 +61,114 @@ class RPKChatGroupImpl(
     }
 
     override fun removeMember(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void> {
-        val event = RPKBukkitChatGroupLeaveEvent(
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitChatGroupLeaveEvent(
                 minecraftProfile,
-                this
-        )
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(null)
-        val chatGroupMemberTable = plugin.database.getTable(RPKChatGroupMemberTable::class.java)
-        return chatGroupMemberTable.get(event.minecraftProfile).thenAcceptAsync { members ->
-            val futures = members.filter { member -> member.chatGroup == event.chatGroup }
-                .map { member -> chatGroupMemberTable.delete(member) }
-            CompletableFuture.allOf(*futures.toTypedArray()).join()
+                this,
+                true
+            )
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val chatGroupMemberTable = plugin.database.getTable(RPKChatGroupMemberTable::class.java)
+            chatGroupMemberTable.get(event.minecraftProfile).thenAcceptAsync { members ->
+                val futures = members.filter { member -> member.chatGroup == event.chatGroup }
+                    .map { member -> chatGroupMemberTable.delete(member) }
+                CompletableFuture.allOf(*futures.toTypedArray()).join()
+            }.join()
         }
-
     }
 
     override fun invite(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void> {
-        return invited.thenAccept { invited ->
+        return invited.thenAcceptAsync { invited ->
             if (!invited.any { invitedMinecraftProfile -> invitedMinecraftProfile.id == minecraftProfile.id }) {
-                plugin.server.scheduler.runTask(plugin, Runnable {
-                    val event = RPKBukkitChatGroupInviteEvent(minecraftProfile, this)
-                    plugin.server.pluginManager.callEvent(event)
-                    if (event.isCancelled) return@Runnable
-                    plugin.database.getTable(RPKChatGroupInviteTable::class.java).insert(
-                        RPKChatGroupInvite(
-                            chatGroup = event.chatGroup,
-                            minecraftProfile = event.minecraftProfile
-                        )
+                val event = RPKBukkitChatGroupInviteEvent(minecraftProfile, this, true)
+                plugin.server.pluginManager.callEvent(event)
+                if (event.isCancelled) return@thenAcceptAsync
+                plugin.database.getTable(RPKChatGroupInviteTable::class.java).insert(
+                    RPKChatGroupInvite(
+                        chatGroup = event.chatGroup,
+                        minecraftProfile = event.minecraftProfile
                     )
-                })
+                ).join()
             }
         }
 
     }
 
     override fun uninvite(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void> {
-        val event = RPKBukkitChatGroupUninviteEvent(minecraftProfile, this)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(null)
-        val chatGroupInviteTable = plugin.database.getTable(RPKChatGroupInviteTable::class.java)
-        return chatGroupInviteTable.get(event.minecraftProfile).thenAcceptAsync { invites ->
-            val futures = invites.filter { invite -> invite.chatGroup == event.chatGroup }
-                .map { invite -> chatGroupInviteTable.delete(invite) }
-            CompletableFuture.allOf(*futures.toTypedArray()).join()
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitChatGroupUninviteEvent(minecraftProfile, this, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val chatGroupInviteTable = plugin.database.getTable(RPKChatGroupInviteTable::class.java)
+            chatGroupInviteTable.get(event.minecraftProfile).thenAcceptAsync { invites ->
+                val futures = invites.filter { invite -> invite.chatGroup == event.chatGroup }
+                    .map { invite -> chatGroupInviteTable.delete(invite) }
+                CompletableFuture.allOf(*futures.toTypedArray()).join()
+            }.join()
         }
-
     }
 
     override fun sendMessage(sender: RPKMinecraftProfile, message: String): CompletableFuture<Void> {
-        val event = RPKBukkitChatGroupMessageEvent(sender, this, message)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return CompletableFuture.completedFuture(null)
-        val prefixService = Services[RPKPrefixService::class.java]
-        val characterService = Services[RPKCharacterService::class.java]
-        val chatGroupService = Services[RPKChatGroupService::class.java]
-        val senderCharacter = characterService?.getPreloadedActiveCharacter(sender)
-        return members.thenAcceptAsync { members ->
-            members.forEach { receiver ->
-                val receiverCharacter = characterService?.getPreloadedActiveCharacter(receiver)
-                val formatString = plugin.config.getString("chat-group.format") ?: return@forEach
-                var formattedMessage = ChatColor.translateAlternateColorCodes('&', formatString)
-                if (formattedMessage.contains("\${message}")) {
-                    formattedMessage = formattedMessage.replace("\${message}", message)
-                }
-                if (formattedMessage.contains("\${sender-prefix}")) {
-                    val profile = sender.profile
-                    formattedMessage = if (profile is RPKProfile) {
-                        formattedMessage.replace("\${sender-prefix}", prefixService?.getPrefix(profile)?.join() ?: "")
-                    } else {
-                        formattedMessage.replace("\${sender-prefix}", "")
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitChatGroupMessageEvent(sender, this, message, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val prefixService = Services[RPKPrefixService::class.java]
+            val characterService = Services[RPKCharacterService::class.java]
+            val chatGroupService = Services[RPKChatGroupService::class.java]
+            val senderCharacter = characterService?.getPreloadedActiveCharacter(sender)
+            members.thenAcceptAsync { members ->
+                members.forEach { receiver ->
+                    val receiverCharacter = characterService?.getPreloadedActiveCharacter(receiver)
+                    val formatString = plugin.config.getString("chat-group.format") ?: return@forEach
+                    var formattedMessage = ChatColor.translateAlternateColorCodes('&', formatString)
+                    if (formattedMessage.contains("\${message}")) {
+                        formattedMessage = formattedMessage.replace("\${message}", message)
                     }
-                }
-                if (formattedMessage.contains("\${sender-player}")) {
-                    formattedMessage = formattedMessage.replace("\${sender-player}", sender.name)
-                }
-                if (formattedMessage.contains("\${sender-character}")) {
-                    if (senderCharacter != null) {
-                        formattedMessage = formattedMessage.replace("\${sender-character}", senderCharacter.name)
+                    if (formattedMessage.contains("\${sender-prefix}")) {
+                        val profile = sender.profile
+                        formattedMessage = if (profile is RPKProfile) {
+                            formattedMessage.replace(
+                                "\${sender-prefix}",
+                                prefixService?.getPrefix(profile)?.join() ?: ""
+                            )
+                        } else {
+                            formattedMessage.replace("\${sender-prefix}", "")
+                        }
                     }
-                }
-                if (formattedMessage.contains("\${receiver-player}")) {
-                    formattedMessage = formattedMessage.replace("\${receiver-player}", receiver.name)
-                }
-                if (formattedMessage.contains("\${receiver-character}")) {
-                    if (receiverCharacter != null) {
-                        formattedMessage = formattedMessage.replace("\${receiver-character}", receiverCharacter.name)
+                    if (formattedMessage.contains("\${sender-player}")) {
+                        formattedMessage = formattedMessage.replace("\${sender-player}", sender.name)
                     }
-                }
-                if (formattedMessage.contains("\${group}")) {
-                    formattedMessage = if (name.value.startsWith("_pm_")) {
-                        formattedMessage.replace("\${group}", sender.name + " -> " + members.first { member -> member.id != sender.id }.name)
-                    } else {
-                        formattedMessage.replace("\${group}", name.value)
+                    if (formattedMessage.contains("\${sender-character}")) {
+                        if (senderCharacter != null) {
+                            formattedMessage = formattedMessage.replace("\${sender-character}", senderCharacter.name)
+                        }
                     }
+                    if (formattedMessage.contains("\${receiver-player}")) {
+                        formattedMessage = formattedMessage.replace("\${receiver-player}", receiver.name)
+                    }
+                    if (formattedMessage.contains("\${receiver-character}")) {
+                        if (receiverCharacter != null) {
+                            formattedMessage =
+                                formattedMessage.replace("\${receiver-character}", receiverCharacter.name)
+                        }
+                    }
+                    if (formattedMessage.contains("\${group}")) {
+                        formattedMessage = if (name.value.startsWith("_pm_")) {
+                            formattedMessage.replace(
+                                "\${group}",
+                                sender.name + " -> " + members.first { member -> member.id != sender.id }.name
+                            )
+                        } else {
+                            formattedMessage.replace("\${group}", name.value)
+                        }
+                    }
+                    receiver.sendMessage(formattedMessage)
+                    chatGroupService?.setLastUsedChatGroup(receiver, this)?.join()
                 }
-                receiver.sendMessage(formattedMessage)
-                chatGroupService?.setLastUsedChatGroup(receiver, this)?.join()
-            }
+            }.join()
         }
-
     }
 
 }

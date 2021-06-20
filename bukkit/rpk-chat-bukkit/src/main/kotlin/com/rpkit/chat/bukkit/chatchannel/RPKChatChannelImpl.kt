@@ -94,9 +94,9 @@ class RPKChatChannelImpl(
         }
     }
 
-    override fun addListener(listener: RPKMinecraftProfile, isAsync: Boolean): CompletableFuture<Void> {
+    override fun addListener(listener: RPKMinecraftProfile): CompletableFuture<Void> {
         val muteService = Services[RPKChatChannelMuteService::class.java] ?: return CompletableFuture.completedFuture(null)
-        return muteService.removeChatChannelMute(listener, this, isAsync)
+        return muteService.removeChatChannelMute(listener, this)
     }
 
     override fun removeListener(listener: RPKMinecraftProfile): CompletableFuture<Void> {

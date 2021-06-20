@@ -22,8 +22,9 @@ import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 
 class RPKBukkitBidDeleteEvent(
-        override val bid: RPKBid
-) : RPKBukkitEvent(), RPKBidDeleteEvent, Cancellable {
+        override val bid: RPKBid,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKBidDeleteEvent, Cancellable {
 
     companion object {
         @JvmStatic

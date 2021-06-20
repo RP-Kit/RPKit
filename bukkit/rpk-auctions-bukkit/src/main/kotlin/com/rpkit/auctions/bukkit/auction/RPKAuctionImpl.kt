@@ -57,14 +57,15 @@ class RPKAuctionImpl(
             val highestCurrentBid = bids.join().maxByOrNull(RPKBid::amount)
             if ((highestCurrentBid == null && bid.amount >= startPrice + minimumBidIncrement) || (highestCurrentBid != null && bid.amount >= highestCurrentBid.amount + minimumBidIncrement)) {
                 val bidService = Services[RPKBidService::class.java] ?: return@supplyAsync false
-                plugin.server.scheduler.runTask(plugin, Runnable {
-                    bidService.addBid(bid)
-                })
-                if (buyOutPrice != null) {
-                    if (bid.amount >= buyOutPrice) {
-                        plugin.server.scheduler.runTask(plugin, Runnable {
-                            closeBidding()
-                        })
+                bidService.addBid(bid).thenAccept { successful ->
+                    if (successful) {
+                        if (buyOutPrice != null) {
+                            if (bid.amount >= buyOutPrice) {
+                                plugin.server.scheduler.runTask(plugin, Runnable {
+                                    closeBidding()
+                                })
+                            }
+                        }
                     }
                 }
                 return@supplyAsync true
@@ -76,7 +77,7 @@ class RPKAuctionImpl(
 
     override fun openBidding() {
         if (!isBiddingOpen) {
-            val event = RPKBukkitAuctionBiddingOpenEvent(this)
+            val event = RPKBukkitAuctionBiddingOpenEvent(this, false)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
             isBiddingOpen = true
@@ -87,7 +88,7 @@ class RPKAuctionImpl(
 
     override fun closeBidding() {
         if (isBiddingOpen) {
-            val event = RPKBukkitAuctionBiddingCloseEvent(this)
+            val event = RPKBukkitAuctionBiddingCloseEvent(this, false)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return
             CompletableFuture.runAsync {
@@ -106,7 +107,7 @@ class RPKAuctionImpl(
                                     if (bukkitPlayer.isOnline) {
                                         val characterService = Services[RPKCharacterService::class.java]
                                         if (characterService != null) {
-                                            if (characterService.getActiveCharacter(minecraftProfile) == character) {
+                                            if (characterService.getPreloadedActiveCharacter(minecraftProfile) == character) {
                                                 bukkitPlayer.player?.sendMessage(
                                                     plugin.messages.auctionItemReceived.withParameters(
                                                         amount = item.amount,
@@ -137,14 +138,16 @@ class RPKAuctionImpl(
         val minecraftProfile = character.minecraftProfile
         if (minecraftProfile != null) {
             val characterService = Services[RPKCharacterService::class.java]
-            if (characterService != null) {
-                if (characterService.getActiveCharacter(minecraftProfile) == character) {
-                    minecraftProfile.sendMessage(plugin.messages.auctionItemReceived.withParameters(
-                        amount = item.amount,
-                        itemType = item.type,
-                        auctionId = id?.value ?: -1,
-                        character = character
-                    ))
+            characterService?.getActiveCharacter(minecraftProfile)?.thenAccept { activeCharacter ->
+                if (activeCharacter == character) {
+                    minecraftProfile.sendMessage(
+                        plugin.messages.auctionItemReceived.withParameters(
+                            amount = item.amount,
+                            itemType = item.type,
+                            auctionId = id?.value ?: -1,
+                            character = character
+                        )
+                    )
                 }
             }
         }
@@ -158,15 +161,19 @@ class RPKAuctionImpl(
             if (bukkitOnlinePlayer != null) {
                 val characterService = Services[RPKCharacterService::class.java]
                 if (characterService != null) {
-                    if (characterService.getActiveCharacter(minecraftProfile) == character) {
-                        bukkitOnlinePlayer.inventory.addItem(item).values.forEach { item ->
-                            bukkitOnlinePlayer.world.dropItem(bukkitOnlinePlayer.location, item)
+                    characterService.getActiveCharacter(minecraftProfile).thenAccept { activeCharacter ->
+                        if (activeCharacter == character) {
+                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                bukkitOnlinePlayer.inventory.addItem(item).values.forEach { item ->
+                                    bukkitOnlinePlayer.world.dropItem(bukkitOnlinePlayer.location, item)
+                                }
+                            })
+                        } else {
+                            val inventoryContentsMutable = character.inventoryContents.toMutableList()
+                            inventoryContentsMutable.add(item)
+                            character.inventoryContents = inventoryContentsMutable.toTypedArray()
+                            characterService.updateCharacter(character)
                         }
-                    } else {
-                        val inventoryContentsMutable = character.inventoryContents.toMutableList()
-                        inventoryContentsMutable.add(item)
-                        character.inventoryContents = inventoryContentsMutable.toTypedArray()
-                        characterService.updateCharacter(character)
                     }
                 }
             } else {

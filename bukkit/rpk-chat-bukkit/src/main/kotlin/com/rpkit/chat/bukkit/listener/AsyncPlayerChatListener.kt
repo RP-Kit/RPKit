@@ -101,7 +101,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
                     if (!listeners.any { listenerMinecraftProfile ->
                             listenerMinecraftProfile.id == minecraftProfile.id
                         }) {
-                        chatChannel.addListener(minecraftProfile, true).join()
+                        chatChannel.addListener(minecraftProfile).join()
                     }
                     if (message.isNotBlank()) {
                         chatChannel.sendMessage(
