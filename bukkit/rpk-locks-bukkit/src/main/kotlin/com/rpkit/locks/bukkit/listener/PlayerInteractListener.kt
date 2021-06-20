@@ -74,6 +74,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
         if (lockService.isClaiming(minecraftProfile)) {
             if (block != null) {
                 event.player.sendMessage(plugin.messages["lock-invalid-already-locked"])
+                event.isCancelled = true
                 return
             }
             if (event.player.inventory.itemInMainHand.amount == 1) {
