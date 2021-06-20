@@ -26,11 +26,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.ConversationContext
-import org.bukkit.conversations.ConversationFactory
-import org.bukkit.conversations.MessagePrompt
-import org.bukkit.conversations.Prompt
-import org.bukkit.conversations.ValidatingPrompt
+import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
@@ -102,12 +98,12 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
             bukkitPlayer.sendMessage(plugin.messages["no-economy-service"])
             return
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile"])
             return
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             bukkitPlayer.sendMessage(plugin.messages["no-character"])
             return
@@ -116,9 +112,14 @@ class MoneyWalletCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor
         val coin = currency.item
         val coinStack = ItemStack(coin)
         coinStack.amount = 64
-        val remainder = (economyService.getBalance(character, currency) % 64)
+        val walletBalance = economyService.getPreloadedBalance(character, currency)
+        if (walletBalance == null) {
+            bukkitPlayer.sendMessage(plugin.messages.noPreloadedBalanceSelf)
+            return
+        }
+        val remainder = (walletBalance % 64)
         var i = 0
-        while (i < economyService.getBalance(character, currency)) {
+        while (i < walletBalance) {
             val leftover = wallet.addItem(coinStack)
             if (leftover.isNotEmpty()) {
                 bukkitPlayer.world.dropItem(bukkitPlayer.location, leftover.values.iterator().next())

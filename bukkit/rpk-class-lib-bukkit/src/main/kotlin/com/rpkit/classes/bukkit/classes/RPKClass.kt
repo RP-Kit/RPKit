@@ -18,13 +18,14 @@ package com.rpkit.classes.bukkit.classes
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.skills.bukkit.skills.RPKSkillType
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKClass {
 
     val name: RPKClassName
     val maxLevel: Int
-    fun hasPrerequisites(character: RPKCharacter): Boolean
+    fun hasPrerequisites(character: RPKCharacter): CompletableFuture<Boolean>
     fun getSkillPoints(skillType: RPKSkillType, level: Int): Int
     fun getStatVariableValue(statVariable: RPKStatVariable, level: Int): Int
 

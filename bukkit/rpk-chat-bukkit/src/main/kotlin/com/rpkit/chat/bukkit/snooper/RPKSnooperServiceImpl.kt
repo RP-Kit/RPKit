@@ -21,38 +21,42 @@ import com.rpkit.chat.bukkit.database.table.RPKSnooperTable
 import com.rpkit.chat.bukkit.event.snooper.RPKBukkitSnoopingBeginEvent
 import com.rpkit.chat.bukkit.event.snooper.RPKBukkitSnoopingEndEvent
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Snooper service implementation.
  */
 class RPKSnooperServiceImpl(override val plugin: RPKChatBukkit) : RPKSnooperService {
 
-    override val snoopers: List<RPKMinecraftProfile>
-        get() = plugin.database.getTable(RPKSnooperTable::class.java).getAll().map(RPKSnooper::minecraftProfile)
+    override val snoopers: CompletableFuture<List<RPKMinecraftProfile>>
+        get() = plugin.database.getTable(RPKSnooperTable::class.java).getAll().thenApply { it.map(RPKSnooper::minecraftProfile) }
 
-    override fun addSnooper(minecraftProfile: RPKMinecraftProfile) {
-        if (!this.snoopers.contains(minecraftProfile)) {
-            val event = RPKBukkitSnoopingBeginEvent(minecraftProfile)
-            plugin.server.pluginManager.callEvent(event)
-            if (event.isCancelled) return
-            plugin.database.getTable(RPKSnooperTable::class.java).insert(RPKSnooper(minecraftProfile = minecraftProfile))
+    override fun addSnooper(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void> {
+        return snoopers.thenAcceptAsync { snoopers ->
+            if (!snoopers.contains(minecraftProfile)) {
+                val event = RPKBukkitSnoopingBeginEvent(minecraftProfile, true)
+                plugin.server.pluginManager.callEvent(event)
+                if (event.isCancelled) return@thenAcceptAsync
+                plugin.database.getTable(RPKSnooperTable::class.java).insert(RPKSnooper(minecraftProfile = minecraftProfile)).join()
+            }
         }
     }
 
-    override fun removeSnooper(minecraftProfile: RPKMinecraftProfile) {
+    override fun removeSnooper(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void> {
         val snooperTable = plugin.database.getTable(RPKSnooperTable::class.java)
-        val snooper = snooperTable.get(minecraftProfile)
-        if (snooper != null) {
-            val event = RPKBukkitSnoopingEndEvent(minecraftProfile)
-            plugin.server.pluginManager.callEvent(event)
-            if (event.isCancelled) return
-            snooperTable.delete(snooper)
+        return snooperTable.get(minecraftProfile).thenAcceptAsync { snooper ->
+            if (snooper != null) {
+                val event = RPKBukkitSnoopingEndEvent(minecraftProfile, true)
+                plugin.server.pluginManager.callEvent(event)
+                if (event.isCancelled) return@thenAcceptAsync
+                snooperTable.delete(snooper).join()
+            }
         }
     }
 
-    override fun isSnooping(minecraftProfile: RPKMinecraftProfile): Boolean {
+    override fun isSnooping(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Boolean> {
         val snooperTable = plugin.database.getTable(RPKSnooperTable::class.java)
-        return snooperTable.get(minecraftProfile) != null
+        return snooperTable.get(minecraftProfile).thenApply { it != null }
     }
 
 }

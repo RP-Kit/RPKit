@@ -44,7 +44,7 @@ class DiscordProfileHandler {
         val discordProfileService = Services[RPKDiscordProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Discord profile service not found"))
-        val discordProfile = discordProfileService.getDiscordProfile(DiscordUserId(discordId))
+        val discordProfile = discordProfileService.getDiscordProfile(DiscordUserId(discordId)).join()
         return Response(OK)
             .with(DiscordProfileResponse.lens of discordProfile.toDiscordProfileResponse())
     }
@@ -57,10 +57,10 @@ class DiscordProfileHandler {
         val discordProfileService = Services[RPKDiscordProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Discord profile service not found"))
-        val profile = profileService.getProfile(RPKProfileId(profileId))
+        val profile = profileService.getProfile(RPKProfileId(profileId)).join()
             ?: return Response(Status.NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
-        val discordProfiles = discordProfileService.getDiscordProfiles(profile)
+        val discordProfiles = discordProfileService.getDiscordProfiles(profile).join()
         return Response(OK)
             .with(DiscordProfileResponse.listLens of discordProfiles.map(RPKDiscordProfile::toDiscordProfileResponse))
     }

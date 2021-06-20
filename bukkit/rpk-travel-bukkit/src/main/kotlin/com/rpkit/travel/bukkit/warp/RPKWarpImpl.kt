@@ -15,11 +15,11 @@
 
 package com.rpkit.travel.bukkit.warp
 
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import com.rpkit.warp.bukkit.warp.RPKWarpName
-import org.bukkit.Location
 
 class RPKWarpImpl(
         override val name: RPKWarpName,
-        override val location: Location
+        override val location: RPKLocation
 ) : RPKWarp

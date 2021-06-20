@@ -46,18 +46,21 @@ class BackCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-location-history-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val previousLocation = locationHistoryService.getPreviousLocation(minecraftProfile)
-        if (previousLocation == null) {
-            sender.sendMessage(plugin.messages["back-invalid-no-locations"])
-            return true
+        locationHistoryService.getPreviousLocation(minecraftProfile).thenAccept { previousLocation ->
+            if (previousLocation == null) {
+                sender.sendMessage(plugin.messages["back-invalid-no-locations"])
+                return@thenAccept
+            }
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                sender.teleport(previousLocation)
+                sender.sendMessage(plugin.messages["back-valid"])
+            })
         }
-        sender.teleport(previousLocation)
-        sender.sendMessage(plugin.messages["back-valid"])
         return true
     }
 }

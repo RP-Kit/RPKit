@@ -44,23 +44,22 @@ class CraftItemListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val craftingSkillService = Services[RPKCraftingSkillService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             event.isCancelled = true
             bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile"])
             return
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             event.isCancelled = true
             bukkitPlayer.sendMessage(plugin.messages["no-character"])
             return
         }
         val itemType = event.recipe.result.type
-        val craftingExperience = craftingSkillService.getCraftingExperience(character, CRAFT, itemType)
+        val craftingExperience = craftingSkillService.getPreloadedCraftingExperience(character, CRAFT, itemType)
         var amountCrafted = getAmountCrafted(event)
-        val craftingSkill = craftingSkillService.getCraftingExperience(character, CRAFT, itemType)
-        val amount = craftingSkillService.getAmountFor(CRAFT, itemType, craftingSkill)
+        val amount = craftingSkillService.getAmountFor(CRAFT, itemType, craftingExperience)
         if (amount > 1) {
             amountCrafted *= amount.roundToInt()
         } else if (amount < 1) {

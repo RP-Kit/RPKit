@@ -17,31 +17,12 @@ package com.rpkit.characters.bukkit
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.characters.bukkit.character.RPKCharacterServiceImpl
-import com.rpkit.characters.bukkit.character.field.AgeField
-import com.rpkit.characters.bukkit.character.field.DeadField
-import com.rpkit.characters.bukkit.character.field.DescriptionField
-import com.rpkit.characters.bukkit.character.field.FoodField
-import com.rpkit.characters.bukkit.character.field.GenderField
-import com.rpkit.characters.bukkit.character.field.HealthField
-import com.rpkit.characters.bukkit.character.field.ManaField
-import com.rpkit.characters.bukkit.character.field.MaxFoodField
-import com.rpkit.characters.bukkit.character.field.MaxHealthField
-import com.rpkit.characters.bukkit.character.field.MaxManaField
-import com.rpkit.characters.bukkit.character.field.MaxThirstField
-import com.rpkit.characters.bukkit.character.field.NameField
-import com.rpkit.characters.bukkit.character.field.ProfileField
-import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
-import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldServiceImpl
-import com.rpkit.characters.bukkit.character.field.RaceField
-import com.rpkit.characters.bukkit.character.field.ThirstField
+import com.rpkit.characters.bukkit.character.field.*
 import com.rpkit.characters.bukkit.command.character.CharacterCommand
 import com.rpkit.characters.bukkit.command.race.RaceCommand
 import com.rpkit.characters.bukkit.database.table.RPKCharacterTable
 import com.rpkit.characters.bukkit.database.table.RPKNewCharacterCooldownTable
-import com.rpkit.characters.bukkit.listener.PlayerDeathListener
-import com.rpkit.characters.bukkit.listener.PlayerInteractEntityListener
-import com.rpkit.characters.bukkit.listener.PlayerJoinListener
-import com.rpkit.characters.bukkit.listener.PlayerMoveListener
+import com.rpkit.characters.bukkit.listener.*
 import com.rpkit.characters.bukkit.messages.CharactersMessages
 import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownService
 import com.rpkit.characters.bukkit.race.RPKRaceService
@@ -171,7 +152,12 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
     }
 
     fun registerListeners() {
-        registerListeners(PlayerJoinListener(this), PlayerInteractEntityListener(this))
+        registerListeners(
+            PlayerJoinListener(this),
+            PlayerInteractEntityListener(this),
+            AsyncPlayerPreLoginListener(this),
+            PlayerQuitListener()
+        )
         if (config.getBoolean("characters.strict-movement-prevention-when-dead")) {
             registerListeners(PlayerMoveListener(this))
         }

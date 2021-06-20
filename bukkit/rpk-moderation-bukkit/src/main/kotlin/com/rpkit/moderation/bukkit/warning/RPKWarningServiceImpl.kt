@@ -24,30 +24,37 @@ import com.rpkit.moderation.bukkit.event.warning.RPKBukkitWarningUpdateEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 
 class RPKWarningServiceImpl(override val plugin: RPKModerationBukkit) : RPKWarningService {
 
-    override fun getWarning(id: RPKWarningId): RPKWarning? {
+    override fun getWarning(id: RPKWarningId): CompletableFuture<RPKWarning?> {
         return plugin.database.getTable(RPKWarningTable::class.java)[id]
     }
 
-    override fun getWarnings(profile: RPKProfile): List<RPKWarning> {
+    override fun getWarnings(profile: RPKProfile): CompletableFuture<List<RPKWarning>> {
         return plugin.database.getTable(RPKWarningTable::class.java).get(profile)
     }
 
-    override fun addWarning(warning: RPKWarning) {
-        val event = RPKBukkitWarningCreateEvent(warning)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val warningTable = plugin.database.getTable(RPKWarningTable::class.java)
-        warningTable.insert(event.warning)
-        // After adding warnings we want to execute any commands for that amount of warnings
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        for (minecraftProfile in minecraftProfileService.getMinecraftProfiles(event.warning.profile)) {
-            val command = plugin.config.getString("warnings.${warningTable.get(event.warning.profile).size}")?.replace("\$player", minecraftProfile.name)
-            if (command != null) {
-                plugin.server.dispatchCommand(plugin.server.consoleSender, command)
+    override fun addWarning(warning: RPKWarning): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitWarningCreateEvent(warning, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val warningTable = plugin.database.getTable(RPKWarningTable::class.java)
+            warningTable.insert(event.warning).join()
+            // After adding warnings we want to execute any commands for that amount of warnings
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@runAsync
+            for (minecraftProfile in minecraftProfileService.getMinecraftProfiles(event.warning.profile).join()) {
+                val warningCount = warningTable.get(event.warning.profile).join().size
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    val command = plugin.config.getString("warnings.${warningCount}")
+                        ?.replace("\${player}", minecraftProfile.name)
+                    if (command != null) {
+                        plugin.server.dispatchCommand(plugin.server.consoleSender, command)
+                    }
+                })
             }
         }
     }
@@ -57,7 +64,7 @@ class RPKWarningServiceImpl(override val plugin: RPKModerationBukkit) : RPKWarni
         profile: RPKProfile,
         issuer: RPKProfile,
         time: LocalDateTime
-    ): RPKWarning {
+    ): CompletableFuture<RPKWarning> {
         val warning = RPKWarningImpl(
             null,
             reason,
@@ -65,22 +72,25 @@ class RPKWarningServiceImpl(override val plugin: RPKModerationBukkit) : RPKWarni
             issuer,
             time
         )
-        addWarning(warning)
-        return warning
+        return addWarning(warning).thenApply { warning }
     }
 
-    override fun removeWarning(warning: RPKWarning) {
-        val event = RPKBukkitWarningDeleteEvent(warning)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKWarningTable::class.java).delete(event.warning)
+    override fun removeWarning(warning: RPKWarning): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitWarningDeleteEvent(warning, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKWarningTable::class.java).delete(event.warning).join()
+        }
     }
 
-    override fun updateWarning(warning: RPKWarning) {
-        val event = RPKBukkitWarningUpdateEvent(warning)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKWarningTable::class.java).update(event.warning)
+    override fun updateWarning(warning: RPKWarning): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitWarningUpdateEvent(warning, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKWarningTable::class.java).update(event.warning).join()
+        }
     }
 
 }

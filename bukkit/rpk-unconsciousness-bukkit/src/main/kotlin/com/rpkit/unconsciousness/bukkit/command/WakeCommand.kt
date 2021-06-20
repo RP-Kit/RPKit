@@ -53,30 +53,35 @@ class WakeCommand(private val plugin: RPKUnconsciousnessBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-unconsciousness-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(target)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-other", mapOf(
                     "player" to target.name
             )])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character-other", mapOf(
                     "player" to minecraftProfile.name
             )])
             return true
         }
-        if (!unconsciousnessService.isUnconscious(character)) {
-            sender.sendMessage(plugin.messages["wake-already-awake", mapOf(
+        unconsciousnessService.isUnconscious(character).thenAccept { isUnconscious ->
+            if (!isUnconscious) {
+                sender.sendMessage(plugin.messages["wake-already-awake", mapOf(
                     "character" to character.name
-            )])
-            return true
+                )])
+                return@thenAccept
+            }
+            unconsciousnessService.setUnconscious(character, false).thenRun {
+                sender.sendMessage(
+                    plugin.messages["wake-success", mapOf(
+                        "character" to character.name
+                    )]
+                )
+            }
         }
-        unconsciousnessService.setUnconscious(character, false)
-        sender.sendMessage(plugin.messages["wake-success", mapOf(
-                "character" to character.name
-        )])
         return true
     }
 }

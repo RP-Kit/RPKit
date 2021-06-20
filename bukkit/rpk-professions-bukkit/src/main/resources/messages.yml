@@ -11,6 +11,7 @@ no-minecraft-profile-self: '&cA Minecraft profile has not been created for you, 
 no-minecraft-profile-other: '&c${player} does not have a Minecraft profile.'
 no-character-self: '&cYou do not currently have an active character. Please create one with /character new, or switch to an old one using /character switch.'
 no-character-other: '&c${player} does not currently have an active character.'
+no-preloaded-professions: '&cYour professions have not been loaded. Please try relogging, and contact the server owner if this error persists.'
 profession-set-invalid-profession: '&cThat is not a valid profession. Please look at the list of available professions with /profession list.'
 profession-set-invalid-already-using-profession: '&cYou are already practicing that profession.'
 profession-set-invalid-too-many-professions: '&cYou have too many professions to choose another.'

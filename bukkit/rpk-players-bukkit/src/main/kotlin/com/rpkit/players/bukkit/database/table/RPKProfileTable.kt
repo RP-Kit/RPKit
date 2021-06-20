@@ -20,12 +20,9 @@ import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.create
 import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_PROFILE
-import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
-import com.rpkit.players.bukkit.profile.RPKProfileId
-import com.rpkit.players.bukkit.profile.RPKProfileImpl
-import com.rpkit.players.bukkit.profile.RPKProfileName
+import com.rpkit.players.bukkit.profile.*
 import org.jooq.impl.DSL.max
+import java.util.concurrent.CompletableFuture
 
 
 class RPKProfileTable(private val database: Database, private val plugin: RPKPlayersBukkit) : Table {
@@ -41,30 +38,33 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
         null
     }
 
-    fun insert(entity: RPKProfile) {
-        database.create
+    fun insert(entity: RPKProfile): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_PROFILE,
-                        RPKIT_PROFILE.NAME,
-                        RPKIT_PROFILE.DISCRIMINATOR,
-                        RPKIT_PROFILE.PASSWORD_HASH,
-                        RPKIT_PROFILE.PASSWORD_SALT
+                    RPKIT_PROFILE,
+                    RPKIT_PROFILE.NAME,
+                    RPKIT_PROFILE.DISCRIMINATOR,
+                    RPKIT_PROFILE.PASSWORD_HASH,
+                    RPKIT_PROFILE.PASSWORD_SALT
                 )
                 .values(
-                        entity.name.value,
-                        entity.discriminator.value,
-                        entity.passwordHash,
-                        entity.passwordSalt
+                    entity.name.value,
+                    entity.discriminator.value,
+                    entity.passwordHash,
+                    entity.passwordSalt
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKProfileId(id)
-        cache?.set(id, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKProfileId(id)
+            cache?.set(id, entity)
+        }
     }
 
-    fun update(entity: RPKProfile) {
-        val id = entity.id ?: return
-        database.create
+    fun update(entity: RPKProfile): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_PROFILE)
                 .set(RPKIT_PROFILE.NAME, entity.name.value)
                 .set(RPKIT_PROFILE.DISCRIMINATOR, entity.discriminator.value)
@@ -72,61 +72,70 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                 .set(RPKIT_PROFILE.PASSWORD_SALT, entity.passwordSalt)
                 .where(RPKIT_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKProfileId): RPKProfile? {
+    operator fun get(id: RPKProfileId): CompletableFuture<RPKProfile?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
+            return CompletableFuture.completedFuture(cache[id.value])
         } else {
-            val result = database.create
+            return CompletableFuture.supplyAsync {
+                val result = database.create
                     .select(
-                            RPKIT_PROFILE.NAME,
-                            RPKIT_PROFILE.DISCRIMINATOR,
-                            RPKIT_PROFILE.PASSWORD_HASH,
-                            RPKIT_PROFILE.PASSWORD_SALT
+                        RPKIT_PROFILE.NAME,
+                        RPKIT_PROFILE.DISCRIMINATOR,
+                        RPKIT_PROFILE.PASSWORD_HASH,
+                        RPKIT_PROFILE.PASSWORD_SALT
                     )
                     .from(RPKIT_PROFILE)
                     .where(RPKIT_PROFILE.ID.eq(id.value))
-                    .fetchOne() ?: return null
-            val profile = RPKProfileImpl(
+                    .fetchOne() ?: return@supplyAsync null
+                val profile = RPKProfileImpl(
                     id,
                     RPKProfileName(result.get(RPKIT_PROFILE.NAME)),
                     RPKProfileDiscriminator(result.get(RPKIT_PROFILE.DISCRIMINATOR)),
                     result.get(RPKIT_PROFILE.PASSWORD_HASH),
                     result.get(RPKIT_PROFILE.PASSWORD_SALT)
-            )
-            cache?.set(id.value, profile)
-            return profile
+                )
+                cache?.set(id.value, profile)
+                return@supplyAsync profile
+            }
         }
     }
 
-    fun get(name: RPKProfileName, discriminator: RPKProfileDiscriminator): RPKProfile? {
-        val result = database.create
+    fun get(name: RPKProfileName, discriminator: RPKProfileDiscriminator): CompletableFuture<RPKProfile?> {
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_PROFILE.ID)
                 .from(RPKIT_PROFILE)
                 .where(RPKIT_PROFILE.NAME.eq(name.value))
                 .and(RPKIT_PROFILE.DISCRIMINATOR.eq(discriminator.value))
-                .fetchOne() ?: return null
-        return get(RPKProfileId(result.get(RPKIT_PROFILE.ID)))
+                .fetchOne() ?: return@supplyAsync null
+            return@supplyAsync get(RPKProfileId(result.get(RPKIT_PROFILE.ID))).join()
+        }
     }
 
-    fun delete(entity: RPKProfile) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKProfile): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_PROFILE)
                 .where(RPKIT_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 
-    fun generateDiscriminatorFor(name: RPKProfileName): RPKProfileDiscriminator {
-        val result = database.create
+    fun generateDiscriminatorFor(name: RPKProfileName): CompletableFuture<RPKProfileDiscriminator> {
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(max(RPKIT_PROFILE.DISCRIMINATOR))
                 .from(RPKIT_PROFILE)
                 .where(RPKIT_PROFILE.NAME.eq(name.value))
                 .fetchOne()
-        return RPKProfileDiscriminator(result?.get(0, Int::class.javaObjectType)?.plus(1) ?: 1)
+            return@supplyAsync RPKProfileDiscriminator(result?.get(0, Int::class.javaObjectType)?.plus(1) ?: 1)
+        }
     }
 
 }

@@ -18,60 +18,98 @@ package com.rpkit.craftingskill.bukkit.craftingskill
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.RPKCraftingSkillBukkit
-import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.CRAFT
-import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.MINE
-import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.SMELT
+import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.*
 import com.rpkit.craftingskill.bukkit.database.table.RPKCraftingExperienceTable
 import com.rpkit.craftingskill.bukkit.event.craftingskill.RPKBukkitCraftingSkillExperienceChangeEvent
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQuality
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityName
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import org.bukkit.Material
-import java.lang.Math.min
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 
 class RPKCraftingSkillServiceImpl(override val plugin: RPKCraftingSkillBukkit) : RPKCraftingSkillService {
 
-    override fun getCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material): Int {
-        return plugin.database.getTable(RPKCraftingExperienceTable::class.java)
-                .get(character, action, material)?.experience ?: 0
+    private data class CraftingActionKey(
+        val characterId: Int,
+        val action: RPKCraftingAction,
+        val material: Material
+    )
+
+    private val craftingExperience = ConcurrentHashMap<CraftingActionKey, Int>()
+
+    override fun getCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material): CompletableFuture<Int> {
+        return plugin.database.getTable(RPKCraftingExperienceTable::class.java)[character, action, material].thenApply { it?.experience ?: 0 }
     }
 
-    override fun setCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material, experience: Int) {
-        val actionConfigSectionName = when (action) {
-            CRAFT -> "crafting"
-            SMELT -> "smelting"
-            MINE -> "mining"
+    override fun getPreloadedCraftingExperience(
+        character: RPKCharacter,
+        action: RPKCraftingAction,
+        material: Material
+    ): Int {
+        val characterId = character.id ?: return 0
+        return craftingExperience[CraftingActionKey(characterId.value, action, material)] ?: 0
+    }
+
+    override fun loadCraftingExperience(character: RPKCharacter): CompletableFuture<Void> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
+        return plugin.database.getTable(RPKCraftingExperienceTable::class.java)[character].thenAccept { craftingExperienceValues ->
+            craftingExperienceValues.forEach { craftingExperienceValue ->
+                craftingExperience[CraftingActionKey(characterId.value, craftingExperienceValue.action, craftingExperienceValue.material)] = craftingExperienceValue.experience
+            }
         }
-        val maxExperience = plugin.config.getConfigurationSection("$actionConfigSectionName.$material")
-            ?.getKeys(false)
-            ?.map(String::toInt)
-            ?.maxOrNull()
-            ?: 0
-        if (maxExperience == 0) return
-        val craftingExperienceTable = plugin.database.getTable(RPKCraftingExperienceTable::class.java)
-        val event = RPKBukkitCraftingSkillExperienceChangeEvent(
+    }
+
+    override fun unloadCraftingExperience(character: RPKCharacter) {
+        val characterId = character.id ?: return
+        val iterator = craftingExperience.keys.iterator()
+        while (iterator.hasNext()) {
+            if (iterator.next().characterId == characterId.value) iterator.remove()
+        }
+    }
+
+    override fun setCraftingExperience(character: RPKCharacter, action: RPKCraftingAction, material: Material, experience: Int): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val actionConfigSectionName = when (action) {
+                CRAFT -> "crafting"
+                SMELT -> "smelting"
+                MINE -> "mining"
+            }
+            val maxExperience = plugin.config.getConfigurationSection("$actionConfigSectionName.$material")
+                ?.getKeys(false)
+                ?.map(String::toInt)
+                ?.maxOrNull()
+                ?: 0
+            if (maxExperience == 0) return@runAsync
+            val craftingExperienceTable = plugin.database.getTable(RPKCraftingExperienceTable::class.java)
+            val event = RPKBukkitCraftingSkillExperienceChangeEvent(
                 character,
                 action,
                 material,
-                craftingExperienceTable.get(character, action, material)?.experience ?: 0,
-                experience
-        )
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        var craftingExperience = craftingExperienceTable
-                .get(event.character, event.action, event.material)
-        if (craftingExperience == null) {
-            craftingExperience = RPKCraftingExperienceValue(
+                craftingExperienceTable[character, action, material].thenApply { it?.experience ?: 0 }.join(),
+                experience,
+                true
+            )
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            var craftingExperience = craftingExperienceTable[event.character, event.action, event.material].join()
+            if (craftingExperience == null) {
+                craftingExperience = RPKCraftingExperienceValue(
                     character = event.character,
                     action = event.action,
                     material = event.material,
-                    experience = min(event.experience, maxExperience)
-            )
-            craftingExperienceTable.insert(craftingExperience)
-        } else {
-            craftingExperience.experience = min(event.experience, maxExperience)
-            craftingExperienceTable.update(craftingExperience)
+                    experience = event.experience.coerceAtMost(maxExperience)
+                )
+                craftingExperienceTable.insert(craftingExperience).join()
+                val characterId = craftingExperience.character.id ?: return@runAsync
+                this.craftingExperience[CraftingActionKey(characterId.value, craftingExperience.action, craftingExperience.material)] = craftingExperience.experience
+            } else {
+                craftingExperience.experience = event.experience.coerceAtMost(maxExperience)
+                craftingExperienceTable.update(craftingExperience).join()
+                val characterId = craftingExperience.character.id ?: return@runAsync
+                this.craftingExperience[CraftingActionKey(characterId.value, craftingExperience.action, craftingExperience.material)] = craftingExperience.experience
+            }
         }
     }
 

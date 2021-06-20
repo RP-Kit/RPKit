@@ -19,6 +19,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides payment notification related operations.
@@ -29,7 +30,7 @@ interface RPKPaymentNotificationService : Service {
      * A list of payment notifications managed by this payment notification service.
      * This is immutable, payment groups must be added and removed using [addPaymentNotification] and [removePaymentNotification]
      */
-    val notifications: List<RPKPaymentNotification>
+    val notifications: CompletableFuture<List<RPKPaymentNotification>>
 
     /**
      * Gets a payment notification by ID.
@@ -37,7 +38,7 @@ interface RPKPaymentNotificationService : Service {
      * @param id The ID of the payment notification
      * @return The payment notification, or null if no payment notification is found with the given ID
      */
-    fun getPaymentNotification(id: RPKPaymentNotificationId): RPKPaymentNotification?
+    fun getPaymentNotification(id: RPKPaymentNotificationId): CompletableFuture<RPKPaymentNotification?>
 
     /**
      * Gets all payment notifications to a character.
@@ -45,14 +46,14 @@ interface RPKPaymentNotificationService : Service {
      * @param character The character to get payment notifications for
      * @return A list of all payment notifications sent to the character
      */
-    fun getPaymentNotificationsFor(character: RPKCharacter): List<RPKPaymentNotification>
+    fun getPaymentNotificationsFor(character: RPKCharacter): CompletableFuture<List<RPKPaymentNotification>>
 
     /**
      * Adds a payment notification to be tracked by this payment notification service.
      *
      * @param paymentNotification The payment notification to add
      */
-    fun addPaymentNotification(paymentNotification: RPKPaymentNotification)
+    fun addPaymentNotification(paymentNotification: RPKPaymentNotification): CompletableFuture<Void>
 
     fun createPaymentNotification(
         group: RPKPaymentGroup,
@@ -60,20 +61,20 @@ interface RPKPaymentNotificationService : Service {
         character: RPKCharacter,
         date: LocalDateTime,
         text: String
-    ): RPKPaymentNotification
+    ): CompletableFuture<RPKPaymentNotification>
 
     /**
      * Removes a payment notification from being tracked by this payment notification service.
      *
      * @param paymentNotification The payment notification to remove
      */
-    fun removePaymentNotification(paymentNotification: RPKPaymentNotification)
+    fun removePaymentNotification(paymentNotification: RPKPaymentNotification): CompletableFuture<Void>
 
     /**
      * Updates a payment notification's state in data storage.
      *
      * @param paymentNotification The payment notification to update
      */
-    fun updatePaymentNotification(paymentNotification: RPKPaymentNotification)
+    fun updatePaymentNotification(paymentNotification: RPKPaymentNotification): CompletableFuture<Void>
 
 }

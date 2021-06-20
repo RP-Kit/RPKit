@@ -19,6 +19,7 @@ import com.rpkit.core.service.Service
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides payment group related operations.
@@ -29,7 +30,7 @@ interface RPKPaymentGroupService : Service {
      * A list of payment groups currently managed by this payment group service.
      * This is immutable, payment groups must be added and removed using [addPaymentGroup] and [removePaymentGroup].
      */
-    val paymentGroups: List<RPKPaymentGroup>
+    val paymentGroups: CompletableFuture<List<RPKPaymentGroup>>
 
     /**
      * Gets a payment group by ID.
@@ -37,7 +38,7 @@ interface RPKPaymentGroupService : Service {
      * @param id The ID of the payment group
      * @return The payment group, or null if no payment group is found with the given ID
      */
-    fun getPaymentGroup(id: RPKPaymentGroupId): RPKPaymentGroup?
+    fun getPaymentGroup(id: RPKPaymentGroupId): CompletableFuture<RPKPaymentGroup?>
 
     /**
      * Gets a payment group by name.
@@ -45,14 +46,14 @@ interface RPKPaymentGroupService : Service {
      * @param name The name of the payment group
      * @return The payment group, or null if no payment group is found with the given name
      */
-    fun getPaymentGroup(name: RPKPaymentGroupName): RPKPaymentGroup?
+    fun getPaymentGroup(name: RPKPaymentGroupName): CompletableFuture<RPKPaymentGroup?>
 
     /**
      * Adds a payment group to be tracked by this payment group service.
      *
      * @param paymentGroup The payment group to add
      */
-    fun addPaymentGroup(paymentGroup: RPKPaymentGroup)
+    fun addPaymentGroup(paymentGroup: RPKPaymentGroup): CompletableFuture<Void>
 
     fun createPaymentGroup(
         name: RPKPaymentGroupName,
@@ -61,20 +62,20 @@ interface RPKPaymentGroupService : Service {
         interval: Duration,
         lastPaymentTime: LocalDateTime,
         balance: Int
-    ): RPKPaymentGroup
+    ): CompletableFuture<RPKPaymentGroup>
 
     /**
      * Removes a payment group from being tracked by this payment group service.
      *
      * @param paymentGroup The payment group to remove
      */
-    fun removePaymentGroup(paymentGroup: RPKPaymentGroup)
+    fun removePaymentGroup(paymentGroup: RPKPaymentGroup): CompletableFuture<Void>
 
     /**
      * Updates a payment group's state in data storage.
      *
      * @param paymentGroup The payment group to update.
      */
-    fun updatePaymentGroup(paymentGroup: RPKPaymentGroup)
+    fun updatePaymentGroup(paymentGroup: RPKPaymentGroup): CompletableFuture<Void>
 
 }

@@ -25,8 +25,9 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitPaymentGroupInviteEvent(
         override val paymentGroup: RPKPaymentGroup,
-        override val character: RPKCharacter
-) : RPKBukkitEvent(), RPKPaymentGroupInviteEvent, Cancellable {
+        override val character: RPKCharacter,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKPaymentGroupInviteEvent, Cancellable {
 
     companion object {
         @JvmStatic

@@ -29,6 +29,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents the chat group member table.
@@ -57,21 +58,23 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
         null
     }
 
-    fun insert(entity: RPKChatGroupMember) {
-        val chatGroupId = entity.chatGroup.id ?: return
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun insert(entity: RPKChatGroupMember): CompletableFuture<Void> {
+        val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_CHAT_GROUP_MEMBER,
-                        RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID,
-                        RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID
+                    RPKIT_CHAT_GROUP_MEMBER,
+                    RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID,
+                    RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID
                 )
                 .values(
                     chatGroupId.value,
                     minecraftProfileId.value
                 )
                 .execute()
-        cache(entity)
+            cache(entity)
+        }
     }
 
     /**
@@ -80,28 +83,32 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
      * @param chatGroup The chat group
      * @return A list of members of the chat group
      */
-    fun get(chatGroup: RPKChatGroup): List<RPKChatGroupMember> {
-        val chatGroupId = chatGroup.id ?: return emptyList()
+    fun get(chatGroup: RPKChatGroup): CompletableFuture<List<RPKChatGroupMember>> {
+        val chatGroupId = chatGroup.id ?: return CompletableFuture.completedFuture(emptyList())
         return if (chatGroupCache?.containsKey(chatGroupId.value) == true) {
-            chatGroupCache[chatGroupId.value] as List<RPKChatGroupMember>
+            CompletableFuture.completedFuture(chatGroupCache[chatGroupId.value] as List<RPKChatGroupMember>)
         } else {
-            val results = database.create
+            CompletableFuture.supplyAsync {
+                val results = database.create
                     .select(RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID)
                     .from(RPKIT_CHAT_GROUP_MEMBER)
                     .where(RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID.eq(chatGroupId.value))
                     .fetch()
-            val chatGroupMembers = results.mapNotNull { result ->
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@mapNotNull null
-                val minecraftProfile = minecraftProfileService
+                val chatGroupMembers = results.mapNotNull { result ->
+                    val minecraftProfileService =
+                        Services[RPKMinecraftProfileService::class.java] ?: return@mapNotNull null
+                    val minecraftProfile = minecraftProfileService
                         .getMinecraftProfile(RPKMinecraftProfileId(result[RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID]))
+                        .join()
                         ?: return@mapNotNull null
-                RPKChatGroupMember(
+                    RPKChatGroupMember(
                         chatGroup,
                         minecraftProfile
-                )
+                    )
+                }
+                chatGroupCache?.set(chatGroupId.value, chatGroupMembers.toMutableList())
+                return@supplyAsync chatGroupMembers
             }
-            chatGroupCache?.set(chatGroupId.value, chatGroupMembers.toMutableList())
-            chatGroupMembers
         }
     }
 
@@ -111,40 +118,44 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
      * @param minecraftProfile The Minecraft profile
      * @return A list of chat group member instances
      */
-    fun get(minecraftProfile: RPKMinecraftProfile): List<RPKChatGroupMember> {
-        val minecraftProfileId = minecraftProfile.id ?: return emptyList()
+    fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<List<RPKChatGroupMember>> {
+        val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(emptyList())
         return if (minecraftProfileCache?.containsKey(minecraftProfileId.value) == true) {
-            minecraftProfileCache[minecraftProfileId.value] as List<RPKChatGroupMember>
+            CompletableFuture.completedFuture(minecraftProfileCache[minecraftProfileId.value] as List<RPKChatGroupMember>)
         } else {
-            val results = database.create
+            CompletableFuture.supplyAsync {
+                val results = database.create
                     .select(RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID)
                     .from(RPKIT_CHAT_GROUP_MEMBER)
                     .where(RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                     .fetch()
-            val chatGroupMembers = results.mapNotNull { result ->
-                val chatGroupService = Services[RPKChatGroupService::class.java] ?: return@mapNotNull null
-                val chatGroup = chatGroupService
-                        .getChatGroup(RPKChatGroupId(result[RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID]))
+                val chatGroupMembers = results.mapNotNull { result ->
+                    val chatGroupService = Services[RPKChatGroupService::class.java] ?: return@mapNotNull null
+                    val chatGroup = chatGroupService
+                        .getChatGroup(RPKChatGroupId(result[RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID])).join()
                         ?: return@mapNotNull null
-                RPKChatGroupMember(
+                    RPKChatGroupMember(
                         chatGroup,
                         minecraftProfile
-                )
+                    )
+                }
+                minecraftProfileCache?.set(minecraftProfileId.value, chatGroupMembers.toMutableList())
+                return@supplyAsync chatGroupMembers
             }
-            minecraftProfileCache?.set(minecraftProfileId.value, chatGroupMembers.toMutableList())
-            chatGroupMembers
         }
     }
 
-    fun delete(entity: RPKChatGroupMember) {
-        val chatGroupId = entity.chatGroup.id ?: return
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun delete(entity: RPKChatGroupMember): CompletableFuture<Void> {
+        val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_CHAT_GROUP_MEMBER)
                 .where(RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID.eq(chatGroupId.value))
                 .and(RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        uncache(entity)
+            uncache(entity)
+        }
     }
 
     private fun cache(chatGroupMember: RPKChatGroupMember) {

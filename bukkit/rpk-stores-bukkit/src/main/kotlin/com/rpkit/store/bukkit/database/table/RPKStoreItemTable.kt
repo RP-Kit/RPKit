@@ -23,6 +23,8 @@ import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.database.create
 import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_STORE_ITEM
 import com.rpkit.store.bukkit.storeitem.RPKStoreItem
+import com.rpkit.store.bukkit.storeitem.RPKStoreItemId
+import java.util.concurrent.CompletableFuture
 
 
 class RPKStoreItemTable(
@@ -41,91 +43,105 @@ class RPKStoreItemTable(
         null
     }
 
-    fun insert(entity: RPKStoreItem): Int {
-        database.create
+    fun insert(entity: RPKStoreItem): CompletableFuture<RPKStoreItemId> {
+        return CompletableFuture.supplyAsync {
+            database.create
                 .insertInto(
-                        RPKIT_STORE_ITEM,
-                        RPKIT_STORE_ITEM.PLUGIN,
-                        RPKIT_STORE_ITEM.IDENTIFIER,
-                        RPKIT_STORE_ITEM.DESCRIPTION,
-                        RPKIT_STORE_ITEM.COST
+                    RPKIT_STORE_ITEM,
+                    RPKIT_STORE_ITEM.PLUGIN,
+                    RPKIT_STORE_ITEM.IDENTIFIER,
+                    RPKIT_STORE_ITEM.DESCRIPTION,
+                    RPKIT_STORE_ITEM.COST
                 )
                 .values(
-                        entity.plugin,
-                        entity.identifier,
-                        entity.description,
-                        entity.cost
+                    entity.plugin,
+                    entity.identifier,
+                    entity.description,
+                    entity.cost
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = id
-        cache?.set(id, entity)
-        return id
+            val id = database.create.lastID().toInt()
+            entity.id = RPKStoreItemId(id)
+            cache?.set(id, entity)
+            return@supplyAsync RPKStoreItemId(id)
+        }
     }
 
-    fun update(entity: RPKStoreItem) {
-        val id = entity.id ?: return
-        database.create
+    fun update(entity: RPKStoreItem): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_STORE_ITEM)
                 .set(RPKIT_STORE_ITEM.PLUGIN, entity.plugin)
                 .set(RPKIT_STORE_ITEM.IDENTIFIER, entity.identifier)
                 .set(RPKIT_STORE_ITEM.DESCRIPTION, entity.description)
                 .set(RPKIT_STORE_ITEM.COST, entity.cost)
-                .where(RPKIT_STORE_ITEM.ID.eq(id))
+                .where(RPKIT_STORE_ITEM.ID.eq(id.value))
                 .execute()
-        cache?.set(id, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: Int): RPKStoreItem? {
-        if (cache?.containsKey(id) == true) return cache[id]
-        var storeItem: RPKStoreItem? = database.getTable(RPKConsumableStoreItemTable::class.java)[id]
-        if (storeItem != null) {
-            cache?.set(id, storeItem)
-            return storeItem
-        } else {
-            cache?.remove(id)
+    operator fun get(id: RPKStoreItemId): CompletableFuture<RPKStoreItem?> {
+        if (cache?.containsKey(id.value) == true) return CompletableFuture.completedFuture(cache[id.value])
+        return CompletableFuture.supplyAsync {
+            var storeItem: RPKStoreItem? = database.getTable(RPKConsumableStoreItemTable::class.java)[id].join()
+            if (storeItem != null) {
+                cache?.set(id.value, storeItem)
+                return@supplyAsync storeItem
+            } else {
+                cache?.remove(id.value)
+            }
+            storeItem = database.getTable(RPKPermanentStoreItemTable::class.java)[id].join()
+            if (storeItem != null) {
+                cache?.set(id.value, storeItem)
+                return@supplyAsync storeItem
+            } else {
+                cache?.remove(id.value)
+            }
+            storeItem = database.getTable(RPKTimedStoreItemTable::class.java)[id].join()
+            if (storeItem != null) {
+                cache?.set(id.value, storeItem)
+                return@supplyAsync storeItem
+            } else {
+                cache?.remove(id.value)
+            }
+            return@supplyAsync null
         }
-        storeItem = database.getTable(RPKPermanentStoreItemTable::class.java)[id]
-        if (storeItem != null) {
-            cache?.set(id, storeItem)
-            return storeItem
-        } else {
-            cache?.remove(id)
-        }
-        storeItem = database.getTable(RPKTimedStoreItemTable::class.java)[id]
-        if (storeItem != null) {
-            cache?.set(id, storeItem)
-            return storeItem
-        } else {
-            cache?.remove(id)
-        }
-        return null
     }
 
-    fun get(plugin: RPKBukkitPlugin, identifier: String): RPKStoreItem? {
-        val result = database.create
+    fun get(plugin: RPKBukkitPlugin, identifier: String): CompletableFuture<RPKStoreItem?> {
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_STORE_ITEM.ID)
                 .from(RPKIT_STORE_ITEM)
                 .where(RPKIT_STORE_ITEM.PLUGIN.eq(plugin.name))
                 .and(RPKIT_STORE_ITEM.IDENTIFIER.eq(identifier))
-                .fetchOne() ?: return null
-        return get(result[RPKIT_STORE_ITEM.ID])
+                .fetchOne() ?: return@supplyAsync null
+            return@supplyAsync get(RPKStoreItemId(result[RPKIT_STORE_ITEM.ID])).join()
+        }
     }
 
-    fun getAll(): List<RPKStoreItem> {
-        val result = database.create
+    fun getAll(): CompletableFuture<List<RPKStoreItem>> {
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_STORE_ITEM.ID)
                 .from(RPKIT_STORE_ITEM)
                 .fetch()
-        return result.mapNotNull { row -> get(row[RPKIT_STORE_ITEM.ID]) }
+            val storeItemFutures = result.map { row -> get(RPKStoreItemId(row[RPKIT_STORE_ITEM.ID])) }
+            CompletableFuture.allOf(*storeItemFutures.toTypedArray()).join()
+            return@supplyAsync storeItemFutures.mapNotNull(CompletableFuture<RPKStoreItem?>::join)
+        }
     }
 
-    fun delete(entity: RPKStoreItem) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKStoreItem): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_STORE_ITEM)
-                .where(RPKIT_STORE_ITEM.ID.eq(id))
+                .where(RPKIT_STORE_ITEM.ID.eq(id.value))
                 .execute()
-        cache?.remove(id)
+            cache?.remove(id.value)
+        }
     }
 }

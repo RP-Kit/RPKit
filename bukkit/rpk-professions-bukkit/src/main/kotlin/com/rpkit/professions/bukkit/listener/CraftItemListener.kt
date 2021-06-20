@@ -42,22 +42,27 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit) : Listener {
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
             val characterService = Services[RPKCharacterService::class.java] ?: return
             val professionService = Services[RPKProfessionService::class.java] ?: return
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
             if (minecraftProfile == null) {
                 event.isCancelled = true
                 bukkitPlayer.sendMessage(plugin.messages["no-minecraft-profile"])
                 return
             }
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             if (character == null) {
                 event.isCancelled = true
-                bukkitPlayer.sendMessage(plugin.messages["no-character"])
+                bukkitPlayer.sendMessage(plugin.messages.noCharacterSelf)
                 return
             }
             val itemType = event.recipe.result.type
-            val professions = professionService.getProfessions(character)
+            val professions = professionService.getPreloadedProfessions(character)
+            if (professions == null) {
+                event.isCancelled = true
+                bukkitPlayer.sendMessage(plugin.messages.noPreloadedProfessions)
+                return
+            }
             val professionLevels = professions
-                    .associateWith { profession -> professionService.getProfessionLevel(character, profession) }
+                    .associateWith { profession -> professionService.getPreloadedProfessionLevel(character, profession) ?: 1 }
             var amountCrafted = getAmountCrafted(event)
             val amount = professionLevels.entries
                 .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.CRAFT, itemType, level) }
@@ -123,19 +128,22 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit) : Listener {
             professions.forEach { profession ->
                 val receivedExperience = plugin.config.getInt("professions.${profession.name.value}.experience.items.crafting.$itemType", 0) * amountCrafted
                 if (receivedExperience > 0) {
-                    professionService.setProfessionExperience(character, profession, professionService.getProfessionExperience(character, profession) + receivedExperience)
-                    val level = professionService.getProfessionLevel(character, profession)
-                    val experience = professionService.getProfessionExperience(character, profession)
-                    event.whoClicked.sendMessage(plugin.messages["craft-experience", mapOf(
-                            "profession" to profession.name.value,
-                            "level" to level.toString(),
-                            "received_experience" to receivedExperience.toString(),
-                            "experience" to (experience - profession.getExperienceNeededForLevel(level)).toString(),
-                            "next_level_experience" to (profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)).toString(),
-                            "total_experience" to experience.toString(),
-                            "total_next_level_experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
-                            "material" to itemType.toString().toLowerCase().replace('_', ' ')
-                    )])
+                    professionService.getProfessionExperience(character, profession).thenAccept { characterProfessionExperience ->
+                        professionService.setProfessionExperience(character, profession, characterProfessionExperience + receivedExperience).thenRunAsync {
+                            val level = professionService.getProfessionLevel(character, profession).join()
+                            val experience = professionService.getProfessionExperience(character, profession).join()
+                            event.whoClicked.sendMessage(plugin.messages.craftExperience.withParameters(
+                                profession = profession,
+                                level = level,
+                                receivedExperience = receivedExperience,
+                                experience = experience - profession.getExperienceNeededForLevel(level),
+                                nextLevelExperience = profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level),
+                                totalExperience = experience,
+                                totalNextLevelExperience = profession.getExperienceNeededForLevel(level + 1),
+                                material = itemType
+                            ))
+                        }
+                    }
                 }
             }
         }

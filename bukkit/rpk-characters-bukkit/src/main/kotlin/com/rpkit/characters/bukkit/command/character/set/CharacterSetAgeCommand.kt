@@ -70,12 +70,12 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
@@ -88,9 +88,10 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             val age = args[0].toInt()
             if (age >= plugin.config.getInt("characters.min-age") && age <= plugin.config.getInt("characters.max-age")) {
                 character.age = age
-                characterService.updateCharacter(character)
-                sender.sendMessage(plugin.messages["character-set-age-valid"])
-                character.showCharacterCard(minecraftProfile)
+                characterService.updateCharacter(character).thenRun {
+                    sender.sendMessage(plugin.messages["character-set-age-valid"])
+                    character.showCharacterCard(minecraftProfile)
+                }
             } else {
                 sender.sendMessage(plugin.messages["character-set-age-invalid-validation"])
             }
@@ -113,10 +114,10 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             context.setSessionData("characterService", characterService)
             val conversable = context.forWhom
             if (conversable !is Player) return false
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(conversable)
             context.setSessionData("minecraftProfile", minecraftProfile)
             if (minecraftProfile == null) return false
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             context.setSessionData("character", character)
             return input.toInt() >= plugin.config.getInt("characters.min-age")
                     && input.toInt() <= plugin.config.getInt("characters.max-age")

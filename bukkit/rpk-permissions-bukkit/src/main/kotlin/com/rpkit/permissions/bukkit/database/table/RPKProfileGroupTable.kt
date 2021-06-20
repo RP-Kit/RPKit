@@ -26,6 +26,7 @@ import com.rpkit.permissions.bukkit.group.RPKGroupName
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.RPKProfileGroup
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.util.concurrent.CompletableFuture
 
 
 class RPKProfileGroupTable(private val database: Database, private val plugin: RPKPermissionsBukkit) : Table {
@@ -46,93 +47,103 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
         null
     }
 
-    fun insert(entity: RPKProfileGroup) {
-        val profileId = entity.profile.id ?: return
+    fun insert(entity: RPKProfileGroup): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
         val groupName = entity.group.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_PROFILE_GROUP,
-                        RPKIT_PROFILE_GROUP.PROFILE_ID,
-                        RPKIT_PROFILE_GROUP.GROUP_NAME,
-                        RPKIT_PROFILE_GROUP.PRIORITY
+                    RPKIT_PROFILE_GROUP,
+                    RPKIT_PROFILE_GROUP.PROFILE_ID,
+                    RPKIT_PROFILE_GROUP.GROUP_NAME,
+                    RPKIT_PROFILE_GROUP.PRIORITY
                 )
                 .values(
-                        profileId.value,
-                        groupName.value,
-                        entity.priority
+                    profileId.value,
+                    groupName.value,
+                    entity.priority
                 )
                 .execute()
-        cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
+            cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
+        }
     }
 
-    fun update(entity: RPKProfileGroup) {
-        val profileId = entity.profile.id ?: return
+    fun update(entity: RPKProfileGroup): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
         val groupName = entity.group.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_PROFILE_GROUP)
                 .set(RPKIT_PROFILE_GROUP.PRIORITY, entity.priority)
                 .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId.value))
                 .and(RPKIT_PROFILE_GROUP.GROUP_NAME.eq(groupName.value))
                 .execute()
-        cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
+            cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
+        }
     }
 
-    operator fun get(profile: RPKProfile, group: RPKGroup): RPKProfileGroup? {
-        val profileId = profile.id ?: return null
+    operator fun get(profile: RPKProfile, group: RPKGroup): CompletableFuture<RPKProfileGroup?> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(null)
         val groupName = group.name
         val cacheKey = ProfileGroupCacheKey(profileId.value, groupName.value)
         if (cache?.containsKey(cacheKey) == true) {
-            return cache[cacheKey]
+            return CompletableFuture.completedFuture(cache[cacheKey])
         }
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(
-                        RPKIT_PROFILE_GROUP.PRIORITY
+                    RPKIT_PROFILE_GROUP.PRIORITY
                 )
                 .from(RPKIT_PROFILE_GROUP)
                 .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId.value))
                 .and(RPKIT_PROFILE_GROUP.GROUP_NAME.eq(groupName.value))
-                .fetchOne() ?: return null
-        val profileGroup = RPKProfileGroup(
+                .fetchOne() ?: return@supplyAsync null
+            val profileGroup = RPKProfileGroup(
                 profile,
                 group,
                 result[RPKIT_PROFILE_GROUP.PRIORITY]
-        )
-        cache?.set(cacheKey, profileGroup)
-        return profileGroup
-    }
-
-    fun get(profile: RPKProfile): List<RPKProfileGroup> {
-        val profileId = profile.id ?: return emptyList()
-        return database.create
-            .select(
-                RPKIT_PROFILE_GROUP.GROUP_NAME,
-                RPKIT_PROFILE_GROUP.PRIORITY
             )
-            .from(RPKIT_PROFILE_GROUP)
-            .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId.value))
-            .orderBy(RPKIT_PROFILE_GROUP.PRIORITY.desc())
-            .fetch()
-            .mapNotNull { result ->
-                val group = result[RPKIT_PROFILE_GROUP.GROUP_NAME]
-                    .let { Services[RPKGroupService::class.java]?.getGroup(RPKGroupName(it)) }
-                    ?: return@mapNotNull null
-                RPKProfileGroup(
-                    profile,
-                    group,
-                    result[RPKIT_PROFILE_GROUP.PRIORITY]
-                )
-            }
+            cache?.set(cacheKey, profileGroup)
+            return@supplyAsync profileGroup
+        }
     }
 
-    fun delete(entity: RPKProfileGroup) {
-        val profileId = entity.profile.id ?: return
+    fun get(profile: RPKProfile): CompletableFuture<List<RPKProfileGroup>> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            return@supplyAsync database.create
+                .select(
+                    RPKIT_PROFILE_GROUP.GROUP_NAME,
+                    RPKIT_PROFILE_GROUP.PRIORITY
+                )
+                .from(RPKIT_PROFILE_GROUP)
+                .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId.value))
+                .orderBy(RPKIT_PROFILE_GROUP.PRIORITY.desc())
+                .fetch()
+                .mapNotNull { result ->
+                    val group = result[RPKIT_PROFILE_GROUP.GROUP_NAME]
+                        .let { Services[RPKGroupService::class.java]?.getGroup(RPKGroupName(it)) }
+                        ?: return@mapNotNull null
+                    RPKProfileGroup(
+                        profile,
+                        group,
+                        result[RPKIT_PROFILE_GROUP.PRIORITY]
+                    )
+                }
+        }
+    }
+
+    fun delete(entity: RPKProfileGroup): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
         val groupName = entity.group.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_PROFILE_GROUP)
                 .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId.value))
                 .and(RPKIT_PROFILE_GROUP.GROUP_NAME.eq(entity.group.name.value))
                 .execute()
-        cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
+            cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
+        }
     }
 
 }

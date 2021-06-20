@@ -50,21 +50,22 @@ class ReplyCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val chatGroup = chatGroupService.getLastUsedChatGroup(minecraftProfile)
-        if (chatGroup == null) {
-            sender.sendMessage(plugin.messages["reply-invalid-chat-group"])
-            return true
+        chatGroupService.getLastUsedChatGroup(minecraftProfile).thenAccept { chatGroup ->
+            if (chatGroup == null) {
+                sender.sendMessage(plugin.messages["reply-invalid-chat-group"])
+                return@thenAccept
+            }
+            if (args.isEmpty()) {
+                sender.sendMessage(plugin.messages["reply-usage"])
+                return@thenAccept
+            }
+            chatGroup.sendMessage(minecraftProfile, args.joinToString(" "))
         }
-        if (args.isEmpty()) {
-            sender.sendMessage(plugin.messages["reply-usage"])
-            return true
-        }
-        chatGroup.sendMessage(minecraftProfile, args.joinToString(" "))
         return true
     }
 

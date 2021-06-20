@@ -19,7 +19,6 @@ package com.rpkit.unconsciousness.bukkit.listener
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
-import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -27,7 +26,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageEvent
 
 
-class EntityDamageListener(private val plugin: RPKUnconsciousnessBukkit) : Listener {
+class EntityDamageListener : Listener {
 
     @EventHandler
     fun onEntityDamage(event: EntityDamageEvent) {
@@ -36,9 +35,9 @@ class EntityDamageListener(private val plugin: RPKUnconsciousnessBukkit) : Liste
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
-        if (!unconsciousnessService.isUnconscious(character)) return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
+        if (!unconsciousnessService.getPreloadedUnconsciousness(character)) return
         event.isCancelled = true
     }
 

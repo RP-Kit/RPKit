@@ -22,7 +22,12 @@ import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 
 
-class RPKBukkitDrunkennessChangeEvent(override val character: RPKCharacter, override val oldDrunkenness: Int, override var drunkenness: Int) : RPKBukkitEvent(), RPKDrunkennessChangeEvent, Cancellable {
+class RPKBukkitDrunkennessChangeEvent(
+    override val character: RPKCharacter,
+    override val oldDrunkenness: Int,
+    override var drunkenness: Int,
+    isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKDrunkennessChangeEvent, Cancellable {
 
     companion object {
         @JvmStatic

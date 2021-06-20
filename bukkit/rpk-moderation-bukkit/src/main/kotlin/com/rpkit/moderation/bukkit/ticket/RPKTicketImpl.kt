@@ -15,10 +15,10 @@
 
 package com.rpkit.moderation.bukkit.ticket
 
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketCloseEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import java.time.LocalDateTime
 
 
@@ -27,13 +27,13 @@ class RPKTicketImpl(
         override val reason: String,
         override val issuer: RPKProfile,
         override var resolver: RPKProfile?,
-        override val location: Location?,
+        override val location: RPKLocation?,
         override val openDate: LocalDateTime,
         override var closeDate: LocalDateTime?,
         override var isClosed: Boolean
 ) : RPKTicket {
 
-    constructor(reason: String, issuer: RPKProfile, location: Location) : this(
+    constructor(reason: String, issuer: RPKProfile, location: RPKLocation) : this(
             null,
             reason,
             issuer,
@@ -45,7 +45,7 @@ class RPKTicketImpl(
     )
 
     override fun close(resolver: RPKProfile) {
-        val event = RPKBukkitTicketCloseEvent(resolver, this)
+        val event = RPKBukkitTicketCloseEvent(resolver, this, false)
         Bukkit.getServer().pluginManager.callEvent(event)
         if (event.isCancelled) return
         isClosed = true

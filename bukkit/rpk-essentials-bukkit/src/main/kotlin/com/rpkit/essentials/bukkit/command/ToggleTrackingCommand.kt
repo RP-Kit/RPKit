@@ -52,21 +52,25 @@ class ToggleTrackingCommand(private val plugin: RPKEssentialsBukkit) : CommandEx
             sender.sendMessage(plugin.messages["no-tracking-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character-self"])
             return true
         }
-        trackingService.setTrackable(character, !trackingService.isTrackable(character))
-        if (trackingService.isTrackable(character)) {
-            sender.sendMessage(plugin.messages["toggle-tracking-on-valid"])
-        } else {
-            sender.sendMessage(plugin.messages["toggle-tracking-off-valid"])
+        trackingService.isTrackable(character).thenAccept { isTrackable ->
+            val newIsTrackable = !isTrackable
+            trackingService.setTrackable(character, newIsTrackable).thenRun {
+                if (newIsTrackable) {
+                    sender.sendMessage(plugin.messages["toggle-tracking-on-valid"])
+                } else {
+                    sender.sendMessage(plugin.messages["toggle-tracking-off-valid"])
+                }
+            }
         }
         return true
     }

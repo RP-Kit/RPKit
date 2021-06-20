@@ -21,20 +21,28 @@ import com.rpkit.selection.bukkit.selection.RPKSelection
 import com.rpkit.selection.bukkit.selection.RPKSelectionService
 import com.rpkit.selection.bukkit.worldedit.RPKSelectionWorldEditBukkit
 import com.sk89q.worldedit.bukkit.WorldEditPlugin
+import org.bukkit.World
+import java.util.concurrent.CompletableFuture
 
 
 class RPKWorldEditSelectionService(override val plugin: RPKSelectionWorldEditBukkit) : RPKSelectionService {
 
-    override fun getSelection(minecraftProfile: RPKMinecraftProfile): RPKSelection {
+    override fun getSelection(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKSelection?> {
         val worldEdit = plugin.server.pluginManager.getPlugin("WorldEdit") as WorldEditPlugin
         val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
-                ?: return RPKWorldEditSelection(minecraftProfile, null)
+                ?: return CompletableFuture.completedFuture(RPKWorldEditSelection(minecraftProfile, null))
         val session = worldEdit.getSession(bukkitPlayer)
-        return RPKWorldEditSelection(minecraftProfile, session)
+        return CompletableFuture.completedFuture(RPKWorldEditSelection(minecraftProfile, session))
     }
 
-    override fun updateSelection(selection: RPKSelection) {
+    override fun createSelection(minecraftProfile: RPKMinecraftProfile, world: World): CompletableFuture<RPKSelection> {
+        val worldEdit = plugin.server.pluginManager.getPlugin("WorldEdit") as WorldEditPlugin
+        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
+        return CompletableFuture.completedFuture(RPKWorldEditSelection(minecraftProfile, worldEdit.getSession(bukkitPlayer)))
+    }
 
+    override fun updateSelection(selection: RPKSelection): CompletableFuture<Void> {
+        return CompletableFuture.completedFuture(null)
     }
 
 }

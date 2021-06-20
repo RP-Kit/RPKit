@@ -18,6 +18,7 @@ package com.rpkit.experience.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
+import com.rpkit.experience.bukkit.RPKExperienceBukkit
 import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
@@ -25,17 +26,29 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 
 
-class PlayerJoinListener : Listener {
+class PlayerJoinListener(private val plugin: RPKExperienceBukkit) : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val experienceService = Services[RPKExperienceService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
-        event.player.level = experienceService.getLevel(character)
-        event.player.exp = (experienceService.getExperience(character) - experienceService.getExperienceNeededForLevel(experienceService.getLevel(character))).toFloat() / (experienceService.getExperienceNeededForLevel(experienceService.getLevel(character) + 1) - experienceService.getExperienceNeededForLevel(experienceService.getLevel(character))).toFloat()
+        minecraftProfileService.getMinecraftProfile(event.player).thenAccept getMinecraftProfile@{ minecraftProfile ->
+            if (minecraftProfile == null) return@getMinecraftProfile
+            characterService.getActiveCharacter(minecraftProfile).thenAccept getActiveCharacter@{ character ->
+                if (character == null) return@getActiveCharacter
+                experienceService.getLevel(character).thenAccept { characterLevel ->
+                    experienceService.getExperience(character).thenAccept { characterExperience ->
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            event.player.level = characterLevel
+                            event.player.exp =
+                                (characterExperience - experienceService.getExperienceNeededForLevel(characterLevel)).toFloat() /
+                                        (experienceService.getExperienceNeededForLevel(characterLevel + 1) - experienceService.getExperienceNeededForLevel(characterLevel)).toFloat()
+                        })
+                    }
+                }
+            }
+        }
     }
 
 }

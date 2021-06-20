@@ -18,6 +18,7 @@ package com.rpkit.store.bukkit.storeitem
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.service.Service
 import java.time.Duration
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides store item related operations
@@ -30,28 +31,28 @@ interface RPKStoreItemService : Service {
      * @param plugin The plugin providing the store item
      * @param identifier The unique identifier of the store item
      */
-    fun getStoreItem(plugin: RPKBukkitPlugin, identifier: String): RPKStoreItem?
+    fun getStoreItem(plugin: RPKBukkitPlugin, identifier: String): CompletableFuture<RPKStoreItem?>
 
     /**
      * Gets a store item by ID.
      *
      * @param id The ID of the store item
      */
-    fun getStoreItem(id: Int): RPKStoreItem?
+    fun getStoreItem(id: RPKStoreItemId): CompletableFuture<RPKStoreItem?>
 
     /**
      * Gets a list of all store items available
      *
      * @return A list containing all available store items
      */
-    fun getStoreItems(): List<RPKStoreItem>
+    fun getStoreItems(): CompletableFuture<List<RPKStoreItem>>
 
     /**
      * Adds a store item
      *
      * @param storeItem The store item to add
      */
-    fun addStoreItem(storeItem: RPKStoreItem)
+    fun addStoreItem(storeItem: RPKStoreItem): CompletableFuture<Void>
 
     fun createConsumableStoreItem(
         plugin: String,
@@ -59,14 +60,14 @@ interface RPKStoreItemService : Service {
         description: String,
         cost: Int,
         uses: Int
-    ): RPKConsumableStoreItem
+    ): CompletableFuture<RPKConsumableStoreItem>
 
     fun createPermanentStoreItem(
         plugin: String,
         identifier: String,
         description: String,
         cost: Int
-    ): RPKPermanentStoreItem
+    ): CompletableFuture<RPKPermanentStoreItem>
 
     fun createTimedStoreItem(
         plugin: String,
@@ -74,20 +75,20 @@ interface RPKStoreItemService : Service {
         description: String,
         cost: Int,
         duration: Duration
-    ): RPKTimedStoreItem
+    ): CompletableFuture<RPKTimedStoreItem>
 
     /**
      * Updates a store item in data storage
      *
      * @param storeItem The store item to update
      */
-    fun updateStoreItem(storeItem: RPKStoreItem)
+    fun updateStoreItem(storeItem: RPKStoreItem): CompletableFuture<Void>
 
     /**
      * Removes a store item
      *
      * @param storeItem The store item to remove
      */
-    fun removeStoreItem(storeItem: RPKStoreItem)
+    fun removeStoreItem(storeItem: RPKStoreItem): CompletableFuture<Void>
 
 }

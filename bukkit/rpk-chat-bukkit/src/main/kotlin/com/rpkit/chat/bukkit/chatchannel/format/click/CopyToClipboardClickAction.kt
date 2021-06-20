@@ -21,13 +21,14 @@ import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ClickEvent.Action.COPY_TO_CLIPBOARD
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture.completedFuture
 
 @SerializableAs("CopyToClipboardClickAction")
 class CopyToClipboardClickAction(val text: String) : ClickAction, ConfigurationSerializable {
-    override fun toClickEvent(context: DirectedPreFormatMessageContext) = ClickEvent(
+    override fun toClickEvent(context: DirectedPreFormatMessageContext) = completedFuture(ClickEvent(
             COPY_TO_CLIPBOARD,
             text
-    )
+    ))
 
     override fun serialize() = mutableMapOf(
             "text" to text

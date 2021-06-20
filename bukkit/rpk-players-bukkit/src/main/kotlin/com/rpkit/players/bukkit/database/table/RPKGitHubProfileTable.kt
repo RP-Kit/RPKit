@@ -28,6 +28,7 @@ import com.rpkit.players.bukkit.profile.github.RPKGitHubProfile
 import com.rpkit.players.bukkit.profile.github.RPKGitHubProfileId
 import com.rpkit.players.bukkit.profile.github.RPKGitHubProfileImpl
 import com.rpkit.players.bukkit.profile.github.RPKGitHubUsername
+import java.util.concurrent.CompletableFuture
 
 
 class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBukkit) : Table {
@@ -54,134 +55,149 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
         null
     }
 
-    fun insert(entity: RPKGitHubProfile) {
-        val profileId = entity.profile.id ?: return
-        database.create
+    fun insert(entity: RPKGitHubProfile): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_GITHUB_PROFILE,
-                        RPKIT_GITHUB_PROFILE.PROFILE_ID,
-                        RPKIT_GITHUB_PROFILE.NAME,
-                        RPKIT_GITHUB_PROFILE.OAUTH_TOKEN
+                    RPKIT_GITHUB_PROFILE,
+                    RPKIT_GITHUB_PROFILE.PROFILE_ID,
+                    RPKIT_GITHUB_PROFILE.NAME,
+                    RPKIT_GITHUB_PROFILE.OAUTH_TOKEN
                 )
                 .values(
-                        profileId.value,
-                        entity.name.value,
-                        entity.oauthToken
+                    profileId.value,
+                    entity.name.value,
+                    entity.oauthToken
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKGitHubProfileId(id)
-        cache?.set(id, entity)
-        nameCache?.set(entity.name.value, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKGitHubProfileId(id)
+            cache?.set(id, entity)
+            nameCache?.set(entity.name.value, entity)
+        }
     }
 
-    fun update(entity: RPKGitHubProfile) {
-        val id = entity.id ?: return
-        val profileId = entity.profile.id ?: return
-        database.create
+    fun update(entity: RPKGitHubProfile): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_GITHUB_PROFILE)
                 .set(RPKIT_GITHUB_PROFILE.PROFILE_ID, profileId.value)
                 .set(RPKIT_GITHUB_PROFILE.NAME, entity.name.value)
                 .set(RPKIT_GITHUB_PROFILE.OAUTH_TOKEN, entity.oauthToken)
                 .where(RPKIT_GITHUB_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
-        nameCache?.set(entity.name.value, entity)
+            cache?.set(id.value, entity)
+            nameCache?.set(entity.name.value, entity)
+        }
     }
 
-    operator fun get(id: RPKGitHubProfileId): RPKGitHubProfile? {
+    operator fun get(id: RPKGitHubProfileId): CompletableFuture<RPKGitHubProfile?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
+            return CompletableFuture.completedFuture(cache[id.value])
         }
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(
-                        RPKIT_GITHUB_PROFILE.PROFILE_ID,
-                        RPKIT_GITHUB_PROFILE.NAME,
-                        RPKIT_GITHUB_PROFILE.OAUTH_TOKEN
+                    RPKIT_GITHUB_PROFILE.PROFILE_ID,
+                    RPKIT_GITHUB_PROFILE.NAME,
+                    RPKIT_GITHUB_PROFILE.OAUTH_TOKEN
                 )
                 .from(RPKIT_GITHUB_PROFILE)
                 .where(RPKIT_GITHUB_PROFILE.ID.eq(id.value))
-                .fetchOne() ?: return null
-        val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profileId = result.get(RPKIT_GITHUB_PROFILE.PROFILE_ID)
-        val profile = profileService.getProfile(RPKProfileId(profileId))
-        if (profile != null) {
-            val githubProfile = RPKGitHubProfileImpl(
+                .fetchOne() ?: return@supplyAsync null
+            val profileService = Services[RPKProfileService::class.java] ?: return@supplyAsync null
+            val profileId = result.get(RPKIT_GITHUB_PROFILE.PROFILE_ID)
+            val profile = profileService.getProfile(RPKProfileId(profileId)).join()
+            if (profile != null) {
+                val githubProfile = RPKGitHubProfileImpl(
                     id,
                     profile,
                     RPKGitHubUsername(result.get(RPKIT_GITHUB_PROFILE.NAME)),
                     result.get(RPKIT_GITHUB_PROFILE.OAUTH_TOKEN)
-            )
-            cache?.set(id.value, githubProfile)
-            nameCache?.set(githubProfile.name.value, githubProfile)
-            return githubProfile
-        } else {
-            database.create
+                )
+                cache?.set(id.value, githubProfile)
+                nameCache?.set(githubProfile.name.value, githubProfile)
+                return@supplyAsync githubProfile
+            } else {
+                database.create
                     .deleteFrom(RPKIT_GITHUB_PROFILE)
                     .where(RPKIT_GITHUB_PROFILE.ID.eq(id.value))
                     .execute()
-            return null
+                return@supplyAsync null
+            }
         }
     }
 
-    operator fun get(name: RPKGitHubUsername): RPKGitHubProfile? {
+    operator fun get(name: RPKGitHubUsername): CompletableFuture<RPKGitHubProfile?> {
         if (nameCache?.containsKey(name.value) == true) {
-            return nameCache[name.value]
+            return CompletableFuture.completedFuture(nameCache[name.value])
         }
-        val result = database.create
-            .select(
-                RPKIT_GITHUB_PROFILE.ID,
-                RPKIT_GITHUB_PROFILE.PROFILE_ID,
-                RPKIT_GITHUB_PROFILE.OAUTH_TOKEN
-            )
-            .from(RPKIT_GITHUB_PROFILE)
-            .where(RPKIT_GITHUB_PROFILE.NAME.eq(name.value))
-            .fetchOne() ?: return null
-        val id = result[RPKIT_GITHUB_PROFILE.ID]
-        val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profileId = result.get(RPKIT_GITHUB_PROFILE.PROFILE_ID)
-        val profile = profileService.getProfile(RPKProfileId(profileId))
-        if (profile != null) {
-            val githubProfile = RPKGitHubProfileImpl(
-                RPKGitHubProfileId(id),
-                profile,
-                name,
-                result[RPKIT_GITHUB_PROFILE.OAUTH_TOKEN]
-            )
-            cache?.set(id, githubProfile)
-            nameCache?.set(name.value, githubProfile)
-            return githubProfile
-        } else {
-            database.create
-                .deleteFrom(RPKIT_GITHUB_PROFILE)
-                .where(RPKIT_GITHUB_PROFILE.ID.eq(id))
-                .execute()
-            cache?.remove(id)
-            nameCache?.remove(name.value)
-            return null
+        return CompletableFuture.supplyAsync {
+            val result = database.create
+                .select(
+                    RPKIT_GITHUB_PROFILE.ID,
+                    RPKIT_GITHUB_PROFILE.PROFILE_ID,
+                    RPKIT_GITHUB_PROFILE.OAUTH_TOKEN
+                )
+                .from(RPKIT_GITHUB_PROFILE)
+                .where(RPKIT_GITHUB_PROFILE.NAME.eq(name.value))
+                .fetchOne() ?: return@supplyAsync null
+            val id = result[RPKIT_GITHUB_PROFILE.ID]
+            val profileService = Services[RPKProfileService::class.java] ?: return@supplyAsync null
+            val profileId = result.get(RPKIT_GITHUB_PROFILE.PROFILE_ID)
+            val profile = profileService.getProfile(RPKProfileId(profileId)).join()
+            if (profile != null) {
+                val githubProfile = RPKGitHubProfileImpl(
+                    RPKGitHubProfileId(id),
+                    profile,
+                    name,
+                    result[RPKIT_GITHUB_PROFILE.OAUTH_TOKEN]
+                )
+                cache?.set(id, githubProfile)
+                nameCache?.set(name.value, githubProfile)
+                return@supplyAsync githubProfile
+            } else {
+                database.create
+                    .deleteFrom(RPKIT_GITHUB_PROFILE)
+                    .where(RPKIT_GITHUB_PROFILE.ID.eq(id))
+                    .execute()
+                cache?.remove(id)
+                nameCache?.remove(name.value)
+                return@supplyAsync null
+            }
         }
     }
 
-    fun get(profile: RPKProfile): List<RPKGitHubProfile> {
-        val profileId = profile.id ?: return emptyList()
-        val results = database.create
+    fun get(profile: RPKProfile): CompletableFuture<List<RPKGitHubProfile>> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_GITHUB_PROFILE.ID)
                 .from(RPKIT_GITHUB_PROFILE)
                 .where(RPKIT_GITHUB_PROFILE.PROFILE_ID.eq(profileId.value))
                 .fetch()
-        return results.map { result ->
-            get(RPKGitHubProfileId(result.get(RPKIT_GITHUB_PROFILE.ID)))
-        }.filterNotNull()
+            val githubProfileFutures = results.map { result ->
+                get(RPKGitHubProfileId(result.get(RPKIT_GITHUB_PROFILE.ID)))
+            }
+            CompletableFuture.allOf(*githubProfileFutures.toTypedArray()).join()
+            return@supplyAsync githubProfileFutures.mapNotNull(CompletableFuture<RPKGitHubProfile?>::join)
+        }
+
     }
 
-    fun delete(entity: RPKGitHubProfile) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKGitHubProfile): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_GITHUB_PROFILE)
                 .where(RPKIT_GITHUB_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
-        nameCache?.remove(entity.name.value)
+            cache?.remove(id.value)
+            nameCache?.remove(entity.name.value)
+        }
     }
 
 }

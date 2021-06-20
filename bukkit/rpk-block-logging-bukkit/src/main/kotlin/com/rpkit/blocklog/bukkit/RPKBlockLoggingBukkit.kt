@@ -24,20 +24,7 @@ import com.rpkit.blocklog.bukkit.command.RollbackCommand
 import com.rpkit.blocklog.bukkit.database.table.RPKBlockChangeTable
 import com.rpkit.blocklog.bukkit.database.table.RPKBlockHistoryTable
 import com.rpkit.blocklog.bukkit.database.table.RPKBlockInventoryChangeTable
-import com.rpkit.blocklog.bukkit.listener.BlockBreakListener
-import com.rpkit.blocklog.bukkit.listener.BlockBurnListener
-import com.rpkit.blocklog.bukkit.listener.BlockFormListener
-import com.rpkit.blocklog.bukkit.listener.BlockFromToListener
-import com.rpkit.blocklog.bukkit.listener.BlockIgniteListener
-import com.rpkit.blocklog.bukkit.listener.BlockPistonExtendListener
-import com.rpkit.blocklog.bukkit.listener.BlockPistonRetractListener
-import com.rpkit.blocklog.bukkit.listener.BlockPlaceListener
-import com.rpkit.blocklog.bukkit.listener.BlockSpreadListener
-import com.rpkit.blocklog.bukkit.listener.EntityBlockFormListener
-import com.rpkit.blocklog.bukkit.listener.EntityChangeBlockListener
-import com.rpkit.blocklog.bukkit.listener.EntityExplodeListener
-import com.rpkit.blocklog.bukkit.listener.InventoryClickListener
-import com.rpkit.blocklog.bukkit.listener.InventoryDragListener
+import com.rpkit.blocklog.bukkit.listener.*
 import com.rpkit.blocklog.bukkit.messages.BlockLoggingMessages
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
@@ -127,11 +114,11 @@ class RPKBlockLoggingBukkit : RPKBukkitPlugin() {
                 BlockFromToListener(this),
                 BlockIgniteListener(this),
                 BlockPistonExtendListener(this),
-                BlockPistonRetractListener(),
+                BlockPistonRetractListener(this),
                 BlockPlaceListener(this),
                 BlockSpreadListener(this),
                 EntityBlockFormListener(this),
-                EntityChangeBlockListener(),
+                EntityChangeBlockListener(this),
                 EntityExplodeListener(this),
                 InventoryClickListener(this),
                 InventoryDragListener(this)

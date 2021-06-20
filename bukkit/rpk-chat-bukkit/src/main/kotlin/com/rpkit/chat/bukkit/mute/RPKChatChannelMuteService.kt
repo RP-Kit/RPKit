@@ -23,6 +23,7 @@ import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelMuteEvent
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelUnmuteEvent
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides chat channel mute related services.
@@ -34,17 +35,19 @@ class RPKChatChannelMuteService(override val plugin: RPKChatBukkit) : Service {
      * @param minecraftProfile The Minecraft profile
      * @param chatChannel The chat channel
      */
-    fun addChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel) {
-        if (!hasMinecraftProfileMutedChatChannel(minecraftProfile, chatChannel)) {
-            val event = RPKBukkitChatChannelMuteEvent(minecraftProfile, chatChannel)
-            plugin.server.pluginManager.callEvent(event)
-            if (event.isCancelled) return
-            plugin.database.getTable(RPKChatChannelMuteTable::class.java).insert(
+    fun addChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): CompletableFuture<Void> {
+        return hasMinecraftProfileMutedChatChannel(minecraftProfile, chatChannel).thenAcceptAsync { hasMuted ->
+            if (!hasMuted) {
+                val event = RPKBukkitChatChannelMuteEvent(minecraftProfile, chatChannel, true)
+                plugin.server.pluginManager.callEvent(event)
+                if (event.isCancelled) return@thenAcceptAsync
+                plugin.database.getTable(RPKChatChannelMuteTable::class.java).insert(
                     RPKChatChannelMute(
-                            minecraftProfile = event.minecraftProfile,
-                            chatChannel = event.chatChannel
+                        minecraftProfile = event.minecraftProfile,
+                        chatChannel = event.chatChannel
                     )
-            )
+                ).join()
+            }
         }
     }
 
@@ -53,14 +56,16 @@ class RPKChatChannelMuteService(override val plugin: RPKChatBukkit) : Service {
      * @param minecraftProfile The Minecraft profile
      * @param chatChannel The chat channel
      */
-    fun removeChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel, isAsync: Boolean = false) {
-        val event = RPKBukkitChatChannelUnmuteEvent(minecraftProfile, chatChannel, isAsync)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val chatChannelMuteTable = plugin.database.getTable(RPKChatChannelMuteTable::class.java)
-        val chatChannelMute = chatChannelMuteTable.get(event.minecraftProfile, event.chatChannel)
-        if (chatChannelMute != null) {
-            chatChannelMuteTable.delete(chatChannelMute)
+    fun removeChatChannelMute(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitChatChannelUnmuteEvent(minecraftProfile, chatChannel, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val chatChannelMuteTable = plugin.database.getTable(RPKChatChannelMuteTable::class.java)
+            val chatChannelMute = chatChannelMuteTable.get(event.minecraftProfile, event.chatChannel).join()
+            if (chatChannelMute != null) {
+                chatChannelMuteTable.delete(chatChannelMute).join()
+            }
         }
     }
 
@@ -71,8 +76,8 @@ class RPKChatChannelMuteService(override val plugin: RPKChatBukkit) : Service {
      * @param chatChannel The chat channel
      * @return Whether the Minecraft profile has muted the chat channel
      */
-    fun hasMinecraftProfileMutedChatChannel(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): Boolean {
-        return plugin.database.getTable(RPKChatChannelMuteTable::class.java).get(minecraftProfile, chatChannel) != null
+    fun hasMinecraftProfileMutedChatChannel(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel): CompletableFuture<Boolean> {
+        return plugin.database.getTable(RPKChatChannelMuteTable::class.java).get(minecraftProfile, chatChannel).thenApply { it != null }
     }
 
 }

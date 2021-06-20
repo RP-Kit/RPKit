@@ -18,10 +18,11 @@ package com.rpkit.skills.bukkit.skills
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKSkillPointService : Service {
 
-    fun getSkillPoints(character: RPKCharacter, skillType: RPKSkillType): Int
+    fun getSkillPoints(character: RPKCharacter, skillType: RPKSkillType): CompletableFuture<Int>
 
 }

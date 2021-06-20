@@ -18,12 +18,13 @@ package com.rpkit.monsters.bukkit.monsterspawnarea
 
 import com.rpkit.core.service.Service
 import org.bukkit.Location
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKMonsterSpawnAreaService : Service {
 
     fun getSpawnArea(location: Location): RPKMonsterSpawnArea?
-    fun addSpawnArea(monsterSpawnArea: RPKMonsterSpawnArea)
-    fun removeSpawnArea(monsterSpawnArea: RPKMonsterSpawnArea)
+    fun addSpawnArea(monsterSpawnArea: RPKMonsterSpawnArea): CompletableFuture<Void>
+    fun removeSpawnArea(monsterSpawnArea: RPKMonsterSpawnArea): CompletableFuture<Void>
 
 }

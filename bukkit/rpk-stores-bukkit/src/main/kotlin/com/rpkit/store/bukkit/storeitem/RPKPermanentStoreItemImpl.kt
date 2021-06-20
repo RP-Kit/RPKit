@@ -18,7 +18,7 @@ package com.rpkit.store.bukkit.storeitem
 
 
 class RPKPermanentStoreItemImpl(
-        override var id: Int? = null,
+        override var id: RPKStoreItemId? = null,
         override val plugin: String,
         override val identifier: String,
         override val description: String,

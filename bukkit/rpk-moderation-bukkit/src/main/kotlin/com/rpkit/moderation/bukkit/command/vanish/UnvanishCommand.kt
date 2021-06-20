@@ -42,7 +42,7 @@ class UnvanishCommand(private val plugin: RPKModerationBukkit) : CommandExecutor
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -52,8 +52,9 @@ class UnvanishCommand(private val plugin: RPKModerationBukkit) : CommandExecutor
             sender.sendMessage(plugin.messages["no-vanish-service"])
             return true
         }
-        vanishService.setVanished(minecraftProfile, false)
-        sender.sendMessage(plugin.messages["unvanish-valid"])
+        vanishService.setVanished(minecraftProfile, false).thenRun {
+            sender.sendMessage(plugin.messages["unvanish-valid"])
+        }
         return true
     }
 

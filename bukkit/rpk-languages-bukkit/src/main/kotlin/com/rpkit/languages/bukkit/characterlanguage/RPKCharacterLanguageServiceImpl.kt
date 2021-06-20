@@ -20,28 +20,33 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.languages.bukkit.RPKLanguagesBukkit
 import com.rpkit.languages.bukkit.database.table.RPKCharacterLanguageTable
 import com.rpkit.languages.bukkit.language.RPKLanguage
+import java.util.concurrent.CompletableFuture
 import kotlin.math.max
 import kotlin.math.min
 
 class RPKCharacterLanguageServiceImpl(override val plugin: RPKLanguagesBukkit) : RPKCharacterLanguageService {
-    override fun getCharacterLanguageUnderstanding(character: RPKCharacter, language: RPKLanguage): Float {
+    override fun getCharacterLanguageUnderstanding(character: RPKCharacter, language: RPKLanguage): CompletableFuture<Float> {
         val race = character.race
-        return plugin.database.getTable(RPKCharacterLanguageTable::class.java).get(character, language)?.understanding
-                ?: if (race != null) language.getBaseUnderstanding(race) else 0f
+        return plugin.database.getTable(RPKCharacterLanguageTable::class.java)[character, language]
+            .thenApply { it?.understanding ?: if (race != null) language.getBaseUnderstanding(race) else 0f }
+
     }
 
-    override fun setCharacterLanguageUnderstanding(character: RPKCharacter, language: RPKLanguage, understanding: Float) {
+    override fun setCharacterLanguageUnderstanding(character: RPKCharacter, language: RPKLanguage, understanding: Float): CompletableFuture<Void> {
         val characterLanguageTable = plugin.database.getTable(RPKCharacterLanguageTable::class.java)
-        val characterLanguage = characterLanguageTable.get(character, language)
-        if (characterLanguage != null) {
-            characterLanguage.understanding = max(min(understanding, 100f), 0f)
-            characterLanguageTable.update(characterLanguage)
-        } else {
-            characterLanguageTable.insert(RPKCharacterLanguage(
-                    character = character,
-                    language = language,
-                    understanding = max(min(understanding, 100f), 0f)
-            ))
+        return characterLanguageTable[character, language].thenAcceptAsync { characterLanguage ->
+            if (characterLanguage != null) {
+                characterLanguage.understanding = max(min(understanding, 100f), 0f)
+                characterLanguageTable.update(characterLanguage).join()
+            } else {
+                characterLanguageTable.insert(
+                    RPKCharacterLanguage(
+                        character = character,
+                        language = language,
+                        understanding = max(min(understanding, 100f), 0f)
+                    )
+                ).join()
+            }
         }
     }
 }

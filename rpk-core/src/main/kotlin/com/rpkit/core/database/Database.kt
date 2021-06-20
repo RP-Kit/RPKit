@@ -59,10 +59,14 @@ class Database(
         hikariConfig.minimumIdle = connectionProperties.minimumIdle
         dataSource = HikariDataSource(hikariConfig)
         Thread.currentThread().contextClassLoader = flywayClassLoader
-        val flyway = Flyway.configure().dataSource(dataSource)
-                .locations("classpath:${migrationProperties.location}")
-                .table(migrationProperties.schemaHistoryTable)
-                .load()
+        val flyway = Flyway.configure()
+            .dataSource(dataSource)
+            .locations("classpath:${migrationProperties.location}")
+            .table(migrationProperties.schemaHistoryTable)
+            .baselineOnMigrate(true)
+            .baselineVersion("0")
+            .validateOnMigrate(false)
+            .load()
         flyway.migrate()
         Thread.currentThread().contextClassLoader = oldClassLoader
         cacheManager = RPKCacheManagerImpl()

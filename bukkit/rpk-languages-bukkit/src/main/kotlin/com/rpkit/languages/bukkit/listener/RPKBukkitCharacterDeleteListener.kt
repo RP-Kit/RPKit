@@ -27,8 +27,9 @@ class RPKBukkitCharacterDeleteListener(private val plugin: RPKLanguagesBukkit) :
     @EventHandler
     fun onCharacterDelete(event: RPKBukkitCharacterDeleteEvent) {
         val characterLanguageTable = plugin.database.getTable(RPKCharacterLanguageTable::class.java)
-        val characterLanguages = characterLanguageTable.get(event.character)
-        characterLanguages.forEach { characterLanguageTable.delete(it) }
+        characterLanguageTable.get(event.character).thenAccept { characterLanguages ->
+            characterLanguages.forEach { characterLanguageTable.delete(it).join() }
+        }
     }
 
 }

@@ -39,11 +39,12 @@ class SignChangeListener(private val plugin: RPKTravelBukkit) : Listener {
             event.player.sendMessage(plugin.messages.noWarpService)
             return
         }
-        val warp = warpService.getWarp(RPKWarpName(event.getLine(1) ?: ""))
-        if (warp == null) {
-            event.block.breakNaturally()
-            event.player.sendMessage(plugin.messages.warpSignInvalidWarp)
-            return
+        warpService.getWarp(RPKWarpName(event.getLine(1) ?: "")).thenAccept { warp ->
+            if (warp == null) {
+                event.block.breakNaturally()
+                event.player.sendMessage(plugin.messages.warpSignInvalidWarp)
+                return@thenAccept
+            }
         }
         event.setLine(0, "$GREEN[warp]")
         event.player.sendMessage(plugin.messages.warpSignValid)

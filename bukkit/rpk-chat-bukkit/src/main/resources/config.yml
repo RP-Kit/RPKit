@@ -308,7 +308,7 @@ prefixes:
   dev: '&4[Developer]'
   et: '&3[Event Team]'
 chat-group:
-  format: '&8[$group] $sender-player: &f$message'
+  format: '&8[${group}] ${sender-player}: &f${message}'
 caching:
   rpkit_chat_group_invite:
     id:

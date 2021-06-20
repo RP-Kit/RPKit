@@ -57,7 +57,7 @@ class BindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -67,22 +67,25 @@ class BindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
         val item = sender.inventory.itemInMainHand
-        if (skillService.getSkillBinding(character, item) != null) {
+        if (skillService.getPreloadedSkillBinding(character, item) != null) {
             sender.sendMessage(plugin.messages["bind-skill-invalid-binding-already-exists"])
             return true
         }
-        skillService.setSkillBinding(character, item, skill)
-        sender.sendMessage(plugin.messages["bind-skill-valid", mapOf(
-                "character" to character.name,
-                "item" to item.type.toString().toLowerCase().replace('_', ' '),
-                "skill" to skill.name.value
-        )])
+        skillService.setSkillBinding(character, item, skill).thenRun {
+            sender.sendMessage(
+                plugin.messages["bind-skill-valid", mapOf(
+                    "character" to character.name,
+                    "item" to item.type.toString().toLowerCase().replace('_', ' '),
+                    "skill" to skill.name.value
+                )]
+            )
+        }
         return true
     }
 }

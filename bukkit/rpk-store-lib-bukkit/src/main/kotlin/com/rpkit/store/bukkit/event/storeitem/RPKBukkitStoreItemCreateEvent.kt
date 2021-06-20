@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitStoreItemCreateEvent(
-        override val storeItem: RPKStoreItem
-) : RPKBukkitEvent(), RPKStoreItemCreateEvent, Cancellable {
+        override val storeItem: RPKStoreItem,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKStoreItemCreateEvent, Cancellable {
 
     companion object {
         @JvmStatic

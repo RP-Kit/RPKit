@@ -22,8 +22,9 @@ import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 
 class RPKBukkitAuctionBiddingOpenEvent(
-        override val auction: RPKAuction
-) : RPKBukkitEvent(), RPKAuctionBiddingOpenEvent, Cancellable {
+        override val auction: RPKAuction,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKAuctionBiddingOpenEvent, Cancellable {
 
     companion object {
         @JvmStatic

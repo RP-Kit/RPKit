@@ -21,6 +21,7 @@ import com.rpkit.auctions.bukkit.auction.RPKAuctionService
 import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.core.service.Services
 import org.bukkit.ChatColor.GREEN
+import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.SignChangeEvent
@@ -51,15 +52,29 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit) : Listener {
                     event.player.sendMessage(plugin.messages.auctionSignInvalidIdNotANumber)
                     return
                 }
-                val auction = auctionService.getAuction(RPKAuctionId(auctionId))
-                if (auction == null) {
-                    event.block.breakNaturally()
-                    event.player.sendMessage(plugin.messages.auctionSignInvalidAuctionDoesNotExist)
-                    return
-                } else {
-                    event.setLine(2, auction.item.amount.toString() + " x " + auction.item.type.toString().toLowerCase().replace('_', ' '))
-                    event.setLine(3, ((auction.bids.maxByOrNull(RPKBid::amount)
-                            ?.amount ?: auction.startPrice) + auction.minimumBidIncrement).toString())
+                auctionService.getAuction(RPKAuctionId(auctionId)).thenAccept { auction ->
+                    if (auction == null) {
+                        event.block.breakNaturally()
+                        event.player.sendMessage(plugin.messages.auctionSignInvalidAuctionDoesNotExist)
+                        return@thenAccept
+                    } else {
+                        auction.bids.thenAccept { bids ->
+                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                val data = event.block.state
+                                if (data is Sign) {
+                                    data.setLine(2,
+                                        auction.item.amount.toString() + " x " + auction.item.type.toString()
+                                            .toLowerCase().replace('_', ' ')
+                                    )
+                                    data.setLine(
+                                        3, ((bids.maxByOrNull(RPKBid::amount)
+                                            ?.amount ?: auction.startPrice) + auction.minimumBidIncrement).toString()
+                                    )
+                                    data.update()
+                                }
+                            })
+                        }
+                    }
                 }
             } catch (exception: NumberFormatException) {
                 event.block.breakNaturally()

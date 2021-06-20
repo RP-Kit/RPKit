@@ -23,24 +23,27 @@ import com.rpkit.core.service.Services
 import com.rpkit.drink.bukkit.drink.RPKDrinkService
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture
 
 @SerializableAs("DrunkenSlurComponent")
 class DrunkenSlurComponent(val drunkenness: Int) : DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
-        val minecraftProfile = context.senderMinecraftProfile ?: return context
-        val characterService = Services[RPKCharacterService::class.java] ?: return context
-        val drinkService = Services[RPKDrinkService::class.java] ?: return context
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return context
-        if (drinkService.getDrunkenness(character) >= drunkenness) {
-            context.message = context.message.replace(Regex("s([^h])"), "sh$1")
+    override fun process(context: DirectedPreFormatMessageContext): CompletableFuture<DirectedPreFormatMessageContext> {
+        val minecraftProfile = context.senderMinecraftProfile ?: return CompletableFuture.completedFuture(context)
+        val characterService = Services[RPKCharacterService::class.java] ?: return CompletableFuture.completedFuture(context)
+        val drinkService = Services[RPKDrinkService::class.java] ?: return CompletableFuture.completedFuture(context)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return CompletableFuture.completedFuture(context)
+        return CompletableFuture.supplyAsync {
+            if (drinkService.getDrunkenness(character).join() >= drunkenness) {
+                context.message = context.message.replace(Regex("s([^h])"), "sh$1")
+            }
+            return@supplyAsync context
         }
-        return context
     }
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-                Pair("drunkenness", drunkenness)
+            "drunkenness" to drunkenness
         )
     }
 
@@ -48,7 +51,7 @@ class DrunkenSlurComponent(val drunkenness: Int) : DirectedPreFormatPipelineComp
         @JvmStatic
         fun deserialize(serialized: MutableMap<String, Any>): DrunkenSlurComponent {
             return DrunkenSlurComponent(
-                    serialized["drunkenness"] as Int
+                serialized["drunkenness"] as Int
             )
         }
     }

@@ -20,24 +20,27 @@ import com.rpkit.core.service.Service
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.database.table.RPKLogMessagesEnabledTable
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 
 class RPKLogMessageService(override val plugin: RPKEssentialsBukkit) : Service {
 
-    fun isLogMessagesEnabled(minecraftProfile: RPKMinecraftProfile): Boolean {
-        return plugin.database.getTable(RPKLogMessagesEnabledTable::class.java)[minecraftProfile] != null
+    fun isLogMessagesEnabled(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Boolean> {
+        return plugin.database.getTable(RPKLogMessagesEnabledTable::class.java)[minecraftProfile].thenApply { it != null }
     }
 
-    fun setLogMessagesEnabled(minecraftProfile: RPKMinecraftProfile, enabled: Boolean) {
-        val logMessagesEnabledTable = plugin.database.getTable(RPKLogMessagesEnabledTable::class.java)
-        val logMessagesEnabled = logMessagesEnabledTable[minecraftProfile]
-        if (logMessagesEnabled != null) {
-            if (!enabled) {
-                logMessagesEnabledTable.delete(logMessagesEnabled)
-            }
-        } else {
-            if (enabled) {
-                logMessagesEnabledTable.insert(RPKLogMessagesEnabled(minecraftProfile))
+    fun setLogMessagesEnabled(minecraftProfile: RPKMinecraftProfile, enabled: Boolean): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val logMessagesEnabledTable = plugin.database.getTable(RPKLogMessagesEnabledTable::class.java)
+            val logMessagesEnabled = logMessagesEnabledTable[minecraftProfile].join()
+            if (logMessagesEnabled != null) {
+                if (!enabled) {
+                    logMessagesEnabledTable.delete(logMessagesEnabled).join()
+                }
+            } else {
+                if (enabled) {
+                    logMessagesEnabledTable.insert(RPKLogMessagesEnabled(minecraftProfile)).join()
+                }
             }
         }
     }

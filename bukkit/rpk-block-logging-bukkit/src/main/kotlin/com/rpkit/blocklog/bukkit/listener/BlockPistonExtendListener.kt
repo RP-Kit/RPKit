@@ -19,6 +19,7 @@ package com.rpkit.blocklog.bukkit.listener
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockChangeImpl
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
 import com.rpkit.core.service.Services
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
@@ -36,8 +37,8 @@ class BlockPistonExtendListener(private val plugin: RPKBlockLoggingBukkit) : Lis
         var block = event.block
         var count = 0
         while (block.type != Material.AIR && count < 12) {
-            val blockHistory = blockHistoryService.getBlockHistory(block)
-            val blockChange = RPKBlockChangeImpl(
+            blockHistoryService.getBlockHistory(block.toRPKBlockLocation()).thenAccept { blockHistory ->
+                val blockChange = RPKBlockChangeImpl(
                     blockHistory = blockHistory,
                     time = LocalDateTime.now(),
                     profile = null,
@@ -46,8 +47,11 @@ class BlockPistonExtendListener(private val plugin: RPKBlockLoggingBukkit) : Lis
                     from = block.type,
                     to = block.getRelative(event.direction.oppositeFace).type,
                     reason = "PISTON"
-            )
-            blockHistoryService.addBlockChange(blockChange)
+                )
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    blockHistoryService.addBlockChange(blockChange)
+                })
+            }
             block = block.getRelative(event.direction)
             count++
         }

@@ -22,6 +22,7 @@ import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldown
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.util.concurrent.CompletableFuture
 
 
 class RPKNewCharacterCooldownTable(private val database: Database, private val plugin: RPKCharactersBukkit) : Table {
@@ -37,60 +38,68 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
         null
     }
 
-    fun insert(entity: RPKNewCharacterCooldown) {
-        val profileId = entity.profile.id ?: return
-        database.create
+    fun insert(entity: RPKNewCharacterCooldown): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_NEW_CHARACTER_COOLDOWN,
-                        RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID,
-                        RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP
+                    RPKIT_NEW_CHARACTER_COOLDOWN,
+                    RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID,
+                    RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP
                 )
                 .values(
                     profileId.value,
                     entity.cooldownExpiryTime
                 )
                 .execute()
-        profileCache?.set(profileId.value, entity)
+            profileCache?.set(profileId.value, entity)
+        }
     }
 
-    fun update(entity: RPKNewCharacterCooldown) {
-        val profileId = entity.profile.id ?: return
-        database.create
+    fun update(entity: RPKNewCharacterCooldown): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_NEW_CHARACTER_COOLDOWN)
                 .set(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP, entity.cooldownExpiryTime)
                 .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
                 .execute()
-        profileCache?.set(profileId.value, entity)
-    }
-
-    operator fun get(profile: RPKProfile): RPKNewCharacterCooldown? {
-        val profileId = profile.id ?: return null
-        if (profileCache?.containsKey(profileId.value) == true) {
-            return profileCache[profileId.value]
+            profileCache?.set(profileId.value, entity)
         }
-        val result = database.create
-            .select(
-                RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID,
-                RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP
-            )
-            .from(RPKIT_NEW_CHARACTER_COOLDOWN)
-            .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
-            .fetchOne() ?: return null
-        val newCharacterCooldown = RPKNewCharacterCooldown(
-            profile,
-            result.get(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP)
-        )
-        profileCache?.set(profileId.value, newCharacterCooldown)
-        return newCharacterCooldown
     }
 
-    fun delete(entity: RPKNewCharacterCooldown) {
-        val profileId = entity.profile.id ?: return
-        database.create
+    operator fun get(profile: RPKProfile): CompletableFuture<RPKNewCharacterCooldown?> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(null)
+        if (profileCache?.containsKey(profileId.value) == true) {
+            return CompletableFuture.completedFuture(profileCache[profileId.value])
+        }
+        return CompletableFuture.supplyAsync {
+            val result = database.create
+                .select(
+                    RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID,
+                    RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP
+                )
+                .from(RPKIT_NEW_CHARACTER_COOLDOWN)
+                .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
+                .fetchOne() ?: return@supplyAsync null
+            val newCharacterCooldown = RPKNewCharacterCooldown(
+                profile,
+                result.get(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP)
+            )
+            profileCache?.set(profileId.value, newCharacterCooldown)
+            return@supplyAsync newCharacterCooldown
+        }
+    }
+
+    fun delete(entity: RPKNewCharacterCooldown): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_NEW_CHARACTER_COOLDOWN)
                 .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
                 .execute()
-        profileCache?.remove(profileId.value)
+            profileCache?.remove(profileId.value)
+        }
     }
 
 }

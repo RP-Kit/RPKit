@@ -17,13 +17,7 @@ package com.rpkit.permissions.bukkit.vault
 
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsLibBukkit
-import com.rpkit.permissions.bukkit.group.RPKGroup
-import com.rpkit.permissions.bukkit.group.RPKGroupName
-import com.rpkit.permissions.bukkit.group.RPKGroupService
-import com.rpkit.permissions.bukkit.group.addGroup
-import com.rpkit.permissions.bukkit.group.groups
-import com.rpkit.permissions.bukkit.group.hasPermission
-import com.rpkit.permissions.bukkit.group.removeGroup
+import com.rpkit.permissions.bukkit.group.*
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftUsername
@@ -44,10 +38,13 @@ class RPKPermissionsVaultPermissions(private val plugin: RPKPermissionsLibBukkit
     }
 
     override fun playerHas(worldName: String, playerName: String, permission: String): Boolean {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (playerHas)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return false
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)) ?: return false
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)).join() ?: return false
         val profile = minecraftProfile.profile as? RPKProfile ?: return false
-        return profile.hasPermission(permission)
+        return profile.hasPermission(permission).join()
     }
 
     override fun playerAdd(worldName: String, playerName: String, permission: String): Boolean {
@@ -59,6 +56,9 @@ class RPKPermissionsVaultPermissions(private val plugin: RPKPermissionsLibBukkit
     }
 
     override fun groupHas(worldName: String, groupName: String, permission: String): Boolean {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (groupHas)")
+        }
         val groupService = Services[RPKGroupService::class.java] ?: return false
         val group = groupService.getGroup(RPKGroupName(groupName)) ?: return false
         return group.hasPermission(permission)
@@ -73,18 +73,24 @@ class RPKPermissionsVaultPermissions(private val plugin: RPKPermissionsLibBukkit
     }
 
     override fun playerInGroup(worldName: String, playerName: String, groupName: String): Boolean {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (playerInGroup)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return false
         val groupService = Services[RPKGroupService::class.java] ?: return false
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)) ?: return false
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)).join() ?: return false
         val profile = minecraftProfile.profile as? RPKProfile ?: return false
         val group = groupService.getGroup(RPKGroupName(groupName)) ?: return false
-        return profile.groups.map(RPKGroup::name).contains(group.name)
+        return profile.groups.join().map(RPKGroup::name).contains(group.name)
     }
 
     override fun playerAddGroup(worldName: String, playerName: String, groupName: String): Boolean {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (playerAddGroup)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return false
         val groupService = Services[RPKGroupService::class.java] ?: return false
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)) ?: return false
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)).join() ?: return false
         val profile = minecraftProfile.profile as? RPKProfile ?: return false
         val group = groupService.getGroup(RPKGroupName(groupName)) ?: return false
         profile.addGroup(group)
@@ -92,9 +98,12 @@ class RPKPermissionsVaultPermissions(private val plugin: RPKPermissionsLibBukkit
     }
 
     override fun playerRemoveGroup(worldName: String, playerName: String, groupName: String): Boolean {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (playerRemoveGroup)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return false
         val groupService = Services[RPKGroupService::class.java] ?: return false
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)) ?: return false
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)).join() ?: return false
         val profile = minecraftProfile.profile as? RPKProfile ?: return false
         val group = groupService.getGroup(RPKGroupName(groupName)) ?: return false
         profile.removeGroup(group)
@@ -102,20 +111,29 @@ class RPKPermissionsVaultPermissions(private val plugin: RPKPermissionsLibBukkit
     }
 
     override fun getPlayerGroups(worldName: String, playerName: String): Array<String> {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (getPlayerGroups)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return emptyArray()
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)) ?: return emptyArray()
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)).join() ?: return emptyArray()
         val profile = minecraftProfile.profile as? RPKProfile ?: return emptyArray()
-        return profile.groups.map { group -> group.name.value }.toTypedArray()
+        return profile.groups.join().map { group -> group.name.value }.toTypedArray()
     }
 
     override fun getPrimaryGroup(worldName: String, playerName: String): String? {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (getPrimaryGroup)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return null
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)) ?: return null
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(playerName)).join() ?: return null
         val profile = minecraftProfile.profile as? RPKProfile ?: return null
-        return profile.groups[0].name.value
+        return profile.groups.join()[0].name.value
     }
 
     override fun getGroups(): Array<String> {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (getGroups)")
+        }
         val groupService = Services[RPKGroupService::class.java] ?: return emptyArray()
         return groupService.groups.map { group -> group.name.value }.toTypedArray()
     }

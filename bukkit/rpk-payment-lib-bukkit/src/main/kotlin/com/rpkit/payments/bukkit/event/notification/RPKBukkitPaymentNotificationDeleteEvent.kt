@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitPaymentNotificationDeleteEvent(
-        override val paymentNotification: RPKPaymentNotification
-) : RPKBukkitEvent(), RPKPaymentNotificationDeleteEvent, Cancellable {
+        override val paymentNotification: RPKPaymentNotification,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKPaymentNotificationDeleteEvent, Cancellable {
 
     companion object {
         @JvmStatic

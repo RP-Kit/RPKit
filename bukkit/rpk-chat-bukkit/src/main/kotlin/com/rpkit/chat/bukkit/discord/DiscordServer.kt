@@ -31,13 +31,7 @@ import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionAddEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import net.dv8tion.jda.api.requests.GatewayIntent.DIRECT_MESSAGES
-import net.dv8tion.jda.api.requests.GatewayIntent.DIRECT_MESSAGE_REACTIONS
-import net.dv8tion.jda.api.requests.GatewayIntent.GUILD_EMOJIS
-import net.dv8tion.jda.api.requests.GatewayIntent.GUILD_MEMBERS
-import net.dv8tion.jda.api.requests.GatewayIntent.GUILD_MESSAGES
-import net.dv8tion.jda.api.requests.GatewayIntent.GUILD_PRESENCES
-import net.dv8tion.jda.api.requests.GatewayIntent.GUILD_VOICE_STATES
+import net.dv8tion.jda.api.requests.GatewayIntent.*
 import org.bukkit.ChatColor
 
 class DiscordServer(
@@ -88,11 +82,11 @@ class DiscordServer(
             }
         } else {
             val discordProfileService = Services[RPKDiscordProfileService::class.java] ?: return
-            val discordProfile = discordProfileService.getDiscordProfile(DiscordUserId(author.idLong))
-            val profile = discordProfile.profile
-            val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
-            val chatChannel = chatChannelService.getChatChannelFromDiscordChannel(DiscordChannel(event.channel.idLong))
-            chatChannel?.sendMessage(
+            discordProfileService.getDiscordProfile(DiscordUserId(author.idLong)).thenAccept { discordProfile ->
+                val profile = discordProfile.profile
+                val chatChannelService = Services[RPKChatChannelService::class.java] ?: return@thenAccept
+                val chatChannel = chatChannelService.getChatChannelFromDiscordChannel(DiscordChannel(event.channel.idLong))
+                chatChannel?.sendMessage(
                     profile,
                     null,
                     message,
@@ -101,7 +95,8 @@ class DiscordServer(
                     chatChannel.directedPostFormatPipeline,
                     chatChannel.undirectedPipeline.filter { it !is DiscordComponent },
                     true
-            )
+                )
+            }
         }
     }
 
@@ -110,22 +105,27 @@ class DiscordServer(
         if (event.reaction.reactionEmote.emoji != "\u2705") return
         val messageId = event.messageIdLong
         val discordService = Services[RPKDiscordService::class.java] ?: return
-        val profile = discordService.getMessageProfileLink(messageId) ?: return
-        val discordProfileService = Services[RPKDiscordProfileService::class.java] ?: return
-        val user = event.user ?: return
-        val discordProfile = discordProfileService.getDiscordProfile(DiscordUserId(user.idLong))
-        discordProfile.profile = profile
-        discordProfileService.updateDiscordProfile(discordProfile)
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        user.openPrivateChannel().queue { privateChannel ->
-            privateChannel.sendMessage("Your Discord profile has been successfully linked to ${profile.name}.").queue()
-            minecraftProfileService.getMinecraftProfiles(profile)
-                    .filter { minecraftProfile -> minecraftProfile.isOnline }
-                    .forEach { minecraftProfile ->
-                        minecraftProfile.sendMessage(plugin.messages["account-link-discord-successful", mapOf(
-                                "discord-tag" to user.asTag
-                        )])
+        discordService.getMessageProfileLink(messageId).thenAccept getMessageProfileLink@{ profile ->
+            if (profile == null) return@getMessageProfileLink
+            val discordProfileService = Services[RPKDiscordProfileService::class.java] ?: return@getMessageProfileLink
+            val user = event.user ?: return@getMessageProfileLink
+            discordProfileService.getDiscordProfile(DiscordUserId(user.idLong)).thenAccept getDiscordProfile@{ discordProfile ->
+                discordProfile.profile = profile
+                discordProfileService.updateDiscordProfile(discordProfile)
+                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@getDiscordProfile
+                user.openPrivateChannel().queue { privateChannel ->
+                    privateChannel.sendMessage("Your Discord profile has been successfully linked to ${profile.name}.").queue()
+                    minecraftProfileService.getMinecraftProfiles(profile).thenAccept { minecraftProfiles ->
+                        minecraftProfiles
+                            .filter { minecraftProfile -> minecraftProfile.isOnline }
+                            .forEach { minecraftProfile ->
+                                minecraftProfile.sendMessage(plugin.messages["account-link-discord-successful", mapOf(
+                                    "discord-tag" to user.asTag
+                                )])
+                            }
                     }
+                }
+            }
         }
     }
 
@@ -152,6 +152,10 @@ class DiscordServer(
                 .firstOrNull()
                 ?.idLong
                 ?.let(::DiscordChannel)
+    }
+
+    fun disconnect() {
+        jda.shutdown()
     }
 
 }

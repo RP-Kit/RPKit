@@ -100,7 +100,7 @@ class RPKModerationBukkit : RPKBukkitPlugin() {
                             "SQLITE" -> "com/rpkit/moderation/migrations/sqlite"
                             else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
                         },
-                        "flyway_schema_history_players"
+                        "flyway_schema_history_moderation"
                 ),
                 classLoader
         )

@@ -31,10 +31,7 @@ import com.rpkit.locks.bukkit.database.table.RPKPlayerGettingKeyTable
 import com.rpkit.locks.bukkit.database.table.RPKPlayerUnclaimingTable
 import com.rpkit.locks.bukkit.keyring.RPKKeyringService
 import com.rpkit.locks.bukkit.keyring.RPKKeyringServiceImpl
-import com.rpkit.locks.bukkit.listener.CraftItemListener
-import com.rpkit.locks.bukkit.listener.InventoryClickListener
-import com.rpkit.locks.bukkit.listener.InventoryCloseListener
-import com.rpkit.locks.bukkit.listener.PlayerInteractListener
+import com.rpkit.locks.bukkit.listener.*
 import com.rpkit.locks.bukkit.lock.RPKLockService
 import com.rpkit.locks.bukkit.lock.RPKLockServiceImpl
 import com.rpkit.locks.bukkit.messages.LocksMessages
@@ -105,6 +102,7 @@ class RPKLocksBukkit : RPKBukkitPlugin() {
         database.addTable(RPKPlayerUnclaimingTable(database, this))
 
         val lockService = RPKLockServiceImpl(this)
+        lockService.loadData()
         Services[RPKLockService::class.java] = lockService
         Services[RPKKeyringService::class.java] = RPKKeyringServiceImpl(this)
         val lockRecipe = ShapedRecipe(NamespacedKey(this, "lock"), lockService.lockItem)
@@ -123,10 +121,13 @@ class RPKLocksBukkit : RPKBukkitPlugin() {
 
     fun registerListeners() {
         registerListeners(
-                CraftItemListener(this),
-                InventoryClickListener(this),
-                InventoryCloseListener(this),
-                PlayerInteractListener(this)
+            CraftItemListener(this),
+            InventoryClickListener(this),
+            InventoryCloseListener(this),
+            PlayerInteractListener(this),
+            AsyncPlayerPreLoginListener(),
+            PlayerQuitListener(),
+            RPKCharacterSwitchListener()
         )
     }
 

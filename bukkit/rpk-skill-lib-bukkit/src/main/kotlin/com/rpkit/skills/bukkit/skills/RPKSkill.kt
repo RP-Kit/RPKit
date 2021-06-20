@@ -16,6 +16,7 @@
 package com.rpkit.skills.bukkit.skills
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKSkill {
@@ -26,7 +27,7 @@ interface RPKSkill {
 
     fun use(character: RPKCharacter)
 
-    fun canUse(character: RPKCharacter): Boolean
+    fun canUse(character: RPKCharacter): CompletableFuture<Boolean>
 
 }
 
@@ -34,6 +35,6 @@ fun RPKCharacter.use(skill: RPKSkill) {
     skill.use(this)
 }
 
-fun RPKCharacter.canUse(skill: RPKSkill): Boolean {
+fun RPKCharacter.canUse(skill: RPKSkill): CompletableFuture<Boolean> {
     return skill.canUse(this)
 }

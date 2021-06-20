@@ -27,6 +27,7 @@ import com.rpkit.moderation.bukkit.warning.RPKWarningImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
+import java.util.concurrent.CompletableFuture
 
 
 class RPKWarningTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
@@ -42,16 +43,17 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
         null
     }
 
-    fun insert(entity: RPKWarning) {
-        val profileId = entity.profile.id ?: return
-        val issuerId = entity.issuer.id ?: return
-        database.create
+    fun insert(entity: RPKWarning): CompletableFuture<Void> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        val issuerId = entity.issuer.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_WARNING,
-                        RPKIT_WARNING.REASON,
-                        RPKIT_WARNING.PROFILE_ID,
-                        RPKIT_WARNING.ISSUER_ID,
-                        RPKIT_WARNING.TIME
+                    RPKIT_WARNING,
+                    RPKIT_WARNING.REASON,
+                    RPKIT_WARNING.PROFILE_ID,
+                    RPKIT_WARNING.ISSUER_ID,
+                    RPKIT_WARNING.TIME
                 )
                 .values(
                     entity.reason,
@@ -60,16 +62,18 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                     entity.time
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKWarningId(id)
-        cache?.set(id, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKWarningId(id)
+            cache?.set(id, entity)
+        }
     }
 
-    fun update(entity: RPKWarning) {
-        val id = entity.id ?: return
-        val profileId = entity.profile.id ?: return
-        val issuerId = entity.issuer.id ?: return
-        database.create
+    fun update(entity: RPKWarning): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        val issuerId = entity.issuer.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_WARNING)
                 .set(RPKIT_WARNING.REASON, entity.reason)
                 .set(RPKIT_WARNING.PROFILE_ID, profileId.value)
@@ -77,59 +81,68 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                 .set(RPKIT_WARNING.TIME, entity.time)
                 .where(RPKIT_WARNING.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKWarningId): RPKWarning? {
-        val result = database.create
+    operator fun get(id: RPKWarningId): CompletableFuture<RPKWarning?> {
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(
-                        RPKIT_WARNING.REASON,
-                        RPKIT_WARNING.PROFILE_ID,
-                        RPKIT_WARNING.ISSUER_ID,
-                        RPKIT_WARNING.TIME
+                    RPKIT_WARNING.REASON,
+                    RPKIT_WARNING.PROFILE_ID,
+                    RPKIT_WARNING.ISSUER_ID,
+                    RPKIT_WARNING.TIME
                 )
                 .from(RPKIT_WARNING)
                 .where(RPKIT_WARNING.ID.eq(id.value))
-                .fetchOne() ?: return null
-        val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profile = profileService.getProfile(RPKProfileId(result[RPKIT_WARNING.PROFILE_ID]))
-        val issuer = profileService.getProfile(RPKProfileId(result[RPKIT_WARNING.ISSUER_ID]))
-        if (profile != null && issuer != null) {
-            val warning = RPKWarningImpl(
+                .fetchOne() ?: return@supplyAsync null
+            val profileService = Services[RPKProfileService::class.java] ?: return@supplyAsync null
+            val profile = profileService.getProfile(RPKProfileId(result[RPKIT_WARNING.PROFILE_ID])).join()
+            val issuer = profileService.getProfile(RPKProfileId(result[RPKIT_WARNING.ISSUER_ID])).join()
+            if (profile != null && issuer != null) {
+                val warning = RPKWarningImpl(
                     id,
                     result[RPKIT_WARNING.REASON],
                     profile,
                     issuer,
                     result[RPKIT_WARNING.TIME]
-            )
-            cache?.set(id.value, warning)
-            return warning
-        } else {
-            database.create
+                )
+                cache?.set(id.value, warning)
+                return@supplyAsync warning
+            } else {
+                database.create
                     .deleteFrom(RPKIT_WARNING)
                     .where(RPKIT_WARNING.ID.eq(id.value))
                     .execute()
-            cache?.remove(id.value)
-            return null
+                cache?.remove(id.value)
+                return@supplyAsync null
+            }
         }
     }
 
-    fun get(profile: RPKProfile): List<RPKWarning> {
-        val profileId = profile.id ?: return emptyList()
-        val results = database.create
+    fun get(profile: RPKProfile): CompletableFuture<List<RPKWarning>> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_WARNING.ID)
                 .from(RPKIT_WARNING)
                 .where(RPKIT_WARNING.PROFILE_ID.eq(profileId.value))
                 .fetch()
-        return results.map { get(RPKWarningId(it[RPKIT_WARNING.ID])) }.filterNotNull()
+            val warningFutures = results.map { get(RPKWarningId(it[RPKIT_WARNING.ID])) }
+            CompletableFuture.allOf(*warningFutures.toTypedArray()).join()
+            return@supplyAsync warningFutures.mapNotNull(CompletableFuture<RPKWarning?>::join)
+        }
     }
 
-    fun delete(entity: RPKWarning) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKWarning): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_WARNING)
                 .where(RPKIT_WARNING.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 }

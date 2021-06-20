@@ -57,7 +57,7 @@ class WarningListCommand(private val plugin: RPKModerationBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["no-warning-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(player)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -67,16 +67,17 @@ class WarningListCommand(private val plugin: RPKModerationBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        val warnings = warningService.getWarnings(profile)
-        sender.sendMessage(plugin.messages["warning-list-title"])
-        for ((index, warning) in warnings.withIndex()) {
-            sender.sendMessage(plugin.messages["warning-list-item", mapOf(
-                "issuer" to warning.issuer.name.value,
-                "profile" to warning.profile.name.value,
-                "index" to (index + 1).toString(),
-                "reason" to warning.reason,
-                "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time)
-            )])
+        warningService.getWarnings(profile).thenAccept { warnings ->
+            sender.sendMessage(plugin.messages["warning-list-title"])
+            for ((index, warning) in warnings.withIndex()) {
+                sender.sendMessage(plugin.messages["warning-list-item", mapOf(
+                    "issuer" to warning.issuer.name.value,
+                    "profile" to warning.profile.name.value,
+                    "index" to (index + 1).toString(),
+                    "reason" to warning.reason,
+                    "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(warning.time)
+                )])
+            }
         }
         return true
     }

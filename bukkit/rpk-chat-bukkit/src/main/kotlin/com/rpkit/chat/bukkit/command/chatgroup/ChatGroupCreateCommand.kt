@@ -49,30 +49,35 @@ class ChatGroupCreateCommand(private val plugin: RPKChatBukkit) : CommandExecuto
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
         }
-        if (chatGroupService.getChatGroup(RPKChatGroupName(args[0])) != null) {
+        chatGroupService.getChatGroup(RPKChatGroupName(args[0])).thenAccept { existingChatGroup ->
+            if (existingChatGroup != null) {
             sender.sendMessage(plugin.messages["chat-group-create-invalid-taken"])
-            return true
+            return@thenAccept
         }
-        if (args[0].startsWith("_pm_")) {
-            sender.sendMessage(plugin.messages["chat-group-create-invalid-reserved"])
-            return true
+            if (args[0].startsWith("_pm_")) {
+                sender.sendMessage(plugin.messages["chat-group-create-invalid-reserved"])
+                return@thenAccept
+            }
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+            if (minecraftProfileService == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+                return@thenAccept
+            }
+            chatGroupService.createChatGroup(RPKChatGroupName(args[0])).thenAccept createChatGroup@{ chatGroup ->
+                val senderMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
+                if (senderMinecraftProfile == null) {
+                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                    return@createChatGroup
+                }
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    chatGroup.addMember(senderMinecraftProfile).thenRun {
+                        sender.sendMessage(plugin.messages["chat-group-create-valid", mapOf(
+                            "group" to chatGroup.name.value
+                        )])
+                    }
+                })
+            }
         }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
-        if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
-            return true
-        }
-        val chatGroup = chatGroupService.createChatGroup(RPKChatGroupName(args[0]))
-        val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
-        if (senderMinecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-            return true
-        }
-        chatGroupService.addChatGroup(chatGroup)
-        chatGroup.addMember(senderMinecraftProfile)
-        sender.sendMessage(plugin.messages["chat-group-create-valid", mapOf(
-            "group" to chatGroup.name.value
-        )])
         return true
     }
 

@@ -25,11 +25,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.ConversationContext
-import org.bukkit.conversations.ConversationFactory
-import org.bukkit.conversations.MessagePrompt
-import org.bukkit.conversations.NumericPrompt
-import org.bukkit.conversations.Prompt
+import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
 /**
@@ -75,29 +71,32 @@ class PaymentSetAmountCommand(private val plugin: RPKPaymentsBukkit) : CommandEx
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         val paymentGroupService = Services[RPKPaymentGroupService::class.java]
         if (paymentGroupService == null) {
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" ")))
-        if (paymentGroup == null) {
-            sender.sendMessage(plugin.messages["payment-set-amount-invalid-group"])
-            return true
+        paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" "))).thenAccept getPaymentGroup@{ paymentGroup ->
+            if (paymentGroup == null) {
+                sender.sendMessage(plugin.messages["payment-set-amount-invalid-group"])
+                return@getPaymentGroup
+            }
+            paymentGroup.owners.thenAccept { owners ->
+                if (!owners.contains(character)) {
+                    sender.sendMessage(plugin.messages["payment-set-amount-invalid-owner"])
+                    return@thenAccept
+                }
+                val conversation = conversationFactory.buildConversation(sender)
+                conversation.context.setSessionData("payment_group", paymentGroup)
+                conversation.begin()
+            }
         }
-        if (!paymentGroup.owners.contains(character)) {
-            sender.sendMessage(plugin.messages["payment-set-amount-invalid-owner"])
-            return true
-        }
-        val conversation = conversationFactory.buildConversation(sender)
-        conversation.context.setSessionData("payment_group", paymentGroup)
-        conversation.begin()
         return true
     }
 

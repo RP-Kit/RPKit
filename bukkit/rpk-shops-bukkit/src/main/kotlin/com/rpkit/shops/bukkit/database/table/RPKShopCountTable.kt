@@ -22,6 +22,7 @@ import com.rpkit.shops.bukkit.RPKShopsBukkit
 import com.rpkit.shops.bukkit.database.create
 import com.rpkit.shops.bukkit.database.jooq.Tables.RPKIT_SHOP_COUNT
 import com.rpkit.shops.bukkit.shopcount.RPKShopCount
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents the shop count table.
@@ -39,30 +40,34 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
         null
     }
 
-    fun insert(entity: RPKShopCount) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKShopCount): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_SHOP_COUNT,
-                        RPKIT_SHOP_COUNT.CHARACTER_ID,
-                        RPKIT_SHOP_COUNT.COUNT
+                    RPKIT_SHOP_COUNT,
+                    RPKIT_SHOP_COUNT.CHARACTER_ID,
+                    RPKIT_SHOP_COUNT.COUNT
                 )
                 .values(
                     characterId.value,
                     entity.count
                 )
                 .execute()
-        characterCache?.set(characterId.value, entity)
+            characterCache?.set(characterId.value, entity)
+        }
     }
 
-    fun update(entity: RPKShopCount) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun update(entity: RPKShopCount): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_SHOP_COUNT)
                 .set(RPKIT_SHOP_COUNT.COUNT, entity.count)
                 .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        characterCache?.set(characterId.value, entity)
+            characterCache?.set(characterId.value, entity)
+        }
     }
 
     /**
@@ -72,34 +77,38 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
      * @param character The character
      * @return The shop count for the character, or null if there is no shop count for the given character
      */
-    operator fun get(character: RPKCharacter): RPKShopCount? {
-        val characterId = character.id ?: return null
+    operator fun get(character: RPKCharacter): CompletableFuture<RPKShopCount?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
         if (characterCache?.containsKey(characterId.value) == true) {
-            return characterCache[characterId.value]
+            return CompletableFuture.completedFuture(characterCache[characterId.value])
         } else {
-            val result = database.create
+            return CompletableFuture.supplyAsync {
+                val result = database.create
                     .select(
-                            RPKIT_SHOP_COUNT.CHARACTER_ID,
-                            RPKIT_SHOP_COUNT.COUNT
+                        RPKIT_SHOP_COUNT.CHARACTER_ID,
+                        RPKIT_SHOP_COUNT.COUNT
                     )
                     .from(RPKIT_SHOP_COUNT)
                     .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId.value))
-                    .fetchOne() ?: return null
-            val shopCount = RPKShopCount(
+                    .fetchOne() ?: return@supplyAsync null
+                val shopCount = RPKShopCount(
                     character,
                     result.get(RPKIT_SHOP_COUNT.COUNT)
-            )
-            characterCache?.set(characterId.value, shopCount)
-            return shopCount
+                )
+                characterCache?.set(characterId.value, shopCount)
+                return@supplyAsync shopCount
+            }
         }
     }
 
-    fun delete(entity: RPKShopCount) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun delete(entity: RPKShopCount): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_SHOP_COUNT)
                 .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        characterCache?.remove(characterId.value)
+            characterCache?.remove(characterId.value)
+        }
     }
 }

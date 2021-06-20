@@ -21,12 +21,7 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.stats.bukkit.command.stats.StatsCommand
 import com.rpkit.stats.bukkit.messages.StatsMessages
-import com.rpkit.stats.bukkit.stat.RPKStatService
-import com.rpkit.stats.bukkit.stat.RPKStatServiceImpl
-import com.rpkit.stats.bukkit.stat.RPKStatVariable
-import com.rpkit.stats.bukkit.stat.RPKStatVariableName
-import com.rpkit.stats.bukkit.stat.RPKStatVariableService
-import com.rpkit.stats.bukkit.stat.RPKStatVariableServiceImpl
+import com.rpkit.stats.bukkit.stat.*
 import org.bstats.bukkit.Metrics
 import org.bukkit.attribute.Attribute
 
@@ -70,7 +65,7 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
             override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
-                    if (Services[RPKCharacterService::class.java]?.getActiveCharacter(minecraftProfile) == character) {
+                    if (Services[RPKCharacterService::class.java]?.getPreloadedActiveCharacter(minecraftProfile) == character) {
                         val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
                         bukkitPlayer?.health ?: character.health
                     } else {
@@ -86,7 +81,7 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
             override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
-                    if (Services[RPKCharacterService::class.java]?.getActiveCharacter(minecraftProfile) == character) {
+                    if (Services[RPKCharacterService::class.java]?.getPreloadedActiveCharacter(minecraftProfile) == character) {
                         val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
                         if (bukkitPlayer != null) {
                             bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: character.maxHealth
@@ -118,16 +113,16 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
             override fun get(character: RPKCharacter): Double {
                 val minecraftProfile = character.minecraftProfile
                 return if (minecraftProfile != null) {
-                    if (Services[RPKCharacterService::class.java]?.getActiveCharacter(minecraftProfile) == character) {
-                        val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
-                        bukkitPlayer?.foodLevel?.toDouble() ?: character.foodLevel.toDouble()
+                        if (Services[RPKCharacterService::class.java]?.getPreloadedActiveCharacter(minecraftProfile) == character) {
+                            val bukkitPlayer = server.getPlayer(minecraftProfile.minecraftUUID)
+                            bukkitPlayer?.foodLevel?.toDouble() ?: character.foodLevel.toDouble()
+                        } else {
+                            character.foodLevel.toDouble()
+                        }
                     } else {
                         character.foodLevel.toDouble()
                     }
-                } else {
-                    character.foodLevel.toDouble()
                 }
-            }
         })
         statVariableService.addStatVariable(object : RPKStatVariable {
             override val name = RPKStatVariableName("characterThirstLevel")
@@ -139,7 +134,7 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
         registerCommands()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("stats")?.setExecutor(StatsCommand(this))
     }
 

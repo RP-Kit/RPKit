@@ -46,15 +46,19 @@ class ToggleLogMessagesCommand(private val plugin: RPKEssentialsBukkit) : Comman
             sender.sendMessage(plugin.messages["no-log-message-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        logMessageService.setLogMessagesEnabled(minecraftProfile, !logMessageService.isLogMessagesEnabled(minecraftProfile))
-        sender.sendMessage(plugin.messages["toggle-log-messages-valid", mapOf(
-                "enabled" to if (logMessageService.isLogMessagesEnabled(minecraftProfile)) "enabled" else "disabled"
-        )])
+        logMessageService.isLogMessagesEnabled(minecraftProfile).thenAccept { isLogMessagesEnabled ->
+            val newLogMessagesEnabled = !isLogMessagesEnabled
+            logMessageService.setLogMessagesEnabled(minecraftProfile, newLogMessagesEnabled).thenRun {
+                sender.sendMessage(plugin.messages["toggle-log-messages-valid", mapOf(
+                    "enabled" to if (newLogMessagesEnabled) "enabled" else "disabled"
+                )])
+            }
+        }
         return true
     }
 }

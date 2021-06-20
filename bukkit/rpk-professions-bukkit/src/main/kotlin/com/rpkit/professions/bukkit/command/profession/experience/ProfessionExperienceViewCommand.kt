@@ -65,7 +65,7 @@ class ProfessionExperienceViewCommand(val plugin: RPKProfessionsBukkit) : Comman
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(target)
         if (minecraftProfile == null) {
             if (target == sender) {
                 sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
@@ -81,7 +81,7 @@ class ProfessionExperienceViewCommand(val plugin: RPKProfessionsBukkit) : Comman
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             if (target == sender) {
                 sender.sendMessage(plugin.messages["no-character-self"])
@@ -106,23 +106,26 @@ class ProfessionExperienceViewCommand(val plugin: RPKProfessionsBukkit) : Comman
             sender.sendMessage(plugin.messages["profession-experience-view-invalid-profession"])
             return true
         }
-        val level = professionService.getProfessionLevel(character, profession)
-        val experienceSinceLastLevel =
-                if (level > 1) {
-                    professionService.getProfessionExperience(character, profession) - profession.getExperienceNeededForLevel(level)
-                } else {
-                    professionService.getProfessionExperience(character, profession)
-                }
-        val experienceNeededForNextLevel =
-                profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)
-        sender.sendMessage(plugin.messages["profession-experience-view-valid", mapOf(
-                "profession" to profession.name.value,
-                "level" to level.toString(),
-                "total_experience" to professionService.getProfessionExperience(character, profession).toString(),
-                "total_next_level_experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
-                "experience" to experienceSinceLastLevel.toString(),
-                "next_level_experience" to experienceNeededForNextLevel.toString()
-        )])
+        professionService.getProfessionExperience(character, profession).thenAccept { professionExperience ->
+            professionService.getProfessionLevel(character, profession).thenAccept { level ->
+                val experienceSinceLastLevel =
+                    if (level > 1) {
+                        professionExperience - profession.getExperienceNeededForLevel(level)
+                    } else {
+                        professionExperience
+                    }
+                val experienceNeededForNextLevel =
+                    profession.getExperienceNeededForLevel(level + 1) - profession.getExperienceNeededForLevel(level)
+                sender.sendMessage(plugin.messages["profession-experience-view-valid", mapOf(
+                    "profession" to profession.name.value,
+                    "level" to level.toString(),
+                    "total_experience" to professionExperience.toString(),
+                    "total_next_level_experience" to profession.getExperienceNeededForLevel(level + 1).toString(),
+                    "experience" to experienceSinceLastLevel.toString(),
+                    "next_level_experience" to experienceNeededForNextLevel.toString()
+                )])
+            }
+        }
         return true
     }
 

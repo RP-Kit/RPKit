@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitWarningCreateEvent(
-        override val warning: RPKWarning
-) : RPKBukkitEvent(), RPKWarningCreateEvent, Cancellable {
+        override val warning: RPKWarning,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKWarningCreateEvent, Cancellable {
 
     companion object {
         @JvmStatic

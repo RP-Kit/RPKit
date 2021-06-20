@@ -19,6 +19,7 @@ package com.rpkit.banks.bukkit.bank
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import com.rpkit.economy.bukkit.currency.RPKCurrency
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents a bank service.
@@ -30,9 +31,9 @@ import com.rpkit.economy.bukkit.currency.RPKCurrency
  * to the character's wallet.
  */
 interface RPKBankService : Service {
-    fun getBalance(character: RPKCharacter, currency: RPKCurrency): Int
-    fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int)
-    fun deposit(character: RPKCharacter, currency: RPKCurrency, amount: Int)
-    fun withdraw(character: RPKCharacter, currency: RPKCurrency, amount: Int)
-    fun getRichestCharacters(currency: RPKCurrency, amount: Int): List<RPKCharacter>
+    fun getBalance(character: RPKCharacter, currency: RPKCurrency): CompletableFuture<Int>
+    fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void>
+    fun deposit(character: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void>
+    fun withdraw(character: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void>
+    fun getRichestCharacters(currency: RPKCurrency, amount: Int): CompletableFuture<List<RPKCharacter>>
 }

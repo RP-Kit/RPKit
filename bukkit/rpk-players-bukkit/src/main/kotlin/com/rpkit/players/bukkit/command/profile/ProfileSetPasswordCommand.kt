@@ -17,11 +17,11 @@
 package com.rpkit.players.bukkit.command.profile
 
 import com.rpkit.core.command.RPKCommandExecutor
-import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.command.result.CommandResult
 import com.rpkit.core.command.result.CommandSuccess
 import com.rpkit.core.command.result.IncorrectUsageFailure
 import com.rpkit.core.command.result.MissingServiceFailure
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
@@ -29,31 +29,32 @@ import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 class ProfileSetPasswordCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
         if (args.isEmpty()) {
             sender.sendMessage(plugin.messages.profileSetPasswordUsage)
-            return IncorrectUsageFailure()
+            return CompletableFuture.completedFuture(IncorrectUsageFailure())
         }
         if (sender !is RPKMinecraftProfile) {
             sender.sendMessage(plugin.messages.notFromConsole)
-            return NotAPlayerFailure()
+            return CompletableFuture.completedFuture(NotAPlayerFailure())
         }
         val profile = sender.profile
         if (profile !is RPKProfile) {
             sender.sendMessage(plugin.messages.noProfileSelf)
-            return NoProfileSelfFailure()
+            return CompletableFuture.completedFuture(NoProfileSelfFailure())
         }
         val password = args.joinToString(" ")
         val profileService = Services[RPKProfileService::class.java]
         if (profileService == null) {
             sender.sendMessage(plugin.messages.noProfileService)
-            return MissingServiceFailure(RPKProfileService::class.java)
+            return CompletableFuture.completedFuture(MissingServiceFailure(RPKProfileService::class.java))
         }
         profile.setPassword(password.toCharArray())
         profileService.updateProfile(profile)
         sender.sendMessage(plugin.messages.profileSetPasswordValid)
-        return CommandSuccess
+        return CompletableFuture.completedFuture(CommandSuccess)
     }
 }

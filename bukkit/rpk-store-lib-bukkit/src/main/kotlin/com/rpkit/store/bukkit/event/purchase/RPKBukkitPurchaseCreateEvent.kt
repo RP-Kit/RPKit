@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitPurchaseCreateEvent(
-        override val purchase: RPKPurchase
-) : RPKBukkitEvent(), RPKPurchaseCreateEvent, Cancellable {
+        override val purchase: RPKPurchase,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKPurchaseCreateEvent, Cancellable {
 
     companion object {
         @JvmStatic

@@ -19,22 +19,31 @@ import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import org.bukkit.OfflinePlayer
-import java.util.UUID
+import java.util.*
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKMinecraftProfileService : Service {
 
-    fun getMinecraftProfile(id: RPKMinecraftProfileId): RPKMinecraftProfile?
-    fun getMinecraftProfile(name: RPKMinecraftUsername): RPKMinecraftProfile?
-    fun getMinecraftProfile(player: OfflinePlayer): RPKMinecraftProfile?
-    fun getMinecraftProfile(minecraftUUID: UUID): RPKMinecraftProfile?
-    fun getMinecraftProfiles(profile: RPKProfile): List<RPKMinecraftProfile>
-    fun createMinecraftProfile(minecraftUsername: RPKMinecraftUsername, profile: RPKThinProfile? = null): RPKMinecraftProfile
-    fun createMinecraftProfile(minecraftUUID: UUID, profile: RPKThinProfile? = null): RPKMinecraftProfile
-    fun updateMinecraftProfile(profile: RPKMinecraftProfile)
-    fun removeMinecraftProfile(profile: RPKMinecraftProfile)
-    fun getMinecraftProfileLinkRequests(minecraftProfile: RPKMinecraftProfile): List<RPKMinecraftProfileLinkRequest>
-    fun removeMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest)
-    fun createMinecraftProfileLinkRequest(profile: RPKProfile, minecraftProfile: RPKMinecraftProfile): RPKMinecraftProfileLinkRequest
+    fun getMinecraftProfile(id: RPKMinecraftProfileId): CompletableFuture<RPKMinecraftProfile?>
+    fun getMinecraftProfile(name: RPKMinecraftUsername): CompletableFuture<RPKMinecraftProfile?>
+    fun getMinecraftProfile(player: OfflinePlayer): CompletableFuture<RPKMinecraftProfile?>
+    fun getMinecraftProfile(minecraftUUID: UUID): CompletableFuture<RPKMinecraftProfile?>
+    fun getMinecraftProfiles(profile: RPKProfile): CompletableFuture<List<RPKMinecraftProfile>>
+    fun createMinecraftProfile(minecraftUsername: RPKMinecraftUsername, profile: RPKThinProfile? = null): CompletableFuture<RPKMinecraftProfile>
+    fun createMinecraftProfile(minecraftUUID: UUID, profile: RPKThinProfile? = null): CompletableFuture<RPKMinecraftProfile>
+    fun createAndLoadMinecraftProfile(minecraftUsername: RPKMinecraftUsername, profile: RPKThinProfile? = null): CompletableFuture<RPKMinecraftProfile>
+    fun createAndLoadMinecraftProfile(minecraftUUID: UUID, profile: RPKThinProfile? = null): CompletableFuture<RPKMinecraftProfile>
+    fun updateMinecraftProfile(profile: RPKMinecraftProfile): CompletableFuture<Void>
+    fun removeMinecraftProfile(profile: RPKMinecraftProfile): CompletableFuture<Void>
+    fun getMinecraftProfileLinkRequests(minecraftProfile: RPKMinecraftProfile): CompletableFuture<List<RPKMinecraftProfileLinkRequest>>
+    fun removeMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest): CompletableFuture<Void>
+    fun createMinecraftProfileLinkRequest(profile: RPKProfile, minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKMinecraftProfileLinkRequest>
+    fun getPreloadedMinecraftProfile(id: RPKMinecraftProfileId): RPKMinecraftProfile?
+    fun getPreloadedMinecraftProfile(name: RPKMinecraftUsername): RPKMinecraftProfile?
+    fun getPreloadedMinecraftProfile(minecraftUUID: UUID): RPKMinecraftProfile?
+    fun getPreloadedMinecraftProfile(player: OfflinePlayer): RPKMinecraftProfile?
+    fun loadMinecraftProfile(minecraftUUID: UUID): CompletableFuture<RPKMinecraftProfile?>
+    fun unloadMinecraftProfile(minecraftProfile: RPKMinecraftProfile)
 
 }

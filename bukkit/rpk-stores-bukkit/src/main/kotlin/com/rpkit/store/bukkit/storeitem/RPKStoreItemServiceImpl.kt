@@ -25,31 +25,37 @@ import com.rpkit.store.bukkit.event.storeitem.RPKBukkitStoreItemCreateEvent
 import com.rpkit.store.bukkit.event.storeitem.RPKBukkitStoreItemDeleteEvent
 import com.rpkit.store.bukkit.event.storeitem.RPKBukkitStoreItemUpdateEvent
 import java.time.Duration
+import java.util.concurrent.CompletableFuture
 
 
 class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreItemService {
 
-    override fun getStoreItem(plugin: RPKBukkitPlugin, identifier: String): RPKStoreItem? {
+    override fun getStoreItem(plugin: RPKBukkitPlugin, identifier: String): CompletableFuture<RPKStoreItem?> {
         return this.plugin.database.getTable(RPKStoreItemTable::class.java).get(plugin, identifier)
     }
 
-    override fun getStoreItem(id: Int): RPKStoreItem? {
+    override fun getStoreItem(id: RPKStoreItemId): CompletableFuture<RPKStoreItem?> {
         return plugin.database.getTable(RPKStoreItemTable::class.java)[id]
     }
 
-    override fun getStoreItems(): List<RPKStoreItem> {
+    override fun getStoreItems(): CompletableFuture<List<RPKStoreItem>> {
         return plugin.database.getTable(RPKStoreItemTable::class.java).getAll()
     }
 
-    override fun addStoreItem(storeItem: RPKStoreItem) {
-        val event = RPKBukkitStoreItemCreateEvent(storeItem)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val eventStoreItem = event.storeItem
-        when (eventStoreItem) {
-            is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class.java).insert(eventStoreItem)
-            is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class.java).insert(eventStoreItem)
-            is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class.java).insert(eventStoreItem)
+    override fun addStoreItem(storeItem: RPKStoreItem): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitStoreItemCreateEvent(storeItem, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val eventStoreItem = event.storeItem
+            when (eventStoreItem) {
+                is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class.java)
+                    .insert(eventStoreItem).join()
+                is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class.java)
+                    .insert(eventStoreItem).join()
+                is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class.java)
+                    .insert(eventStoreItem).join()
+            }
         }
     }
 
@@ -59,7 +65,7 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
         description: String,
         cost: Int,
         uses: Int
-    ): RPKConsumableStoreItem {
+    ): CompletableFuture<RPKConsumableStoreItem> {
         val storeItem = RPKConsumableStoreItemImpl(
             null,
             uses,
@@ -68,8 +74,7 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
             description,
             cost
         )
-        addStoreItem(storeItem)
-        return storeItem
+        return addStoreItem(storeItem).thenApply { storeItem }
     }
 
     override fun createPermanentStoreItem(
@@ -77,7 +82,7 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
         identifier: String,
         description: String,
         cost: Int
-    ): RPKPermanentStoreItem {
+    ): CompletableFuture<RPKPermanentStoreItem> {
         val storeItem = RPKPermanentStoreItemImpl(
             null,
             plugin,
@@ -85,8 +90,7 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
             description,
             cost
         )
-        addStoreItem(storeItem)
-        return storeItem
+        return addStoreItem(storeItem).thenApply { storeItem }
     }
 
     override fun createTimedStoreItem(
@@ -95,7 +99,7 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
         description: String,
         cost: Int,
         duration: Duration
-    ): RPKTimedStoreItem {
+    ): CompletableFuture<RPKTimedStoreItem> {
         val storeItem = RPKTimedStoreItemImpl(
             null,
             duration,
@@ -104,31 +108,40 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
             description,
             cost
         )
-        addStoreItem(storeItem)
-        return storeItem
+        return addStoreItem(storeItem).thenApply { storeItem }
     }
 
-    override fun updateStoreItem(storeItem: RPKStoreItem) {
-        val event = RPKBukkitStoreItemUpdateEvent(storeItem)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val eventStoreItem = event.storeItem
-        when (eventStoreItem) {
-            is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class.java).update(eventStoreItem)
-            is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class.java).update(eventStoreItem)
-            is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class.java).update(eventStoreItem)
+    override fun updateStoreItem(storeItem: RPKStoreItem): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitStoreItemUpdateEvent(storeItem, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val eventStoreItem = event.storeItem
+            when (eventStoreItem) {
+                is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class.java)
+                    .update(eventStoreItem).join()
+                is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class.java)
+                    .update(eventStoreItem).join()
+                is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class.java)
+                    .update(eventStoreItem).join()
+            }
         }
     }
 
-    override fun removeStoreItem(storeItem: RPKStoreItem) {
-        val event = RPKBukkitStoreItemDeleteEvent(storeItem)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        val eventStoreItem = event.storeItem
-        when (eventStoreItem) {
-            is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class.java).delete(eventStoreItem)
-            is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class.java).delete(eventStoreItem)
-            is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class.java).delete(eventStoreItem)
+    override fun removeStoreItem(storeItem: RPKStoreItem): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitStoreItemDeleteEvent(storeItem, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            val eventStoreItem = event.storeItem
+            when (eventStoreItem) {
+                is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class.java)
+                    .delete(eventStoreItem).join()
+                is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class.java)
+                    .delete(eventStoreItem).join()
+                is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class.java)
+                    .delete(eventStoreItem).join()
+            }
         }
     }
 }

@@ -18,31 +18,28 @@ package com.rpkit.professions.bukkit.profession
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import java.time.Duration
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKProfessionService : Service {
 
     val professions: List<RPKProfession>
-
     fun getProfession(name: RPKProfessionName): RPKProfession?
-
-    fun getProfessions(character: RPKCharacter): List<RPKProfession>
-
-    fun addProfession(character: RPKCharacter, profession: RPKProfession)
-
-    fun removeProfession(character: RPKCharacter, profession: RPKProfession)
-
-    fun getProfessionLevel(character: RPKCharacter, profession: RPKProfession): Int
-
-    fun setProfessionLevel(character: RPKCharacter, profession: RPKProfession, level: Int)
-
-    fun getProfessionExperience(character: RPKCharacter, profession: RPKProfession): Int
-
-    fun setProfessionExperience(character: RPKCharacter, profession: RPKProfession, experience: Int)
-
-    fun getProfessionChangeCooldown(character: RPKCharacter): Duration
-
-    fun setProfessionChangeCooldown(character: RPKCharacter, cooldown: Duration)
-
+    fun getProfessions(character: RPKCharacter): CompletableFuture<List<RPKProfession>>
+    fun addProfession(character: RPKCharacter, profession: RPKProfession): CompletableFuture<Void>
+    fun removeProfession(character: RPKCharacter, profession: RPKProfession): CompletableFuture<Void>
+    fun getProfessionLevel(character: RPKCharacter, profession: RPKProfession): CompletableFuture<Int>
+    fun setProfessionLevel(character: RPKCharacter, profession: RPKProfession, level: Int): CompletableFuture<Void>
+    fun getProfessionExperience(character: RPKCharacter, profession: RPKProfession): CompletableFuture<Int>
+    fun setProfessionExperience(character: RPKCharacter, profession: RPKProfession, experience: Int): CompletableFuture<Void>
+    fun getProfessionChangeCooldown(character: RPKCharacter): CompletableFuture<Duration>
+    fun setProfessionChangeCooldown(character: RPKCharacter, cooldown: Duration): CompletableFuture<Void>
+    fun getPreloadedProfessions(character: RPKCharacter): List<RPKProfession>?
+    fun loadProfessions(character: RPKCharacter): CompletableFuture<List<RPKProfession>>
+    fun unloadProfessions(character: RPKCharacter)
+    fun getPreloadedProfessionLevel(character: RPKCharacter, profession: RPKProfession): Int?
+    fun getPreloadedProfessionExperience(character: RPKCharacter, profession: RPKProfession): Int?
+    fun loadProfessionExperience(character: RPKCharacter, profession: RPKProfession): CompletableFuture<Int?>
+    fun unloadProfessionExperience(character: RPKCharacter, profession: RPKProfession)
 
 }

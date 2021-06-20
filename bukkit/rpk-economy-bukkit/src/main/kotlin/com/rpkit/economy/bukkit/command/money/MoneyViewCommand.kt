@@ -27,6 +27,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import java.util.concurrent.CompletableFuture
 
 /**
  * Money view command.
@@ -66,7 +67,7 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -76,33 +77,36 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        val character: RPKCharacter?
-        character = if (args.size > 1) {
+        val characterFuture: CompletableFuture<RPKCharacter?>
+        characterFuture = if (args.size > 1) {
             val nameBuilder = StringBuilder()
             for (i in 1..args.size - 2) {
                 nameBuilder.append(args[i]).append(' ')
             }
             nameBuilder.append(args[args.size - 1])
             val name = nameBuilder.toString()
-            characterService.getCharacters(profile)
-                    .firstOrNull { profileCharacter -> profileCharacter.name == name }
+            characterService.getCharacters(profile).thenApply { characters ->
+                characters.firstOrNull { profileCharacter -> profileCharacter.name == name }
+            }
         } else {
-            characterService.getActiveCharacter(minecraftProfile)
+            CompletableFuture.completedFuture(characterService.getPreloadedActiveCharacter(minecraftProfile))
         }
-        if (character == null) {
-            sender.sendMessage(plugin.messages["no-character"])
-            return true
-        }
-        sender.sendMessage(plugin.messages["money-view-valid"])
-        sender.sendMessage(currencyService.currencies
+        characterFuture.thenAccept { character ->
+            if (character == null) {
+                sender.sendMessage(plugin.messages["no-character"])
+                return@thenAccept
+            }
+            sender.sendMessage(plugin.messages["money-view-valid"])
+            sender.sendMessage(currencyService.currencies
                 .map { currency ->
                     plugin.messages["money-view-valid-list-item", mapOf(
                         "currency" to currency.name.value,
-                        "balance" to economyService.getBalance(character, currency).toString()
+                        "balance" to economyService.getPreloadedBalance(character, currency).toString()
                     )]
                 }
                 .toTypedArray()
-        )
+            )
+        }
         return true
     }
 

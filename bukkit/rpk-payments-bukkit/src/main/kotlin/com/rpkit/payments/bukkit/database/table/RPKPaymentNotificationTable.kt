@@ -29,6 +29,7 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotification
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationId
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationImpl
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents payment notification table.
@@ -49,38 +50,41 @@ class RPKPaymentNotificationTable(
         null
     }
 
-    fun insert(entity: RPKPaymentNotification) {
-        val groupId = entity.group.id ?: return
-        val toId = entity.to.id ?: return
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKPaymentNotification): CompletableFuture<Void> {
+        val groupId = entity.group.id ?: return CompletableFuture.completedFuture(null)
+        val toId = entity.to.id ?: return CompletableFuture.completedFuture(null)
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_PAYMENT_NOTIFICATION,
-                        RPKIT_PAYMENT_NOTIFICATION.GROUP_ID,
-                        RPKIT_PAYMENT_NOTIFICATION.TO_ID,
-                        RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID,
-                        RPKIT_PAYMENT_NOTIFICATION.DATE,
-                        RPKIT_PAYMENT_NOTIFICATION.TEXT
+                    RPKIT_PAYMENT_NOTIFICATION,
+                    RPKIT_PAYMENT_NOTIFICATION.GROUP_ID,
+                    RPKIT_PAYMENT_NOTIFICATION.TO_ID,
+                    RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID,
+                    RPKIT_PAYMENT_NOTIFICATION.DATE,
+                    RPKIT_PAYMENT_NOTIFICATION.TEXT
                 )
                 .values(
-                        groupId.value,
-                        toId.value,
-                        characterId.value,
-                        entity.date,
-                        entity.text
+                    groupId.value,
+                    toId.value,
+                    characterId.value,
+                    entity.date,
+                    entity.text
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKPaymentNotificationId(id)
-        cache?.set(id, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKPaymentNotificationId(id)
+            cache?.set(id, entity)
+        }
     }
 
-    fun update(entity: RPKPaymentNotification) {
-        val groupId = entity.group.id ?: return
-        val toId = entity.to.id ?: return
-        val characterId = entity.character.id ?: return
-        val id = entity.id ?: return
-        database.create
+    fun update(entity: RPKPaymentNotification): CompletableFuture<Void> {
+        val groupId = entity.group.id ?: return CompletableFuture.completedFuture(null)
+        val toId = entity.to.id ?: return CompletableFuture.completedFuture(null)
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_PAYMENT_NOTIFICATION)
                 .set(RPKIT_PAYMENT_NOTIFICATION.GROUP_ID, groupId.value)
                 .set(RPKIT_PAYMENT_NOTIFICATION.TO_ID, toId.value)
@@ -89,79 +93,92 @@ class RPKPaymentNotificationTable(
                 .set(RPKIT_PAYMENT_NOTIFICATION.TEXT, entity.text)
                 .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKPaymentNotificationId): RPKPaymentNotification? {
+    operator fun get(id: RPKPaymentNotificationId): CompletableFuture<RPKPaymentNotification?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
+            return CompletableFuture.completedFuture(cache[id.value])
         }
-        val result = database.create
-            .select(
-                RPKIT_PAYMENT_NOTIFICATION.GROUP_ID,
-                RPKIT_PAYMENT_NOTIFICATION.TO_ID,
-                RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID,
-                RPKIT_PAYMENT_NOTIFICATION.DATE,
-                RPKIT_PAYMENT_NOTIFICATION.TEXT
-            )
-            .from(RPKIT_PAYMENT_NOTIFICATION)
-            .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(id.value))
-            .fetchOne() ?: return null
-        val paymentGroupService = Services[RPKPaymentGroupService::class.java] ?: return null
-        val paymentGroupId = result.get(RPKIT_PAYMENT_NOTIFICATION.GROUP_ID)
-        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupId(paymentGroupId))
-        val characterService = Services[RPKCharacterService::class.java] ?: return null
-        val toId = result.get(RPKIT_PAYMENT_NOTIFICATION.TO_ID)
-        val to = characterService.getCharacter(RPKCharacterId(toId))
-        val characterId = result.get(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID)
-        val character = characterService.getCharacter(RPKCharacterId(characterId))
-        if (paymentGroup != null && to != null && character != null) {
-            val paymentNotification = RPKPaymentNotificationImpl(
-                id,
-                paymentGroup,
-                to,
-                character,
-                result.get(RPKIT_PAYMENT_NOTIFICATION.DATE),
-                result.get(RPKIT_PAYMENT_NOTIFICATION.TEXT)
-            )
-            cache?.set(id.value, paymentNotification)
-            return paymentNotification
-        } else {
-            database.create
-                .deleteFrom(RPKIT_PAYMENT_NOTIFICATION)
+        return CompletableFuture.supplyAsync {
+            val result = database.create
+                .select(
+                    RPKIT_PAYMENT_NOTIFICATION.GROUP_ID,
+                    RPKIT_PAYMENT_NOTIFICATION.TO_ID,
+                    RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID,
+                    RPKIT_PAYMENT_NOTIFICATION.DATE,
+                    RPKIT_PAYMENT_NOTIFICATION.TEXT
+                )
+                .from(RPKIT_PAYMENT_NOTIFICATION)
                 .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(id.value))
-                .execute()
-            return null
+                .fetchOne() ?: return@supplyAsync null
+            val paymentGroupService = Services[RPKPaymentGroupService::class.java] ?: return@supplyAsync null
+            val paymentGroupId = result.get(RPKIT_PAYMENT_NOTIFICATION.GROUP_ID)
+            val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupId(paymentGroupId)).join()
+            val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync null
+            val toId = result.get(RPKIT_PAYMENT_NOTIFICATION.TO_ID)
+            val to = characterService.getCharacter(RPKCharacterId(toId)).join()
+            val characterId = result.get(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID)
+            val character = characterService.getCharacter(RPKCharacterId(characterId)).join()
+            if (paymentGroup != null && to != null && character != null) {
+                val paymentNotification = RPKPaymentNotificationImpl(
+                    id,
+                    paymentGroup,
+                    to,
+                    character,
+                    result.get(RPKIT_PAYMENT_NOTIFICATION.DATE),
+                    result.get(RPKIT_PAYMENT_NOTIFICATION.TEXT)
+                )
+                cache?.set(id.value, paymentNotification)
+                return@supplyAsync paymentNotification
+            } else {
+                database.create
+                    .deleteFrom(RPKIT_PAYMENT_NOTIFICATION)
+                    .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(id.value))
+                    .execute()
+                return@supplyAsync null
+            }
         }
     }
 
-    fun getAll(): List<RPKPaymentNotification> {
-        val results = database.create
+    fun getAll(): CompletableFuture<List<RPKPaymentNotification>> {
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_PAYMENT_NOTIFICATION.ID)
                 .from(RPKIT_PAYMENT_NOTIFICATION)
                 .fetch()
-        return results.map { result -> get(RPKPaymentNotificationId(result.get(RPKIT_PAYMENT_NOTIFICATION.ID))) }
-                .filterNotNull()
+            val futures =
+                results.map { result -> get(RPKPaymentNotificationId(result.get(RPKIT_PAYMENT_NOTIFICATION.ID))) }
+            CompletableFuture.allOf(*futures.toTypedArray()).join()
+            return@supplyAsync futures.mapNotNull(CompletableFuture<RPKPaymentNotification?>::join)
+        }
     }
 
-    fun get(character: RPKCharacter): List<RPKPaymentNotification> {
-        val characterId = character.id ?: return emptyList()
-        val results = database.create
+    fun get(character: RPKCharacter): CompletableFuture<List<RPKPaymentNotification>> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_PAYMENT_NOTIFICATION.ID)
                 .from(RPKIT_PAYMENT_NOTIFICATION)
                 .where(RPKIT_PAYMENT_NOTIFICATION.CHARACTER_ID.eq(characterId.value))
                 .fetch()
-        return results.map { result -> get(RPKPaymentNotificationId(result.get(RPKIT_PAYMENT_NOTIFICATION.ID))) }
-                .filterNotNull()
+            val futures =
+                results.map { result -> get(RPKPaymentNotificationId(result.get(RPKIT_PAYMENT_NOTIFICATION.ID))) }
+            CompletableFuture.allOf(*futures.toTypedArray()).join()
+            return@supplyAsync futures.mapNotNull(CompletableFuture<RPKPaymentNotification?>::join)
+        }
     }
 
-    fun delete(entity: RPKPaymentNotification) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKPaymentNotification): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_PAYMENT_NOTIFICATION)
                 .where(RPKIT_PAYMENT_NOTIFICATION.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 
 }

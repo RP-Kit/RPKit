@@ -26,11 +26,7 @@ import com.rpkit.craftingskill.bukkit.command.craftingskill.CraftingSkillCommand
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillService
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillServiceImpl
 import com.rpkit.craftingskill.bukkit.database.table.RPKCraftingExperienceTable
-import com.rpkit.craftingskill.bukkit.listener.BlockBreakListener
-import com.rpkit.craftingskill.bukkit.listener.CraftItemListener
-import com.rpkit.craftingskill.bukkit.listener.InventoryClickListener
-import com.rpkit.craftingskill.bukkit.listener.PrepareItemCraftListener
-import com.rpkit.craftingskill.bukkit.listener.RPKBukkitCharacterDeleteListener
+import com.rpkit.craftingskill.bukkit.listener.*
 import com.rpkit.craftingskill.bukkit.messages.CraftingSkillMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
@@ -98,17 +94,19 @@ class RPKCraftingSkillBukkit : RPKBukkitPlugin() {
         registerCommands()
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
-                RPKBukkitCharacterDeleteListener(this),
-                BlockBreakListener(this),
-                CraftItemListener(this),
-                PrepareItemCraftListener(this),
-                InventoryClickListener(this)
+            RPKBukkitCharacterDeleteListener(this),
+            BlockBreakListener(this),
+            CraftItemListener(this),
+            PrepareItemCraftListener(this),
+            InventoryClickListener(this),
+            AsyncPlayerPreLoginListener(this),
+            PlayerQuitListener(this)
         )
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("craftingskill")?.setExecutor(CraftingSkillCommand(this))
     }
 

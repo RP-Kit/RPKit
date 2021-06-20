@@ -16,11 +16,7 @@
 package com.rpkit.players.bukkit.command.profile
 
 import com.rpkit.core.command.RPKCommandExecutor
-import com.rpkit.core.command.result.CommandFailure
-import com.rpkit.core.command.result.CommandResult
-import com.rpkit.core.command.result.CommandSuccess
-import com.rpkit.core.command.result.IncorrectUsageFailure
-import com.rpkit.core.command.result.MissingServiceFailure
+import com.rpkit.core.command.result.*
 import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
@@ -29,6 +25,7 @@ import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import java.util.concurrent.CompletableFuture
 
 
 class ProfileDenyLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
@@ -37,14 +34,14 @@ class ProfileDenyLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandE
     class InvalidRequestFailure : CommandFailure()
     class InvalidAccountTypeFailure : CommandFailure()
 
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
         if (sender !is RPKMinecraftProfile) {
             sender.sendMessage(plugin.messages.notFromConsole)
-            return NotAPlayerFailure()
+            return CompletableFuture.completedFuture(NotAPlayerFailure())
         }
         if (args.size <= 1) {
             sender.sendMessage(plugin.messages.profileDenyLinkUsage)
-            return IncorrectUsageFailure()
+            return CompletableFuture.completedFuture(IncorrectUsageFailure())
         }
         val type = args[0]
         val id = args[1].toIntOrNull()
@@ -52,41 +49,45 @@ class ProfileDenyLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandE
             "minecraft" -> {
                 if (id == null) {
                     sender.sendMessage(plugin.messages.profileDenyLinkInvalidId)
-                    return InvalidIdFailure()
+                    return CompletableFuture.completedFuture(InvalidIdFailure())
                 }
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
                     sender.sendMessage(plugin.messages.noMinecraftProfileService)
-                    return MissingServiceFailure(RPKMinecraftProfileService::class.java)
+                    return CompletableFuture.completedFuture(MissingServiceFailure(RPKMinecraftProfileService::class.java))
                 }
-                val linkRequests = minecraftProfileService.getMinecraftProfileLinkRequests(sender).toMutableList()
-                val linkRequest = linkRequests.firstOrNull { request -> request.profile.id?.value == id }
-                if (linkRequest == null) {
-                    sender.sendMessage(plugin.messages.profileDenyLinkInvalidRequest)
-                    return InvalidRequestFailure()
+                return minecraftProfileService.getMinecraftProfileLinkRequests(sender).thenApplyAsync { immutableLinkRequests ->
+                    val linkRequests = immutableLinkRequests.toMutableList()
+                    val linkRequest = linkRequests.firstOrNull { request -> request.profile.id?.value == id }
+                    if (linkRequest == null) {
+                        sender.sendMessage(plugin.messages.profileDenyLinkInvalidRequest)
+                        return@thenApplyAsync InvalidRequestFailure()
+                    }
+                    minecraftProfileService.removeMinecraftProfileLinkRequest(linkRequest)
+                    linkRequests.remove(linkRequest)
+                    if (linkRequests.isNotEmpty()) {
+                        sender.sendMessage(plugin.messages.profileDenyLinkValid)
+                        return@thenApplyAsync CommandSuccess
+                    }
+                    // If they no longer have any link requests pending, we can create a new profile for them based on their
+                    // Minecraft profile.
+                    val profileService = Services[RPKProfileService::class.java]
+                    if (profileService == null) {
+                        sender.sendMessage(plugin.messages.noProfileService)
+                        return@thenApplyAsync MissingServiceFailure(RPKProfileService::class.java)
+                    }
+                    return@thenApplyAsync profileService.createProfile(RPKProfileName(sender.name))
+                        .thenApply createProfile@{ profile ->
+                            sender.profile = profile
+                            minecraftProfileService.updateMinecraftProfile(sender)
+                            sender.sendMessage(plugin.messages.profileDenyLinkProfileCreated)
+                            return@createProfile CommandSuccess
+                        }.join()
                 }
-                minecraftProfileService.removeMinecraftProfileLinkRequest(linkRequest)
-                linkRequests.remove(linkRequest)
-                if (linkRequests.isNotEmpty()) {
-                    sender.sendMessage(plugin.messages.profileDenyLinkValid)
-                    return CommandSuccess
-                }
-                // If they no longer have any link requests pending, we can create a new profile for them based on their
-                // Minecraft profile.
-                val profileService = Services[RPKProfileService::class.java]
-                if (profileService == null) {
-                    sender.sendMessage(plugin.messages.noProfileService)
-                    return MissingServiceFailure(RPKProfileService::class.java)
-                }
-                val profile = profileService.createProfile(RPKProfileName(sender.name))
-                sender.profile = profile
-                minecraftProfileService.updateMinecraftProfile(sender)
-                sender.sendMessage(plugin.messages.profileDenyLinkProfileCreated)
-                return CommandSuccess
             }
             else -> {
                 sender.sendMessage(plugin.messages.profileDenyLinkInvalidType)
-                return InvalidAccountTypeFailure()
+                return CompletableFuture.completedFuture(InvalidAccountTypeFailure())
             }
         }
     }

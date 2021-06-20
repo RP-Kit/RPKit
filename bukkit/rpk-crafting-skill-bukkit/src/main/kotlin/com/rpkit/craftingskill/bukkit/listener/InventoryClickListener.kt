@@ -45,12 +45,12 @@ class InventoryClickListener(private val plugin: RPKCraftingSkillBukkit) : Liste
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val craftingSkillService = Services[RPKCraftingSkillService::class.java] ?: return
         val bukkitPlayer = event.whoClicked as? Player ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         val item = event.currentItem ?: return
         if (item.amount == 0 || item.type == Material.AIR) return
         val material = item.type
-        val craftingSkill = craftingSkillService.getCraftingExperience(character, RPKCraftingAction.SMELT, material)
+        val craftingSkill = craftingSkillService.getPreloadedCraftingExperience(character, RPKCraftingAction.SMELT, material)
         val quality = craftingSkillService.getQualityFor(RPKCraftingAction.SMELT, material, craftingSkill)
         val amount = craftingSkillService.getAmountFor(RPKCraftingAction.SMELT, material, craftingSkill) * item.amount
         if (quality != null) {

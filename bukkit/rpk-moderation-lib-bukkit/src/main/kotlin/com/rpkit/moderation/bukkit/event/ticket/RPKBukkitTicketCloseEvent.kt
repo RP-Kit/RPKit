@@ -25,8 +25,9 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitTicketCloseEvent(
         override val profile: RPKProfile,
-        override val ticket: RPKTicket
-) : RPKBukkitEvent(), RPKTicketCloseEvent, Cancellable {
+        override val ticket: RPKTicket,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKTicketCloseEvent, Cancellable {
 
     companion object {
         @JvmStatic

@@ -18,11 +18,15 @@ package com.rpkit.skills.bukkit.database.table
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.RPKSkillsBukkit
 import com.rpkit.skills.bukkit.database.create
 import com.rpkit.skills.bukkit.database.jooq.Tables.RPKIT_SKILL_COOLDOWN
 import com.rpkit.skills.bukkit.skills.RPKSkill
 import com.rpkit.skills.bukkit.skills.RPKSkillCooldown
+import com.rpkit.skills.bukkit.skills.RPKSkillName
+import com.rpkit.skills.bukkit.skills.RPKSkillService
+import java.util.concurrent.CompletableFuture
 
 
 class RPKSkillCooldownTable(private val database: Database, private val plugin: RPKSkillsBukkit) : Table {
@@ -43,68 +47,95 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
         null
     }
 
-    fun insert(entity: RPKSkillCooldown) {
-        val characterId = entity.character.id ?: return
+    fun insert(entity: RPKSkillCooldown): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val skillName = entity.skill.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_SKILL_COOLDOWN,
-                        RPKIT_SKILL_COOLDOWN.CHARACTER_ID,
-                        RPKIT_SKILL_COOLDOWN.SKILL_NAME,
-                        RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP
+                    RPKIT_SKILL_COOLDOWN,
+                    RPKIT_SKILL_COOLDOWN.CHARACTER_ID,
+                    RPKIT_SKILL_COOLDOWN.SKILL_NAME,
+                    RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP
                 )
                 .values(
-                        characterId.value,
-                        entity.skill.name.value,
-                        entity.cooldownTimestamp
+                    characterId.value,
+                    entity.skill.name.value,
+                    entity.cooldownTimestamp
                 )
                 .execute()
-        cache?.set(CharacterSkillCacheKey(characterId.value, skillName.value), entity)
+            cache?.set(CharacterSkillCacheKey(characterId.value, skillName.value), entity)
+        }
     }
 
-    fun update(entity: RPKSkillCooldown) {
-        val characterId = entity.character.id ?: return
+    fun update(entity: RPKSkillCooldown): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val skillName = entity.skill.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_SKILL_COOLDOWN)
                 .set(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP, entity.cooldownTimestamp)
                 .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(skillName.value))
                 .execute()
-        cache?.set(CharacterSkillCacheKey(characterId.value, skillName.value), entity)
+            cache?.set(CharacterSkillCacheKey(characterId.value, skillName.value), entity)
+        }
     }
 
-    operator fun get(character: RPKCharacter, skill: RPKSkill): RPKSkillCooldown? {
-        val characterId = character.id ?: return null
+    operator fun get(character: RPKCharacter, skill: RPKSkill): CompletableFuture<RPKSkillCooldown?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
         val skillName = skill.name
         val cacheKey = CharacterSkillCacheKey(characterId.value, skillName.value)
         if (cache?.containsKey(cacheKey) == true) {
-            return cache[cacheKey]
+            return CompletableFuture.completedFuture(cache[cacheKey])
         }
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP)
                 .from(RPKIT_SKILL_COOLDOWN)
                 .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(skill.name.value))
-                .fetchOne() ?: return null
-        val skillCooldown = RPKSkillCooldown(
+                .fetchOne() ?: return@supplyAsync null
+            val skillCooldown = RPKSkillCooldown(
                 character,
                 skill,
                 result.get(RPKIT_SKILL_COOLDOWN.COOLDOWN_TIMESTAMP)
-        )
-        cache?.set(cacheKey, skillCooldown)
-        return skillCooldown
+            )
+            cache?.set(cacheKey, skillCooldown)
+            return@supplyAsync skillCooldown
+        }
     }
 
-    fun delete(entity: RPKSkillCooldown) {
-        val characterId = entity.character.id ?: return
+    operator fun get(character: RPKCharacter): CompletableFuture<List<RPKSkillCooldown>> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
+        val skillService = Services[RPKSkillService::class.java] ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.supplyAsync {
+            database.create
+                .selectFrom(RPKIT_SKILL_COOLDOWN)
+                .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
+                .fetch()
+                .mapNotNull { result ->
+                    val skill = skillService.getSkill(RPKSkillName(result.skillName)) ?: return@mapNotNull null
+                    RPKSkillCooldown(
+                        character,
+                        skill,
+                        result.cooldownTimestamp
+                    )
+                }
+        }
+    }
+
+    fun delete(entity: RPKSkillCooldown): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val skillName = entity.skill.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_SKILL_COOLDOWN)
                 .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(entity.skill.name.value))
                 .execute()
-        cache?.remove(CharacterSkillCacheKey(characterId.value, skillName.value))
+            cache?.remove(CharacterSkillCacheKey(characterId.value, skillName.value))
+        }
     }
 
 }

@@ -47,7 +47,7 @@ class MinecraftProfileHandler {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Minecraft profile service not found"))
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(name))
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(RPKMinecraftUsername(name)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Minecraft profile not found"))
         return Response(OK)
@@ -63,7 +63,7 @@ class MinecraftProfileHandler {
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Minecraft profile service not found"))
         val profile = if (minecraftProfilePostRequest.profileId != null) {
-            val profile = profileService.getProfile(RPKProfileId(minecraftProfilePostRequest.profileId))
+            val profile = profileService.getProfile(RPKProfileId(minecraftProfilePostRequest.profileId)).join()
                 ?: return Response(BAD_REQUEST)
                     .with(ErrorResponse.lens of ErrorResponse("Invalid profile ID"))
             if (profile != request.authenticatedProfile) {
@@ -72,13 +72,13 @@ class MinecraftProfileHandler {
             }
             profile
         } else null
-        if (minecraftProfileService.getMinecraftProfile(minecraftProfilePostRequest.minecraftUUID) != null) {
+        if (minecraftProfileService.getMinecraftProfile(minecraftProfilePostRequest.minecraftUUID).join() != null) {
             return Response(CONFLICT)
                 .with(ErrorResponse.lens of ErrorResponse("A Minecraft profile with that UUID already exists"))
         }
-        val minecraftProfile = minecraftProfileService.createMinecraftProfile(minecraftProfilePostRequest.minecraftUUID)
+        val minecraftProfile = minecraftProfileService.createMinecraftProfile(minecraftProfilePostRequest.minecraftUUID).join()
         if (profile != null) {
-            minecraftProfileService.createMinecraftProfileLinkRequest(profile, minecraftProfile)
+            minecraftProfileService.createMinecraftProfileLinkRequest(profile, minecraftProfile).join()
         }
         return Response(OK)
             .with(MinecraftProfileResponse.lens of minecraftProfile.toMinecraftProfileResponse())
@@ -92,10 +92,10 @@ class MinecraftProfileHandler {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Minecraft profile service not found"))
-        val profile = profileService.getProfile(RPKProfileId(profileId))
+        val profile = profileService.getProfile(RPKProfileId(profileId)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
-        val minecraftProfiles = minecraftProfileService.getMinecraftProfiles(profile)
+        val minecraftProfiles = minecraftProfileService.getMinecraftProfiles(profile).join()
         return Response(OK)
             .with(MinecraftProfileResponse.listLens of minecraftProfiles.map(RPKMinecraftProfile::toMinecraftProfileResponse))
     }

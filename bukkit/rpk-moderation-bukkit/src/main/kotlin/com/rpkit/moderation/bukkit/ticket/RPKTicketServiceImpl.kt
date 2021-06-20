@@ -15,6 +15,7 @@
 
 package com.rpkit.moderation.bukkit.ticket
 
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.database.table.RPKTicketTable
 import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketCreateEvent
@@ -23,38 +24,41 @@ import com.rpkit.moderation.bukkit.event.ticket.RPKBukkitTicketUpdateEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.Location
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 
 class RPKTicketServiceImpl(override val plugin: RPKModerationBukkit) : RPKTicketService {
 
-    override fun getTicket(id: RPKTicketId): RPKTicket? {
+    override fun getTicket(id: RPKTicketId): CompletableFuture<RPKTicket?> {
         return plugin.database.getTable(RPKTicketTable::class.java)[id]
     }
 
-    override fun getOpenTickets(): List<RPKTicket> {
+    override fun getOpenTickets(): CompletableFuture<List<RPKTicket>> {
         return plugin.database.getTable(RPKTicketTable::class.java).getOpenTickets()
     }
 
-    override fun getClosedTickets(): List<RPKTicket> {
+    override fun getClosedTickets(): CompletableFuture<List<RPKTicket>> {
         return plugin.database.getTable(RPKTicketTable::class.java).getClosedTickets()
     }
 
-    override fun addTicket(ticket: RPKTicket) {
-        val event = RPKBukkitTicketCreateEvent(ticket)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKTicketTable::class.java).insert(event.ticket)
+    override fun addTicket(ticket: RPKTicket): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitTicketCreateEvent(ticket, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKTicketTable::class.java).insert(event.ticket).join()
+        }
     }
 
     override fun createTicket(
         reason: String,
         issuer: RPKProfile,
         resolver: RPKProfile?,
-        location: Location?,
+        location: RPKLocation?,
         openDate: LocalDateTime,
         closeDate: LocalDateTime?,
         isClosed: Boolean
-    ): RPKTicket {
+    ): CompletableFuture<RPKTicket> {
         val ticket = RPKTicketImpl(
             null,
             reason,
@@ -65,22 +69,25 @@ class RPKTicketServiceImpl(override val plugin: RPKModerationBukkit) : RPKTicket
             closeDate,
             isClosed
         )
-        addTicket(ticket)
-        return ticket
+        return addTicket(ticket).thenApply { ticket }
     }
 
-    override fun updateTicket(ticket: RPKTicket) {
-        val event = RPKBukkitTicketUpdateEvent(ticket)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKTicketTable::class.java).update(event.ticket)
+    override fun updateTicket(ticket: RPKTicket): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitTicketUpdateEvent(ticket, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKTicketTable::class.java).update(event.ticket).join()
+        }
     }
 
-    override fun removeTicket(ticket: RPKTicket) {
-        val event = RPKBukkitTicketDeleteEvent(ticket)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKTicketTable::class.java).delete(event.ticket)
+    override fun removeTicket(ticket: RPKTicket): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitTicketDeleteEvent(ticket, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKTicketTable::class.java).delete(event.ticket).join()
+        }
     }
 
 }

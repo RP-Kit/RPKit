@@ -16,9 +16,9 @@
 
 package com.rpkit.locks.bukkit.lock
 
-import org.bukkit.block.Block
+import com.rpkit.core.location.RPKBlockLocation
 
 
 class RPKLockedBlock(
-        val block: Block
+        val block: RPKBlockLocation
 )

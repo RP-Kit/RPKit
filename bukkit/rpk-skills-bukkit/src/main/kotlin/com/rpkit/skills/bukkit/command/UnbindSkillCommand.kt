@@ -41,7 +41,7 @@ class UnbindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor 
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -51,7 +51,7 @@ class UnbindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor 
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
@@ -62,17 +62,20 @@ class UnbindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor 
             return true
         }
         val item = sender.inventory.itemInMainHand
-        val skill = skillService.getSkillBinding(character, item)
+        val skill = skillService.getPreloadedSkillBinding(character, item)
         if (skill == null) {
             sender.sendMessage(plugin.messages["unbind-skill-invalid-no-binding"])
             return true
         }
-        skillService.setSkillBinding(character, item, null)
-        sender.sendMessage(plugin.messages["unbind-skill-valid", mapOf(
-                "character" to character.name,
-                "item" to item.type.toString().toLowerCase().replace('_', ' '),
-                "skill" to skill.name.value
-        )])
+        skillService.setSkillBinding(character, item, null).thenRun {
+            sender.sendMessage(
+                plugin.messages["unbind-skill-valid", mapOf(
+                    "character" to character.name,
+                    "item" to item.type.toString().toLowerCase().replace('_', ' '),
+                    "skill" to skill.name.value
+                )]
+            )
+        }
         return true
     }
 }

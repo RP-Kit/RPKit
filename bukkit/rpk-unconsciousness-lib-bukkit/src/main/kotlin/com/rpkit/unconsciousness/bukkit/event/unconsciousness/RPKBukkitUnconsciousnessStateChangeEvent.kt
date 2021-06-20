@@ -24,8 +24,9 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitUnconsciousnessStateChangeEvent(
         override val character: RPKCharacter,
-        override var isUnconscious: Boolean
-) : RPKBukkitEvent(), RPKUnconsciousnessStateChangeEvent, Cancellable {
+        override var isUnconscious: Boolean,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKUnconsciousnessStateChangeEvent, Cancellable {
 
     companion object {
         @JvmStatic

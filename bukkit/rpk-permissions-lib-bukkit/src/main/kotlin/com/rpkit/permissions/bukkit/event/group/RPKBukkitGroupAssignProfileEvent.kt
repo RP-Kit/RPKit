@@ -26,8 +26,9 @@ import org.bukkit.event.HandlerList
 class RPKBukkitGroupAssignProfileEvent(
         override val group: RPKGroup,
         override val profile: RPKProfile,
-        override val priority: Int
-) : RPKBukkitEvent(), RPKGroupAssignProfileEvent, Cancellable {
+        override val priority: Int,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKGroupAssignProfileEvent, Cancellable {
 
     companion object {
         @JvmStatic

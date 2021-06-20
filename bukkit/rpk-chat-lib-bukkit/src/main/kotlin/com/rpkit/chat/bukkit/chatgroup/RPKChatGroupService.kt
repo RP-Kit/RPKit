@@ -17,6 +17,7 @@ package com.rpkit.chat.bukkit.chatgroup
 
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides chat group related operations.
@@ -30,7 +31,7 @@ interface RPKChatGroupService : Service {
      * @param id The ID of the chat group
      * @return The chat group, or null if no chat group is found with the given ID
      */
-    fun getChatGroup(id: RPKChatGroupId): RPKChatGroup?
+    fun getChatGroup(id: RPKChatGroupId): CompletableFuture<RPKChatGroup?>
 
     /**
      * Gets a chat group by name.
@@ -39,30 +40,30 @@ interface RPKChatGroupService : Service {
      * @param name The name of the chat group
      * @return The chat group, or null if no chat group is found with the given ID
      */
-    fun getChatGroup(name: RPKChatGroupName): RPKChatGroup?
+    fun getChatGroup(name: RPKChatGroupName): CompletableFuture<RPKChatGroup?>
 
     /**
      * Adds a chat group to be tracked by this chat group service.
      *
      * @param chatGroup The chat group to add
      */
-    fun addChatGroup(chatGroup: RPKChatGroup)
+    fun addChatGroup(chatGroup: RPKChatGroup): CompletableFuture<Void>
 
-    fun createChatGroup(name: RPKChatGroupName): RPKChatGroup
+    fun createChatGroup(name: RPKChatGroupName): CompletableFuture<RPKChatGroup>
 
     /**
      * Removes a chat group from being tracked by this chat group service.
      *
      * @param chatGroup The chat group to remove
      */
-    fun removeChatGroup(chatGroup: RPKChatGroup)
+    fun removeChatGroup(chatGroup: RPKChatGroup): CompletableFuture<Void>
 
     /**
      * Updates a chat group in data storage.
      *
      * @param chatGroup The chat group to update
      */
-    fun updateChatGroup(chatGroup: RPKChatGroup)
+    fun updateChatGroup(chatGroup: RPKChatGroup): CompletableFuture<Void>
 
     /**
      * Gets a Minecraft profile's last used chat group.
@@ -71,7 +72,7 @@ interface RPKChatGroupService : Service {
      * @param minecraftProfile The Minecraft profile
      * @return The last used chat group used by the Minecraft profile, or null if the Minecraft profile has not used a chat group
      */
-    fun getLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile): RPKChatGroup?
+    fun getLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKChatGroup?>
 
     /**
      * Sets a Minecraft profile's last used chat group.
@@ -79,5 +80,5 @@ interface RPKChatGroupService : Service {
      * @param minecraftProfile The Minecraft profile
      * @param chatGroup The chat group to set
      */
-    fun setLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile, chatGroup: RPKChatGroup)
+    fun setLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile, chatGroup: RPKChatGroup): CompletableFuture<Void>
 }

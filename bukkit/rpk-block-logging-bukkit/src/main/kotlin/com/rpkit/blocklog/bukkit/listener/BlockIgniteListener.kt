@@ -20,9 +20,10 @@ import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockChangeImpl
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority.MONITOR
 import org.bukkit.event.Listener
@@ -42,11 +43,11 @@ class BlockIgniteListener(private val plugin: RPKBlockLoggingBukkit) : Listener 
             return
         }
         val player = event.player
-        val minecraftProfile = if (player == null) null else minecraftProfileService?.getMinecraftProfile(player)
+        val minecraftProfile = if (player == null) null else minecraftProfileService?.getPreloadedMinecraftProfile(player)
         val profile = minecraftProfile?.profile as? RPKProfile
-        val character = if (minecraftProfile == null) null else characterService?.getActiveCharacter(minecraftProfile)
-        val blockHistory = blockHistoryService.getBlockHistory(event.block)
-        val blockChange = RPKBlockChangeImpl(
+        val character = if (minecraftProfile == null) null else characterService?.getPreloadedActiveCharacter(minecraftProfile)
+        blockHistoryService.getBlockHistory(event.block.toRPKBlockLocation()).thenAccept { blockHistory ->
+            val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
                 time = LocalDateTime.now(),
                 profile = profile,
@@ -55,8 +56,11 @@ class BlockIgniteListener(private val plugin: RPKBlockLoggingBukkit) : Listener 
                 from = event.block.type,
                 to = event.block.type,
                 reason = "IGNITE"
-        )
-        blockHistoryService.addBlockChange(blockChange)
+            )
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                blockHistoryService.addBlockChange(blockChange)
+            })
+        }
     }
 
 }

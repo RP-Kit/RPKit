@@ -21,13 +21,14 @@ import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ClickEvent.Action.SUGGEST_COMMAND
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture.completedFuture
 
 @SerializableAs("SuggestCommandClickAction")
 class SuggestCommandClickAction(val command: String) : ClickAction, ConfigurationSerializable {
-    override fun toClickEvent(context: DirectedPreFormatMessageContext) = ClickEvent(
+    override fun toClickEvent(context: DirectedPreFormatMessageContext) = completedFuture(ClickEvent(
             SUGGEST_COMMAND,
             command
-    )
+    ))
 
     override fun serialize() = mutableMapOf(
             "command" to command

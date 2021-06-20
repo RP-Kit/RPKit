@@ -23,6 +23,7 @@ import com.rpkit.professions.bukkit.database.create
 import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_CHARACTER_PROFESSION_EXPERIENCE
 import com.rpkit.professions.bukkit.profession.RPKCharacterProfessionExperience
 import com.rpkit.professions.bukkit.profession.RPKProfession
+import java.util.concurrent.CompletableFuture
 
 
 class RPKCharacterProfessionExperienceTable(
@@ -46,76 +47,88 @@ class RPKCharacterProfessionExperienceTable(
         null
     }
 
-    fun insert(entity: RPKCharacterProfessionExperience) {
-        val characterId = entity.character.id ?: return
+    fun insert(entity: RPKCharacterProfessionExperience): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val professionName = entity.profession.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_CHARACTER_PROFESSION_EXPERIENCE,
-                        RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID,
-                        RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION,
-                        RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE
+                    RPKIT_CHARACTER_PROFESSION_EXPERIENCE,
+                    RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID,
+                    RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION,
+                    RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE
                 )
                 .values(
-                        characterId.value,
-                        professionName.value,
-                        entity.experience
+                    characterId.value,
+                    professionName.value,
+                    entity.experience
                 )
                 .execute()
-        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
+            cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
+        }
     }
 
-    fun update(entity: RPKCharacterProfessionExperience) {
-        val characterId = entity.character.id ?: return
+    fun update(entity: RPKCharacterProfessionExperience): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val professionName = entity.profession.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
-                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID, characterId.value)
-                .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION, professionName.value)
                 .set(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE, entity.experience)
                 .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
+                .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName.value))
                 .execute()
-        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
+            cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
+        }
     }
 
-    operator fun get(character: RPKCharacter, profession: RPKProfession): RPKCharacterProfessionExperience? {
-        val characterId = character.id ?: return null
+    operator fun get(character: RPKCharacter, profession: RPKProfession): CompletableFuture<RPKCharacterProfessionExperience?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
         val professionName = profession.name
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE)
                 .from(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
                 .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName.value))
-                .fetchOne() ?: return null
-        val characterProfessionExperience = RPKCharacterProfessionExperience(
+                .fetchOne() ?: return@supplyAsync null
+            val characterProfessionExperience = RPKCharacterProfessionExperience(
                 character,
                 profession,
                 result[RPKIT_CHARACTER_PROFESSION_EXPERIENCE.EXPERIENCE]
-        )
-        cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), characterProfessionExperience)
-        return characterProfessionExperience
+            )
+            cache?.set(
+                CharacterProfessionCacheKey(characterId.value, professionName.value),
+                characterProfessionExperience
+            )
+            return@supplyAsync characterProfessionExperience
+        }
     }
 
-    fun delete(entity: RPKCharacterProfessionExperience) {
-        val characterId = entity.character.id ?: return
+    fun delete(entity: RPKCharacterProfessionExperience): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val professionName = entity.profession.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
                 .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName.value))
                 .execute()
-        cache?.remove(CharacterProfessionCacheKey(characterId.value, professionName.value))
+            cache?.remove(CharacterProfessionCacheKey(characterId.value, professionName.value))
+        }
     }
 
-    fun delete(character: RPKCharacter) {
-        val characterId = character.id ?: return
-        database.create
+    fun delete(character: RPKCharacter): CompletableFuture<Void> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_CHARACTER_PROFESSION_EXPERIENCE)
                 .where(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.keys()
-            ?.filter { it.characterId == characterId.value }
-            ?.forEach { cache.remove(it) }
+            cache?.keys()
+                ?.filter { it.characterId == characterId.value }
+                ?.forEach { cache.remove(it) }
+        }
     }
 
 }

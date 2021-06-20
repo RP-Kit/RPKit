@@ -19,7 +19,6 @@ package com.rpkit.unconsciousness.bukkit.listener
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
-import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import org.bukkit.entity.Creature
 import org.bukkit.entity.Player
@@ -29,7 +28,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 
 
-class EntityDamageByEntityListener(private val plugin: RPKUnconsciousnessBukkit) : Listener {
+class EntityDamageByEntityListener : Listener {
 
     @EventHandler
     fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
@@ -38,9 +37,9 @@ class EntityDamageByEntityListener(private val plugin: RPKUnconsciousnessBukkit)
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
             val characterService = Services[RPKCharacterService::class.java] ?: return
             val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(damager) ?: return
-            val character = characterService.getActiveCharacter(minecraftProfile) ?: return
-            if (!unconsciousnessService.isUnconscious(character)) return
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(damager) ?: return
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
+            if (!unconsciousnessService.getPreloadedUnconsciousness(character)) return
             event.isCancelled = true
         } else if (damager is Projectile) {
             val shooter = damager.shooter
@@ -48,9 +47,9 @@ class EntityDamageByEntityListener(private val plugin: RPKUnconsciousnessBukkit)
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
             val characterService = Services[RPKCharacterService::class.java] ?: return
             val unconsciousnessService = Services[RPKUnconsciousnessService::class.java] ?: return
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(shooter) ?: return
-            val character = characterService.getActiveCharacter(minecraftProfile) ?: return
-            if (!unconsciousnessService.isUnconscious(character)) return
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(shooter) ?: return
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
+            if (!unconsciousnessService.getPreloadedUnconsciousness(character)) return
             event.isCancelled = true
             val target = event.entity
             if (target !is Creature) return

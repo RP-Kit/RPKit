@@ -20,6 +20,7 @@ import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.discord.DiscordUserId
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfile
+import java.util.concurrent.CompletableFuture
 
 interface RPKDiscordService : Service {
 
@@ -29,8 +30,9 @@ interface RPKDiscordService : Service {
     fun getUserId(discordUserName: String): DiscordUserId?
     fun setMessageAsProfileLinkRequest(messageId: Long, profile: RPKProfile)
     fun setMessageAsProfileLinkRequest(message: DiscordMessage, profile: RPKProfile)
-    fun getMessageProfileLink(messageId: Long): RPKProfile?
-    fun getMessageProfileLink(message: DiscordMessage): RPKProfile?
+    fun getMessageProfileLink(messageId: Long): CompletableFuture<RPKProfile?>
+    fun getMessageProfileLink(message: DiscordMessage): CompletableFuture<RPKProfile?>
     fun getDiscordChannel(name: String): DiscordChannel?
+    fun disconnect()
 
 }

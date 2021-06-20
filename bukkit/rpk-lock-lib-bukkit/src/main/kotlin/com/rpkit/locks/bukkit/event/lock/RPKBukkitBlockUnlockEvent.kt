@@ -17,14 +17,15 @@
 package com.rpkit.locks.bukkit.event.lock
 
 import com.rpkit.core.bukkit.event.RPKBukkitEvent
-import org.bukkit.block.Block
+import com.rpkit.core.location.RPKBlockLocation
 import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 
 
 class RPKBukkitBlockUnlockEvent(
-        override val block: Block
-) : RPKBukkitEvent(), RPKBlockUnlockEvent, Cancellable {
+        override val block: RPKBlockLocation,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKBlockUnlockEvent, Cancellable {
 
     companion object {
         @JvmStatic

@@ -22,6 +22,7 @@ import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
 import com.rpkit.unconsciousness.bukkit.database.create
 import com.rpkit.unconsciousness.bukkit.database.jooq.Tables.RPKIT_UNCONSCIOUS_STATE
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousState
+import java.util.concurrent.CompletableFuture
 
 
 class RPKUnconsciousStateTable(private val database: Database, private val plugin: RPKUnconsciousnessBukkit) : Table {
@@ -37,62 +38,70 @@ class RPKUnconsciousStateTable(private val database: Database, private val plugi
         null
     }
 
-    fun insert(entity: RPKUnconsciousState) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKUnconsciousState): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_UNCONSCIOUS_STATE,
-                        RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID,
-                        RPKIT_UNCONSCIOUS_STATE.DEATH_TIME
+                    RPKIT_UNCONSCIOUS_STATE,
+                    RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID,
+                    RPKIT_UNCONSCIOUS_STATE.DEATH_TIME
                 )
                 .values(
                     characterId.value,
                     entity.deathTime
                 )
                 .execute()
-        cache?.set(characterId.value, entity)
+            cache?.set(characterId.value, entity)
+        }
     }
 
-    fun update(entity: RPKUnconsciousState) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun update(entity: RPKUnconsciousState): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_UNCONSCIOUS_STATE)
                 .set(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID, characterId.value)
                 .set(RPKIT_UNCONSCIOUS_STATE.DEATH_TIME, entity.deathTime)
                 .execute()
-        cache?.set(characterId.value, entity)
-    }
-
-    operator fun get(character: RPKCharacter): RPKUnconsciousState? {
-        val characterId = character.id ?: return null
-        if (cache?.containsKey(characterId.value) == true) {
-            return cache[characterId.value]
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID,
-                            RPKIT_UNCONSCIOUS_STATE.DEATH_TIME
-                    )
-                    .from(RPKIT_UNCONSCIOUS_STATE)
-                    .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(characterId.value))
-                    .fetchOne() ?: return null
-            val deathTime = result[RPKIT_UNCONSCIOUS_STATE.DEATH_TIME]
-            val unconsciousState = RPKUnconsciousState(
-                    character,
-                    deathTime
-            )
-            cache?.set(characterId.value, unconsciousState)
-            return unconsciousState
+            cache?.set(characterId.value, entity)
         }
     }
 
-    fun delete(entity: RPKUnconsciousState) {
-        val characterId = entity.character.id ?: return
-        database.create
+    operator fun get(character: RPKCharacter): CompletableFuture<RPKUnconsciousState?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
+        if (cache?.containsKey(characterId.value) == true) {
+            return CompletableFuture.completedFuture(cache[characterId.value])
+        } else {
+            return CompletableFuture.supplyAsync {
+                val result = database.create
+                    .select(
+                        RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID,
+                        RPKIT_UNCONSCIOUS_STATE.DEATH_TIME
+                    )
+                    .from(RPKIT_UNCONSCIOUS_STATE)
+                    .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(characterId.value))
+                    .fetchOne() ?: return@supplyAsync null
+                val deathTime = result[RPKIT_UNCONSCIOUS_STATE.DEATH_TIME]
+                val unconsciousState = RPKUnconsciousState(
+                    character,
+                    deathTime
+                )
+                cache?.set(characterId.value, unconsciousState)
+                return@supplyAsync unconsciousState
+            }
+        }
+    }
+
+    fun delete(entity: RPKUnconsciousState): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_UNCONSCIOUS_STATE)
                 .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.remove(characterId.value)
+            cache?.remove(characterId.value)
+        }
     }
 
 }

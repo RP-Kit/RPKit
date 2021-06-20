@@ -50,27 +50,30 @@ class ChatGroupMessageCommand(private val plugin: RPKChatBukkit) : CommandExecut
             sender.sendMessage(plugin.messages["no-chat-group-service"])
             return true
         }
-        val chatGroup = chatGroupService.getChatGroup(RPKChatGroupName(args[0]))
-        if (chatGroup == null) {
-            sender.sendMessage(plugin.messages["chat-group-message-invalid-chat-group"])
-            return true
+        chatGroupService.getChatGroup(RPKChatGroupName(args[0])).thenAccept { chatGroup ->
+            if (chatGroup == null) {
+                sender.sendMessage(plugin.messages["chat-group-message-invalid-chat-group"])
+                return@thenAccept
+            }
+            if (sender !is Player) {
+                sender.sendMessage(plugin.messages["not-from-console"])
+                return@thenAccept
+            }
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
+            if (minecraftProfile == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                return@thenAccept
+            }
+            chatGroup.members.thenAccept getMembers@{ members ->
+                if (members.none { memberMinecraftProfile ->
+                        memberMinecraftProfile.id == minecraftProfile.id
+                    }) {
+                    sender.sendMessage(plugin.messages["chat-group-message-invalid-not-a-member"])
+                    return@getMembers
+                }
+                chatGroup.sendMessage(minecraftProfile, args.drop(1).joinToString(" "))
+            }
         }
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
-            return true
-        }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-            return true
-        }
-        if (chatGroup.members.none { memberMinecraftProfile ->
-                    memberMinecraftProfile.id == minecraftProfile.id
-                }) {
-            sender.sendMessage(plugin.messages["chat-group-message-invalid-not-a-member"])
-            return true
-        }
-        chatGroup.sendMessage(minecraftProfile, args.drop(1).joinToString(" "))
         return true
     }
 

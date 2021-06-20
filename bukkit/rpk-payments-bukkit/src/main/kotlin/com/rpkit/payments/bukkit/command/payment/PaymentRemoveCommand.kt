@@ -43,37 +43,42 @@ class PaymentRemoveCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" ")))
-        if (paymentGroup == null) {
-            sender.sendMessage(plugin.messages["payment-remove-invalid-payment-group"])
-            return true
+        paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.joinToString(" "))).thenAccept getPaymentGroup@{ paymentGroup ->
+            if (paymentGroup == null) {
+                sender.sendMessage(plugin.messages["payment-remove-invalid-payment-group"])
+                return@getPaymentGroup
+            }
+            if (sender !is Player) {
+                sender.sendMessage(plugin.messages["not-from-console"])
+                return@getPaymentGroup
+            }
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+            if (minecraftProfileService == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+                return@getPaymentGroup
+            }
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
+            if (minecraftProfile == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                return@getPaymentGroup
+            }
+            val characterService = Services[RPKCharacterService::class.java]
+            if (characterService == null) {
+                sender.sendMessage(plugin.messages["no-character-service"])
+                return@getPaymentGroup
+            }
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+            paymentGroup.owners.thenAccept { owners ->
+                if (!owners.contains(character)) {
+                    sender.sendMessage(plugin.messages["payment-remove-invalid-not-an-owner"])
+                    return@thenAccept
+                }
+                paymentGroupService.removePaymentGroup(paymentGroup).thenRun {
+                    sender.sendMessage(plugin.messages["payment-remove-valid"])
+                }
+            }
         }
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
-            return true
-        }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
-        if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
-            return true
-        }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-            return true
-        }
-        val characterService = Services[RPKCharacterService::class.java]
-        if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
-            return true
-        }
-        val character = characterService.getActiveCharacter(minecraftProfile)
-        if (!paymentGroup.owners.contains(character)) {
-            sender.sendMessage(plugin.messages["payment-remove-invalid-not-an-owner"])
-            return true
-        }
-        paymentGroupService.removePaymentGroup(paymentGroup)
-        sender.sendMessage(plugin.messages["payment-remove-valid"])
+
         return true
     }
 

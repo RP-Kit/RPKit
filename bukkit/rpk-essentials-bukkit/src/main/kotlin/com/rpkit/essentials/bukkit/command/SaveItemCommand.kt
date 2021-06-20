@@ -11,25 +11,26 @@ import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
+import java.util.concurrent.CompletableFuture
 
 class SaveItemCommand(private val plugin: RPKEssentialsBukkit) : RPKCommandExecutor {
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
         if (!sender.hasPermission("rpkit.essentials.command.saveitem")) {
             sender.sendMessage(plugin.messages.noPermissionSaveItem)
-            return NoPermissionFailure("rpkit.essentials.command.saveitem")
+            return CompletableFuture.completedFuture(NoPermissionFailure("rpkit.essentials.command.saveitem"))
         }
         if (sender !is RPKMinecraftProfile) {
             sender.sendMessage(plugin.messages.notFromConsole)
-            return NotAPlayerFailure()
+            return CompletableFuture.completedFuture(NotAPlayerFailure())
         }
         val bukkitPlayer = plugin.server.getPlayer(sender.minecraftUUID)
         if (bukkitPlayer == null) {
             sender.sendMessage(plugin.messages.notFromConsole)
-            return NotAPlayerFailure()
+            return CompletableFuture.completedFuture(NotAPlayerFailure())
         }
         if (args.isEmpty()) {
             sender.sendMessage(plugin.messages.saveItemUsage)
-            return IncorrectUsageFailure()
+            return CompletableFuture.completedFuture(IncorrectUsageFailure())
         }
         val itemName = args[0]
         val itemInHand = bukkitPlayer.inventory.itemInMainHand
@@ -38,6 +39,6 @@ class SaveItemCommand(private val plugin: RPKEssentialsBukkit) : RPKCommandExecu
         itemsConfig.set(itemName, itemInHand)
         itemsConfig.save(itemsFile)
         sender.sendMessage(plugin.messages.saveItemValid.withParameters(itemName))
-        return CommandSuccess
+        return CompletableFuture.completedFuture(CommandSuccess)
     }
 }

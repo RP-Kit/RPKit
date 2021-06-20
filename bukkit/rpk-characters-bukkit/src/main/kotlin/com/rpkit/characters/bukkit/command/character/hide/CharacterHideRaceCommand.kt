@@ -50,20 +50,21 @@ class CharacterHideRaceCommand(private val plugin: RPKCharactersBukkit) : Comman
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
         character.isRaceHidden = true
-        characterService.updateCharacter(character)
-        sender.sendMessage(plugin.messages["character-hide-race-valid"])
-        character.showCharacterCard(minecraftProfile)
+        characterService.updateCharacter(character).thenRun {
+            sender.sendMessage(plugin.messages["character-hide-race-valid"])
+            character.showCharacterCard(minecraftProfile)
+        }
         return true
     }
 

@@ -17,12 +17,7 @@ package com.rpkit.players.bukkit.command.profile
 
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.command.RPKCommandExecutor
-import com.rpkit.core.command.result.CommandFailure
-import com.rpkit.core.command.result.CommandResult
-import com.rpkit.core.command.result.CommandSuccess
-import com.rpkit.core.command.result.IncorrectUsageFailure
-import com.rpkit.core.command.result.MissingServiceFailure
-import com.rpkit.core.command.result.NoPermissionFailure
+import com.rpkit.core.command.result.*
 import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
@@ -34,6 +29,7 @@ import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Account link IRC command.
@@ -44,56 +40,57 @@ class ProfileLinkIRCCommand(private val plugin: RPKPlayersBukkit) : RPKCommandEx
     class InvalidIRCNickFailure : CommandFailure()
     class IRCProfileAlreadyLinkedFailure(val ircProfile: RPKIRCProfile) : CommandFailure()
 
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
         if (sender !is RPKMinecraftProfile) {
             sender.sendMessage(plugin.messages.notFromConsole)
-            return NotAPlayerFailure()
+            return CompletableFuture.completedFuture(NotAPlayerFailure())
         }
         if (!sender.hasPermission("rpkit.players.command.profile.link.irc")) {
             sender.sendMessage(plugin.messages.noPermissionProfileLinkIrc)
-            return NoPermissionFailure("rpkit.players.command.profile.link.irc")
+            return CompletableFuture.completedFuture(NoPermissionFailure("rpkit.players.command.profile.link.irc"))
         }
         if (args.isEmpty()) {
             sender.sendMessage(plugin.messages.profileLinkIrcUsage)
-            return IncorrectUsageFailure()
+            return CompletableFuture.completedFuture(IncorrectUsageFailure())
         }
         val nick = RPKIRCNick(args[0])
         val ircService = Services[RPKIRCService::class.java]
         if (ircService == null) {
             sender.sendMessage(plugin.messages.noIrcService)
-            return MissingServiceFailure(RPKIRCService::class.java)
+            return CompletableFuture.completedFuture(MissingServiceFailure(RPKIRCService::class.java))
         }
         if (!ircService.isOnline(nick)) {
             sender.sendMessage(plugin.messages.profileLinkIrcInvalidNick)
-            return InvalidIRCNickFailure()
+            return CompletableFuture.completedFuture(InvalidIRCNickFailure())
         }
         val profile = sender.profile
         if (profile !is RPKProfile) {
             sender.sendMessage(plugin.messages.noProfileSelf)
-            return NoProfileSelfFailure()
+            return CompletableFuture.completedFuture(NoProfileSelfFailure())
         }
         val profileService = Services[RPKProfileService::class.java]
         if (profileService == null) {
             sender.sendMessage(plugin.messages.noProfileService)
-            return MissingServiceFailure(RPKProfileService::class.java)
+            return CompletableFuture.completedFuture(MissingServiceFailure(RPKProfileService::class.java))
         }
         val ircProfileService = Services[RPKIRCProfileService::class.java]
         if (ircProfileService == null) {
             sender.sendMessage(plugin.messages.noIrcProfileService)
-            return MissingServiceFailure(RPKIRCProfileService::class.java)
+            return CompletableFuture.completedFuture(MissingServiceFailure(RPKIRCProfileService::class.java))
         }
-        val ircProfile = ircProfileService.getIRCProfile(nick) ?: null
-        if (ircProfile != null && ircProfile.profile is RPKProfile) {
-            sender.sendMessage(plugin.messages.profileLinkIrcInvalidAlreadyLinked)
-            return IRCProfileAlreadyLinkedFailure(ircProfile)
+        return ircProfileService.getIRCProfile(nick).thenApply { ircProfile ->
+            if (ircProfile != null && ircProfile.profile is RPKProfile) {
+                sender.sendMessage(plugin.messages.profileLinkIrcInvalidAlreadyLinked)
+                return@thenApply IRCProfileAlreadyLinkedFailure(ircProfile)
+            }
+            if (ircProfile == null) {
+                ircProfileService.createIRCProfile(profile, nick)
+            } else {
+                ircProfile.profile = profile
+                ircProfileService.updateIRCProfile(ircProfile)
+            }
+            sender.sendMessage(plugin.messages.profileLinkIrcValid)
+            return@thenApply CommandSuccess
         }
-        if (ircProfile == null) {
-            ircProfileService.createIRCProfile(profile, nick)
-        } else {
-            ircProfile.profile = profile
-            ircProfileService.updateIRCProfile(ircProfile)
-        }
-        sender.sendMessage(plugin.messages.profileLinkIrcValid)
-        return CommandSuccess
     }
 }

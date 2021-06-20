@@ -25,8 +25,9 @@ import org.bukkit.event.HandlerList
 class RPKBukkitExperienceChangeEvent(
         override val character: RPKCharacter,
         override val oldExperience: Int,
-        override var experience: Int
-) : RPKBukkitEvent(), RPKExperienceChangeEvent, Cancellable {
+        override var experience: Int,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKExperienceChangeEvent, Cancellable {
 
     companion object {
         @JvmStatic

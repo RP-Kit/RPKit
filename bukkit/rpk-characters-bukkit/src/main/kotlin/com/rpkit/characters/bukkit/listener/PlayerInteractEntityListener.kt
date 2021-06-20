@@ -52,17 +52,17 @@ class PlayerInteractEntityListener(private val plugin: RPKCharactersBukkit) : Li
             event.player.sendMessage(plugin.messages["no-character-service"])
             return
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             event.player.sendMessage(plugin.messages["no-minecraft-profile"])
             return
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             event.player.sendMessage(plugin.messages["no-character-other"])
             return
         }
-        val rightClicker = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        val rightClicker = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
         character.showCharacterCard(rightClicker)
     }
 }

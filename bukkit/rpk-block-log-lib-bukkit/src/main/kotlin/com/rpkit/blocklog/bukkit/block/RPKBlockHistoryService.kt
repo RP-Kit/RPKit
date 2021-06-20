@@ -15,29 +15,30 @@
 
 package com.rpkit.blocklog.bukkit.block
 
+import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.core.service.Service
 import org.bukkit.Material
-import org.bukkit.block.Block
 import org.bukkit.inventory.ItemStack
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKBlockHistoryService : Service {
 
-    fun getBlockHistory(id: RPKBlockHistoryId): RPKBlockHistory?
-    fun addBlockHistory(blockHistory: RPKBlockHistory)
-    fun updateBlockHistory(blockHistory: RPKBlockHistory)
-    fun removeBlockHistory(blockHistory: RPKBlockHistory)
-    fun getBlockChange(id: RPKBlockChangeId): RPKBlockChange?
-    fun addBlockChange(blockChange: RPKBlockChange)
-    fun updateBlockChange(blockChange: RPKBlockChange)
-    fun removeBlockChange(blockChange: RPKBlockChange)
-    fun getBlockInventoryChange(id: RPKBlockInventoryChangeId): RPKBlockInventoryChange?
-    fun addBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange)
-    fun updateBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange)
-    fun removeBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange)
-    fun getBlockHistory(block: Block): RPKBlockHistory
-    fun getBlockTypeAtTime(block: Block, time: LocalDateTime): Material
-    fun getBlockInventoryAtTime(block: Block, time: LocalDateTime): Array<ItemStack>
+    fun getBlockHistory(id: RPKBlockHistoryId): CompletableFuture<RPKBlockHistory?>
+    fun addBlockHistory(blockHistory: RPKBlockHistory): CompletableFuture<Void>
+    fun updateBlockHistory(blockHistory: RPKBlockHistory): CompletableFuture<Void>
+    fun removeBlockHistory(blockHistory: RPKBlockHistory): CompletableFuture<Void>
+    fun getBlockChange(id: RPKBlockChangeId): CompletableFuture<RPKBlockChange?>
+    fun addBlockChange(blockChange: RPKBlockChange): CompletableFuture<Void>
+    fun updateBlockChange(blockChange: RPKBlockChange): CompletableFuture<Void>
+    fun removeBlockChange(blockChange: RPKBlockChange): CompletableFuture<Void>
+    fun getBlockInventoryChange(id: RPKBlockInventoryChangeId): CompletableFuture<RPKBlockInventoryChange?>
+    fun addBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void>
+    fun updateBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void>
+    fun removeBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void>
+    fun getBlockHistory(block: RPKBlockLocation): CompletableFuture<RPKBlockHistory>
+    fun getBlockTypeAtTime(block: RPKBlockLocation, time: LocalDateTime): CompletableFuture<Material>
+    fun getBlockInventoryAtTime(block: RPKBlockLocation, time: LocalDateTime): CompletableFuture<Array<ItemStack>>
 
 }

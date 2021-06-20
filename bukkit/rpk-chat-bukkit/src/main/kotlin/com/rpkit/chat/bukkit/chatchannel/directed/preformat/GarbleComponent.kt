@@ -26,6 +26,7 @@ import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
 /**
  * Garble component.
@@ -34,15 +35,28 @@ import java.util.*
 @SerializableAs("GarbleComponent")
 class GarbleComponent(var clearRadius: Double) : DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
-        if (context.isCancelled) return context // Don't bother garbling if the receiver won't receive anyway
-        val senderMinecraftProfile = context.senderMinecraftProfile
-                ?: return context // Prevent garble if the message wasn't sent from Minecraft
+    override fun process(context: DirectedPreFormatMessageContext): CompletableFuture<DirectedPreFormatMessageContext> {
+        if (context.isCancelled) return CompletableFuture.completedFuture(context) // Don't bother garbling if the receiver won't receive anyway
+        context.senderMinecraftProfile ?: return CompletableFuture.completedFuture(context) // Prevent garble if the message wasn't sent from Minecraft
         val receiverMinecraftProfile = context.receiverMinecraftProfile
         val snooperService = Services[RPKSnooperService::class.java]
         if (snooperService != null) {
-            if (snooperService.isSnooping(receiverMinecraftProfile)) return context // Prevent garble if the receiver is snooping
+            return snooperService.isSnooping(receiverMinecraftProfile).thenApply { isSnooping ->
+                if (isSnooping) {
+                    return@thenApply context // Prevent garble if the receiver is snooping
+                } else {
+                    return@thenApply applyGarble(context)
+                }
+            }
+        } else {
+            return CompletableFuture.completedFuture(applyGarble(context))
         }
+    }
+
+    fun applyGarble(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
+        val senderMinecraftProfile = context.senderMinecraftProfile
+            ?: return context // Prevent garble if the message wasn't sent from Minecraft
+        val receiverMinecraftProfile = context.receiverMinecraftProfile
         val senderOfflineBukkitPlayer = Bukkit.getOfflinePlayer(senderMinecraftProfile.minecraftUUID)
         val receiverOfflineBukkitPlayer = Bukkit.getOfflinePlayer(receiverMinecraftProfile.minecraftUUID)
         val senderBukkitPlayer = senderOfflineBukkitPlayer.player

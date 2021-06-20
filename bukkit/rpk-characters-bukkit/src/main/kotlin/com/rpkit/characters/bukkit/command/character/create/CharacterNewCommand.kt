@@ -17,12 +17,11 @@
 package com.rpkit.characters.bukkit.command.character.create
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.character.RPKCharacterImpl
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownService
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -38,50 +37,62 @@ class CharacterNewCommand(private val plugin: RPKCharactersBukkit) : CommandExec
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         if (!sender.hasPermission("rpkit.characters.command.character.new")) {
-            sender.sendMessage(plugin.messages["no-permission-character-new"])
+            sender.sendMessage(plugin.messages.noPermissionCharacterNew)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
+            sender.sendMessage(plugin.messages.noCharacterService)
             return true
         }
         val newCharacterCooldownService = Services[RPKNewCharacterCooldownService::class.java]
         if (newCharacterCooldownService == null) {
-            sender.sendMessage(plugin.messages["no-new-character-cooldown-service"])
+            sender.sendMessage(plugin.messages.noNewCharacterCooldownService)
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true
         }
         val profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
-            sender.sendMessage(plugin.messages["no-profile"])
+            sender.sendMessage(plugin.messages.noProfile)
             return true
         }
-        val newCharacterCooldown = newCharacterCooldownService.getNewCharacterCooldown(profile)
-        if (!sender.hasPermission("rpkit.characters.command.character.new.nocooldown")
+        newCharacterCooldownService.getNewCharacterCooldown(profile).thenAccept { newCharacterCooldown ->
+            if (!sender.hasPermission("rpkit.characters.command.character.new.nocooldown")
                 && !newCharacterCooldown.isNegative && !newCharacterCooldown.isZero) {
-            sender.sendMessage(plugin.messages["character-new-invalid-cooldown"])
-            return true
+                sender.sendMessage(plugin.messages.characterNewInvalidCooldown)
+                return@thenAccept
+            }
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                characterService.createCharacter(profile = profile).thenAccept { character ->
+                    plugin.server.scheduler.runTask(plugin, Runnable {
+                        characterService.setActiveCharacter(minecraftProfile, character).thenRun {
+                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                newCharacterCooldownService.setNewCharacterCooldown(
+                                    profile,
+                                    Duration.of(plugin.config.getLong("characters.new-character-cooldown"), MILLIS)
+                                ).thenRun {
+                                    sender.sendMessage(plugin.messages.characterNewValid)
+                                    character.showCharacterCard(minecraftProfile)
+                                }
+                            })
+                        }
+                    })
+                }
+            })
         }
-        val character = RPKCharacterImpl(plugin, profile = profile)
-        characterService.addCharacter(character)
-        characterService.setActiveCharacter(minecraftProfile, character)
-        newCharacterCooldownService.setNewCharacterCooldown(profile, Duration.of(plugin.config.getLong("characters.new-character-cooldown"), MILLIS))
-        sender.sendMessage(plugin.messages["character-new-valid"])
-        character.showCharacterCard(minecraftProfile)
         return true
     }
 

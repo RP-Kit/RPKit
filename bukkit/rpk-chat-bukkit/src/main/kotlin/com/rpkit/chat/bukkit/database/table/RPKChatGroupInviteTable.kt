@@ -27,16 +27,18 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents chat group invite table.
  */
 class RPKChatGroupInviteTable(private val database: Database) : Table {
 
-    fun insert(entity: RPKChatGroupInvite) {
-        val chatGroupId = entity.chatGroup.id ?: return
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun insert(entity: RPKChatGroupInvite): CompletableFuture<Void> {
+        val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
                     RPKIT_CHAT_GROUP_INVITE,
                     RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID,
@@ -47,6 +49,7 @@ class RPKChatGroupInviteTable(private val database: Database) : Table {
                     minecraftProfileId.value
                 )
                 .execute()
+        }
     }
 
     /**
@@ -55,23 +58,27 @@ class RPKChatGroupInviteTable(private val database: Database) : Table {
      * @param chatGroup The chat group
      * @return A list of chat group invites
      */
-    fun get(chatGroup: RPKChatGroup): List<RPKChatGroupInvite> {
-        val chatGroupId = chatGroup.id ?: return emptyList()
-        return database.create
-            .select(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID)
-            .from(RPKIT_CHAT_GROUP_INVITE)
-            .where(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID.eq(chatGroupId.value))
-            .fetch()
-            .mapNotNull { result ->
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@mapNotNull null
-                val minecraftProfile = minecraftProfileService
-                    .getMinecraftProfile(RPKMinecraftProfileId(result[RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID]))
-                    ?: return@mapNotNull null
-                RPKChatGroupInvite(
-                    chatGroup,
-                    minecraftProfile
-                )
-            }
+    fun get(chatGroup: RPKChatGroup): CompletableFuture<List<RPKChatGroupInvite>> {
+        val chatGroupId = chatGroup.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            return@supplyAsync database.create
+                .select(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID)
+                .from(RPKIT_CHAT_GROUP_INVITE)
+                .where(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID.eq(chatGroupId.value))
+                .fetch()
+                .mapNotNull { result ->
+                    val minecraftProfileService =
+                        Services[RPKMinecraftProfileService::class.java] ?: return@mapNotNull null
+                    val minecraftProfile = minecraftProfileService
+                        .getMinecraftProfile(RPKMinecraftProfileId(result[RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID]))
+                        .join()
+                        ?: return@mapNotNull null
+                    return@mapNotNull RPKChatGroupInvite(
+                        chatGroup,
+                        minecraftProfile
+                    )
+                }
+        }
     }
 
     /**
@@ -80,33 +87,37 @@ class RPKChatGroupInviteTable(private val database: Database) : Table {
      * @param minecraftProfile The Minecraft profile
      * @return A list of chat group invites for the Minecraft profile
      */
-    fun get(minecraftProfile: RPKMinecraftProfile): List<RPKChatGroupInvite> {
-        val minecraftProfileId = minecraftProfile.id ?: return emptyList()
-        return database.create
-            .select(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID)
-            .from(RPKIT_CHAT_GROUP_INVITE)
-            .where(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-            .fetch()
-            .mapNotNull { result ->
-                val chatGroupService = Services[RPKChatGroupService::class.java] ?: return@mapNotNull null
-                val chatGroup = chatGroupService
-                    .getChatGroup(RPKChatGroupId(result[RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID]))
-                    ?: return@mapNotNull null
-                RPKChatGroupInvite(
-                    chatGroup,
-                    minecraftProfile
-                )
-            }
+    fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<List<RPKChatGroupInvite>> {
+        val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            return@supplyAsync database.create
+                .select(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID)
+                .from(RPKIT_CHAT_GROUP_INVITE)
+                .where(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+                .fetch()
+                .mapNotNull { result ->
+                    val chatGroupService = Services[RPKChatGroupService::class.java] ?: return@mapNotNull null
+                    val chatGroup = chatGroupService
+                        .getChatGroup(RPKChatGroupId(result[RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID])).join()
+                        ?: return@mapNotNull null
+                    return@mapNotNull RPKChatGroupInvite(
+                        chatGroup,
+                        minecraftProfile
+                    )
+                }
+        }
     }
 
-    fun delete(entity: RPKChatGroupInvite) {
-        val chatGroupId = entity.chatGroup.id ?: return
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun delete(entity: RPKChatGroupInvite): CompletableFuture<Void> {
+        val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_CHAT_GROUP_INVITE)
                 .where(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID.eq(chatGroupId.value))
                 .and(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
+        }
     }
 
 }

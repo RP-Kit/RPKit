@@ -15,8 +15,8 @@
 
 package com.rpkit.moderation.bukkit.ticket
 
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.players.bukkit.profile.RPKProfile
-import org.bukkit.Location
 import java.time.LocalDateTime
 
 
@@ -26,7 +26,7 @@ interface RPKTicket {
     val reason: String
     val issuer: RPKProfile
     var resolver: RPKProfile?
-    val location: Location?
+    val location: RPKLocation?
     val openDate: LocalDateTime
     var closeDate: LocalDateTime?
     var isClosed: Boolean

@@ -16,7 +16,6 @@
 package com.rpkit.economy.bukkit.listener
 
 import com.rpkit.core.service.Services
-import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import org.bukkit.Material.AIR
@@ -24,7 +23,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 
-class InventoryClickListener(private val plugin: RPKEconomyBukkit) : Listener {
+class InventoryClickListener : Listener {
 
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {

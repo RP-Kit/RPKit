@@ -71,7 +71,7 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : Command
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -81,7 +81,7 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : Command
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
@@ -91,7 +91,7 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : Command
             sender.sendMessage(plugin.messages["no-crafting-skill-service"])
             return true
         }
-        val totalExperience = craftingSkillService.getCraftingExperience(character, action, material)
+        val totalExperience = craftingSkillService.getPreloadedCraftingExperience(character, action, material)
         val maxExperience = plugin.config.getConfigurationSection("$actionConfigSectionName.$material")
             ?.getKeys(false)
             ?.map(String::toInt)

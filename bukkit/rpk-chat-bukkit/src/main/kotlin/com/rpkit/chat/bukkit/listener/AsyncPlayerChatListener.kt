@@ -38,13 +38,13 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
         event.isCancelled = true
         val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
-            val chatChannel = chatChannelService.getMinecraftProfileChannel(minecraftProfile)
-            val message = event.message
-            var readMessageIndex = 0
-            chatChannelService.matchPatterns
+            chatChannelService.getMinecraftProfileChannel(minecraftProfile).thenAcceptAsync { chatChannel ->
+                val message = event.message
+                var readMessageIndex = 0
+                chatChannelService.matchPatterns
                     .map { matchPattern ->
                         val matches = matchPattern.regex.let(::Regex).findAll(message).toList()
                         matches to matchPattern
@@ -57,8 +57,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
                             message.substring(readMessageIndex, match.range.first),
                             event.player,
                             profile,
-                            minecraftProfile,
-                            event.isAsynchronous
+                            minecraftProfile
                         )
                         match.groupValues.forEachIndexed { index, value ->
                             val otherChatChannel = matchPattern.groups[index]
@@ -68,22 +67,21 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
                                     value,
                                     event.player,
                                     profile,
-                                    minecraftProfile,
-                                    event.isAsynchronous
+                                    minecraftProfile
                                 )
                             }
                         }
                         readMessageIndex = match.range.last + 1
                     }
-            if (readMessageIndex < message.length) {
-                sendMessage(
-                    chatChannel,
-                    message.substring(readMessageIndex, message.length),
-                    event.player,
-                    profile,
-                    minecraftProfile,
-                    event.isAsynchronous
-                )
+                if (readMessageIndex < message.length) {
+                    sendMessage(
+                        chatChannel,
+                        message.substring(readMessageIndex, message.length),
+                        event.player,
+                        profile,
+                        minecraftProfile
+                    )
+                }
             }
         } else {
             event.player.sendMessage(plugin.messages["no-minecraft-profile"])
@@ -95,23 +93,26 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
         message: String,
         bukkitPlayer: Player,
         profile: RPKThinProfile,
-        minecraftProfile: RPKMinecraftProfile,
-        isAsynchronous: Boolean
+        minecraftProfile: RPKMinecraftProfile
     ) {
         if (chatChannel != null) {
-            if (!chatChannel.listeners.any { listenerMinecraftProfile ->
-                        listenerMinecraftProfile.id == minecraftProfile.id
-                    }) {
-                chatChannel.addListener(minecraftProfile, isAsynchronous)
-            }
-            if (message.isNotBlank()) {
-                chatChannel.sendMessage(
-                        profile,
-                        minecraftProfile,
-                        message.trim(),
-                        isAsynchronous
-                )
-            }
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                chatChannel.listeners.thenAcceptAsync { listeners ->
+                    if (!listeners.any { listenerMinecraftProfile ->
+                            listenerMinecraftProfile.id == minecraftProfile.id
+                        }) {
+                        chatChannel.addListener(minecraftProfile).join()
+                    }
+                    if (message.isNotBlank()) {
+                        chatChannel.sendMessage(
+                            profile,
+                            minecraftProfile,
+                            message.trim(),
+                            true
+                        )
+                    }
+                }
+            })
         } else {
             bukkitPlayer.sendMessage(plugin.messages["no-chat-channel"])
         }

@@ -17,8 +17,8 @@
 package com.rpkit.store.bukkit.command
 
 import com.rpkit.core.service.Services
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.purchase.RPKPurchaseService
 import org.bukkit.command.Command
@@ -42,7 +42,7 @@ class PurchasesCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
@@ -58,16 +58,23 @@ class PurchasesCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
             return true
         }
         sender.sendMessage(plugin.messages["purchases-title"])
-        purchaseService.getPurchases(profile).forEach { purchase ->
-            sender.sendMessage(plugin.messages["purchases-item", mapOf(
-                    Pair("purchase_id", purchase.id.toString()),
-                    Pair("purchase_date", DateTimeFormatter.ISO_DATE_TIME.format(purchase.purchaseDate)),
-                    Pair("store_item_identifier", purchase.storeItem.identifier), // order is important, must be before id
-                    Pair("store_item_id", purchase.storeItem.id.toString()),
-                    Pair("store_item_plugin", purchase.storeItem.plugin),
-                    Pair("store_item_description", purchase.storeItem.description),
-                    Pair("store_item_cost", String.format("%.02f", purchase.storeItem.cost / 100.0) + plugin.config.getString("purchases.currency"))
-            )])
+        purchaseService.getPurchases(profile).thenAccept { purchases ->
+            purchases.forEach { purchase ->
+                sender.sendMessage(
+                    plugin.messages["purchases-item", mapOf(
+                        "purchase_id" to purchase.id.toString(),
+                        "purchase_date" to DateTimeFormatter.ISO_DATE_TIME.format(purchase.purchaseDate),
+                        "store_item_identifier" to purchase.storeItem.identifier, // order is important, must be before id
+                        "store_item_id" to purchase.storeItem.id.toString(),
+                        "store_item_plugin" to purchase.storeItem.plugin,
+                        "store_item_description" to purchase.storeItem.description,
+                        "store_item_cost" to String.format(
+                            "%.02f",
+                            purchase.storeItem.cost / 100.0
+                        ) + plugin.config.getString("purchases.currency")
+                    )]
+                )
+            }
         }
         return true
     }

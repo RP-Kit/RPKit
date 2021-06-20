@@ -20,7 +20,6 @@ import org.bukkit.entity.EntityType
 
 
 class RPKMonsterSpawnAreaMonster(
-        val monsterSpawnArea: RPKMonsterSpawnArea,
         val entityType: EntityType,
         val minLevel: Int,
         val maxLevel: Int

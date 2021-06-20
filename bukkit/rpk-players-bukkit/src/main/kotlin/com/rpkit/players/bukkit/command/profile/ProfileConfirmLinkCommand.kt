@@ -16,11 +16,7 @@
 package com.rpkit.players.bukkit.command.profile
 
 import com.rpkit.core.command.RPKCommandExecutor
-import com.rpkit.core.command.result.CommandFailure
-import com.rpkit.core.command.result.CommandResult
-import com.rpkit.core.command.result.CommandSuccess
-import com.rpkit.core.command.result.IncorrectUsageFailure
-import com.rpkit.core.command.result.MissingServiceFailure
+import com.rpkit.core.command.result.*
 import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
@@ -28,6 +24,7 @@ import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import java.util.concurrent.CompletableFuture
 
 
 class ProfileConfirmLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
@@ -37,14 +34,14 @@ class ProfileConfirmLinkCommand(private val plugin: RPKPlayersBukkit) : RPKComma
     class InvalidRequestFailure : CommandFailure()
     class InvalidProfileTypeFailure : CommandFailure()
 
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
         if (sender !is RPKMinecraftProfile) {
             sender.sendMessage(plugin.messages.notFromConsole)
-            return NotAPlayerFailure()
+            return CompletableFuture.completedFuture(NotAPlayerFailure())
         }
         if (args.size <= 1) {
             sender.sendMessage(plugin.messages.profileConfirmLinkUsage)
-            return IncorrectUsageFailure()
+            return CompletableFuture.completedFuture(IncorrectUsageFailure())
         }
         val type = args[0]
         val id = args[1].toIntOrNull()
@@ -52,33 +49,36 @@ class ProfileConfirmLinkCommand(private val plugin: RPKPlayersBukkit) : RPKComma
             "minecraft" -> {
                 if (id == null) {
                     sender.sendMessage(plugin.messages.profileConfirmLinkInvalidId)
-                    return InvalidIdFailure()
+                    return CompletableFuture.completedFuture(InvalidIdFailure())
                 }
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
                     sender.sendMessage(plugin.messages.noMinecraftProfileService)
-                    return MissingServiceFailure(RPKMinecraftProfileService::class.java)
+                    return CompletableFuture.completedFuture(MissingServiceFailure(RPKMinecraftProfileService::class.java))
                 }
                 val profile = sender.profile
                 if (profile is RPKProfile) {
                     sender.sendMessage(plugin.messages.profileConfirmLinkInvalidAlreadyLinked)
-                    return AlreadyLinkedFailure(profile)
+                    return CompletableFuture.completedFuture(AlreadyLinkedFailure(profile))
                 }
-                val linkRequests = minecraftProfileService.getMinecraftProfileLinkRequests(sender)
-                val linkRequest = linkRequests.firstOrNull { request -> request.profile.id?.value == id }
-                if (linkRequest == null) {
-                    sender.sendMessage(plugin.messages.profileConfirmLinkInvalidRequest)
-                    return InvalidRequestFailure()
+                return minecraftProfileService.getMinecraftProfileLinkRequests(sender).thenApplyAsync { linkRequests ->
+                    val linkRequest = linkRequests.firstOrNull { request -> request.profile.id?.value == id }
+                    if (linkRequest == null) {
+                        sender.sendMessage(plugin.messages.profileConfirmLinkInvalidRequest)
+                        return@thenApplyAsync InvalidRequestFailure()
+                    }
+                    sender.profile = linkRequest.profile
+                    minecraftProfileService.updateMinecraftProfile(sender).join()
+                    minecraftProfileService.removeMinecraftProfileLinkRequest(linkRequest).join()
+                    minecraftProfileService.loadMinecraftProfile(sender.minecraftUUID).join()
+                    sender.sendMessage(plugin.messages.profileConfirmLinkValid)
+                    return@thenApplyAsync CommandSuccess
                 }
-                sender.profile = linkRequest.profile
-                minecraftProfileService.updateMinecraftProfile(sender)
-                minecraftProfileService.removeMinecraftProfileLinkRequest(linkRequest)
-                sender.sendMessage(plugin.messages.profileConfirmLinkValid)
-                return CommandSuccess
+
             }
             else -> {
                 sender.sendMessage(plugin.messages.profileConfirmLinkInvalidType)
-                return InvalidProfileTypeFailure()
+                return CompletableFuture.completedFuture(InvalidProfileTypeFailure())
             }
         }
     }

@@ -31,7 +31,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
+import org.bukkit.potion.PotionEffectType.*
 import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
 
@@ -97,26 +97,29 @@ class RPKDrinksBukkit : RPKBukkitPlugin() {
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 val characterService = Services[RPKCharacterService::class.java]
                 server.onlinePlayers.forEach { bukkitPlayer ->
-                    val minecraftProfile = minecraftProfileService?.getMinecraftProfile(bukkitPlayer) ?: return@forEach
-                    val character = characterService?.getActiveCharacter(minecraftProfile) ?: return@forEach
-                    val drunkenness = drinkService.getDrunkenness(character)
-                    if (drunkenness > 0) {
-                        if (drunkenness > 1000) {
-                            if (config.getBoolean("kill-characters"))
-                                character.isDead = true
-                            characterService.updateCharacter(character)
-                        }
-                        if (drunkenness >= 75) {
-                            bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.POISON, 1200, drunkenness))
-                        }
-                        if (drunkenness >= 50) {
-                            bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1200, drunkenness))
-                        }
-                        if (drunkenness >= 10) {
-                            bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.WEAKNESS, 1200, drunkenness))
-                        }
-                        bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.CONFUSION, 1200, drunkenness))
-                        drinkService.setDrunkenness(character, drunkenness - 1)
+                    val minecraftProfile = minecraftProfileService?.getPreloadedMinecraftProfile(bukkitPlayer) ?: return@forEach
+                    val character = characterService?.getPreloadedActiveCharacter(minecraftProfile) ?: return@forEach
+                    drinkService.getDrunkenness(character).thenAccept { drunkenness ->
+                        server.scheduler.runTask(this@RPKDrinksBukkit, Runnable {
+                            if (drunkenness > 0) {
+                                if (drunkenness > 1000) {
+                                    if (config.getBoolean("kill-characters"))
+                                        character.isDead = true
+                                    characterService.updateCharacter(character)
+                                }
+                                if (drunkenness >= 75) {
+                                    bukkitPlayer.addPotionEffect(PotionEffect(POISON, 1200, drunkenness))
+                                }
+                                if (drunkenness >= 50) {
+                                    bukkitPlayer.addPotionEffect(PotionEffect(BLINDNESS, 1200, drunkenness))
+                                }
+                                if (drunkenness >= 10) {
+                                    bukkitPlayer.addPotionEffect(PotionEffect(WEAKNESS, 1200, drunkenness))
+                                }
+                                bukkitPlayer.addPotionEffect(PotionEffect(CONFUSION, 1200, drunkenness))
+                                drinkService.setDrunkenness(character, drunkenness - 1)
+                            }
+                        })
                     }
                 }
             }
@@ -125,7 +128,7 @@ class RPKDrinksBukkit : RPKBukkitPlugin() {
         registerListeners()
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
                 PlayerItemConsumeListener(this)
         )
