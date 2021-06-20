@@ -80,11 +80,11 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-economy-service"])
                 return
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
             if (minecraftProfile == null) {
                 event.player.sendMessage(plugin.messages["no-minecraft-profile"])
             } else {
-                val character = characterService.getActiveCharacter(minecraftProfile)
+                val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
                 if (character == null) {
                     event.player.sendMessage(plugin.messages["no-character"])
                     return
@@ -93,11 +93,16 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
                     event.player.sendMessage(plugin.messages["no-permission-trader-buy"])
                     return
                 }
-                if (economyService.getBalance(character, currency) < buyPrice) {
+                val walletBalance = economyService.getPreloadedBalance(character, currency)
+                if (walletBalance == null) {
+                    event.player.sendMessage(plugin.messages.noPreloadedBalance)
+                    return
+                }
+                if (walletBalance < buyPrice) {
                     event.player.sendMessage(plugin.messages["trader-buy-insufficient-funds"])
                     return
                 }
-                economyService.setBalance(character, currency, economyService.getBalance(character, currency) - buyPrice)
+                economyService.setBalance(character, currency, walletBalance - buyPrice)
                 val item = ItemStack(material, amount)
                 Services[RPKExpiryService::class.java]?.setExpiry(item)
                 event.player.inventory.addItem(item)
@@ -125,12 +130,12 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-economy-service"])
                 return
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
             if (minecraftProfile == null) {
                 event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                 return
             }
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             if (character == null) {
                 event.player.sendMessage(plugin.messages["no-character"])
                 return
@@ -143,11 +148,16 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["trader-sell-insufficient-items"])
                 return
             }
-            if (economyService.getBalance(character, currency) + sellPrice > 1728) {
+            val walletBalance = economyService.getPreloadedBalance(character, currency)
+            if (walletBalance == null) {
+                event.player.sendMessage(plugin.messages.noPreloadedBalance)
+                return
+            }
+            if (walletBalance + sellPrice > 1728) {
                 event.player.sendMessage(plugin.messages["trader-sell-insufficient-wallet-space"])
                 return
             }
-            economyService.setBalance(character, currency, economyService.getBalance(character, currency) + sellPrice)
+            economyService.setBalance(character, currency, walletBalance + sellPrice)
             var amountRemaining = amount
             val contents = event.player.inventory.contents
             contents

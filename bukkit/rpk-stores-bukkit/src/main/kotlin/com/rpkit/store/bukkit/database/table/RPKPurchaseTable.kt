@@ -23,6 +23,7 @@ import com.rpkit.store.bukkit.database.create
 import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_PURCHASE
 import com.rpkit.store.bukkit.purchase.RPKPurchase
 import com.rpkit.store.bukkit.purchase.RPKPurchaseId
+import java.util.concurrent.CompletableFuture
 
 
 class RPKPurchaseTable(
@@ -41,80 +42,92 @@ class RPKPurchaseTable(
         null
     }
 
-    fun insert(entity: RPKPurchase): RPKPurchaseId? {
-        val profileId = entity.profile.id ?: return null
-        database.create
+    fun insert(entity: RPKPurchase): CompletableFuture<RPKPurchaseId?> {
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        val storeItemId = entity.storeItem.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.supplyAsync {
+            database.create
                 .insertInto(
-                        RPKIT_PURCHASE,
-                        RPKIT_PURCHASE.STORE_ITEM_ID,
-                        RPKIT_PURCHASE.PROFILE_ID,
-                        RPKIT_PURCHASE.PURCHASE_DATE
+                    RPKIT_PURCHASE,
+                    RPKIT_PURCHASE.STORE_ITEM_ID,
+                    RPKIT_PURCHASE.PROFILE_ID,
+                    RPKIT_PURCHASE.PURCHASE_DATE
                 )
                 .values(
-                        entity.storeItem.id,
-                        profileId.value,
-                        entity.purchaseDate
+                    storeItemId.value,
+                    profileId.value,
+                    entity.purchaseDate
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKPurchaseId(id)
-        cache?.set(id, entity)
-        return RPKPurchaseId(id)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKPurchaseId(id)
+            cache?.set(id, entity)
+            return@supplyAsync RPKPurchaseId(id)
+        }
     }
 
-    fun update(entity: RPKPurchase) {
-        val id = entity.id ?: return
-        val profileId = entity.profile.id ?: return
-        database.create
+    fun update(entity: RPKPurchase): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
+        val storeItemId = entity.storeItem.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_PURCHASE)
-                .set(RPKIT_PURCHASE.STORE_ITEM_ID, entity.storeItem.id)
+                .set(RPKIT_PURCHASE.STORE_ITEM_ID, storeItemId.value)
                 .set(RPKIT_PURCHASE.PROFILE_ID, profileId.value)
                 .set(RPKIT_PURCHASE.PURCHASE_DATE, entity.purchaseDate)
                 .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKPurchaseId): RPKPurchase? {
-        if (cache?.containsKey(id.value) == true) return cache[id.value]
-        var purchase: RPKPurchase? = database.getTable(RPKConsumablePurchaseTable::class.java)[id]
-        if (purchase != null) {
-            cache?.set(id.value, purchase)
-            return purchase
-        } else {
-            cache?.remove(id.value)
+    operator fun get(id: RPKPurchaseId): CompletableFuture<RPKPurchase?> {
+        if (cache?.containsKey(id.value) == true) return CompletableFuture.completedFuture(cache[id.value])
+        return CompletableFuture.supplyAsync {
+            var purchase: RPKPurchase? = database.getTable(RPKConsumablePurchaseTable::class.java)[id].join()
+            if (purchase != null) {
+                cache?.set(id.value, purchase)
+                return@supplyAsync purchase
+            } else {
+                cache?.remove(id.value)
+            }
+            purchase = database.getTable(RPKPermanentPurchaseTable::class.java)[id].join()
+            if (purchase != null) {
+                cache?.set(id.value, purchase)
+                return@supplyAsync purchase
+            } else {
+                cache?.remove(id.value)
+            }
+            purchase = database.getTable(RPKTimedPurchaseTable::class.java)[id].join()
+            if (purchase != null) {
+                cache?.set(id.value, purchase)
+                return@supplyAsync purchase
+            } else {
+                cache?.remove(id.value)
+            }
+            return@supplyAsync null
         }
-        purchase = database.getTable(RPKPermanentPurchaseTable::class.java)[id]
-        if (purchase != null) {
-            cache?.set(id.value, purchase)
-            return purchase
-        } else {
-            cache?.remove(id.value)
-        }
-        purchase = database.getTable(RPKTimedPurchaseTable::class.java)[id]
-        if (purchase != null) {
-            cache?.set(id.value, purchase)
-            return purchase
-        } else {
-            cache?.remove(id.value)
-        }
-        return null
     }
 
-    fun get(profile: RPKProfile): List<RPKPurchase> {
-        return listOf(
-                *database.getTable(RPKConsumablePurchaseTable::class.java).get(profile).toTypedArray(),
-                *database.getTable(RPKPermanentPurchaseTable::class.java).get(profile).toTypedArray(),
-                *database.getTable(RPKTimedPurchaseTable::class.java).get(profile).toTypedArray()
-        )
+    fun get(profile: RPKProfile): CompletableFuture<List<RPKPurchase>> {
+        return CompletableFuture.supplyAsync {
+            listOf(
+                *database.getTable(RPKConsumablePurchaseTable::class.java).get(profile).join().toTypedArray(),
+                *database.getTable(RPKPermanentPurchaseTable::class.java).get(profile).join().toTypedArray(),
+                *database.getTable(RPKTimedPurchaseTable::class.java).get(profile).join().toTypedArray()
+            )
+        }
     }
 
-    fun delete(entity: RPKPurchase) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKPurchase): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_PURCHASE)
                 .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 }

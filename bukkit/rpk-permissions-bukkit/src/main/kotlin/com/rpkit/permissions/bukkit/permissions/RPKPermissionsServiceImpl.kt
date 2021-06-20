@@ -22,15 +22,18 @@ import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroup
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.groups
+import com.rpkit.permissions.bukkit.group.preloadedGroups
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import org.bukkit.permissions.PermissionAttachment
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKPermissionsService {
 
     val defaultGroup = plugin.config.get("default-group") as RPKGroup
-    private val permissionsAttachments = mutableMapOf<Int, PermissionAttachment>()
+    private val permissionsAttachments = ConcurrentHashMap<Int, PermissionAttachment>()
 
     override fun hasPermission(group: RPKGroup, node: String): Boolean {
         return hasPermission(group, node, plugin.server.pluginManager.getPermission(node)?.default?.getValue(false)
@@ -40,7 +43,7 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
     override fun hasPermission(group: RPKGroup, node: String, default: Boolean): Boolean {
         var hasPermission = default
         for (inheritedGroup in group.inheritance) {
-            hasPermission = hasPermission(inheritedGroup, node)
+            hasPermission = hasPermission(inheritedGroup, node, hasPermission)
         }
         if (node in group.allow) {
             hasPermission = true
@@ -51,64 +54,70 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
         return hasPermission
     }
 
-    override fun hasPermission(profile: RPKProfile, node: String): Boolean {
+    override fun hasPermission(profile: RPKProfile, node: String): CompletableFuture<Boolean> {
         var hasPermission = plugin.server.pluginManager.getPermission(node)?.default?.getValue(false) ?: false
-        val groupService = Services[RPKGroupService::class.java] ?: return hasPermission
-        val groups = groupService.getGroups(profile)
-        if (groups.isEmpty()) {
-            hasPermission = hasPermission(defaultGroup, node, hasPermission)
-        } else {
-            for (group in groups) {
-                hasPermission = hasPermission(group, node, hasPermission)
+        val groupService = Services[RPKGroupService::class.java] ?: return CompletableFuture.completedFuture(hasPermission)
+        return groupService.getGroups(profile).thenApply { groups ->
+            if (groups.isEmpty()) {
+                hasPermission = hasPermission(defaultGroup, node, hasPermission)
+            } else {
+                for (group in groups) {
+                    hasPermission = hasPermission(group, node, hasPermission)
+                }
             }
+            return@thenApply hasPermission
         }
-        return hasPermission
     }
 
-    override fun hasPermission(character: RPKCharacter, node: String): Boolean {
+    override fun hasPermission(character: RPKCharacter, node: String): CompletableFuture<Boolean> {
         var hasPermission = plugin.server.pluginManager.getPermission(node)?.default?.getValue(false) ?: false
         val minecraftProfile = character.minecraftProfile
-        if (minecraftProfile != null) {
-            val profile = minecraftProfile.profile
-            if (profile is RPKProfile) {
-                hasPermission = hasPermission(profile, node)
+        return CompletableFuture.supplyAsync {
+            if (minecraftProfile != null) {
+                val profile = minecraftProfile.profile
+                if (profile is RPKProfile) {
+                    hasPermission = hasPermission(profile, node).join()
+                }
             }
+            for (group in character.groups.join()) {
+                hasPermission = hasPermission(group, node, hasPermission)
+            }
+            return@supplyAsync hasPermission
         }
-        for (group in character.groups) {
-            hasPermission = hasPermission(group, node, hasPermission)
-        }
-        return hasPermission
     }
 
     override fun assignPermissions(minecraftProfile: RPKMinecraftProfile) {
         val minecraftProfileId = minecraftProfile.id
                 ?: throw IllegalStateException("Minecraft profile has not yet been inserted into the database.")
         val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
-        if (bukkitPlayer != null) {
-            val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
-            if (permissionsAttachment == null) {
-                permissionsAttachments[minecraftProfileId.value] = bukkitPlayer.addAttachment(plugin)
-            } else {
-                bukkitPlayer.removeAttachment(permissionsAttachment)
-                permissionsAttachments[minecraftProfileId.value] = bukkitPlayer.addAttachment(plugin)
+            ?: return
+        val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
+        if (permissionsAttachment == null) {
+            permissionsAttachments[minecraftProfileId.value] = bukkitPlayer.addAttachment(plugin)
+        } else {
+            bukkitPlayer.removeAttachment(permissionsAttachment)
+            permissionsAttachments[minecraftProfileId.value] = bukkitPlayer.addAttachment(plugin)
+        }
+        val groups = mutableListOf<RPKGroup>()
+        val profile = minecraftProfile.profile
+        if (profile is RPKProfile) {
+            profile.preloadedGroups?.let { groups.addAll(it) }
+        }
+        val characterService =
+            Services[RPKCharacterService::class.java] ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+        if (character != null) {
+            character.preloadedGroups?.let {
+                groups.removeAll(it) // If groups are assigned due to the profile, make sure them being assigned to the character increases their priority
+                groups.addAll(it)
             }
-            val groups = mutableListOf<RPKGroup>()
-            val profile = minecraftProfile.profile
-            if (profile is RPKProfile) {
-                groups.addAll(profile.groups)
-            }
-            val characterService = Services[RPKCharacterService::class.java] ?: return
-            val character = characterService.getActiveCharacter(minecraftProfile)
-            if (character != null) {
-                groups.addAll(character.groups)
-            }
-            if (groups.isEmpty()) {
-                assignGroupPermissions(minecraftProfile, defaultGroup, mutableListOf())
-            } else {
-                val assignedGroups = mutableListOf<RPKGroup>()
-                for (group in groups) {
-                    assignGroupPermissions(minecraftProfile, group, assignedGroups)
-                }
+        }
+        if (groups.isEmpty()) {
+            assignGroupPermissions(minecraftProfile, defaultGroup, mutableListOf())
+        } else {
+            val assignedGroups = mutableListOf<RPKGroup>()
+            for (group in groups) {
+                assignGroupPermissions(minecraftProfile, group, assignedGroups)
             }
         }
     }
@@ -137,15 +146,12 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
         }
     }
 
-    override fun unassignPermissions(minecraftProfile: RPKMinecraftProfile) {
-        val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
-        if (bukkitPlayer != null) {
-            val minecraftProfileId = minecraftProfile.id ?: return
-            val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
-            if (permissionsAttachment != null) {
-                bukkitPlayer.removeAttachment(permissionsAttachment)
-                permissionsAttachments.remove(minecraftProfileId.value)
-            }
+    override fun unassignPermissions(minecraftProfile: RPKMinecraftProfile, bukkitPlayer: Player) {
+        val minecraftProfileId = minecraftProfile.id ?: return
+        val permissionsAttachment = permissionsAttachments[minecraftProfileId.value]
+        if (permissionsAttachment != null) {
+            bukkitPlayer.removeAttachment(permissionsAttachment)
+            permissionsAttachments.remove(minecraftProfileId.value)
         }
     }
 

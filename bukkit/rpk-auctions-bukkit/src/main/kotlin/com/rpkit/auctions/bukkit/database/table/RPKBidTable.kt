@@ -29,6 +29,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents the bid table.
@@ -49,75 +50,81 @@ class RPKBidTable(
         null
     }
 
-    fun insert(entity: RPKBid) {
-        val auctionId = entity.auction.id ?: return
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKBid): CompletableFuture<Void> {
+        val auctionId = entity.auction.id ?: return CompletableFuture.completedFuture(null)
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_BID,
-                        RPKIT_BID.AUCTION_ID,
-                        RPKIT_BID.CHARACTER_ID,
-                        RPKIT_BID.AMOUNT
+                    RPKIT_BID,
+                    RPKIT_BID.AUCTION_ID,
+                    RPKIT_BID.CHARACTER_ID,
+                    RPKIT_BID.AMOUNT
                 )
                 .values(
-                        auctionId.value,
-                        characterId.value,
-                        entity.amount
+                    auctionId.value,
+                    characterId.value,
+                    entity.amount
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKBidId(id)
-        cache?.set(id, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKBidId(id)
+            cache?.set(id, entity)
+        }
     }
 
-    fun update(entity: RPKBid) {
-        val id = entity.id ?: return
-        val auctionId = entity.auction.id ?: return
-        val characterId = entity.character.id ?: return
-        database.create
+    fun update(entity: RPKBid): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        val auctionId = entity.auction.id ?: return CompletableFuture.completedFuture(null)
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_BID)
                 .set(RPKIT_BID.AUCTION_ID, auctionId.value)
                 .set(RPKIT_BID.CHARACTER_ID, characterId.value)
                 .set(RPKIT_BID.AMOUNT, entity.amount)
                 .where(RPKIT_BID.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKBidId): RPKBid? {
+    operator fun get(id: RPKBidId): CompletableFuture<RPKBid?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
+            return CompletableFuture.completedFuture(cache[id.value])
         }
-        val result = database.create
-            .select(
-                RPKIT_BID.AUCTION_ID,
-                RPKIT_BID.CHARACTER_ID,
-                RPKIT_BID.AMOUNT
-            )
-            .from(RPKIT_BID)
-            .where(RPKIT_BID.ID.eq(id.value))
-            .fetchOne() ?: return null
-        val auctionService = Services[RPKAuctionService::class.java] ?: return null
-        val auctionId = result.get(RPKIT_BID.AUCTION_ID)
-        val auction = auctionService.getAuction(RPKAuctionId(auctionId))
-        val characterService = Services[RPKCharacterService::class.java] ?: return null
-        val characterId = result.get(RPKIT_BID.CHARACTER_ID)
-        val character = characterService.getCharacter(RPKCharacterId(characterId))
-        if (auction != null && character != null) {
-            val bid = RPKBidImpl(
-                id,
-                auction,
-                character,
-                result.get(RPKIT_BID.AMOUNT)
-            )
-            cache?.set(id.value, bid)
-            return bid
-        } else {
-            database.create
-                .deleteFrom(RPKIT_BID)
+        return CompletableFuture.supplyAsync {
+            val result = database.create
+                .select(
+                    RPKIT_BID.AUCTION_ID,
+                    RPKIT_BID.CHARACTER_ID,
+                    RPKIT_BID.AMOUNT
+                )
+                .from(RPKIT_BID)
                 .where(RPKIT_BID.ID.eq(id.value))
-                .execute()
-            return null
+                .fetchOne() ?: return@supplyAsync null
+            val auctionService = Services[RPKAuctionService::class.java] ?: return@supplyAsync null
+            val auctionId = result.get(RPKIT_BID.AUCTION_ID)
+            val auction = auctionService.getAuction(RPKAuctionId(auctionId)).join()
+            val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync null
+            val characterId = result.get(RPKIT_BID.CHARACTER_ID)
+            val character = characterService.getCharacter(RPKCharacterId(characterId)).join()
+            if (auction != null && character != null) {
+                val bid = RPKBidImpl(
+                    id,
+                    auction,
+                    character,
+                    result.get(RPKIT_BID.AMOUNT)
+                )
+                cache?.set(id.value, bid)
+                return@supplyAsync bid
+            } else {
+                database.create
+                    .deleteFrom(RPKIT_BID)
+                    .where(RPKIT_BID.ID.eq(id.value))
+                    .execute()
+                return@supplyAsync null
+            }
         }
     }
 
@@ -126,23 +133,27 @@ class RPKBidTable(
      *
      * @return A list of the bids made on the auction
      */
-    fun get(auction: RPKAuction): List<RPKBid> {
-        val results = database.create
+    fun get(auction: RPKAuction): CompletableFuture<List<RPKBid>> {
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_BID.ID)
                 .from(RPKIT_BID)
                 .where(RPKIT_BID.AUCTION_ID.eq(auction.id?.value))
                 .fetch()
-        return results.map { result ->
-            get(RPKBidId(result.get(RPKIT_BID.ID)))
-        }.filterNotNull()
+            return@supplyAsync results.map { result ->
+                get(RPKBidId(result.get(RPKIT_BID.ID))).join()
+            }.filterNotNull()
+        }
     }
 
-    fun delete(entity: RPKBid) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKBid): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_BID)
                 .where(RPKIT_BID.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 }

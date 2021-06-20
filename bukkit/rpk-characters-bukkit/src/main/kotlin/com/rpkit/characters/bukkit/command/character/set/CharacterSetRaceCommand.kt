@@ -24,11 +24,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.ConversationContext
-import org.bukkit.conversations.ConversationFactory
-import org.bukkit.conversations.MessagePrompt
-import org.bukkit.conversations.Prompt
-import org.bukkit.conversations.ValidatingPrompt
+import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
 /**
@@ -73,12 +69,12 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
@@ -121,8 +117,8 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return RaceSetPrompt()
             val characterService = Services[RPKCharacterService::class.java] ?: return RaceSetPrompt()
             val raceService = Services[RPKRaceService::class.java] ?: return RaceSetPrompt()
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(conversable) ?: return RaceSetPrompt()
-            val character = characterService.getActiveCharacter(minecraftProfile) ?: return RaceSetPrompt()
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(conversable) ?: return RaceSetPrompt()
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return RaceSetPrompt()
             character.race = raceService.getRace(RPKRaceName(input))!!
             characterService.updateCharacter(character)
             return RaceSetPrompt()
@@ -165,9 +161,9 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
                     conversable.sendMessage(plugin.messages["no-race-service"])
                     return END_OF_CONVERSATION
                 }
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(context.forWhom as Player)
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(context.forWhom as Player)
                 if (minecraftProfile != null) {
-                    characterService.getActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
+                    characterService.getPreloadedActiveCharacter(minecraftProfile)?.showCharacterCard(minecraftProfile)
                 }
             }
             return END_OF_CONVERSATION

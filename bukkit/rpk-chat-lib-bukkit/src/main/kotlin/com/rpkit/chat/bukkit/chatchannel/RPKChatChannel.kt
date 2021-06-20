@@ -22,6 +22,7 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.awt.Color
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents a chat channel
@@ -51,14 +52,14 @@ interface RPKChatChannel {
      * If a speaker sends a message without indicating who it is directed to, it will be sent to this channel.
      * Chat participants may only be speakers in a single channel.
      */
-    val speakers: List<RPKMinecraftProfile>
+    val speakers: CompletableFuture<List<RPKMinecraftProfile>>
 
     /**
      * A list of all listeners in the channel.
      * If a message is sent to a channel, it will be heard by all listeners.
      * Chat participants may listen to multiple channels.
      */
-    val listeners: List<RPKMinecraftProfile>
+    val listeners: CompletableFuture<List<RPKMinecraftProfile>>
 
     /**
      * The directed pre-format pipeline for the channel.
@@ -104,29 +105,28 @@ interface RPKChatChannel {
      *
      * @param speaker The chat participant to add
      */
-    fun addSpeaker(speaker: RPKMinecraftProfile)
+    fun addSpeaker(speaker: RPKMinecraftProfile): CompletableFuture<Void>
 
     /**
      * Removes a speaker from the channel.
      *
      * @param speaker The chat participant to remove
      */
-    fun removeSpeaker(speaker: RPKMinecraftProfile)
+    fun removeSpeaker(speaker: RPKMinecraftProfile): CompletableFuture<Void>
 
     /**
      * Adds a listener to the channel.
      *
      * @param listener The Minecraft profile to add
-     * @param isAsync Whether adding the listener is being done asynchronously
      */
-    fun addListener(listener: RPKMinecraftProfile, isAsync: Boolean = false)
+    fun addListener(listener: RPKMinecraftProfile): CompletableFuture<Void>
 
     /**
      * Removes a listener from the channel.
      *
      * @param listener The Minecraft profile to remove
      */
-    fun removeListener(listener: RPKMinecraftProfile)
+    fun removeListener(listener: RPKMinecraftProfile): CompletableFuture<Void>
 
     /**
      * Sends a message to the channel, passing it through the directed pipeline once for each listener, and the

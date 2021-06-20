@@ -56,12 +56,12 @@ class ClassSetCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-class-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
@@ -72,14 +72,17 @@ class ClassSetCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["class-set-invalid-class"])
             return true
         }
-        if (!`class`.hasPrerequisites(character)) {
-            sender.sendMessage(plugin.messages["class-set-invalid-prerequisites"])
-            return true
+        `class`.hasPrerequisites(character).thenAccept { hasPrerequisites ->
+            if (!hasPrerequisites) {
+                sender.sendMessage(plugin.messages["class-set-invalid-prerequisites"])
+                return@thenAccept
+            }
+            classService.setClass(character, `class`).thenRun {
+                sender.sendMessage(plugin.messages["class-set-valid", mapOf(
+                    "class" to `class`.name.value
+                )])
+            }
         }
-        classService.setClass(character, `class`)
-        sender.sendMessage(plugin.messages["class-set-valid", mapOf(
-            "class" to `class`.name.value
-        )])
         return true
     }
 }

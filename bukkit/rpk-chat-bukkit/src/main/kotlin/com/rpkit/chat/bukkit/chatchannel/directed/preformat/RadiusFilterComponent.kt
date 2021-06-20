@@ -21,6 +21,7 @@ import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture
 
 /**
  * Radius filter component.
@@ -29,8 +30,8 @@ import org.bukkit.configuration.serialization.SerializableAs
 @SerializableAs("RadiusFilterComponent")
 class RadiusFilterComponent : DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
-        if (context.isCancelled) return context
+    override fun process(context: DirectedPreFormatMessageContext): CompletableFuture<DirectedPreFormatMessageContext> {
+        if (context.isCancelled) return CompletableFuture.completedFuture(context)
         val senderMinecraftProfile = context.senderMinecraftProfile
         if (senderMinecraftProfile != null) {
             val senderBukkitPlayer = Bukkit.getOfflinePlayer(senderMinecraftProfile.minecraftUUID)
@@ -58,7 +59,7 @@ class RadiusFilterComponent : DirectedPreFormatPipelineComponent, ConfigurationS
         } else {
             context.isCancelled = true
         }
-        return context
+        return CompletableFuture.completedFuture(context)
     }
 
     override fun serialize(): MutableMap<String, Any> {

@@ -21,15 +21,12 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.create
 import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_IRC_PROFILE
-import com.rpkit.players.bukkit.profile.RPKProfile
-import com.rpkit.players.bukkit.profile.RPKProfileId
-import com.rpkit.players.bukkit.profile.RPKProfileName
-import com.rpkit.players.bukkit.profile.RPKProfileService
-import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
+import com.rpkit.players.bukkit.profile.*
 import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileId
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileImpl
+import java.util.concurrent.CompletableFuture
 
 
 class RPKIRCProfileTable(private val database: Database, plugin: RPKPlayersBukkit) : Table {
@@ -45,103 +42,117 @@ class RPKIRCProfileTable(private val database: Database, plugin: RPKPlayersBukki
         null
     }
 
-    fun insert(entity: RPKIRCProfile) {
+    fun insert(entity: RPKIRCProfile): CompletableFuture<Void> {
         val profile = entity.profile
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_IRC_PROFILE,
-                        RPKIT_IRC_PROFILE.PROFILE_ID,
-                        RPKIT_IRC_PROFILE.NICK
+                    RPKIT_IRC_PROFILE,
+                    RPKIT_IRC_PROFILE.PROFILE_ID,
+                    RPKIT_IRC_PROFILE.NICK
                 )
                 .values(
-                        if (profile is RPKProfile) {
-                            profile.id?.value
-                        } else {
-                            null
-                        },
-                        entity.nick.value
+                    if (profile is RPKProfile) {
+                        profile.id?.value
+                    } else {
+                        null
+                    },
+                    entity.nick.value
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKIRCProfileId(id)
-        cache?.set(id, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKIRCProfileId(id)
+            cache?.set(id, entity)
+        }
     }
 
-    fun update(entity: RPKIRCProfile) {
+    fun update(entity: RPKIRCProfile): CompletableFuture<Void> {
         val profile = entity.profile
-        val id = entity.id ?: return
-        database.create
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_IRC_PROFILE)
                 .set(
-                        RPKIT_IRC_PROFILE.PROFILE_ID,
-                        if (profile is RPKProfile) {
-                            profile.id?.value
-                        } else {
-                            null
-                        }
+                    RPKIT_IRC_PROFILE.PROFILE_ID,
+                    if (profile is RPKProfile) {
+                        profile.id?.value
+                    } else {
+                        null
+                    }
                 )
                 .set(RPKIT_IRC_PROFILE.NICK, entity.nick.value)
                 .where(RPKIT_IRC_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKIRCProfileId): RPKIRCProfile? {
+    operator fun get(id: RPKIRCProfileId): CompletableFuture<RPKIRCProfile?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
+            return CompletableFuture.completedFuture(cache[id.value])
         }
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(
-                        RPKIT_IRC_PROFILE.PROFILE_ID,
-                        RPKIT_IRC_PROFILE.NICK
+                    RPKIT_IRC_PROFILE.PROFILE_ID,
+                    RPKIT_IRC_PROFILE.NICK
                 )
                 .from(RPKIT_IRC_PROFILE)
                 .where(RPKIT_IRC_PROFILE.ID.eq(id.value))
-                .fetchOne() ?: return null
-        val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profileId = result.get(RPKIT_IRC_PROFILE.PROFILE_ID)
-        val profile = if (profileId != null) {
-            profileService.getProfile(RPKProfileId(profileId))
-        } else {
-            null
-        } ?: RPKThinProfileImpl(RPKProfileName(result.get(RPKIT_IRC_PROFILE.NICK)))
-        val ircProfile = RPKIRCProfileImpl(
+                .fetchOne() ?: return@supplyAsync null
+            val profileService = Services[RPKProfileService::class.java] ?: return@supplyAsync null
+            val profileId = result.get(RPKIT_IRC_PROFILE.PROFILE_ID)
+            val profile = if (profileId != null) {
+                profileService.getProfile(RPKProfileId(profileId)).join()
+            } else {
+                null
+            } ?: RPKThinProfileImpl(RPKProfileName(result.get(RPKIT_IRC_PROFILE.NICK)))
+            val ircProfile = RPKIRCProfileImpl(
                 id,
                 profile,
                 RPKIRCNick(result.get(RPKIT_IRC_PROFILE.NICK))
-        )
-        cache?.set(id.value, ircProfile)
-        return ircProfile
+            )
+            cache?.set(id.value, ircProfile)
+            return@supplyAsync ircProfile
+        }
     }
 
-    fun get(profile: RPKProfile): List<RPKIRCProfile> {
-        val profileId = profile.id ?: return emptyList()
-        val results = database.create
+    fun get(profile: RPKProfile): CompletableFuture<List<RPKIRCProfile>> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_IRC_PROFILE.ID)
                 .from(RPKIT_IRC_PROFILE)
                 .where(RPKIT_IRC_PROFILE.PROFILE_ID.eq(profileId.value))
                 .fetch()
-        return results.map { result ->
-            get(RPKIRCProfileId(result.get(RPKIT_IRC_PROFILE.ID)))
-        }.filterNotNull()
+            val ircProfileFutures = results.map { result ->
+                get(RPKIRCProfileId(result.get(RPKIT_IRC_PROFILE.ID)))
+            }
+            CompletableFuture.allOf(*ircProfileFutures.toTypedArray()).join()
+            return@supplyAsync ircProfileFutures.mapNotNull(CompletableFuture<RPKIRCProfile?>::join)
+        }
     }
 
-    fun get(nick: RPKIRCNick): RPKIRCProfile? {
-        val result = database.create
+    fun get(nick: RPKIRCNick): CompletableFuture<RPKIRCProfile?> {
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_IRC_PROFILE.ID)
                 .from(RPKIT_IRC_PROFILE)
                 .where(RPKIT_IRC_PROFILE.NICK.eq(nick.value))
-                .fetchOne() ?: return null
-        return get(RPKIRCProfileId(result.get(RPKIT_IRC_PROFILE.ID)))
+                .fetchOne() ?: return@supplyAsync null
+            return@supplyAsync get(RPKIRCProfileId(result.get(RPKIT_IRC_PROFILE.ID))).join()
+        }
     }
 
-    fun delete(entity: RPKIRCProfile) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKIRCProfile): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_IRC_PROFILE)
                 .where(RPKIT_IRC_PROFILE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 
 }

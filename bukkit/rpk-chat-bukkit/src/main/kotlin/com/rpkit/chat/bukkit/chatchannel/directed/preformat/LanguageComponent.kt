@@ -24,37 +24,40 @@ import com.rpkit.languages.bukkit.language.RPKLanguageName
 import com.rpkit.languages.bukkit.language.RPKLanguageService
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture
 
 @SerializableAs("LanguageComponent")
 class LanguageComponent : DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: DirectedPreFormatMessageContext): DirectedPreFormatMessageContext {
-        val characterService = Services[RPKCharacterService::class.java] ?: return context
-        val senderMinecraftProfile = context.senderMinecraftProfile ?: return context
+    override fun process(context: DirectedPreFormatMessageContext): CompletableFuture<DirectedPreFormatMessageContext> {
+        val characterService = Services[RPKCharacterService::class.java] ?: return CompletableFuture.completedFuture(context)
+        val senderMinecraftProfile = context.senderMinecraftProfile ?: return CompletableFuture.completedFuture(context)
         val receiverMinecraftProfile = context.receiverMinecraftProfile
         var message = context.message
-        val senderCharacter = characterService.getActiveCharacter(senderMinecraftProfile) ?: return context
-        val receiverCharacter = characterService.getActiveCharacter(receiverMinecraftProfile) ?: return context
+        val senderCharacter = characterService.getPreloadedActiveCharacter(senderMinecraftProfile) ?: return CompletableFuture.completedFuture(context)
+        val receiverCharacter = characterService.getPreloadedActiveCharacter(receiverMinecraftProfile) ?: return CompletableFuture.completedFuture(context)
         val receiverRace = receiverCharacter.race
-        if (!message.startsWith("[") || !message.contains("]")) return context
-        val languageName = Regex("\\[([^]]+)]").find(message)?.groupValues?.get(1) ?: return context
-        val languageService = Services[RPKLanguageService::class.java] ?: return context
-        val language = languageService.getLanguage(RPKLanguageName(languageName)) ?: return context
+        if (!message.startsWith("[") || !message.contains("]")) return CompletableFuture.completedFuture(context)
+        val languageName = Regex("\\[([^]]+)]").find(message)?.groupValues?.get(1) ?: return CompletableFuture.completedFuture(context)
+        val languageService = Services[RPKLanguageService::class.java] ?: return CompletableFuture.completedFuture(context)
+        val language = languageService.getLanguage(RPKLanguageName(languageName)) ?: return CompletableFuture.completedFuture(context)
         message = message.replaceFirst(
                 "[$languageName] ",
                 ""
         )
-        val characterLanguageService = Services[RPKCharacterLanguageService::class.java] ?: return context
-        val senderUnderstanding = characterLanguageService.getCharacterLanguageUnderstanding(senderCharacter, language)
-        val receiverUnderstanding = characterLanguageService.getCharacterLanguageUnderstanding(receiverCharacter, language)
-        context.message = "[${language.name.value}] ${language.apply(message, senderUnderstanding, receiverUnderstanding)}"
-        if (receiverRace != null) {
-            characterLanguageService.setCharacterLanguageUnderstanding(
-                    receiverCharacter,
-                    language,
-                    receiverUnderstanding + language.randomUnderstandingIncrement(receiverRace))
-        }
-        return context
+        val characterLanguageService = Services[RPKCharacterLanguageService::class.java] ?: return CompletableFuture.completedFuture(context)
+        return characterLanguageService.getCharacterLanguageUnderstanding(senderCharacter, language)
+            .thenCombineAsync(characterLanguageService.getCharacterLanguageUnderstanding(receiverCharacter, language)) { senderUnderstanding, receiverUnderstanding ->
+                context.message = "[${language.name.value}] ${language.apply(message, senderUnderstanding, receiverUnderstanding)}"
+                if (receiverRace != null) {
+                    characterLanguageService.setCharacterLanguageUnderstanding(
+                        receiverCharacter,
+                        language,
+                        receiverUnderstanding + language.randomUnderstandingIncrement(receiverRace)
+                    ).join()
+                }
+                return@thenCombineAsync context
+            }
     }
 
     override fun serialize(): MutableMap<String, Any> {

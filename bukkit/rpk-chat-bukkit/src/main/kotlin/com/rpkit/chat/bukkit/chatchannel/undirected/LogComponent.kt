@@ -26,7 +26,8 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.*
+import java.util.concurrent.CompletableFuture
 
 /**
  * Log component.
@@ -35,7 +36,7 @@ import java.util.Date
 @SerializableAs("LogComponent")
 class LogComponent(private val plugin: RPKChatBukkit) : UndirectedPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
+    override fun process(context: UndirectedMessageContext): CompletableFuture<UndirectedMessageContext> {
         val logDirectory = File(plugin.dataFolder, "logs")
         val logDateFormat = SimpleDateFormat("yyyy-MM-dd")
         val datedLogDirectory = File(logDirectory, logDateFormat.format(Date()))
@@ -52,7 +53,7 @@ class LogComponent(private val plugin: RPKChatBukkit) : UndirectedPipelineCompon
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         writer.append("[").append(dateFormat.format(Date())).append("] ").append(context.message).append("\n")
         writer.close()
-        return context
+        return CompletableFuture.completedFuture(context)
     }
 
     override fun serialize(): MutableMap<String, Any> {

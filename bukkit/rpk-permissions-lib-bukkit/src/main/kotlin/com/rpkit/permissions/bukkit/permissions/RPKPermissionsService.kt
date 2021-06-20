@@ -19,8 +19,10 @@ package com.rpkit.permissions.bukkit.permissions
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import com.rpkit.permissions.bukkit.group.RPKGroup
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import org.bukkit.entity.Player
+import java.util.concurrent.CompletableFuture
 
 interface RPKPermissionsService : Service {
 
@@ -46,12 +48,12 @@ interface RPKPermissionsService : Service {
     /**
      * Checks whether a profile has a permissions node
      */
-    fun hasPermission(profile: RPKProfile, node: String): Boolean
+    fun hasPermission(profile: RPKProfile, node: String): CompletableFuture<Boolean>
 
     /**
      * Checks whether a character has a permissions node
      */
-    fun hasPermission(character: RPKCharacter, node: String): Boolean
+    fun hasPermission(character: RPKCharacter, node: String): CompletableFuture<Boolean>
 
     /**
      * Assigns permissions to a player in Minecraft
@@ -65,6 +67,6 @@ interface RPKPermissionsService : Service {
      *
      * @param minecraftProfile
      */
-    fun unassignPermissions(minecraftProfile: RPKMinecraftProfile)
+    fun unassignPermissions(minecraftProfile: RPKMinecraftProfile, bukkitPlayer: Player)
 
 }

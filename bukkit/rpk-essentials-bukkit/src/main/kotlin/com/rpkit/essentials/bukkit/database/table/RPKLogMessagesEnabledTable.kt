@@ -22,6 +22,7 @@ import com.rpkit.essentials.bukkit.database.create
 import com.rpkit.essentials.bukkit.database.jooq.Tables.RPKIT_LOG_MESSAGES_ENABLED
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessagesEnabled
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 
 class RPKLogMessagesEnabledTable(private val database: Database, plugin: RPKEssentialsBukkit) : Table {
@@ -37,9 +38,10 @@ class RPKLogMessagesEnabledTable(private val database: Database, plugin: RPKEsse
         null
     }
 
-    fun insert(entity: RPKLogMessagesEnabled) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun insert(entity: RPKLogMessagesEnabled): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
                     RPKIT_LOG_MESSAGES_ENABLED,
                     RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID
@@ -48,33 +50,38 @@ class RPKLogMessagesEnabledTable(private val database: Database, plugin: RPKEsse
                     minecraftProfileId.value
                 )
                 .execute()
-        cache?.set(minecraftProfileId.value, entity)
+            cache?.set(minecraftProfileId.value, entity)
+        }
     }
 
-    operator fun get(minecraftProfile: RPKMinecraftProfile): RPKLogMessagesEnabled? {
-        val minecraftProfileId = minecraftProfile.id ?: return null
+    operator fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKLogMessagesEnabled?> {
+        val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
         if (cache?.containsKey(minecraftProfileId.value) == true) {
-            return cache[minecraftProfileId.value]
+            return CompletableFuture.completedFuture(cache[minecraftProfileId.value])
         }
-        database.create
+        return CompletableFuture.supplyAsync {
+            database.create
                 .select(
-                        RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID
+                    RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID
                 )
                 .from(RPKIT_LOG_MESSAGES_ENABLED)
                 .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-                .fetchOne() ?: return null
-        val logMessagesEnabled = RPKLogMessagesEnabled(minecraftProfile)
-        cache?.set(minecraftProfileId.value, logMessagesEnabled)
-        return logMessagesEnabled
+                .fetchOne() ?: return@supplyAsync null
+            val logMessagesEnabled = RPKLogMessagesEnabled(minecraftProfile)
+            cache?.set(minecraftProfileId.value, logMessagesEnabled)
+            return@supplyAsync logMessagesEnabled
+        }
     }
 
-    fun delete(entity: RPKLogMessagesEnabled) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun delete(entity: RPKLogMessagesEnabled): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_LOG_MESSAGES_ENABLED)
                 .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.remove(minecraftProfileId.value)
+            cache?.remove(minecraftProfileId.value)
+        }
     }
 
 }

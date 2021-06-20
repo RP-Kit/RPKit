@@ -22,6 +22,7 @@ import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaImpl
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.selection.bukkit.selection.RPKSelectionService
+import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -32,48 +33,58 @@ class MonsterSpawnAreaCreateCommand(private val plugin: RPKMonstersBukkit) : Com
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.monsters.command.monsterspawnarea.create")) {
-            sender.sendMessage(plugin.messages["no-permission-monster-spawn-area-create"])
+            sender.sendMessage(plugin.messages.noPermissionMonsterSpawnAreaCreate)
             return true
         }
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileSelf)
             return true
         }
         val selectionService = Services[RPKSelectionService::class.java]
         if (selectionService == null) {
-            sender.sendMessage(plugin.messages["no-selection-service"])
+            sender.sendMessage(plugin.messages.noSelectionService)
             return true
         }
-        val selection = selectionService.getSelection(minecraftProfile)
-        val monsterSpawnAreaService = Services[RPKMonsterSpawnAreaService::class.java]
-        if (monsterSpawnAreaService == null) {
-            sender.sendMessage(plugin.messages["no-monster-spawn-area-service"])
-            return true
+        selectionService.getSelection(minecraftProfile).thenAccept { selection ->
+            if (selection == null) {
+                sender.sendMessage(plugin.messages.noSelection)
+                return@thenAccept
+            }
+            val monsterSpawnAreaService = Services[RPKMonsterSpawnAreaService::class.java]
+            if (monsterSpawnAreaService == null) {
+                sender.sendMessage(plugin.messages.noMonsterSpawnAreaService)
+                return@thenAccept
+            }
+            monsterSpawnAreaService.addSpawnArea(
+                RPKMonsterSpawnAreaImpl(
+                    plugin,
+                    minPoint = selection.minimumPoint,
+                    maxPoint = selection.maximumPoint
+                )
+            ).thenRun {
+                sender.sendMessage(
+                    plugin.messages.monsterSpawnAreaCreateValid.withParameters(
+                        world = Bukkit.getWorld(selection.world) ?: Bukkit.getWorlds()[0],
+                        selection.minimumPoint.x,
+                        selection.minimumPoint.y,
+                        selection.minimumPoint.z,
+                        selection.maximumPoint.x,
+                        selection.maximumPoint.y,
+                        selection.maximumPoint.z
+                    )
+                )
+            }
         }
-        monsterSpawnAreaService.addSpawnArea(RPKMonsterSpawnAreaImpl(
-                plugin,
-                minPoint = selection.minimumPoint.location,
-                maxPoint = selection.maximumPoint.location
-        ))
-        sender.sendMessage(plugin.messages["monster-spawn-area-create-valid", mapOf(
-                "world" to selection.minimumPoint.world.name,
-                "min_x" to selection.minimumPoint.x.toString(),
-                "min_y" to selection.minimumPoint.y.toString(),
-                "min_z" to selection.minimumPoint.z.toString(),
-                "max_x" to selection.maximumPoint.x.toString(),
-                "max_y" to selection.maximumPoint.y.toString(),
-                "max_z" to selection.maximumPoint.z.toString()
-        )])
         return true
     }
 

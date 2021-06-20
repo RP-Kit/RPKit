@@ -42,14 +42,16 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
 
     private fun handleSnooping(event: PlayerCommandPreprocessEvent) {
         val snooperService = Services[RPKSnooperService::class.java] ?: return
-        snooperService.snoopers
-                .filter(RPKMinecraftProfile::isOnline)
-                .forEach { minecraftProfile ->
-                    minecraftProfile.sendMessage(plugin.messages["command-snoop", mapOf(
-                        "sender_player" to event.player.name,
-                        "command" to event.message
-                    )])
-                }
+        snooperService.snoopers.thenAccept { snoopers ->
+            snoopers.filter(RPKMinecraftProfile::isOnline)
+            .forEach { minecraftProfile ->
+                minecraftProfile.sendMessage(plugin.messages["command-snoop", mapOf(
+                    "sender_player" to event.player.name,
+                    "command" to event.message
+                )])
+            }
+        }
+
     }
 
     private fun handleQuickChannelSwitch(event: PlayerCommandPreprocessEvent) {
@@ -65,7 +67,7 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
         }
         event.isCancelled = true
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
         if (minecraftProfile == null) {
             event.player.sendMessage(plugin.messages["no-minecraft-profile"])
             return

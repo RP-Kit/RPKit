@@ -34,8 +34,8 @@ class PlayerDeathListener(private val plugin: RPKCharactersBukkit) : Listener {
     fun onPlayerDeath(event: PlayerDeathEvent) {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.entity) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.entity) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         if (!plugin.config.getBoolean("characters.kill-character-on-death")) return
         character.isDead = true
         characterService.updateCharacter(character)

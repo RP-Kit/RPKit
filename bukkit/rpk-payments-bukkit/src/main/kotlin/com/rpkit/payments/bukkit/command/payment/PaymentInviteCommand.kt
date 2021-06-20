@@ -27,6 +27,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
@@ -49,57 +50,59 @@ class PaymentInviteCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["no-payment-group-service"])
             return true
         }
-        val paymentGroup = paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.dropLast(1).joinToString(" ")))
-        if (paymentGroup == null) {
-            sender.sendMessage(plugin.messages["payment-invite-invalid-group"])
-            return true
-        }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
-        if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
-            return true
-        }
-        val characterService = Services[RPKCharacterService::class.java]
-        if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
-            return true
-        }
-        val bukkitPlayer = plugin.server.getOfflinePlayer(args.last())
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-            return true
-        }
-        val character = characterService.getActiveCharacter(minecraftProfile)
-        if (character == null) {
-            sender.sendMessage(plugin.messages["payment-invite-invalid-character"])
-            return true
-        }
-        paymentGroup.addInvite(character)
-        sender.sendMessage(plugin.messages["payment-invite-valid"])
-        val paymentNotificationService = Services[RPKPaymentNotificationService::class.java]
-        if (paymentNotificationService == null) {
-            sender.sendMessage(plugin.messages["no-payment-notification-service"])
-            return true
-        }
-        val now = LocalDateTime.now()
-        val notificationMessage = plugin.messages["payment-notification-invite", mapOf(
-                "member" to character.name,
-                "group" to paymentGroup.name.value,
-                "date" to dateFormat.format(now)
-        )]
-        if (minecraftProfile.isOnline) { // If online
-            minecraftProfile.sendMessage(notificationMessage)
-        } else { // If offline
-            paymentNotificationService.addPaymentNotification(
-                    RPKPaymentNotificationImpl(
+        paymentGroupService.getPaymentGroup(RPKPaymentGroupName(args.dropLast(1).joinToString(" "))).thenAccept getPaymentGroup@{ paymentGroup ->
+            if (paymentGroup == null) {
+                sender.sendMessage(plugin.messages["payment-invite-invalid-group"])
+                return@getPaymentGroup
+            }
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+            if (minecraftProfileService == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+                return@getPaymentGroup
+            }
+            val characterService = Services[RPKCharacterService::class.java]
+            if (characterService == null) {
+                sender.sendMessage(plugin.messages["no-character-service"])
+                return@getPaymentGroup
+            }
+            val bukkitPlayer = plugin.server.getOfflinePlayer(args.last())
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
+            if (minecraftProfile == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                return@getPaymentGroup
+            }
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+            if (character == null) {
+                sender.sendMessage(plugin.messages["payment-invite-invalid-character"])
+                return@getPaymentGroup
+            }
+            paymentGroup.addInvite(character).thenRun {
+                sender.sendMessage(plugin.messages["payment-invite-valid"])
+                val paymentNotificationService = Services[RPKPaymentNotificationService::class.java]
+                if (paymentNotificationService == null) {
+                    sender.sendMessage(plugin.messages["no-payment-notification-service"])
+                    return@thenRun
+                }
+                val now = LocalDateTime.now()
+                val notificationMessage = plugin.messages["payment-notification-invite", mapOf(
+                    "member" to character.name,
+                    "group" to paymentGroup.name.value,
+                    "date" to dateFormat.format(now.atZone(ZoneId.systemDefault()))
+                )]
+                if (minecraftProfile.isOnline) { // If online
+                    minecraftProfile.sendMessage(notificationMessage)
+                } else { // If offline
+                    paymentNotificationService.addPaymentNotification(
+                        RPKPaymentNotificationImpl(
                             group = paymentGroup,
                             to = character,
                             character = character,
                             date = now,
                             text = notificationMessage
+                        )
                     )
-            )
+                }
+            }
         }
         return true
     }

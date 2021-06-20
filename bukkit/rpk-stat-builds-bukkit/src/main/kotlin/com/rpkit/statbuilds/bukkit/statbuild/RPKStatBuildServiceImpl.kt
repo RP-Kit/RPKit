@@ -23,56 +23,103 @@ import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
 import com.rpkit.statbuilds.bukkit.database.table.RPKCharacterStatPointsTable
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttribute
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 class RPKStatBuildServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKStatBuildService {
 
-    override fun getStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int {
-        return plugin.database.getTable(RPKCharacterStatPointsTable::class.java)[character, statAttribute]?.points
-                ?: 0
+    private val statPoints = ConcurrentHashMap<Int, ConcurrentHashMap<String, Int>>()
+
+    override fun getStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): CompletableFuture<Int> {
+        val preloadedStatPoints = getPreloadedStatPoints(character, statAttribute)
+        if (preloadedStatPoints != null) return CompletableFuture.completedFuture(preloadedStatPoints)
+        return plugin.database.getTable(RPKCharacterStatPointsTable::class.java)[character, statAttribute].thenApply { statPoints ->
+            statPoints?.points ?: 0
+        }
     }
 
-    override fun setStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute, amount: Int) {
+    override fun setStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute, amount: Int): CompletableFuture<Void> {
         val characterStatPointsTable = plugin.database.getTable(RPKCharacterStatPointsTable::class.java)
-        var characterStatPoints = characterStatPointsTable.get(character, statAttribute)
-        if (characterStatPoints == null) {
-            characterStatPoints = RPKCharacterStatPoints(
+        return characterStatPointsTable[character, statAttribute].thenAcceptAsync { characterStatPoints ->
+            if (characterStatPoints == null) {
+                characterStatPointsTable.insert(RPKCharacterStatPoints(
                     character = character,
                     statAttribute = statAttribute,
                     points = amount
-            )
-            characterStatPointsTable.insert(characterStatPoints)
-        } else {
-            characterStatPoints.points = amount
-            characterStatPointsTable.update(characterStatPoints)
+                )).join()
+            } else {
+                characterStatPoints.points = amount
+                characterStatPointsTable.update(characterStatPoints).join()
+            }
+            if (character.minecraftProfile?.isOnline == true) {
+                val characterId = character.id
+                if (characterId != null) {
+                    val preloadedCharacterStatPoints = statPoints[characterId.value] ?: ConcurrentHashMap()
+                    preloadedCharacterStatPoints[statAttribute.name.value] = amount
+                    statPoints[characterId.value] = preloadedCharacterStatPoints
+                }
+            }
+        }
+    }
+
+    override fun getPreloadedStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int? {
+        return character.id?.value?.let { characterId -> statPoints[characterId]?.get(statAttribute.name.value) }
+    }
+
+    override fun loadStatPoints(character: RPKCharacter): CompletableFuture<Void> {
+        plugin.logger.info("Loading stat points for character ${character.name} (${character.id?.value})...")
+        return plugin.database.getTable(RPKCharacterStatPointsTable::class.java)[character].thenAccept { characterStatPoints ->
+            character.id?.value?.let { characterId ->
+                statPoints[characterId] = ConcurrentHashMap(characterStatPoints.associate { characterStatAttributePoints ->
+                    characterStatAttributePoints.statAttribute.name.value to characterStatAttributePoints.points
+                })
+                plugin.logger.info("Loaded stat points for character ${character.name} (${characterId})")
+            }
+        }
+    }
+
+    override fun unloadStatPoints(character: RPKCharacter) {
+        character.id?.value?.let { characterId ->
+            statPoints.remove(characterId)
+            plugin.logger.info("Unloaded stat points for character ${character.name} (${characterId})")
         }
     }
 
     override fun getMaxStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int {
         val expressionService = Services[RPKExpressionService::class.java] ?: return 0
         val expression = expressionService.createExpression(plugin.config.getString("stat-attributes.${statAttribute.name}.max-points") ?: return 0)
-        return expression.parseInt(mapOf(
-            "level" to (Services[RPKExperienceService::class.java]?.getLevel(character)?.toDouble() ?: 1.0)
-        )) ?: 0
+        return expression.parseInt(
+                mapOf(
+                    "level" to (Services[RPKExperienceService::class.java]?.getLevel(character)?.join()?.toDouble() ?: 1.0)
+                )
+            ) ?: 0
     }
 
-    override fun getTotalStatPoints(character: RPKCharacter): Int {
-        val expressionService = Services[RPKExpressionService::class.java] ?: return 0
-        val expression = expressionService.createExpression(plugin.config.getString("stat-attribute-points-formula") ?: return 0)
-        return expression.parseInt(mapOf(
-            "level" to (Services[RPKExperienceService::class.java]?.getLevel(character)?.toDouble() ?: 1.0)
-        )) ?: 0
+    override fun getTotalStatPoints(character: RPKCharacter): CompletableFuture<Int> {
+        val expressionService = Services[RPKExpressionService::class.java] ?: return CompletableFuture.completedFuture(0)
+        val expression = expressionService.createExpression(plugin.config.getString("stat-attribute-points-formula") ?: return CompletableFuture.completedFuture(0))
+        return CompletableFuture.supplyAsync {
+            expression.parseInt(mapOf(
+                "level" to (Services[RPKExperienceService::class.java]?.getLevel(character)?.join()?.toDouble() ?: 1.0)
+            )) ?: 0
+        }
     }
 
-    override fun getUnassignedStatPoints(character: RPKCharacter): Int {
-        return getTotalStatPoints(character) - getAssignedStatPoints(character)
+    override fun getUnassignedStatPoints(character: RPKCharacter): CompletableFuture<Int> {
+        return CompletableFuture.supplyAsync {
+            getTotalStatPoints(character).join() - getAssignedStatPoints(character).join()
+        }
     }
 
-    override fun getAssignedStatPoints(character: RPKCharacter): Int {
-        return Services[RPKStatAttributeService::class.java]
+    override fun getAssignedStatPoints(character: RPKCharacter): CompletableFuture<Int> {
+        return CompletableFuture.supplyAsync {
+            Services[RPKStatAttributeService::class.java]
                 ?.statAttributes
                 ?.map { statAttribute -> getStatPoints(character, statAttribute) }
-                ?.sum()
+                ?.also { CompletableFuture.allOf(*it.toTypedArray()).join() }
+                ?.sumOf(CompletableFuture<Int>::join)
                 ?: 0
+        }
     }
 
 

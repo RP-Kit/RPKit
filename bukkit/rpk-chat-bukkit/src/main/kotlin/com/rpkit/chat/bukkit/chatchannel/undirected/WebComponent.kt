@@ -19,18 +19,19 @@ package com.rpkit.chat.bukkit.chatchannel.undirected
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
 import org.bukkit.configuration.serialization.ConfigurationSerializable
+import java.util.concurrent.CompletableFuture
 
 
 class WebComponent : UndirectedPipelineComponent, ConfigurationSerializable {
-    override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
-        if (context.isCancelled) return context
+    override fun process(context: UndirectedMessageContext): CompletableFuture<UndirectedMessageContext> {
+        if (context.isCancelled) return CompletableFuture.completedFuture(context)
 //        Services[RPKChatWebSocketService::class.java].sockets
 //                .filter { socket -> socket.value.session?.isOpen == true }
 //                .forEach { socket ->
 //                    socket.value.session?.remote
 //                            ?.sendStringByFuture("${context.chatChannel.name}:::${ChatColor.stripColor(context.message)}")
 //                }
-        return context
+        return CompletableFuture.completedFuture(context)
     }
 
     override fun serialize(): MutableMap<String, Any> {

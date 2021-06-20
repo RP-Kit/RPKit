@@ -24,6 +24,9 @@ import com.rpkit.classes.bukkit.classes.RPKClassServiceImpl
 import com.rpkit.classes.bukkit.command.`class`.ClassCommand
 import com.rpkit.classes.bukkit.database.table.RPKCharacterClassTable
 import com.rpkit.classes.bukkit.database.table.RPKClassExperienceTable
+import com.rpkit.classes.bukkit.listener.AsyncPlayerPreLoginListener
+import com.rpkit.classes.bukkit.listener.PlayerQuitListener
+import com.rpkit.classes.bukkit.listener.RPKCharacterSwitchListener
 import com.rpkit.classes.bukkit.messages.ClassesMessages
 import com.rpkit.classes.bukkit.skillpoint.RPKSkillPointServiceImpl
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
@@ -113,9 +116,12 @@ class RPKClassesBukkit : RPKBukkitPlugin() {
                                 override val name = RPKStatVariableName(statVariableName)
 
                                 override fun get(character: RPKCharacter): Double {
-                                    val `class` = classService.getClass(character)
-                                    return `class`?.getStatVariableValue(this, classService.getLevel(character, `class`))?.toDouble()
-                                            ?: 0.0
+                                    val `class` = classService.getPreloadedClass(character)
+                                    return `class`?.getStatVariableValue(
+                                        this,
+                                        classService.getLevel(character, `class`).join()
+                                    )?.toDouble()
+                                        ?: 0.0
                                 }
                             })
                         }
@@ -127,10 +133,19 @@ class RPKClassesBukkit : RPKBukkitPlugin() {
         }
 
         registerCommands()
+        registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("class")?.setExecutor(ClassCommand(this))
+    }
+
+    private fun registerListeners() {
+        registerListeners(
+            AsyncPlayerPreLoginListener(),
+            PlayerQuitListener(),
+            RPKCharacterSwitchListener()
+        )
     }
 
 }

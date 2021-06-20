@@ -24,6 +24,7 @@ import com.rpkit.locks.bukkit.RPKLocksBukkit
 import com.rpkit.locks.bukkit.database.create
 import com.rpkit.locks.bukkit.database.jooq.Tables.RPKIT_KEYRING
 import com.rpkit.locks.bukkit.keyring.RPKKeyring
+import java.util.concurrent.CompletableFuture
 
 
 class RPKKeyringTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
@@ -39,60 +40,68 @@ class RPKKeyringTable(private val database: Database, private val plugin: RPKLoc
         null
     }
 
-    fun insert(entity: RPKKeyring) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKKeyring): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_KEYRING,
-                        RPKIT_KEYRING.CHARACTER_ID,
-                        RPKIT_KEYRING.ITEMS
+                    RPKIT_KEYRING,
+                    RPKIT_KEYRING.CHARACTER_ID,
+                    RPKIT_KEYRING.ITEMS
                 )
                 .values(
-                        characterId.value,
-                        entity.items.toTypedArray().toByteArray()
+                    characterId.value,
+                    entity.items.toTypedArray().toByteArray()
                 )
                 .execute()
-        cache?.set(characterId.value, entity)
+            cache?.set(characterId.value, entity)
+        }
     }
 
-    fun update(entity: RPKKeyring) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun update(entity: RPKKeyring): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_KEYRING)
                 .set(RPKIT_KEYRING.ITEMS, entity.items.toTypedArray().toByteArray())
                 .where(RPKIT_KEYRING.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.set(characterId.value, entity)
-    }
-
-    operator fun get(character: RPKCharacter): RPKKeyring? {
-        val characterId = character.id ?: return null
-        if (cache?.containsKey(characterId.value) == true) {
-            return cache[characterId.value]
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_KEYRING.CHARACTER_ID,
-                            RPKIT_KEYRING.ITEMS
-                    )
-                    .from(RPKIT_KEYRING)
-                    .where(RPKIT_KEYRING.CHARACTER_ID.eq(characterId.value))
-                    .fetchOne() ?: return null
-            val keyring = RPKKeyring(
-                    character,
-                    result.get(RPKIT_KEYRING.ITEMS).toItemStackArray().toMutableList()
-            )
-            cache?.set(characterId.value, keyring)
-            return keyring
+            cache?.set(characterId.value, entity)
         }
     }
 
-    fun delete(entity: RPKKeyring) {
-        val characterId = entity.character.id ?: return
-        database.create
+    operator fun get(character: RPKCharacter): CompletableFuture<RPKKeyring?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
+        if (cache?.containsKey(characterId.value) == true) {
+            return CompletableFuture.completedFuture(cache[characterId.value])
+        } else {
+            return CompletableFuture.supplyAsync {
+                val result = database.create
+                    .select(
+                        RPKIT_KEYRING.CHARACTER_ID,
+                        RPKIT_KEYRING.ITEMS
+                    )
+                    .from(RPKIT_KEYRING)
+                    .where(RPKIT_KEYRING.CHARACTER_ID.eq(characterId.value))
+                    .fetchOne() ?: return@supplyAsync null
+                val keyring = RPKKeyring(
+                    character,
+                    result.get(RPKIT_KEYRING.ITEMS).toItemStackArray().toMutableList()
+                )
+                cache?.set(characterId.value, keyring)
+                return@supplyAsync keyring
+            }
+        }
+    }
+
+    fun delete(entity: RPKKeyring): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_KEYRING)
                 .where(RPKIT_KEYRING.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.remove(characterId.value)
+            cache?.remove(characterId.value)
+        }
     }
 }

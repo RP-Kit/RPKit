@@ -60,8 +60,9 @@ class MonsterSpawnAreaRemoveMonsterCommand(private val plugin: RPKMonstersBukkit
             sender.sendMessage(plugin.messages["monster-spawn-area-remove-monster-invalid-monster-type"])
             return true
         }
-        monsterSpawnArea.removeMonster(monsterType)
-        sender.sendMessage(plugin.messages["monster-spawn-area-remove-monster-valid"])
+        monsterSpawnArea.removeMonster(monsterType).thenRun {
+            sender.sendMessage(plugin.messages["monster-spawn-area-remove-monster-valid"])
+        }
         return true
     }
 }

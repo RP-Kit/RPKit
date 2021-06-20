@@ -29,8 +29,8 @@ class RPKStatImpl(
     override fun get(character: RPKCharacter, variables: List<RPKStatVariable>): Int {
         val expressionService = Services[RPKExpressionService::class.java] ?: return 0
         val expression = expressionService.createExpression(formula)
-        return expression.parseInt(variables.map { variable ->
+        return expression.parseInt(variables.associate { variable ->
             variable.name.value to variable.get(character)
-        }.toMap()) ?: 0
+        }) ?: 0
     }
 }

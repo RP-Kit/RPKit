@@ -68,8 +68,9 @@ class MonsterSpawnAreaAddMonsterCommand(private val plugin: RPKMonstersBukkit) :
             sender.sendMessage(plugin.messages["monster-spawn-area-add-monster-invalid-max-level"])
             return true
         }
-        monsterSpawnArea.addMonster(monsterType, minLevel, maxLevel)
-        sender.sendMessage(plugin.messages["monster-spawn-area-add-monster-valid"])
+        monsterSpawnArea.addMonster(monsterType, minLevel, maxLevel).thenRun {
+            sender.sendMessage(plugin.messages["monster-spawn-area-add-monster-valid"])
+        }
         return true
     }
 

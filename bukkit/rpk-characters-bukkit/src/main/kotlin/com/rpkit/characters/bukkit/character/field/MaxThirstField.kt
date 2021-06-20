@@ -17,6 +17,7 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 /**
  * Character card field for max thirst.
@@ -24,8 +25,8 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 class MaxThirstField : CharacterCardField {
 
     override val name = "max_thirst"
-    override fun get(character: RPKCharacter): String {
-        return 20.toString()
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return CompletableFuture.completedFuture(20.toString())
     }
 
 

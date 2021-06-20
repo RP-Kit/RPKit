@@ -27,13 +27,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.ConversationContext
-import org.bukkit.conversations.ConversationFactory
-import org.bukkit.conversations.MessagePrompt
-import org.bukkit.conversations.NumericPrompt
-import org.bukkit.conversations.PlayerNamePrompt
-import org.bukkit.conversations.Prompt
-import org.bukkit.conversations.ValidatingPrompt
+import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
 /**
@@ -85,12 +79,12 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-currency-service"])
             return true
         }
-        val fromMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val fromMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (fromMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val fromCharacter = characterService.getActiveCharacter(fromMinecraftProfile)
+        val fromCharacter = characterService.getPreloadedActiveCharacter(fromMinecraftProfile)
         if (fromCharacter == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
@@ -104,12 +98,12 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["money-pay-player-invalid-player-offline"])
             return true
         }
-        val toMinecraftProfile = minecraftProfileService.getMinecraftProfile(toBukkitPlayer)
+        val toMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(toBukkitPlayer)
         if (toMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val toCharacter = characterService.getActiveCharacter(toMinecraftProfile)
+        val toCharacter = characterService.getPreloadedActiveCharacter(toMinecraftProfile)
         if (toCharacter == null) {
             sender.sendMessage(plugin.messages["money-pay-character-invalid-character"])
             return true
@@ -140,11 +134,21 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
                 sender.sendMessage(plugin.messages["money-pay-player-invalid-player-distance"])
                 return true
             }
-            if (economyService.getBalance(fromCharacter, currency) < amount) {
+            val fromWalletBalance = economyService.getPreloadedBalance(fromCharacter, currency)
+            if (fromWalletBalance == null) {
+                sender.sendMessage(plugin.messages.noPreloadedBalanceSelf)
+                return true
+            }
+            if (fromWalletBalance < amount) {
                 sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-balance"])
                 return true
             }
-            if (economyService.getBalance(toCharacter, currency) + amount > 1728) {
+            val toWalletBalance = economyService.getPreloadedBalance(toCharacter, currency)
+            if (toWalletBalance == null) {
+                sender.sendMessage(plugin.messages.noPreloadedBalanceOther.withParameters(character = toCharacter))
+                return true
+            }
+            if (toWalletBalance + amount > 1728) {
                 sender.sendMessage(plugin.messages["money-pay-amount-invalid-amount-limit"])
                 return true
             }
@@ -283,11 +287,11 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             val characterService = Services[RPKCharacterService::class.java] ?: return plugin.messages["no-character-service"]
             val economyService = Services[RPKEconomyService::class.java] ?: return plugin.messages["no-economy-service"]
             val fromBukkitPlayer = context.forWhom as Player
-            val fromMinecraftProfile = minecraftProfileService.getMinecraftProfile(fromBukkitPlayer)
+            val fromMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(fromBukkitPlayer)
                     ?: return plugin.messages["no-minecraft-profile"]
-            val fromCharacter = characterService.getActiveCharacter(fromMinecraftProfile)
+            val fromCharacter = characterService.getPreloadedActiveCharacter(fromMinecraftProfile)
             val toMinecraftProfile = context.getSessionData("minecraft_profile") as RPKMinecraftProfile
-            val toCharacter = characterService.getActiveCharacter(toMinecraftProfile)
+            val toCharacter = characterService.getPreloadedActiveCharacter(toMinecraftProfile)
             val currency = context.getSessionData("currency") as RPKCurrency
             val amount = context.getSessionData("amount") as Int
             if (fromCharacter == null) {
@@ -302,10 +306,14 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             if (fromBukkitPlayer.location.distanceSquared(toBukkitPlayer.location) > plugin.config.getDouble("payments.maximum-distance") * plugin.config.getDouble("payments.maximum-distance")) {
                 return plugin.messages["money-pay-player-invalid-player-distance"]
             }
-            if (economyService.getBalance(fromCharacter, currency) < amount) {
+            val fromWalletBalance = economyService.getPreloadedBalance(fromCharacter, currency)
+                ?: return plugin.messages.noPreloadedBalanceSelf
+            if (fromWalletBalance < amount) {
                 return plugin.messages["money-pay-amount-invalid-amount-balance"]
             }
-            if (economyService.getBalance(toCharacter, currency) + amount > 1728) {
+            val toWalletBalance = economyService.getPreloadedBalance(toCharacter, currency)
+                ?: return plugin.messages.noPreloadedBalanceOther.withParameters(character = toCharacter)
+            if (toWalletBalance + amount > 1728) {
                 return plugin.messages["money-pay-amount-invalid-amount-limit"]
             }
             economyService.transfer(fromCharacter, toCharacter, currency, amount)

@@ -22,24 +22,27 @@ import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 
 class RPKNewCharacterCooldownService(override val plugin: RPKCharactersBukkit) : Service {
 
-    fun getNewCharacterCooldown(profile: RPKProfile): Duration =
-        plugin.database.getTable(RPKNewCharacterCooldownTable::class.java)[profile]
-            ?.let { Duration.between(LocalDateTime.now(), it.cooldownExpiryTime) }
-            ?: Duration.ZERO
+    fun getNewCharacterCooldown(profile: RPKProfile): CompletableFuture<Duration> =
+        plugin.database.getTable(RPKNewCharacterCooldownTable::class.java)[profile].thenApply { newCharacterCooldown ->
+            newCharacterCooldown?.let { Duration.between(LocalDateTime.now(), it.cooldownExpiryTime) }
+                ?: Duration.ZERO
+        }
 
-    fun setNewCharacterCooldown(profile: RPKProfile, cooldown: Duration) {
+
+    fun setNewCharacterCooldown(profile: RPKProfile, cooldown: Duration): CompletableFuture<Void> {
         val newCharacterCooldownTable = plugin.database.getTable(RPKNewCharacterCooldownTable::class.java)
-        var newCharacterCooldown = newCharacterCooldownTable[profile]
-        if (newCharacterCooldown == null) {
-            newCharacterCooldown = RPKNewCharacterCooldown(profile = profile, cooldownExpiryTime = LocalDateTime.now().plus(cooldown))
-            newCharacterCooldownTable.insert(newCharacterCooldown)
-        } else {
-            newCharacterCooldown.cooldownExpiryTime = LocalDateTime.now().plus(cooldown)
-            newCharacterCooldownTable.update(newCharacterCooldown)
+        return newCharacterCooldownTable[profile].thenAcceptAsync { newCharacterCooldown ->
+            if (newCharacterCooldown == null) {
+                newCharacterCooldownTable.insert(RPKNewCharacterCooldown(profile = profile, cooldownExpiryTime = LocalDateTime.now().plus(cooldown))).join()
+            } else {
+                newCharacterCooldown.cooldownExpiryTime = LocalDateTime.now().plus(cooldown)
+                newCharacterCooldownTable.update(newCharacterCooldown).join()
+            }
         }
     }
 

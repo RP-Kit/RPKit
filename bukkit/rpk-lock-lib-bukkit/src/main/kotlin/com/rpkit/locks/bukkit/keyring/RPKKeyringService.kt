@@ -19,11 +19,15 @@ package com.rpkit.locks.bukkit.keyring
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKKeyringService : Service {
 
-    fun getKeyring(character: RPKCharacter): MutableList<ItemStack>
-    fun setKeyring(character: RPKCharacter, items: MutableList<ItemStack>)
+    fun getKeyring(character: RPKCharacter): CompletableFuture<MutableList<ItemStack>>
+    fun setKeyring(character: RPKCharacter, items: MutableList<ItemStack>): CompletableFuture<Void>
+    fun loadKeyring(character: RPKCharacter): CompletableFuture<MutableList<ItemStack>>
+    fun unloadKeyring(character: RPKCharacter)
+    fun getPreloadedKeyring(character: RPKCharacter): MutableList<ItemStack>?
 
 }

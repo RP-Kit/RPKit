@@ -17,9 +17,9 @@ package com.rpkit.characters.bukkit.character
 
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 
 /**
@@ -96,7 +96,7 @@ interface RPKCharacter {
      * the character last time they were switched to. In this situation you may wish to use the location of the player
      * currently playing the character instead.
      */
-    var location: Location
+    var location: RPKLocation
 
     /**
      * The inventory contents of the character.

@@ -25,8 +25,9 @@ import java.time.LocalDateTime
 
 class RPKBukkitBlockRollbackEvent(
         override val block: Block,
-        override var time: LocalDateTime
-) : RPKBukkitEvent(), RPKBlockRollbackEvent, Cancellable {
+        override var time: LocalDateTime,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKBlockRollbackEvent, Cancellable {
 
     companion object {
         @JvmStatic

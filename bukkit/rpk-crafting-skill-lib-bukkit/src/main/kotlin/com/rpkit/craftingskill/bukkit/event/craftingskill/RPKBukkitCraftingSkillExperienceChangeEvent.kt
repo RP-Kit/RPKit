@@ -29,8 +29,9 @@ class RPKBukkitCraftingSkillExperienceChangeEvent(
         override val action: RPKCraftingAction,
         override val material: Material,
         override val oldExperience: Int,
-        override var experience: Int
-) : RPKBukkitEvent(), RPKCraftingSkillExperienceChangeEvent, Cancellable {
+        override var experience: Int,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKCraftingSkillExperienceChangeEvent, Cancellable {
 
     companion object {
         @JvmStatic

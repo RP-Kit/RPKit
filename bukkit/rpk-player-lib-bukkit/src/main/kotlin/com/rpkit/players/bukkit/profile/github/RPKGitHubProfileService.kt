@@ -17,20 +17,21 @@ package com.rpkit.players.bukkit.profile.github
 
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKGitHubProfileService : Service {
 
-    fun getGitHubProfile(id: RPKGitHubProfileId): RPKGitHubProfile?
-    fun getGitHubProfile(name: RPKGitHubUsername): RPKGitHubProfile?
-    fun getGitHubProfiles(profile: RPKProfile): List<RPKGitHubProfile>
-    fun addGitHubProfile(profile: RPKGitHubProfile)
+    fun getGitHubProfile(id: RPKGitHubProfileId): CompletableFuture<RPKGitHubProfile?>
+    fun getGitHubProfile(name: RPKGitHubUsername): CompletableFuture<RPKGitHubProfile?>
+    fun getGitHubProfiles(profile: RPKProfile): CompletableFuture<List<RPKGitHubProfile>>
+    fun addGitHubProfile(profile: RPKGitHubProfile): CompletableFuture<Void>
     fun createGitHubProfile(
         profile: RPKProfile,
         name: RPKGitHubUsername,
         oauthToken: String
-    ): RPKGitHubProfile
-    fun updateGitHubProfile(profile: RPKGitHubProfile)
-    fun removeGitHubProfile(profile: RPKGitHubProfile)
+    ): CompletableFuture<RPKGitHubProfile>
+    fun updateGitHubProfile(profile: RPKGitHubProfile): CompletableFuture<Void>
+    fun removeGitHubProfile(profile: RPKGitHubProfile): CompletableFuture<Void>
 
 }

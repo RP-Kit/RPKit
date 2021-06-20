@@ -31,6 +31,7 @@ import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.awt.Color
+import java.util.concurrent.CompletableFuture
 
 /**
  * Chat channel service implementation.
@@ -79,22 +80,23 @@ class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatCha
         return chatChannels.firstOrNull { it.name.value.equals(name.value, ignoreCase = true) }
     }
 
-    override fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel? {
-        return Services[RPKChatChannelSpeakerService::class.java]?.getMinecraftProfileChannel(minecraftProfile)
+    override fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKChatChannel?> {
+        val speakerService = Services[RPKChatChannelSpeakerService::class.java] ?: return CompletableFuture.completedFuture(null)
+        return speakerService.getMinecraftProfileChannel(minecraftProfile)
     }
 
-    override fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?, isAsync: Boolean) {
-        var oldChannel = getMinecraftProfileChannel(minecraftProfile)
-        val event = RPKBukkitChatChannelSwitchEvent(minecraftProfile, oldChannel, channel)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        oldChannel = event.oldChannel
-        if (oldChannel != null) {
-            oldChannel.removeSpeaker(minecraftProfile)
-        }
-        val chatChannel = event.chatChannel
-        if (chatChannel != null) {
-            chatChannel.addSpeaker(minecraftProfile)
+    override fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?): CompletableFuture<Void> {
+        return getMinecraftProfileChannel(minecraftProfile).thenAcceptAsync { oldChannel ->
+            val event = RPKBukkitChatChannelSwitchEvent(minecraftProfile, oldChannel, channel, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@thenAcceptAsync
+            if (oldChannel != null) {
+                oldChannel.removeSpeaker(minecraftProfile).join()
+            }
+            val chatChannel = event.chatChannel
+            if (chatChannel != null) {
+                chatChannel.addSpeaker(minecraftProfile).join()
+            }
         }
     }
 

@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitChatGroupDeleteEvent(
-        override val chatGroup: RPKChatGroup
-) : RPKBukkitEvent(), RPKChatGroupDeleteEvent, Cancellable {
+        override val chatGroup: RPKChatGroup,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKChatGroupDeleteEvent, Cancellable {
 
     companion object {
         @JvmStatic

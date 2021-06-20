@@ -21,6 +21,7 @@ import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItem
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides purchase related operations.
@@ -33,7 +34,7 @@ interface RPKPurchaseService : Service {
      * @param profile The profile to get purchases for
      * @return A list of purchases made by the given profile. If no purchases, an empty list is returned.
      */
-    fun getPurchases(profile: RPKProfile): List<RPKPurchase>
+    fun getPurchases(profile: RPKProfile): CompletableFuture<List<RPKPurchase>>
 
     /**
      * Gets a purchase by ID
@@ -41,46 +42,46 @@ interface RPKPurchaseService : Service {
      * @param id The id of the purchase
      * @return The purchase, or null if there are none with the given ID
      */
-    fun getPurchase(id: RPKPurchaseId): RPKPurchase?
+    fun getPurchase(id: RPKPurchaseId): CompletableFuture<RPKPurchase?>
 
     /**
      * Adds a purchase
      *
      * @param purchase The purchase to add
      */
-    fun addPurchase(purchase: RPKPurchase)
+    fun addPurchase(purchase: RPKPurchase): CompletableFuture<Void>
 
     fun createConsumablePurchase(
         storeItem: RPKConsumableStoreItem,
         profile: RPKProfile,
         purchaseDate: LocalDateTime,
         remainingUses: Int
-    ): RPKConsumablePurchase
+    ): CompletableFuture<RPKConsumablePurchase>
 
     fun createPermanentPurchase(
         storeItem: RPKPermanentStoreItem,
         profile: RPKProfile,
         purchaseDate: LocalDateTime
-    ): RPKPermanentPurchase
+    ): CompletableFuture<RPKPermanentPurchase>
 
     fun createTimedPurchase(
         storeItem: RPKTimedStoreItem,
         profile: RPKProfile,
         purchaseDate: LocalDateTime
-    ): RPKTimedPurchase
+    ): CompletableFuture<RPKTimedPurchase>
 
     /**
      * Updates a purchase in data storage
      *
      * @param purchase the purchase to update
      */
-    fun updatePurchase(purchase: RPKPurchase)
+    fun updatePurchase(purchase: RPKPurchase): CompletableFuture<Void>
 
     /**
      * Removes a purchase
      *
      * @param purchase The purchase to remove
      */
-    fun removePurchase(purchase: RPKPurchase)
+    fun removePurchase(purchase: RPKPurchase): CompletableFuture<Void>
 
 }

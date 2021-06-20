@@ -18,11 +18,14 @@ package com.rpkit.selection.bukkit.selection
 
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import org.bukkit.World
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKSelectionService : Service {
 
-    fun getSelection(minecraftProfile: RPKMinecraftProfile): RPKSelection
-    fun updateSelection(selection: RPKSelection)
+    fun getSelection(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKSelection?>
+    fun updateSelection(selection: RPKSelection): CompletableFuture<Void>
+    fun createSelection(minecraftProfile: RPKMinecraftProfile, world: World): CompletableFuture<RPKSelection>
 
 }

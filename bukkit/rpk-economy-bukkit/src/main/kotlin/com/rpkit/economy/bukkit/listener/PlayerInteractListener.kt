@@ -67,27 +67,37 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                     event.player.sendMessage(plugin.messages["no-economy-service"])
                     return
                 }
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
                 if (minecraftProfile == null) {
                     event.player.sendMessage(plugin.messages["no-minecraft-profile"])
                     return
                 }
-                val character = characterService.getActiveCharacter(minecraftProfile)
+                val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
                 if (character == null) {
                     event.player.sendMessage(plugin.messages["no-character"])
                     return
                 }
-                if (economyService.getBalance(character, fromCurrency) - amount < 0) {
+                val walletBalanceFromCurrency = economyService.getPreloadedBalance(character, fromCurrency)
+                if (walletBalanceFromCurrency == null) {
+                    event.player.sendMessage(plugin.messages.noPreloadedBalanceSelf)
+                    return
+                }
+                if (walletBalanceFromCurrency - amount < 0) {
                     event.player.sendMessage(plugin.messages["exchange-invalid-wallet-balance-too-low"])
                     return
                 }
                 val convertedAmount = fromCurrency.convert(amount, toCurrency)
-                if (economyService.getBalance(character, toCurrency) + convertedAmount > 1728) {
+                val walletBalanceToCurrency = economyService.getPreloadedBalance(character, toCurrency)
+                if (walletBalanceToCurrency == null) {
+                    event.player.sendMessage(plugin.messages.noPreloadedBalanceSelf)
+                    return
+                }
+                if (walletBalanceToCurrency + convertedAmount > 1728) {
                     event.player.sendMessage(plugin.messages["exchange-invalid-wallet-balance-too-high"])
                     return
                 }
-                economyService.setBalance(character, fromCurrency, economyService.getBalance(character, fromCurrency) - amount)
-                economyService.setBalance(character, toCurrency, economyService.getBalance(character, toCurrency) + convertedAmount)
+                economyService.setBalance(character, fromCurrency, walletBalanceFromCurrency - amount)
+                economyService.setBalance(character, toCurrency, walletBalanceToCurrency + convertedAmount)
                 event.player.sendMessage(plugin.messages["exchange-valid", mapOf(
                     "from_amount" to amount.toString(),
                     "to_amount" to convertedAmount.toString(),
@@ -120,12 +130,22 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                     event.player.sendMessage(plugin.messages["no-economy-service"])
                     return
                 }
-                val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-                val character = characterService.getActiveCharacter(minecraftProfile) ?: return
-                if (economyService.getBalance(character, fromCurrency) - fromAmount < 0) return
-                if (economyService.getBalance(character, toCurrency) + toAmount > 1728) return
-                economyService.setBalance(character, fromCurrency, economyService.getBalance(character, fromCurrency) - fromAmount)
-                economyService.setBalance(character, toCurrency, economyService.getBalance(character, toCurrency) + toAmount)
+                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
+                val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
+                val walletBalanceFromCurrency = economyService.getPreloadedBalance(character, fromCurrency)
+                if (walletBalanceFromCurrency == null) {
+                    event.player.sendMessage(plugin.messages.noPreloadedBalanceSelf)
+                    return
+                }
+                if (walletBalanceFromCurrency - fromAmount < 0) return
+                val walletBalanceToCurrency = economyService.getPreloadedBalance(character, toCurrency)
+                if (walletBalanceToCurrency == null) {
+                    event.player.sendMessage(plugin.messages.noPreloadedBalanceSelf)
+                    return
+                }
+                if (walletBalanceToCurrency + toAmount > 1728) return
+                economyService.setBalance(character, fromCurrency, walletBalanceFromCurrency - fromAmount)
+                economyService.setBalance(character, toCurrency, walletBalanceToCurrency + toAmount)
                 var rate = fromAmount.toDouble() / toAmount.toDouble()
                 val rateChange = plugin.config.getDouble("dynamic-exchanges.rate-change")
                 rate -= rateChange
@@ -169,12 +189,22 @@ class PlayerInteractListener(private val plugin: RPKEconomyBukkit) : Listener {
                 event.player.sendMessage(plugin.messages["no-economy-service"])
                 return
             }
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-            val character = characterService.getActiveCharacter(minecraftProfile) ?: return
-            if (economyService.getBalance(character, fromCurrency) - fromAmount < 0) return
-            if (economyService.getBalance(character, toCurrency) + toAmount > 1728) return
-            economyService.setBalance(character, fromCurrency, economyService.getBalance(character, fromCurrency) - fromAmount)
-            economyService.setBalance(character, toCurrency, economyService.getBalance(character, toCurrency) + toAmount)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
+            val walletBalanceFromCurrency = economyService.getPreloadedBalance(character, fromCurrency)
+            if (walletBalanceFromCurrency == null) {
+                event.player.sendMessage(plugin.messages.noPreloadedBalanceSelf)
+                return
+            }
+            if (walletBalanceFromCurrency - fromAmount < 0) return
+            val walletBalanceToCurrency = economyService.getPreloadedBalance(character, toCurrency)
+            if (walletBalanceToCurrency == null) {
+                event.player.sendMessage(plugin.messages.noPreloadedBalanceSelf)
+                return
+            }
+            if (walletBalanceToCurrency + toAmount > 1728) return
+            economyService.setBalance(character, fromCurrency, walletBalanceFromCurrency - fromAmount)
+            economyService.setBalance(character, toCurrency, walletBalanceToCurrency + toAmount)
             var rate = toAmount.toDouble() / fromAmount.toDouble()
             val rateChange = plugin.config.getDouble("dynamic-exchanges.rate-change")
             rate += rateChange

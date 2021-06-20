@@ -40,17 +40,20 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
     }
 
     override fun getBalance(playerName: String): Double {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (getBalance)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return 0.0
         val characterService = Services[RPKCharacterService::class.java] ?: return 0.0
         val economyService = Services[RPKEconomyService::class.java] ?: return 0.0
         val currencyService = Services[RPKCurrencyService::class.java] ?: return 0.0
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         return if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
             if (character != null && currency != null) {
-                economyService.getBalance(character, currency).toDouble()
+                economyService.getBalance(character, currency).join().toDouble()
             } else {
                 0.0
             }
@@ -68,6 +71,9 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
     }
 
     override fun isBankOwner(name: String, playerName: String): EconomyResponse {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (isBankOwner)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 ?: return EconomyResponse(
                         0.0,
@@ -97,14 +103,14 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
                     if (name == playerName) {
-                        EconomyResponse(0.0, bankService.getBalance(character, currency).toDouble(), SUCCESS, "")
+                        EconomyResponse(0.0, bankService.getBalance(character, currency).join().toDouble(), SUCCESS, "")
                     } else {
                         EconomyResponse(0.0, 0.0, FAILURE, "Bank is not owned by player.")
                     }
@@ -128,6 +134,9 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
     }
 
     override fun bankDeposit(name: String, amount: Double): EconomyResponse {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (bankDeposit)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 ?: return EconomyResponse(
                         0.0,
@@ -157,17 +166,17 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
             if (character != null) {
                 return if (currency != null) {
-                    val balance = bankService.getBalance(character, currency)
-                    bankService.setBalance(character, currency, balance + amount.toInt())
+                    val balance = bankService.getBalance(character, currency).join()
+                    bankService.setBalance(character, currency, balance + amount.toInt()).join()
                     EconomyResponse(
                             amount.toInt().toDouble(),
-                            bankService.getBalance(character, currency).toDouble(),
+                            bankService.getBalance(character, currency).join().toDouble(),
                             SUCCESS,
                             ""
                     )
@@ -183,6 +192,9 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
     }
 
     override fun bankWithdraw(name: String, amount: Double): EconomyResponse {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (bankWithdraw)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 ?: return EconomyResponse(
                         0.0,
@@ -212,17 +224,17 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
             if (character != null) {
                 return if (currency != null) {
-                    val balance = bankService.getBalance(character, currency)
-                    bankService.setBalance(character, currency, balance - amount.toInt())
+                    val balance = bankService.getBalance(character, currency).join()
+                    bankService.setBalance(character, currency, balance - amount.toInt()).join()
                     EconomyResponse(
                             amount.toInt().toDouble(),
-                            bankService.getBalance(character, currency).toDouble(),
+                            bankService.getBalance(character, currency).join().toDouble(),
                             SUCCESS,
                             ""
                     )
@@ -238,6 +250,9 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
     }
 
     override fun deleteBank(name: String): EconomyResponse {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (deleteBank)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 ?: return EconomyResponse(
                         0.0,
@@ -267,16 +282,16 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
-                    bankService.setBalance(character, currency, 0)
+                    bankService.setBalance(character, currency, 0).join()
                     EconomyResponse(
                             0.0,
-                            bankService.getBalance(character, currency).toDouble(),
+                            bankService.getBalance(character, currency).join().toDouble(),
                             SUCCESS,
                             ""
                     )
@@ -292,6 +307,9 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
     }
 
     override fun depositPlayer(playerName: String, amount: Double): EconomyResponse {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (depositPlayer)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 ?: return EconomyResponse(
                         0.0,
@@ -321,18 +339,18 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no currency service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
-                    val balance = economyService.getBalance(character, currency)
+                    val balance = economyService.getBalance(character, currency).join()
                     if (balance + amount.toInt() <= 1720) {
-                        economyService.setBalance(character, currency, balance + amount.toInt())
-                        EconomyResponse(amount.toInt().toDouble(), economyService.getBalance(character, currency).toDouble(), SUCCESS, "")
+                        economyService.setBalance(character, currency, balance + amount.toInt()).join()
+                        EconomyResponse(amount.toInt().toDouble(), economyService.getBalance(character, currency).join().toDouble(), SUCCESS, "")
                     } else {
-                        EconomyResponse(0.0, economyService.getBalance(character, currency).toDouble(), FAILURE, "Can not hold more than 1720 in wallet.")
+                        EconomyResponse(0.0, economyService.getBalance(character, currency).join().toDouble(), FAILURE, "Can not hold more than 1720 in wallet.")
                     }
                 } else {
                     EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
@@ -350,6 +368,9 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
     }
 
     override fun createBank(name: String, playerName: String): EconomyResponse {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (createBank)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 ?: return EconomyResponse(
                         0.0,
@@ -379,16 +400,16 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
-                    bankService.setBalance(character, currency, 0)
+                    bankService.setBalance(character, currency, 0).join()
                     EconomyResponse(
                             0.0,
-                            bankService.getBalance(character, currency).toDouble(),
+                            bankService.getBalance(character, currency).join().toDouble(),
                             SUCCESS,
                             ""
                     )
@@ -404,11 +425,14 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
     }
 
     override fun hasAccount(playerName: String): Boolean {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (hasAccount)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return false
         val characterService = Services[RPKCharacterService::class.java] ?: return false
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer) ?: return false
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join() ?: return false
+        val character = characterService.getActiveCharacter(minecraftProfile).join()
         return character != null
     }
 
@@ -429,6 +453,9 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
     }
 
     override fun withdrawPlayer(playerName: String, amount: Double): EconomyResponse {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (withdrawPlayer)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 ?: return EconomyResponse(
                         0.0,
@@ -458,18 +485,18 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no currency service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(playerName)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
-                    val balance = economyService.getBalance(character, currency)
+                    val balance = economyService.getBalance(character, currency).join()
                     if (balance - amount.toInt() >= 0) {
-                        economyService.setBalance(character, currency, balance - amount.toInt())
-                        EconomyResponse(amount.toInt().toDouble(), economyService.getBalance(character, currency).toDouble(), SUCCESS, "")
+                        economyService.setBalance(character, currency, balance - amount.toInt()).join()
+                        EconomyResponse(amount.toInt().toDouble(), economyService.getBalance(character, currency).join().toDouble(), SUCCESS, "")
                     } else {
-                        EconomyResponse(0.0, economyService.getBalance(character, currency).toDouble(), FAILURE, "Wallet does not have enough money.")
+                        EconomyResponse(0.0, economyService.getBalance(character, currency).join().toDouble(), FAILURE, "Wallet does not have enough money.")
                     }
                 } else {
                     EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
@@ -492,6 +519,9 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
     }
 
     override fun bankHas(name: String, amount: Double): EconomyResponse {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (bankHas)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 ?: return EconomyResponse(
                         0.0,
@@ -528,16 +558,16 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
             return if (character != null) {
                 if (currency != null) {
-                    if (bankService.getBalance(character, currency) >= amount.toInt()) {
-                        EconomyResponse(0.0, economyService.getBalance(character, currency).toDouble(), SUCCESS, "")
+                    if (bankService.getBalance(character, currency).join() >= amount.toInt()) {
+                        EconomyResponse(0.0, economyService.getBalance(character, currency).join().toDouble(), SUCCESS, "")
                     } else {
-                        EconomyResponse(0.0, economyService.getBalance(character, currency).toDouble(), FAILURE, "Bank does not have enough money.")
+                        EconomyResponse(0.0, economyService.getBalance(character, currency).join().toDouble(), FAILURE, "Bank does not have enough money.")
                     }
                 } else {
                     EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
@@ -564,6 +594,9 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
     }
 
     override fun bankBalance(name: String): EconomyResponse {
+        if (plugin.server.isPrimaryThread) {
+            plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (bankBalance)")
+        }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 ?: return EconomyResponse(
                         0.0,
@@ -593,13 +626,13 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
                         "There is no bank service available."
                 )
         val bukkitOfflinePlayer = plugin.server.getOfflinePlayer(name)
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer)
+        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitOfflinePlayer).join()
         return if (minecraftProfile != null) {
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getActiveCharacter(minecraftProfile).join()
             val currency = currencyService.defaultCurrency
             if (character != null) {
                 if (currency != null) {
-                    EconomyResponse(0.0, bankService.getBalance(character, currency).toDouble(), SUCCESS, "")
+                    EconomyResponse(0.0, bankService.getBalance(character, currency).join().toDouble(), SUCCESS, "")
                 } else {
                     EconomyResponse(0.0, 0.0, FAILURE, "No default currency is set.")
                 }

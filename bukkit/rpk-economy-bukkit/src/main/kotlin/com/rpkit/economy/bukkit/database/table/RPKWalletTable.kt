@@ -26,6 +26,7 @@ import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.database.create
 import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_WALLET
 import com.rpkit.economy.bukkit.wallet.RPKWallet
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents the wallet table.
@@ -51,15 +52,16 @@ class RPKWalletTable(
         null
     }
 
-    fun insert(entity: RPKWallet) {
-        val characterId = entity.character.id ?: return
+    fun insert(entity: RPKWallet): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = entity.currency.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_WALLET,
-                        RPKIT_WALLET.CHARACTER_ID,
-                        RPKIT_WALLET.CURRENCY_NAME,
-                        RPKIT_WALLET.BALANCE
+                    RPKIT_WALLET,
+                    RPKIT_WALLET.CHARACTER_ID,
+                    RPKIT_WALLET.CURRENCY_NAME,
+                    RPKIT_WALLET.BALANCE
                 )
                 .values(
                     characterId.value,
@@ -67,79 +69,89 @@ class RPKWalletTable(
                     entity.balance
                 )
                 .execute()
-        cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
+            cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
+        }
     }
 
-    fun update(entity: RPKWallet) {
-        val characterId = entity.character.id ?: return
+    fun update(entity: RPKWallet): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = entity.currency.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_WALLET)
                 .set(RPKIT_WALLET.BALANCE, entity.balance)
                 .where(RPKIT_WALLET.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_WALLET.CURRENCY_NAME.eq(currencyName.value))
                 .execute()
-        cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
+            cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
+        }
     }
 
-    fun get(character: RPKCharacter, currency: RPKCurrency): RPKWallet? {
-        val characterId = character.id ?: return null
+    fun get(character: RPKCharacter, currency: RPKCurrency): CompletableFuture<RPKWallet?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = currency.name
         val cacheKey = CharacterCurrencyCacheKey(characterId.value, currencyName.value)
         if (cache?.containsKey(cacheKey) == true) {
-            return cache[cacheKey]
+            return CompletableFuture.completedFuture(cache[cacheKey])
         }
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_WALLET.BALANCE)
                 .from(RPKIT_WALLET)
                 .where(RPKIT_WALLET.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_WALLET.CURRENCY_NAME.eq(currencyName.value))
-                .fetchOne() ?: return null
-        val wallet = RPKWallet(
+                .fetchOne() ?: return@supplyAsync null
+            val wallet = RPKWallet(
                 character,
                 currency,
                 result[RPKIT_WALLET.BALANCE]
-        )
-        cache?.set(cacheKey, wallet)
-        return wallet
+            )
+            cache?.set(cacheKey, wallet)
+            return@supplyAsync wallet
+        }
     }
 
-    fun getTop(amount: Int = 5, currency: RPKCurrency): List<RPKWallet> {
-        val currencyName = currency.name
-        val results = database.create
+    fun getTop(amount: Int = 5, currency: RPKCurrency): CompletableFuture<List<RPKWallet>> {
+        return CompletableFuture.supplyAsync {
+            val currencyName = currency.name
+            val results = database.create
                 .select(
-                        RPKIT_WALLET.CHARACTER_ID,
-                        RPKIT_WALLET.BALANCE
+                    RPKIT_WALLET.CHARACTER_ID,
+                    RPKIT_WALLET.BALANCE
                 )
                 .from(RPKIT_WALLET)
                 .where(RPKIT_WALLET.CURRENCY_NAME.eq(currencyName.value))
                 .orderBy(RPKIT_WALLET.BALANCE.desc())
                 .limit(amount)
                 .fetch()
-        val characterService = Services[RPKCharacterService::class.java] ?: return emptyList()
-        return results
+            val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync emptyList()
+            return@supplyAsync results
                 .mapNotNull { result ->
                     val characterId = result[RPKIT_WALLET.CHARACTER_ID]
-                    val character = characterService.getCharacter(RPKCharacterId(characterId)) ?: return@mapNotNull null
+                    val character =
+                        characterService.getCharacter(RPKCharacterId(characterId)).join() ?: return@mapNotNull null
                     val wallet = RPKWallet(
-                            character,
-                            currency,
-                            result[RPKIT_WALLET.BALANCE]
+                        character,
+                        currency,
+                        result[RPKIT_WALLET.BALANCE]
                     )
                     cache?.set(CharacterCurrencyCacheKey(characterId, currencyName.value), wallet)
                     return@mapNotNull wallet
                 }
+        }
     }
 
-    fun delete(entity: RPKWallet) {
-        val characterId = entity.character.id ?: return
+    fun delete(entity: RPKWallet): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = entity.currency.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_WALLET)
                 .where(RPKIT_WALLET.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_WALLET.CURRENCY_NAME.eq(currencyName.value))
                 .execute()
-        cache?.remove(CharacterCurrencyCacheKey(characterId.value, currencyName.value))
+            cache?.remove(CharacterCurrencyCacheKey(characterId.value, currencyName.value))
+        }
     }
 
 }

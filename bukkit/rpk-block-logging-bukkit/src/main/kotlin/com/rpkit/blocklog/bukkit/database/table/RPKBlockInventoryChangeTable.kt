@@ -30,6 +30,7 @@ import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import java.util.concurrent.CompletableFuture
 
 
 class RPKBlockInventoryChangeTable(private val database: Database, private val plugin: RPKBlockLoggingBukkit) : Table {
@@ -45,38 +46,41 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
         null
     }
 
-    fun insert(entity: RPKBlockInventoryChange) {
-        database.create
+    fun insert(entity: RPKBlockInventoryChange): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_BLOCK_INVENTORY_CHANGE,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.TIME,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.FROM,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.TO,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.REASON
+                    RPKIT_BLOCK_INVENTORY_CHANGE,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.TIME,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.FROM,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.TO,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.REASON
                 )
                 .values(
-                        entity.blockHistory.id?.value,
-                        entity.time,
-                        entity.profile?.id?.value,
-                        entity.minecraftProfile?.id?.value,
-                        entity.character?.id?.value,
-                        entity.from.toByteArray(),
-                        entity.to.toByteArray(),
-                        entity.reason
+                    entity.blockHistory.id?.value,
+                    entity.time,
+                    entity.profile?.id?.value,
+                    entity.minecraftProfile?.id?.value,
+                    entity.character?.id?.value,
+                    entity.from.toByteArray(),
+                    entity.to.toByteArray(),
+                    entity.reason
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKBlockInventoryChangeId(id)
-        cache?.set(id, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKBlockInventoryChangeId(id)
+            cache?.set(id, entity)
+        }
     }
 
-    fun update(entity: RPKBlockInventoryChange) {
-        val id = entity.id ?: return
-        database.create
+    fun update(entity: RPKBlockInventoryChange): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_BLOCK_INVENTORY_CHANGE)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID, entity.blockHistory.id?.value)
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.TIME, entity.time)
@@ -88,52 +92,55 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                 .set(RPKIT_BLOCK_INVENTORY_CHANGE.REASON, entity.reason)
                 .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKBlockInventoryChangeId): RPKBlockInventoryChange? {
+    operator fun get(id: RPKBlockInventoryChangeId): CompletableFuture<RPKBlockInventoryChange?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
+            return CompletableFuture.completedFuture(cache[id.value])
         }
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(
-                        RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.TIME,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.FROM,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.TO,
-                        RPKIT_BLOCK_INVENTORY_CHANGE.REASON
+                    RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.TIME,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.FROM,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.TO,
+                    RPKIT_BLOCK_INVENTORY_CHANGE.REASON
                 )
                 .from(RPKIT_BLOCK_INVENTORY_CHANGE)
                 .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id.value))
-                .fetchOne() ?: return null
-        val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return null
-        val blockHistoryId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID)
-        val blockHistory = blockHistoryService.getBlockHistory(RPKBlockHistoryId(blockHistoryId))
-        if (blockHistory == null) {
-            database.create
+                .fetchOne() ?: return@supplyAsync null
+            val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return@supplyAsync null
+            val blockHistoryId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID)
+            val blockHistory = blockHistoryService.getBlockHistory(RPKBlockHistoryId(blockHistoryId)).join()
+            if (blockHistory == null) {
+                database.create
                     .deleteFrom(RPKIT_BLOCK_INVENTORY_CHANGE)
                     .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id.value))
                     .execute()
-            cache?.remove(id.value)
-            return null
-        }
-        val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID)
-        val profile = if (profileId == null) null else profileService.getProfile(RPKProfileId(profileId))
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return null
-        val minecraftProfileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID)
-        val minecraftProfile = if (minecraftProfileId == null) {
-            null
-        } else {
-            minecraftProfileService.getMinecraftProfile(RPKMinecraftProfileId(minecraftProfileId))
-        }
-        val characterService = Services[RPKCharacterService::class.java] ?: return null
-        val characterId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID)
-        val character = if (characterId == null) null else characterService.getCharacter(RPKCharacterId(characterId))
-        val blockInventoryChange = RPKBlockInventoryChangeImpl(
+                cache?.remove(id.value)
+                return@supplyAsync null
+            }
+            val profileService = Services[RPKProfileService::class.java] ?: return@supplyAsync null
+            val profileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.PROFILE_ID)
+            val profile = if (profileId == null) null else profileService.getProfile(RPKProfileId(profileId)).join()
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@supplyAsync null
+            val minecraftProfileId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.MINECRAFT_PROFILE_ID)
+            val minecraftProfile = if (minecraftProfileId == null) {
+                null
+            } else {
+                minecraftProfileService.getMinecraftProfile(RPKMinecraftProfileId(minecraftProfileId)).join()
+            }
+            val characterService = Services[RPKCharacterService::class.java] ?: return@supplyAsync null
+            val characterId = result.get(RPKIT_BLOCK_INVENTORY_CHANGE.CHARACTER_ID)
+            val character =
+                if (characterId == null) null else characterService.getCharacter(RPKCharacterId(characterId)).join()
+            val blockInventoryChange = RPKBlockInventoryChangeImpl(
                 id,
                 blockHistory,
                 result.get(RPKIT_BLOCK_INVENTORY_CHANGE.TIME),
@@ -143,28 +150,34 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                 result.get(RPKIT_BLOCK_INVENTORY_CHANGE.FROM).toItemStackArray(),
                 result.get(RPKIT_BLOCK_INVENTORY_CHANGE.TO).toItemStackArray(),
                 result.get(RPKIT_BLOCK_INVENTORY_CHANGE.REASON)
-        )
-        cache?.set(id.value, blockInventoryChange)
-        return blockInventoryChange
+            )
+            cache?.set(id.value, blockInventoryChange)
+            return@supplyAsync blockInventoryChange
+        }
     }
 
-    fun get(blockHistory: RPKBlockHistory): List<RPKBlockInventoryChange> {
-        val results = database.create
+    fun get(blockHistory: RPKBlockHistory): CompletableFuture<List<RPKBlockInventoryChange>> {
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_BLOCK_INVENTORY_CHANGE.ID)
                 .from(RPKIT_BLOCK_INVENTORY_CHANGE)
                 .where(RPKIT_BLOCK_INVENTORY_CHANGE.BLOCK_HISTORY_ID.eq(blockHistory.id?.value))
                 .fetch()
-        return results
+            val futures = results
                 .map { result -> get(RPKBlockInventoryChangeId(result[RPKIT_BLOCK_INVENTORY_CHANGE.ID])) }
-                .filterNotNull()
+            CompletableFuture.allOf(*futures.toTypedArray()).join()
+            return@supplyAsync futures.mapNotNull(CompletableFuture<RPKBlockInventoryChange?>::join)
+        }
     }
 
-    fun delete(entity: RPKBlockInventoryChange) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKBlockInventoryChange): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_BLOCK_INVENTORY_CHANGE)
                 .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 }

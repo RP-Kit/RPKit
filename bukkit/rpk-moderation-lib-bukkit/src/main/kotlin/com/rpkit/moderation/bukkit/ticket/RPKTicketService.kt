@@ -15,10 +15,11 @@
 
 package com.rpkit.moderation.bukkit.ticket
 
+import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
-import org.bukkit.Location
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides ticket related functionality
@@ -31,51 +32,51 @@ interface RPKTicketService : Service {
      * @param id The ID to get
      * @return The ticket
      */
-    fun getTicket(id: RPKTicketId): RPKTicket?
+    fun getTicket(id: RPKTicketId): CompletableFuture<RPKTicket?>
 
     /**
      * Gets open tickets.
      *
      * @return All open tickets
      */
-    fun getOpenTickets(): List<RPKTicket>
+    fun getOpenTickets(): CompletableFuture<List<RPKTicket>>
 
     /**
      * Gets closed tickets.
      *
      * @return All closed tickets
      */
-    fun getClosedTickets(): List<RPKTicket>
+    fun getClosedTickets(): CompletableFuture<List<RPKTicket>>
 
     /**
      * Adds a ticket
      *
      * @param ticket The ticket to add
      */
-    fun addTicket(ticket: RPKTicket)
+    fun addTicket(ticket: RPKTicket): CompletableFuture<Void>
 
     fun createTicket(
         reason: String,
         issuer: RPKProfile,
         resolver: RPKProfile?,
-        location: Location?,
+        location: RPKLocation?,
         openDate: LocalDateTime,
         closeDate: LocalDateTime?,
         isClosed: Boolean
-    ): RPKTicket
+    ): CompletableFuture<RPKTicket>
 
     /**
      * Updates a ticket
      *
      * @param ticket The ticket to update
      */
-    fun updateTicket(ticket: RPKTicket)
+    fun updateTicket(ticket: RPKTicket): CompletableFuture<Void>
 
     /**
      * Removes a ticket
      *
      * @param ticket The ticket to remove
      */
-    fun removeTicket(ticket: RPKTicket)
+    fun removeTicket(ticket: RPKTicket): CompletableFuture<Void>
 
 }

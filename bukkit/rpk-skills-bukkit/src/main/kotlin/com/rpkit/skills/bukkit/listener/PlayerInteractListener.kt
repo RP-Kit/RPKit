@@ -35,39 +35,49 @@ class PlayerInteractListener(private val plugin: RPKSkillsBukkit) : Listener {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val skillService = Services[RPKSkillService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         val item = event.item ?: return
-        val skill = skillService.getSkillBinding(character, item) ?: return
-        if (!character.canUse(skill)) {
-            event.player.sendMessage(plugin.messages["skill-invalid-unmet-prerequisites", mapOf(
-                "skill" to skill.name.value
-            )])
-            return
+        val skill = skillService.getPreloadedSkillBinding(character, item) ?: return
+        character.canUse(skill).thenAccept { canUse ->
+            if (!canUse) {
+                event.player.sendMessage(plugin.messages["skill-invalid-unmet-prerequisites", mapOf(
+                    "skill" to skill.name.value
+                )])
+                return@thenAccept
+            }
+            if (character.mana < skill.manaCost) {
+                event.player.sendMessage(plugin.messages["skill-invalid-not-enough-mana", mapOf(
+                    "skill" to skill.name.value,
+                    "mana_cost" to skill.manaCost.toString(),
+                    "mana" to character.mana.toString(),
+                    "max_mana" to character.maxMana.toString()
+                )])
+                return@thenAccept
+            }
+            val preloadedSkillCooldown = skillService.getPreloadedSkillCooldown(character, skill) ?: 0
+            if (preloadedSkillCooldown > 0) {
+                event.player.sendMessage(plugin.messages["skill-invalid-on-cooldown", mapOf(
+                    "skill" to skill.name.value,
+                    "cooldown" to skillService.getPreloadedSkillCooldown(character, skill).toString()
+                )])
+                return@thenAccept
+            }
+            skillService.setSkillCooldown(character, skill, skill.cooldown).thenRun {
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    character.use(skill)
+                })
+                character.mana -= skill.manaCost
+                characterService.updateCharacter(character).thenRun {
+                    event.player.sendMessage(
+                        plugin.messages["skill-valid", mapOf(
+                            "skill" to skill.name.value
+                        )]
+                    )
+                }
+            }
+
         }
-        if (character.mana < skill.manaCost) {
-            event.player.sendMessage(plugin.messages["skill-invalid-not-enough-mana", mapOf(
-                "skill" to skill.name.value,
-                "mana_cost" to skill.manaCost.toString(),
-                "mana" to character.mana.toString(),
-                "max_mana" to character.maxMana.toString()
-            )])
-            return
-        }
-        if (skillService.getSkillCooldown(character, skill) > 0) {
-            event.player.sendMessage(plugin.messages["skill-invalid-on-cooldown", mapOf(
-                "skill" to skill.name.value,
-                "cooldown" to skillService.getSkillCooldown(character, skill).toString()
-            )])
-            return
-        }
-        character.use(skill)
-        skillService.setSkillCooldown(character, skill, skill.cooldown)
-        character.mana -= skill.manaCost
-        characterService.updateCharacter(character)
-        event.player.sendMessage(plugin.messages["skill-valid", mapOf(
-            "skill" to skill.name.value
-        )])
     }
 
 }

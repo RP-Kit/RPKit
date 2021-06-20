@@ -22,60 +22,68 @@ import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupCreateEvent
 import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupDeleteEvent
 import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupUpdateEvent
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Chat group service implementation.
  */
 class RPKChatGroupServiceImpl(override val plugin: RPKChatBukkit) : RPKChatGroupService {
 
-    override fun getChatGroup(id: RPKChatGroupId): RPKChatGroup? {
+    override fun getChatGroup(id: RPKChatGroupId): CompletableFuture<RPKChatGroup?> {
         return plugin.database.getTable(RPKChatGroupTable::class.java)[id]
     }
 
-    override fun getChatGroup(name: RPKChatGroupName): RPKChatGroup? {
+    override fun getChatGroup(name: RPKChatGroupName): CompletableFuture<RPKChatGroup?> {
         return plugin.database.getTable(RPKChatGroupTable::class.java)[name]
     }
 
-    override fun addChatGroup(chatGroup: RPKChatGroup) {
-        val event = RPKBukkitChatGroupCreateEvent(chatGroup)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKChatGroupTable::class.java).insert(event.chatGroup)
-    }
-
-    override fun createChatGroup(name: RPKChatGroupName): RPKChatGroup {
-        val chatGroup = RPKChatGroupImpl(plugin, null, name)
-        addChatGroup(chatGroup)
-        return chatGroup
-    }
-
-    override fun removeChatGroup(chatGroup: RPKChatGroup) {
-        val event = RPKBukkitChatGroupDeleteEvent(chatGroup)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKChatGroupTable::class.java).delete(event.chatGroup)
-    }
-
-    override fun updateChatGroup(chatGroup: RPKChatGroup) {
-        val event = RPKBukkitChatGroupUpdateEvent(chatGroup)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKChatGroupTable::class.java).update(event.chatGroup)
-    }
-
-    override fun getLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile): RPKChatGroup? {
-        return plugin.database.getTable(RPKLastUsedChatGroupTable::class.java).get(minecraftProfile)?.chatGroup
-    }
-
-    override fun setLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile, chatGroup: RPKChatGroup) {
-        val lastUsedChatGroupTable = plugin.database.getTable(RPKLastUsedChatGroupTable::class.java)
-        val lastUsedChatGroup = lastUsedChatGroupTable.get(minecraftProfile)
-        if (lastUsedChatGroup != null) {
-            lastUsedChatGroup.chatGroup = chatGroup
-            lastUsedChatGroupTable.update(lastUsedChatGroup)
-        } else {
-            lastUsedChatGroupTable.insert(RPKLastUsedChatGroup(minecraftProfile = minecraftProfile, chatGroup = chatGroup))
+    override fun addChatGroup(chatGroup: RPKChatGroup): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitChatGroupCreateEvent(chatGroup, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKChatGroupTable::class.java).insert(event.chatGroup).join()
         }
+    }
+
+    override fun createChatGroup(name: RPKChatGroupName): CompletableFuture<RPKChatGroup> {
+        val chatGroup = RPKChatGroupImpl(plugin, null, name)
+        return addChatGroup(chatGroup).thenApply { chatGroup }
+    }
+
+    override fun removeChatGroup(chatGroup: RPKChatGroup): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitChatGroupDeleteEvent(chatGroup, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKChatGroupTable::class.java).delete(event.chatGroup).join()
+        }
+    }
+
+    override fun updateChatGroup(chatGroup: RPKChatGroup): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitChatGroupUpdateEvent(chatGroup, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKChatGroupTable::class.java).update(event.chatGroup).join()
+        }
+    }
+
+    override fun getLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKChatGroup?> {
+        return plugin.database.getTable(RPKLastUsedChatGroupTable::class.java).get(minecraftProfile).thenApply { it?.chatGroup }
+    }
+
+    override fun setLastUsedChatGroup(minecraftProfile: RPKMinecraftProfile, chatGroup: RPKChatGroup): CompletableFuture<Void> {
+        val lastUsedChatGroupTable = plugin.database.getTable(RPKLastUsedChatGroupTable::class.java)
+        return lastUsedChatGroupTable.get(minecraftProfile).thenAcceptAsync { lastUsedChatGroup ->
+            if (lastUsedChatGroup != null) {
+                lastUsedChatGroup.chatGroup = chatGroup
+                lastUsedChatGroupTable.update(lastUsedChatGroup).join()
+            } else {
+                lastUsedChatGroupTable.insert(RPKLastUsedChatGroup(minecraftProfile = minecraftProfile, chatGroup = chatGroup)).join()
+            }
+        }
+
     }
 
 }

@@ -19,6 +19,7 @@ package com.rpkit.blocklog.bukkit.listener
 import com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
 import com.rpkit.blocklog.bukkit.block.RPKBlockChangeImpl
 import com.rpkit.blocklog.bukkit.block.RPKBlockHistoryService
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
 import com.rpkit.core.service.Services
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
@@ -37,8 +38,8 @@ class BlockBurnListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
             plugin.logger.severe("Failed to retrieve block history service, did the plugin load correctly?")
             return
         }
-        val blockHistory = blockHistoryService.getBlockHistory(event.block)
-        val blockChange = RPKBlockChangeImpl(
+        blockHistoryService.getBlockHistory(event.block.toRPKBlockLocation()).thenAccept { blockHistory ->
+            val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
                 time = LocalDateTime.now(),
                 profile = null,
@@ -47,7 +48,11 @@ class BlockBurnListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
                 from = event.block.type,
                 to = Material.AIR,
                 reason = "BURN"
-        )
-        blockHistoryService.addBlockChange(blockChange)
+            )
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                blockHistoryService.addBlockChange(blockChange)
+            })
+        }
+
     }
 }

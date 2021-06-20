@@ -18,10 +18,11 @@ package com.rpkit.tracking.bukkit.tracking
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
+import java.util.concurrent.CompletableFuture
 
 interface RPKTrackingService : Service {
 
-    fun isTrackable(character: RPKCharacter): Boolean
-    fun setTrackable(character: RPKCharacter, trackable: Boolean)
+    fun isTrackable(character: RPKCharacter): CompletableFuture<Boolean>
+    fun setTrackable(character: RPKCharacter, trackable: Boolean): CompletableFuture<Void>
 
 }

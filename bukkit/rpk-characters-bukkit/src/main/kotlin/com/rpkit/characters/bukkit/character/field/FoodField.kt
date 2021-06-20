@@ -17,6 +17,7 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 /**
  * Character card field for food.
@@ -24,8 +25,8 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 class FoodField : CharacterCardField {
 
     override val name = "food"
-    override fun get(character: RPKCharacter): String {
-        return character.foodLevel.toString()
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return CompletableFuture.completedFuture(character.foodLevel.toString())
     }
 
 }

@@ -29,7 +29,9 @@ import com.rpkit.store.bukkit.purchase.RPKPermanentPurchase
 import com.rpkit.store.bukkit.purchase.RPKPermanentPurchaseImpl
 import com.rpkit.store.bukkit.purchase.RPKPurchaseId
 import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
+import com.rpkit.store.bukkit.storeitem.RPKStoreItemId
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
+import java.util.concurrent.CompletableFuture
 
 
 class RPKPermanentPurchaseTable(
@@ -48,101 +50,114 @@ class RPKPermanentPurchaseTable(
         null
     }
 
-    fun insert(entity: RPKPermanentPurchase) {
-        val id = database.getTable(RPKPurchaseTable::class.java).insert(entity) ?: return
-        database.create
+    fun insert(entity: RPKPermanentPurchase): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val id = database.getTable(RPKPurchaseTable::class.java).insert(entity).join() ?: return@runAsync
+            database.create
                 .insertInto(
-                        RPKIT_PERMANENT_PURCHASE,
-                        RPKIT_PERMANENT_PURCHASE.PURCHASE_ID
+                    RPKIT_PERMANENT_PURCHASE,
+                    RPKIT_PERMANENT_PURCHASE.PURCHASE_ID
                 )
                 .values(
-                        id.value
+                    id.value
                 )
                 .execute()
-        entity.id = id
-        cache?.set(id.value, entity)
+            entity.id = id
+            cache?.set(id.value, entity)
+        }
     }
 
-    fun update(entity: RPKPermanentPurchase) {
-        val id = entity.id ?: return
-        database.getTable(RPKPurchaseTable::class.java).update(entity)
-        cache?.set(id.value, entity)
+    fun update(entity: RPKPermanentPurchase): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.getTable(RPKPurchaseTable::class.java).update(entity).join()
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKPurchaseId): RPKPermanentPurchase? {
-        val result = database.create
+    operator fun get(id: RPKPurchaseId): CompletableFuture<RPKPermanentPurchase?> {
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(
-                        RPKIT_PURCHASE.STORE_ITEM_ID,
-                        RPKIT_PURCHASE.PROFILE_ID,
-                        RPKIT_PURCHASE.PURCHASE_DATE,
-                        RPKIT_PERMANENT_PURCHASE.PURCHASE_ID
+                    RPKIT_PURCHASE.STORE_ITEM_ID,
+                    RPKIT_PURCHASE.PROFILE_ID,
+                    RPKIT_PURCHASE.PURCHASE_DATE,
+                    RPKIT_PERMANENT_PURCHASE.PURCHASE_ID
                 )
                 .from(
-                        RPKIT_PURCHASE,
-                        RPKIT_PERMANENT_PURCHASE
+                    RPKIT_PURCHASE,
+                    RPKIT_PERMANENT_PURCHASE
                 )
                 .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .and(RPKIT_PERMANENT_PURCHASE.PURCHASE_ID.eq(RPKIT_PURCHASE.ID))
-                .fetchOne() ?: return null
-        val storeItemService = Services[RPKStoreItemService::class.java] ?: return null
-        val storeItem = storeItemService.getStoreItem(result[RPKIT_PURCHASE.STORE_ITEM_ID]) as? RPKPermanentStoreItem
-        if (storeItem == null) {
-            database.create
+                .fetchOne() ?: return@supplyAsync null
+            val storeItemService = Services[RPKStoreItemService::class.java] ?: return@supplyAsync null
+            val storeItem =
+                storeItemService.getStoreItem(RPKStoreItemId(result[RPKIT_PURCHASE.STORE_ITEM_ID])).join() as? RPKPermanentStoreItem
+            if (storeItem == null) {
+                database.create
                     .deleteFrom(RPKIT_PURCHASE)
                     .where(RPKIT_PURCHASE.ID.eq(id.value))
                     .execute()
-            database.create
+                database.create
                     .deleteFrom(RPKIT_PERMANENT_PURCHASE)
                     .where(RPKIT_PERMANENT_PURCHASE.PURCHASE_ID.eq(id.value))
                     .execute()
-            cache?.remove(id.value)
-            return null
-        }
-        val profileService = Services[RPKProfileService::class.java] ?: return null
-        val profile = profileService.getProfile(RPKProfileId(result[RPKIT_PURCHASE.PROFILE_ID]))
-        if (profile == null) {
-            database.create
+                cache?.remove(id.value)
+                return@supplyAsync null
+            }
+            val profileService = Services[RPKProfileService::class.java] ?: return@supplyAsync null
+            val profile = profileService.getProfile(RPKProfileId(result[RPKIT_PURCHASE.PROFILE_ID])).join()
+            if (profile == null) {
+                database.create
                     .deleteFrom(RPKIT_PURCHASE)
                     .where(RPKIT_PURCHASE.ID.eq(id.value))
                     .execute()
-            database.create
+                database.create
                     .deleteFrom(RPKIT_PERMANENT_PURCHASE)
                     .where(RPKIT_PERMANENT_PURCHASE.PURCHASE_ID.eq(id.value))
                     .execute()
-            cache?.remove(id.value)
-            return null
-        }
-        val permanentPurchase = RPKPermanentPurchaseImpl(
+                cache?.remove(id.value)
+                return@supplyAsync null
+            }
+            val permanentPurchase = RPKPermanentPurchaseImpl(
                 RPKPurchaseId(id.value),
                 storeItem,
                 profile,
                 result[RPKIT_PURCHASE.PURCHASE_DATE]
-        )
-        cache?.set(id.value, permanentPurchase)
-        return permanentPurchase
+            )
+            cache?.set(id.value, permanentPurchase)
+            return@supplyAsync permanentPurchase
+        }
     }
 
-    fun get(profile: RPKProfile): List<RPKPermanentPurchase> {
-        val profileId = profile.id ?: return emptyList()
-        val result = database.create
+    fun get(profile: RPKProfile): CompletableFuture<List<RPKPermanentPurchase>> {
+        val profileId = profile.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_PERMANENT_PURCHASE.PURCHASE_ID)
                 .from(
-                        RPKIT_PURCHASE,
-                        RPKIT_PERMANENT_PURCHASE
+                    RPKIT_PURCHASE,
+                    RPKIT_PERMANENT_PURCHASE
                 )
                 .where(RPKIT_PURCHASE.ID.eq(RPKIT_PERMANENT_PURCHASE.ID))
                 .and(RPKIT_PURCHASE.PROFILE_ID.eq(profileId.value))
                 .fetch()
-        return result.mapNotNull { row -> get(RPKPurchaseId(row[RPKIT_PERMANENT_PURCHASE.PURCHASE_ID])) }
+            val purchaseFutures = result.map { row -> get(RPKPurchaseId(row[RPKIT_PERMANENT_PURCHASE.PURCHASE_ID])) }
+            CompletableFuture.allOf(*purchaseFutures.toTypedArray()).join()
+            return@supplyAsync purchaseFutures.mapNotNull(CompletableFuture<RPKPermanentPurchase?>::join)
+        }
     }
 
-    fun delete(entity: RPKPermanentPurchase) {
-        val id = entity.id ?: return
-        database.getTable(RPKPurchaseTable::class.java).delete(entity)
-        database.create
+    fun delete(entity: RPKPermanentPurchase): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.getTable(RPKPurchaseTable::class.java).delete(entity).join()
+            database.create
                 .deleteFrom(RPKIT_PERMANENT_PURCHASE)
                 .where(RPKIT_PERMANENT_PURCHASE.PURCHASE_ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 }

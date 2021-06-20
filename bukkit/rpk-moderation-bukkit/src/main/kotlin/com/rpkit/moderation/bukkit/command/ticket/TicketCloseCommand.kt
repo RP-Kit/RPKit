@@ -43,7 +43,7 @@ class TicketCloseCommand(private val plugin: RPKModerationBukkit) : CommandExecu
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -59,18 +59,23 @@ class TicketCloseCommand(private val plugin: RPKModerationBukkit) : CommandExecu
             return true
         }
         try {
-            val ticket = ticketService.getTicket(RPKTicketId(args[0].toInt()))
-            if (ticket == null) {
-                sender.sendMessage(plugin.messages["ticket-close-invalid-ticket"])
-                return true
+            ticketService.getTicket(RPKTicketId(args[0].toInt())).thenAccept { ticket ->
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    if (ticket == null) {
+                        sender.sendMessage(plugin.messages["ticket-close-invalid-ticket"])
+                        return@Runnable
+                    }
+                    if (!sender.hasPermission("rpkit.moderation.command.ticket.close") && ticket.issuer.id != profile.id) {
+                        sender.sendMessage(plugin.messages["no-permission-ticket-close"])
+                        return@Runnable
+                    }
+                    ticket.close(profile)
+                    ticketService.updateTicket(ticket).thenRun {
+                        sender.sendMessage(plugin.messages["ticket-close-valid"])
+                    }
+                })
+
             }
-            if (!sender.hasPermission("rpkit.moderation.command.ticket.close") && ticket.issuer.id != profile.id) {
-                sender.sendMessage(plugin.messages["no-permission-ticket-close"])
-                return true
-            }
-            ticket.close(profile)
-            ticketService.updateTicket(ticket)
-            sender.sendMessage(plugin.messages["ticket-close-valid"])
         } catch (exception: NumberFormatException) {
             sender.sendMessage(plugin.messages["ticket-close-invalid-id"])
         }

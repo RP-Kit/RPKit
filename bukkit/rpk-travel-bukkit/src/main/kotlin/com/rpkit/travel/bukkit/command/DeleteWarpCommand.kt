@@ -44,15 +44,19 @@ class DeleteWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages.noWarpService)
             return true
         }
-        val warp = warpService.getWarp(RPKWarpName(args[0].toLowerCase()))
-        if (warp == null) {
-            sender.sendMessage(plugin.messages.deleteWarpInvalidWarp)
-            return true
+        warpService.getWarp(RPKWarpName(args[0].toLowerCase())).thenAccept { warp ->
+            if (warp == null) {
+                sender.sendMessage(plugin.messages.deleteWarpInvalidWarp)
+                return@thenAccept
+            }
+            warpService.removeWarp(warp).thenRun {
+                sender.sendMessage(
+                    plugin.messages.deleteWarpValid.withParameters(
+                        warp = warp
+                    )
+                )
+            }
         }
-        warpService.removeWarp(warp)
-        sender.sendMessage(plugin.messages.deleteWarpValid.withParameters(
-            warp = warp
-        ))
         return true
     }
 }

@@ -20,6 +20,7 @@ import com.rpkit.chat.bukkit.discord.DiscordChannel
 import com.rpkit.chat.bukkit.irc.IRCChannel
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides chat channel related operations.
@@ -47,7 +48,7 @@ interface RPKChatChannelService : Service {
      *
      * @param minecraftProfile The Minecraft profile
      */
-    fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel?
+    fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKChatChannel?>
 
     /**
      * Sets the chat channel a Minecraft profile is currently speaking in.
@@ -55,7 +56,7 @@ interface RPKChatChannelService : Service {
      * @param minecraftProfile The Minecraft profile
      * @param channel The channel to set
      */
-    fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?, isAsync: Boolean = false)
+    fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, channel: RPKChatChannel?): CompletableFuture<Void>
 
     /**
      * Gets a chat channel from the IRC channel it is linked to.

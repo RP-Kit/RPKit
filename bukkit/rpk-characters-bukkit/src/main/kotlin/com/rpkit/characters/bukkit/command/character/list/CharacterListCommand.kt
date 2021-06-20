@@ -51,7 +51,7 @@ class CharacterListCommand(private val plugin: RPKCharactersBukkit) : CommandExe
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -62,10 +62,12 @@ class CharacterListCommand(private val plugin: RPKCharactersBukkit) : CommandExe
             return true
         }
         sender.sendMessage(plugin.messages["character-list-title"])
-        for (character in characterService.getCharacters(profile)) {
-            sender.sendMessage(plugin.messages["character-list-item", mapOf(
-                "character" to character.name
-            )])
+        characterService.getCharacters(profile).thenAccept { characters ->
+            for (character in characters) {
+                sender.sendMessage(plugin.messages.characterListItem.withParameters(
+                    character = character
+                ))
+            }
         }
         return true
     }

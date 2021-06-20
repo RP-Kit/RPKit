@@ -18,6 +18,8 @@ package com.rpkit.skills.bukkit.skills
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import org.bukkit.inventory.ItemStack
+import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 
 interface RPKSkillService : Service {
@@ -26,9 +28,15 @@ interface RPKSkillService : Service {
     fun getSkill(name: RPKSkillName): RPKSkill?
     fun addSkill(skill: RPKSkill)
     fun removeSkill(skill: RPKSkill)
-    fun getSkillCooldown(character: RPKCharacter, skill: RPKSkill): Int
-    fun setSkillCooldown(character: RPKCharacter, skill: RPKSkill, seconds: Int)
-    fun getSkillBinding(character: RPKCharacter, item: ItemStack): RPKSkill?
-    fun setSkillBinding(character: RPKCharacter, item: ItemStack, skill: RPKSkill?)
+    fun getSkillCooldown(character: RPKCharacter, skill: RPKSkill): CompletableFuture<Int>
+    fun setSkillCooldown(character: RPKCharacter, skill: RPKSkill, seconds: Int): CompletableFuture<Void>
+    fun loadSkillCooldowns(character: RPKCharacter): CompletableFuture<Map<RPKSkill, LocalDateTime>>
+    fun unloadSkillCooldowns(character: RPKCharacter)
+    fun getPreloadedSkillCooldown(character: RPKCharacter, skill: RPKSkill): Int?
+    fun getSkillBinding(character: RPKCharacter, item: ItemStack): CompletableFuture<RPKSkill?>
+    fun setSkillBinding(character: RPKCharacter, item: ItemStack, skill: RPKSkill?): CompletableFuture<Void>
+    fun loadSkillBindings(character: RPKCharacter): CompletableFuture<Map<ItemStack, RPKSkill>>
+    fun unloadSkillBindings(character: RPKCharacter)
+    fun getPreloadedSkillBinding(character: RPKCharacter, item: ItemStack): RPKSkill?
 
 }

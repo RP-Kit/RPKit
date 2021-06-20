@@ -27,7 +27,10 @@ import com.rpkit.skills.bukkit.command.SkillCommand
 import com.rpkit.skills.bukkit.command.UnbindSkillCommand
 import com.rpkit.skills.bukkit.database.table.RPKSkillBindingTable
 import com.rpkit.skills.bukkit.database.table.RPKSkillCooldownTable
+import com.rpkit.skills.bukkit.listener.AsyncPlayerPreLoginListener
 import com.rpkit.skills.bukkit.listener.PlayerInteractListener
+import com.rpkit.skills.bukkit.listener.PlayerQuitListener
+import com.rpkit.skills.bukkit.listener.RPKCharacterSwitchListener
 import com.rpkit.skills.bukkit.messages.SkillsMessages
 import com.rpkit.skills.bukkit.skills.RPKSkillService
 import com.rpkit.skills.bukkit.skills.RPKSkillServiceImpl
@@ -110,7 +113,10 @@ class RPKSkillsBukkit : RPKBukkitPlugin() {
 
     fun registerListeners() {
         registerListeners(
-                PlayerInteractListener(this)
+            PlayerInteractListener(this),
+            AsyncPlayerPreLoginListener(),
+            RPKCharacterSwitchListener(),
+            PlayerQuitListener()
         )
     }
 

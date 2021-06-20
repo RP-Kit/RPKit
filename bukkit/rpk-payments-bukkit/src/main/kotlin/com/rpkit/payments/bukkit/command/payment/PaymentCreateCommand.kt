@@ -63,35 +63,36 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
         else
             currencyService.getCurrency(RPKCurrencyName(currencyName))
         val name = args.joinToString(" ")
-        if (paymentGroupService.getPaymentGroup(RPKPaymentGroupName(name)) != null) {
-            sender.sendMessage(plugin.messages["payment-create-invalid-name-already-exists"])
-            return true
-        }
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
-            return true
-        }
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
-        if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
-            return true
-        }
-        val characterService = Services[RPKCharacterService::class.java]
-        if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
-            return true
-        }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-            return true
-        }
-        val character = characterService.getActiveCharacter(minecraftProfile)
-        if (character == null) {
-            sender.sendMessage(plugin.messages["no-character"])
-            return true
-        }
-        val paymentGroup = RPKPaymentGroupImpl(
+        paymentGroupService.getPaymentGroup(RPKPaymentGroupName(name)).thenAccept getExistingPaymentGroup@{ existingPaymentGroup ->
+            if (existingPaymentGroup != null) {
+                sender.sendMessage(plugin.messages["payment-create-invalid-name-already-exists"])
+                return@getExistingPaymentGroup
+            }
+            if (sender !is Player) {
+                sender.sendMessage(plugin.messages["not-from-console"])
+                return@getExistingPaymentGroup
+            }
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+            if (minecraftProfileService == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+                return@getExistingPaymentGroup
+            }
+            val characterService = Services[RPKCharacterService::class.java]
+            if (characterService == null) {
+                sender.sendMessage(plugin.messages["no-character-service"])
+                return@getExistingPaymentGroup
+            }
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
+            if (minecraftProfile == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                return@getExistingPaymentGroup
+            }
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+            if (character == null) {
+                sender.sendMessage(plugin.messages["no-character"])
+                return@getExistingPaymentGroup
+            }
+            val paymentGroup = RPKPaymentGroupImpl(
                 plugin,
                 name = RPKPaymentGroupName(name),
                 amount = plugin.config.getInt("payment-groups.defaults.amount"),
@@ -99,10 +100,13 @@ class PaymentCreateCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
                 interval = Duration.of(plugin.config.getLong("payment-groups.defaults.interval"), MILLIS),
                 lastPaymentTime = LocalDateTime.now(),
                 balance = 0
-        )
-        paymentGroupService.addPaymentGroup(paymentGroup)
-        paymentGroup.addOwner(character)
-        sender.sendMessage(plugin.messages["payment-create-valid"])
+            )
+            paymentGroupService.addPaymentGroup(paymentGroup).thenRun {
+                paymentGroup.addOwner(character).thenRun {
+                    sender.sendMessage(plugin.messages["payment-create-valid"])
+                }
+            }
+        }
         return true
     }
 

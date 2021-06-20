@@ -26,6 +26,7 @@ import com.rpkit.languages.bukkit.database.jooq.Tables.RPKIT_CHARACTER_LANGUAGE
 import com.rpkit.languages.bukkit.language.RPKLanguage
 import com.rpkit.languages.bukkit.language.RPKLanguageName
 import com.rpkit.languages.bukkit.language.RPKLanguageService
+import java.util.concurrent.CompletableFuture
 
 class RPKCharacterLanguageTable(
         private val database: Database,
@@ -48,88 +49,101 @@ class RPKCharacterLanguageTable(
         null
     }
 
-    fun insert(entity: RPKCharacterLanguage) {
-        val characterId = entity.character.id ?: return
+    fun insert(entity: RPKCharacterLanguage): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val languageName = entity.language.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_CHARACTER_LANGUAGE,
-                        RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID,
-                        RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME,
-                        RPKIT_CHARACTER_LANGUAGE.UNDERSTANDING
+                    RPKIT_CHARACTER_LANGUAGE,
+                    RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID,
+                    RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME,
+                    RPKIT_CHARACTER_LANGUAGE.UNDERSTANDING
                 )
                 .values(
-                        characterId.value,
-                        entity.language.name.value,
-                        entity.understanding.toDouble()
+                    characterId.value,
+                    entity.language.name.value,
+                    entity.understanding.toDouble()
                 )
                 .execute()
-        cache?.set(CharacterLanguageCacheKey(characterId.value, languageName.value), entity)
+            cache?.set(CharacterLanguageCacheKey(characterId.value, languageName.value), entity)
+        }
     }
 
-    fun update(entity: RPKCharacterLanguage) {
-        val characterId = entity.character.id ?: return
+    fun update(entity: RPKCharacterLanguage): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val languageName = entity.language.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_CHARACTER_LANGUAGE)
                 .set(RPKIT_CHARACTER_LANGUAGE.UNDERSTANDING, entity.understanding.toDouble())
                 .where(
-                        RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId.value)
-                                .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(languageName.value))
+                    RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId.value)
+                        .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(languageName.value))
                 )
                 .execute()
-        cache?.set(CharacterLanguageCacheKey(characterId.value, languageName.value), entity)
+            cache?.set(CharacterLanguageCacheKey(characterId.value, languageName.value), entity)
+        }
     }
 
-    operator fun get(character: RPKCharacter, language: RPKLanguage): RPKCharacterLanguage? {
-        val characterId = character.id ?: return null
+    operator fun get(character: RPKCharacter, language: RPKLanguage): CompletableFuture<RPKCharacterLanguage?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
         val languageName = language.name
         val cacheKey = CharacterLanguageCacheKey(characterId.value, languageName.value)
         if (cache?.containsKey(cacheKey) == true) {
-            return cache[cacheKey]
+            return CompletableFuture.completedFuture(cache[cacheKey])
         }
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(
-                        RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID,
-                        RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME,
-                        RPKIT_CHARACTER_LANGUAGE.UNDERSTANDING
+                    RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID,
+                    RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME,
+                    RPKIT_CHARACTER_LANGUAGE.UNDERSTANDING
                 )
                 .from(RPKIT_CHARACTER_LANGUAGE)
                 .where(RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(language.name.value))
-                .fetchOne() ?: return null
-        val characterLanguage = RPKCharacterLanguage(
+                .fetchOne() ?: return@supplyAsync null
+            val characterLanguage = RPKCharacterLanguage(
                 character,
                 language,
                 result[RPKIT_CHARACTER_LANGUAGE.UNDERSTANDING].toFloat()
-        )
-        cache?.set(cacheKey, characterLanguage)
-        return characterLanguage
+            )
+            cache?.set(cacheKey, characterLanguage)
+            return@supplyAsync characterLanguage
+        }
     }
 
-    fun get(character: RPKCharacter): List<RPKCharacterLanguage> {
-        val characterId = character.id ?: return emptyList()
-        val results = database.create
+    fun get(character: RPKCharacter): CompletableFuture<List<RPKCharacterLanguage>> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            val results = database.create
                 .select(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME)
                 .from(RPKIT_CHARACTER_LANGUAGE)
                 .where(RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId.value))
                 .fetch()
-        val languageService = Services[RPKLanguageService::class.java] ?: return emptyList()
-        return results.mapNotNull { result ->
-            val language = languageService.getLanguage(RPKLanguageName(result[RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME])) ?: return@mapNotNull null
-            return@mapNotNull get(character, language)
+            val languageService = Services[RPKLanguageService::class.java] ?: return@supplyAsync emptyList()
+            val languageFutures = results.mapNotNull { result ->
+                languageService.getLanguage(RPKLanguageName(result[RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME]))?.let { language ->
+                    get(character, language)
+                }
+            }
+            CompletableFuture.allOf(*languageFutures.toTypedArray()).join()
+            return@supplyAsync languageFutures.mapNotNull(CompletableFuture<RPKCharacterLanguage?>::join)
         }
     }
 
-    fun delete(entity: RPKCharacterLanguage) {
-        val characterId = entity.character.id ?: return
+    fun delete(entity: RPKCharacterLanguage): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val languageName = entity.language.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_CHARACTER_LANGUAGE)
                 .where(RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(languageName.value))
                 .execute()
-        cache?.remove(CharacterLanguageCacheKey(characterId.value, languageName.value))
+            cache?.remove(CharacterLanguageCacheKey(characterId.value, languageName.value))
+        }
     }
 
 }

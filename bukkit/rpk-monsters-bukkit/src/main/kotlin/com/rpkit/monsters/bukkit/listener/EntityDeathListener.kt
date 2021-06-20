@@ -46,35 +46,43 @@ class EntityDeathListener(private val plugin: RPKMonstersBukkit) : Listener {
         val damager = lastDamageEvent.damager
         if (damager !is Player) return
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(damager) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(damager) ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return
         val experienceService = Services[RPKExperienceService::class.java] ?: return
         val experience = getExperience(event.entity)
-        experienceService.setExperience(character, experienceService.getExperience(character) + experience)
-        damager.sendMessage(plugin.messages["experience-gained", mapOf(
-                "experience_gained" to experience.toString(),
-                "experience" to (experienceService.getExperience(character) - experienceService.getExperienceNeededForLevel(experienceService.getLevel(character))).toString(),
-                "required_experience" to experienceService.getExperienceNeededForLevel(experienceService.getLevel(character) + 1).toString()
-        )])
-        val currencyService = Services[RPKCurrencyService::class.java] ?: return
-        val moneyConfigSection = plugin.config.getConfigurationSection("monsters.${event.entityType}.money")
-                ?: plugin.config.getConfigurationSection("monsters.default.money")
-        moneyConfigSection?.getKeys(false)
-                ?.forEach { currencyName ->
-                    val currency = currencyService.getCurrency(RPKCurrencyName(currencyName))
-                    if (currency != null) {
-                        val amount = getMoney(event.entity, currency)
-                        if (amount > 0) {
-                            val coins = currency.item.clone()
-                            coins.amount = amount
-                            val meta = coins.itemMeta ?: plugin.server.itemFactory.getItemMeta(coins.type) ?: return
-                            meta.setDisplayName(currency.nameSingular)
-                            coins.itemMeta = meta
-                            event.entity.world.dropItem(event.entity.location, coins)
+        experienceService.getExperience(character).thenAccept { characterExperience ->
+            experienceService.setExperience(character, characterExperience + experience).thenRun {
+                experienceService.getLevel(character).thenAccept sendExperienceAndDropMoney@{ characterLevel ->
+                    damager.sendMessage(plugin.messages["experience-gained", mapOf(
+                        "experience_gained" to experience.toString(),
+                        "experience" to (characterExperience + experience - experienceService.getExperienceNeededForLevel(characterLevel)).toString(),
+                        "required_experience" to experienceService.getExperienceNeededForLevel(characterLevel + 1).toString()
+                    )])
+                    val currencyService = Services[RPKCurrencyService::class.java] ?: return@sendExperienceAndDropMoney
+                    val moneyConfigSection = plugin.config.getConfigurationSection("monsters.${event.entityType}.money")
+                        ?: plugin.config.getConfigurationSection("monsters.default.money")
+                    moneyConfigSection?.getKeys(false)
+                        ?.forEach { currencyName ->
+                            val currency = currencyService.getCurrency(RPKCurrencyName(currencyName))
+                            if (currency != null) {
+                                val amount = getMoney(event.entity, currency)
+                                if (amount > 0) {
+                                    plugin.server.scheduler.runTask(plugin, Runnable {
+                                        val coins = currency.item.clone()
+                                        coins.amount = amount
+                                        val meta = coins.itemMeta ?: plugin.server.itemFactory.getItemMeta(coins.type) ?: return@Runnable
+                                        meta.setDisplayName(currency.nameSingular)
+                                        coins.itemMeta = meta
+                                        event.entity.world.dropItem(event.entity.location, coins)
+                                    })
+                                }
+                            }
                         }
-                    }
                 }
+
+            }
+        }
     }
 
     private fun getExperience(entity: LivingEntity): Int {

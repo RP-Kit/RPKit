@@ -26,6 +26,7 @@ import com.rpkit.permissions.bukkit.group.RPKCharacterGroup
 import com.rpkit.permissions.bukkit.group.RPKGroup
 import com.rpkit.permissions.bukkit.group.RPKGroupName
 import com.rpkit.permissions.bukkit.group.RPKGroupService
+import java.util.concurrent.CompletableFuture
 
 
 class RPKCharacterGroupTable(private val database: Database, private val plugin: RPKPermissionsBukkit) : Table {
@@ -46,91 +47,101 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
         null
     }
 
-    fun insert(entity: RPKCharacterGroup) {
-        val characterId = entity.character.id ?: return
+    fun insert(entity: RPKCharacterGroup): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val groupName = entity.group.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_CHARACTER_GROUP,
-                        RPKIT_CHARACTER_GROUP.CHARACTER_ID,
-                        RPKIT_CHARACTER_GROUP.GROUP_NAME,
-                        RPKIT_CHARACTER_GROUP.PRIORITY
+                    RPKIT_CHARACTER_GROUP,
+                    RPKIT_CHARACTER_GROUP.CHARACTER_ID,
+                    RPKIT_CHARACTER_GROUP.GROUP_NAME,
+                    RPKIT_CHARACTER_GROUP.PRIORITY
                 )
                 .values(
-                        characterId.value,
-                        groupName.value,
-                        entity.priority
+                    characterId.value,
+                    groupName.value,
+                    entity.priority
                 )
                 .execute()
-        cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
+            cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
+        }
     }
 
-    fun update(entity: RPKCharacterGroup) {
-        val characterId = entity.character.id ?: return
+    fun update(entity: RPKCharacterGroup): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val groupName = entity.group.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_CHARACTER_GROUP)
                 .set(RPKIT_CHARACTER_GROUP.PRIORITY, entity.priority)
                 .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_GROUP.GROUP_NAME.eq(entity.group.name.value))
                 .execute()
-        cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
+            cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
+        }
     }
 
-    operator fun get(character: RPKCharacter, group: RPKGroup): RPKCharacterGroup? {
-        val characterId = character.id ?: return null
+    operator fun get(character: RPKCharacter, group: RPKGroup): CompletableFuture<RPKCharacterGroup?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
         val groupName = group.name
         val cacheKey = CharacterGroupCacheKey(characterId.value, groupName.value)
         if (cache?.containsKey(cacheKey) == true) {
-            return cache[cacheKey]
+            return CompletableFuture.completedFuture(cache[cacheKey])
         }
-        val result = database.create
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_CHARACTER_GROUP.PRIORITY)
                 .from(RPKIT_CHARACTER_GROUP)
                 .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_GROUP.GROUP_NAME.eq(groupName.value))
-                .fetchOne() ?: return null
-        val characterGroup = RPKCharacterGroup(
+                .fetchOne() ?: return@supplyAsync null
+            val characterGroup = RPKCharacterGroup(
                 character,
                 group,
                 result[RPKIT_CHARACTER_GROUP.PRIORITY]
-        )
-        cache?.set(cacheKey, characterGroup)
-        return characterGroup
-    }
-
-    fun get(character: RPKCharacter): List<RPKCharacterGroup> {
-        val characterId = character.id ?: return emptyList()
-        return database.create
-            .select(
-                RPKIT_CHARACTER_GROUP.GROUP_NAME,
-                RPKIT_CHARACTER_GROUP.PRIORITY
             )
-            .from(RPKIT_CHARACTER_GROUP)
-            .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(characterId.value))
-            .orderBy(RPKIT_CHARACTER_GROUP.PRIORITY.desc())
-            .fetch()
-            .mapNotNull { result ->
-                val group = result[RPKIT_CHARACTER_GROUP.GROUP_NAME]
-                    .let { Services[RPKGroupService::class.java]?.getGroup(RPKGroupName(it)) }
-                    ?: return@mapNotNull null
-                RPKCharacterGroup(
-                    character,
-                    group,
-                    result[RPKIT_CHARACTER_GROUP.PRIORITY]
-                )
-            }
+            cache?.set(cacheKey, characterGroup)
+            return@supplyAsync characterGroup
+        }
     }
 
-    fun delete(entity: RPKCharacterGroup) {
-        val characterId = entity.character.id ?: return
+    fun get(character: RPKCharacter): CompletableFuture<List<RPKCharacterGroup>> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(emptyList())
+        return CompletableFuture.supplyAsync {
+            return@supplyAsync database.create
+                .select(
+                    RPKIT_CHARACTER_GROUP.GROUP_NAME,
+                    RPKIT_CHARACTER_GROUP.PRIORITY
+                )
+                .from(RPKIT_CHARACTER_GROUP)
+                .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(characterId.value))
+                .orderBy(RPKIT_CHARACTER_GROUP.PRIORITY.desc())
+                .fetch()
+                .mapNotNull { result ->
+                    val group = result[RPKIT_CHARACTER_GROUP.GROUP_NAME]
+                        .let { Services[RPKGroupService::class.java]?.getGroup(RPKGroupName(it)) }
+                        ?: return@mapNotNull null
+                    RPKCharacterGroup(
+                        character,
+                        group,
+                        result[RPKIT_CHARACTER_GROUP.PRIORITY]
+                    )
+                }
+        }
+    }
+
+    fun delete(entity: RPKCharacterGroup): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val groupName = entity.group.name
-        database.create
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_CHARACTER_GROUP)
                 .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_GROUP.GROUP_NAME.eq(groupName.value))
                 .execute()
-        cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
+            cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
+        }
     }
 
 }

@@ -17,6 +17,7 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents a hideable character card field.
@@ -33,7 +34,7 @@ interface HideableCharacterCardField : CharacterCardField {
      * @param character The character to check
      * @return Whether the field is hidden
      */
-    fun isHidden(character: RPKCharacter): Boolean
+    fun isHidden(character: RPKCharacter): CompletableFuture<Boolean>
 
     /**
      * Sets whether the field is hidden for the given character.
@@ -41,6 +42,6 @@ interface HideableCharacterCardField : CharacterCardField {
      * @param character The character to set the field's hidden state for
      * @param hidden Whether the field should be hidden for the given character
      */
-    fun setHidden(character: RPKCharacter, hidden: Boolean)
+    fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void>
 
 }

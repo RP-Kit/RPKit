@@ -22,12 +22,13 @@ import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.bukkit.location.toBukkitLocation
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.ChatColor.GREEN
-import org.bukkit.Material.AIR
+import org.bukkit.Material
 import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -67,83 +68,98 @@ class PlayerInteractListener(private val plugin: RPKAuctionsBukkit) : Listener {
             event.player.sendMessage(plugin.messages.noAuctionService)
             return
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
         if (minecraftProfile == null) {
             event.player.sendMessage(plugin.messages.noMinecraftProfile)
             return
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
-        val auction = auctionService.getAuction(RPKAuctionId(sign.getLine(1).toInt()))
-        if (auction == null) {
-            event.player.sendMessage(plugin.messages.bidInvalidAuctionNotExistent)
-            return
-        }
-        if (System.currentTimeMillis() >= auction.endTime) {
-            auction.closeBidding()
-        }
-        if (!auction.isBiddingOpen) {
-            event.player.sendMessage(plugin.messages.bidInvalidAuctionNotOpen)
-            return
-        }
-        val bidAmount = (auction.bids.maxByOrNull(RPKBid::amount)?.amount
-                ?: auction.startPrice) + auction.minimumBidIncrement
-        if (character == null) {
-            event.player.sendMessage(plugin.messages.noCharacter)
-            return
-        }
-        if (bidAmount > economyService.getBalance(character, auction.currency)) {
-            event.player.sendMessage(plugin.messages.bidInvalidNotEnoughMoney)
-            return
-        }
-        val radius = plugin.config.getInt("auctions.radius")
-        val auctionLocation = auction.location
-        if (radius >= 0 && auctionLocation != null && event.player.location.distanceSquared(auctionLocation) > radius * radius) {
-            event.player.sendMessage(plugin.messages.bidInvalidTooFarAway)
-            return
-        }
-        val bid = RPKBidImpl(
-                auction = auction,
-                character = character,
-                amount = bidAmount
-        )
-        if (!auction.addBid(bid)) {
-            event.player.sendMessage(plugin.messages.bidCreateFailed)
-            return
-        }
-        if (!auctionService.updateAuction(auction)) {
-            event.player.sendMessage(plugin.messages.auctionUpdateFailed)
-            return
-        }
-        event.player.sendMessage(plugin.messages.bidValid.withParameters(
-            currencyAmount = bid.amount,
-            currency = auction.currency,
-            itemAmount = auction.item.amount,
-            itemType = auction.item.type
-        ))
-        auction.bids
-                .asSequence()
-                .map(RPKBid::character)
-                .toSet()
-                .asSequence()
-                .filter { it != bid.character }
-                .map(RPKCharacter::minecraftProfile)
-                .filterNotNull()
-                .filter(RPKMinecraftProfile::isOnline)
-                .toList()
-                .forEach { bidderMinecraftProfile ->
-                    bidderMinecraftProfile.sendMessage(plugin.messages.bidCreated.withParameters(
-                        auction = bid.auction,
-                        character = bid.character,
-                        currencyAmount = bid.amount,
-                        currency = auction.currency,
-                        itemType = auction.item.type,
-                        itemAmount = auction.item.amount
-                    ))
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+        auctionService.getAuction(RPKAuctionId(sign.getLine(1).toInt())).thenAccept getAuction@{ auction ->
+            if (auction == null) {
+                event.player.sendMessage(plugin.messages.bidInvalidAuctionNotExistent)
+                return@getAuction
+            }
+            if (System.currentTimeMillis() >= auction.endTime) {
+                auction.closeBidding()
+            }
+            if (!auction.isBiddingOpen) {
+                event.player.sendMessage(plugin.messages.bidInvalidAuctionNotOpen)
+                return@getAuction
+            }
+            auction.bids.thenAccept getBids@{ bids ->
+                val bidAmount = (bids.maxByOrNull(RPKBid::amount)?.amount
+                    ?: auction.startPrice) + auction.minimumBidIncrement
+                if (character == null) {
+                    event.player.sendMessage(plugin.messages.noCharacter)
+                    return@getBids
                 }
-        sign.setLine(3, (bid.amount + auction.minimumBidIncrement).toString())
-        sign.update()
-        if (!auction.isBiddingOpen) {
-            event.clickedBlock?.type = AIR
+                val walletBalance = economyService.getPreloadedBalance(character, auction.currency)
+                if (walletBalance == null) {
+                    event.player.sendMessage(plugin.messages.noPreloadedBalance)
+                    return@getBids
+                }
+                if (bidAmount > walletBalance) {
+                    event.player.sendMessage(plugin.messages.bidInvalidNotEnoughMoney)
+                    return@getBids
+                }
+                val radius = plugin.config.getInt("auctions.radius")
+                val auctionLocation = auction.location?.toBukkitLocation()
+                if (radius >= 0 && auctionLocation != null && event.player.location.distanceSquared(auctionLocation) > radius * radius) {
+                    event.player.sendMessage(plugin.messages.bidInvalidTooFarAway)
+                    return@getBids
+                }
+                val bid = RPKBidImpl(
+                    auction = auction,
+                    character = character,
+                    amount = bidAmount
+                )
+                auction.addBid(bid).thenAccept addBid@{ bidSuccessful ->
+                    if (!bidSuccessful) {
+                        event.player.sendMessage(plugin.messages.bidCreateFailed)
+                        return@addBid
+                    }
+                    auctionService.updateAuction(auction).thenAccept updateAuction@{ auctionUpdateSuccessful ->
+                        if (!auctionUpdateSuccessful) {
+                            event.player.sendMessage(plugin.messages.auctionUpdateFailed)
+                            return@updateAuction
+                        }
+                        event.player.sendMessage(plugin.messages.bidValid.withParameters(
+                            currencyAmount = bid.amount,
+                            currency = auction.currency,
+                            itemAmount = auction.item.amount,
+                            itemType = auction.item.type
+                        ))
+                        auction.bids.thenAccept newBids@{ bids ->
+                            bids.asSequence()
+                                .map(RPKBid::character)
+                                .toSet()
+                                .asSequence()
+                                .filter { it != bid.character }
+                                .map(RPKCharacter::minecraftProfile)
+                                .filterNotNull()
+                                .filter(RPKMinecraftProfile::isOnline)
+                                .toList()
+                                .forEach { bidderMinecraftProfile ->
+                                    bidderMinecraftProfile.sendMessage(plugin.messages.bidCreated.withParameters(
+                                        auction = bid.auction,
+                                        character = bid.character,
+                                        currencyAmount = bid.amount,
+                                        currency = auction.currency,
+                                        itemType = auction.item.type,
+                                        itemAmount = auction.item.amount
+                                    ))
+                                }
+                            plugin.server.scheduler.runTask(plugin, Runnable {
+                                sign.setLine(3, (bid.amount + auction.minimumBidIncrement).toString())
+                                sign.update()
+                                if (!auction.isBiddingOpen) {
+                                    event.clickedBlock?.type = Material.AIR
+                                }
+                            })
+                        }
+                    }
+                }
+            }
         }
     }
 

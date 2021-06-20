@@ -21,6 +21,7 @@ import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
 import com.rpkit.chat.bukkit.database.table.RPKChatChannelSpeakerTable
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides chat channel speaker related operations.
@@ -34,8 +35,9 @@ class RPKChatChannelSpeakerService(override val plugin: RPKChatBukkit) : Service
      * @param minecraftProfile The Minecraft profile
      * @return The chat channel, or null if the Minecraft profile is not currently speaking
      */
-    fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): RPKChatChannel? {
-        return plugin.database.getTable(RPKChatChannelSpeakerTable::class.java).get(minecraftProfile)?.chatChannel
+    fun getMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKChatChannel?> {
+        return plugin.database.getTable(RPKChatChannelSpeakerTable::class.java).get(minecraftProfile)
+            .thenApply { speaker -> speaker?.chatChannel }
     }
 
     /**
@@ -44,20 +46,20 @@ class RPKChatChannelSpeakerService(override val plugin: RPKChatBukkit) : Service
      * @param minecraftProfile The Minecraft profile
      * @param chatChannel The chat channel to set
      */
-    fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel?) {
+    fun setMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile, chatChannel: RPKChatChannel?): CompletableFuture<Void> {
         val table = plugin.database.getTable(RPKChatChannelSpeakerTable::class.java)
-        var chatChannelSpeaker = table.get(minecraftProfile)
-        if (chatChannelSpeaker == null) {
-            if (chatChannel != null) {
-                chatChannelSpeaker = RPKChatChannelSpeaker(minecraftProfile = minecraftProfile, chatChannel = chatChannel)
-                table.insert(chatChannelSpeaker)
-            }
-        } else {
-            if (chatChannel == null) {
-                table.delete(chatChannelSpeaker)
+        return table.get(minecraftProfile).thenAcceptAsync { chatChannelSpeaker ->
+            if (chatChannelSpeaker == null) {
+                if (chatChannel != null) {
+                    table.insert(RPKChatChannelSpeaker(minecraftProfile = minecraftProfile, chatChannel = chatChannel)).join()
+                }
             } else {
-                chatChannelSpeaker.chatChannel = chatChannel
-                table.update(chatChannelSpeaker)
+                if (chatChannel == null) {
+                    table.delete(chatChannelSpeaker).join()
+                } else {
+                    chatChannelSpeaker.chatChannel = chatChannel
+                    table.update(chatChannelSpeaker).join()
+                }
             }
         }
     }
@@ -67,11 +69,12 @@ class RPKChatChannelSpeakerService(override val plugin: RPKChatBukkit) : Service
      *
      * @param minecraftProfile The Minecraft profile to stop speaking
      */
-    fun removeMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile) {
+    fun removeMinecraftProfileChannel(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void> {
         val table = plugin.database.getTable(RPKChatChannelSpeakerTable::class.java)
-        val chatChannelSpeaker = table.get(minecraftProfile)
-        if (chatChannelSpeaker != null) {
-            table.delete(chatChannelSpeaker)
+        return table.get(minecraftProfile).thenAcceptAsync { chatChannelSpeaker ->
+            if (chatChannelSpeaker != null) {
+                table.delete(chatChannelSpeaker).join()
+            }
         }
     }
 

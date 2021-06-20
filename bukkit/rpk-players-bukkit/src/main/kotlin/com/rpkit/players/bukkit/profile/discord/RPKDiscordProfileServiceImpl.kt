@@ -23,49 +23,56 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
+import java.util.concurrent.CompletableFuture
 
 class RPKDiscordProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKDiscordProfileService {
-    override fun getDiscordProfile(id: RPKDiscordProfileId): RPKDiscordProfile? {
-        return plugin.database.getTable(RPKDiscordProfileTable::class.java).get(id)
+    override fun getDiscordProfile(id: RPKDiscordProfileId): CompletableFuture<RPKDiscordProfile?> {
+        return plugin.database.getTable(RPKDiscordProfileTable::class.java)[id]
     }
 
-    override fun getDiscordProfile(discordUserId: DiscordUserId): RPKDiscordProfile {
-        val discordProfileTable = plugin.database.getTable(RPKDiscordProfileTable::class.java)
-        var discordProfile = discordProfileTable.get(discordUserId)
-        if (discordProfile == null) {
-            val discordService = Services[RPKDiscordService::class.java]
-            val userName = discordService?.getUserName(discordUserId)
-            discordProfile = RPKDiscordProfileImpl(discordId = discordUserId, profile = RPKThinProfileImpl(
-                RPKProfileName(userName ?: "Unknown Discord User")
-            ))
-            discordProfileTable.insert(discordProfile)
+    override fun getDiscordProfile(discordUserId: DiscordUserId): CompletableFuture<RPKDiscordProfile> {
+        return CompletableFuture.supplyAsync {
+            val discordProfileTable = plugin.database.getTable(RPKDiscordProfileTable::class.java)
+            var discordProfile = discordProfileTable.get(discordUserId).join()
+            if (discordProfile == null) {
+                val discordService = Services[RPKDiscordService::class.java]
+                val userName = discordService?.getUserName(discordUserId)
+                discordProfile = RPKDiscordProfileImpl(
+                    discordId = discordUserId, profile = RPKThinProfileImpl(
+                        RPKProfileName(userName ?: "Unknown Discord User")
+                    )
+                )
+                discordProfileTable.insert(discordProfile).join()
+            }
+            return@supplyAsync discordProfile
         }
-        return discordProfile
     }
 
-    override fun getDiscordProfiles(profile: RPKProfile): List<RPKDiscordProfile> {
+    override fun getDiscordProfiles(profile: RPKProfile): CompletableFuture<List<RPKDiscordProfile>> {
         return plugin.database.getTable(RPKDiscordProfileTable::class.java).get(profile)
     }
 
-    override fun addDiscordProfile(profile: RPKDiscordProfile) {
-        plugin.database.getTable(RPKDiscordProfileTable::class.java).insert(profile)
+    override fun addDiscordProfile(profile: RPKDiscordProfile): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKDiscordProfileTable::class.java).insert(profile)
     }
 
-    override fun createDiscordProfile(profile: RPKThinProfile, discordId: DiscordUserId): RPKDiscordProfile {
-        val discordProfile = RPKDiscordProfileImpl(
-            null,
-            profile,
-            discordId
-        )
-        addDiscordProfile(discordProfile)
-        return discordProfile
+    override fun createDiscordProfile(profile: RPKThinProfile, discordId: DiscordUserId): CompletableFuture<RPKDiscordProfile> {
+        return CompletableFuture.supplyAsync {
+            val discordProfile = RPKDiscordProfileImpl(
+                null,
+                profile,
+                discordId
+            )
+            addDiscordProfile(discordProfile).join()
+            return@supplyAsync discordProfile
+        }
     }
 
-    override fun updateDiscordProfile(profile: RPKDiscordProfile) {
-        plugin.database.getTable(RPKDiscordProfileTable::class.java).update(profile)
+    override fun updateDiscordProfile(profile: RPKDiscordProfile): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKDiscordProfileTable::class.java).update(profile)
     }
 
-    override fun removeDiscordProfile(profile: RPKDiscordProfile) {
-        plugin.database.getTable(RPKDiscordProfileTable::class.java).delete(profile)
+    override fun removeDiscordProfile(profile: RPKDiscordProfile): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKDiscordProfileTable::class.java).delete(profile)
     }
 }

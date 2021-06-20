@@ -47,7 +47,7 @@ class ClaimCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
@@ -62,32 +62,36 @@ class ClaimCommand(private val plugin: RPKStoresBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-purchase-service"])
             return true
         }
-        val purchase = purchaseService.getPurchase(RPKPurchaseId(purchaseId))
-        if (purchase == null) {
-            sender.sendMessage(plugin.messages["claim-purchase-id-invalid-purchase"])
-            return true
+        purchaseService.getPurchase(RPKPurchaseId(purchaseId)).thenAccept getPurchase@{ purchase ->
+            if (purchase == null) {
+                sender.sendMessage(plugin.messages["claim-purchase-id-invalid-purchase"])
+                return@getPurchase
+            }
+            if (purchase.profile != minecraftProfile.profile) {
+                sender.sendMessage(plugin.messages["claim-purchase-id-invalid-profile"])
+                return@getPurchase
+            }
+            if (purchase !is RPKConsumablePurchase) {
+                sender.sendMessage(plugin.messages["claim-purchase-id-invalid-consumable"])
+                return@getPurchase
+            }
+            val purchasePlugin = plugin.server.pluginManager.getPlugin(purchase.storeItem.plugin)
+            if (purchasePlugin == null) {
+                sender.sendMessage(plugin.messages["claim-plugin-not-installed"])
+                return@getPurchase
+            }
+            if (purchasePlugin !is RPKPurchaseResolverService) {
+                sender.sendMessage(plugin.messages["claim-plugin-cannot-claim"])
+                return@getPurchase
+            }
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                purchasePlugin.getPurchaseResolver(purchase.storeItem.identifier).claim(purchase, minecraftProfile)
+                purchase.remainingUses--
+                purchaseService.updatePurchase(purchase).thenRun {
+                    sender.sendMessage(plugin.messages["claim-successful"])
+                }
+            })
         }
-        if (purchase.profile != minecraftProfile.profile) {
-            sender.sendMessage(plugin.messages["claim-purchase-id-invalid-profile"])
-            return true
-        }
-        if (purchase !is RPKConsumablePurchase) {
-            sender.sendMessage(plugin.messages["claim-purchase-id-invalid-consumable"])
-            return true
-        }
-        val purchasePlugin = plugin.server.pluginManager.getPlugin(purchase.storeItem.plugin)
-        if (purchasePlugin == null) {
-            sender.sendMessage(plugin.messages["claim-plugin-not-installed"])
-            return true
-        }
-        if (purchasePlugin !is RPKPurchaseResolverService) {
-            sender.sendMessage(plugin.messages["claim-plugin-cannot-claim"])
-            return true
-        }
-        purchasePlugin.getPurchaseResolver(purchase.storeItem.identifier).claim(purchase, minecraftProfile)
-        purchase.remainingUses--
-        purchaseService.updatePurchase(purchase)
-        sender.sendMessage(plugin.messages["claim-successful"])
         return true
     }
 

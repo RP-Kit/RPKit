@@ -18,6 +18,7 @@ package com.rpkit.payments.bukkit.listener
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
+import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
@@ -27,19 +28,26 @@ import org.bukkit.event.player.PlayerJoinEvent
 /**
  * Player join listener for sending payment notifications.
  */
-class PlayerJoinListener : Listener {
+class PlayerJoinListener(private val plugin: RPKPaymentsBukkit) : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val characterService = Services[RPKCharacterService::class.java] ?: return
         val paymentNotificationService = Services[RPKPaymentNotificationService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
-        val character = characterService.getActiveCharacter(minecraftProfile) ?: return
-        paymentNotificationService.getPaymentNotificationsFor(character).forEach { notification ->
-            event.player.sendMessage(notification.text)
-            paymentNotificationService.removePaymentNotification(notification)
+        minecraftProfileService.getMinecraftProfile(event.player).thenAccept getMinecraftProfile@{ minecraftProfile ->
+            if (minecraftProfile == null) return@getMinecraftProfile
+            characterService.loadActiveCharacter(minecraftProfile).thenAccept loadActiveCharacter@{ character ->
+                if (character == null) return@loadActiveCharacter
+                paymentNotificationService.getPaymentNotificationsFor(character).thenAccept { notifications ->
+                    notifications.forEach { notification ->
+                        event.player.sendMessage(notification.text)
+                        paymentNotificationService.removePaymentNotification(notification)
+                    }
+                }
+            }
         }
+
     }
 
 }

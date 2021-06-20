@@ -34,6 +34,7 @@ import com.rpkit.players.bukkit.profile.RPKThinProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.awt.Color
+import java.util.concurrent.CompletableFuture
 
 /**
  * Chat channel implementation.
@@ -50,34 +51,57 @@ class RPKChatChannelImpl(
         override val isJoinedByDefault: Boolean
 ) : RPKChatChannel {
 
-    override val speakers: List<RPKMinecraftProfile>
+    override val speakers: CompletableFuture<List<RPKMinecraftProfile>>
         get() = plugin.server.onlinePlayers
-                .mapNotNull { player -> Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfile(player) }
-                .filter { minecraftProfile -> Services[RPKChatChannelSpeakerService::class.java]?.getMinecraftProfileChannel(minecraftProfile) == this }
+            .mapNotNull { player -> Services[RPKMinecraftProfileService::class.java]?.getPreloadedMinecraftProfile(player) }
+            .map { minecraftProfile -> minecraftProfile to Services[RPKChatChannelSpeakerService::class.java]?.getMinecraftProfileChannel(minecraftProfile) }
+            .fold(listOf<CompletableFuture<RPKMinecraftProfile?>>()) { futures, (minecraftProfile, channelFuture) ->
+                futures + (channelFuture?.thenApply { channel -> if (channel == this) minecraftProfile else null } ?: CompletableFuture.completedFuture(null))
+            }
+            .let { futures ->
+                CompletableFuture.allOf(*futures.toTypedArray())
+                    .thenApplyAsync {
+                        futures.mapNotNull(CompletableFuture<RPKMinecraftProfile?>::join)
+                    }
+            }
 
-    override val listeners: List<RPKMinecraftProfile>
+    override val listeners: CompletableFuture<List<RPKMinecraftProfile>>
         get() = plugin.server.onlinePlayers
-                .filter { player -> player.hasPermission("rpkit.chat.listen.${name.value}") }
-                .mapNotNull { player -> Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfile(player) }
-                .filter { minecraftProfile -> Services[RPKChatChannelMuteService::class.java]?.hasMinecraftProfileMutedChatChannel(minecraftProfile, this) == false }
+            .filter { player -> player.hasPermission("rpkit.chat.listen.${name.value}") }
+            .mapNotNull { player -> Services[RPKMinecraftProfileService::class.java]?.getPreloadedMinecraftProfile(player) }
+            .map { minecraftProfile -> minecraftProfile to Services[RPKChatChannelMuteService::class.java]?.hasMinecraftProfileMutedChatChannel(minecraftProfile, this) }
+            .fold(listOf<CompletableFuture<RPKMinecraftProfile?>>()) { futures, (minecraftProfile, mutedFuture) ->
+                futures + (mutedFuture?.thenApply { muted -> if (!muted) minecraftProfile else null } ?: CompletableFuture.completedFuture(null))
+            }
+            .let { futures ->
+                CompletableFuture.allOf(*futures.toTypedArray())
+                    .thenApplyAsync {
+                        futures.mapNotNull(CompletableFuture<RPKMinecraftProfile?>::join)
+                    }
+            }
 
-    override fun addSpeaker(speaker: RPKMinecraftProfile) {
-        Services[RPKChatChannelSpeakerService::class.java]?.setMinecraftProfileChannel(speaker, this)
+    override fun addSpeaker(speaker: RPKMinecraftProfile): CompletableFuture<Void> {
+        val speakerService = Services[RPKChatChannelSpeakerService::class.java] ?: return CompletableFuture.completedFuture(null)
+        return speakerService.setMinecraftProfileChannel(speaker, this)
     }
 
-    override fun removeSpeaker(speaker: RPKMinecraftProfile) {
-        val chatChannelSpeakerService = Services[RPKChatChannelSpeakerService::class.java]
-        if (chatChannelSpeakerService?.getMinecraftProfileChannel(speaker) == this) {
-            chatChannelSpeakerService.removeMinecraftProfileChannel(speaker)
+    override fun removeSpeaker(speaker: RPKMinecraftProfile): CompletableFuture<Void> {
+        val speakerService = Services[RPKChatChannelSpeakerService::class.java] ?: return CompletableFuture.completedFuture(null)
+        return speakerService.getMinecraftProfileChannel(speaker).thenAcceptAsync { chatChannel ->
+            if (chatChannel == this) {
+                speakerService.removeMinecraftProfileChannel(speaker).join()
+            }
         }
     }
 
-    override fun addListener(listener: RPKMinecraftProfile, isAsync: Boolean) {
-        Services[RPKChatChannelMuteService::class.java]?.removeChatChannelMute(listener, this, isAsync)
+    override fun addListener(listener: RPKMinecraftProfile): CompletableFuture<Void> {
+        val muteService = Services[RPKChatChannelMuteService::class.java] ?: return CompletableFuture.completedFuture(null)
+        return muteService.removeChatChannelMute(listener, this)
     }
 
-    override fun removeListener(listener: RPKMinecraftProfile) {
-        Services[RPKChatChannelMuteService::class.java]?.addChatChannelMute(listener, this)
+    override fun removeListener(listener: RPKMinecraftProfile): CompletableFuture<Void> {
+        val muteService = Services[RPKChatChannelMuteService::class.java] ?: return CompletableFuture.completedFuture(null)
+        return muteService.addChatChannelMute(listener, this)
     }
 
     override fun sendMessage(
@@ -111,38 +135,42 @@ class RPKChatChannelImpl(
         val event = RPKBukkitChatChannelMessageEvent(sender, senderMinecraftProfile, this, message, isAsync)
         plugin.server.pluginManager.callEvent(event)
         if (event.isCancelled) return
-        listeners.forEach { listener ->
-            var preFormatContext: DirectedPreFormatMessageContext = DirectedPreFormatMessageContextImpl(
+        plugin.server.scheduler.runTask(plugin, Runnable {
+            listeners.thenAcceptAsync { listeners ->
+                listeners.forEach { listener ->
+                    var preFormatContext: DirectedPreFormatMessageContext = DirectedPreFormatMessageContextImpl(
+                        event.chatChannel,
+                        event.profile,
+                        event.minecraftProfile,
+                        listener,
+                        event.message
+                    )
+                    directedPreFormatPipeline.forEach { component ->
+                        preFormatContext = component.process(preFormatContext).join()
+                    }
+                    var postFormatContext: DirectedPostFormatMessageContext = DirectedPostFormatMessageContextImpl(
+                        preFormatContext.chatChannel,
+                        preFormatContext.senderProfile,
+                        preFormatContext.senderMinecraftProfile,
+                        listener,
+                        format.flatMap { part -> part.toChatComponents(preFormatContext).join().toList() }.toTypedArray(),
+                        preFormatContext.isCancelled
+                    )
+                    directedPostFormatPipeline.forEach { component ->
+                        postFormatContext = component.process(postFormatContext).join()
+                    }
+                }
+                var context: UndirectedMessageContext = UndirectedMessageContextImpl(
                     event.chatChannel,
                     event.profile,
                     event.minecraftProfile,
-                    listener,
                     event.message
-            )
-            directedPreFormatPipeline.forEach { component ->
-                preFormatContext = component.process(preFormatContext)
+                )
+                undirectedPipeline.forEach { component ->
+                    context = component.process(context).join()
+                }
             }
-            var postFormatContext: DirectedPostFormatMessageContext = DirectedPostFormatMessageContextImpl(
-                    preFormatContext.chatChannel,
-                    preFormatContext.senderProfile,
-                    preFormatContext.senderMinecraftProfile,
-                    listener,
-                    format.flatMap { part -> part.toChatComponents(preFormatContext).toList() }.toTypedArray(),
-                    preFormatContext.isCancelled
-            )
-            directedPostFormatPipeline.forEach { component ->
-                postFormatContext = component.process(postFormatContext)
-            }
-        }
-        var context: UndirectedMessageContext = UndirectedMessageContextImpl(
-                event.chatChannel,
-                event.profile,
-                event.minecraftProfile,
-                event.message
-        )
-        undirectedPipeline.forEach { component ->
-            context = component.process(context)
-        }
+        })
     }
 
 }

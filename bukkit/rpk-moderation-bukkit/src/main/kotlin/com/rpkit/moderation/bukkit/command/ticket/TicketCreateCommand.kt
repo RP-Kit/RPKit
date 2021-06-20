@@ -16,6 +16,7 @@
 
 package com.rpkit.moderation.bukkit.command.ticket
 
+import com.rpkit.core.bukkit.location.toRPKLocation
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.RPKModerationBukkit
 import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
@@ -49,7 +50,7 @@ class TicketCreateCommand(private val plugin: RPKModerationBukkit) : CommandExec
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
@@ -67,13 +68,14 @@ class TicketCreateCommand(private val plugin: RPKModerationBukkit) : CommandExec
         val ticket = RPKTicketImpl(
                 reason,
                 profile,
-                sender.location
+                sender.location.toRPKLocation()
         )
-        ticketService.addTicket(ticket)
-        sender.sendMessage(plugin.messages["ticket-create-valid", mapOf(
-            "id" to ticket.id.toString(),
-            "reason" to reason
-        )])
+        ticketService.addTicket(ticket).thenRun {
+            sender.sendMessage(plugin.messages["ticket-create-valid", mapOf(
+                "id" to ticket.id?.value.toString(),
+                "reason" to reason
+            )])
+        }
         return true
     }
 

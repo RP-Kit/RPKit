@@ -66,42 +66,46 @@ class DistanceCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
             sender.sendMessage(plugin.messages["no-tracking-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
-        if (!trackingService.isTrackable(character)) {
-            sender.sendMessage(plugin.messages["distance-invalid-untrackable"])
-            bukkitPlayer.sendMessage(plugin.messages["distance-untrackable-notification", mapOf(
+        trackingService.isTrackable(character).thenAccept { isTrackable ->
+            if (!isTrackable) {
+                sender.sendMessage(plugin.messages["distance-invalid-untrackable"])
+                bukkitPlayer.sendMessage(plugin.messages["distance-untrackable-notification", mapOf(
                     "player" to minecraftProfile.name
-            )])
-            return true
-        }
-        val itemRequirement = plugin.config.getItemStack("distance-command.item-requirement")
-        if (itemRequirement != null && !bukkitPlayer.inventory.containsAtLeast(itemRequirement, itemRequirement.amount)) {
-                sender.sendMessage(plugin.messages["distance-invalid-item", mapOf(
+                )])
+                return@thenAccept
+            }
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                val itemRequirement = plugin.config.getItemStack("distance-command.item-requirement")
+                if (itemRequirement != null && !bukkitPlayer.inventory.containsAtLeast(itemRequirement, itemRequirement.amount)) {
+                    sender.sendMessage(plugin.messages["distance-invalid-item", mapOf(
                         "amount" to itemRequirement.amount.toString(),
                         "type" to itemRequirement.type.toString().toLowerCase().replace('_', ' ')
+                    )])
+                    return@Runnable
+                }
+                val maximumDistance = plugin.config.getInt("distance-command.maximum-distance")
+                val distance = fastSqrt(bukkitPlayer.location.distanceSquared(sender.location))
+                if (maximumDistance >= 0 && distance > maximumDistance) {
+                    sender.sendMessage(plugin.messages["distance-invalid-distance"])
+                    return@Runnable
+                }
+                sender.sendMessage(plugin.messages["distance-valid", mapOf(
+                    "character" to character.name,
+                    "player" to minecraftProfile.name,
+                    "distance" to distance.toString()
                 )])
-                return true
-            }
-        val maximumDistance = plugin.config.getInt("distance-command.maximum-distance")
-        val distance = fastSqrt(bukkitPlayer.location.distanceSquared(sender.location))
-        if (maximumDistance >= 0 && distance > maximumDistance) {
-            sender.sendMessage(plugin.messages["distance-invalid-distance"])
-            return true
+            })
         }
-        sender.sendMessage(plugin.messages["distance-valid", mapOf(
-                "character" to character.name,
-                "player" to minecraftProfile.name,
-                "distance" to distance.toString()
-        )])
         return true
     }
 

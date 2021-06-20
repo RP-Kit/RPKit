@@ -25,14 +25,10 @@ import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.command.RPKBukkitMinecraftProfileCommandSenderResolver
 import com.rpkit.players.bukkit.command.profile.ProfileCommand
-import com.rpkit.players.bukkit.database.table.RPKDiscordProfileTable
-import com.rpkit.players.bukkit.database.table.RPKGitHubProfileTable
-import com.rpkit.players.bukkit.database.table.RPKIRCProfileTable
-import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileLinkRequestTable
-import com.rpkit.players.bukkit.database.table.RPKMinecraftProfileTable
-import com.rpkit.players.bukkit.database.table.RPKProfileTable
+import com.rpkit.players.bukkit.database.table.*
+import com.rpkit.players.bukkit.listener.AsyncPlayerPreLoginListener
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
-import com.rpkit.players.bukkit.listener.PlayerLoginListener
+import com.rpkit.players.bukkit.listener.PlayerQuitListener
 import com.rpkit.players.bukkit.messages.PlayersMessages
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.RPKProfileServiceImpl
@@ -146,7 +142,11 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
     }
 
     private fun registerListeners() {
-        registerListeners(PlayerJoinListener(this), PlayerLoginListener(this))
+        registerListeners(
+            PlayerJoinListener(this),
+            AsyncPlayerPreLoginListener(this),
+            PlayerQuitListener(this)
+        )
     }
 
     private var webConfig: FileConfiguration? = null

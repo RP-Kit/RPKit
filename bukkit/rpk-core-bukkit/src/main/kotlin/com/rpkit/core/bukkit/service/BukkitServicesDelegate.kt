@@ -16,6 +16,7 @@
 
 package com.rpkit.core.bukkit.service
 
+import com.rpkit.core.bukkit.event.service.RPKBukkitServiceReadyEvent
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.service.Service
 import com.rpkit.core.service.ServicesDelegate
@@ -31,6 +32,7 @@ class BukkitServicesDelegate : ServicesDelegate {
         val plugin = service.plugin
         if (plugin is RPKBukkitPlugin) {
             Bukkit.getServicesManager().register(type, service, plugin, Normal)
+            Bukkit.getPluginManager().callEvent(RPKBukkitServiceReadyEvent(service, false))
         }
     }
 

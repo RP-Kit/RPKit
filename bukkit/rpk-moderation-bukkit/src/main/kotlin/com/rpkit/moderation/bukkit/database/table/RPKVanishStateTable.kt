@@ -22,6 +22,7 @@ import com.rpkit.moderation.bukkit.database.create
 import com.rpkit.moderation.bukkit.database.jooq.Tables.RPKIT_VANISHED
 import com.rpkit.moderation.bukkit.vanish.RPKVanishState
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 
 class RPKVanishStateTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
@@ -37,43 +38,48 @@ class RPKVanishStateTable(private val database: Database, private val plugin: RP
         null
     }
 
-    fun insert(entity: RPKVanishState) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun insert(entity: RPKVanishState): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_VANISHED,
-                        RPKIT_VANISHED.MINECRAFT_PROFILE_ID
+                    RPKIT_VANISHED,
+                    RPKIT_VANISHED.MINECRAFT_PROFILE_ID
                 )
                 .values(minecraftProfileId.value)
                 .execute()
-        cache?.set(minecraftProfileId.value, entity)
-    }
-
-    operator fun get(minecraftProfile: RPKMinecraftProfile): RPKVanishState? {
-        val minecraftProfileId = minecraftProfile.id ?: return null
-        if (cache?.containsKey(minecraftProfileId.value) == true) {
-            return cache[minecraftProfileId.value]
-        } else {
-            database.create
-                    .select(RPKIT_VANISHED.MINECRAFT_PROFILE_ID)
-                    .from(RPKIT_VANISHED)
-                    .where(RPKIT_VANISHED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-                    .fetchOne() ?: return null
-            val vanishState = RPKVanishState(
-                    minecraftProfile
-            )
-            cache?.set(minecraftProfileId.value, vanishState)
-            return vanishState
+            cache?.set(minecraftProfileId.value, entity)
         }
     }
 
-    fun delete(entity: RPKVanishState) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    operator fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKVanishState?> {
+        val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        if (cache?.containsKey(minecraftProfileId.value) == true) {
+            return CompletableFuture.completedFuture(cache[minecraftProfileId.value])
+        }
+        return CompletableFuture.supplyAsync {
+            database.create
+                .select(RPKIT_VANISHED.MINECRAFT_PROFILE_ID)
+                .from(RPKIT_VANISHED)
+                .where(RPKIT_VANISHED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+                .fetchOne() ?: return@supplyAsync null
+            val vanishState = RPKVanishState(
+                minecraftProfile
+            )
+            cache?.set(minecraftProfileId.value, vanishState)
+            return@supplyAsync vanishState
+        }
+    }
+
+    fun delete(entity: RPKVanishState): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_VANISHED)
                 .where(RPKIT_VANISHED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        cache?.remove(minecraftProfileId.value)
+            cache?.remove(minecraftProfileId.value)
+        }
     }
 
 }

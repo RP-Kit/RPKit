@@ -7,6 +7,7 @@ bank-deposit-invalid-not-enough-money: '&cYou cannot deposit that amount, your w
 bank-deposit-valid: '&aDeposited ${amount} ${currency}. Wallet balance: ${wallet_balance}. Bank balance: ${bank_balance}.'
 bank-balance-valid: '&aBalance: ${amount} ${currency}'
 no-permission-bank-create: '&cYou do not have permission to create banks.'
+no-preloaded-balance: '&cYour wallet balance has not been loaded. Please try relogging, or if the problem persists, contact an administrator.'
 no-currency-service: '&cThere is no currency service available.'
 no-bank-service: '&cThere is no bank service available.'
 no-minecraft-profile-service: '&cThere is no Minecraft profile service available.'

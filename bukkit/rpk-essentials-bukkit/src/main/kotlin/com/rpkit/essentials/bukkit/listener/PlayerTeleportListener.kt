@@ -30,7 +30,7 @@ class PlayerTeleportListener : Listener {
     fun onPlayerTeleport(event: PlayerTeleportEvent) {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
         val locationHistoryService = Services[RPKLocationHistoryService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
         if (minecraftProfile != null) {
             locationHistoryService.setPreviousLocation(minecraftProfile, event.from)
         }

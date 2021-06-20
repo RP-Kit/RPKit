@@ -25,8 +25,9 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitChatChannelMuteEvent(
         override val minecraftProfile: RPKMinecraftProfile,
-        override val chatChannel: RPKChatChannel
-) : RPKBukkitEvent(), RPKChatChannelMuteEvent, Cancellable {
+        override val chatChannel: RPKChatChannel,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKChatChannelMuteEvent, Cancellable {
 
     companion object {
         @JvmStatic

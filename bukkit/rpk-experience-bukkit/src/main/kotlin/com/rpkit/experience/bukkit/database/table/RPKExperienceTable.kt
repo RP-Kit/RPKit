@@ -22,6 +22,7 @@ import com.rpkit.experience.bukkit.RPKExperienceBukkit
 import com.rpkit.experience.bukkit.database.create
 import com.rpkit.experience.bukkit.database.jooq.Tables.RPKIT_EXPERIENCE_
 import com.rpkit.experience.bukkit.experience.RPKExperienceValue
+import java.util.concurrent.CompletableFuture
 
 
 class RPKExperienceTable(private val database: Database, private val plugin: RPKExperienceBukkit) : Table {
@@ -37,61 +38,68 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
         null
     }
 
-    fun delete(entity: RPKExperienceValue) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun delete(entity: RPKExperienceValue): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_EXPERIENCE_)
                 .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.remove(characterId.value)
-    }
-
-    operator fun get(character: RPKCharacter): RPKExperienceValue? {
-        val characterId = character.id ?: return null
-        if (cache?.containsKey(characterId.value) == true) {
-            return cache[characterId.value]
-        } else {
-            val result = database.create
-                    .select(
-                            RPKIT_EXPERIENCE_.CHARACTER_ID,
-                            RPKIT_EXPERIENCE_.VALUE
-                    )
-                    .from(RPKIT_EXPERIENCE_)
-                    .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId.value))
-                    .fetchOne() ?: return null
-            val experienceValue = RPKExperienceValue(
-                    character,
-                    result.get(RPKIT_EXPERIENCE_.VALUE)
-            )
-            cache?.set(characterId.value, experienceValue)
-            return experienceValue
+            cache?.remove(characterId.value)
         }
     }
 
-    fun insert(entity: RPKExperienceValue) {
-        val characterId = entity.character.id ?: return
-        database.create
-                .insertInto(
-                        RPKIT_EXPERIENCE_,
-                        RPKIT_EXPERIENCE_.CHARACTER_ID,
-                        RPKIT_EXPERIENCE_.VALUE
+    operator fun get(character: RPKCharacter): CompletableFuture<RPKExperienceValue?> {
+        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
+        if (cache?.containsKey(characterId.value) == true) {
+            return CompletableFuture.completedFuture(cache[characterId.value])
+        }
+        return CompletableFuture.supplyAsync {
+            val result = database.create
+                .select(
+                    RPKIT_EXPERIENCE_.CHARACTER_ID,
+                    RPKIT_EXPERIENCE_.VALUE
                 )
-                .values(
-                        characterId.value,
-                        entity.value
-                )
-                .execute()
-        cache?.set(characterId.value, entity)
+                .from(RPKIT_EXPERIENCE_)
+                .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId.value))
+                .fetchOne() ?: return@supplyAsync null
+            val experienceValue = RPKExperienceValue(
+                character,
+                result.get(RPKIT_EXPERIENCE_.VALUE)
+            )
+            cache?.set(characterId.value, experienceValue)
+            return@supplyAsync experienceValue
+        }
     }
 
-    fun update(entity: RPKExperienceValue) {
-        val characterId = entity.character.id ?: return
-        database.create
+    fun insert(entity: RPKExperienceValue): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
+                .insertInto(
+                    RPKIT_EXPERIENCE_,
+                    RPKIT_EXPERIENCE_.CHARACTER_ID,
+                    RPKIT_EXPERIENCE_.VALUE
+                )
+                .values(
+                    characterId.value,
+                    entity.value
+                )
+                .execute()
+            cache?.set(characterId.value, entity)
+        }
+    }
+
+    fun update(entity: RPKExperienceValue): CompletableFuture<Void> {
+        val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_EXPERIENCE_)
                 .set(RPKIT_EXPERIENCE_.VALUE, entity.value)
                 .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId.value))
                 .execute()
-        cache?.set(characterId.value, entity)
+            cache?.set(characterId.value, entity)
+        }
     }
 
 }

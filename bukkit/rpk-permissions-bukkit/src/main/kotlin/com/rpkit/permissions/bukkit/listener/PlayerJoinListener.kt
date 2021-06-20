@@ -33,7 +33,7 @@ class PlayerJoinListener : Listener {
     fun onPlayerJoin(event: PlayerJoinEvent) {
         if (event.player.isBanned) return
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(event.player) ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
         minecraftProfile.assignPermissions()
     }
 

@@ -19,4 +19,6 @@ package com.rpkit.shops.bukkit.messages
 import com.rpkit.core.bukkit.message.BukkitMessages
 import com.rpkit.shops.bukkit.RPKShopsBukkit
 
-class ShopsMessages(plugin: RPKShopsBukkit) : BukkitMessages(plugin)
+class ShopsMessages(plugin: RPKShopsBukkit) : BukkitMessages(plugin) {
+    val noPreloadedBalance = get("no-preloaded-balance")
+}

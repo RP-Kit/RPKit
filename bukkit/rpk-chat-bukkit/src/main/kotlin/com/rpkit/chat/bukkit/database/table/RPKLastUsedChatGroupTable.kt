@@ -25,6 +25,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents the last used chat group table
@@ -42,73 +43,81 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
         null
     }
 
-    fun insert(entity: RPKLastUsedChatGroup) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        val chatGroupId = entity.chatGroup.id ?: return
-        database.create
+    fun insert(entity: RPKLastUsedChatGroup): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_LAST_USED_CHAT_GROUP,
-                        RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID,
-                        RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID
+                    RPKIT_LAST_USED_CHAT_GROUP,
+                    RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID,
+                    RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID
                 )
                 .values(
                     minecraftProfileId.value,
                     chatGroupId.value
                 )
                 .execute()
-        minecraftProfileCache?.set(minecraftProfileId.value, entity)
+            minecraftProfileCache?.set(minecraftProfileId.value, entity)
+        }
     }
 
-    fun update(entity: RPKLastUsedChatGroup) {
-        val chatGroupId = entity.chatGroup.id ?: return
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
+    fun update(entity: RPKLastUsedChatGroup): CompletableFuture<Void> {
+        val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .update(RPKIT_LAST_USED_CHAT_GROUP)
                 .set(RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID, chatGroupId.value)
                 .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-        minecraftProfileCache?.set(minecraftProfileId.value, entity)
+            minecraftProfileCache?.set(minecraftProfileId.value, entity)
+        }
     }
 
-    fun get(minecraftProfile: RPKMinecraftProfile): RPKLastUsedChatGroup? {
-        val minecraftProfileId = minecraftProfile.id ?: return null
+    fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKLastUsedChatGroup?> {
+        val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
         if (minecraftProfileCache?.containsKey(minecraftProfileId.value) == true) {
-            return minecraftProfileCache[minecraftProfileId.value]
+            return CompletableFuture.completedFuture(minecraftProfileCache[minecraftProfileId.value])
         }
-        val result = database.create
-            .select(
-                RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID,
-                RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID
-            )
-            .from(RPKIT_LAST_USED_CHAT_GROUP)
-            .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-            .fetchOne() ?: return null
-        val chatGroupService = Services[RPKChatGroupService::class.java] ?: return null
-        val chatGroupId = result.get(RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID)
-        val chatGroup = chatGroupService.getChatGroup(RPKChatGroupId(chatGroupId))
-        if (chatGroup != null) {
-            val lastUsedChatGroup = RPKLastUsedChatGroup(
-                minecraftProfile,
-                chatGroup
-            )
-            minecraftProfileCache?.set(minecraftProfileId.value, lastUsedChatGroup)
-            return lastUsedChatGroup
-        } else {
+        return CompletableFuture.supplyAsync {
+            val result = database.create
+                .select(
+                    RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID,
+                    RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID
+                )
+                .from(RPKIT_LAST_USED_CHAT_GROUP)
+                .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+                .fetchOne() ?: return@supplyAsync null
+            val chatGroupService = Services[RPKChatGroupService::class.java] ?: return@supplyAsync null
+            val chatGroupId = result.get(RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID)
+            val chatGroup = chatGroupService.getChatGroup(RPKChatGroupId(chatGroupId)).join()
+            if (chatGroup != null) {
+                val lastUsedChatGroup = RPKLastUsedChatGroup(
+                    minecraftProfile,
+                    chatGroup
+                )
+                minecraftProfileCache?.set(minecraftProfileId.value, lastUsedChatGroup)
+                return@supplyAsync lastUsedChatGroup
+            } else {
+                database.create
+                    .deleteFrom(RPKIT_LAST_USED_CHAT_GROUP)
+                    .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+                    .execute()
+                return@supplyAsync null
+            }
+        }
+    }
+
+    fun delete(entity: RPKLastUsedChatGroup): CompletableFuture<Void> {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
             database.create
                 .deleteFrom(RPKIT_LAST_USED_CHAT_GROUP)
                 .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
-            return null
+            minecraftProfileCache?.remove(minecraftProfileId.value)
         }
-    }
-
-    fun delete(entity: RPKLastUsedChatGroup) {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return
-        database.create
-                .deleteFrom(RPKIT_LAST_USED_CHAT_GROUP)
-                .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-                .execute()
-        minecraftProfileCache?.remove(minecraftProfileId.value)
     }
 
 }

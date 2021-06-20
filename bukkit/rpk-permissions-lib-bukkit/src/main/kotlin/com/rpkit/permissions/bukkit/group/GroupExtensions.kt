@@ -19,58 +19,70 @@ package com.rpkit.permissions.bukkit.group
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.permissions.RPKPermissionsService
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
+import java.util.concurrent.CompletableFuture
 
-fun RPKProfile.addGroup(group: RPKGroup) {
-    Services[RPKGroupService::class.java]?.addGroup(this, group)
+fun RPKProfile.addGroup(group: RPKGroup): CompletableFuture<Void> {
+    return Services[RPKGroupService::class.java]?.addGroup(this, group) ?: CompletableFuture.completedFuture(null)
 }
 
-fun RPKProfile.addGroup(group: RPKGroup, priority: Int) {
-    Services[RPKGroupService::class.java]?.addGroup(this, group, priority)
+fun RPKProfile.addGroup(group: RPKGroup, priority: Int): CompletableFuture<Void> {
+    return Services[RPKGroupService::class.java]?.addGroup(this, group, priority) ?: CompletableFuture.completedFuture(null)
 }
 
-fun RPKProfile.removeGroup(group: RPKGroup) {
-    Services[RPKGroupService::class.java]?.removeGroup(this, group)
+fun RPKProfile.removeGroup(group: RPKGroup): CompletableFuture<Void> {
+    return Services[RPKGroupService::class.java]?.removeGroup(this, group) ?: CompletableFuture.completedFuture(null)
 }
 
-fun RPKProfile.hasPermission(node: String): Boolean {
+fun RPKProfile.hasPermission(node: String): CompletableFuture<Boolean> {
     return Services[RPKPermissionsService::class.java]?.hasPermission(this, node)
-            ?: Bukkit.getPluginManager().getPermission(node)?.default?.getValue(false)
-            ?: false
+            ?: CompletableFuture.completedFuture(
+                Bukkit.getPluginManager().getPermission(node)?.default?.getValue(false)
+                    ?: false
+            )
 }
 
-val RPKProfile.groups
-    get() = Services[RPKGroupService::class.java]?.getGroups(this) ?: emptyList()
+val RPKProfile.groups: CompletableFuture<List<RPKGroup>>
+    get() = Services[RPKGroupService::class.java]?.getGroups(this) ?: CompletableFuture.completedFuture(emptyList())
 
-fun RPKCharacter.addGroup(group: RPKGroup) {
-    Services[RPKGroupService::class.java]?.addGroup(this, group)
+val RPKProfile.preloadedGroups: List<RPKGroup>?
+    get() = Services[RPKGroupService::class.java]?.getPreloadedGroups(this)
+
+fun RPKCharacter.addGroup(group: RPKGroup): CompletableFuture<Void> {
+    return Services[RPKGroupService::class.java]?.addGroup(this, group) ?: CompletableFuture.completedFuture(null)
 }
 
-fun RPKCharacter.addGroup(group: RPKGroup, priority: Int) {
-    Services[RPKGroupService::class.java]?.addGroup(this, group, priority)
+fun RPKCharacter.addGroup(group: RPKGroup, priority: Int): CompletableFuture<Void> {
+    return Services[RPKGroupService::class.java]?.addGroup(this, group, priority) ?: CompletableFuture.completedFuture(null)
 }
 
-fun RPKCharacter.removeGroup(group: RPKGroup) {
-    Services[RPKGroupService::class.java]?.removeGroup(this, group)
+fun RPKCharacter.removeGroup(group: RPKGroup): CompletableFuture<Void> {
+    return Services[RPKGroupService::class.java]?.removeGroup(this, group) ?: CompletableFuture.completedFuture(null)
 }
 
-fun RPKCharacter.hasPermission(node: String): Boolean {
+fun RPKCharacter.hasPermission(node: String): CompletableFuture<Boolean> {
     return Services[RPKPermissionsService::class.java]?.hasPermission(this, node)
-            ?: Bukkit.getPluginManager().getPermission(node)?.default?.getValue(false)
-            ?: false
+            ?: CompletableFuture.completedFuture(
+                Bukkit.getPluginManager().getPermission(node)?.default?.getValue(false)
+                    ?: false
+            )
 }
 
-val RPKCharacter.groups
-    get() = Services[RPKGroupService::class.java]?.getGroups(this) ?: emptyList()
+val RPKCharacter.groups: CompletableFuture<List<RPKGroup>>
+    get() = Services[RPKGroupService::class.java]?.getGroups(this) ?: CompletableFuture.completedFuture(emptyList())
+
+val RPKCharacter.preloadedGroups: List<RPKGroup>?
+    get() = Services[RPKGroupService::class.java]?.getPreloadedGroups(this)
 
 fun RPKMinecraftProfile.assignPermissions() {
     Services[RPKPermissionsService::class.java]?.assignPermissions(this)
 }
 
-fun RPKMinecraftProfile.unassignPermissions() {
-    Services[RPKPermissionsService::class.java]?.unassignPermissions(this)
+fun RPKMinecraftProfile.unassignPermissions(bukkitPlayer: Player) {
+    Services[RPKPermissionsService::class.java]?.unassignPermissions(this, bukkitPlayer)
 }
 
 fun RPKGroup.hasPermission(node: String, default: Boolean): Boolean {

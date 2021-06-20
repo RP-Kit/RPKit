@@ -45,8 +45,9 @@ class MonsterSpawnAreaDeleteCommand(private val plugin: RPKMonstersBukkit) : Com
             sender.sendMessage(plugin.messages["monster-spawn-area-delete-invalid-area"])
             return true
         }
-        monsterSpawnAreaService.removeSpawnArea(monsterSpawnArea)
-        sender.sendMessage(plugin.messages["monster-spawn-area-delete-valid"])
+        monsterSpawnAreaService.removeSpawnArea(monsterSpawnArea).thenRun {
+            sender.sendMessage(plugin.messages["monster-spawn-area-delete-valid"])
+        }
         return true
     }
 

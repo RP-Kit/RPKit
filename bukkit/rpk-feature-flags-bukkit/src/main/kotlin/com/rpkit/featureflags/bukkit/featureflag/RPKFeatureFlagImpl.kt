@@ -18,6 +18,7 @@ package com.rpkit.featureflags.bukkit.featureflag
 import com.rpkit.featureflags.bukkit.RPKFeatureFlagsBukkit
 import com.rpkit.featureflags.bukkit.database.table.RPKProfileFeatureFlagTable
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.util.concurrent.CompletableFuture
 
 
 class RPKFeatureFlagImpl(
@@ -26,21 +27,25 @@ class RPKFeatureFlagImpl(
     override var isEnabledByDefault: Boolean
 ) : RPKFeatureFlag {
 
-    override fun isEnabledFor(profile: RPKProfile): Boolean {
-        return plugin.database.getTable(RPKProfileFeatureFlagTable::class.java).get(profile, this)?.isEnabled
-                ?: isEnabledByDefault
+    override fun isEnabledFor(profile: RPKProfile): CompletableFuture<Boolean> {
+        return plugin.database.getTable(RPKProfileFeatureFlagTable::class.java).get(profile, this).thenApply {
+            it?.isEnabled ?: isEnabledByDefault
+        }
     }
 
-    override fun setEnabledFor(profile: RPKProfile, enabled: Boolean) {
-        val profileFeatureFlagTable = plugin.database.getTable(RPKProfileFeatureFlagTable::class.java)
-        if (isEnabledFor(profile) != enabled) {
-            var playerFeatureFlag = profileFeatureFlagTable.get(profile, this)
-            if (playerFeatureFlag == null) {
-                playerFeatureFlag = RPKProfileFeatureFlag(profile = profile, featureFlag = this, isEnabled = enabled)
-                profileFeatureFlagTable.insert(playerFeatureFlag)
-            } else {
-                playerFeatureFlag.isEnabled = enabled
-                profileFeatureFlagTable.update(playerFeatureFlag)
+    override fun setEnabledFor(profile: RPKProfile, enabled: Boolean): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val profileFeatureFlagTable = plugin.database.getTable(RPKProfileFeatureFlagTable::class.java)
+            if (isEnabledFor(profile).join() != enabled) {
+                var playerFeatureFlag = profileFeatureFlagTable.get(profile, this).join()
+                if (playerFeatureFlag == null) {
+                    playerFeatureFlag =
+                        RPKProfileFeatureFlag(profile = profile, featureFlag = this, isEnabled = enabled)
+                    profileFeatureFlagTable.insert(playerFeatureFlag).join()
+                } else {
+                    playerFeatureFlag.isEnabled = enabled
+                    profileFeatureFlagTable.update(playerFeatureFlag).join()
+                }
             }
         }
     }

@@ -50,12 +50,12 @@ class CharacterCardCommand(private val plugin: RPKCharactersBukkit) : CommandExe
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        var minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        var minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (sender.hasPermission("rpkit.characters.command.character.card.other")) {
             if (args.isNotEmpty()) {
                 val bukkitPlayer = plugin.server.getPlayer(args[0])
                 if (bukkitPlayer != null) {
-                    minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+                    minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
                 }
             }
         }
@@ -63,12 +63,12 @@ class CharacterCardCommand(private val plugin: RPKCharactersBukkit) : CommandExe
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character"])
             return true
         }
-        val senderMinecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val senderMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (senderMinecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile"])
             return true

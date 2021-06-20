@@ -29,6 +29,7 @@ import com.rpkit.permissions.bukkit.database.table.RPKProfileGroupTable
 import com.rpkit.permissions.bukkit.group.RPKGroupImpl
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.RPKGroupServiceImpl
+import com.rpkit.permissions.bukkit.listener.AsyncPlayerPreLoginListener
 import com.rpkit.permissions.bukkit.listener.PlayerJoinListener
 import com.rpkit.permissions.bukkit.listener.PlayerQuitListener
 import com.rpkit.permissions.bukkit.listener.RPKBukkitCharacterSwitchListener
@@ -115,9 +116,10 @@ class RPKPermissionsBukkit : RPKBukkitPlugin() {
 
     fun registerListeners() {
         registerListeners(
-                PlayerJoinListener(),
-                PlayerQuitListener(),
-                RPKBukkitCharacterSwitchListener()
+            PlayerJoinListener(),
+            PlayerQuitListener(this),
+            RPKBukkitCharacterSwitchListener(),
+            AsyncPlayerPreLoginListener()
         )
     }
 }

@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitVanishEvent(
-        override val minecraftProfile: RPKMinecraftProfile
-) : RPKBukkitEvent(), RPKVanishEvent, Cancellable {
+        override val minecraftProfile: RPKMinecraftProfile,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKVanishEvent, Cancellable {
 
     companion object {
         @JvmStatic

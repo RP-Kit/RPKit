@@ -46,12 +46,12 @@ class PrepareItemCraftListener(private val plugin: RPKProfessionsBukkit) : Liste
             return
         }
         if (bukkitPlayer.gameMode == GameMode.CREATIVE || bukkitPlayer.gameMode == GameMode.SPECTATOR) return
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
         if (minecraftProfile == null) {
             event.inventory.result = null
             return
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             event.inventory.result = null
             return
@@ -61,9 +61,14 @@ class PrepareItemCraftListener(private val plugin: RPKProfessionsBukkit) : Liste
             event.inventory.result = null
             return
         }
-        val professions = professionService.getProfessions(character)
+        val professions = professionService.getPreloadedProfessions(character)
+        if (professions == null) {
+            minecraftProfile.sendMessage(plugin.messages.noPreloadedProfessions)
+            event.inventory.result = null
+            return
+        }
         val professionLevels = professions
-                .associateWith { profession -> professionService.getProfessionLevel(character, profession) }
+                .associateWith { profession -> professionService.getPreloadedProfessionLevel(character, profession) ?: 1 }
         val amount = professionLevels.entries
             .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.CRAFT, material, level) }
             .maxOrNull() ?: plugin.config.getDouble("default.crafting.$material.amount", 1.0)

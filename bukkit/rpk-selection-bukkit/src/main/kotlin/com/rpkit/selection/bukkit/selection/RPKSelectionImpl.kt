@@ -16,33 +16,18 @@
 
 package com.rpkit.selection.bukkit.selection
 
+import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import org.bukkit.World
-import org.bukkit.block.Block
 
 
 class RPKSelectionImpl(
         override val minecraftProfile: RPKMinecraftProfile,
-        override var world: World,
-        override var point1: Block,
-        override var point2: Block
+        override var world: String,
+        override var point1: RPKBlockLocation,
+        override var point2: RPKBlockLocation
 ) : RPKSelection {
 
-    override val minimumPoint: Block
-        get() = world.getBlockAt(
-                Math.min(point1.x, point2.x),
-                Math.min(point1.y, point2.y),
-                Math.min(point1.z, point2.z)
-        )
-
-    override val maximumPoint: Block
-        get() = world.getBlockAt(
-                Math.max(point1.x, point2.x),
-                Math.max(point1.y, point2.y),
-                Math.max(point1.z, point2.z)
-        )
-
-    override fun contains(block: Block): Boolean {
+    override fun contains(block: RPKBlockLocation): Boolean {
         return block.world == world
                 && block.x >= minimumPoint.x
                 && block.y >= minimumPoint.y

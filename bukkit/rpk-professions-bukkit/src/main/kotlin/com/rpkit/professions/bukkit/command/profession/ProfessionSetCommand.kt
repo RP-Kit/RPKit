@@ -71,7 +71,7 @@ class ProfessionSetCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(target)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(target)
         if (minecraftProfile == null) {
             if (target == sender) {
                 sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
@@ -87,7 +87,7 @@ class ProfessionSetCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             if (target == sender) {
                 sender.sendMessage(plugin.messages["no-character-self"])
@@ -108,25 +108,29 @@ class ProfessionSetCommand(val plugin: RPKProfessionsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["profession-set-invalid-profession"])
             return true
         }
-        if (professionService.getProfessions(character).contains(profession)) {
-            sender.sendMessage(plugin.messages["profession-set-invalid-already-using-profession"])
-            return true
-        }
-        if (professionService.getProfessions(character).size >= plugin.config.getInt("max-professions")) {
-            sender.sendMessage(plugin.messages["profession-set-invalid-too-many-professions"])
-            return true
-        }
-        professionService.addProfession(character, profession)
-        professionService.setProfessionChangeCooldown(
-                character,
-                Duration.of(
+        professionService.getProfessions(character).thenAccept { characterProfessions ->
+            if (characterProfessions.contains(profession)) {
+                sender.sendMessage(plugin.messages["profession-set-invalid-already-using-profession"])
+                return@thenAccept
+            }
+            if (characterProfessions.size >= plugin.config.getInt("max-professions")) {
+                sender.sendMessage(plugin.messages["profession-set-invalid-too-many-professions"])
+                return@thenAccept
+            }
+            professionService.addProfession(character, profession).thenRun {
+                professionService.setProfessionChangeCooldown(
+                    character,
+                    Duration.of(
                         plugin.config.getLong("profession-change-cooldown"),
                         SECONDS
-                )
-        )
-        sender.sendMessage(plugin.messages["profession-set-valid", mapOf(
-                "profession" to profession.name.value
-        )])
+                    )
+                ).thenRun {
+                    sender.sendMessage(plugin.messages["profession-set-valid", mapOf(
+                        "profession" to profession.name.value
+                    )])
+                }
+            }
+        }
         return true
     }
 }

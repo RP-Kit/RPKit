@@ -26,96 +26,192 @@ import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
 import org.bukkit.OfflinePlayer
-import java.util.UUID
+import java.util.*
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 
 class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKMinecraftProfileService {
 
-    override fun getMinecraftProfile(id: RPKMinecraftProfileId): RPKMinecraftProfile? {
+    private val minecraftProfilesById = ConcurrentHashMap<Int, RPKMinecraftProfile>()
+    private val minecraftProfilesByMinecraftUsername = ConcurrentHashMap<String, RPKMinecraftProfile>()
+    private val minecraftProfilesByUuid = ConcurrentHashMap<UUID, RPKMinecraftProfile>()
+
+    override fun getPreloadedMinecraftProfile(id: RPKMinecraftProfileId): RPKMinecraftProfile? {
+        return minecraftProfilesById[id.value]
+    }
+
+    override fun getPreloadedMinecraftProfile(name: RPKMinecraftUsername): RPKMinecraftProfile? {
+        return minecraftProfilesByMinecraftUsername[name.value]
+    }
+
+    override fun getPreloadedMinecraftProfile(minecraftUUID: UUID): RPKMinecraftProfile? {
+        return minecraftProfilesByUuid[minecraftUUID]
+    }
+
+    override fun getPreloadedMinecraftProfile(player: OfflinePlayer): RPKMinecraftProfile? {
+        return getPreloadedMinecraftProfile(player.uniqueId)
+    }
+
+    override fun loadMinecraftProfile(minecraftUUID: UUID): CompletableFuture<RPKMinecraftProfile?> {
+        val preloadedMinecraftProfile = getPreloadedMinecraftProfile(minecraftUUID)
+        if (preloadedMinecraftProfile != null) return CompletableFuture.completedFuture(preloadedMinecraftProfile)
+        plugin.logger.info("Loading Minecraft profile for user $minecraftUUID...")
+        val minecraftProfileFuture = plugin.database.getTable(RPKMinecraftProfileTable::class.java)[minecraftUUID]
+        minecraftProfileFuture.thenAccept { minecraftProfile ->
+            if (minecraftProfile != null) {
+                val minecraftProfileId = minecraftProfile.id
+                if (minecraftProfileId != null) {
+                    minecraftProfilesById[minecraftProfileId.value] = minecraftProfile
+                }
+                minecraftProfilesByMinecraftUsername[minecraftProfile.minecraftUsername.value] = minecraftProfile
+                minecraftProfilesByUuid[minecraftUUID] = minecraftProfile
+            }
+        }
+        return minecraftProfileFuture
+    }
+
+    override fun unloadMinecraftProfile(minecraftProfile: RPKMinecraftProfile) {
+        val minecraftProfileId = minecraftProfile.id
+        if (minecraftProfileId != null) {
+            minecraftProfilesById.remove(minecraftProfileId.value)
+        }
+        minecraftProfilesByMinecraftUsername.remove(minecraftProfile.minecraftUsername.value)
+        minecraftProfilesByUuid.remove(minecraftProfile.minecraftUUID)
+        plugin.logger.info("Unloaded Minecraft profile for user ${minecraftProfile.minecraftUUID}")
+    }
+
+    override fun getMinecraftProfile(id: RPKMinecraftProfileId): CompletableFuture<RPKMinecraftProfile?> {
         return plugin.database.getTable(RPKMinecraftProfileTable::class.java)[id]
     }
 
-    override fun getMinecraftProfile(name: RPKMinecraftUsername): RPKMinecraftProfile? {
+    override fun getMinecraftProfile(name: RPKMinecraftUsername): CompletableFuture<RPKMinecraftProfile?> {
         val bukkitPlayer = plugin.server.getOfflinePlayer(name.value)
         return getMinecraftProfile(bukkitPlayer)
     }
 
-    override fun getMinecraftProfile(player: OfflinePlayer): RPKMinecraftProfile? {
+    override fun getMinecraftProfile(player: OfflinePlayer): CompletableFuture<RPKMinecraftProfile?> {
         return getMinecraftProfile(player.uniqueId)
     }
 
-    override fun getMinecraftProfile(minecraftUUID: UUID): RPKMinecraftProfile? {
+    override fun getMinecraftProfile(minecraftUUID: UUID): CompletableFuture<RPKMinecraftProfile?> {
         return plugin.database.getTable(RPKMinecraftProfileTable::class.java).get(minecraftUUID)
     }
 
-    override fun getMinecraftProfiles(profile: RPKProfile): List<RPKMinecraftProfile> {
+    override fun getMinecraftProfiles(profile: RPKProfile): CompletableFuture<List<RPKMinecraftProfile>> {
         return plugin.database.getTable(RPKMinecraftProfileTable::class.java).get(profile)
     }
 
-    private fun addMinecraftProfile(profile: RPKMinecraftProfile) {
-        val event = RPKBukkitMinecraftProfileCreateEvent(profile, !plugin.server.isPrimaryThread)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKMinecraftProfileTable::class.java).insert(event.minecraftProfile)
+    private fun addMinecraftProfile(profile: RPKMinecraftProfile): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitMinecraftProfileCreateEvent(profile, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKMinecraftProfileTable::class.java).insert(event.minecraftProfile).join()
+        }
     }
 
-    override fun createMinecraftProfile(minecraftUsername: RPKMinecraftUsername, profile: RPKThinProfile?): RPKMinecraftProfile {
+    override fun createMinecraftProfile(minecraftUsername: RPKMinecraftUsername, profile: RPKThinProfile?): CompletableFuture<RPKMinecraftProfile> {
         val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftUsername.value)
-        val minecraftProfile = RPKMinecraftProfileImpl(
-            profile = profile ?: RPKThinProfileImpl(
-                RPKProfileName(bukkitPlayer.name ?: "Unknown Minecraft user")
-            ),
-            minecraftUUID = bukkitPlayer.uniqueId
-        )
-        addMinecraftProfile(minecraftProfile)
-        return minecraftProfile
+        return CompletableFuture.supplyAsync {
+            val minecraftProfile = RPKMinecraftProfileImpl(
+                profile = profile ?: RPKThinProfileImpl(
+                    RPKProfileName(bukkitPlayer.name ?: "Unknown Minecraft user")
+                ),
+                minecraftUUID = bukkitPlayer.uniqueId
+            )
+            addMinecraftProfile(minecraftProfile).join()
+            return@supplyAsync minecraftProfile
+        }
     }
 
-    override fun createMinecraftProfile(minecraftUUID: UUID, profile: RPKThinProfile?): RPKMinecraftProfile {
+    override fun createMinecraftProfile(minecraftUUID: UUID, profile: RPKThinProfile?): CompletableFuture<RPKMinecraftProfile> {
         val bukkitPlayer = plugin.server.getOfflinePlayer(minecraftUUID)
-        val minecraftProfile = RPKMinecraftProfileImpl(
-            profile = profile ?: RPKThinProfileImpl(
-                RPKProfileName(bukkitPlayer.name ?: "Unknown Minecraft user")
-            ),
-            minecraftUUID = minecraftUUID
-        )
-        addMinecraftProfile(minecraftProfile)
-        return minecraftProfile
+        return CompletableFuture.supplyAsync {
+            val minecraftProfile = RPKMinecraftProfileImpl(
+                profile = profile ?: RPKThinProfileImpl(
+                    RPKProfileName(bukkitPlayer.name ?: "Unknown Minecraft user")
+                ),
+                minecraftUUID = minecraftUUID
+            )
+            addMinecraftProfile(minecraftProfile).join()
+            return@supplyAsync minecraftProfile
+        }
     }
 
-    override fun updateMinecraftProfile(profile: RPKMinecraftProfile) {
-        val event = RPKBukkitMinecraftProfileUpdateEvent(profile, !plugin.server.isPrimaryThread)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKMinecraftProfileTable::class.java).update(event.minecraftProfile)
+    override fun createAndLoadMinecraftProfile(
+        minecraftUsername: RPKMinecraftUsername,
+        profile: RPKThinProfile?
+    ): CompletableFuture<RPKMinecraftProfile> {
+        return CompletableFuture.supplyAsync {
+            val minecraftProfile = createMinecraftProfile(minecraftUsername, profile).join()
+            val minecraftProfileId = minecraftProfile.id
+            if (minecraftProfileId != null) {
+                minecraftProfilesById[minecraftProfileId.value] = minecraftProfile
+            }
+            minecraftProfilesByMinecraftUsername[minecraftProfile.minecraftUsername.value] = minecraftProfile
+            minecraftProfilesByUuid[minecraftProfile.minecraftUUID] = minecraftProfile
+            plugin.logger.info("Created and loaded Minecraft profile for user ${minecraftProfile.minecraftUUID}")
+            return@supplyAsync minecraftProfile
+        }
     }
 
-    override fun removeMinecraftProfile(profile: RPKMinecraftProfile) {
-        val event = RPKBukkitMinecraftProfileDeleteEvent(profile, !plugin.server.isPrimaryThread)
-        plugin.server.pluginManager.callEvent(event)
-        if (event.isCancelled) return
-        plugin.database.getTable(RPKMinecraftProfileTable::class.java).delete(event.minecraftProfile)
+    override fun createAndLoadMinecraftProfile(
+        minecraftUUID: UUID,
+        profile: RPKThinProfile?
+    ): CompletableFuture<RPKMinecraftProfile> {
+        return CompletableFuture.supplyAsync {
+            val minecraftProfile = createMinecraftProfile(minecraftUUID, profile).join()
+            val minecraftProfileId = minecraftProfile.id
+            if (minecraftProfileId != null) {
+                minecraftProfilesById[minecraftProfileId.value] = minecraftProfile
+            }
+            minecraftProfilesByMinecraftUsername[minecraftProfile.minecraftUsername.value] = minecraftProfile
+            minecraftProfilesByUuid[minecraftUUID] = minecraftProfile
+            plugin.logger.info("Created and loaded Minecraft profile for user $minecraftUUID")
+            return@supplyAsync minecraftProfile
+        }
     }
 
-    override fun getMinecraftProfileLinkRequests(minecraftProfile: RPKMinecraftProfile): List<RPKMinecraftProfileLinkRequest> {
+    override fun updateMinecraftProfile(profile: RPKMinecraftProfile): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitMinecraftProfileUpdateEvent(profile, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKMinecraftProfileTable::class.java).update(event.minecraftProfile).join()
+        }
+    }
+
+    override fun removeMinecraftProfile(profile: RPKMinecraftProfile): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val event = RPKBukkitMinecraftProfileDeleteEvent(profile, true)
+            plugin.server.pluginManager.callEvent(event)
+            if (event.isCancelled) return@runAsync
+            plugin.database.getTable(RPKMinecraftProfileTable::class.java).delete(event.minecraftProfile)
+        }
+    }
+
+    override fun getMinecraftProfileLinkRequests(minecraftProfile: RPKMinecraftProfile): CompletableFuture<List<RPKMinecraftProfileLinkRequest>> {
         return plugin.database.getTable(RPKMinecraftProfileLinkRequestTable::class.java).get(minecraftProfile)
     }
 
-    private fun addMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest) {
-        plugin.database.getTable(RPKMinecraftProfileLinkRequestTable::class.java).insert(minecraftProfileLinkRequest)
+    private fun addMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKMinecraftProfileLinkRequestTable::class.java).insert(minecraftProfileLinkRequest)
     }
 
     override fun createMinecraftProfileLinkRequest(
         profile: RPKProfile,
         minecraftProfile: RPKMinecraftProfile
-    ): RPKMinecraftProfileLinkRequest {
-        val linkRequest = RPKMinecraftProfileLinkRequestImpl(profile, minecraftProfile)
-        addMinecraftProfileLinkRequest(linkRequest)
-        return linkRequest
+    ): CompletableFuture<RPKMinecraftProfileLinkRequest> {
+        return CompletableFuture.supplyAsync {
+            val linkRequest = RPKMinecraftProfileLinkRequestImpl(profile, minecraftProfile)
+            addMinecraftProfileLinkRequest(linkRequest).join()
+            return@supplyAsync linkRequest
+        }
     }
 
-    override fun removeMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest) {
-        plugin.database.getTable(RPKMinecraftProfileLinkRequestTable::class.java).delete(minecraftProfileLinkRequest)
+    override fun removeMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest): CompletableFuture<Void> {
+        return plugin.database.getTable(RPKMinecraftProfileLinkRequestTable::class.java).delete(minecraftProfileLinkRequest)
     }
 
 }

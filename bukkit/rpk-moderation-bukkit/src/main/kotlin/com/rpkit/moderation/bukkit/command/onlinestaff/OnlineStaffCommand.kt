@@ -29,7 +29,7 @@ class OnlineStaffCommand(private val plugin: RPKModerationBukkit) : CommandExecu
             plugin.server.onlinePlayers
                     .filter { player -> player.hasPermission("rpkit.moderation.staff") }
                     .forEach { player ->
-                        sender.sendMessage(plugin.messages["online-staff-item", mapOf(Pair("name", player.name))])
+                        sender.sendMessage(plugin.messages["online-staff-item", mapOf("name" to player.name)])
                     }
         }
         return true

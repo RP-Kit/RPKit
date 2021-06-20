@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitSnoopingBeginEvent(
-        override val snooper: RPKMinecraftProfile
-) : RPKBukkitEvent(), RPKSnoopingBeginEvent, Cancellable {
+        override val snooper: RPKMinecraftProfile,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKSnoopingBeginEvent, Cancellable {
 
     companion object {
         @JvmStatic

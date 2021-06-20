@@ -25,8 +25,9 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitProfessionRemoveEvent(
         override val character: RPKCharacter,
-        override val profession: RPKProfession
-) : RPKBukkitEvent(), RPKProfessionRemoveEvent, Cancellable {
+        override val profession: RPKProfession,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKProfessionRemoveEvent, Cancellable {
 
     companion object {
         @JvmStatic

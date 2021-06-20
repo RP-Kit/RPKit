@@ -63,7 +63,7 @@ class StatBuildAssignPointCommand(private val plugin: RPKStatBuildsBukkit) : Com
             sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages["no-minecraft-profile-self"])
             return true
@@ -73,7 +73,7 @@ class StatBuildAssignPointCommand(private val plugin: RPKStatBuildsBukkit) : Com
             sender.sendMessage(plugin.messages["no-character-service"])
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages["no-character-self"])
             return true
@@ -83,22 +83,29 @@ class StatBuildAssignPointCommand(private val plugin: RPKStatBuildsBukkit) : Com
             sender.sendMessage(plugin.messages["no-stat-build-service"])
             return true
         }
-        if (points > statBuildService.getUnassignedStatPoints(character)) {
-            sender.sendMessage(plugin.messages["stat-build-assign-point-invalid-points-not-enough"])
-            return true
+        statBuildService.getUnassignedStatPoints(character).thenAccept getUnassignedStatPoints@{ unasssignedStatPoints ->
+            if (points > unasssignedStatPoints) {
+                sender.sendMessage(plugin.messages["stat-build-assign-point-invalid-points-not-enough"])
+                return@getUnassignedStatPoints
+            }
+            statBuildService.getStatPoints(character, statAttribute).thenAccept getStatPoints@{ assignedStatPoints ->
+                val maxStatPoints = statBuildService.getMaxStatPoints(character, statAttribute)
+                if (assignedStatPoints + points > maxStatPoints) {
+                    sender.sendMessage(plugin.messages["stat-build-assign-point-invalid-points-too-many-in-stat"])
+                    return@getStatPoints
+                }
+                statBuildService.setStatPoints(character, statAttribute, assignedStatPoints + points)
+                sender.sendMessage(plugin.messages["stat-build-assign-point-valid", mapOf(
+                    "character" to character.name,
+                    "stat_attribute" to statAttribute.name.value,
+                    "points" to points.toString(),
+                    "total_points" to statBuildService.getStatPoints(character, statAttribute).toString(),
+                    "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
+                )])
+            }
+
         }
-        if (statBuildService.getStatPoints(character, statAttribute) + points > statBuildService.getMaxStatPoints(character, statAttribute)) {
-            sender.sendMessage(plugin.messages["stat-build-assign-point-invalid-points-too-many-in-stat"])
-            return true
-        }
-        statBuildService.setStatPoints(character, statAttribute, statBuildService.getStatPoints(character, statAttribute) + points)
-        sender.sendMessage(plugin.messages["stat-build-assign-point-valid", mapOf(
-                "character" to character.name,
-                "stat_attribute" to statAttribute.name.value,
-                "points" to points.toString(),
-                "total_points" to statBuildService.getStatPoints(character, statAttribute).toString(),
-                "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
-        )])
+
         return true
     }
 

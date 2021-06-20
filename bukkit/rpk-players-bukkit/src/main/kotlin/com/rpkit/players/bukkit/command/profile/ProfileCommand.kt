@@ -21,6 +21,7 @@ import com.rpkit.core.command.result.CommandResult
 import com.rpkit.core.command.result.IncorrectUsageFailure
 import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.players.bukkit.RPKPlayersBukkit
+import java.util.concurrent.CompletableFuture
 
 
 class ProfileCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
@@ -31,10 +32,10 @@ class ProfileCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor 
     private val profileConfirmLinkCommand = ProfileConfirmLinkCommand(plugin)
     private val profileDenyLinkCommand = ProfileDenyLinkCommand(plugin)
 
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CommandResult {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
         if (args.isEmpty()) {
             sender.sendMessage(plugin.messages.profileUsage)
-            return IncorrectUsageFailure()
+            return CompletableFuture.completedFuture(IncorrectUsageFailure())
         }
         val newArgs = args.drop(1).toTypedArray()
         return when (args[0].toLowerCase()) {
@@ -45,7 +46,7 @@ class ProfileCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor 
             "denylink" -> profileDenyLinkCommand.onCommand(sender, newArgs)
             else -> {
                 sender.sendMessage(plugin.messages.profileUsage)
-                IncorrectUsageFailure()
+                CompletableFuture.completedFuture(IncorrectUsageFailure())
             }
         }
     }

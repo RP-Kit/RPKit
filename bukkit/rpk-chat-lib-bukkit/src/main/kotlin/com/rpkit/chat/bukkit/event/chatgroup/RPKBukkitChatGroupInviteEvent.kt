@@ -25,8 +25,9 @@ import org.bukkit.event.HandlerList
 
 class RPKBukkitChatGroupInviteEvent(
         override val minecraftProfile: RPKMinecraftProfile,
-        override val chatGroup: RPKChatGroup
-) : RPKBukkitEvent(), RPKChatGroupInviteEvent, Cancellable {
+        override val chatGroup: RPKChatGroup,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKChatGroupInviteEvent, Cancellable {
 
     companion object {
         @JvmStatic

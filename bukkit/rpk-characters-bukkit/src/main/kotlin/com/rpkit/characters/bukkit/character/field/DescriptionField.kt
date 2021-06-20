@@ -17,6 +17,7 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 /**
  * A character card field for description
@@ -24,16 +25,23 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 class DescriptionField : HideableCharacterCardField {
 
     override val name = "description"
-    override fun get(character: RPKCharacter): String {
-        return if (isHidden(character)) "[HIDDEN]" else character.description
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return isHidden(character).thenApply { hidden ->
+            if (hidden) {
+                "[HIDDEN]"
+            } else {
+                character.description
+            }
+        }
     }
 
-    override fun isHidden(character: RPKCharacter): Boolean {
-        return character.isDescriptionHidden
+    override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
+        return CompletableFuture.completedFuture(character.isDescriptionHidden)
     }
 
-    override fun setHidden(character: RPKCharacter, hidden: Boolean) {
+    override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         character.isDescriptionHidden = hidden
+        return CompletableFuture.completedFuture(null)
     }
 
 }

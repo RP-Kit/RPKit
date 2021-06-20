@@ -26,6 +26,7 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.util.concurrent.CompletableFuture
 
 /**
  * IRC component.
@@ -38,14 +39,14 @@ class IRCComponent(
         val isIRCWhitelisted: Boolean
 ) : UndirectedPipelineComponent, ConfigurationSerializable {
 
-    override fun process(context: UndirectedMessageContext): UndirectedMessageContext {
+    override fun process(context: UndirectedMessageContext): CompletableFuture<UndirectedMessageContext> {
         if (!context.isCancelled) {
-            val ircService = Services[RPKIRCService::class.java] ?: return context
+            val ircService = Services[RPKIRCService::class.java] ?: return CompletableFuture.completedFuture(context)
             if (ircService.isConnected) {
                 ircService.sendMessage(ircChannel, ChatColor.stripColor(context.message)!!)
             }
         }
-        return context
+        return CompletableFuture.completedFuture(context)
     }
 
     override fun serialize(): MutableMap<String, Any> {

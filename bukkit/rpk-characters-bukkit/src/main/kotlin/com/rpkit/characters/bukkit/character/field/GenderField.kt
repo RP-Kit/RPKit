@@ -17,6 +17,7 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import java.util.concurrent.CompletableFuture
 
 /**
  * Character card field for gender.
@@ -24,16 +25,23 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 class GenderField : HideableCharacterCardField {
 
     override val name = "gender"
-    override fun get(character: RPKCharacter): String {
-        return if (isHidden(character)) "[HIDDEN]" else character.gender ?: "unset"
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
+        return isHidden(character).thenApply { hidden ->
+            if (hidden) {
+                "[HIDDEN]"
+            } else {
+                character.gender ?: "unset"
+            }
+        }
     }
 
-    override fun isHidden(character: RPKCharacter): Boolean {
-        return character.isGenderHidden
+    override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
+        return CompletableFuture.completedFuture(character.isGenderHidden)
     }
 
-    override fun setHidden(character: RPKCharacter, hidden: Boolean) {
+    override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         character.isGenderHidden = hidden
+        return CompletableFuture.completedFuture(null)
     }
 
 }

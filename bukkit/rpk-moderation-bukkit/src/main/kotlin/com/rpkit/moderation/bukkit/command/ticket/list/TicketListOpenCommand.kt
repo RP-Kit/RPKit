@@ -35,21 +35,22 @@ class TicketListOpenCommand(private val plugin: RPKModerationBukkit) : CommandEx
             sender.sendMessage(plugin.messages["no-ticket-service"])
             return true
         }
-        val openTickets = ticketService.getOpenTickets()
-        sender.sendMessage(plugin.messages["ticket-list-title"])
-        val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        openTickets.forEach { ticket ->
-            val closeDate = ticket.closeDate
-            sender.sendMessage(plugin.messages["ticket-list-item", mapOf(
-                "id" to ticket.id.toString(),
-                "reason" to ticket.reason,
-                "location" to "${ticket.location?.world} ${ticket.location?.blockX}, ${ticket.location?.blockY}, ${ticket.location?.blockZ}",
-                "issuer" to ticket.issuer.name.value,
-                "resolver" to (ticket.resolver?.name?.value ?: "none"),
-                "open_date" to dateTimeFormatter.format(ticket.openDate),
-                "close_date" to if (closeDate == null) "none" else dateTimeFormatter.format(ticket.closeDate),
-                "closed" to ticket.isClosed.toString()
-            )])
+        ticketService.getOpenTickets().thenAccept { openTickets ->
+            sender.sendMessage(plugin.messages["ticket-list-title"])
+            val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            openTickets.forEach { ticket ->
+                val closeDate = ticket.closeDate
+                sender.sendMessage(plugin.messages["ticket-list-item", mapOf(
+                    "id" to ticket.id?.value.toString(),
+                    "reason" to ticket.reason,
+                    "location" to "${ticket.location?.world} ${ticket.location?.x}, ${ticket.location?.y}, ${ticket.location?.z}",
+                    "issuer" to ticket.issuer.name.value,
+                    "resolver" to (ticket.resolver?.name?.value ?: "none"),
+                    "open_date" to dateTimeFormatter.format(ticket.openDate),
+                    "close_date" to if (closeDate == null) "none" else dateTimeFormatter.format(ticket.closeDate),
+                    "closed" to ticket.isClosed.toString()
+                )])
+            }
         }
         return true
     }

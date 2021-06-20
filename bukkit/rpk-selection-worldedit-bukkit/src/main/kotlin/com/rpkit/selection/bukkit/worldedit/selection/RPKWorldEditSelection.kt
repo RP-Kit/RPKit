@@ -16,6 +16,9 @@
 
 package com.rpkit.selection.bukkit.worldedit.selection
 
+import com.rpkit.core.bukkit.location.toBukkitBlock
+import com.rpkit.core.bukkit.location.toRPKBlockLocation
+import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.selection.bukkit.selection.RPKSelection
 import com.sk89q.worldedit.IncompleteRegionException
@@ -25,8 +28,6 @@ import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldedit.regions.selector.CuboidRegionSelector
 import com.sk89q.worldedit.regions.selector.limit.PermissiveSelectorLimits
 import org.bukkit.Bukkit
-import org.bukkit.World
-import org.bukkit.block.Block
 import kotlin.math.floor
 
 
@@ -35,27 +36,39 @@ class RPKWorldEditSelection(
         val session: LocalSession?
 ) : RPKSelection {
 
-    override var point1: Block
+    override var point1: RPKBlockLocation
         get() {
             return if (session == null) {
                 val world = Bukkit.getWorlds()[0]
-                world.getBlockAt(world.spawnLocation)
+                RPKBlockLocation(
+                    world.name,
+                    world.spawnLocation.blockX,
+                    world.spawnLocation.blockY,
+                    world.spawnLocation.blockZ
+                )
             } else {
-                val world = BukkitAdapter.adapt(session.selectionWorld)
-                val primaryPosition = try {
-                    session.getRegionSelector(session.selectionWorld).primaryPosition.toVector3()
-                } catch (exception: IncompleteRegionException) {
-                    BukkitAdapter.adapt(world.spawnLocation).toVector()
-                }
-                world.getBlockAt(
+                val selectionWorld = session.selectionWorld
+                if (selectionWorld != null) {
+                    val world = BukkitAdapter.adapt(selectionWorld)
+                    val primaryPosition = try {
+                        session.getRegionSelector(selectionWorld).primaryPosition.toVector3()
+                    } catch (exception: IncompleteRegionException) {
+                        BukkitAdapter.adapt(world.spawnLocation).toVector()
+                    }
+                    RPKBlockLocation(
+                        world.name,
                         floor(primaryPosition.x).toInt(),
                         floor(primaryPosition.y).toInt(),
                         floor(primaryPosition.z).toInt()
-                )
+                    )
+                } else {
+                    Bukkit.getWorlds()[0].spawnLocation.toRPKBlockLocation()
+                }
             }
         }
         set(value) {
-            val selector = session?.getRegionSelector(BukkitAdapter.adapt(value.world))
+            val bukkitBlock = value.toBukkitBlock()
+            val selector = session?.getRegionSelector(BukkitAdapter.adapt(bukkitBlock?.world ?: Bukkit.getWorlds()[0]))
             selector?.selectPrimary(
                     BlockVector3.at(
                             value.x,
@@ -66,27 +79,39 @@ class RPKWorldEditSelection(
             )
         }
 
-    override var point2: Block
+    override var point2: RPKBlockLocation
         get() {
             return if (session == null) {
                 val world = Bukkit.getWorlds()[0]
-                world.getBlockAt(world.spawnLocation)
+                RPKBlockLocation(
+                    world.name,
+                    world.spawnLocation.blockX,
+                    world.spawnLocation.blockY,
+                    world.spawnLocation.blockZ
+                )
             } else {
-                val world = BukkitAdapter.adapt(session.selectionWorld)
-                val secondaryPosition = try {
-                    (session.getRegionSelector(session.selectionWorld) as? CuboidRegionSelector)?.region?.pos2?.toVector3()
-                } catch (exception: IncompleteRegionException) {
-                    null
-                } ?: BukkitAdapter.adapt(world.spawnLocation).toVector()
-                world.getBlockAt(
+                val selectionWorld = session.selectionWorld
+                if (selectionWorld != null) {
+                    val world = BukkitAdapter.adapt(session.selectionWorld)
+                    val secondaryPosition = try {
+                        (session.getRegionSelector(session.selectionWorld) as? CuboidRegionSelector)?.region?.pos2?.toVector3()
+                    } catch (exception: IncompleteRegionException) {
+                        null
+                    } ?: BukkitAdapter.adapt(world.spawnLocation).toVector()
+                    RPKBlockLocation(
+                        world.name,
                         floor(secondaryPosition.x).toInt(),
                         floor(secondaryPosition.y).toInt(),
                         floor(secondaryPosition.z).toInt()
-                )
+                    )
+                } else {
+                    Bukkit.getWorlds()[0].spawnLocation.toRPKBlockLocation()
+                }
             }
         }
         set(value) {
-            val selector = session?.getRegionSelector(BukkitAdapter.adapt(value.world))
+            val bukkitBlock = value.toBukkitBlock()
+            val selector = session?.getRegionSelector(BukkitAdapter.adapt(bukkitBlock?.world ?: Bukkit.getWorlds()[0]))
             selector?.selectPrimary(
                     BlockVector3.at(
                             value.x,
@@ -97,14 +122,17 @@ class RPKWorldEditSelection(
             )
         }
 
-    override var world: World
-        get() = BukkitAdapter.adapt(session?.selectionWorld) ?: Bukkit.getWorlds()[0]
+    override var world: String
+        get() = (session?.selectionWorld?.let { BukkitAdapter.adapt(it) } ?: Bukkit.getWorlds()[0]).name
         set(value) {
 
         }
 
-    override fun contains(block: Block): Boolean {
-        return session?.getSelection(session.selectionWorld)?.contains(BukkitAdapter.asBlockVector(block.location))
+    override fun contains(block: RPKBlockLocation): Boolean {
+        val blockVector = block.toBukkitBlock()?.location?.let(BukkitAdapter::asBlockVector)
+            ?: return false
+        return session?.getSelection(session.selectionWorld)
+            ?.contains(blockVector)
                 ?: false
     }
 

@@ -23,8 +23,9 @@ import org.bukkit.event.HandlerList
 
 
 class RPKBukkitFeatureFlagDeleteEvent(
-        override val featureFlag: RPKFeatureFlag
-) : RPKBukkitEvent(), RPKFeatureFlagDeleteEvent, Cancellable {
+        override val featureFlag: RPKFeatureFlag,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKFeatureFlagDeleteEvent, Cancellable {
 
     companion object {
         @JvmStatic

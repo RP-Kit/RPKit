@@ -17,7 +17,8 @@
 package com.rpkit.chat.bukkit.chatchannel.pipeline
 
 import com.rpkit.chat.bukkit.context.DirectedPostFormatMessageContext
+import java.util.concurrent.CompletableFuture
 
 interface DirectedPostFormatPipelineComponent {
-    fun process(context: DirectedPostFormatMessageContext): DirectedPostFormatMessageContext
+    fun process(context: DirectedPostFormatMessageContext): CompletableFuture<DirectedPostFormatMessageContext>
 }

@@ -19,14 +19,18 @@ package com.rpkit.statbuilds.bukkit.statbuild
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttribute
+import java.util.concurrent.CompletableFuture
 
 interface RPKStatBuildService : Service {
 
-    fun getStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int
-    fun setStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute, amount: Int)
+    fun getStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): CompletableFuture<Int>
+    fun setStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute, amount: Int): CompletableFuture<Void>
+    fun getPreloadedStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int?
+    fun loadStatPoints(character: RPKCharacter): CompletableFuture<Void>
+    fun unloadStatPoints(character: RPKCharacter)
     fun getMaxStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int
-    fun getTotalStatPoints(character: RPKCharacter): Int
-    fun getUnassignedStatPoints(character: RPKCharacter): Int
-    fun getAssignedStatPoints(character: RPKCharacter): Int
+    fun getTotalStatPoints(character: RPKCharacter): CompletableFuture<Int>
+    fun getUnassignedStatPoints(character: RPKCharacter): CompletableFuture<Int>
+    fun getAssignedStatPoints(character: RPKCharacter): CompletableFuture<Int>
 
 }

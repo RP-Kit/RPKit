@@ -23,7 +23,8 @@ import com.rpkit.blocklog.bukkit.database.create
 import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_HISTORY
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
-import org.bukkit.block.Block
+import com.rpkit.core.location.RPKBlockLocation
+import java.util.concurrent.CompletableFuture
 
 
 class RPKBlockHistoryTable(private val database: Database, private val plugin: RPKBlockLoggingBukkit) : Table {
@@ -39,100 +40,101 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
         null
     }
 
-    fun insert(entity: RPKBlockHistory) {
-        database.create
+    fun insert(entity: RPKBlockHistory): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            database.create
                 .insertInto(
-                        RPKIT_BLOCK_HISTORY,
-                        RPKIT_BLOCK_HISTORY.WORLD,
-                        RPKIT_BLOCK_HISTORY.X,
-                        RPKIT_BLOCK_HISTORY.Y,
-                        RPKIT_BLOCK_HISTORY.Z
+                    RPKIT_BLOCK_HISTORY,
+                    RPKIT_BLOCK_HISTORY.WORLD,
+                    RPKIT_BLOCK_HISTORY.X,
+                    RPKIT_BLOCK_HISTORY.Y,
+                    RPKIT_BLOCK_HISTORY.Z
                 )
                 .values(
-                        entity.world.name,
-                        entity.x,
-                        entity.y,
-                        entity.z
+                    entity.world,
+                    entity.x,
+                    entity.y,
+                    entity.z
                 )
                 .execute()
-        val id = database.create.lastID().toInt()
-        entity.id = RPKBlockHistoryId(id)
-        cache?.set(id, entity)
+            val id = database.create.lastID().toInt()
+            entity.id = RPKBlockHistoryId(id)
+            cache?.set(id, entity)
+        }
     }
 
-    fun update(entity: RPKBlockHistory) {
-        val id = entity.id ?: return
-        database.create
+    fun update(entity: RPKBlockHistory): CompletableFuture<Void> {
+        return CompletableFuture.runAsync {
+            val id = entity.id ?: return@runAsync
+            database.create
                 .update(RPKIT_BLOCK_HISTORY)
-                .set(RPKIT_BLOCK_HISTORY.WORLD, entity.world.name)
+                .set(RPKIT_BLOCK_HISTORY.WORLD, entity.world)
                 .set(RPKIT_BLOCK_HISTORY.X, entity.x)
                 .set(RPKIT_BLOCK_HISTORY.Y, entity.y)
                 .set(RPKIT_BLOCK_HISTORY.Z, entity.z)
                 .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
                 .execute()
-        cache?.set(id.value, entity)
+            cache?.set(id.value, entity)
+        }
     }
 
-    operator fun get(id: RPKBlockHistoryId): RPKBlockHistory? {
+    operator fun get(id: RPKBlockHistoryId): CompletableFuture<RPKBlockHistory?> {
         if (cache?.containsKey(id.value) == true) {
-            return cache[id.value]
+            return CompletableFuture.completedFuture(cache[id.value])
         } else {
-            val result = database.create
+            return CompletableFuture.supplyAsync {
+                val result = database.create
                     .select(
-                            RPKIT_BLOCK_HISTORY.WORLD,
-                            RPKIT_BLOCK_HISTORY.X,
-                            RPKIT_BLOCK_HISTORY.Y,
-                            RPKIT_BLOCK_HISTORY.Z
+                        RPKIT_BLOCK_HISTORY.WORLD,
+                        RPKIT_BLOCK_HISTORY.X,
+                        RPKIT_BLOCK_HISTORY.Y,
+                        RPKIT_BLOCK_HISTORY.Z
                     )
                     .from(RPKIT_BLOCK_HISTORY)
                     .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
-                    .fetchOne() ?: return null
-            val world = plugin.server.getWorld(result.get(RPKIT_BLOCK_HISTORY.WORLD))
-            if (world == null) {
-                database.create
-                        .deleteFrom(RPKIT_BLOCK_HISTORY)
-                        .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
-                        .execute()
-                cache?.remove(id.value)
-                return null
-            }
-            val blockHistory = RPKBlockHistoryImpl(
+                    .fetchOne() ?: return@supplyAsync null
+                val blockHistory = RPKBlockHistoryImpl(
                     plugin,
                     id,
-                    world,
-                    result.get(RPKIT_BLOCK_HISTORY.X),
-                    result.get(RPKIT_BLOCK_HISTORY.Y),
-                    result.get(RPKIT_BLOCK_HISTORY.Z)
-            )
-            cache?.set(id.value, blockHistory)
-            return blockHistory
+                    result[RPKIT_BLOCK_HISTORY.WORLD],
+                    result[RPKIT_BLOCK_HISTORY.X],
+                    result[RPKIT_BLOCK_HISTORY.Y],
+                    result[RPKIT_BLOCK_HISTORY.Z]
+                )
+                cache?.set(id.value, blockHistory)
+                return@supplyAsync blockHistory
+            }
         }
     }
 
-    fun get(block: Block): RPKBlockHistory? {
-        val result = database.create
+    fun get(block: RPKBlockLocation): CompletableFuture<RPKBlockHistory?> {
+        return CompletableFuture.supplyAsync {
+            val result = database.create
                 .select(RPKIT_BLOCK_HISTORY.ID)
                 .from(RPKIT_BLOCK_HISTORY)
-                .where(RPKIT_BLOCK_HISTORY.WORLD.eq(block.world.name))
+                .where(RPKIT_BLOCK_HISTORY.WORLD.eq(block.world))
                 .and(RPKIT_BLOCK_HISTORY.X.eq(block.x))
                 .and(RPKIT_BLOCK_HISTORY.Y.eq(block.y))
                 .and(RPKIT_BLOCK_HISTORY.Z.eq(block.z))
-                .fetchOne() ?: return null
-        val id = result.get(RPKIT_BLOCK_HISTORY.ID)
-        return if (id == null) {
-            null
-        } else {
-            get(RPKBlockHistoryId(id))
+                .fetchOne() ?: return@supplyAsync null
+            val id = result.get(RPKIT_BLOCK_HISTORY.ID)
+            return@supplyAsync if (id == null) {
+                null
+            } else {
+                get(RPKBlockHistoryId(id)).join()
+            }
         }
     }
 
-    fun delete(entity: RPKBlockHistory) {
-        val id = entity.id ?: return
-        database.create
+    fun delete(entity: RPKBlockHistory): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return CompletableFuture.runAsync {
+            database.create
                 .deleteFrom(RPKIT_BLOCK_HISTORY)
                 .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
                 .execute()
-        cache?.remove(id.value)
+            cache?.remove(id.value)
+        }
     }
 
 }

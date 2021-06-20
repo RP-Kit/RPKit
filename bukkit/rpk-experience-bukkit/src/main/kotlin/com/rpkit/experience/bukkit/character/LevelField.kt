@@ -21,16 +21,17 @@ import com.rpkit.characters.bukkit.character.field.CharacterCardField
 import com.rpkit.core.service.Services
 import com.rpkit.experience.bukkit.RPKExperienceBukkit
 import com.rpkit.experience.bukkit.experience.RPKExperienceService
+import java.util.concurrent.CompletableFuture
 
 
 class LevelField(private val plugin: RPKExperienceBukkit) : CharacterCardField {
 
     override val name = "level"
 
-    override fun get(character: RPKCharacter): String {
+    override fun get(character: RPKCharacter): CompletableFuture<String> {
         val experienceService = Services[RPKExperienceService::class.java]
-        if (experienceService == null) return plugin.messages["no-experience-service"]
-        return experienceService.getLevel(character).toString()
+        if (experienceService == null) return CompletableFuture.completedFuture(plugin.messages["no-experience-service"])
+        return CompletableFuture.completedFuture(experienceService.getLevel(character).toString())
     }
 
 }

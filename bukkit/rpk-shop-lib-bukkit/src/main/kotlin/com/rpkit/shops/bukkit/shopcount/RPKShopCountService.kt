@@ -18,6 +18,7 @@ package com.rpkit.shops.bukkit.shopcount
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.service.Service
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides shop count related operations.
@@ -30,7 +31,7 @@ interface RPKShopCountService : Service {
      * @param character The character
      * @return The amount of shops owned by the character
      */
-    fun getShopCount(character: RPKCharacter): Int
+    fun getShopCount(character: RPKCharacter): CompletableFuture<Int>
 
     /**
      * Sets the amount of shops owned by a character.
@@ -38,6 +39,9 @@ interface RPKShopCountService : Service {
      * @param character The character
      * @param amount The amount of shops to set
      */
-    fun setShopCount(character: RPKCharacter, amount: Int)
+    fun setShopCount(character: RPKCharacter, amount: Int): CompletableFuture<Void>
+    fun getPreloadedShopCount(character: RPKCharacter): Int?
+    fun loadShopCount(character: RPKCharacter): CompletableFuture<Int>
+    fun unloadShopCount(character: RPKCharacter)
 
 }

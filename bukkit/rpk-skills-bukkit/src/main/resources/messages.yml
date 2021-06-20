@@ -1,6 +1,6 @@
 skill-valid: '&aUsed ${skill}.'
 skill-invalid-on-cooldown: '&c${skill} is on cooldown for ${cooldown} seconds.'
-skill-invalid-not-enough-mana: '&c${skill} requires ${mana}-cost mana, you have ${mana}/${max}-mana'
+skill-invalid-not-enough-mana: '&c${skill} requires ${mana_cost} mana, you have ${mana}/${max_mana}'
 skill-invalid-unmet-prerequisites: '&cYou do not meet the prerequisites for ${skill}.'
 skill-invalid-skill: '&cThere is no skill by that name.'
 skill-list-title: '&fSkills: '

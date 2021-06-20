@@ -19,6 +19,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
 
 /**
  * Represents a payment group.
@@ -42,19 +43,19 @@ interface RPKPaymentGroup {
      * The owners of the group. These characters are notified by all actions concerning the group.
      * They may also withdraw and deposit money into the group balance, and may invite or kick members from the group.
      */
-    val owners: List<RPKCharacter>
+    val owners: CompletableFuture<List<RPKCharacter>>
 
     /**
      * The members of the group. These characters are paid to/from the balance of the payment group.
      * They are notified by actions concerning them, e.g. being failed to be paid, or failing to pay.
      */
-    val members: List<RPKCharacter>
+    val members: CompletableFuture<List<RPKCharacter>>
 
     /**
      * The characters invited to the group.
      * These characters may join the group if they wish.
      */
-    val invites: List<RPKCharacter>
+    val invites: CompletableFuture<List<RPKCharacter>>
 
     /**
      * The amount of money given to the characters in the group at the specified interval.
@@ -95,41 +96,41 @@ interface RPKPaymentGroup {
      *
      * @param character The owner to add
      */
-    fun addOwner(character: RPKCharacter)
+    fun addOwner(character: RPKCharacter): CompletableFuture<Void>
 
     /**
      * Removes an owner from the payment group.
      *
      * @param character The owner to remove
      */
-    fun removeOwner(character: RPKCharacter)
+    fun removeOwner(character: RPKCharacter): CompletableFuture<Void>
 
     /**
      * Adds a member to the payment group.
      *
      * @param character The member to add
      */
-    fun addMember(character: RPKCharacter)
+    fun addMember(character: RPKCharacter): CompletableFuture<Void>
 
     /**
      * Removes a member from the payment group.
      *
      * @param character The member to remove
      */
-    fun removeMember(character: RPKCharacter)
+    fun removeMember(character: RPKCharacter): CompletableFuture<Void>
 
     /**
      * Invites a character to the payment group.
      *
      * @param character The character to invite
      */
-    fun addInvite(character: RPKCharacter)
+    fun addInvite(character: RPKCharacter): CompletableFuture<Void>
 
     /**
      * Uninvites a character from the payment group.
      *
      * @param character The character to uninvite
      */
-    fun removeInvite(character: RPKCharacter)
+    fun removeInvite(character: RPKCharacter): CompletableFuture<Void>
 
 }

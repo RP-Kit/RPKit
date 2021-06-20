@@ -48,7 +48,7 @@ class CharacterHandler {
         val characterService = Services[RPKCharacterService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Character service not found"))
-        val character = characterService.getCharacter(RPKCharacterId(id))
+        val character = characterService.getCharacter(RPKCharacterId(id)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Character not found"))
         return Response(OK)
@@ -64,7 +64,7 @@ class CharacterHandler {
         val raceService = Services[RPKRaceService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Race service not found"))
-        val character = characterService.getCharacter(RPKCharacterId(id))
+        val character = characterService.getCharacter(RPKCharacterId(id)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Character not found"))
         if (character.profile?.id != request.authenticatedProfile?.id) {
@@ -83,7 +83,7 @@ class CharacterHandler {
         character.isAgeHidden = characterPutRequest.isAgeHidden
         character.isRaceHidden = characterPutRequest.isRaceHidden
         character.isDescriptionHidden = characterPutRequest.isDescriptionHidden
-        characterService.updateCharacter(character)
+        characterService.updateCharacter(character).join()
         return Response(NO_CONTENT)
     }
 
@@ -96,7 +96,7 @@ class CharacterHandler {
         val raceService = Services[RPKRaceService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Race service not found"))
-        val character = characterService.getCharacter(RPKCharacterId(id))
+        val character = characterService.getCharacter(RPKCharacterId(id)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Character not found"))
         if (character.profile?.id != request.authenticatedProfile?.id) {
@@ -115,7 +115,7 @@ class CharacterHandler {
         character.isAgeHidden = characterPatchRequest.isAgeHidden ?: character.isAgeHidden
         character.isRaceHidden = characterPatchRequest.isRaceHidden ?: character.isRaceHidden
         character.isDescriptionHidden = characterPatchRequest.isDescriptionHidden ?: character.isDescriptionHidden
-        characterService.updateCharacter(character)
+        characterService.updateCharacter(character).join()
         return Response(NO_CONTENT)
     }
 
@@ -124,14 +124,14 @@ class CharacterHandler {
         val characterService = Services[RPKCharacterService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Character service not found"))
-        val character = characterService.getCharacter(RPKCharacterId(id))
+        val character = characterService.getCharacter(RPKCharacterId(id)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Character not found"))
         if (character.profile?.id != request.authenticatedProfile?.id) {
             return Response(FORBIDDEN)
                 .with(ErrorResponse.lens of ErrorResponse("You can not delete characters you do not own"))
         }
-        characterService.removeCharacter(character)
+        characterService.removeCharacter(character).join()
         return Response(NO_CONTENT)
     }
 
@@ -169,7 +169,7 @@ class CharacterHandler {
             characterPostRequest.isAgeHidden,
             characterPostRequest.isRaceHidden,
             characterPostRequest.isDescriptionHidden
-        )
+        ).join()
         return Response(OK)
             .with(CharacterResponse.lens of character.toCharacterResponse())
     }
@@ -182,10 +182,10 @@ class CharacterHandler {
         val characterService = Services[RPKCharacterService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Character service not found"))
-        val profile = profileService.getProfile(RPKProfileId(profileId))
+        val profile = profileService.getProfile(RPKProfileId(profileId)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Profile not found"))
-        val characters = characterService.getCharacters(profile)
+        val characters = characterService.getCharacters(profile).join()
         return Response(OK)
             .with(CharacterResponse.listLens of characters.map(RPKCharacter::toCharacterResponse))
     }

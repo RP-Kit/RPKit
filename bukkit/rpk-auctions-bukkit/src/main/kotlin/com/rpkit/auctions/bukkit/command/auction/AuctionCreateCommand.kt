@@ -26,12 +26,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.conversations.ConversationContext
-import org.bukkit.conversations.ConversationFactory
-import org.bukkit.conversations.MessagePrompt
-import org.bukkit.conversations.NumericPrompt
-import org.bukkit.conversations.Prompt
-import org.bukkit.conversations.ValidatingPrompt
+import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
 /**
@@ -78,12 +73,12 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
             sender.sendMessage(plugin.messages.noCurrencyService)
             return true
         }
-        val minecraftProfile = minecraftProfileService.getMinecraftProfile(sender)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true
         }
-        val character = characterService.getActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character != null) {
             conversationFactory.buildConversation(sender).begin()
         } else {
@@ -326,11 +321,11 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
             val auctionService = Services[RPKAuctionService::class.java]
                     ?: return AuctionErrorPrompt(plugin.messages.noAuctionService)
             val bukkitPlayer = context.forWhom as Player
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(bukkitPlayer)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(bukkitPlayer)
                     ?: return AuctionErrorPrompt(plugin.messages.noMinecraftProfile)
-            val character = characterService.getActiveCharacter(minecraftProfile)
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
                     ?: return AuctionErrorPrompt(plugin.messages.noCharacter)
-            val auction = auctionService.createAuction(
+            auctionService.createAuction(
                 bukkitPlayer.inventory.itemInMainHand,
                 context.getSessionData("currency") as RPKCurrency,
                 bukkitPlayer.location,
@@ -341,30 +336,31 @@ class AuctionCreateCommand(private val plugin: RPKAuctionsBukkit) : CommandExecu
                 context.getSessionData("buy_out_price") as Int,
                 context.getSessionData("no_sell_price") as Int,
                 context.getSessionData("minimum_bid_increment") as Int
-            ) ?: return AuctionErrorPrompt(plugin.messages.auctionCreateFailed)
-            auction.openBidding()
-            if (!auctionService.updateAuction(auction)) {
-                return AuctionErrorPrompt(plugin.messages.auctionUpdateFailed)
+            ).thenAccept { auction ->
+                if (auction == null) {
+                    bukkitPlayer.sendMessage(plugin.messages.auctionCreateFailed)
+                } else {
+                    plugin.server.scheduler.runTask(plugin, Runnable {
+                        auction.openBidding()
+                        auctionService.updateAuction(auction)
+                            .thenAccept { updateSuccessful ->
+                                if (!updateSuccessful) {
+                                    bukkitPlayer.sendMessage(plugin.messages.auctionUpdateFailed)
+                                } else {
+                                    plugin.server.scheduler.runTask(plugin, Runnable {
+                                        bukkitPlayer.inventory.setItemInMainHand(null)
+                                    })
+                                    bukkitPlayer.sendMessage(plugin.messages.auctionCreateId.withParameters(id = auction.id?.value ?: 0))
+                                }
+                            }
+                    })
+                }
             }
-            bukkitPlayer.inventory.setItemInMainHand(null)
-            context.setSessionData("id", auction.id?.value)
-            return AuctionIDPrompt()
-        }
-
-        override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages.auctionCreateValid
-        }
-
-    }
-
-    private inner class AuctionIDPrompt : MessagePrompt() {
-
-        override fun getNextPrompt(context: ConversationContext): Prompt? {
             return END_OF_CONVERSATION
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages.auctionCreateId.withParameters(id = context.getSessionData("id") as Int)
+            return plugin.messages.auctionCreateValid
         }
 
     }

@@ -27,8 +27,9 @@ class RPKBukkitClassExperienceChangeEvent(
         override val character: RPKCharacter,
         override val `class`: RPKClass,
         override val oldExperience: Int,
-        override var experience: Int
-) : RPKBukkitEvent(), RPKClassExperienceChangeEvent, Cancellable {
+        override var experience: Int,
+        isAsync: Boolean
+) : RPKBukkitEvent(isAsync), RPKClassExperienceChangeEvent, Cancellable {
 
     companion object {
         @JvmStatic

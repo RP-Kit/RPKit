@@ -18,6 +18,7 @@ package com.rpkit.chat.bukkit.irc
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.irc.RPKIRCNick
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
+import java.util.concurrent.CompletableFuture
 
 /**
  * Provides IRC related operations.
@@ -39,21 +40,21 @@ interface RPKIRCService : Service {
      * @param channel The IRC channel to send a message to
      * @param message The message to send
      */
-    fun sendMessage(channel: IRCChannel, message: String)
+    fun sendMessage(channel: IRCChannel, message: String): CompletableFuture<Void>
 
     /**
      * Sends a message to the given IRC nick
      * @param nick The nick of the user to send a message to
      * @param message The message to send
      */
-    fun sendMessage(nick: RPKIRCNick, message: String)
+    fun sendMessage(nick: RPKIRCNick, message: String): CompletableFuture<Void>
 
     /**
      * Sends a message to the given IRC profile
      * @param user The user to send a message to
      * @param message The message to send
      */
-    fun sendMessage(user: RPKIRCProfile, message: String)
+    fun sendMessage(user: RPKIRCProfile, message: String): CompletableFuture<Void>
 
     /**
      * Checks whether a user with the given nick is online
