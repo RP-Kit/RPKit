@@ -111,18 +111,20 @@ class MoneyAddCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
                     sender.sendMessage(plugin.messages.moneyAddAmountInvalidAmountNegative)
                     return@thenAccept
                 }
-                val walletBalance = economyService.getPreloadedBalance(character, currency)
-                if (walletBalance == null) {
-                    sender.sendMessage(plugin.messages.noPreloadedBalanceOther.withParameters(character = character))
-                    return@thenAccept
+                economyService.getBalance(character, currency).thenAccept getBalance@{ walletBalance ->
+                    if (walletBalance == null) {
+                        sender.sendMessage(plugin.messages.noPreloadedBalanceOther.withParameters(character = character))
+                        return@getBalance
+                    }
+                    if (walletBalance + amount > 1728) {
+                        sender.sendMessage(plugin.messages.moneyAddAmountInvalidAmountLimit)
+                        return@getBalance
+                    }
+                    economyService.setBalance(character, currency, walletBalance + amount).thenRun {
+                        sender.sendMessage(plugin.messages.moneyAddAmountValid)
+                        sender.sendMessage(plugin.messages.moneyAddValid)
+                    }
                 }
-                if (walletBalance + amount > 1728) {
-                    sender.sendMessage(plugin.messages.moneyAddAmountInvalidAmountLimit)
-                    return@thenAccept
-                }
-                economyService.setBalance(character, currency, walletBalance + amount)
-                sender.sendMessage(plugin.messages.moneyAddAmountValid)
-                sender.sendMessage(plugin.messages.moneyAddValid)
             } catch (exception: NumberFormatException) {
                 sender.sendMessage(plugin.messages.moneyAddAmountInvalidAmountNumber)
             }
