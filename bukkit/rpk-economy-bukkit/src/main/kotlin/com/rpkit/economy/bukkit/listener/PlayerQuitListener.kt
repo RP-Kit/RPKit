@@ -19,7 +19,11 @@ class PlayerQuitListener : Listener {
             if (minecraftProfile == null) return@getMinecraftProfile
             characterService.getActiveCharacter(minecraftProfile).thenAccept getCharacter@{ character ->
                 if (character == null) return@getCharacter
-                economyService.unloadBalances(character)
+                // If a player relogs quickly, then by the time the data has been retrieved, the player is sometimes back
+                // online. We only want to unload data if the player is offline.
+                if (!minecraftProfile.isOnline) {
+                    economyService.unloadBalances(character)
+                }
             }
         }
 

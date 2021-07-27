@@ -141,7 +141,8 @@ interface RPKChatChannel {
             sender: RPKThinProfile,
             senderMinecraftProfile: RPKMinecraftProfile?,
             message: String,
-            isAsync: Boolean = false
+            isAsync: Boolean = false,
+            callback: RPKChatChannelMessageCallback? = null
     )
 
     /**
@@ -164,7 +165,8 @@ interface RPKChatChannel {
             format: List<FormatPart>,
             directedPostFormatPipeline: List<DirectedPostFormatPipelineComponent>,
             undirectedPipeline: List<UndirectedPipelineComponent>,
-            isAsync: Boolean = false
+            isAsync: Boolean = false,
+            callback: RPKChatChannelMessageCallback? = null
     )
 
 }

@@ -108,17 +108,19 @@ class RPKChatChannelImpl(
             sender: RPKThinProfile,
             senderMinecraftProfile: RPKMinecraftProfile?,
             message: String,
-            isAsync: Boolean
+            isAsync: Boolean,
+            callback: RPKChatChannelMessageCallback?
     ) {
         sendMessage(
-                sender,
-                senderMinecraftProfile,
-                message,
-                directedPreFormatPipeline,
-                format,
-                directedPostFormatPipeline,
-                undirectedPipeline,
-                isAsync
+            sender,
+            senderMinecraftProfile,
+            message,
+            directedPreFormatPipeline,
+            format,
+            directedPostFormatPipeline,
+            undirectedPipeline,
+            isAsync,
+            callback
         )
     }
 
@@ -130,7 +132,8 @@ class RPKChatChannelImpl(
             format: List<FormatPart>,
             directedPostFormatPipeline: List<DirectedPostFormatPipelineComponent>,
             undirectedPipeline: List<UndirectedPipelineComponent>,
-            isAsync: Boolean
+            isAsync: Boolean,
+            callback: RPKChatChannelMessageCallback?
     ) {
         val event = RPKBukkitChatChannelMessageEvent(sender, senderMinecraftProfile, this, message, isAsync)
         plugin.server.pluginManager.callEvent(event)
@@ -169,6 +172,7 @@ class RPKChatChannelImpl(
                 undirectedPipeline.forEach { component ->
                     context = component.process(context).join()
                 }
+                callback?.invoke()
             }
         })
     }
