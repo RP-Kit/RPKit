@@ -17,6 +17,7 @@ package com.rpkit.chat.bukkit.listener
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannel
+import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelMessageCallback
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKThinProfile
@@ -42,6 +43,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
             chatChannelService.getMinecraftProfileChannel(minecraftProfile).thenAcceptAsync { chatChannel ->
+                val queuedMessages = mutableListOf<QueuedMessage>()
                 val message = event.message
                 var readMessageIndex = 0
                 chatChannelService.matchPatterns
@@ -52,40 +54,51 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
                     .flatMap { (matches, matchPattern) -> matches.associateWith { matchPattern }.toList() }
                     .sortedBy { (match, _) -> match.range.first }
                     .forEach { (match, matchPattern) ->
-                        sendMessage(
+                        queuedMessages.add(QueuedMessage(
                             chatChannel,
                             message.substring(readMessageIndex, match.range.first),
                             event.player,
                             profile,
                             minecraftProfile
-                        )
+                        ))
                         match.groupValues.forEachIndexed { index, value ->
                             val otherChatChannel = matchPattern.groups[index]
                             if (otherChatChannel != null) {
-                                sendMessage(
+                                queuedMessages.add(QueuedMessage(
                                     otherChatChannel,
                                     value,
                                     event.player,
                                     profile,
                                     minecraftProfile
-                                )
+                                ))
                             }
                         }
                         readMessageIndex = match.range.last + 1
                     }
                 if (readMessageIndex < message.length) {
-                    sendMessage(
+                    queuedMessages.add(QueuedMessage(
                         chatChannel,
                         message.substring(readMessageIndex, message.length),
                         event.player,
                         profile,
                         minecraftProfile
-                    )
+                    ))
                 }
+                sendMessages(queuedMessages)
             }
         } else {
             event.player.sendMessage(plugin.messages["no-minecraft-profile"])
         }
+    }
+
+    private fun sendMessages(queue: List<QueuedMessage>) {
+        if (queue.isNotEmpty()) {
+            sendMessage(queue.first()) { sendMessages(queue.drop(1)) }
+        }
+    }
+
+    private fun sendMessage(message: QueuedMessage, callback: RPKChatChannelMessageCallback? = null) {
+        sendMessage(message.chatChannel, message.message, message.bukkitPlayer, message.profile, message.minecraftProfile, callback)
     }
 
     private fun sendMessage(
@@ -93,7 +106,8 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
         message: String,
         bukkitPlayer: Player,
         profile: RPKThinProfile,
-        minecraftProfile: RPKMinecraftProfile
+        minecraftProfile: RPKMinecraftProfile,
+        callback: RPKChatChannelMessageCallback? = null
     ) {
         if (chatChannel != null) {
             plugin.server.scheduler.runTask(plugin, Runnable {
@@ -108,8 +122,11 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
                             profile,
                             minecraftProfile,
                             message.trim(),
-                            true
+                            true,
+                            callback
                         )
+                    } else {
+                        callback?.invoke()
                     }
                 }
             })
@@ -117,5 +134,13 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
             bukkitPlayer.sendMessage(plugin.messages["no-chat-channel"])
         }
     }
+
+    private data class QueuedMessage(
+        val chatChannel: RPKChatChannel?,
+        val message: String,
+        val bukkitPlayer: Player,
+        val profile: RPKThinProfile,
+        val minecraftProfile: RPKMinecraftProfile
+    )
 
 }

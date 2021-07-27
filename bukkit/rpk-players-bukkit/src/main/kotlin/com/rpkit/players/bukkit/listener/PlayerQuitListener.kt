@@ -30,16 +30,21 @@ class PlayerQuitListener(private val plugin: RPKPlayersBukkit) : Listener {
                         val minecraftProfiles =
                             minecraftProfileFutures.mapNotNull(CompletableFuture<RPKMinecraftProfile?>::join)
                                 .filter { it != minecraftProfile }
-                        if (minecraftProfiles.none {
-                            val otherProfile = it.profile
-                            return@none otherProfile is RPKProfile && otherProfile.id?.value == profile.id?.value
-                        }) {
-                            profileService.unloadProfile(profile)
+                        if (!minecraftProfile.isOnline) {
+                            if (minecraftProfiles.none {
+                                    if (it.isOnline) return@none true
+                                    val otherProfile = it.profile
+                                    return@none otherProfile is RPKProfile && otherProfile.id?.value == profile.id?.value
+                                }) {
+                                profileService.unloadProfile(profile)
+                            }
                         }
                     }
                 }
             })
-            minecraftProfileService.unloadMinecraftProfile(minecraftProfile)
+            if (!minecraftProfile.isOnline) {
+                minecraftProfileService.unloadMinecraftProfile(minecraftProfile)
+            }
         }
     }
 

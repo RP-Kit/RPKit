@@ -111,14 +111,16 @@ class MoneySubtractCommand(val plugin: RPKEconomyBukkit) : CommandExecutor {
                     sender.sendMessage(plugin.messages.moneySubtractAmountInvalidAmountNegative)
                     return@thenAccept
                 }
-                val walletBalance = economyService.getPreloadedBalance(character, currency)
-                if (walletBalance == null) {
-                    sender.sendMessage(plugin.messages.noPreloadedBalanceOther.withParameters(character = character))
-                    return@thenAccept
+                economyService.getBalance(character, currency).thenAccept getBalance@{ walletBalance ->
+                    if (walletBalance == null) {
+                        sender.sendMessage(plugin.messages.noPreloadedBalanceOther.withParameters(character = character))
+                        return@getBalance
+                    }
+                    economyService.setBalance(character, currency, walletBalance - amount).thenRun {
+                        sender.sendMessage(plugin.messages.moneySubtractAmountValid)
+                        sender.sendMessage(plugin.messages.moneySubtractValid)
+                    }
                 }
-                economyService.setBalance(character, currency, walletBalance - amount)
-                sender.sendMessage(plugin.messages.moneySubtractAmountValid)
-                sender.sendMessage(plugin.messages.moneySubtractValid)
             } catch (exception: NumberFormatException) {
                 sender.sendMessage(plugin.messages.moneySubtractAmountInvalidAmountNumber)
             }
