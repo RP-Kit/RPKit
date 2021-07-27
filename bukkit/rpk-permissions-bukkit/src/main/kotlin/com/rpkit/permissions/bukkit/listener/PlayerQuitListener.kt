@@ -53,7 +53,9 @@ class PlayerQuitListener(private val plugin: RPKPermissionsBukkit) : Listener {
                     }
                     characterService?.getActiveCharacter(minecraftProfile)?.thenAccept getCharacter@{ character ->
                         if (character == null) return@getCharacter
-                        groupService.unloadGroups(character)
+                        if (!minecraftProfile.isOnline) {
+                            groupService.unloadGroups(character)
+                        }
                     }
                 })
             }
