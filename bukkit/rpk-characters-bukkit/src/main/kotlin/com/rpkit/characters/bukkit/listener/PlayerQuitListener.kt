@@ -16,7 +16,11 @@ class PlayerQuitListener : Listener {
         val characterService = Services[RPKCharacterService::class.java] ?: return
         minecraftProfileService.getMinecraftProfile(event.player).thenAccept { minecraftProfile ->
             if (minecraftProfile == null) return@thenAccept
-            characterService.unloadActiveCharacter(minecraftProfile)
+            // If a player relogs quickly, then by the time the data has been retrieved, the player is sometimes back
+            // online. We only want to unload data if the player is offline.
+            if (!minecraftProfile.isOnline) {
+                characterService.unloadActiveCharacter(minecraftProfile)
+            }
         }
 
     }

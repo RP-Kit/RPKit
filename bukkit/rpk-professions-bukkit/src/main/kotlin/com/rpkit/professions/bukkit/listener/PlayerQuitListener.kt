@@ -20,10 +20,14 @@ class PlayerQuitListener : Listener {
             characterService.getActiveCharacter(minecraftProfile).thenAccept getCharacter@{ character ->
                 if (character == null) return@getCharacter
                 professionService.getProfessions(character).thenAccept { professions ->
-                    professions.forEach { profession ->
-                        professionService.unloadProfessionExperience(character, profession)
+                    // If a player relogs quickly, then by the time the data has been retrieved, the player is sometimes back
+                    // online. We only want to unload data if the player is offline.
+                    if (!minecraftProfile.isOnline) {
+                        professions.forEach { profession ->
+                            professionService.unloadProfessionExperience(character, profession)
+                        }
+                        professionService.unloadProfessions(character)
                     }
-                    professionService.unloadProfessions(character)
                 }
             }
         }
