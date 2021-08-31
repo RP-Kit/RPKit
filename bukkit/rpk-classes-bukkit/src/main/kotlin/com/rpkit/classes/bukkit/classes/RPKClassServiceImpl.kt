@@ -30,31 +30,33 @@ import java.util.concurrent.ConcurrentHashMap
 class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassService {
 
     override val classes: List<RPKClass> = plugin.config.getConfigurationSection("classes")
-            ?.getKeys(false)
-            ?.map { className ->
-                RPKClassImpl(
-                        RPKClassName(className),
-                        plugin.config.getInt("classes.$className.max-level"),
-                    plugin.config.getConfigurationSection("classes.$className.prerequisites")
-                        ?.getKeys(false)?.associate { prerequisiteClassName ->
-                            prerequisiteClassName to plugin.config.getInt("classes.$className.prerequisites.$prerequisiteClassName")
-                        } ?: mapOf(),
-                    plugin.config.getConfigurationSection("classes.$className.skill-points.base")
-                        ?.getKeys(false)?.associate { skillTypeName ->
-                            skillTypeName to plugin.config.getInt("classes.$className.skill-points.base.$skillTypeName")
-                        } ?: mapOf(),
-                    plugin.config.getConfigurationSection("classes.$className.skill-points.level")
-                        ?.getKeys(false)?.associate { skillTypeName ->
-                            skillTypeName to plugin.config.getInt("classes.$className.skill-points.level.$skillTypeName")
-                        } ?: mapOf(),
-                    plugin.config.getConfigurationSection("classes.$className.stat-variables")
-                        ?.getKeys(false)?.associate { statVariableName ->
-                            statVariableName to (plugin.config.getString("classes.$className.stat-variables.$statVariableName")
-                                ?: "0")
-                        } ?: mapOf()
-                )
-            }
-            ?: mutableListOf()
+        ?.getKeys(false)
+        ?.map { className ->
+            RPKClassImpl(
+                RPKClassName(className),
+                plugin.config.getInt("classes.$className.max-level"),
+                plugin.config.getInt("classes.$className.max-age"),
+                plugin.config.getInt("classes.$className.min-age"),
+                plugin.config.getConfigurationSection("classes.$className.prerequisites")
+                    ?.getKeys(false)?.associate { prerequisiteClassName ->
+                        prerequisiteClassName to plugin.config.getInt("classes.$className.prerequisites.$prerequisiteClassName")
+                    } ?: mapOf(),
+                plugin.config.getConfigurationSection("classes.$className.skill-points.base")
+                    ?.getKeys(false)?.associate { skillTypeName ->
+                        skillTypeName to plugin.config.getInt("classes.$className.skill-points.base.$skillTypeName")
+                    } ?: mapOf(),
+                plugin.config.getConfigurationSection("classes.$className.skill-points.level")
+                    ?.getKeys(false)?.associate { skillTypeName ->
+                        skillTypeName to plugin.config.getInt("classes.$className.skill-points.level.$skillTypeName")
+                    } ?: mapOf(),
+                plugin.config.getConfigurationSection("classes.$className.stat-variables")
+                    ?.getKeys(false)?.associate { statVariableName ->
+                        statVariableName to (plugin.config.getString("classes.$className.stat-variables.$statVariableName")
+                            ?: "0")
+                    } ?: mapOf()
+            )
+        }
+        ?: mutableListOf()
 
     private val characterClasses = ConcurrentHashMap<Int, RPKClass>()
     private val characterClassExperience = ConcurrentHashMap<Int, ConcurrentHashMap<RPKClass, Int>>()
@@ -73,7 +75,8 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
     override fun setClass(character: RPKCharacter, `class`: RPKClass): CompletableFuture<Void> {
         // Update experience in the class the character is being switched from
         // Unsafe if experience service is unavailable so just abort
-        val experienceService = Services[RPKExperienceService::class.java] ?: return CompletableFuture.completedFuture(null)
+        val experienceService =
+            Services[RPKExperienceService::class.java] ?: return CompletableFuture.completedFuture(null)
         return CompletableFuture.runAsync {
             val oldClass = getClass(character).join()
             val event = RPKBukkitClassChangeEvent(character, oldClass, `class`, true)
@@ -99,7 +102,8 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
             }
 
             // Update experience in the experience service to that of the new class
-            experienceService.setExperience(event.character, getExperience(event.character, event.`class`).join()).join()
+            experienceService.setExperience(event.character, getExperience(event.character, event.`class`).join())
+                .join()
 
             // Update database with new class
             val characterClassTable = plugin.database.getTable(RPKCharacterClassTable::class.java)
@@ -162,7 +166,8 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
     }
 
     override fun getLevel(character: RPKCharacter, `class`: RPKClass): CompletableFuture<Int> {
-        val experienceService = Services[RPKExperienceService::class.java] ?: return CompletableFuture.completedFuture(1)
+        val experienceService =
+            Services[RPKExperienceService::class.java] ?: return CompletableFuture.completedFuture(1)
         return CompletableFuture.supplyAsync {
             if (`class` == getClass(character).join()) {
                 return@supplyAsync experienceService.getLevel(character).join()
@@ -174,7 +179,8 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
     }
 
     override fun setLevel(character: RPKCharacter, `class`: RPKClass, level: Int): CompletableFuture<Void> {
-        val experienceService = Services[RPKExperienceService::class.java] ?: return CompletableFuture.completedFuture(null)
+        val experienceService =
+            Services[RPKExperienceService::class.java] ?: return CompletableFuture.completedFuture(null)
         return CompletableFuture.runAsync {
             if (`class` == getClass(character).join()) {
                 experienceService.setLevel(character, level).join()
@@ -189,7 +195,8 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
     }
 
     override fun getExperience(character: RPKCharacter, `class`: RPKClass): CompletableFuture<Int> {
-        val experienceService = Services[RPKExperienceService::class.java] ?: return CompletableFuture.completedFuture(0)
+        val experienceService =
+            Services[RPKExperienceService::class.java] ?: return CompletableFuture.completedFuture(0)
         return CompletableFuture.supplyAsync {
             return@supplyAsync if (`class` == getClass(character).join()) {
                 experienceService.getExperience(character).join()
@@ -202,7 +209,8 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
     }
 
     override fun setExperience(character: RPKCharacter, `class`: RPKClass, experience: Int): CompletableFuture<Void> {
-        val experienceService = Services[RPKExperienceService::class.java] ?: return CompletableFuture.completedFuture(null)
+        val experienceService =
+            Services[RPKExperienceService::class.java] ?: return CompletableFuture.completedFuture(null)
         return CompletableFuture.runAsync {
             val oldExperience = getExperience(character, `class`).join()
             val event = RPKBukkitClassExperienceChangeEvent(character, `class`, oldExperience, experience, true)
