@@ -25,6 +25,7 @@ interface RPKClass {
 
     val name: RPKClassName
     val maxLevel: Int
+    val restriction: RPKClassRestriction
     fun hasPrerequisites(character: RPKCharacter): CompletableFuture<Boolean>
     fun getSkillPoints(skillType: RPKSkillType, level: Int): Int
     fun getStatVariableValue(statVariable: RPKStatVariable, level: Int): Int

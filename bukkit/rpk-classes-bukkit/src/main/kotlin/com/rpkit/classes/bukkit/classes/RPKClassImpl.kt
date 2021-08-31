@@ -26,12 +26,13 @@ import java.util.concurrent.CompletableFuture
 
 
 class RPKClassImpl(
-        override val name: RPKClassName,
-        override val maxLevel: Int,
-        private val prerequisitesByName: Map<String, Int>,
-        private val baseSkillPointsByName: Map<String, Int>,
-        private val levelSkillPointsByName: Map<String, Int>,
-        private val statVariableFormulae: Map<String, String>
+    override val name: RPKClassName,
+    override val maxLevel: Int,
+    override val restriction: RPKClassRestriction,
+    private val prerequisitesByName: Map<String, Int>,
+    private val baseSkillPointsByName: Map<String, Int>,
+    private val levelSkillPointsByName: Map<String, Int>,
+    private val statVariableFormulae: Map<String, String>,
 ) : RPKClass {
 
     val prerequisites: Map<RPKClass, Int>

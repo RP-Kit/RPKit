@@ -18,6 +18,7 @@ package com.rpkit.classes.bukkit.command.`class`
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.classes.bukkit.RPKClassesBukkit
 import com.rpkit.classes.bukkit.classes.RPKClassName
+import com.rpkit.classes.bukkit.classes.RPKClassRestrictionType
 import com.rpkit.classes.bukkit.classes.RPKClassService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -77,10 +78,24 @@ class ClassSetCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
                 sender.sendMessage(plugin.messages["class-set-invalid-prerequisites"])
                 return@thenAccept
             }
-            classService.setClass(character, `class`).thenRun {
-                sender.sendMessage(plugin.messages["class-set-valid", mapOf(
-                    "class" to `class`.name.value
-                )])
+
+            val restriction = `class`.restriction
+            val isAgeValid: Boolean = when (restriction.restrictionType) {
+                RPKClassRestrictionType.OLDER_THAN -> character.age > restriction.age
+                RPKClassRestrictionType.YOUNGER_THAN -> character.age < restriction.age
+            }
+
+            if (isAgeValid) {
+                classService.setClass(character, `class`).thenRun {
+                    sender.sendMessage(
+                        plugin.messages["class-set-valid", mapOf(
+                            "class" to `class`.name.value
+                        )]
+                    )
+                }
+            } else {
+                sender.sendMessage(plugin.messages["class-set-invalid-restriction"])
+                return@thenAccept
             }
         }
         return true
