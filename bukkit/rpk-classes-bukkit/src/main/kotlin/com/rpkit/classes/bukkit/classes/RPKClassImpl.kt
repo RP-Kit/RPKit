@@ -28,7 +28,8 @@ import java.util.concurrent.CompletableFuture
 class RPKClassImpl(
     override val name: RPKClassName,
     override val maxLevel: Int,
-    override val restriction: RPKClassRestriction,
+    override val maxAge: Int,
+    override val minAge: Int,
     private val prerequisitesByName: Map<String, Int>,
     private val baseSkillPointsByName: Map<String, Int>,
     private val levelSkillPointsByName: Map<String, Int>,

@@ -35,11 +35,8 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
             RPKClassImpl(
                 RPKClassName(className),
                 plugin.config.getInt("classes.$className.max-level"),
-                RPKClassRestriction(
-                    RPKClassRestrictionType.valueOf(
-                        plugin.config.getString("classes.$className.restriction.type") ?: "OLDER_THAN"
-                    ), plugin.config.getInt("classes.$className.restriction.age")
-                ),
+                plugin.config.getInt("classes.$className.max-age"),
+                plugin.config.getInt("classes.$className.min-age"),
                 plugin.config.getConfigurationSection("classes.$className.prerequisites")
                     ?.getKeys(false)?.associate { prerequisiteClassName ->
                         prerequisiteClassName to plugin.config.getInt("classes.$className.prerequisites.$prerequisiteClassName")
