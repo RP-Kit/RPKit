@@ -18,7 +18,6 @@ package com.rpkit.classes.bukkit.command.`class`
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.classes.bukkit.RPKClassesBukkit
 import com.rpkit.classes.bukkit.classes.RPKClassName
-import com.rpkit.classes.bukkit.classes.RPKClassRestrictionType
 import com.rpkit.classes.bukkit.classes.RPKClassService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
@@ -79,11 +78,7 @@ class ClassSetCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
                 return@thenAccept
             }
 
-            val restriction = `class`.restriction
-            val isAgeValid: Boolean = when (restriction.restrictionType) {
-                RPKClassRestrictionType.OLDER_THAN -> character.age > restriction.age
-                RPKClassRestrictionType.YOUNGER_THAN -> character.age < restriction.age
-            }
+            val isAgeValid: Boolean = character.age <= `class`.maxAge && character.age >= `class`.minAge
 
             if (isAgeValid) {
                 classService.setClass(character, `class`).thenRun {
@@ -94,7 +89,7 @@ class ClassSetCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
                     )
                 }
             } else {
-                sender.sendMessage(plugin.messages["class-set-invalid-restriction"])
+                sender.sendMessage(plugin.messages.classSetInvalidRestriction.withParameters(`class`.maxAge, `class`.minAge))
                 return@thenAccept
             }
         }

@@ -18,5 +18,15 @@ package com.rpkit.classes.bukkit.messages
 
 import com.rpkit.classes.bukkit.RPKClassesBukkit
 import com.rpkit.core.bukkit.message.BukkitMessages
+import com.rpkit.core.message.ParameterizedMessage
 
-class ClassesMessages(plugin: RPKClassesBukkit) : BukkitMessages(plugin)
+class ClassesMessages(plugin: RPKClassesBukkit) : BukkitMessages(plugin) {
+
+    class ClassSetInvalidRestrictionMessage(private val message: ParameterizedMessage) {
+        fun withParameters(maxAge: Int, minAge: Int) =
+            message.withParameters(mapOf(Pair("minAge", minAge.toString()), Pair("maxAge", maxAge.toString())))
+    }
+
+    val classSetInvalidRestriction = getParameterized("auction-set-currency-prompt-list-item")
+        .let(::ClassSetInvalidRestrictionMessage)
+}
