@@ -8,7 +8,6 @@ import com.rpkit.auctions.bukkit.database.jooq.Keys;
 import com.rpkit.auctions.bukkit.database.jooq.RpkitAuctions;
 import com.rpkit.auctions.bukkit.database.jooq.tables.records.RpkitAuctionRecord;
 import org.jooq.*;
-import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;

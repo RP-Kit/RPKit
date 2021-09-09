@@ -9,7 +9,6 @@ import com.rpkit.blocklog.bukkit.database.jooq.Keys;
 import com.rpkit.blocklog.bukkit.database.jooq.RpkitBlockLogging;
 import com.rpkit.blocklog.bukkit.database.jooq.tables.records.FlywaySchemaHistoryBlockloggingRecord;
 import org.jooq.*;
-import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;

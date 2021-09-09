@@ -8,7 +8,6 @@ import com.rpkit.banks.bukkit.database.jooq.Keys;
 import com.rpkit.banks.bukkit.database.jooq.RpkitBanks;
 import com.rpkit.banks.bukkit.database.jooq.tables.records.RpkitBankRecord;
 import org.jooq.*;
-import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;

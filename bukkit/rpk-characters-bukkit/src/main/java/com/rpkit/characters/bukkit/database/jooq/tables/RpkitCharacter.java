@@ -8,7 +8,6 @@ import com.rpkit.characters.bukkit.database.jooq.Keys;
 import com.rpkit.characters.bukkit.database.jooq.RpkitCharacters;
 import com.rpkit.characters.bukkit.database.jooq.tables.records.RpkitCharacterRecord;
 import org.jooq.*;
-import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
