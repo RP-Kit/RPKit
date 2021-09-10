@@ -24,10 +24,12 @@ import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageService
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageServiceImpl
+import com.rpkit.languages.bukkit.command.ListCharacterUnderstandingCommand
 import com.rpkit.languages.bukkit.database.table.RPKCharacterLanguageTable
 import com.rpkit.languages.bukkit.language.RPKLanguageService
 import com.rpkit.languages.bukkit.language.RPKLanguageServiceImpl
 import com.rpkit.languages.bukkit.listener.RPKBukkitCharacterDeleteListener
+import com.rpkit.languages.bukkit.message.LanguageMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -35,12 +37,15 @@ import java.io.File
 class RPKLanguagesBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
+    lateinit var messages: LanguageMessages
 
     override fun onEnable() {
         System.setProperty("com.rpkit.languages.bukkit.shadow.impl.org.jooq.no-logo", "true")
 
         Metrics(this, 6764)
         saveDefaultConfig()
+
+        messages = LanguageMessages(this)
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
@@ -64,23 +69,23 @@ class RPKLanguagesBukkit : RPKBukkitPlugin() {
             return
         }
         database = Database(
-                DatabaseConnectionProperties(
-                        databaseUrl,
-                        databaseUsername,
-                        databasePassword,
-                        databaseSqlDialect,
-                        databaseMaximumPoolSize,
-                        databaseMinimumIdle
-                ),
-                DatabaseMigrationProperties(
-                        when (databaseSqlDialect) {
-                            "MYSQL" -> "com/rpkit/languages/migrations/mysql"
-                            "SQLITE" -> "com/rpkit/languages/migrations/sqlite"
-                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
-                        },
-                        "flyway_schema_history_languages"
-                ),
-                classLoader
+            DatabaseConnectionProperties(
+                databaseUrl,
+                databaseUsername,
+                databasePassword,
+                databaseSqlDialect,
+                databaseMaximumPoolSize,
+                databaseMinimumIdle
+            ),
+            DatabaseMigrationProperties(
+                when (databaseSqlDialect) {
+                    "MYSQL" -> "com/rpkit/languages/migrations/mysql"
+                    "SQLITE" -> "com/rpkit/languages/migrations/sqlite"
+                    else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                },
+                "flyway_schema_history_languages"
+            ),
+            classLoader
         )
         database.addTable(RPKCharacterLanguageTable(database, this))
 
@@ -88,10 +93,15 @@ class RPKLanguagesBukkit : RPKBukkitPlugin() {
         Services[RPKCharacterLanguageService::class.java] = RPKCharacterLanguageServiceImpl(this)
 
         registerListeners()
+        registerCommands()
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(RPKBukkitCharacterDeleteListener(this))
+    }
+
+    private fun registerCommands() {
+        getCommand("listunderstandings")?.setExecutor(ListCharacterUnderstandingCommand(this))
     }
 
 }
