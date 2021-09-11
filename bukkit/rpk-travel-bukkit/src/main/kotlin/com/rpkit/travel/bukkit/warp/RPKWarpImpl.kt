@@ -21,5 +21,5 @@ import com.rpkit.warp.bukkit.warp.RPKWarpName
 
 class RPKWarpImpl(
         override val name: RPKWarpName,
-        override val location: RPKLocation
+        override val location: RPKLocation,
 ) : RPKWarp
