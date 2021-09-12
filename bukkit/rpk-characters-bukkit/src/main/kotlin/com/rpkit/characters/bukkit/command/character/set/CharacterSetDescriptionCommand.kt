@@ -88,9 +88,9 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
         }
         descriptionBuilder.append(args[args.size - 1])
         character.description = descriptionBuilder.toString()
-        characterService.updateCharacter(character).thenRun {
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
             sender.sendMessage(plugin.messages["character-set-description-valid"])
-            character.showCharacterCard(minecraftProfile)
+            updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
     }

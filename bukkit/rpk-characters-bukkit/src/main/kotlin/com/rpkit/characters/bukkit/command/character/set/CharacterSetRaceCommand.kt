@@ -99,9 +99,10 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             return true
         }
         character.race = race
-        characterService.updateCharacter(character)
-        sender.sendMessage(plugin.messages["character-set-race-valid"])
-        character.showCharacterCard(minecraftProfile)
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
+            sender.sendMessage(plugin.messages["character-set-race-valid"])
+            updatedCharacter?.showCharacterCard(minecraftProfile)
+        }
         return true
     }
 

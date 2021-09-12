@@ -22,11 +22,11 @@ import com.rpkit.core.message.ParameterizedMessage
 
 class ClassesMessages(plugin: RPKClassesBukkit) : BukkitMessages(plugin) {
 
-    class ClassSetInvalidRestrictionMessage(private val message: ParameterizedMessage) {
+    class ClassSetInvalidAgeMessage(private val message: ParameterizedMessage) {
         fun withParameters(maxAge: Int, minAge: Int) =
-            message.withParameters(mapOf(Pair("minAge", minAge.toString()), Pair("maxAge", maxAge.toString())))
+            message.withParameters(mapOf("min_age" to minAge.toString(), "max_age" to maxAge.toString()))
     }
 
-    val classSetInvalidRestriction = getParameterized("auction-set-currency-prompt-list-item")
-        .let(::ClassSetInvalidRestrictionMessage)
+    val classSetInvalidAge = getParameterized("class-set-invalid-age")
+        .let(::ClassSetInvalidAgeMessage)
 }

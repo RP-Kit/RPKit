@@ -190,8 +190,8 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
         }
     }
 
-    operator fun get(id: RPKCharacterId): CompletableFuture<RPKCharacter?> {
-        if (cache?.containsKey(id.value) == true) {
+    operator fun get(id: RPKCharacterId, overrideCache: Boolean = false): CompletableFuture<RPKCharacter?> {
+        if (!overrideCache && cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         } else {
             return CompletableFuture.supplyAsync {

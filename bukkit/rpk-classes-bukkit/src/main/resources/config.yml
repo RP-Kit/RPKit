@@ -34,6 +34,8 @@ classes:
       strength: 8 + (level * 5)
       agility: 6 + (level * 2)
       intelligence: 3 + level
+    min-age: 16
+    max-age: 70
   bowman:
     max-level: 20
     skill-points:
@@ -69,6 +71,8 @@ classes:
       strength: 5 + (level * 2)
       agility: 7 + (level * 4)
       intelligence: 5 + (level * 2)
+    min-age: 16
+    max-age: 70
   wizard:
     max-level: 20
     skill-points:
@@ -104,6 +108,8 @@ classes:
       strength: 3 + level
       agility: 6 + (level * 2)
       intelligence: 8 + (level * 5)
+    min-age: 16
+    max-age: 70
   freelancer:
     max-level: 50
     prerequisites:
@@ -143,6 +149,8 @@ classes:
       strength: 5 + (level * 2)
       agility: 5 + (level * 2)
       intelligence: 5 + (level * 2)
+    min-age: 16
+    max-age: 70
 caching:
   rpkit_character_class:
     character_id:

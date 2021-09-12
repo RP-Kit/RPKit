@@ -89,7 +89,7 @@ class ClassSetCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
                     )
                 }
             } else {
-                sender.sendMessage(plugin.messages.classSetInvalidRestriction.withParameters(`class`.maxAge, `class`.minAge))
+                sender.sendMessage(plugin.messages.classSetInvalidAge.withParameters(`class`.maxAge, `class`.minAge))
                 return@thenAccept
             }
         }

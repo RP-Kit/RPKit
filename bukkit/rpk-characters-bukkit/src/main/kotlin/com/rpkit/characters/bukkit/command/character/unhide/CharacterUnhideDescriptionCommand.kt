@@ -61,9 +61,9 @@ class CharacterUnhideDescriptionCommand(private val plugin: RPKCharactersBukkit)
             return true
         }
         character.isDescriptionHidden = false
-        characterService.updateCharacter(character).thenRun {
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
             sender.sendMessage(plugin.messages["character-unhide-description-valid"])
-            character.showCharacterCard(minecraftProfile)
+            updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
     }

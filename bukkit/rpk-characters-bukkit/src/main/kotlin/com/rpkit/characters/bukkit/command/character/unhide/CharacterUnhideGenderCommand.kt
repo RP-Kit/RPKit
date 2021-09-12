@@ -61,9 +61,9 @@ class CharacterUnhideGenderCommand(private val plugin: RPKCharactersBukkit) : Co
             return true
         }
         character.isGenderHidden = false
-        characterService.updateCharacter(character).thenRun {
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
             sender.sendMessage(plugin.messages["character-unhide-gender-valid"])
-            character.showCharacterCard(minecraftProfile)
+            updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
     }
