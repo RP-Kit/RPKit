@@ -61,9 +61,9 @@ class CharacterHideProfileCommand(private val plugin: RPKCharactersBukkit) : Com
             return true
         }
         character.isProfileHidden = true
-        characterService.updateCharacter(character).thenRun {
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
             sender.sendMessage(plugin.messages["character-hide-profile-valid"])
-            character.showCharacterCard(minecraftProfile)
+            updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
     }

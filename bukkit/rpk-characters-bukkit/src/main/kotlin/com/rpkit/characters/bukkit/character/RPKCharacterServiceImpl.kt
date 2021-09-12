@@ -273,15 +273,26 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         }
     }
 
-    override fun updateCharacter(character: RPKCharacter): CompletableFuture<Void> {
-        return CompletableFuture.runAsync {
+    override fun updateCharacter(character: RPKCharacter): CompletableFuture<RPKCharacter?> {
+        return CompletableFuture.supplyAsync {
             if (plugin.config.getBoolean("characters.delete-character-on-death") && character.isDead) {
                 removeCharacter(character).join()
+                return@supplyAsync null
             } else {
                 val event = RPKBukkitCharacterUpdateEvent(character, true)
                 plugin.server.pluginManager.callEvent(event)
-                if (event.isCancelled) return@runAsync
+                if (event.isCancelled) {
+                    // Character update is unsuccessful, so rollback preloaded & cached versions to last version in the database
+                    event.character.id?.let { characterId ->
+                        val databaseCharacter = plugin.database.getTable(RPKCharacterTable::class.java).get(characterId, overrideCache = true).join()
+                        if (databaseCharacter != null) {
+                            characters[characterId.value] = databaseCharacter
+                            return@supplyAsync databaseCharacter
+                        }
+                    }
+                }
                 plugin.database.getTable(RPKCharacterTable::class.java).update(event.character).join()
+                return@supplyAsync event.character
             }
         }
     }

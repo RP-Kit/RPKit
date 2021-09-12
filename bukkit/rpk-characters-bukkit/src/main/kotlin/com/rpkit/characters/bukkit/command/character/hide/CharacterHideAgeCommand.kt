@@ -61,9 +61,10 @@ class CharacterHideAgeCommand(private val plugin: RPKCharactersBukkit) : Command
             return true
         }
         character.isAgeHidden = true
-        characterService.updateCharacter(character)
-        sender.sendMessage(plugin.messages["character-hide-age-valid"])
-        character.showCharacterCard(minecraftProfile)
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
+            sender.sendMessage(plugin.messages["character-hide-age-valid"])
+            updatedCharacter?.showCharacterCard(minecraftProfile)
+        }
         return true
     }
 

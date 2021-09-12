@@ -77,10 +77,20 @@ class ClassSetCommand(private val plugin: RPKClassesBukkit) : CommandExecutor {
                 sender.sendMessage(plugin.messages["class-set-invalid-prerequisites"])
                 return@thenAccept
             }
-            classService.setClass(character, `class`).thenRun {
-                sender.sendMessage(plugin.messages["class-set-valid", mapOf(
-                    "class" to `class`.name.value
-                )])
+
+            val isAgeValid: Boolean = character.age < `class`.maxAge && character.age >= `class`.minAge
+
+            if (isAgeValid) {
+                classService.setClass(character, `class`).thenRun {
+                    sender.sendMessage(
+                        plugin.messages["class-set-valid", mapOf(
+                            "class" to `class`.name.value
+                        )]
+                    )
+                }
+            } else {
+                sender.sendMessage(plugin.messages.classSetInvalidAge.withParameters(`class`.maxAge, `class`.minAge))
+                return@thenAccept
             }
         }
         return true

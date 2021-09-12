@@ -88,9 +88,9 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             val age = args[0].toInt()
             if (age >= plugin.config.getInt("characters.min-age") && age <= plugin.config.getInt("characters.max-age")) {
                 character.age = age
-                characterService.updateCharacter(character).thenRun {
+                characterService.updateCharacter(character).thenAccept { updatedCharacter ->
                     sender.sendMessage(plugin.messages["character-set-age-valid"])
-                    character.showCharacterCard(minecraftProfile)
+                    updatedCharacter?.showCharacterCard(minecraftProfile)
                 }
             } else {
                 sender.sendMessage(plugin.messages["character-set-age-invalid-validation"])

@@ -88,9 +88,9 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit) : Command
         }
         nameBuilder.append(args[args.size - 1])
         character.name = nameBuilder.toString()
-        characterService.updateCharacter(character).thenRun {
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
             sender.sendMessage(plugin.messages["character-set-name-valid"])
-            character.showCharacterCard(minecraftProfile)
+            updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
     }

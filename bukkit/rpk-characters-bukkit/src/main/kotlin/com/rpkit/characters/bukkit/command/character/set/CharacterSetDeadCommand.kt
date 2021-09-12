@@ -87,9 +87,9 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
         val dead = args[0].toBoolean()
         if (dead && sender.hasPermission("rpkit.characters.command.character.set.dead.yes") || !dead && sender.hasPermission("rpkit.characters.command.character.set.dead.no")) {
             character.isDead = dead
-            characterService.updateCharacter(character).thenRun {
+            characterService.updateCharacter(character).thenAccept { updatedCharacter ->
                 sender.sendMessage(plugin.messages["character-set-dead-valid"])
-                character.showCharacterCard(minecraftProfile)
+                updatedCharacter?.showCharacterCard(minecraftProfile)
                 plugin.server.scheduler.runTask(plugin, Runnable {
                     if (dead) {
                         sender.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))

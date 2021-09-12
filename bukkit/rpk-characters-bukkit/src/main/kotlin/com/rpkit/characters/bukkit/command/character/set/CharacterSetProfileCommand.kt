@@ -106,11 +106,11 @@ class CharacterSetProfileCommand(private val plugin: RPKCharactersBukkit) : Comm
                 return@thenAccept
             }
             character.profile = newProfile
-            characterService.updateCharacter(character).thenRun {
+            characterService.updateCharacter(character).thenAccept { updatedCharacter ->
                 plugin.server.scheduler.runTask(plugin, Runnable {
                     characterService.setActiveCharacter(minecraftProfile, null).thenRun {
                         sender.sendMessage(plugin.messages["character-set-profile-valid"])
-                        character.showCharacterCard(minecraftProfile)
+                        updatedCharacter?.showCharacterCard(minecraftProfile)
                     }
                 })
             }
