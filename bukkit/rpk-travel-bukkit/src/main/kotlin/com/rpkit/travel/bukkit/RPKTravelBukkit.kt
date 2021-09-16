@@ -29,6 +29,7 @@ import com.rpkit.travel.bukkit.database.table.RPKWarpTable
 import com.rpkit.travel.bukkit.listener.PlayerInteractListener
 import com.rpkit.travel.bukkit.listener.SignChangeListener
 import com.rpkit.travel.bukkit.messages.TravelMessages
+import com.rpkit.travel.bukkit.permissions.TravelPermissions
 import com.rpkit.travel.bukkit.warp.RPKWarpServiceImpl
 import com.rpkit.warp.bukkit.warp.RPKWarpService
 import org.bstats.bukkit.Metrics
@@ -40,6 +41,7 @@ class RPKTravelBukkit : RPKBukkitPlugin() {
 
     lateinit var database: Database
     lateinit var messages: TravelMessages
+    lateinit var permissions: TravelPermissions
 
     override fun onEnable() {
         System.setProperty("com.rpkit.travel.bukkit.shadow.impl.org.jooq.no-logo", "true")
@@ -48,6 +50,7 @@ class RPKTravelBukkit : RPKBukkitPlugin() {
         saveDefaultConfig()
 
         messages = TravelMessages(this)
+        permissions = TravelPermissions()
 
         val databaseConfigFile = File(dataFolder, "database.yml")
         if (!databaseConfigFile.exists()) {
