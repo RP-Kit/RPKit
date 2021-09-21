@@ -8,3 +8,11 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-language-lib-bukkit
+commands:
+  listunderstandings:
+    description: Lists the language understanding of an active character of a player
+    usage: /<command> <player>
+permissions:
+  rpkit.languages.command.listunderstandings:
+    description: Lists the understanding of languages from a player
+    default: op
