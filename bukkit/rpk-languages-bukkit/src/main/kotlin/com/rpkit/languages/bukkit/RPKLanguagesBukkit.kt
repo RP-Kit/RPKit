@@ -29,7 +29,7 @@ import com.rpkit.languages.bukkit.database.table.RPKCharacterLanguageTable
 import com.rpkit.languages.bukkit.language.RPKLanguageService
 import com.rpkit.languages.bukkit.language.RPKLanguageServiceImpl
 import com.rpkit.languages.bukkit.listener.RPKBukkitCharacterDeleteListener
-import com.rpkit.languages.bukkit.message.LanguageMessages
+import com.rpkit.languages.bukkit.messages.LanguageMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
