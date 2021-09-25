@@ -24,6 +24,7 @@ import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageService
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageServiceImpl
+import com.rpkit.languages.bukkit.command.LanguageCommand
 import com.rpkit.languages.bukkit.command.ListCharacterUnderstandingCommand
 import com.rpkit.languages.bukkit.database.table.RPKCharacterLanguageTable
 import com.rpkit.languages.bukkit.language.RPKLanguageService
@@ -101,7 +102,9 @@ class RPKLanguagesBukkit : RPKBukkitPlugin() {
     }
 
     private fun registerCommands() {
+        getCommand("language")?.setExecutor(LanguageCommand(this))
         getCommand("listunderstandings")?.setExecutor(ListCharacterUnderstandingCommand(this))
+
     }
 
 }
