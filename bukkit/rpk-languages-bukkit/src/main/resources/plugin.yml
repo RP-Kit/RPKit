@@ -11,8 +11,16 @@ depend:
 commands:
   listunderstandings:
     description: Lists the language understanding of an active character of a player
-    usage: /<command> <player>
+    usage: /<command> [player]
+  language:
+    description: |
+      Base command for languages
+      /language list - Lists available languages
+    usage: /language [list]
 permissions:
   rpkit.languages.command.listunderstandings:
     description: Lists the understanding of languages from a player
+    default: op
+  rpkit.language.command.language.list:
+    description: Allows listing languages
     default: op

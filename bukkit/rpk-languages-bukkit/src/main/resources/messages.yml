@@ -1,3 +1,7 @@
+language-usage: '&cUsage: /language [list]'
+no-permission-language-list: '&cYou do not have permission to list all languages.'
+language-list-title: '&fLanguages:'
+language-list-item: '&f- &7${language}'
 no-character: '&cYou require a character to perform that command.'
 no-minecraft-profile: '&cA Minecraft profile has not been created for you, or was unable to be retrieved. Please try relogging, and contact the server owner if this error persists.'
 no-minecraft-profile-service: '&cThere is no Minecraft profile service available.'
