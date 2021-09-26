@@ -21,42 +21,48 @@ public class RpkitProfileFeatureFlagRecord extends TableRecordImpl<RpkitProfileF
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_feature_flags.rpkit_profile_feature_flag.profile_id</code>.
+     * Setter for
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag.profile_id</code>.
      */
     public void setProfileId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_feature_flags.rpkit_profile_feature_flag.profile_id</code>.
+     * Getter for
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag.profile_id</code>.
      */
     public Integer getProfileId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_feature_flags.rpkit_profile_feature_flag.feature_flag_name</code>.
+     * Setter for
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag.feature_flag_name</code>.
      */
     public void setFeatureFlagName(String value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_feature_flags.rpkit_profile_feature_flag.feature_flag_name</code>.
+     * Getter for
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag.feature_flag_name</code>.
      */
     public String getFeatureFlagName() {
         return (String) get(1);
     }
 
     /**
-     * Setter for <code>rpkit_feature_flags.rpkit_profile_feature_flag.enabled</code>.
+     * Setter for
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag.enabled</code>.
      */
     public void setEnabled(Boolean value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>rpkit_feature_flags.rpkit_profile_feature_flag.enabled</code>.
+     * Getter for
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag.enabled</code>.
      */
     public Boolean getEnabled() {
         return (Boolean) get(2);

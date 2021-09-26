@@ -21,56 +21,64 @@ public class RpkitCraftingExperienceRecord extends TableRecordImpl<RpkitCrafting
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_crafting_skill.rpkit_crafting_experience.character_id</code>.
+     * Setter for
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.character_id</code>.
      */
     public void setCharacterId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_crafting_skill.rpkit_crafting_experience.character_id</code>.
+     * Getter for
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.character_id</code>.
      */
     public Integer getCharacterId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_crafting_skill.rpkit_crafting_experience.action</code>.
+     * Setter for
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.action</code>.
      */
     public void setAction(String value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_crafting_skill.rpkit_crafting_experience.action</code>.
+     * Getter for
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.action</code>.
      */
     public String getAction() {
         return (String) get(1);
     }
 
     /**
-     * Setter for <code>rpkit_crafting_skill.rpkit_crafting_experience.material</code>.
+     * Setter for
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.material</code>.
      */
     public void setMaterial(String value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>rpkit_crafting_skill.rpkit_crafting_experience.material</code>.
+     * Getter for
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.material</code>.
      */
     public String getMaterial() {
         return (String) get(2);
     }
 
     /**
-     * Setter for <code>rpkit_crafting_skill.rpkit_crafting_experience.experience</code>.
+     * Setter for
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.experience</code>.
      */
     public void setExperience(Integer value) {
         set(3, value);
     }
 
     /**
-     * Getter for <code>rpkit_crafting_skill.rpkit_crafting_experience.experience</code>.
+     * Getter for
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.experience</code>.
      */
     public Integer getExperience() {
         return (Integer) get(3);

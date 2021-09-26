@@ -21,56 +21,64 @@ public class RpkitMonsterSpawnAreaMonsterRecord extends TableRecordImpl<RpkitMon
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_monsters.rpkit_monster_spawn_area_monster.monster_spawn_area_id</code>.
+     * Setter for
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.monster_spawn_area_id</code>.
      */
     public void setMonsterSpawnAreaId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_monsters.rpkit_monster_spawn_area_monster.monster_spawn_area_id</code>.
+     * Getter for
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.monster_spawn_area_id</code>.
      */
     public Integer getMonsterSpawnAreaId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_monsters.rpkit_monster_spawn_area_monster.entity_type</code>.
+     * Setter for
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.entity_type</code>.
      */
     public void setEntityType(String value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_monsters.rpkit_monster_spawn_area_monster.entity_type</code>.
+     * Getter for
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.entity_type</code>.
      */
     public String getEntityType() {
         return (String) get(1);
     }
 
     /**
-     * Setter for <code>rpkit_monsters.rpkit_monster_spawn_area_monster.min_level</code>.
+     * Setter for
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.min_level</code>.
      */
     public void setMinLevel(Integer value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>rpkit_monsters.rpkit_monster_spawn_area_monster.min_level</code>.
+     * Getter for
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.min_level</code>.
      */
     public Integer getMinLevel() {
         return (Integer) get(2);
     }
 
     /**
-     * Setter for <code>rpkit_monsters.rpkit_monster_spawn_area_monster.max_level</code>.
+     * Setter for
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.max_level</code>.
      */
     public void setMaxLevel(Integer value) {
         set(3, value);
     }
 
     /**
-     * Getter for <code>rpkit_monsters.rpkit_monster_spawn_area_monster.max_level</code>.
+     * Getter for
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.max_level</code>.
      */
     public Integer getMaxLevel() {
         return (Integer) get(3);

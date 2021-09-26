@@ -5,6 +5,7 @@ package com.rpkit.blocklog.bukkit.database.jooq;
 
 
 import com.rpkit.blocklog.bukkit.database.jooq.tables.FlywaySchemaHistoryBlocklogging;
+
 import org.jooq.Index;
 import org.jooq.OrderField;
 import org.jooq.impl.DSL;

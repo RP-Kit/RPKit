@@ -53,7 +53,8 @@ public class RpkitPlayers extends SchemaImpl {
     public final RpkitMinecraftProfile RPKIT_MINECRAFT_PROFILE = RpkitMinecraftProfile.RPKIT_MINECRAFT_PROFILE;
 
     /**
-     * The table <code>rpkit_players.rpkit_minecraft_profile_link_request</code>.
+     * The table
+     * <code>rpkit_players.rpkit_minecraft_profile_link_request</code>.
      */
     public final RpkitMinecraftProfileLinkRequest RPKIT_MINECRAFT_PROFILE_LINK_REQUEST = RpkitMinecraftProfileLinkRequest.RPKIT_MINECRAFT_PROFILE_LINK_REQUEST;
 
@@ -77,12 +78,13 @@ public class RpkitPlayers extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitDiscordProfile.RPKIT_DISCORD_PROFILE,
             RpkitGithubProfile.RPKIT_GITHUB_PROFILE,
             RpkitIrcProfile.RPKIT_IRC_PROFILE,
             RpkitMinecraftProfile.RPKIT_MINECRAFT_PROFILE,
             RpkitMinecraftProfileLinkRequest.RPKIT_MINECRAFT_PROFILE_LINK_REQUEST,
-            RpkitProfile.RPKIT_PROFILE);
+            RpkitProfile.RPKIT_PROFILE
+        );
     }
 }

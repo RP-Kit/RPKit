@@ -8,9 +8,6 @@ import com.rpkit.players.bukkit.database.jooq.Keys;
 import com.rpkit.players.bukkit.database.jooq.RpkitPlayers;
 import com.rpkit.players.bukkit.database.jooq.tables.records.RpkitIrcProfileRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -56,7 +53,7 @@ public class RpkitIrcProfile extends TableImpl<RpkitIrcProfileRecord> {
     /**
      * The column <code>rpkit_players.rpkit_irc_profile.profile_id</code>.
      */
-    public final TableField<RpkitIrcProfileRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.defaultValue(DSL.inline("NULL", SQLDataType.INTEGER)), this, "");
+    public final TableField<RpkitIrcProfileRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.defaultValue(DSL.field("NULL", SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_players.rpkit_irc_profile.nick</code>.
@@ -72,14 +69,16 @@ public class RpkitIrcProfile extends TableImpl<RpkitIrcProfileRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_irc_profile</code> table reference
+     * Create an aliased <code>rpkit_players.rpkit_irc_profile</code> table
+     * reference
      */
     public RpkitIrcProfile(String alias) {
         this(DSL.name(alias), RPKIT_IRC_PROFILE);
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_irc_profile</code> table reference
+     * Create an aliased <code>rpkit_players.rpkit_irc_profile</code> table
+     * reference
      */
     public RpkitIrcProfile(Name alias) {
         this(alias, RPKIT_IRC_PROFILE);
@@ -98,7 +97,7 @@ public class RpkitIrcProfile extends TableImpl<RpkitIrcProfileRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitPlayers.RPKIT_PLAYERS;
+        return aliased() ? null : RpkitPlayers.RPKIT_PLAYERS;
     }
 
     @Override
@@ -109,11 +108,6 @@ public class RpkitIrcProfile extends TableImpl<RpkitIrcProfileRecord> {
     @Override
     public UniqueKey<RpkitIrcProfileRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_IRC_PROFILE_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitIrcProfileRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitIrcProfileRecord>>asList(Keys.KEY_RPKIT_IRC_PROFILE_PRIMARY);
     }
 
     @Override

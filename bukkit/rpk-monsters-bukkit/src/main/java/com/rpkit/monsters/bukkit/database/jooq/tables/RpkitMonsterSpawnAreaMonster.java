@@ -30,7 +30,8 @@ public class RpkitMonsterSpawnAreaMonster extends TableImpl<RpkitMonsterSpawnAre
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_monsters.rpkit_monster_spawn_area_monster</code>
+     * The reference instance of
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster</code>
      */
     public static final RpkitMonsterSpawnAreaMonster RPKIT_MONSTER_SPAWN_AREA_MONSTER = new RpkitMonsterSpawnAreaMonster();
 
@@ -43,22 +44,26 @@ public class RpkitMonsterSpawnAreaMonster extends TableImpl<RpkitMonsterSpawnAre
     }
 
     /**
-     * The column <code>rpkit_monsters.rpkit_monster_spawn_area_monster.monster_spawn_area_id</code>.
+     * The column
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.monster_spawn_area_id</code>.
      */
     public final TableField<RpkitMonsterSpawnAreaMonsterRecord, Integer> MONSTER_SPAWN_AREA_ID = createField(DSL.name("monster_spawn_area_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_monsters.rpkit_monster_spawn_area_monster.entity_type</code>.
+     * The column
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.entity_type</code>.
      */
     public final TableField<RpkitMonsterSpawnAreaMonsterRecord, String> ENTITY_TYPE = createField(DSL.name("entity_type"), SQLDataType.VARCHAR(256).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_monsters.rpkit_monster_spawn_area_monster.min_level</code>.
+     * The column
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.min_level</code>.
      */
     public final TableField<RpkitMonsterSpawnAreaMonsterRecord, Integer> MIN_LEVEL = createField(DSL.name("min_level"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_monsters.rpkit_monster_spawn_area_monster.max_level</code>.
+     * The column
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster.max_level</code>.
      */
     public final TableField<RpkitMonsterSpawnAreaMonsterRecord, Integer> MAX_LEVEL = createField(DSL.name("max_level"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -71,21 +76,26 @@ public class RpkitMonsterSpawnAreaMonster extends TableImpl<RpkitMonsterSpawnAre
     }
 
     /**
-     * Create an aliased <code>rpkit_monsters.rpkit_monster_spawn_area_monster</code> table reference
+     * Create an aliased
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster</code> table
+     * reference
      */
     public RpkitMonsterSpawnAreaMonster(String alias) {
         this(DSL.name(alias), RPKIT_MONSTER_SPAWN_AREA_MONSTER);
     }
 
     /**
-     * Create an aliased <code>rpkit_monsters.rpkit_monster_spawn_area_monster</code> table reference
+     * Create an aliased
+     * <code>rpkit_monsters.rpkit_monster_spawn_area_monster</code> table
+     * reference
      */
     public RpkitMonsterSpawnAreaMonster(Name alias) {
         this(alias, RPKIT_MONSTER_SPAWN_AREA_MONSTER);
     }
 
     /**
-     * Create a <code>rpkit_monsters.rpkit_monster_spawn_area_monster</code> table reference
+     * Create a <code>rpkit_monsters.rpkit_monster_spawn_area_monster</code>
+     * table reference
      */
     public RpkitMonsterSpawnAreaMonster() {
         this(DSL.name("rpkit_monster_spawn_area_monster"), null);
@@ -97,7 +107,7 @@ public class RpkitMonsterSpawnAreaMonster extends TableImpl<RpkitMonsterSpawnAre
 
     @Override
     public Schema getSchema() {
-        return RpkitMonsters.RPKIT_MONSTERS;
+        return aliased() ? null : RpkitMonsters.RPKIT_MONSTERS;
     }
 
     @Override

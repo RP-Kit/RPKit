@@ -8,9 +8,6 @@ import com.rpkit.players.bukkit.database.jooq.Keys;
 import com.rpkit.players.bukkit.database.jooq.RpkitPlayers;
 import com.rpkit.players.bukkit.database.jooq.tables.records.RpkitGithubProfileRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -56,7 +53,7 @@ public class RpkitGithubProfile extends TableImpl<RpkitGithubProfileRecord> {
     /**
      * The column <code>rpkit_players.rpkit_github_profile.profile_id</code>.
      */
-    public final TableField<RpkitGithubProfileRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.defaultValue(DSL.inline("NULL", SQLDataType.INTEGER)), this, "");
+    public final TableField<RpkitGithubProfileRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.defaultValue(DSL.field("NULL", SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_players.rpkit_github_profile.name</code>.
@@ -77,14 +74,16 @@ public class RpkitGithubProfile extends TableImpl<RpkitGithubProfileRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_github_profile</code> table reference
+     * Create an aliased <code>rpkit_players.rpkit_github_profile</code> table
+     * reference
      */
     public RpkitGithubProfile(String alias) {
         this(DSL.name(alias), RPKIT_GITHUB_PROFILE);
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_github_profile</code> table reference
+     * Create an aliased <code>rpkit_players.rpkit_github_profile</code> table
+     * reference
      */
     public RpkitGithubProfile(Name alias) {
         this(alias, RPKIT_GITHUB_PROFILE);
@@ -103,7 +102,7 @@ public class RpkitGithubProfile extends TableImpl<RpkitGithubProfileRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitPlayers.RPKIT_PLAYERS;
+        return aliased() ? null : RpkitPlayers.RPKIT_PLAYERS;
     }
 
     @Override
@@ -114,11 +113,6 @@ public class RpkitGithubProfile extends TableImpl<RpkitGithubProfileRecord> {
     @Override
     public UniqueKey<RpkitGithubProfileRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_GITHUB_PROFILE_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitGithubProfileRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitGithubProfileRecord>>asList(Keys.KEY_RPKIT_GITHUB_PROFILE_PRIMARY);
     }
 
     @Override

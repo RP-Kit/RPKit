@@ -64,7 +64,7 @@ class SignChangeListener(private val plugin: RPKAuctionsBukkit) : Listener {
                                 if (data is Sign) {
                                     data.setLine(2,
                                         auction.item.amount.toString() + " x " + auction.item.type.toString()
-                                            .toLowerCase().replace('_', ' ')
+                                            .lowercase().replace('_', ' ')
                                     )
                                     data.setLine(
                                         3, ((bids.maxByOrNull(RPKBid::amount)

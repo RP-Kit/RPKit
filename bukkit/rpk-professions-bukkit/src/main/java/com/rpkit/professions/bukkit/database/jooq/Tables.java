@@ -22,12 +22,14 @@ public class Tables {
     public static final RpkitCharacterProfession RPKIT_CHARACTER_PROFESSION = RpkitCharacterProfession.RPKIT_CHARACTER_PROFESSION;
 
     /**
-     * The table <code>rpkit_professions.rpkit_character_profession_change_cooldown</code>.
+     * The table
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown</code>.
      */
     public static final RpkitCharacterProfessionChangeCooldown RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN = RpkitCharacterProfessionChangeCooldown.RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN;
 
     /**
-     * The table <code>rpkit_professions.rpkit_character_profession_experience</code>.
+     * The table
+     * <code>rpkit_professions.rpkit_character_profession_experience</code>.
      */
     public static final RpkitCharacterProfessionExperience RPKIT_CHARACTER_PROFESSION_EXPERIENCE = RpkitCharacterProfessionExperience.RPKIT_CHARACTER_PROFESSION_EXPERIENCE;
 

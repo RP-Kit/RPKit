@@ -53,8 +53,9 @@ public class RpkitMonsters extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitMonsterSpawnArea.RPKIT_MONSTER_SPAWN_AREA,
-            RpkitMonsterSpawnAreaMonster.RPKIT_MONSTER_SPAWN_AREA_MONSTER);
+            RpkitMonsterSpawnAreaMonster.RPKIT_MONSTER_SPAWN_AREA_MONSTER
+        );
     }
 }

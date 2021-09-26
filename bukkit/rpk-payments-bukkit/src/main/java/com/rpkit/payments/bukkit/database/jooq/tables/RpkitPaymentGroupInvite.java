@@ -30,7 +30,8 @@ public class RpkitPaymentGroupInvite extends TableImpl<RpkitPaymentGroupInviteRe
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_payments.rpkit_payment_group_invite</code>
+     * The reference instance of
+     * <code>rpkit_payments.rpkit_payment_group_invite</code>
      */
     public static final RpkitPaymentGroupInvite RPKIT_PAYMENT_GROUP_INVITE = new RpkitPaymentGroupInvite();
 
@@ -43,12 +44,14 @@ public class RpkitPaymentGroupInvite extends TableImpl<RpkitPaymentGroupInviteRe
     }
 
     /**
-     * The column <code>rpkit_payments.rpkit_payment_group_invite.payment_group_id</code>.
+     * The column
+     * <code>rpkit_payments.rpkit_payment_group_invite.payment_group_id</code>.
      */
     public final TableField<RpkitPaymentGroupInviteRecord, Integer> PAYMENT_GROUP_ID = createField(DSL.name("payment_group_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_payments.rpkit_payment_group_invite.character_id</code>.
+     * The column
+     * <code>rpkit_payments.rpkit_payment_group_invite.character_id</code>.
      */
     public final TableField<RpkitPaymentGroupInviteRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -61,21 +64,24 @@ public class RpkitPaymentGroupInvite extends TableImpl<RpkitPaymentGroupInviteRe
     }
 
     /**
-     * Create an aliased <code>rpkit_payments.rpkit_payment_group_invite</code> table reference
+     * Create an aliased <code>rpkit_payments.rpkit_payment_group_invite</code>
+     * table reference
      */
     public RpkitPaymentGroupInvite(String alias) {
         this(DSL.name(alias), RPKIT_PAYMENT_GROUP_INVITE);
     }
 
     /**
-     * Create an aliased <code>rpkit_payments.rpkit_payment_group_invite</code> table reference
+     * Create an aliased <code>rpkit_payments.rpkit_payment_group_invite</code>
+     * table reference
      */
     public RpkitPaymentGroupInvite(Name alias) {
         this(alias, RPKIT_PAYMENT_GROUP_INVITE);
     }
 
     /**
-     * Create a <code>rpkit_payments.rpkit_payment_group_invite</code> table reference
+     * Create a <code>rpkit_payments.rpkit_payment_group_invite</code> table
+     * reference
      */
     public RpkitPaymentGroupInvite() {
         this(DSL.name("rpkit_payment_group_invite"), null);
@@ -87,7 +93,7 @@ public class RpkitPaymentGroupInvite extends TableImpl<RpkitPaymentGroupInviteRe
 
     @Override
     public Schema getSchema() {
-        return RpkitPayments.RPKIT_PAYMENTS;
+        return aliased() ? null : RpkitPayments.RPKIT_PAYMENTS;
     }
 
     @Override

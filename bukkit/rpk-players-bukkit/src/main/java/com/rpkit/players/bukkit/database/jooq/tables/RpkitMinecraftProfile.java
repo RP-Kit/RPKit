@@ -8,9 +8,6 @@ import com.rpkit.players.bukkit.database.jooq.Keys;
 import com.rpkit.players.bukkit.database.jooq.RpkitPlayers;
 import com.rpkit.players.bukkit.database.jooq.tables.records.RpkitMinecraftProfileRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -36,7 +33,8 @@ public class RpkitMinecraftProfile extends TableImpl<RpkitMinecraftProfileRecord
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_players.rpkit_minecraft_profile</code>
+     * The reference instance of
+     * <code>rpkit_players.rpkit_minecraft_profile</code>
      */
     public static final RpkitMinecraftProfile RPKIT_MINECRAFT_PROFILE = new RpkitMinecraftProfile();
 
@@ -56,10 +54,11 @@ public class RpkitMinecraftProfile extends TableImpl<RpkitMinecraftProfileRecord
     /**
      * The column <code>rpkit_players.rpkit_minecraft_profile.profile_id</code>.
      */
-    public final TableField<RpkitMinecraftProfileRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.defaultValue(DSL.inline("NULL", SQLDataType.INTEGER)), this, "");
+    public final TableField<RpkitMinecraftProfileRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.defaultValue(DSL.field("NULL", SQLDataType.INTEGER)), this, "");
 
     /**
-     * The column <code>rpkit_players.rpkit_minecraft_profile.minecraft_uuid</code>.
+     * The column
+     * <code>rpkit_players.rpkit_minecraft_profile.minecraft_uuid</code>.
      */
     public final TableField<RpkitMinecraftProfileRecord, String> MINECRAFT_UUID = createField(DSL.name("minecraft_uuid"), SQLDataType.VARCHAR(36).nullable(false), this, "");
 
@@ -72,21 +71,24 @@ public class RpkitMinecraftProfile extends TableImpl<RpkitMinecraftProfileRecord
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_minecraft_profile</code> table reference
+     * Create an aliased <code>rpkit_players.rpkit_minecraft_profile</code>
+     * table reference
      */
     public RpkitMinecraftProfile(String alias) {
         this(DSL.name(alias), RPKIT_MINECRAFT_PROFILE);
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_minecraft_profile</code> table reference
+     * Create an aliased <code>rpkit_players.rpkit_minecraft_profile</code>
+     * table reference
      */
     public RpkitMinecraftProfile(Name alias) {
         this(alias, RPKIT_MINECRAFT_PROFILE);
     }
 
     /**
-     * Create a <code>rpkit_players.rpkit_minecraft_profile</code> table reference
+     * Create a <code>rpkit_players.rpkit_minecraft_profile</code> table
+     * reference
      */
     public RpkitMinecraftProfile() {
         this(DSL.name("rpkit_minecraft_profile"), null);
@@ -98,7 +100,7 @@ public class RpkitMinecraftProfile extends TableImpl<RpkitMinecraftProfileRecord
 
     @Override
     public Schema getSchema() {
-        return RpkitPlayers.RPKIT_PLAYERS;
+        return aliased() ? null : RpkitPlayers.RPKIT_PLAYERS;
     }
 
     @Override
@@ -109,11 +111,6 @@ public class RpkitMinecraftProfile extends TableImpl<RpkitMinecraftProfileRecord
     @Override
     public UniqueKey<RpkitMinecraftProfileRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_MINECRAFT_PROFILE_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitMinecraftProfileRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitMinecraftProfileRecord>>asList(Keys.KEY_RPKIT_MINECRAFT_PROFILE_PRIMARY);
     }
 
     @Override

@@ -82,7 +82,7 @@ public class RpkitSnooper extends TableImpl<RpkitSnooperRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitChat.RPKIT_CHAT;
+        return aliased() ? null : RpkitChat.RPKIT_CHAT;
     }
 
     @Override

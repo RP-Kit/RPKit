@@ -8,9 +8,6 @@ import com.rpkit.store.bukkit.database.jooq.Keys;
 import com.rpkit.store.bukkit.database.jooq.RpkitStores;
 import com.rpkit.store.bukkit.database.jooq.tables.records.RpkitStoreItemRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -82,14 +79,16 @@ public class RpkitStoreItem extends TableImpl<RpkitStoreItemRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_store_item</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_store_item</code> table
+     * reference
      */
     public RpkitStoreItem(String alias) {
         this(DSL.name(alias), RPKIT_STORE_ITEM);
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_store_item</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_store_item</code> table
+     * reference
      */
     public RpkitStoreItem(Name alias) {
         this(alias, RPKIT_STORE_ITEM);
@@ -108,7 +107,7 @@ public class RpkitStoreItem extends TableImpl<RpkitStoreItemRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitStores.RPKIT_STORES;
+        return aliased() ? null : RpkitStores.RPKIT_STORES;
     }
 
     @Override
@@ -119,11 +118,6 @@ public class RpkitStoreItem extends TableImpl<RpkitStoreItemRecord> {
     @Override
     public UniqueKey<RpkitStoreItemRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_STORE_ITEM_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitStoreItemRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitStoreItemRecord>>asList(Keys.KEY_RPKIT_STORE_ITEM_PRIMARY);
     }
 
     @Override

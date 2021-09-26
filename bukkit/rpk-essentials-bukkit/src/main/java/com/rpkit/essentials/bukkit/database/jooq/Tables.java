@@ -4,7 +4,6 @@
 package com.rpkit.essentials.bukkit.database.jooq;
 
 
-import com.rpkit.essentials.bukkit.database.jooq.tables.FlywaySchemaHistoryPlayers;
 import com.rpkit.essentials.bukkit.database.jooq.tables.RpkitLogMessagesEnabled;
 import com.rpkit.essentials.bukkit.database.jooq.tables.RpkitPreviousLocation;
 import com.rpkit.essentials.bukkit.database.jooq.tables.RpkitTrackingDisabled;
@@ -15,11 +14,6 @@ import com.rpkit.essentials.bukkit.database.jooq.tables.RpkitTrackingDisabled;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
-
-    /**
-     * The table <code>rpkit_essentials.flyway_schema_history_players</code>.
-     */
-    public static final FlywaySchemaHistoryPlayers FLYWAY_SCHEMA_HISTORY_PLAYERS = FlywaySchemaHistoryPlayers.FLYWAY_SCHEMA_HISTORY_PLAYERS;
 
     /**
      * The table <code>rpkit_essentials.rpkit_log_messages_enabled</code>.

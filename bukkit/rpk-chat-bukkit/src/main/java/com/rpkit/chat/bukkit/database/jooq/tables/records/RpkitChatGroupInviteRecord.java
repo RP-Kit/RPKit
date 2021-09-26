@@ -5,6 +5,7 @@ package com.rpkit.chat.bukkit.database.jooq.tables.records;
 
 
 import com.rpkit.chat.bukkit.database.jooq.tables.RpkitChatGroupInvite;
+
 import org.jooq.Field;
 import org.jooq.Record2;
 import org.jooq.Row2;
@@ -34,14 +35,16 @@ public class RpkitChatGroupInviteRecord extends TableRecordImpl<RpkitChatGroupIn
     }
 
     /**
-     * Setter for <code>rpkit_chat.rpkit_chat_group_invite.minecraft_profile_id</code>.
+     * Setter for
+     * <code>rpkit_chat.rpkit_chat_group_invite.minecraft_profile_id</code>.
      */
     public void setMinecraftProfileId(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_chat.rpkit_chat_group_invite.minecraft_profile_id</code>.
+     * Getter for
+     * <code>rpkit_chat.rpkit_chat_group_invite.minecraft_profile_id</code>.
      */
     public Integer getMinecraftProfileId() {
         return (Integer) get(1);

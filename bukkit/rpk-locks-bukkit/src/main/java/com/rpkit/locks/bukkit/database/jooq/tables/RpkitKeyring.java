@@ -8,9 +8,6 @@ import com.rpkit.locks.bukkit.database.jooq.Keys;
 import com.rpkit.locks.bukkit.database.jooq.RpkitLocks;
 import com.rpkit.locks.bukkit.database.jooq.tables.records.RpkitKeyringRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -92,17 +89,12 @@ public class RpkitKeyring extends TableImpl<RpkitKeyringRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitLocks.RPKIT_LOCKS;
+        return aliased() ? null : RpkitLocks.RPKIT_LOCKS;
     }
 
     @Override
     public UniqueKey<RpkitKeyringRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_KEYRING_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitKeyringRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitKeyringRecord>>asList(Keys.KEY_RPKIT_KEYRING_PRIMARY);
     }
 
     @Override

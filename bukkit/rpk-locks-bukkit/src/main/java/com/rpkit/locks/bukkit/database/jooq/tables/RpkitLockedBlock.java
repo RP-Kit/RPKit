@@ -71,14 +71,16 @@ public class RpkitLockedBlock extends TableImpl<RpkitLockedBlockRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_locks.rpkit_locked_block</code> table reference
+     * Create an aliased <code>rpkit_locks.rpkit_locked_block</code> table
+     * reference
      */
     public RpkitLockedBlock(String alias) {
         this(DSL.name(alias), RPKIT_LOCKED_BLOCK);
     }
 
     /**
-     * Create an aliased <code>rpkit_locks.rpkit_locked_block</code> table reference
+     * Create an aliased <code>rpkit_locks.rpkit_locked_block</code> table
+     * reference
      */
     public RpkitLockedBlock(Name alias) {
         this(alias, RPKIT_LOCKED_BLOCK);
@@ -97,7 +99,7 @@ public class RpkitLockedBlock extends TableImpl<RpkitLockedBlockRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitLocks.RPKIT_LOCKS;
+        return aliased() ? null : RpkitLocks.RPKIT_LOCKS;
     }
 
     @Override

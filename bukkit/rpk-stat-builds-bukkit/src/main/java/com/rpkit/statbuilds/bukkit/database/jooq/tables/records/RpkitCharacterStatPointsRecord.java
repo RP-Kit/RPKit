@@ -21,42 +21,48 @@ public class RpkitCharacterStatPointsRecord extends TableRecordImpl<RpkitCharact
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_stat_builds.rpkit_character_stat_points.character_id</code>.
+     * Setter for
+     * <code>rpkit_stat_builds.rpkit_character_stat_points.character_id</code>.
      */
     public void setCharacterId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_stat_builds.rpkit_character_stat_points.character_id</code>.
+     * Getter for
+     * <code>rpkit_stat_builds.rpkit_character_stat_points.character_id</code>.
      */
     public Integer getCharacterId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_stat_builds.rpkit_character_stat_points.stat_attribute</code>.
+     * Setter for
+     * <code>rpkit_stat_builds.rpkit_character_stat_points.stat_attribute</code>.
      */
     public void setStatAttribute(String value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_stat_builds.rpkit_character_stat_points.stat_attribute</code>.
+     * Getter for
+     * <code>rpkit_stat_builds.rpkit_character_stat_points.stat_attribute</code>.
      */
     public String getStatAttribute() {
         return (String) get(1);
     }
 
     /**
-     * Setter for <code>rpkit_stat_builds.rpkit_character_stat_points.points</code>.
+     * Setter for
+     * <code>rpkit_stat_builds.rpkit_character_stat_points.points</code>.
      */
     public void setPoints(Integer value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>rpkit_stat_builds.rpkit_character_stat_points.points</code>.
+     * Getter for
+     * <code>rpkit_stat_builds.rpkit_character_stat_points.points</code>.
      */
     public Integer getPoints() {
         return (Integer) get(2);

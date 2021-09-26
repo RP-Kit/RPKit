@@ -8,6 +8,7 @@ import com.rpkit.characters.bukkit.database.jooq.tables.RpkitCharacter;
 import com.rpkit.characters.bukkit.database.jooq.tables.RpkitNewCharacterCooldown;
 import com.rpkit.characters.bukkit.database.jooq.tables.records.RpkitCharacterRecord;
 import com.rpkit.characters.bukkit.database.jooq.tables.records.RpkitNewCharacterCooldownRecord;
+
 import org.jooq.TableField;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
@@ -15,7 +16,7 @@ import org.jooq.impl.Internal;
 
 
 /**
- * A class modelling foreign key relationships and constraints of tables in 
+ * A class modelling foreign key relationships and constraints of tables in
  * rpkit_characters.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })

@@ -55,7 +55,7 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
     }
 
     private fun handleQuickChannelSwitch(event: PlayerCommandPreprocessEvent) {
-        val chatChannelName = event.message.split(Regex("\\s+"))[0].drop(1).toLowerCase()
+        val chatChannelName = event.message.split(Regex("\\s+"))[0].drop(1).lowercase()
         val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
         val chatChannel = chatChannelService.getChatChannel(RPKChatChannelName(chatChannelName)) ?: return
         if (!event.player.hasPermission("rpkit.chat.command.chatchannel.${chatChannel.name.value}")) {
@@ -73,9 +73,9 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
             return
         }
         val profile = minecraftProfile.profile
-        if (event.message.toLowerCase().startsWith("/$chatChannelName ")) {
+        if (event.message.lowercase().startsWith("/$chatChannelName ")) {
             chatChannel.sendMessage(profile, minecraftProfile, event.message.split(Regex("\\s+")).drop(1).joinToString(" "))
-        } else if (event.message.toLowerCase().startsWith("/$chatChannelName")) {
+        } else if (event.message.lowercase().startsWith("/$chatChannelName")) {
             chatChannel.addSpeaker(minecraftProfile)
             event.player.sendMessage(plugin.messages["chatchannel-valid", mapOf(
                 "channel" to chatChannel.name.value

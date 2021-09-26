@@ -47,7 +47,8 @@ public class RpkitCraftingSkill extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            RpkitCraftingExperience.RPKIT_CRAFTING_EXPERIENCE);
+        return Arrays.asList(
+            RpkitCraftingExperience.RPKIT_CRAFTING_EXPERIENCE
+        );
     }
 }

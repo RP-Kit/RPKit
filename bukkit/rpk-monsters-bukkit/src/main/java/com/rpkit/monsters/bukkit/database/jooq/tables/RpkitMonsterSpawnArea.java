@@ -8,9 +8,6 @@ import com.rpkit.monsters.bukkit.database.jooq.Keys;
 import com.rpkit.monsters.bukkit.database.jooq.RpkitMonsters;
 import com.rpkit.monsters.bukkit.database.jooq.tables.records.RpkitMonsterSpawnAreaRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -36,7 +33,8 @@ public class RpkitMonsterSpawnArea extends TableImpl<RpkitMonsterSpawnAreaRecord
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_monsters.rpkit_monster_spawn_area</code>
+     * The reference instance of
+     * <code>rpkit_monsters.rpkit_monster_spawn_area</code>
      */
     public static final RpkitMonsterSpawnArea RPKIT_MONSTER_SPAWN_AREA = new RpkitMonsterSpawnArea();
 
@@ -97,21 +95,24 @@ public class RpkitMonsterSpawnArea extends TableImpl<RpkitMonsterSpawnAreaRecord
     }
 
     /**
-     * Create an aliased <code>rpkit_monsters.rpkit_monster_spawn_area</code> table reference
+     * Create an aliased <code>rpkit_monsters.rpkit_monster_spawn_area</code>
+     * table reference
      */
     public RpkitMonsterSpawnArea(String alias) {
         this(DSL.name(alias), RPKIT_MONSTER_SPAWN_AREA);
     }
 
     /**
-     * Create an aliased <code>rpkit_monsters.rpkit_monster_spawn_area</code> table reference
+     * Create an aliased <code>rpkit_monsters.rpkit_monster_spawn_area</code>
+     * table reference
      */
     public RpkitMonsterSpawnArea(Name alias) {
         this(alias, RPKIT_MONSTER_SPAWN_AREA);
     }
 
     /**
-     * Create a <code>rpkit_monsters.rpkit_monster_spawn_area</code> table reference
+     * Create a <code>rpkit_monsters.rpkit_monster_spawn_area</code> table
+     * reference
      */
     public RpkitMonsterSpawnArea() {
         this(DSL.name("rpkit_monster_spawn_area"), null);
@@ -123,7 +124,7 @@ public class RpkitMonsterSpawnArea extends TableImpl<RpkitMonsterSpawnAreaRecord
 
     @Override
     public Schema getSchema() {
-        return RpkitMonsters.RPKIT_MONSTERS;
+        return aliased() ? null : RpkitMonsters.RPKIT_MONSTERS;
     }
 
     @Override
@@ -134,11 +135,6 @@ public class RpkitMonsterSpawnArea extends TableImpl<RpkitMonsterSpawnAreaRecord
     @Override
     public UniqueKey<RpkitMonsterSpawnAreaRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_MONSTER_SPAWN_AREA_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitMonsterSpawnAreaRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitMonsterSpawnAreaRecord>>asList(Keys.KEY_RPKIT_MONSTER_SPAWN_AREA_PRIMARY);
     }
 
     @Override

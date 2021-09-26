@@ -47,7 +47,8 @@ public class RpkitShops extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            RpkitShopCount.RPKIT_SHOP_COUNT);
+        return Arrays.asList(
+            RpkitShopCount.RPKIT_SHOP_COUNT
+        );
     }
 }

@@ -36,14 +36,16 @@ public class RpkitTimedStoreItemRecord extends UpdatableRecordImpl<RpkitTimedSto
     }
 
     /**
-     * Setter for <code>rpkit_stores.rpkit_timed_store_item.store_item_id</code>.
+     * Setter for
+     * <code>rpkit_stores.rpkit_timed_store_item.store_item_id</code>.
      */
     public void setStoreItemId(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_stores.rpkit_timed_store_item.store_item_id</code>.
+     * Getter for
+     * <code>rpkit_stores.rpkit_timed_store_item.store_item_id</code>.
      */
     public Integer getStoreItemId() {
         return (Integer) get(1);

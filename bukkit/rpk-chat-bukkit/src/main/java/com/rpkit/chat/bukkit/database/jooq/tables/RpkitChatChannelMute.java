@@ -43,12 +43,14 @@ public class RpkitChatChannelMute extends TableImpl<RpkitChatChannelMuteRecord> 
     }
 
     /**
-     * The column <code>rpkit_chat.rpkit_chat_channel_mute.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_chat.rpkit_chat_channel_mute.minecraft_profile_id</code>.
      */
     public final TableField<RpkitChatChannelMuteRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_chat.rpkit_chat_channel_mute.chat_channel_name</code>.
+     * The column
+     * <code>rpkit_chat.rpkit_chat_channel_mute.chat_channel_name</code>.
      */
     public final TableField<RpkitChatChannelMuteRecord, String> CHAT_CHANNEL_NAME = createField(DSL.name("chat_channel_name"), SQLDataType.VARCHAR(256).nullable(false), this, "");
 
@@ -61,14 +63,16 @@ public class RpkitChatChannelMute extends TableImpl<RpkitChatChannelMuteRecord> 
     }
 
     /**
-     * Create an aliased <code>rpkit_chat.rpkit_chat_channel_mute</code> table reference
+     * Create an aliased <code>rpkit_chat.rpkit_chat_channel_mute</code> table
+     * reference
      */
     public RpkitChatChannelMute(String alias) {
         this(DSL.name(alias), RPKIT_CHAT_CHANNEL_MUTE);
     }
 
     /**
-     * Create an aliased <code>rpkit_chat.rpkit_chat_channel_mute</code> table reference
+     * Create an aliased <code>rpkit_chat.rpkit_chat_channel_mute</code> table
+     * reference
      */
     public RpkitChatChannelMute(Name alias) {
         this(alias, RPKIT_CHAT_CHANNEL_MUTE);
@@ -87,7 +91,7 @@ public class RpkitChatChannelMute extends TableImpl<RpkitChatChannelMuteRecord> 
 
     @Override
     public Schema getSchema() {
-        return RpkitChat.RPKIT_CHAT;
+        return aliased() ? null : RpkitChat.RPKIT_CHAT;
     }
 
     @Override

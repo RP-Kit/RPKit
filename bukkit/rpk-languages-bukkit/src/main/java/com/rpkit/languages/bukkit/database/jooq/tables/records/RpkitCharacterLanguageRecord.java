@@ -21,42 +21,48 @@ public class RpkitCharacterLanguageRecord extends TableRecordImpl<RpkitCharacter
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_languages.rpkit_character_language.character_id</code>.
+     * Setter for
+     * <code>rpkit_languages.rpkit_character_language.character_id</code>.
      */
     public void setCharacterId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_languages.rpkit_character_language.character_id</code>.
+     * Getter for
+     * <code>rpkit_languages.rpkit_character_language.character_id</code>.
      */
     public Integer getCharacterId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_languages.rpkit_character_language.language_name</code>.
+     * Setter for
+     * <code>rpkit_languages.rpkit_character_language.language_name</code>.
      */
     public void setLanguageName(String value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_languages.rpkit_character_language.language_name</code>.
+     * Getter for
+     * <code>rpkit_languages.rpkit_character_language.language_name</code>.
      */
     public String getLanguageName() {
         return (String) get(1);
     }
 
     /**
-     * Setter for <code>rpkit_languages.rpkit_character_language.understanding</code>.
+     * Setter for
+     * <code>rpkit_languages.rpkit_character_language.understanding</code>.
      */
     public void setUnderstanding(Double value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>rpkit_languages.rpkit_character_language.understanding</code>.
+     * Getter for
+     * <code>rpkit_languages.rpkit_character_language.understanding</code>.
      */
     public Double getUnderstanding() {
         return (Double) get(2);

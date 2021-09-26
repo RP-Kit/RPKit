@@ -5,6 +5,7 @@ package com.rpkit.characters.bukkit.database.jooq.tables.records;
 
 
 import com.rpkit.characters.bukkit.database.jooq.tables.RpkitCharacter;
+
 import org.jooq.Record1;
 import org.jooq.impl.UpdatableRecordImpl;
 
@@ -46,14 +47,16 @@ public class RpkitCharacterRecord extends UpdatableRecordImpl<RpkitCharacterReco
     }
 
     /**
-     * Setter for <code>rpkit_characters.rpkit_character.minecraft_profile_id</code>.
+     * Setter for
+     * <code>rpkit_characters.rpkit_character.minecraft_profile_id</code>.
      */
     public void setMinecraftProfileId(Integer value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>rpkit_characters.rpkit_character.minecraft_profile_id</code>.
+     * Getter for
+     * <code>rpkit_characters.rpkit_character.minecraft_profile_id</code>.
      */
     public Integer getMinecraftProfileId() {
         return (Integer) get(2);
@@ -228,14 +231,16 @@ public class RpkitCharacterRecord extends UpdatableRecordImpl<RpkitCharacterReco
     }
 
     /**
-     * Setter for <code>rpkit_characters.rpkit_character.inventory_contents</code>.
+     * Setter for
+     * <code>rpkit_characters.rpkit_character.inventory_contents</code>.
      */
     public void setInventoryContents(byte[] value) {
         set(15, value);
     }
 
     /**
-     * Getter for <code>rpkit_characters.rpkit_character.inventory_contents</code>.
+     * Getter for
+     * <code>rpkit_characters.rpkit_character.inventory_contents</code>.
      */
     public byte[] getInventoryContents() {
         return (byte[]) get(15);
@@ -452,14 +457,16 @@ public class RpkitCharacterRecord extends UpdatableRecordImpl<RpkitCharacterReco
     }
 
     /**
-     * Setter for <code>rpkit_characters.rpkit_character.description_hidden</code>.
+     * Setter for
+     * <code>rpkit_characters.rpkit_character.description_hidden</code>.
      */
     public void setDescriptionHidden(Boolean value) {
         set(31, value);
     }
 
     /**
-     * Getter for <code>rpkit_characters.rpkit_character.description_hidden</code>.
+     * Getter for
+     * <code>rpkit_characters.rpkit_character.description_hidden</code>.
      */
     public Boolean getDescriptionHidden() {
         return (Boolean) get(31);

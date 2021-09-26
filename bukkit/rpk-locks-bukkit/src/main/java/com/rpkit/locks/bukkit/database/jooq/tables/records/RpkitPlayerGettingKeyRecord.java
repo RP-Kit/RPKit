@@ -21,14 +21,16 @@ public class RpkitPlayerGettingKeyRecord extends UpdatableRecordImpl<RpkitPlayer
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_locks.rpkit_player_getting_key.minecraft_profile_id</code>.
+     * Setter for
+     * <code>rpkit_locks.rpkit_player_getting_key.minecraft_profile_id</code>.
      */
     public void setMinecraftProfileId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_locks.rpkit_player_getting_key.minecraft_profile_id</code>.
+     * Getter for
+     * <code>rpkit_locks.rpkit_player_getting_key.minecraft_profile_id</code>.
      */
     public Integer getMinecraftProfileId() {
         return (Integer) get(0);

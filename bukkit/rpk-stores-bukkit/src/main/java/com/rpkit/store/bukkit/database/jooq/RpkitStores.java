@@ -89,7 +89,7 @@ public class RpkitStores extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitConsumablePurchase.RPKIT_CONSUMABLE_PURCHASE,
             RpkitConsumableStoreItem.RPKIT_CONSUMABLE_STORE_ITEM,
             RpkitPermanentPurchase.RPKIT_PERMANENT_PURCHASE,
@@ -97,6 +97,7 @@ public class RpkitStores extends SchemaImpl {
             RpkitPurchase.RPKIT_PURCHASE,
             RpkitStoreItem.RPKIT_STORE_ITEM,
             RpkitTimedPurchase.RPKIT_TIMED_PURCHASE,
-            RpkitTimedStoreItem.RPKIT_TIMED_STORE_ITEM);
+            RpkitTimedStoreItem.RPKIT_TIMED_STORE_ITEM
+        );
     }
 }

@@ -7,14 +7,22 @@ package com.rpkit.characters.bukkit.database.jooq.tables;
 import com.rpkit.characters.bukkit.database.jooq.Keys;
 import com.rpkit.characters.bukkit.database.jooq.RpkitCharacters;
 import com.rpkit.characters.bukkit.database.jooq.tables.records.RpkitNewCharacterCooldownRecord;
-import org.jooq.*;
+
+import java.time.LocalDateTime;
+
+import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.Name;
+import org.jooq.Record;
+import org.jooq.Row2;
+import org.jooq.Schema;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.TableOptions;
+import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
-
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -26,7 +34,8 @@ public class RpkitNewCharacterCooldown extends TableImpl<RpkitNewCharacterCooldo
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_characters.rpkit_new_character_cooldown</code>
+     * The reference instance of
+     * <code>rpkit_characters.rpkit_new_character_cooldown</code>
      */
     public static final RpkitNewCharacterCooldown RPKIT_NEW_CHARACTER_COOLDOWN = new RpkitNewCharacterCooldown();
 
@@ -39,12 +48,14 @@ public class RpkitNewCharacterCooldown extends TableImpl<RpkitNewCharacterCooldo
     }
 
     /**
-     * The column <code>rpkit_characters.rpkit_new_character_cooldown.profile_id</code>.
+     * The column
+     * <code>rpkit_characters.rpkit_new_character_cooldown.profile_id</code>.
      */
     public final TableField<RpkitNewCharacterCooldownRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_characters.rpkit_new_character_cooldown.cooldown_timestamp</code>.
+     * The column
+     * <code>rpkit_characters.rpkit_new_character_cooldown.cooldown_timestamp</code>.
      */
     public final TableField<RpkitNewCharacterCooldownRecord, LocalDateTime> COOLDOWN_TIMESTAMP = createField(DSL.name("cooldown_timestamp"), SQLDataType.LOCALDATETIME(0).nullable(false), this, "");
 
@@ -57,21 +68,26 @@ public class RpkitNewCharacterCooldown extends TableImpl<RpkitNewCharacterCooldo
     }
 
     /**
-     * Create an aliased <code>rpkit_characters.rpkit_new_character_cooldown</code> table reference
+     * Create an aliased
+     * <code>rpkit_characters.rpkit_new_character_cooldown</code> table
+     * reference
      */
     public RpkitNewCharacterCooldown(String alias) {
         this(DSL.name(alias), RPKIT_NEW_CHARACTER_COOLDOWN);
     }
 
     /**
-     * Create an aliased <code>rpkit_characters.rpkit_new_character_cooldown</code> table reference
+     * Create an aliased
+     * <code>rpkit_characters.rpkit_new_character_cooldown</code> table
+     * reference
      */
     public RpkitNewCharacterCooldown(Name alias) {
         this(alias, RPKIT_NEW_CHARACTER_COOLDOWN);
     }
 
     /**
-     * Create a <code>rpkit_characters.rpkit_new_character_cooldown</code> table reference
+     * Create a <code>rpkit_characters.rpkit_new_character_cooldown</code> table
+     * reference
      */
     public RpkitNewCharacterCooldown() {
         this(DSL.name("rpkit_new_character_cooldown"), null);
@@ -83,17 +99,12 @@ public class RpkitNewCharacterCooldown extends TableImpl<RpkitNewCharacterCooldo
 
     @Override
     public Schema getSchema() {
-        return RpkitCharacters.RPKIT_CHARACTERS;
+        return aliased() ? null : RpkitCharacters.RPKIT_CHARACTERS;
     }
 
     @Override
     public UniqueKey<RpkitNewCharacterCooldownRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_NEW_CHARACTER_COOLDOWN_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitNewCharacterCooldownRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitNewCharacterCooldownRecord>>asList(Keys.KEY_RPKIT_NEW_CHARACTER_COOLDOWN_PRIMARY);
     }
 
     @Override

@@ -24,28 +24,32 @@ public class RpkitCharacterProfessionChangeCooldownRecord extends UpdatableRecor
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_professions.rpkit_character_profession_change_cooldown.character_id</code>.
+     * Setter for
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown.character_id</code>.
      */
     public void setCharacterId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_professions.rpkit_character_profession_change_cooldown.character_id</code>.
+     * Getter for
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown.character_id</code>.
      */
     public Integer getCharacterId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_professions.rpkit_character_profession_change_cooldown.cooldown_end_time</code>.
+     * Setter for
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown.cooldown_end_time</code>.
      */
     public void setCooldownEndTime(LocalDateTime value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_professions.rpkit_character_profession_change_cooldown.cooldown_end_time</code>.
+     * Getter for
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown.cooldown_end_time</code>.
      */
     public LocalDateTime getCooldownEndTime() {
         return (LocalDateTime) get(1);
@@ -135,7 +139,8 @@ public class RpkitCharacterProfessionChangeCooldownRecord extends UpdatableRecor
     }
 
     /**
-     * Create a detached, initialised RpkitCharacterProfessionChangeCooldownRecord
+     * Create a detached, initialised
+     * RpkitCharacterProfessionChangeCooldownRecord
      */
     public RpkitCharacterProfessionChangeCooldownRecord(Integer characterId, LocalDateTime cooldownEndTime) {
         super(RpkitCharacterProfessionChangeCooldown.RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN);

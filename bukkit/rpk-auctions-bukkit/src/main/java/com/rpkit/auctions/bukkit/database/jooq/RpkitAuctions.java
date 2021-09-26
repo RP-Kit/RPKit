@@ -6,12 +6,13 @@ package com.rpkit.auctions.bukkit.database.jooq;
 
 import com.rpkit.auctions.bukkit.database.jooq.tables.RpkitAuction;
 import com.rpkit.auctions.bukkit.database.jooq.tables.RpkitBid;
-import org.jooq.Catalog;
-import org.jooq.Table;
-import org.jooq.impl.SchemaImpl;
 
 import java.util.Arrays;
 import java.util.List;
+
+import org.jooq.Catalog;
+import org.jooq.Table;
+import org.jooq.impl.SchemaImpl;
 
 
 /**
@@ -52,8 +53,9 @@ public class RpkitAuctions extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitAuction.RPKIT_AUCTION,
-            RpkitBid.RPKIT_BID);
+            RpkitBid.RPKIT_BID
+        );
     }
 }

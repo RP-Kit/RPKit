@@ -108,7 +108,7 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
                 event.player.inventory.addItem(item)
                 event.player.sendMessage(plugin.messages["trader-buy", mapOf(
                         Pair("quantity", amount.toString()),
-                        Pair("material", material.toString().toLowerCase().replace('_', ' ')),
+                        Pair("material", material.toString().lowercase().replace('_', ' ')),
                         Pair("price", buyPrice.toString() + " " + if (sellPrice == 1) currency.nameSingular else currency.namePlural)
                 )])
                 actualPrice += plugin.config.getDouble("traders.price-change")
@@ -177,7 +177,7 @@ class PlayerInteractListener(private val plugin: RPKTradeBukkit) : Listener {
             event.player.inventory.contents = contents
             event.player.sendMessage(plugin.messages["trader-sell", mapOf(
                     Pair("quantity", amount.toString()),
-                    Pair("material", material.toString().toLowerCase().replace('_', ' ')),
+                    Pair("material", material.toString().lowercase().replace('_', ' ')),
                     Pair("price", sellPrice.toString() + " " + if (sellPrice == 1) currency.nameSingular else currency.namePlural)
             )])
             actualPrice -= plugin.config.getDouble("traders.price-change")

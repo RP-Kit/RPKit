@@ -8,9 +8,6 @@ import com.rpkit.players.bukkit.database.jooq.Keys;
 import com.rpkit.players.bukkit.database.jooq.RpkitPlayers;
 import com.rpkit.players.bukkit.database.jooq.tables.records.RpkitProfileRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -66,12 +63,12 @@ public class RpkitProfile extends TableImpl<RpkitProfileRecord> {
     /**
      * The column <code>rpkit_players.rpkit_profile.password_hash</code>.
      */
-    public final TableField<RpkitProfileRecord, byte[]> PASSWORD_HASH = createField(DSL.name("password_hash"), SQLDataType.BLOB.defaultValue(DSL.inline("NULL", SQLDataType.BLOB)), this, "");
+    public final TableField<RpkitProfileRecord, byte[]> PASSWORD_HASH = createField(DSL.name("password_hash"), SQLDataType.BLOB.defaultValue(DSL.field("NULL", SQLDataType.BLOB)), this, "");
 
     /**
      * The column <code>rpkit_players.rpkit_profile.password_salt</code>.
      */
-    public final TableField<RpkitProfileRecord, byte[]> PASSWORD_SALT = createField(DSL.name("password_salt"), SQLDataType.BLOB.defaultValue(DSL.inline("NULL", SQLDataType.BLOB)), this, "");
+    public final TableField<RpkitProfileRecord, byte[]> PASSWORD_SALT = createField(DSL.name("password_salt"), SQLDataType.BLOB.defaultValue(DSL.field("NULL", SQLDataType.BLOB)), this, "");
 
     private RpkitProfile(Name alias, Table<RpkitProfileRecord> aliased) {
         this(alias, aliased, null);
@@ -82,14 +79,16 @@ public class RpkitProfile extends TableImpl<RpkitProfileRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_profile</code> table reference
+     * Create an aliased <code>rpkit_players.rpkit_profile</code> table
+     * reference
      */
     public RpkitProfile(String alias) {
         this(DSL.name(alias), RPKIT_PROFILE);
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_profile</code> table reference
+     * Create an aliased <code>rpkit_players.rpkit_profile</code> table
+     * reference
      */
     public RpkitProfile(Name alias) {
         this(alias, RPKIT_PROFILE);
@@ -108,7 +107,7 @@ public class RpkitProfile extends TableImpl<RpkitProfileRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitPlayers.RPKIT_PLAYERS;
+        return aliased() ? null : RpkitPlayers.RPKIT_PLAYERS;
     }
 
     @Override
@@ -119,11 +118,6 @@ public class RpkitProfile extends TableImpl<RpkitProfileRecord> {
     @Override
     public UniqueKey<RpkitProfileRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_PROFILE_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitProfileRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitProfileRecord>>asList(Keys.KEY_RPKIT_PROFILE_PRIMARY);
     }
 
     @Override

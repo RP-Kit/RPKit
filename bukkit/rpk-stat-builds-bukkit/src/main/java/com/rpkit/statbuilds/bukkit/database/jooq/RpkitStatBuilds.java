@@ -47,7 +47,8 @@ public class RpkitStatBuilds extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            RpkitCharacterStatPoints.RPKIT_CHARACTER_STAT_POINTS);
+        return Arrays.asList(
+            RpkitCharacterStatPoints.RPKIT_CHARACTER_STAT_POINTS
+        );
     }
 }

@@ -4,7 +4,6 @@
 package com.rpkit.moderation.bukkit.database.jooq;
 
 
-import com.rpkit.moderation.bukkit.database.jooq.tables.FlywaySchemaHistoryPlayers;
 import com.rpkit.moderation.bukkit.database.jooq.tables.RpkitTicket;
 import com.rpkit.moderation.bukkit.database.jooq.tables.RpkitVanished;
 import com.rpkit.moderation.bukkit.database.jooq.tables.RpkitWarning;
@@ -15,11 +14,6 @@ import com.rpkit.moderation.bukkit.database.jooq.tables.RpkitWarning;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
-
-    /**
-     * The table <code>rpkit_moderation.flyway_schema_history_players</code>.
-     */
-    public static final FlywaySchemaHistoryPlayers FLYWAY_SCHEMA_HISTORY_PLAYERS = FlywaySchemaHistoryPlayers.FLYWAY_SCHEMA_HISTORY_PLAYERS;
 
     /**
      * The table <code>rpkit_moderation.rpkit_ticket</code>.

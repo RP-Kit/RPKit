@@ -4,12 +4,8 @@
 package com.rpkit.professions.bukkit.database.jooq.tables;
 
 
-import com.rpkit.professions.bukkit.database.jooq.Keys;
 import com.rpkit.professions.bukkit.database.jooq.RpkitProfessions;
 import com.rpkit.professions.bukkit.database.jooq.tables.records.RpkitCharacterProfessionRecord;
-
-import java.util.Arrays;
-import java.util.List;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -20,7 +16,6 @@ import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
-import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
@@ -35,7 +30,8 @@ public class RpkitCharacterProfession extends TableImpl<RpkitCharacterProfession
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_professions.rpkit_character_profession</code>
+     * The reference instance of
+     * <code>rpkit_professions.rpkit_character_profession</code>
      */
     public static final RpkitCharacterProfession RPKIT_CHARACTER_PROFESSION = new RpkitCharacterProfession();
 
@@ -48,12 +44,14 @@ public class RpkitCharacterProfession extends TableImpl<RpkitCharacterProfession
     }
 
     /**
-     * The column <code>rpkit_professions.rpkit_character_profession.character_id</code>.
+     * The column
+     * <code>rpkit_professions.rpkit_character_profession.character_id</code>.
      */
     public final TableField<RpkitCharacterProfessionRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_professions.rpkit_character_profession.profession</code>.
+     * The column
+     * <code>rpkit_professions.rpkit_character_profession.profession</code>.
      */
     public final TableField<RpkitCharacterProfessionRecord, String> PROFESSION = createField(DSL.name("profession"), SQLDataType.VARCHAR(256).nullable(false), this, "");
 
@@ -66,21 +64,24 @@ public class RpkitCharacterProfession extends TableImpl<RpkitCharacterProfession
     }
 
     /**
-     * Create an aliased <code>rpkit_professions.rpkit_character_profession</code> table reference
+     * Create an aliased
+     * <code>rpkit_professions.rpkit_character_profession</code> table reference
      */
     public RpkitCharacterProfession(String alias) {
         this(DSL.name(alias), RPKIT_CHARACTER_PROFESSION);
     }
 
     /**
-     * Create an aliased <code>rpkit_professions.rpkit_character_profession</code> table reference
+     * Create an aliased
+     * <code>rpkit_professions.rpkit_character_profession</code> table reference
      */
     public RpkitCharacterProfession(Name alias) {
         this(alias, RPKIT_CHARACTER_PROFESSION);
     }
 
     /**
-     * Create a <code>rpkit_professions.rpkit_character_profession</code> table reference
+     * Create a <code>rpkit_professions.rpkit_character_profession</code> table
+     * reference
      */
     public RpkitCharacterProfession() {
         this(DSL.name("rpkit_character_profession"), null);
@@ -92,17 +93,7 @@ public class RpkitCharacterProfession extends TableImpl<RpkitCharacterProfession
 
     @Override
     public Schema getSchema() {
-        return RpkitProfessions.RPKIT_PROFESSIONS;
-    }
-
-    @Override
-    public UniqueKey<RpkitCharacterProfessionRecord> getPrimaryKey() {
-        return Keys.KEY_RPKIT_CHARACTER_PROFESSION_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitCharacterProfessionRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitCharacterProfessionRecord>>asList(Keys.KEY_RPKIT_CHARACTER_PROFESSION_PRIMARY);
+        return aliased() ? null : RpkitProfessions.RPKIT_PROFESSIONS;
     }
 
     @Override

@@ -109,7 +109,7 @@ class ProfessionsMessages(plugin: RPKProfessionsBukkit) : BukkitMessages(plugin)
             "next_level_experience" to nextLevelExperience.toString(),
             "total_experience" to totalExperience.toString(),
             "total_next_level_experience" to totalNextLevelExperience.toString(),
-            "material" to material.toString().toLowerCase().replace('_', ' ')
+            "material" to material.toString().lowercase().replace('_', ' ')
         )
     }
 
@@ -131,7 +131,7 @@ class ProfessionsMessages(plugin: RPKProfessionsBukkit) : BukkitMessages(plugin)
             "next_level_experience" to nextLevelExperience.toString(),
             "total_experience" to totalExperience.toString(),
             "total_next_level_experience" to totalNextLevelExperience.toString(),
-            "material" to material.toString().toLowerCase().replace('_', ' ')
+            "material" to material.toString().lowercase().replace('_', ' ')
         )
     }
 
@@ -153,7 +153,7 @@ class ProfessionsMessages(plugin: RPKProfessionsBukkit) : BukkitMessages(plugin)
             "next_level_experience" to nextLevelExperience.toString(),
             "total_experience" to totalExperience.toString(),
             "total_next_level_experience" to totalNextLevelExperience.toString(),
-            "material" to material.toString().toLowerCase().replace('_', ' ')
+            "material" to material.toString().lowercase().replace('_', ' ')
         )
     }
 

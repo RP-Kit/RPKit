@@ -30,7 +30,8 @@ public class RpkitMinecraftProfileLinkRequest extends TableImpl<RpkitMinecraftPr
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_players.rpkit_minecraft_profile_link_request</code>
+     * The reference instance of
+     * <code>rpkit_players.rpkit_minecraft_profile_link_request</code>
      */
     public static final RpkitMinecraftProfileLinkRequest RPKIT_MINECRAFT_PROFILE_LINK_REQUEST = new RpkitMinecraftProfileLinkRequest();
 
@@ -43,12 +44,14 @@ public class RpkitMinecraftProfileLinkRequest extends TableImpl<RpkitMinecraftPr
     }
 
     /**
-     * The column <code>rpkit_players.rpkit_minecraft_profile_link_request.profile_id</code>.
+     * The column
+     * <code>rpkit_players.rpkit_minecraft_profile_link_request.profile_id</code>.
      */
     public final TableField<RpkitMinecraftProfileLinkRequestRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_players.rpkit_minecraft_profile_link_request.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_players.rpkit_minecraft_profile_link_request.minecraft_profile_id</code>.
      */
     public final TableField<RpkitMinecraftProfileLinkRequestRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -61,21 +64,26 @@ public class RpkitMinecraftProfileLinkRequest extends TableImpl<RpkitMinecraftPr
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_minecraft_profile_link_request</code> table reference
+     * Create an aliased
+     * <code>rpkit_players.rpkit_minecraft_profile_link_request</code> table
+     * reference
      */
     public RpkitMinecraftProfileLinkRequest(String alias) {
         this(DSL.name(alias), RPKIT_MINECRAFT_PROFILE_LINK_REQUEST);
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_minecraft_profile_link_request</code> table reference
+     * Create an aliased
+     * <code>rpkit_players.rpkit_minecraft_profile_link_request</code> table
+     * reference
      */
     public RpkitMinecraftProfileLinkRequest(Name alias) {
         this(alias, RPKIT_MINECRAFT_PROFILE_LINK_REQUEST);
     }
 
     /**
-     * Create a <code>rpkit_players.rpkit_minecraft_profile_link_request</code> table reference
+     * Create a <code>rpkit_players.rpkit_minecraft_profile_link_request</code>
+     * table reference
      */
     public RpkitMinecraftProfileLinkRequest() {
         this(DSL.name("rpkit_minecraft_profile_link_request"), null);
@@ -87,7 +95,7 @@ public class RpkitMinecraftProfileLinkRequest extends TableImpl<RpkitMinecraftPr
 
     @Override
     public Schema getSchema() {
-        return RpkitPlayers.RPKIT_PLAYERS;
+        return aliased() ? null : RpkitPlayers.RPKIT_PLAYERS;
     }
 
     @Override

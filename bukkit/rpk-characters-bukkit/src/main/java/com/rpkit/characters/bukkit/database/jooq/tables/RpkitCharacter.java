@@ -7,13 +7,20 @@ package com.rpkit.characters.bukkit.database.jooq.tables;
 import com.rpkit.characters.bukkit.database.jooq.Keys;
 import com.rpkit.characters.bukkit.database.jooq.RpkitCharacters;
 import com.rpkit.characters.bukkit.database.jooq.tables.records.RpkitCharacterRecord;
-import org.jooq.*;
+
+import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.Identity;
+import org.jooq.Name;
+import org.jooq.Record;
+import org.jooq.Schema;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.TableOptions;
+import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
-
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -45,12 +52,13 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     /**
      * The column <code>rpkit_characters.rpkit_character.profile_id</code>.
      */
-    public final TableField<RpkitCharacterRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.defaultValue(DSL.inline("NULL", SQLDataType.INTEGER)), this, "");
+    public final TableField<RpkitCharacterRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.defaultValue(DSL.field("NULL", SQLDataType.INTEGER)), this, "");
 
     /**
-     * The column <code>rpkit_characters.rpkit_character.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_characters.rpkit_character.minecraft_profile_id</code>.
      */
-    public final TableField<RpkitCharacterRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.defaultValue(DSL.inline("NULL", SQLDataType.INTEGER)), this, "");
+    public final TableField<RpkitCharacterRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.defaultValue(DSL.field("NULL", SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.name</code>.
@@ -60,7 +68,7 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     /**
      * The column <code>rpkit_characters.rpkit_character.gender</code>.
      */
-    public final TableField<RpkitCharacterRecord, String> GENDER = createField(DSL.name("gender"), SQLDataType.VARCHAR(256).defaultValue(DSL.inline("NULL", SQLDataType.VARCHAR)), this, "");
+    public final TableField<RpkitCharacterRecord, String> GENDER = createField(DSL.name("gender"), SQLDataType.VARCHAR(256).defaultValue(DSL.field("NULL", SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.age</code>.
@@ -70,7 +78,7 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     /**
      * The column <code>rpkit_characters.rpkit_character.race_name</code>.
      */
-    public final TableField<RpkitCharacterRecord, String> RACE_NAME = createField(DSL.name("race_name"), SQLDataType.VARCHAR(256).defaultValue(DSL.inline("NULL", SQLDataType.VARCHAR)), this, "");
+    public final TableField<RpkitCharacterRecord, String> RACE_NAME = createField(DSL.name("race_name"), SQLDataType.VARCHAR(256).defaultValue(DSL.field("NULL", SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.description</code>.
@@ -113,29 +121,30 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     public final TableField<RpkitCharacterRecord, Float> PITCH = createField(DSL.name("pitch"), SQLDataType.REAL.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_characters.rpkit_character.inventory_contents</code>.
+     * The column
+     * <code>rpkit_characters.rpkit_character.inventory_contents</code>.
      */
     public final TableField<RpkitCharacterRecord, byte[]> INVENTORY_CONTENTS = createField(DSL.name("inventory_contents"), SQLDataType.BLOB.nullable(false), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.helmet</code>.
      */
-    public final TableField<RpkitCharacterRecord, byte[]> HELMET = createField(DSL.name("helmet"), SQLDataType.BLOB.defaultValue(DSL.inline("NULL", SQLDataType.BLOB)), this, "");
+    public final TableField<RpkitCharacterRecord, byte[]> HELMET = createField(DSL.name("helmet"), SQLDataType.BLOB.defaultValue(DSL.field("NULL", SQLDataType.BLOB)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.chestplate</code>.
      */
-    public final TableField<RpkitCharacterRecord, byte[]> CHESTPLATE = createField(DSL.name("chestplate"), SQLDataType.BLOB.defaultValue(DSL.inline("NULL", SQLDataType.BLOB)), this, "");
+    public final TableField<RpkitCharacterRecord, byte[]> CHESTPLATE = createField(DSL.name("chestplate"), SQLDataType.BLOB.defaultValue(DSL.field("NULL", SQLDataType.BLOB)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.leggings</code>.
      */
-    public final TableField<RpkitCharacterRecord, byte[]> LEGGINGS = createField(DSL.name("leggings"), SQLDataType.BLOB.defaultValue(DSL.inline("NULL", SQLDataType.BLOB)), this, "");
+    public final TableField<RpkitCharacterRecord, byte[]> LEGGINGS = createField(DSL.name("leggings"), SQLDataType.BLOB.defaultValue(DSL.field("NULL", SQLDataType.BLOB)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.boots</code>.
      */
-    public final TableField<RpkitCharacterRecord, byte[]> BOOTS = createField(DSL.name("boots"), SQLDataType.BLOB.defaultValue(DSL.inline("NULL", SQLDataType.BLOB)), this, "");
+    public final TableField<RpkitCharacterRecord, byte[]> BOOTS = createField(DSL.name("boots"), SQLDataType.BLOB.defaultValue(DSL.field("NULL", SQLDataType.BLOB)), this, "");
 
     /**
      * The column <code>rpkit_characters.rpkit_character.health</code>.
@@ -193,7 +202,8 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     public final TableField<RpkitCharacterRecord, Boolean> RACE_HIDDEN = createField(DSL.name("race_hidden"), SQLDataType.BOOLEAN.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_characters.rpkit_character.description_hidden</code>.
+     * The column
+     * <code>rpkit_characters.rpkit_character.description_hidden</code>.
      */
     public final TableField<RpkitCharacterRecord, Boolean> DESCRIPTION_HIDDEN = createField(DSL.name("description_hidden"), SQLDataType.BOOLEAN.nullable(false), this, "");
 
@@ -206,14 +216,16 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_characters.rpkit_character</code> table reference
+     * Create an aliased <code>rpkit_characters.rpkit_character</code> table
+     * reference
      */
     public RpkitCharacter(String alias) {
         this(DSL.name(alias), RPKIT_CHARACTER);
     }
 
     /**
-     * Create an aliased <code>rpkit_characters.rpkit_character</code> table reference
+     * Create an aliased <code>rpkit_characters.rpkit_character</code> table
+     * reference
      */
     public RpkitCharacter(Name alias) {
         this(alias, RPKIT_CHARACTER);
@@ -232,7 +244,7 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitCharacters.RPKIT_CHARACTERS;
+        return aliased() ? null : RpkitCharacters.RPKIT_CHARACTERS;
     }
 
     @Override
@@ -243,11 +255,6 @@ public class RpkitCharacter extends TableImpl<RpkitCharacterRecord> {
     @Override
     public UniqueKey<RpkitCharacterRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_CHARACTER_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitCharacterRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitCharacterRecord>>asList(Keys.KEY_RPKIT_CHARACTER_PRIMARY);
     }
 
     @Override

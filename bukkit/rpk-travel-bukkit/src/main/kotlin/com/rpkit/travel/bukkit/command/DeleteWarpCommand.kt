@@ -44,7 +44,7 @@ class DeleteWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages.noWarpService)
             return true
         }
-        warpService.getWarp(RPKWarpName(args[0].toLowerCase())).thenAccept { warp ->
+        warpService.getWarp(RPKWarpName(args[0].lowercase())).thenAccept { warp ->
             if (warp == null) {
                 sender.sendMessage(plugin.messages.deleteWarpInvalidWarp)
                 return@thenAccept

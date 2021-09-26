@@ -161,7 +161,7 @@ class RPKMonsterStatServiceImpl(override val plugin: RPKMonstersBukkit) : RPKMon
             maxDamage: Double = (maxDamageMultiplier * (monster.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)?.value
                     ?: 1.0))
     ) {
-        val monsterName = monster.type.toString().toLowerCase().replace('_', ' ')
+        val monsterName = monster.type.toString().lowercase().replace('_', ' ')
         val formattedHealth = String.format("%.2f", health)
         val formattedMaxHealth = String.format("%.2f", maxHealth)
         val formattedMinDamage = String.format("%.2f", minDamage)

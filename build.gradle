@@ -25,9 +25,9 @@ buildscript {
 
 plugins {
     id "com.github.breadmoirai.github-release" version "2.2.12"
-    id "org.jetbrains.kotlin.jvm" version "1.4.30" apply false
+    id "org.jetbrains.kotlin.jvm" version "1.5.31" apply false
     id "maven-publish"
-    id "org.jetbrains.dokka" version "1.4.20" apply false
+    id "org.jetbrains.dokka" version "1.4.30" apply false
 }
 
 repositories {
@@ -57,13 +57,13 @@ subprojects {
 
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "16"
         }
     }
 
     compileTestKotlin {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "16"
         }
     }
 }

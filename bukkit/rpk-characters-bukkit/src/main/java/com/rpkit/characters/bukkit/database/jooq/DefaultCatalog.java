@@ -4,11 +4,11 @@
 package com.rpkit.characters.bukkit.database.jooq;
 
 
-import org.jooq.Schema;
-import org.jooq.impl.CatalogImpl;
-
 import java.util.Arrays;
 import java.util.List;
+
+import org.jooq.Schema;
+import org.jooq.impl.CatalogImpl;
 
 
 /**
@@ -38,7 +38,8 @@ public class DefaultCatalog extends CatalogImpl {
 
     @Override
     public final List<Schema> getSchemas() {
-        return Arrays.<Schema>asList(
-            RpkitCharacters.RPKIT_CHARACTERS);
+        return Arrays.asList(
+            RpkitCharacters.RPKIT_CHARACTERS
+        );
     }
 }

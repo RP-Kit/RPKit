@@ -8,9 +8,6 @@ import com.rpkit.chat.bukkit.database.jooq.Keys;
 import com.rpkit.chat.bukkit.database.jooq.RpkitChat;
 import com.rpkit.chat.bukkit.database.jooq.tables.records.RpkitChatGroupRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -67,14 +64,16 @@ public class RpkitChatGroup extends TableImpl<RpkitChatGroupRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_chat.rpkit_chat_group</code> table reference
+     * Create an aliased <code>rpkit_chat.rpkit_chat_group</code> table
+     * reference
      */
     public RpkitChatGroup(String alias) {
         this(DSL.name(alias), RPKIT_CHAT_GROUP);
     }
 
     /**
-     * Create an aliased <code>rpkit_chat.rpkit_chat_group</code> table reference
+     * Create an aliased <code>rpkit_chat.rpkit_chat_group</code> table
+     * reference
      */
     public RpkitChatGroup(Name alias) {
         this(alias, RPKIT_CHAT_GROUP);
@@ -93,7 +92,7 @@ public class RpkitChatGroup extends TableImpl<RpkitChatGroupRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitChat.RPKIT_CHAT;
+        return aliased() ? null : RpkitChat.RPKIT_CHAT;
     }
 
     @Override
@@ -104,11 +103,6 @@ public class RpkitChatGroup extends TableImpl<RpkitChatGroupRecord> {
     @Override
     public UniqueKey<RpkitChatGroupRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_CHAT_GROUP_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitChatGroupRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitChatGroupRecord>>asList(Keys.KEY_RPKIT_CHAT_GROUP_PRIMARY);
     }
 
     @Override

@@ -36,28 +36,32 @@ public class RpkitConsumablePurchaseRecord extends UpdatableRecordImpl<RpkitCons
     }
 
     /**
-     * Setter for <code>rpkit_stores.rpkit_consumable_purchase.purchase_id</code>.
+     * Setter for
+     * <code>rpkit_stores.rpkit_consumable_purchase.purchase_id</code>.
      */
     public void setPurchaseId(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_stores.rpkit_consumable_purchase.purchase_id</code>.
+     * Getter for
+     * <code>rpkit_stores.rpkit_consumable_purchase.purchase_id</code>.
      */
     public Integer getPurchaseId() {
         return (Integer) get(1);
     }
 
     /**
-     * Setter for <code>rpkit_stores.rpkit_consumable_purchase.remaining_uses</code>.
+     * Setter for
+     * <code>rpkit_stores.rpkit_consumable_purchase.remaining_uses</code>.
      */
     public void setRemainingUses(Integer value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>rpkit_stores.rpkit_consumable_purchase.remaining_uses</code>.
+     * Getter for
+     * <code>rpkit_stores.rpkit_consumable_purchase.remaining_uses</code>.
      */
     public Integer getRemainingUses() {
         return (Integer) get(2);

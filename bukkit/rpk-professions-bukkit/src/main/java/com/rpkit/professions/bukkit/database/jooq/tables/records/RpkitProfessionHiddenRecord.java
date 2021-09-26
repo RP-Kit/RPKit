@@ -21,14 +21,16 @@ public class RpkitProfessionHiddenRecord extends UpdatableRecordImpl<RpkitProfes
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_professions.rpkit_profession_hidden.character_id</code>.
+     * Setter for
+     * <code>rpkit_professions.rpkit_profession_hidden.character_id</code>.
      */
     public void setCharacterId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_professions.rpkit_profession_hidden.character_id</code>.
+     * Getter for
+     * <code>rpkit_professions.rpkit_profession_hidden.character_id</code>.
      */
     public Integer getCharacterId() {
         return (Integer) get(0);

@@ -97,7 +97,7 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
                 return@thenAccept
             }
             sender.sendMessage(plugin.messages["money-view-valid"])
-            sender.sendMessage(currencyService.currencies
+            sender.sendMessage(*currencyService.currencies
                 .map { currency ->
                     plugin.messages["money-view-valid-list-item", mapOf(
                         "currency" to currency.name.value,

@@ -12,6 +12,7 @@ import com.rpkit.blocklog.bukkit.database.jooq.tables.records.FlywaySchemaHistor
 import com.rpkit.blocklog.bukkit.database.jooq.tables.records.RpkitBlockChangeRecord;
 import com.rpkit.blocklog.bukkit.database.jooq.tables.records.RpkitBlockHistoryRecord;
 import com.rpkit.blocklog.bukkit.database.jooq.tables.records.RpkitBlockInventoryChangeRecord;
+
 import org.jooq.TableField;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
@@ -19,7 +20,7 @@ import org.jooq.impl.Internal;
 
 
 /**
- * A class modelling foreign key relationships and constraints of tables in 
+ * A class modelling foreign key relationships and constraints of tables in
  * rpkit_block_logging.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })

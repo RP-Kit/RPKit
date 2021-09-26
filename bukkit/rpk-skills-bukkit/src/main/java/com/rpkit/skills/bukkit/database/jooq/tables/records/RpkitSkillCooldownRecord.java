@@ -51,14 +51,16 @@ public class RpkitSkillCooldownRecord extends TableRecordImpl<RpkitSkillCooldown
     }
 
     /**
-     * Setter for <code>rpkit_skills.rpkit_skill_cooldown.cooldown_timestamp</code>.
+     * Setter for
+     * <code>rpkit_skills.rpkit_skill_cooldown.cooldown_timestamp</code>.
      */
     public void setCooldownTimestamp(LocalDateTime value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>rpkit_skills.rpkit_skill_cooldown.cooldown_timestamp</code>.
+     * Getter for
+     * <code>rpkit_skills.rpkit_skill_cooldown.cooldown_timestamp</code>.
      */
     public LocalDateTime getCooldownTimestamp() {
         return (LocalDateTime) get(2);

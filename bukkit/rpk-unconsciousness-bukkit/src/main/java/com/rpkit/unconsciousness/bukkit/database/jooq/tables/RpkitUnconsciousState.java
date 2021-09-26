@@ -32,7 +32,8 @@ public class RpkitUnconsciousState extends TableImpl<RpkitUnconsciousStateRecord
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_unconsciousness.rpkit_unconscious_state</code>
+     * The reference instance of
+     * <code>rpkit_unconsciousness.rpkit_unconscious_state</code>
      */
     public static final RpkitUnconsciousState RPKIT_UNCONSCIOUS_STATE = new RpkitUnconsciousState();
 
@@ -45,12 +46,14 @@ public class RpkitUnconsciousState extends TableImpl<RpkitUnconsciousStateRecord
     }
 
     /**
-     * The column <code>rpkit_unconsciousness.rpkit_unconscious_state.character_id</code>.
+     * The column
+     * <code>rpkit_unconsciousness.rpkit_unconscious_state.character_id</code>.
      */
     public final TableField<RpkitUnconsciousStateRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_unconsciousness.rpkit_unconscious_state.death_time</code>.
+     * The column
+     * <code>rpkit_unconsciousness.rpkit_unconscious_state.death_time</code>.
      */
     public final TableField<RpkitUnconsciousStateRecord, LocalDateTime> DEATH_TIME = createField(DSL.name("death_time"), SQLDataType.LOCALDATETIME(0).nullable(false).defaultValue(DSL.field("current_timestamp()", SQLDataType.LOCALDATETIME)), this, "");
 
@@ -63,21 +66,26 @@ public class RpkitUnconsciousState extends TableImpl<RpkitUnconsciousStateRecord
     }
 
     /**
-     * Create an aliased <code>rpkit_unconsciousness.rpkit_unconscious_state</code> table reference
+     * Create an aliased
+     * <code>rpkit_unconsciousness.rpkit_unconscious_state</code> table
+     * reference
      */
     public RpkitUnconsciousState(String alias) {
         this(DSL.name(alias), RPKIT_UNCONSCIOUS_STATE);
     }
 
     /**
-     * Create an aliased <code>rpkit_unconsciousness.rpkit_unconscious_state</code> table reference
+     * Create an aliased
+     * <code>rpkit_unconsciousness.rpkit_unconscious_state</code> table
+     * reference
      */
     public RpkitUnconsciousState(Name alias) {
         this(alias, RPKIT_UNCONSCIOUS_STATE);
     }
 
     /**
-     * Create a <code>rpkit_unconsciousness.rpkit_unconscious_state</code> table reference
+     * Create a <code>rpkit_unconsciousness.rpkit_unconscious_state</code> table
+     * reference
      */
     public RpkitUnconsciousState() {
         this(DSL.name("rpkit_unconscious_state"), null);
@@ -89,7 +97,7 @@ public class RpkitUnconsciousState extends TableImpl<RpkitUnconsciousStateRecord
 
     @Override
     public Schema getSchema() {
-        return RpkitUnconsciousness.RPKIT_UNCONSCIOUSNESS;
+        return aliased() ? null : RpkitUnconsciousness.RPKIT_UNCONSCIOUSNESS;
     }
 
     @Override

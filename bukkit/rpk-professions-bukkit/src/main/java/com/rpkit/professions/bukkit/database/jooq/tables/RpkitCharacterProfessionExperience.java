@@ -4,6 +4,7 @@
 package com.rpkit.professions.bukkit.database.jooq.tables;
 
 
+import com.rpkit.professions.bukkit.database.jooq.Keys;
 import com.rpkit.professions.bukkit.database.jooq.RpkitProfessions;
 import com.rpkit.professions.bukkit.database.jooq.tables.records.RpkitCharacterProfessionExperienceRecord;
 
@@ -16,6 +17,7 @@ import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
+import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
@@ -30,7 +32,8 @@ public class RpkitCharacterProfessionExperience extends TableImpl<RpkitCharacter
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_professions.rpkit_character_profession_experience</code>
+     * The reference instance of
+     * <code>rpkit_professions.rpkit_character_profession_experience</code>
      */
     public static final RpkitCharacterProfessionExperience RPKIT_CHARACTER_PROFESSION_EXPERIENCE = new RpkitCharacterProfessionExperience();
 
@@ -43,17 +46,20 @@ public class RpkitCharacterProfessionExperience extends TableImpl<RpkitCharacter
     }
 
     /**
-     * The column <code>rpkit_professions.rpkit_character_profession_experience.character_id</code>.
+     * The column
+     * <code>rpkit_professions.rpkit_character_profession_experience.character_id</code>.
      */
     public final TableField<RpkitCharacterProfessionExperienceRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_professions.rpkit_character_profession_experience.profession</code>.
+     * The column
+     * <code>rpkit_professions.rpkit_character_profession_experience.profession</code>.
      */
     public final TableField<RpkitCharacterProfessionExperienceRecord, String> PROFESSION = createField(DSL.name("profession"), SQLDataType.VARCHAR(256).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_professions.rpkit_character_profession_experience.experience</code>.
+     * The column
+     * <code>rpkit_professions.rpkit_character_profession_experience.experience</code>.
      */
     public final TableField<RpkitCharacterProfessionExperienceRecord, Integer> EXPERIENCE = createField(DSL.name("experience"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -66,21 +72,27 @@ public class RpkitCharacterProfessionExperience extends TableImpl<RpkitCharacter
     }
 
     /**
-     * Create an aliased <code>rpkit_professions.rpkit_character_profession_experience</code> table reference
+     * Create an aliased
+     * <code>rpkit_professions.rpkit_character_profession_experience</code>
+     * table reference
      */
     public RpkitCharacterProfessionExperience(String alias) {
         this(DSL.name(alias), RPKIT_CHARACTER_PROFESSION_EXPERIENCE);
     }
 
     /**
-     * Create an aliased <code>rpkit_professions.rpkit_character_profession_experience</code> table reference
+     * Create an aliased
+     * <code>rpkit_professions.rpkit_character_profession_experience</code>
+     * table reference
      */
     public RpkitCharacterProfessionExperience(Name alias) {
         this(alias, RPKIT_CHARACTER_PROFESSION_EXPERIENCE);
     }
 
     /**
-     * Create a <code>rpkit_professions.rpkit_character_profession_experience</code> table reference
+     * Create a
+     * <code>rpkit_professions.rpkit_character_profession_experience</code>
+     * table reference
      */
     public RpkitCharacterProfessionExperience() {
         this(DSL.name("rpkit_character_profession_experience"), null);
@@ -92,7 +104,12 @@ public class RpkitCharacterProfessionExperience extends TableImpl<RpkitCharacter
 
     @Override
     public Schema getSchema() {
-        return RpkitProfessions.RPKIT_PROFESSIONS;
+        return aliased() ? null : RpkitProfessions.RPKIT_PROFESSIONS;
+    }
+
+    @Override
+    public UniqueKey<RpkitCharacterProfessionExperienceRecord> getPrimaryKey() {
+        return Keys.KEY_RPKIT_CHARACTER_PROFESSION_EXPERIENCE_PRIMARY;
     }
 
     @Override

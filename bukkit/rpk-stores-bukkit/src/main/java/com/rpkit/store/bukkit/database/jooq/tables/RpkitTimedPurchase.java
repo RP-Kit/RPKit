@@ -8,9 +8,6 @@ import com.rpkit.store.bukkit.database.jooq.Keys;
 import com.rpkit.store.bukkit.database.jooq.RpkitStores;
 import com.rpkit.store.bukkit.database.jooq.tables.records.RpkitTimedPurchaseRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -67,14 +64,16 @@ public class RpkitTimedPurchase extends TableImpl<RpkitTimedPurchaseRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_timed_purchase</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_timed_purchase</code> table
+     * reference
      */
     public RpkitTimedPurchase(String alias) {
         this(DSL.name(alias), RPKIT_TIMED_PURCHASE);
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_timed_purchase</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_timed_purchase</code> table
+     * reference
      */
     public RpkitTimedPurchase(Name alias) {
         this(alias, RPKIT_TIMED_PURCHASE);
@@ -93,7 +92,7 @@ public class RpkitTimedPurchase extends TableImpl<RpkitTimedPurchaseRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitStores.RPKIT_STORES;
+        return aliased() ? null : RpkitStores.RPKIT_STORES;
     }
 
     @Override
@@ -104,11 +103,6 @@ public class RpkitTimedPurchase extends TableImpl<RpkitTimedPurchaseRecord> {
     @Override
     public UniqueKey<RpkitTimedPurchaseRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_TIMED_PURCHASE_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitTimedPurchaseRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitTimedPurchaseRecord>>asList(Keys.KEY_RPKIT_TIMED_PURCHASE_PRIMARY);
     }
 
     @Override

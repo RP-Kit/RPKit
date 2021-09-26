@@ -8,9 +8,6 @@ import com.rpkit.store.bukkit.database.jooq.Keys;
 import com.rpkit.store.bukkit.database.jooq.RpkitStores;
 import com.rpkit.store.bukkit.database.jooq.tables.records.RpkitPermanentPurchaseRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -36,7 +33,8 @@ public class RpkitPermanentPurchase extends TableImpl<RpkitPermanentPurchaseReco
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_stores.rpkit_permanent_purchase</code>
+     * The reference instance of
+     * <code>rpkit_stores.rpkit_permanent_purchase</code>
      */
     public static final RpkitPermanentPurchase RPKIT_PERMANENT_PURCHASE = new RpkitPermanentPurchase();
 
@@ -54,7 +52,8 @@ public class RpkitPermanentPurchase extends TableImpl<RpkitPermanentPurchaseReco
     public final TableField<RpkitPermanentPurchaseRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>rpkit_stores.rpkit_permanent_purchase.purchase_id</code>.
+     * The column
+     * <code>rpkit_stores.rpkit_permanent_purchase.purchase_id</code>.
      */
     public final TableField<RpkitPermanentPurchaseRecord, Integer> PURCHASE_ID = createField(DSL.name("purchase_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -67,21 +66,24 @@ public class RpkitPermanentPurchase extends TableImpl<RpkitPermanentPurchaseReco
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_permanent_purchase</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_permanent_purchase</code>
+     * table reference
      */
     public RpkitPermanentPurchase(String alias) {
         this(DSL.name(alias), RPKIT_PERMANENT_PURCHASE);
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_permanent_purchase</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_permanent_purchase</code>
+     * table reference
      */
     public RpkitPermanentPurchase(Name alias) {
         this(alias, RPKIT_PERMANENT_PURCHASE);
     }
 
     /**
-     * Create a <code>rpkit_stores.rpkit_permanent_purchase</code> table reference
+     * Create a <code>rpkit_stores.rpkit_permanent_purchase</code> table
+     * reference
      */
     public RpkitPermanentPurchase() {
         this(DSL.name("rpkit_permanent_purchase"), null);
@@ -93,7 +95,7 @@ public class RpkitPermanentPurchase extends TableImpl<RpkitPermanentPurchaseReco
 
     @Override
     public Schema getSchema() {
-        return RpkitStores.RPKIT_STORES;
+        return aliased() ? null : RpkitStores.RPKIT_STORES;
     }
 
     @Override
@@ -104,11 +106,6 @@ public class RpkitPermanentPurchase extends TableImpl<RpkitPermanentPurchaseReco
     @Override
     public UniqueKey<RpkitPermanentPurchaseRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_PERMANENT_PURCHASE_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitPermanentPurchaseRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitPermanentPurchaseRecord>>asList(Keys.KEY_RPKIT_PERMANENT_PURCHASE_PRIMARY);
     }
 
     @Override

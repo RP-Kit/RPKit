@@ -6,12 +6,13 @@ package com.rpkit.characters.bukkit.database.jooq;
 
 import com.rpkit.characters.bukkit.database.jooq.tables.RpkitCharacter;
 import com.rpkit.characters.bukkit.database.jooq.tables.RpkitNewCharacterCooldown;
-import org.jooq.Catalog;
-import org.jooq.Table;
-import org.jooq.impl.SchemaImpl;
 
 import java.util.Arrays;
 import java.util.List;
+
+import org.jooq.Catalog;
+import org.jooq.Table;
+import org.jooq.impl.SchemaImpl;
 
 
 /**
@@ -52,8 +53,9 @@ public class RpkitCharacters extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitCharacter.RPKIT_CHARACTER,
-            RpkitNewCharacterCooldown.RPKIT_NEW_CHARACTER_COOLDOWN);
+            RpkitNewCharacterCooldown.RPKIT_NEW_CHARACTER_COOLDOWN
+        );
     }
 }

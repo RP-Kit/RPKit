@@ -42,7 +42,7 @@ class AuctionsMessages(plugin: RPKAuctionsBukkit) : BukkitMessages(plugin) {
             character: RPKCharacter
         ) = message.withParameters(
             "amount" to amount.toString(),
-            "item_type" to itemType.toString().toLowerCase().replace('_', ' '),
+            "item_type" to itemType.toString().lowercase().replace('_', ' '),
             "auction_id" to auctionId.toString(),
             "character" to character.name
         )
@@ -51,7 +51,7 @@ class AuctionsMessages(plugin: RPKAuctionsBukkit) : BukkitMessages(plugin) {
     class AuctionItemReturnedMessage(private val message: ParameterizedMessage) {
         fun withParameters(amount: Int, itemType: Material, auctionId: Int) = message.withParameters(
             "amount" to amount.toString(),
-            "item_type" to itemType.toString().toLowerCase().replace('_', ' '),
+            "item_type" to itemType.toString().lowercase().replace('_', ' '),
             "auction_id" to auctionId.toString()
         )
     }
@@ -86,7 +86,7 @@ class AuctionsMessages(plugin: RPKAuctionsBukkit) : BukkitMessages(plugin) {
             "currency" to currency.name.value,
             "auction_id" to auction.id.toString(),
             "item_amount" to itemAmount.toString(),
-            "item_type" to itemType.toString().toLowerCase().replace('_', ' ')
+            "item_type" to itemType.toString().lowercase().replace('_', ' ')
         )
     }
 
