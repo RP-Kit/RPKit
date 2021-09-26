@@ -120,6 +120,7 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
                 assignGroupPermissions(minecraftProfile, group, assignedGroups)
             }
         }
+        bukkitPlayer.updateCommands()
     }
 
     private fun assignGroupPermissions(minecraftProfile: RPKMinecraftProfile, group: RPKGroup, assignedGroups: MutableList<RPKGroup>) {
