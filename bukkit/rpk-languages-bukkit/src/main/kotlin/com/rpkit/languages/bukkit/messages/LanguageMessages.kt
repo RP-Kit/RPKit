@@ -50,5 +50,5 @@ class LanguageMessages(plugin: RPKLanguagesBukkit) : BukkitMessages(plugin) {
     val noPermissionLanguageList = get("no-permission-language-list")
     val noLanguageService = get("no-language-service")
     val languageListTitle = get("language-list-title")
-    val languageListItem = getParameterized("currency-list-item").let(::LanguageListItemMessage)
+    val languageListItem = getParameterized("language-list-item").let(::LanguageListItemMessage)
 }
