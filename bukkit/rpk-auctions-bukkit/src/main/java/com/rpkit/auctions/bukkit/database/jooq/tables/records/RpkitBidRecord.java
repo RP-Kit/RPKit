@@ -5,6 +5,7 @@ package com.rpkit.auctions.bukkit.database.jooq.tables.records;
 
 
 import com.rpkit.auctions.bukkit.database.jooq.tables.RpkitBid;
+
 import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.Record4;

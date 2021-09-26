@@ -33,7 +33,7 @@ class InventoryCloseListener : Listener {
 
     @EventHandler
     fun onInventoryClose(event: InventoryCloseEvent) {
-        if (!event.view.title.toLowerCase().contains("wallet")) return
+        if (!event.view.title.lowercase().contains("wallet")) return
         val bukkitPlayer = event.player
         if (bukkitPlayer !is Player) return
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return

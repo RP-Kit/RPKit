@@ -5,13 +5,14 @@ package com.rpkit.blocklog.bukkit.database.jooq.tables.records;
 
 
 import com.rpkit.blocklog.bukkit.database.jooq.tables.RpkitBlockInventoryChange;
+
+import java.time.LocalDateTime;
+
 import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.Record9;
 import org.jooq.Row9;
 import org.jooq.impl.UpdatableRecordImpl;
-
-import java.time.LocalDateTime;
 
 
 /**
@@ -23,126 +24,144 @@ public class RpkitBlockInventoryChangeRecord extends UpdatableRecordImpl<RpkitBl
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_block_logging.rpkit_block_inventory_change.id</code>.
+     * Setter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.id</code>.
      */
     public void setId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_block_logging.rpkit_block_inventory_change.id</code>.
+     * Getter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.id</code>.
      */
     public Integer getId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_block_logging.rpkit_block_inventory_change.block_history_id</code>.
+     * Setter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.block_history_id</code>.
      */
     public void setBlockHistoryId(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_block_logging.rpkit_block_inventory_change.block_history_id</code>.
+     * Getter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.block_history_id</code>.
      */
     public Integer getBlockHistoryId() {
         return (Integer) get(1);
     }
 
     /**
-     * Setter for <code>rpkit_block_logging.rpkit_block_inventory_change.time</code>.
+     * Setter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.time</code>.
      */
     public void setTime(LocalDateTime value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>rpkit_block_logging.rpkit_block_inventory_change.time</code>.
+     * Getter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.time</code>.
      */
     public LocalDateTime getTime() {
         return (LocalDateTime) get(2);
     }
 
     /**
-     * Setter for <code>rpkit_block_logging.rpkit_block_inventory_change.profile_id</code>.
+     * Setter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.profile_id</code>.
      */
     public void setProfileId(Integer value) {
         set(3, value);
     }
 
     /**
-     * Getter for <code>rpkit_block_logging.rpkit_block_inventory_change.profile_id</code>.
+     * Getter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.profile_id</code>.
      */
     public Integer getProfileId() {
         return (Integer) get(3);
     }
 
     /**
-     * Setter for <code>rpkit_block_logging.rpkit_block_inventory_change.minecraft_profile_id</code>.
+     * Setter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.minecraft_profile_id</code>.
      */
     public void setMinecraftProfileId(Integer value) {
         set(4, value);
     }
 
     /**
-     * Getter for <code>rpkit_block_logging.rpkit_block_inventory_change.minecraft_profile_id</code>.
+     * Getter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.minecraft_profile_id</code>.
      */
     public Integer getMinecraftProfileId() {
         return (Integer) get(4);
     }
 
     /**
-     * Setter for <code>rpkit_block_logging.rpkit_block_inventory_change.character_id</code>.
+     * Setter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.character_id</code>.
      */
     public void setCharacterId(Integer value) {
         set(5, value);
     }
 
     /**
-     * Getter for <code>rpkit_block_logging.rpkit_block_inventory_change.character_id</code>.
+     * Getter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.character_id</code>.
      */
     public Integer getCharacterId() {
         return (Integer) get(5);
     }
 
     /**
-     * Setter for <code>rpkit_block_logging.rpkit_block_inventory_change.from</code>.
+     * Setter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.from</code>.
      */
     public void setFrom(byte[] value) {
         set(6, value);
     }
 
     /**
-     * Getter for <code>rpkit_block_logging.rpkit_block_inventory_change.from</code>.
+     * Getter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.from</code>.
      */
     public byte[] getFrom() {
         return (byte[]) get(6);
     }
 
     /**
-     * Setter for <code>rpkit_block_logging.rpkit_block_inventory_change.to</code>.
+     * Setter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.to</code>.
      */
     public void setTo(byte[] value) {
         set(7, value);
     }
 
     /**
-     * Getter for <code>rpkit_block_logging.rpkit_block_inventory_change.to</code>.
+     * Getter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.to</code>.
      */
     public byte[] getTo() {
         return (byte[]) get(7);
     }
 
     /**
-     * Setter for <code>rpkit_block_logging.rpkit_block_inventory_change.reason</code>.
+     * Setter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.reason</code>.
      */
     public void setReason(String value) {
         set(8, value);
     }
 
     /**
-     * Getter for <code>rpkit_block_logging.rpkit_block_inventory_change.reason</code>.
+     * Getter for
+     * <code>rpkit_block_logging.rpkit_block_inventory_change.reason</code>.
      */
     public String getReason() {
         return (String) get(8);

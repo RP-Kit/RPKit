@@ -5,13 +5,14 @@ package com.rpkit.characters.bukkit.database.jooq.tables.records;
 
 
 import com.rpkit.characters.bukkit.database.jooq.tables.RpkitNewCharacterCooldown;
+
+import java.time.LocalDateTime;
+
 import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.Record2;
 import org.jooq.Row2;
 import org.jooq.impl.UpdatableRecordImpl;
-
-import java.time.LocalDateTime;
 
 
 /**
@@ -23,28 +24,32 @@ public class RpkitNewCharacterCooldownRecord extends UpdatableRecordImpl<RpkitNe
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_characters.rpkit_new_character_cooldown.profile_id</code>.
+     * Setter for
+     * <code>rpkit_characters.rpkit_new_character_cooldown.profile_id</code>.
      */
     public void setProfileId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_characters.rpkit_new_character_cooldown.profile_id</code>.
+     * Getter for
+     * <code>rpkit_characters.rpkit_new_character_cooldown.profile_id</code>.
      */
     public Integer getProfileId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_characters.rpkit_new_character_cooldown.cooldown_timestamp</code>.
+     * Setter for
+     * <code>rpkit_characters.rpkit_new_character_cooldown.cooldown_timestamp</code>.
      */
     public void setCooldownTimestamp(LocalDateTime value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_characters.rpkit_new_character_cooldown.cooldown_timestamp</code>.
+     * Getter for
+     * <code>rpkit_characters.rpkit_new_character_cooldown.cooldown_timestamp</code>.
      */
     public LocalDateTime getCooldownTimestamp() {
         return (LocalDateTime) get(1);

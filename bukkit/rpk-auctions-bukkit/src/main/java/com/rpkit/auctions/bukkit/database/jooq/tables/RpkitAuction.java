@@ -7,13 +7,21 @@ package com.rpkit.auctions.bukkit.database.jooq.tables;
 import com.rpkit.auctions.bukkit.database.jooq.Keys;
 import com.rpkit.auctions.bukkit.database.jooq.RpkitAuctions;
 import com.rpkit.auctions.bukkit.database.jooq.tables.records.RpkitAuctionRecord;
-import org.jooq.*;
+
+import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.Identity;
+import org.jooq.Name;
+import org.jooq.Record;
+import org.jooq.Row17;
+import org.jooq.Schema;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.TableOptions;
+import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
-
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -55,32 +63,32 @@ public class RpkitAuction extends TableImpl<RpkitAuctionRecord> {
     /**
      * The column <code>rpkit_auctions.rpkit_auction.world</code>.
      */
-    public final TableField<RpkitAuctionRecord, String> WORLD = createField(DSL.name("world"), SQLDataType.VARCHAR(256).defaultValue(DSL.inline("NULL", SQLDataType.VARCHAR)), this, "");
+    public final TableField<RpkitAuctionRecord, String> WORLD = createField(DSL.name("world"), SQLDataType.VARCHAR(256).defaultValue(DSL.field("NULL", SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.x</code>.
      */
-    public final TableField<RpkitAuctionRecord, Double> X = createField(DSL.name("x"), SQLDataType.DOUBLE.defaultValue(DSL.inline("NULL", SQLDataType.DOUBLE)), this, "");
+    public final TableField<RpkitAuctionRecord, Double> X = createField(DSL.name("x"), SQLDataType.DOUBLE.defaultValue(DSL.field("NULL", SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.y</code>.
      */
-    public final TableField<RpkitAuctionRecord, Double> Y = createField(DSL.name("y"), SQLDataType.DOUBLE.defaultValue(DSL.inline("NULL", SQLDataType.DOUBLE)), this, "");
+    public final TableField<RpkitAuctionRecord, Double> Y = createField(DSL.name("y"), SQLDataType.DOUBLE.defaultValue(DSL.field("NULL", SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.z</code>.
      */
-    public final TableField<RpkitAuctionRecord, Double> Z = createField(DSL.name("z"), SQLDataType.DOUBLE.defaultValue(DSL.inline("NULL", SQLDataType.DOUBLE)), this, "");
+    public final TableField<RpkitAuctionRecord, Double> Z = createField(DSL.name("z"), SQLDataType.DOUBLE.defaultValue(DSL.field("NULL", SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.yaw</code>.
      */
-    public final TableField<RpkitAuctionRecord, Double> YAW = createField(DSL.name("yaw"), SQLDataType.DOUBLE.defaultValue(DSL.inline("NULL", SQLDataType.DOUBLE)), this, "");
+    public final TableField<RpkitAuctionRecord, Double> YAW = createField(DSL.name("yaw"), SQLDataType.DOUBLE.defaultValue(DSL.field("NULL", SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.pitch</code>.
      */
-    public final TableField<RpkitAuctionRecord, Double> PITCH = createField(DSL.name("pitch"), SQLDataType.DOUBLE.defaultValue(DSL.inline("NULL", SQLDataType.DOUBLE)), this, "");
+    public final TableField<RpkitAuctionRecord, Double> PITCH = createField(DSL.name("pitch"), SQLDataType.DOUBLE.defaultValue(DSL.field("NULL", SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.character_id</code>.
@@ -105,15 +113,16 @@ public class RpkitAuction extends TableImpl<RpkitAuctionRecord> {
     /**
      * The column <code>rpkit_auctions.rpkit_auction.buy_out_price</code>.
      */
-    public final TableField<RpkitAuctionRecord, Integer> BUY_OUT_PRICE = createField(DSL.name("buy_out_price"), SQLDataType.INTEGER.defaultValue(DSL.inline("NULL", SQLDataType.INTEGER)), this, "");
+    public final TableField<RpkitAuctionRecord, Integer> BUY_OUT_PRICE = createField(DSL.name("buy_out_price"), SQLDataType.INTEGER.defaultValue(DSL.field("NULL", SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_auctions.rpkit_auction.no_sell_price</code>.
      */
-    public final TableField<RpkitAuctionRecord, Integer> NO_SELL_PRICE = createField(DSL.name("no_sell_price"), SQLDataType.INTEGER.defaultValue(DSL.inline("NULL", SQLDataType.INTEGER)), this, "");
+    public final TableField<RpkitAuctionRecord, Integer> NO_SELL_PRICE = createField(DSL.name("no_sell_price"), SQLDataType.INTEGER.defaultValue(DSL.field("NULL", SQLDataType.INTEGER)), this, "");
 
     /**
-     * The column <code>rpkit_auctions.rpkit_auction.minimum_bid_increment</code>.
+     * The column
+     * <code>rpkit_auctions.rpkit_auction.minimum_bid_increment</code>.
      */
     public final TableField<RpkitAuctionRecord, Integer> MINIMUM_BID_INCREMENT = createField(DSL.name("minimum_bid_increment"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -131,14 +140,16 @@ public class RpkitAuction extends TableImpl<RpkitAuctionRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_auctions.rpkit_auction</code> table reference
+     * Create an aliased <code>rpkit_auctions.rpkit_auction</code> table
+     * reference
      */
     public RpkitAuction(String alias) {
         this(DSL.name(alias), RPKIT_AUCTION);
     }
 
     /**
-     * Create an aliased <code>rpkit_auctions.rpkit_auction</code> table reference
+     * Create an aliased <code>rpkit_auctions.rpkit_auction</code> table
+     * reference
      */
     public RpkitAuction(Name alias) {
         this(alias, RPKIT_AUCTION);
@@ -157,7 +168,7 @@ public class RpkitAuction extends TableImpl<RpkitAuctionRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitAuctions.RPKIT_AUCTIONS;
+        return aliased() ? null : RpkitAuctions.RPKIT_AUCTIONS;
     }
 
     @Override
@@ -168,11 +179,6 @@ public class RpkitAuction extends TableImpl<RpkitAuctionRecord> {
     @Override
     public UniqueKey<RpkitAuctionRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_AUCTION_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitAuctionRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitAuctionRecord>>asList(Keys.KEY_RPKIT_AUCTION_PRIMARY);
     }
 
     @Override

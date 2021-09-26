@@ -5,4 +5,4 @@ main: com.rpkit.drink.bukkit.RPKDrinkLibBukkit
 depend:
 - rpk-core-bukkit
 - rpk-character-lib-bukkit
-api-version: '1.16'
+api-version: '1.17'

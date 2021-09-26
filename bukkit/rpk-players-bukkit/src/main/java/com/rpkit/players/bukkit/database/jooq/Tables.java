@@ -39,7 +39,8 @@ public class Tables {
     public static final RpkitMinecraftProfile RPKIT_MINECRAFT_PROFILE = RpkitMinecraftProfile.RPKIT_MINECRAFT_PROFILE;
 
     /**
-     * The table <code>rpkit_players.rpkit_minecraft_profile_link_request</code>.
+     * The table
+     * <code>rpkit_players.rpkit_minecraft_profile_link_request</code>.
      */
     public static final RpkitMinecraftProfileLinkRequest RPKIT_MINECRAFT_PROFILE_LINK_REQUEST = RpkitMinecraftProfileLinkRequest.RPKIT_MINECRAFT_PROFILE_LINK_REQUEST;
 

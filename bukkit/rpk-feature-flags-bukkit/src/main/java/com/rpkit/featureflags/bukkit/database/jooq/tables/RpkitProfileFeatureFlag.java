@@ -30,7 +30,8 @@ public class RpkitProfileFeatureFlag extends TableImpl<RpkitProfileFeatureFlagRe
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_feature_flags.rpkit_profile_feature_flag</code>
+     * The reference instance of
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag</code>
      */
     public static final RpkitProfileFeatureFlag RPKIT_PROFILE_FEATURE_FLAG = new RpkitProfileFeatureFlag();
 
@@ -43,17 +44,20 @@ public class RpkitProfileFeatureFlag extends TableImpl<RpkitProfileFeatureFlagRe
     }
 
     /**
-     * The column <code>rpkit_feature_flags.rpkit_profile_feature_flag.profile_id</code>.
+     * The column
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag.profile_id</code>.
      */
     public final TableField<RpkitProfileFeatureFlagRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_feature_flags.rpkit_profile_feature_flag.feature_flag_name</code>.
+     * The column
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag.feature_flag_name</code>.
      */
     public final TableField<RpkitProfileFeatureFlagRecord, String> FEATURE_FLAG_NAME = createField(DSL.name("feature_flag_name"), SQLDataType.VARCHAR(1024).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_feature_flags.rpkit_profile_feature_flag.enabled</code>.
+     * The column
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag.enabled</code>.
      */
     public final TableField<RpkitProfileFeatureFlagRecord, Boolean> ENABLED = createField(DSL.name("enabled"), SQLDataType.BOOLEAN.nullable(false), this, "");
 
@@ -66,21 +70,26 @@ public class RpkitProfileFeatureFlag extends TableImpl<RpkitProfileFeatureFlagRe
     }
 
     /**
-     * Create an aliased <code>rpkit_feature_flags.rpkit_profile_feature_flag</code> table reference
+     * Create an aliased
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag</code> table
+     * reference
      */
     public RpkitProfileFeatureFlag(String alias) {
         this(DSL.name(alias), RPKIT_PROFILE_FEATURE_FLAG);
     }
 
     /**
-     * Create an aliased <code>rpkit_feature_flags.rpkit_profile_feature_flag</code> table reference
+     * Create an aliased
+     * <code>rpkit_feature_flags.rpkit_profile_feature_flag</code> table
+     * reference
      */
     public RpkitProfileFeatureFlag(Name alias) {
         this(alias, RPKIT_PROFILE_FEATURE_FLAG);
     }
 
     /**
-     * Create a <code>rpkit_feature_flags.rpkit_profile_feature_flag</code> table reference
+     * Create a <code>rpkit_feature_flags.rpkit_profile_feature_flag</code>
+     * table reference
      */
     public RpkitProfileFeatureFlag() {
         this(DSL.name("rpkit_profile_feature_flag"), null);
@@ -92,7 +101,7 @@ public class RpkitProfileFeatureFlag extends TableImpl<RpkitProfileFeatureFlagRe
 
     @Override
     public Schema getSchema() {
-        return RpkitFeatureFlags.RPKIT_FEATURE_FLAGS;
+        return aliased() ? null : RpkitFeatureFlags.RPKIT_FEATURE_FLAGS;
     }
 
     @Override

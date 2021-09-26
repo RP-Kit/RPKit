@@ -4,7 +4,6 @@
 package com.rpkit.essentials.bukkit.database.jooq;
 
 
-import com.rpkit.essentials.bukkit.database.jooq.tables.FlywaySchemaHistoryPlayers;
 import com.rpkit.essentials.bukkit.database.jooq.tables.RpkitLogMessagesEnabled;
 import com.rpkit.essentials.bukkit.database.jooq.tables.RpkitPreviousLocation;
 import com.rpkit.essentials.bukkit.database.jooq.tables.RpkitTrackingDisabled;
@@ -29,11 +28,6 @@ public class RpkitEssentials extends SchemaImpl {
      * The reference instance of <code>rpkit_essentials</code>
      */
     public static final RpkitEssentials RPKIT_ESSENTIALS = new RpkitEssentials();
-
-    /**
-     * The table <code>rpkit_essentials.flyway_schema_history_players</code>.
-     */
-    public final FlywaySchemaHistoryPlayers FLYWAY_SCHEMA_HISTORY_PLAYERS = FlywaySchemaHistoryPlayers.FLYWAY_SCHEMA_HISTORY_PLAYERS;
 
     /**
      * The table <code>rpkit_essentials.rpkit_log_messages_enabled</code>.
@@ -65,10 +59,10 @@ public class RpkitEssentials extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            FlywaySchemaHistoryPlayers.FLYWAY_SCHEMA_HISTORY_PLAYERS,
+        return Arrays.asList(
             RpkitLogMessagesEnabled.RPKIT_LOG_MESSAGES_ENABLED,
             RpkitPreviousLocation.RPKIT_PREVIOUS_LOCATION,
-            RpkitTrackingDisabled.RPKIT_TRACKING_DISABLED);
+            RpkitTrackingDisabled.RPKIT_TRACKING_DISABLED
+        );
     }
 }

@@ -8,9 +8,6 @@ import com.rpkit.essentials.bukkit.database.jooq.Keys;
 import com.rpkit.essentials.bukkit.database.jooq.RpkitEssentials;
 import com.rpkit.essentials.bukkit.database.jooq.tables.records.RpkitLogMessagesEnabledRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -35,7 +32,8 @@ public class RpkitLogMessagesEnabled extends TableImpl<RpkitLogMessagesEnabledRe
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_essentials.rpkit_log_messages_enabled</code>
+     * The reference instance of
+     * <code>rpkit_essentials.rpkit_log_messages_enabled</code>
      */
     public static final RpkitLogMessagesEnabled RPKIT_LOG_MESSAGES_ENABLED = new RpkitLogMessagesEnabled();
 
@@ -48,7 +46,8 @@ public class RpkitLogMessagesEnabled extends TableImpl<RpkitLogMessagesEnabledRe
     }
 
     /**
-     * The column <code>rpkit_essentials.rpkit_log_messages_enabled.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_essentials.rpkit_log_messages_enabled.minecraft_profile_id</code>.
      */
     public final TableField<RpkitLogMessagesEnabledRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -61,21 +60,24 @@ public class RpkitLogMessagesEnabled extends TableImpl<RpkitLogMessagesEnabledRe
     }
 
     /**
-     * Create an aliased <code>rpkit_essentials.rpkit_log_messages_enabled</code> table reference
+     * Create an aliased
+     * <code>rpkit_essentials.rpkit_log_messages_enabled</code> table reference
      */
     public RpkitLogMessagesEnabled(String alias) {
         this(DSL.name(alias), RPKIT_LOG_MESSAGES_ENABLED);
     }
 
     /**
-     * Create an aliased <code>rpkit_essentials.rpkit_log_messages_enabled</code> table reference
+     * Create an aliased
+     * <code>rpkit_essentials.rpkit_log_messages_enabled</code> table reference
      */
     public RpkitLogMessagesEnabled(Name alias) {
         this(alias, RPKIT_LOG_MESSAGES_ENABLED);
     }
 
     /**
-     * Create a <code>rpkit_essentials.rpkit_log_messages_enabled</code> table reference
+     * Create a <code>rpkit_essentials.rpkit_log_messages_enabled</code> table
+     * reference
      */
     public RpkitLogMessagesEnabled() {
         this(DSL.name("rpkit_log_messages_enabled"), null);
@@ -87,17 +89,12 @@ public class RpkitLogMessagesEnabled extends TableImpl<RpkitLogMessagesEnabledRe
 
     @Override
     public Schema getSchema() {
-        return RpkitEssentials.RPKIT_ESSENTIALS;
+        return aliased() ? null : RpkitEssentials.RPKIT_ESSENTIALS;
     }
 
     @Override
     public UniqueKey<RpkitLogMessagesEnabledRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_LOG_MESSAGES_ENABLED_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitLogMessagesEnabledRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitLogMessagesEnabledRecord>>asList(Keys.KEY_RPKIT_LOG_MESSAGES_ENABLED_PRIMARY);
     }
 
     @Override

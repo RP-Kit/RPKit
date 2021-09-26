@@ -21,28 +21,32 @@ public class RpkitLastUsedChatGroupRecord extends TableRecordImpl<RpkitLastUsedC
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_chat.rpkit_last_used_chat_group.minecraft_profile_id</code>.
+     * Setter for
+     * <code>rpkit_chat.rpkit_last_used_chat_group.minecraft_profile_id</code>.
      */
     public void setMinecraftProfileId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_chat.rpkit_last_used_chat_group.minecraft_profile_id</code>.
+     * Getter for
+     * <code>rpkit_chat.rpkit_last_used_chat_group.minecraft_profile_id</code>.
      */
     public Integer getMinecraftProfileId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_chat.rpkit_last_used_chat_group.chat_group_id</code>.
+     * Setter for
+     * <code>rpkit_chat.rpkit_last_used_chat_group.chat_group_id</code>.
      */
     public void setChatGroupId(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_chat.rpkit_last_used_chat_group.chat_group_id</code>.
+     * Getter for
+     * <code>rpkit_chat.rpkit_last_used_chat_group.chat_group_id</code>.
      */
     public Integer getChatGroupId() {
         return (Integer) get(1);

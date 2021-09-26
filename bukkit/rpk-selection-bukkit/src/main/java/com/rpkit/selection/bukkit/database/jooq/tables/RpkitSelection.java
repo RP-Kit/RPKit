@@ -7,9 +7,6 @@ package com.rpkit.selection.bukkit.database.jooq.tables;
 import com.rpkit.selection.bukkit.database.jooq.Keys;
 import com.rpkit.selection.bukkit.database.jooq.tables.records.RpkitSelectionRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -47,7 +44,8 @@ public class RpkitSelection extends TableImpl<RpkitSelectionRecord> {
     }
 
     /**
-     * The column <code>rpkit_selection.rpkit_selection.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_selection.rpkit_selection.minecraft_profile_id</code>.
      */
     public final TableField<RpkitSelectionRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -95,14 +93,16 @@ public class RpkitSelection extends TableImpl<RpkitSelectionRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_selection.rpkit_selection</code> table reference
+     * Create an aliased <code>rpkit_selection.rpkit_selection</code> table
+     * reference
      */
     public RpkitSelection(String alias) {
         this(DSL.name(alias), RPKIT_SELECTION_);
     }
 
     /**
-     * Create an aliased <code>rpkit_selection.rpkit_selection</code> table reference
+     * Create an aliased <code>rpkit_selection.rpkit_selection</code> table
+     * reference
      */
     public RpkitSelection(Name alias) {
         this(alias, RPKIT_SELECTION_);
@@ -121,17 +121,12 @@ public class RpkitSelection extends TableImpl<RpkitSelectionRecord> {
 
     @Override
     public Schema getSchema() {
-        return com.rpkit.selection.bukkit.database.jooq.RpkitSelection.RPKIT_SELECTION;
+        return aliased() ? null : com.rpkit.selection.bukkit.database.jooq.RpkitSelection.RPKIT_SELECTION;
     }
 
     @Override
     public UniqueKey<RpkitSelectionRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_SELECTION_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitSelectionRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitSelectionRecord>>asList(Keys.KEY_RPKIT_SELECTION_PRIMARY);
     }
 
     @Override

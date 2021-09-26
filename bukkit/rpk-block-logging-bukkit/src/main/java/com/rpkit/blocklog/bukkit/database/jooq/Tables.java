@@ -17,7 +17,8 @@ import com.rpkit.blocklog.bukkit.database.jooq.tables.RpkitBlockInventoryChange;
 public class Tables {
 
     /**
-     * The table <code>rpkit_block_logging.flyway_schema_history_blocklogging</code>.
+     * The table
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging</code>.
      */
     public static final FlywaySchemaHistoryBlocklogging FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING = FlywaySchemaHistoryBlocklogging.FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING;
 

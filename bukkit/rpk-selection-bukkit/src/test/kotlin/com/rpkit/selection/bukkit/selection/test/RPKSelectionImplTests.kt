@@ -20,20 +20,21 @@ import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.selection.bukkit.selection.RPKSelectionImpl
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.every
 import io.mockk.mockk
 
 class RPKSelectionImplTests : WordSpec({
-    val minPosition = mockk<RPKBlockLocation>()
-    every { minPosition.world } returns "world"
-    every { minPosition.x } returns 1
-    every { minPosition.y } returns 1
-    every { minPosition.z } returns 1
-    val maxPosition = mockk<RPKBlockLocation>()
-    every { maxPosition.world } returns "world"
-    every { maxPosition.x } returns 3
-    every { maxPosition.y } returns 3
-    every { maxPosition.z } returns 3
+    val minPosition = RPKBlockLocation(
+        world = "world",
+        x = 1,
+        y = 1,
+        z = 1
+    )
+    val maxPosition = RPKBlockLocation(
+        world = "world",
+        x = 3,
+        y = 3,
+        z = 3
+    )
     val selection = RPKSelectionImpl(
             mockk(),
             "world",
@@ -43,29 +44,32 @@ class RPKSelectionImplTests : WordSpec({
 
     "RPKSelectionImpl.contains" should {
         "return true when it contains the given point" {
-            val block = mockk<RPKBlockLocation>()
-            every { block.world } returns "world"
-            every { block.x } returns 2
-            every { block.y } returns 2
-            every { block.z } returns 2
+            val block = RPKBlockLocation(
+                world = "world",
+                x = 2,
+                y = 2,
+                z = 2
+            )
 
             selection.contains(block) shouldBe true
         }
         "return false when it does not contain the given point" {
-            val block = mockk<RPKBlockLocation>()
-            every { block.world } returns "world"
-            every { block.x } returns 4
-            every { block.y } returns 4
-            every { block.z } returns 4
+            val block = RPKBlockLocation(
+                world = "world",
+                x = 4,
+                y = 4,
+                z = 4
+            )
 
             selection.contains(block) shouldBe false
         }
         "return false when the given point is in another world" {
-            val block = mockk<RPKBlockLocation>()
-            every { block.world } returns "otherWorld"
-            every { block.x } returns 2
-            every { block.y } returns 2
-            every { block.z } returns 2
+            val block = RPKBlockLocation(
+                world = "otherWorld",
+                x = 2,
+                y = 2,
+                z = 2
+            )
 
             selection.contains(block) shouldBe false
         }

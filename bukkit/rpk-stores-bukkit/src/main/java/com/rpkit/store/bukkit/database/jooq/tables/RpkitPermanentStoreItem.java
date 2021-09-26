@@ -8,9 +8,6 @@ import com.rpkit.store.bukkit.database.jooq.Keys;
 import com.rpkit.store.bukkit.database.jooq.RpkitStores;
 import com.rpkit.store.bukkit.database.jooq.tables.records.RpkitPermanentStoreItemRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -36,7 +33,8 @@ public class RpkitPermanentStoreItem extends TableImpl<RpkitPermanentStoreItemRe
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_stores.rpkit_permanent_store_item</code>
+     * The reference instance of
+     * <code>rpkit_stores.rpkit_permanent_store_item</code>
      */
     public static final RpkitPermanentStoreItem RPKIT_PERMANENT_STORE_ITEM = new RpkitPermanentStoreItem();
 
@@ -54,7 +52,8 @@ public class RpkitPermanentStoreItem extends TableImpl<RpkitPermanentStoreItemRe
     public final TableField<RpkitPermanentStoreItemRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>rpkit_stores.rpkit_permanent_store_item.store_item_id</code>.
+     * The column
+     * <code>rpkit_stores.rpkit_permanent_store_item.store_item_id</code>.
      */
     public final TableField<RpkitPermanentStoreItemRecord, Integer> STORE_ITEM_ID = createField(DSL.name("store_item_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -67,21 +66,24 @@ public class RpkitPermanentStoreItem extends TableImpl<RpkitPermanentStoreItemRe
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_permanent_store_item</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_permanent_store_item</code>
+     * table reference
      */
     public RpkitPermanentStoreItem(String alias) {
         this(DSL.name(alias), RPKIT_PERMANENT_STORE_ITEM);
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_permanent_store_item</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_permanent_store_item</code>
+     * table reference
      */
     public RpkitPermanentStoreItem(Name alias) {
         this(alias, RPKIT_PERMANENT_STORE_ITEM);
     }
 
     /**
-     * Create a <code>rpkit_stores.rpkit_permanent_store_item</code> table reference
+     * Create a <code>rpkit_stores.rpkit_permanent_store_item</code> table
+     * reference
      */
     public RpkitPermanentStoreItem() {
         this(DSL.name("rpkit_permanent_store_item"), null);
@@ -93,7 +95,7 @@ public class RpkitPermanentStoreItem extends TableImpl<RpkitPermanentStoreItemRe
 
     @Override
     public Schema getSchema() {
-        return RpkitStores.RPKIT_STORES;
+        return aliased() ? null : RpkitStores.RPKIT_STORES;
     }
 
     @Override
@@ -104,11 +106,6 @@ public class RpkitPermanentStoreItem extends TableImpl<RpkitPermanentStoreItemRe
     @Override
     public UniqueKey<RpkitPermanentStoreItemRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_PERMANENT_STORE_ITEM_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitPermanentStoreItemRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitPermanentStoreItemRecord>>asList(Keys.KEY_RPKIT_PERMANENT_STORE_ITEM_PRIMARY);
     }
 
     @Override

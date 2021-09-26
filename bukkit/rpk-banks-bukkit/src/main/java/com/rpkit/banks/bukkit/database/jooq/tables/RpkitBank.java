@@ -7,13 +7,20 @@ package com.rpkit.banks.bukkit.database.jooq.tables;
 import com.rpkit.banks.bukkit.database.jooq.Keys;
 import com.rpkit.banks.bukkit.database.jooq.RpkitBanks;
 import com.rpkit.banks.bukkit.database.jooq.tables.records.RpkitBankRecord;
-import org.jooq.*;
+
+import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.Name;
+import org.jooq.Record;
+import org.jooq.Row3;
+import org.jooq.Schema;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.TableOptions;
+import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
-
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -87,17 +94,12 @@ public class RpkitBank extends TableImpl<RpkitBankRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitBanks.RPKIT_BANKS;
+        return aliased() ? null : RpkitBanks.RPKIT_BANKS;
     }
 
     @Override
     public UniqueKey<RpkitBankRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_BANK_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitBankRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitBankRecord>>asList(Keys.KEY_RPKIT_BANK_PRIMARY);
     }
 
     @Override

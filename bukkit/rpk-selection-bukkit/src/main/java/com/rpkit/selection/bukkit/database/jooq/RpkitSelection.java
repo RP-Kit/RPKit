@@ -45,7 +45,8 @@ public class RpkitSelection extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            com.rpkit.selection.bukkit.database.jooq.tables.RpkitSelection.RPKIT_SELECTION_);
+        return Arrays.asList(
+            com.rpkit.selection.bukkit.database.jooq.tables.RpkitSelection.RPKIT_SELECTION_
+        );
     }
 }

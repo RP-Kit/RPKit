@@ -21,14 +21,16 @@ public class RpkitVanishedRecord extends UpdatableRecordImpl<RpkitVanishedRecord
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_moderation.rpkit_vanished.minecraft_profile_id</code>.
+     * Setter for
+     * <code>rpkit_moderation.rpkit_vanished.minecraft_profile_id</code>.
      */
     public void setMinecraftProfileId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_moderation.rpkit_vanished.minecraft_profile_id</code>.
+     * Getter for
+     * <code>rpkit_moderation.rpkit_vanished.minecraft_profile_id</code>.
      */
     public Integer getMinecraftProfileId() {
         return (Integer) get(0);

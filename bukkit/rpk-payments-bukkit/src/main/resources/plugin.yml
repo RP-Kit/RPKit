@@ -9,7 +9,7 @@ depend:
 - rpk-economy-lib-bukkit
 - rpk-bank-lib-bukkit
 - rpk-payment-lib-bukkit
-api-version: '1.16'
+api-version: '1.17'
 commands:
   payment:
     description: Payment management command

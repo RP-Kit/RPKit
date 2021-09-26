@@ -45,7 +45,7 @@ class ProfileDenyLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandE
         }
         val type = args[0]
         val id = args[1].toIntOrNull()
-        when (type.toLowerCase()) {
+        when (type.lowercase()) {
             "minecraft" -> {
                 if (id == null) {
                     sender.sendMessage(plugin.messages.profileDenyLinkInvalidId)

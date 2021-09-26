@@ -36,7 +36,7 @@ class RPKBukkitConsoleCommandSender(
     }
 
     override fun sendMessage(messages: Array<String>) {
-        bukkitCommandSender.sendMessage(messages)
+        bukkitCommandSender.sendMessage(*messages)
     }
 
     override fun sendMessage(vararg components: BaseComponent) {

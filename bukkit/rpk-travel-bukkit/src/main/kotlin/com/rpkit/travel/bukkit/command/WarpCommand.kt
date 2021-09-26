@@ -40,7 +40,7 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             return true
         }
         if (args.isNotEmpty()) {
-            warpService.getWarp(RPKWarpName(args[0].toLowerCase())).thenAcceptAsync { warp ->
+            warpService.getWarp(RPKWarpName(args[0].lowercase())).thenAcceptAsync { warp ->
                 if (warp == null) {
                     sender.sendMessage(plugin.messages.warpInvalidWarp)
                     return@thenAcceptAsync

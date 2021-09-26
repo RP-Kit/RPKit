@@ -35,14 +35,16 @@ public class RpkitChatGroupMemberRecord extends TableRecordImpl<RpkitChatGroupMe
     }
 
     /**
-     * Setter for <code>rpkit_chat.rpkit_chat_group_member.minecraft_profile_id</code>.
+     * Setter for
+     * <code>rpkit_chat.rpkit_chat_group_member.minecraft_profile_id</code>.
      */
     public void setMinecraftProfileId(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_chat.rpkit_chat_group_member.minecraft_profile_id</code>.
+     * Getter for
+     * <code>rpkit_chat.rpkit_chat_group_member.minecraft_profile_id</code>.
      */
     public Integer getMinecraftProfileId() {
         return (Integer) get(1);

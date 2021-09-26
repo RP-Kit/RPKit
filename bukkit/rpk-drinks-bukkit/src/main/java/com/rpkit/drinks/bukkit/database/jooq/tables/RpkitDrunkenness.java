@@ -8,9 +8,6 @@ import com.rpkit.drinks.bukkit.database.jooq.Keys;
 import com.rpkit.drinks.bukkit.database.jooq.RpkitDrinks;
 import com.rpkit.drinks.bukkit.database.jooq.tables.records.RpkitDrunkennessRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -66,14 +63,16 @@ public class RpkitDrunkenness extends TableImpl<RpkitDrunkennessRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_drinks.rpkit_drunkenness</code> table reference
+     * Create an aliased <code>rpkit_drinks.rpkit_drunkenness</code> table
+     * reference
      */
     public RpkitDrunkenness(String alias) {
         this(DSL.name(alias), RPKIT_DRUNKENNESS);
     }
 
     /**
-     * Create an aliased <code>rpkit_drinks.rpkit_drunkenness</code> table reference
+     * Create an aliased <code>rpkit_drinks.rpkit_drunkenness</code> table
+     * reference
      */
     public RpkitDrunkenness(Name alias) {
         this(alias, RPKIT_DRUNKENNESS);
@@ -92,17 +91,12 @@ public class RpkitDrunkenness extends TableImpl<RpkitDrunkennessRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitDrinks.RPKIT_DRINKS;
+        return aliased() ? null : RpkitDrinks.RPKIT_DRINKS;
     }
 
     @Override
     public UniqueKey<RpkitDrunkennessRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_DRUNKENNESS_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitDrunkennessRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitDrunkennessRecord>>asList(Keys.KEY_RPKIT_DRUNKENNESS_PRIMARY);
     }
 
     @Override

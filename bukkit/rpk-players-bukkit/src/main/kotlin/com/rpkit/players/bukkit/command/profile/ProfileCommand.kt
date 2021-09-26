@@ -38,7 +38,7 @@ class ProfileCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor 
             return CompletableFuture.completedFuture(IncorrectUsageFailure())
         }
         val newArgs = args.drop(1).toTypedArray()
-        return when (args[0].toLowerCase()) {
+        return when (args[0].lowercase()) {
             "view" -> profileViewCommand.onCommand(sender, newArgs)
             "set" -> profileSetCommand.onCommand(sender, newArgs)
             "link" -> profileLinkCommand.onCommand(sender, newArgs)

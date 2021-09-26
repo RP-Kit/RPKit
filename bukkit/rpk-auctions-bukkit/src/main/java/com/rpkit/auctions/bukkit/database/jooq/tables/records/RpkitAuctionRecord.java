@@ -5,6 +5,7 @@ package com.rpkit.auctions.bukkit.database.jooq.tables.records;
 
 
 import com.rpkit.auctions.bukkit.database.jooq.tables.RpkitAuction;
+
 import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.Record17;
@@ -231,14 +232,16 @@ public class RpkitAuctionRecord extends UpdatableRecordImpl<RpkitAuctionRecord> 
     }
 
     /**
-     * Setter for <code>rpkit_auctions.rpkit_auction.minimum_bid_increment</code>.
+     * Setter for
+     * <code>rpkit_auctions.rpkit_auction.minimum_bid_increment</code>.
      */
     public void setMinimumBidIncrement(Integer value) {
         set(15, value);
     }
 
     /**
-     * Getter for <code>rpkit_auctions.rpkit_auction.minimum_bid_increment</code>.
+     * Getter for
+     * <code>rpkit_auctions.rpkit_auction.minimum_bid_increment</code>.
      */
     public Integer getMinimumBidIncrement() {
         return (Integer) get(15);

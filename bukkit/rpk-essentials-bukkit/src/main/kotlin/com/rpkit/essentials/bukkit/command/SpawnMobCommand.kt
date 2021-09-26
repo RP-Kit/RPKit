@@ -14,7 +14,7 @@ class SpawnMobCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
             if (args.size >= 2) {
                 if (sender is Player) {
                     try {
-                        val entityType = EntityType.valueOf(args[0].toUpperCase())
+                        val entityType = EntityType.valueOf(args[0].uppercase())
                         try {
                             val amount = Integer.parseInt(args[1])
                             for (i in 0 until amount) {

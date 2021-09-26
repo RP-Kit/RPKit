@@ -30,7 +30,8 @@ public class RpkitChatChannelSpeaker extends TableImpl<RpkitChatChannelSpeakerRe
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_chat.rpkit_chat_channel_speaker</code>
+     * The reference instance of
+     * <code>rpkit_chat.rpkit_chat_channel_speaker</code>
      */
     public static final RpkitChatChannelSpeaker RPKIT_CHAT_CHANNEL_SPEAKER = new RpkitChatChannelSpeaker();
 
@@ -43,12 +44,14 @@ public class RpkitChatChannelSpeaker extends TableImpl<RpkitChatChannelSpeakerRe
     }
 
     /**
-     * The column <code>rpkit_chat.rpkit_chat_channel_speaker.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_chat.rpkit_chat_channel_speaker.minecraft_profile_id</code>.
      */
     public final TableField<RpkitChatChannelSpeakerRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_chat.rpkit_chat_channel_speaker.chat_channel_name</code>.
+     * The column
+     * <code>rpkit_chat.rpkit_chat_channel_speaker.chat_channel_name</code>.
      */
     public final TableField<RpkitChatChannelSpeakerRecord, String> CHAT_CHANNEL_NAME = createField(DSL.name("chat_channel_name"), SQLDataType.VARCHAR(256).nullable(false), this, "");
 
@@ -61,21 +64,24 @@ public class RpkitChatChannelSpeaker extends TableImpl<RpkitChatChannelSpeakerRe
     }
 
     /**
-     * Create an aliased <code>rpkit_chat.rpkit_chat_channel_speaker</code> table reference
+     * Create an aliased <code>rpkit_chat.rpkit_chat_channel_speaker</code>
+     * table reference
      */
     public RpkitChatChannelSpeaker(String alias) {
         this(DSL.name(alias), RPKIT_CHAT_CHANNEL_SPEAKER);
     }
 
     /**
-     * Create an aliased <code>rpkit_chat.rpkit_chat_channel_speaker</code> table reference
+     * Create an aliased <code>rpkit_chat.rpkit_chat_channel_speaker</code>
+     * table reference
      */
     public RpkitChatChannelSpeaker(Name alias) {
         this(alias, RPKIT_CHAT_CHANNEL_SPEAKER);
     }
 
     /**
-     * Create a <code>rpkit_chat.rpkit_chat_channel_speaker</code> table reference
+     * Create a <code>rpkit_chat.rpkit_chat_channel_speaker</code> table
+     * reference
      */
     public RpkitChatChannelSpeaker() {
         this(DSL.name("rpkit_chat_channel_speaker"), null);
@@ -87,7 +93,7 @@ public class RpkitChatChannelSpeaker extends TableImpl<RpkitChatChannelSpeakerRe
 
     @Override
     public Schema getSchema() {
-        return RpkitChat.RPKIT_CHAT;
+        return aliased() ? null : RpkitChat.RPKIT_CHAT;
     }
 
     @Override

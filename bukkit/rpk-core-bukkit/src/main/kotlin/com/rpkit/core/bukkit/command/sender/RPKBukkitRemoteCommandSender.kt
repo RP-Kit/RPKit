@@ -32,7 +32,7 @@ class RPKBukkitRemoteCommandSender(
     }
 
     override fun sendMessage(messages: Array<String>) {
-        commandSender.sendMessage(messages)
+        commandSender.sendMessage(*messages)
     }
 
     override fun hasPermission(permission: String): Boolean {

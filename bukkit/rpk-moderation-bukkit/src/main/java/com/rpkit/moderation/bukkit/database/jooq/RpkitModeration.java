@@ -4,7 +4,6 @@
 package com.rpkit.moderation.bukkit.database.jooq;
 
 
-import com.rpkit.moderation.bukkit.database.jooq.tables.FlywaySchemaHistoryPlayers;
 import com.rpkit.moderation.bukkit.database.jooq.tables.RpkitTicket;
 import com.rpkit.moderation.bukkit.database.jooq.tables.RpkitVanished;
 import com.rpkit.moderation.bukkit.database.jooq.tables.RpkitWarning;
@@ -29,11 +28,6 @@ public class RpkitModeration extends SchemaImpl {
      * The reference instance of <code>rpkit_moderation</code>
      */
     public static final RpkitModeration RPKIT_MODERATION = new RpkitModeration();
-
-    /**
-     * The table <code>rpkit_moderation.flyway_schema_history_players</code>.
-     */
-    public final FlywaySchemaHistoryPlayers FLYWAY_SCHEMA_HISTORY_PLAYERS = FlywaySchemaHistoryPlayers.FLYWAY_SCHEMA_HISTORY_PLAYERS;
 
     /**
      * The table <code>rpkit_moderation.rpkit_ticket</code>.
@@ -65,10 +59,10 @@ public class RpkitModeration extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            FlywaySchemaHistoryPlayers.FLYWAY_SCHEMA_HISTORY_PLAYERS,
+        return Arrays.asList(
             RpkitTicket.RPKIT_TICKET,
             RpkitVanished.RPKIT_VANISHED,
-            RpkitWarning.RPKIT_WARNING);
+            RpkitWarning.RPKIT_WARNING
+        );
     }
 }

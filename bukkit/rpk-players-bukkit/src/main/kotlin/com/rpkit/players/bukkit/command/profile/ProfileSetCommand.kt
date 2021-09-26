@@ -34,7 +34,7 @@ class ProfileSetCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecut
             return CompletableFuture.completedFuture(IncorrectUsageFailure())
         }
         val newArgs = args.drop(1).toTypedArray()
-        return when (args[0].toLowerCase()) {
+        return when (args[0].lowercase()) {
             "name" -> profileSetNameCommand.onCommand(sender, newArgs)
             "password" -> profileSetPasswordCommand.onCommand(sender, newArgs)
             else -> {

@@ -8,9 +8,6 @@ import com.rpkit.store.bukkit.database.jooq.Keys;
 import com.rpkit.store.bukkit.database.jooq.RpkitStores;
 import com.rpkit.store.bukkit.database.jooq.tables.records.RpkitConsumablePurchaseRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -36,7 +33,8 @@ public class RpkitConsumablePurchase extends TableImpl<RpkitConsumablePurchaseRe
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_stores.rpkit_consumable_purchase</code>
+     * The reference instance of
+     * <code>rpkit_stores.rpkit_consumable_purchase</code>
      */
     public static final RpkitConsumablePurchase RPKIT_CONSUMABLE_PURCHASE = new RpkitConsumablePurchase();
 
@@ -54,12 +52,14 @@ public class RpkitConsumablePurchase extends TableImpl<RpkitConsumablePurchaseRe
     public final TableField<RpkitConsumablePurchaseRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>rpkit_stores.rpkit_consumable_purchase.purchase_id</code>.
+     * The column
+     * <code>rpkit_stores.rpkit_consumable_purchase.purchase_id</code>.
      */
     public final TableField<RpkitConsumablePurchaseRecord, Integer> PURCHASE_ID = createField(DSL.name("purchase_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_stores.rpkit_consumable_purchase.remaining_uses</code>.
+     * The column
+     * <code>rpkit_stores.rpkit_consumable_purchase.remaining_uses</code>.
      */
     public final TableField<RpkitConsumablePurchaseRecord, Integer> REMAINING_USES = createField(DSL.name("remaining_uses"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -72,21 +72,24 @@ public class RpkitConsumablePurchase extends TableImpl<RpkitConsumablePurchaseRe
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_consumable_purchase</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_consumable_purchase</code>
+     * table reference
      */
     public RpkitConsumablePurchase(String alias) {
         this(DSL.name(alias), RPKIT_CONSUMABLE_PURCHASE);
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_consumable_purchase</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_consumable_purchase</code>
+     * table reference
      */
     public RpkitConsumablePurchase(Name alias) {
         this(alias, RPKIT_CONSUMABLE_PURCHASE);
     }
 
     /**
-     * Create a <code>rpkit_stores.rpkit_consumable_purchase</code> table reference
+     * Create a <code>rpkit_stores.rpkit_consumable_purchase</code> table
+     * reference
      */
     public RpkitConsumablePurchase() {
         this(DSL.name("rpkit_consumable_purchase"), null);
@@ -98,7 +101,7 @@ public class RpkitConsumablePurchase extends TableImpl<RpkitConsumablePurchaseRe
 
     @Override
     public Schema getSchema() {
-        return RpkitStores.RPKIT_STORES;
+        return aliased() ? null : RpkitStores.RPKIT_STORES;
     }
 
     @Override
@@ -109,11 +112,6 @@ public class RpkitConsumablePurchase extends TableImpl<RpkitConsumablePurchaseRe
     @Override
     public UniqueKey<RpkitConsumablePurchaseRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_CONSUMABLE_PURCHASE_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitConsumablePurchaseRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitConsumablePurchaseRecord>>asList(Keys.KEY_RPKIT_CONSUMABLE_PURCHASE_PRIMARY);
     }
 
     @Override

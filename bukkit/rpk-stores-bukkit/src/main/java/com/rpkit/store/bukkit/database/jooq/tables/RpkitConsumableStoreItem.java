@@ -8,9 +8,6 @@ import com.rpkit.store.bukkit.database.jooq.Keys;
 import com.rpkit.store.bukkit.database.jooq.RpkitStores;
 import com.rpkit.store.bukkit.database.jooq.tables.records.RpkitConsumableStoreItemRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -36,7 +33,8 @@ public class RpkitConsumableStoreItem extends TableImpl<RpkitConsumableStoreItem
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_stores.rpkit_consumable_store_item</code>
+     * The reference instance of
+     * <code>rpkit_stores.rpkit_consumable_store_item</code>
      */
     public static final RpkitConsumableStoreItem RPKIT_CONSUMABLE_STORE_ITEM = new RpkitConsumableStoreItem();
 
@@ -54,7 +52,8 @@ public class RpkitConsumableStoreItem extends TableImpl<RpkitConsumableStoreItem
     public final TableField<RpkitConsumableStoreItemRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>rpkit_stores.rpkit_consumable_store_item.store_item_id</code>.
+     * The column
+     * <code>rpkit_stores.rpkit_consumable_store_item.store_item_id</code>.
      */
     public final TableField<RpkitConsumableStoreItemRecord, Integer> STORE_ITEM_ID = createField(DSL.name("store_item_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -72,21 +71,24 @@ public class RpkitConsumableStoreItem extends TableImpl<RpkitConsumableStoreItem
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_consumable_store_item</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_consumable_store_item</code>
+     * table reference
      */
     public RpkitConsumableStoreItem(String alias) {
         this(DSL.name(alias), RPKIT_CONSUMABLE_STORE_ITEM);
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_consumable_store_item</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_consumable_store_item</code>
+     * table reference
      */
     public RpkitConsumableStoreItem(Name alias) {
         this(alias, RPKIT_CONSUMABLE_STORE_ITEM);
     }
 
     /**
-     * Create a <code>rpkit_stores.rpkit_consumable_store_item</code> table reference
+     * Create a <code>rpkit_stores.rpkit_consumable_store_item</code> table
+     * reference
      */
     public RpkitConsumableStoreItem() {
         this(DSL.name("rpkit_consumable_store_item"), null);
@@ -98,7 +100,7 @@ public class RpkitConsumableStoreItem extends TableImpl<RpkitConsumableStoreItem
 
     @Override
     public Schema getSchema() {
-        return RpkitStores.RPKIT_STORES;
+        return aliased() ? null : RpkitStores.RPKIT_STORES;
     }
 
     @Override
@@ -109,11 +111,6 @@ public class RpkitConsumableStoreItem extends TableImpl<RpkitConsumableStoreItem
     @Override
     public UniqueKey<RpkitConsumableStoreItemRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_CONSUMABLE_STORE_ITEM_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitConsumableStoreItemRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitConsumableStoreItemRecord>>asList(Keys.KEY_RPKIT_CONSUMABLE_STORE_ITEM_PRIMARY);
     }
 
     @Override

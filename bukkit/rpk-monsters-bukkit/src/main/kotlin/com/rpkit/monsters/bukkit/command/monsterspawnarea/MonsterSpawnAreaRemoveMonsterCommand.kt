@@ -52,7 +52,7 @@ class MonsterSpawnAreaRemoveMonsterCommand(private val plugin: RPKMonstersBukkit
             return true
         }
         val monsterType = try {
-            EntityType.valueOf(args[0].toUpperCase())
+            EntityType.valueOf(args[0].uppercase())
         } catch (exception: IllegalArgumentException) {
             null
         }

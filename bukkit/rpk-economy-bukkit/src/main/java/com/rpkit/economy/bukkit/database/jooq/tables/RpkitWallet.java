@@ -8,9 +8,6 @@ import com.rpkit.economy.bukkit.database.jooq.Keys;
 import com.rpkit.economy.bukkit.database.jooq.RpkitEconomy;
 import com.rpkit.economy.bukkit.database.jooq.tables.records.RpkitWalletRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -97,17 +94,12 @@ public class RpkitWallet extends TableImpl<RpkitWalletRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitEconomy.RPKIT_ECONOMY;
+        return aliased() ? null : RpkitEconomy.RPKIT_ECONOMY;
     }
 
     @Override
     public UniqueKey<RpkitWalletRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_WALLET_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitWalletRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitWalletRecord>>asList(Keys.KEY_RPKIT_WALLET_PRIMARY);
     }
 
     @Override

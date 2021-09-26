@@ -44,9 +44,9 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : Command
             sender.sendMessage(plugin.messages["crafting-skill-usage"])
             return true
         }
-        val actionName = args[0].toUpperCase()
+        val actionName = args[0].uppercase()
         val action = try {
-            RPKCraftingAction.valueOf(actionName.toUpperCase())
+            RPKCraftingAction.valueOf(actionName.uppercase())
         } catch (exception: IllegalArgumentException) {
             sender.sendMessage(plugin.messages["crafting-skill-actions-title"])
             RPKCraftingAction.values().forEach { action ->
@@ -61,7 +61,7 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : Command
             RPKCraftingAction.SMELT -> "smelting"
             RPKCraftingAction.MINE -> "mining"
         }
-        val material = Material.matchMaterial(args.drop(1).joinToString("_").toUpperCase())
+        val material = Material.matchMaterial(args.drop(1).joinToString("_").uppercase())
         if (material == null) {
             sender.sendMessage(plugin.messages["crafting-skill-invalid-material"])
             return true
@@ -98,8 +98,8 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : Command
             ?.maxOrNull()
             ?: 0
         sender.sendMessage(plugin.messages["crafting-skill-valid", mapOf(
-                "action" to action.toString().toLowerCase(),
-                "material" to material.toString().toLowerCase().replace('_', ' '),
+                "action" to action.toString().lowercase(),
+                "material" to material.toString().lowercase().replace('_', ' '),
                 "total_experience" to totalExperience.toString(),
                 "max_experience" to maxExperience.toString()
         )])

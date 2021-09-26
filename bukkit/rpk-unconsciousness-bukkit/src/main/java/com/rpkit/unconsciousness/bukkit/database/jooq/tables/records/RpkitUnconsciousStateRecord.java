@@ -23,28 +23,32 @@ public class RpkitUnconsciousStateRecord extends TableRecordImpl<RpkitUnconsciou
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_unconsciousness.rpkit_unconscious_state.character_id</code>.
+     * Setter for
+     * <code>rpkit_unconsciousness.rpkit_unconscious_state.character_id</code>.
      */
     public void setCharacterId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_unconsciousness.rpkit_unconscious_state.character_id</code>.
+     * Getter for
+     * <code>rpkit_unconsciousness.rpkit_unconscious_state.character_id</code>.
      */
     public Integer getCharacterId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_unconsciousness.rpkit_unconscious_state.death_time</code>.
+     * Setter for
+     * <code>rpkit_unconsciousness.rpkit_unconscious_state.death_time</code>.
      */
     public void setDeathTime(LocalDateTime value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_unconsciousness.rpkit_unconscious_state.death_time</code>.
+     * Getter for
+     * <code>rpkit_unconsciousness.rpkit_unconscious_state.death_time</code>.
      */
     public LocalDateTime getDeathTime() {
         return (LocalDateTime) get(1);

@@ -59,8 +59,8 @@ class HistoryCommand(private val plugin: RPKBlockLoggingBukkit) : CommandExecuto
                             "profile" to (change.profile?.name?.value ?: "None"),
                             "minecraft_profile" to (change.minecraftProfile?.name ?: "None"),
                             "character" to (change.character?.name ?: "None"),
-                            "from" to change.from.toString().toLowerCase().replace('_', ' '),
-                            "to" to change.to.toString().toLowerCase().replace('_', ' '),
+                            "from" to change.from.toString().lowercase().replace('_', ' '),
+                            "to" to change.to.toString().lowercase().replace('_', ' '),
                             "reason" to change.reason
                         )]
                     )

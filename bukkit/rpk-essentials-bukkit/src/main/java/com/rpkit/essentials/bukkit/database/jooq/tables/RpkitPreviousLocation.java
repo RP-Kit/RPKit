@@ -8,9 +8,6 @@ import com.rpkit.essentials.bukkit.database.jooq.Keys;
 import com.rpkit.essentials.bukkit.database.jooq.RpkitEssentials;
 import com.rpkit.essentials.bukkit.database.jooq.tables.records.RpkitPreviousLocationRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -35,7 +32,8 @@ public class RpkitPreviousLocation extends TableImpl<RpkitPreviousLocationRecord
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_essentials.rpkit_previous_location</code>
+     * The reference instance of
+     * <code>rpkit_essentials.rpkit_previous_location</code>
      */
     public static final RpkitPreviousLocation RPKIT_PREVIOUS_LOCATION = new RpkitPreviousLocation();
 
@@ -48,7 +46,8 @@ public class RpkitPreviousLocation extends TableImpl<RpkitPreviousLocationRecord
     }
 
     /**
-     * The column <code>rpkit_essentials.rpkit_previous_location.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_essentials.rpkit_previous_location.minecraft_profile_id</code>.
      */
     public final TableField<RpkitPreviousLocationRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -91,21 +90,24 @@ public class RpkitPreviousLocation extends TableImpl<RpkitPreviousLocationRecord
     }
 
     /**
-     * Create an aliased <code>rpkit_essentials.rpkit_previous_location</code> table reference
+     * Create an aliased <code>rpkit_essentials.rpkit_previous_location</code>
+     * table reference
      */
     public RpkitPreviousLocation(String alias) {
         this(DSL.name(alias), RPKIT_PREVIOUS_LOCATION);
     }
 
     /**
-     * Create an aliased <code>rpkit_essentials.rpkit_previous_location</code> table reference
+     * Create an aliased <code>rpkit_essentials.rpkit_previous_location</code>
+     * table reference
      */
     public RpkitPreviousLocation(Name alias) {
         this(alias, RPKIT_PREVIOUS_LOCATION);
     }
 
     /**
-     * Create a <code>rpkit_essentials.rpkit_previous_location</code> table reference
+     * Create a <code>rpkit_essentials.rpkit_previous_location</code> table
+     * reference
      */
     public RpkitPreviousLocation() {
         this(DSL.name("rpkit_previous_location"), null);
@@ -117,17 +119,12 @@ public class RpkitPreviousLocation extends TableImpl<RpkitPreviousLocationRecord
 
     @Override
     public Schema getSchema() {
-        return RpkitEssentials.RPKIT_ESSENTIALS;
+        return aliased() ? null : RpkitEssentials.RPKIT_ESSENTIALS;
     }
 
     @Override
     public UniqueKey<RpkitPreviousLocationRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_PREVIOUS_LOCATION_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitPreviousLocationRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitPreviousLocationRecord>>asList(Keys.KEY_RPKIT_PREVIOUS_LOCATION_PRIMARY);
     }
 
     @Override

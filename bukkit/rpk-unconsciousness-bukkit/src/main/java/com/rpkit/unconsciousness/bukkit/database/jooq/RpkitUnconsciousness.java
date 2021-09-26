@@ -47,7 +47,8 @@ public class RpkitUnconsciousness extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            RpkitUnconsciousState.RPKIT_UNCONSCIOUS_STATE);
+        return Arrays.asList(
+            RpkitUnconsciousState.RPKIT_UNCONSCIOUS_STATE
+        );
     }
 }

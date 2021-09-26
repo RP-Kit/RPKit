@@ -47,7 +47,8 @@ public class RpkitDrinks extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            RpkitDrunkenness.RPKIT_DRUNKENNESS);
+        return Arrays.asList(
+            RpkitDrunkenness.RPKIT_DRUNKENNESS
+        );
     }
 }

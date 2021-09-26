@@ -8,12 +8,13 @@ import com.rpkit.blocklog.bukkit.database.jooq.tables.FlywaySchemaHistoryBlocklo
 import com.rpkit.blocklog.bukkit.database.jooq.tables.RpkitBlockChange;
 import com.rpkit.blocklog.bukkit.database.jooq.tables.RpkitBlockHistory;
 import com.rpkit.blocklog.bukkit.database.jooq.tables.RpkitBlockInventoryChange;
-import org.jooq.Catalog;
-import org.jooq.Table;
-import org.jooq.impl.SchemaImpl;
 
 import java.util.Arrays;
 import java.util.List;
+
+import org.jooq.Catalog;
+import org.jooq.Table;
+import org.jooq.impl.SchemaImpl;
 
 
 /**
@@ -30,7 +31,8 @@ public class RpkitBlockLogging extends SchemaImpl {
     public static final RpkitBlockLogging RPKIT_BLOCK_LOGGING = new RpkitBlockLogging();
 
     /**
-     * The table <code>rpkit_block_logging.flyway_schema_history_blocklogging</code>.
+     * The table
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging</code>.
      */
     public final FlywaySchemaHistoryBlocklogging FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING = FlywaySchemaHistoryBlocklogging.FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING;
 
@@ -64,10 +66,11 @@ public class RpkitBlockLogging extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             FlywaySchemaHistoryBlocklogging.FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING,
             RpkitBlockChange.RPKIT_BLOCK_CHANGE,
             RpkitBlockHistory.RPKIT_BLOCK_HISTORY,
-            RpkitBlockInventoryChange.RPKIT_BLOCK_INVENTORY_CHANGE);
+            RpkitBlockInventoryChange.RPKIT_BLOCK_INVENTORY_CHANGE
+        );
     }
 }

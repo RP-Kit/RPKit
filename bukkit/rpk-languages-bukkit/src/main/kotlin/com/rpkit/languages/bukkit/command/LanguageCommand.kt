@@ -12,7 +12,7 @@ class LanguageCommand(private val plugin: RPKLanguagesBukkit) : CommandExecutor 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
             val newArgs = args.drop(1).toTypedArray()
-            when (args[0].toUpperCase()) {
+            when (args[0].uppercase()) {
                 "LIST" -> languageListCommand.onCommand(sender, command, label, newArgs)
                 else -> sender.sendMessage(plugin.messages.languageUsage)
             }

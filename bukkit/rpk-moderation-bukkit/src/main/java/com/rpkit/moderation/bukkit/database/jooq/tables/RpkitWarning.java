@@ -9,8 +9,6 @@ import com.rpkit.moderation.bukkit.database.jooq.RpkitModeration;
 import com.rpkit.moderation.bukkit.database.jooq.tables.records.RpkitWarningRecord;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -83,14 +81,16 @@ public class RpkitWarning extends TableImpl<RpkitWarningRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_moderation.rpkit_warning</code> table reference
+     * Create an aliased <code>rpkit_moderation.rpkit_warning</code> table
+     * reference
      */
     public RpkitWarning(String alias) {
         this(DSL.name(alias), RPKIT_WARNING);
     }
 
     /**
-     * Create an aliased <code>rpkit_moderation.rpkit_warning</code> table reference
+     * Create an aliased <code>rpkit_moderation.rpkit_warning</code> table
+     * reference
      */
     public RpkitWarning(Name alias) {
         this(alias, RPKIT_WARNING);
@@ -109,7 +109,7 @@ public class RpkitWarning extends TableImpl<RpkitWarningRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitModeration.RPKIT_MODERATION;
+        return aliased() ? null : RpkitModeration.RPKIT_MODERATION;
     }
 
     @Override
@@ -120,11 +120,6 @@ public class RpkitWarning extends TableImpl<RpkitWarningRecord> {
     @Override
     public UniqueKey<RpkitWarningRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_WARNING_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitWarningRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitWarningRecord>>asList(Keys.KEY_RPKIT_WARNING_PRIMARY);
     }
 
     @Override

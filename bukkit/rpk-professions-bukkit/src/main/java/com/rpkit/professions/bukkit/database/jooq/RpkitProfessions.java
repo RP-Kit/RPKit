@@ -36,12 +36,14 @@ public class RpkitProfessions extends SchemaImpl {
     public final RpkitCharacterProfession RPKIT_CHARACTER_PROFESSION = RpkitCharacterProfession.RPKIT_CHARACTER_PROFESSION;
 
     /**
-     * The table <code>rpkit_professions.rpkit_character_profession_change_cooldown</code>.
+     * The table
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown</code>.
      */
     public final RpkitCharacterProfessionChangeCooldown RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN = RpkitCharacterProfessionChangeCooldown.RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN;
 
     /**
-     * The table <code>rpkit_professions.rpkit_character_profession_experience</code>.
+     * The table
+     * <code>rpkit_professions.rpkit_character_profession_experience</code>.
      */
     public final RpkitCharacterProfessionExperience RPKIT_CHARACTER_PROFESSION_EXPERIENCE = RpkitCharacterProfessionExperience.RPKIT_CHARACTER_PROFESSION_EXPERIENCE;
 
@@ -65,10 +67,11 @@ public class RpkitProfessions extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitCharacterProfession.RPKIT_CHARACTER_PROFESSION,
             RpkitCharacterProfessionChangeCooldown.RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN,
             RpkitCharacterProfessionExperience.RPKIT_CHARACTER_PROFESSION_EXPERIENCE,
-            RpkitProfessionHidden.RPKIT_PROFESSION_HIDDEN);
+            RpkitProfessionHidden.RPKIT_PROFESSION_HIDDEN
+        );
     }
 }

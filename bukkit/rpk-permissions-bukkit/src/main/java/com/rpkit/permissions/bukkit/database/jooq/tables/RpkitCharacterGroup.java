@@ -30,7 +30,8 @@ public class RpkitCharacterGroup extends TableImpl<RpkitCharacterGroupRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_permissions.rpkit_character_group</code>
+     * The reference instance of
+     * <code>rpkit_permissions.rpkit_character_group</code>
      */
     public static final RpkitCharacterGroup RPKIT_CHARACTER_GROUP = new RpkitCharacterGroup();
 
@@ -43,12 +44,14 @@ public class RpkitCharacterGroup extends TableImpl<RpkitCharacterGroupRecord> {
     }
 
     /**
-     * The column <code>rpkit_permissions.rpkit_character_group.character_id</code>.
+     * The column
+     * <code>rpkit_permissions.rpkit_character_group.character_id</code>.
      */
     public final TableField<RpkitCharacterGroupRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_permissions.rpkit_character_group.group_name</code>.
+     * The column
+     * <code>rpkit_permissions.rpkit_character_group.group_name</code>.
      */
     public final TableField<RpkitCharacterGroupRecord, String> GROUP_NAME = createField(DSL.name("group_name"), SQLDataType.VARCHAR(256).nullable(false), this, "");
 
@@ -66,21 +69,24 @@ public class RpkitCharacterGroup extends TableImpl<RpkitCharacterGroupRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_permissions.rpkit_character_group</code> table reference
+     * Create an aliased <code>rpkit_permissions.rpkit_character_group</code>
+     * table reference
      */
     public RpkitCharacterGroup(String alias) {
         this(DSL.name(alias), RPKIT_CHARACTER_GROUP);
     }
 
     /**
-     * Create an aliased <code>rpkit_permissions.rpkit_character_group</code> table reference
+     * Create an aliased <code>rpkit_permissions.rpkit_character_group</code>
+     * table reference
      */
     public RpkitCharacterGroup(Name alias) {
         this(alias, RPKIT_CHARACTER_GROUP);
     }
 
     /**
-     * Create a <code>rpkit_permissions.rpkit_character_group</code> table reference
+     * Create a <code>rpkit_permissions.rpkit_character_group</code> table
+     * reference
      */
     public RpkitCharacterGroup() {
         this(DSL.name("rpkit_character_group"), null);
@@ -92,7 +98,7 @@ public class RpkitCharacterGroup extends TableImpl<RpkitCharacterGroupRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitPermissions.RPKIT_PERMISSIONS;
+        return aliased() ? null : RpkitPermissions.RPKIT_PERMISSIONS;
     }
 
     @Override

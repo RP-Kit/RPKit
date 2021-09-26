@@ -5,6 +5,7 @@ package com.rpkit.banks.bukkit.database.jooq.tables.records;
 
 
 import com.rpkit.banks.bukkit.database.jooq.tables.RpkitBank;
+
 import org.jooq.Field;
 import org.jooq.Record2;
 import org.jooq.Record3;

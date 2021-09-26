@@ -8,9 +8,6 @@ import com.rpkit.professions.bukkit.database.jooq.Keys;
 import com.rpkit.professions.bukkit.database.jooq.RpkitProfessions;
 import com.rpkit.professions.bukkit.database.jooq.tables.records.RpkitProfessionHiddenRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -35,7 +32,8 @@ public class RpkitProfessionHidden extends TableImpl<RpkitProfessionHiddenRecord
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_professions.rpkit_profession_hidden</code>
+     * The reference instance of
+     * <code>rpkit_professions.rpkit_profession_hidden</code>
      */
     public static final RpkitProfessionHidden RPKIT_PROFESSION_HIDDEN = new RpkitProfessionHidden();
 
@@ -48,7 +46,8 @@ public class RpkitProfessionHidden extends TableImpl<RpkitProfessionHiddenRecord
     }
 
     /**
-     * The column <code>rpkit_professions.rpkit_profession_hidden.character_id</code>.
+     * The column
+     * <code>rpkit_professions.rpkit_profession_hidden.character_id</code>.
      */
     public final TableField<RpkitProfessionHiddenRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -61,21 +60,24 @@ public class RpkitProfessionHidden extends TableImpl<RpkitProfessionHiddenRecord
     }
 
     /**
-     * Create an aliased <code>rpkit_professions.rpkit_profession_hidden</code> table reference
+     * Create an aliased <code>rpkit_professions.rpkit_profession_hidden</code>
+     * table reference
      */
     public RpkitProfessionHidden(String alias) {
         this(DSL.name(alias), RPKIT_PROFESSION_HIDDEN);
     }
 
     /**
-     * Create an aliased <code>rpkit_professions.rpkit_profession_hidden</code> table reference
+     * Create an aliased <code>rpkit_professions.rpkit_profession_hidden</code>
+     * table reference
      */
     public RpkitProfessionHidden(Name alias) {
         this(alias, RPKIT_PROFESSION_HIDDEN);
     }
 
     /**
-     * Create a <code>rpkit_professions.rpkit_profession_hidden</code> table reference
+     * Create a <code>rpkit_professions.rpkit_profession_hidden</code> table
+     * reference
      */
     public RpkitProfessionHidden() {
         this(DSL.name("rpkit_profession_hidden"), null);
@@ -87,17 +89,12 @@ public class RpkitProfessionHidden extends TableImpl<RpkitProfessionHiddenRecord
 
     @Override
     public Schema getSchema() {
-        return RpkitProfessions.RPKIT_PROFESSIONS;
+        return aliased() ? null : RpkitProfessions.RPKIT_PROFESSIONS;
     }
 
     @Override
     public UniqueKey<RpkitProfessionHiddenRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_PROFESSION_HIDDEN_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitProfessionHiddenRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitProfessionHiddenRecord>>asList(Keys.KEY_RPKIT_PROFESSION_HIDDEN_PRIMARY);
     }
 
     @Override

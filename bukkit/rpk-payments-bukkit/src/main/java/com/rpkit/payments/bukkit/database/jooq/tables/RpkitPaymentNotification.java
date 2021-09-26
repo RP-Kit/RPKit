@@ -9,8 +9,6 @@ import com.rpkit.payments.bukkit.database.jooq.RpkitPayments;
 import com.rpkit.payments.bukkit.database.jooq.tables.records.RpkitPaymentNotificationRecord;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -37,7 +35,8 @@ public class RpkitPaymentNotification extends TableImpl<RpkitPaymentNotification
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_payments.rpkit_payment_notification</code>
+     * The reference instance of
+     * <code>rpkit_payments.rpkit_payment_notification</code>
      */
     public static final RpkitPaymentNotification RPKIT_PAYMENT_NOTIFICATION = new RpkitPaymentNotification();
 
@@ -55,7 +54,8 @@ public class RpkitPaymentNotification extends TableImpl<RpkitPaymentNotification
     public final TableField<RpkitPaymentNotificationRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>rpkit_payments.rpkit_payment_notification.group_id</code>.
+     * The column
+     * <code>rpkit_payments.rpkit_payment_notification.group_id</code>.
      */
     public final TableField<RpkitPaymentNotificationRecord, Integer> GROUP_ID = createField(DSL.name("group_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -65,7 +65,8 @@ public class RpkitPaymentNotification extends TableImpl<RpkitPaymentNotification
     public final TableField<RpkitPaymentNotificationRecord, Integer> TO_ID = createField(DSL.name("to_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_payments.rpkit_payment_notification.character_id</code>.
+     * The column
+     * <code>rpkit_payments.rpkit_payment_notification.character_id</code>.
      */
     public final TableField<RpkitPaymentNotificationRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -88,21 +89,24 @@ public class RpkitPaymentNotification extends TableImpl<RpkitPaymentNotification
     }
 
     /**
-     * Create an aliased <code>rpkit_payments.rpkit_payment_notification</code> table reference
+     * Create an aliased <code>rpkit_payments.rpkit_payment_notification</code>
+     * table reference
      */
     public RpkitPaymentNotification(String alias) {
         this(DSL.name(alias), RPKIT_PAYMENT_NOTIFICATION);
     }
 
     /**
-     * Create an aliased <code>rpkit_payments.rpkit_payment_notification</code> table reference
+     * Create an aliased <code>rpkit_payments.rpkit_payment_notification</code>
+     * table reference
      */
     public RpkitPaymentNotification(Name alias) {
         this(alias, RPKIT_PAYMENT_NOTIFICATION);
     }
 
     /**
-     * Create a <code>rpkit_payments.rpkit_payment_notification</code> table reference
+     * Create a <code>rpkit_payments.rpkit_payment_notification</code> table
+     * reference
      */
     public RpkitPaymentNotification() {
         this(DSL.name("rpkit_payment_notification"), null);
@@ -114,7 +118,7 @@ public class RpkitPaymentNotification extends TableImpl<RpkitPaymentNotification
 
     @Override
     public Schema getSchema() {
-        return RpkitPayments.RPKIT_PAYMENTS;
+        return aliased() ? null : RpkitPayments.RPKIT_PAYMENTS;
     }
 
     @Override
@@ -125,11 +129,6 @@ public class RpkitPaymentNotification extends TableImpl<RpkitPaymentNotification
     @Override
     public UniqueKey<RpkitPaymentNotificationRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_PAYMENT_NOTIFICATION_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitPaymentNotificationRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitPaymentNotificationRecord>>asList(Keys.KEY_RPKIT_PAYMENT_NOTIFICATION_PRIMARY);
     }
 
     @Override

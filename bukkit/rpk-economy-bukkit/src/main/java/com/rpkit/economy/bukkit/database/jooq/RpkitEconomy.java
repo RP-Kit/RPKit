@@ -53,8 +53,9 @@ public class RpkitEconomy extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitMoneyHidden.RPKIT_MONEY_HIDDEN,
-            RpkitWallet.RPKIT_WALLET);
+            RpkitWallet.RPKIT_WALLET
+        );
     }
 }

@@ -45,7 +45,8 @@ public class RpkitExperience extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            com.rpkit.experience.bukkit.database.jooq.tables.RpkitExperience.RPKIT_EXPERIENCE_);
+        return Arrays.asList(
+            com.rpkit.experience.bukkit.database.jooq.tables.RpkitExperience.RPKIT_EXPERIENCE_
+        );
     }
 }
