@@ -41,6 +41,7 @@ dependencies {
     implementation project(":bukkit:rpk-economy-lib-bukkit")
     implementation project(":bukkit:rpk-bank-lib-bukkit")
     implementation project(":bukkit:rpk-payment-lib-bukkit")
+    implementation project(":bukkit:rpk-notification-lib-bukkit")
 }
 
 processResources {

@@ -82,5 +82,7 @@ include "bukkit:rpk-stat-build-lib-bukkit"
 include "bukkit:rpk-stat-builds-bukkit"
 include "bukkit:rpk-language-lib-bukkit"
 include "bukkit:rpk-languages-bukkit"
+include "bukkit:rpk-notification-lib-bukkit"
+include "bukkit:rpk-notifications-bukkit"
 
 include "bukkit:skills:rpk-skill-fireball-bukkit"
