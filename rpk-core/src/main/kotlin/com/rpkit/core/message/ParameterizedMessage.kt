@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ class ParameterizedMessage(private val template: String) {
     }
 
     fun withParameters(vararg parameters: MessageParameter): String {
-        return withParameters(parameters.map { (key, value) -> Pair(key, value) }.toMap())
+        return withParameters(parameters.associate { (key, value) -> Pair(key, value) })
     }
 
 }

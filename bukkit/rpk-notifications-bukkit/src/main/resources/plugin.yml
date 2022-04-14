@@ -1,0 +1,16 @@
+name: rpk-notifications-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.notifications.bukkit.RPKNotificationsBukkit
+api-version: '1.17'
+depend:
+- rpk-player-lib-bukkit
+- rpk-notification-lib-bukkit
+commands:
+  notification:
+    description: |
+      Notification management command
+      /notification list - Lists notifications
+      /notification view [id] - Views a notification
+      /notification dismiss [id] - Dismisses a notification as read
+    usage: /<command> [list|view|dismiss]
