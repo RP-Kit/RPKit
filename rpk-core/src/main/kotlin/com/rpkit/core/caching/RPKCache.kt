@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,5 +23,6 @@ interface RPKCache<K, V> {
     fun containsKey(key: K): Boolean
     fun remove(key: K)
     fun keys(): Set<K>
+    fun clear()
 
 }
