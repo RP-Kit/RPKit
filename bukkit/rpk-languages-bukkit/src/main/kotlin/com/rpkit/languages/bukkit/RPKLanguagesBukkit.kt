@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.rpkit.languages.bukkit
 
+import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
@@ -25,7 +26,6 @@ import com.rpkit.core.service.Services
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageService
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageServiceImpl
 import com.rpkit.languages.bukkit.command.LanguageCommand
-import com.rpkit.languages.bukkit.command.ListCharacterUnderstandingCommand
 import com.rpkit.languages.bukkit.database.table.RPKCharacterLanguageTable
 import com.rpkit.languages.bukkit.language.RPKLanguageService
 import com.rpkit.languages.bukkit.language.RPKLanguageServiceImpl
@@ -102,9 +102,7 @@ class RPKLanguagesBukkit : RPKBukkitPlugin() {
     }
 
     private fun registerCommands() {
-        getCommand("language")?.setExecutor(LanguageCommand(this))
-        getCommand("listunderstandings")?.setExecutor(ListCharacterUnderstandingCommand(this))
-
+        getCommand("language")?.setExecutor(LanguageCommand(this).toBukkit())
     }
 
 }

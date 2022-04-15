@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,75 +17,80 @@
 package com.rpkit.languages.bukkit.command
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.command.result.NoCharacterOtherFailure
+import com.rpkit.core.command.RPKCommandExecutor
+import com.rpkit.core.command.result.*
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
 import com.rpkit.languages.bukkit.RPKLanguagesBukkit
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageService
 import com.rpkit.languages.bukkit.language.RPKLanguageService
+import com.rpkit.players.bukkit.command.result.NoMinecraftProfileOtherFailure
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
-import org.bukkit.Bukkit
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 
-class ListCharacterUnderstandingCommand(private val plugin: RPKLanguagesBukkit) : CommandExecutor {
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (!sender.hasPermission("rpkit.languages.command.listunderstandings")) {
-            sender.sendMessage(plugin.messages.noPermissionListCharacterLanguageUnderstanding)
-            return true
+class LanguageListUnderstandingCommand(private val plugin: RPKLanguagesBukkit) : RPKCommandExecutor {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
+        if (!sender.hasPermission("rpkit.languages.command.language.listunderstanding")) {
+            sender.sendMessage(plugin.messages.noPermissionLanguageListUnderstanding)
+            return completedFuture(NoPermissionFailure("rpkit.languages.command.language.listunderstanding"))
         }
         if (args.isEmpty()) {
-            sender.sendMessage(plugin.messages.listCharacterLanguageUnderstandingUsage)
-            return true
+            sender.sendMessage(plugin.messages.languageListUnderstandingUsage)
+            return completedFuture(IncorrectUsageFailure())
         }
-        val player = Bukkit.getPlayer(args[0])
+        val player = plugin.server.getPlayer(args[0])
         if (player == null) {
             sender.sendMessage(plugin.messages.noPlayerFound)
-            return true
+            return completedFuture(InvalidTargetFailure())
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfileService)
-            return true
+            return completedFuture(MissingServiceFailure(RPKMinecraftProfileService::class.java))
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages.noCharacterService)
-            return true
+            return completedFuture(MissingServiceFailure(RPKCharacterService::class.java))
         }
         val characterLanguageService = Services[RPKCharacterLanguageService::class.java]
         if (characterLanguageService == null) {
             sender.sendMessage(plugin.messages.noCharacterLanguageService)
-            return true
+            return completedFuture(MissingServiceFailure(RPKCharacterLanguageService::class.java))
         }
         val languageService = Services[RPKLanguageService::class.java]
         if (languageService == null) {
             sender.sendMessage(plugin.messages.noLanguageService)
-            return true
+            return completedFuture(MissingServiceFailure(RPKLanguageService::class.java))
         }
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(player)
         if (minecraftProfile == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfile)
-            return true
+            return completedFuture(NoMinecraftProfileOtherFailure())
         }
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
             sender.sendMessage(plugin.messages.noCharacter)
-            return true
+            return completedFuture(NoCharacterOtherFailure())
         }
         sender.sendMessage(
-            plugin.messages.listCharacterLanguageUnderstandingTitle.withParameters(
+            plugin.messages.languageListUnderstandingTitle.withParameters(
                 player,
                 character
             )
         )
         languageService.languages.forEach {
             sender.sendMessage(
-                plugin.messages.listCharacterLanguageUnderstandingItem.withParameters(
+                plugin.messages.languageListUnderstandingItem.withParameters(
                     it,
                     characterLanguageService.getCharacterLanguageUnderstanding(character, it).get()
                 )
             )
         }
-        return true
+        return completedFuture(CommandSuccess)
     }
+
+    class InvalidTargetFailure : CommandFailure()
 }
