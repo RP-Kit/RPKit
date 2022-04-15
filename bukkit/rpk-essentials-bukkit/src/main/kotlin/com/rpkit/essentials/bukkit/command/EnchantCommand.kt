@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,11 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
             return true
         }
         if (sender.hasPermission("rpkit.essentials.command.enchant.unsafe")) {
-            val enchantment = Enchantment.getByKey(NamespacedKey.minecraft(args[0].uppercase()))
+            val enchantment = try {
+                Enchantment.getByKey(NamespacedKey.minecraft(args[0].lowercase()))
+            } catch (exception: Exception) {
+                null
+            }
             if (enchantment == null) {
                 sender.sendMessage(plugin.messages["enchant-invalid-enchantment"])
                 return true
@@ -63,7 +67,11 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                 sender.sendMessage(plugin.messages["enchant-invalid-level"])
             }
         } else {
-            val enchantment = Enchantment.getByKey(NamespacedKey.minecraft(args[0]))
+            val enchantment = try {
+                Enchantment.getByKey(NamespacedKey.minecraft(args[0].lowercase()))
+            } catch (exception: IllegalArgumentException) {
+                null
+            }
             if (enchantment == null) {
                 sender.sendMessage(plugin.messages["enchant-invalid-enchantment"])
                 return true
