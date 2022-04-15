@@ -32,12 +32,24 @@ characters:
   set-player-display-name: false
   new-character-cooldown: 604800000
 races:
-- Human
-- Elf
-- Dwarf
-- Orc
-- Half-Elf
-- Half-Orc
+  Human:
+    min-age: 0
+    max-age: 130
+  Elf:
+    min-age: 0
+    max-age: 2000
+  Dwarf:
+    min-age: 0
+    max-age: 1000
+  Orc:
+    min-age: 0
+    max-age: 60
+  Half-Elf:
+    min-age: 0
+    max-age: 200
+  Half-Orc:
+    min-age: 0
+    max-age: 60
 caching:
   rpkit_character:
     id:

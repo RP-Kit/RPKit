@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Character set age command.
@@ -40,12 +42,12 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
                 .withModality(true)
                 .withFirstPrompt(AgePrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages.notFromConsole)
                 .addConversationAbandonedListener { event ->
                     if (!event.gracefulExit()) {
                         val conversable = event.context.forWhom
                         if (conversable is Player) {
-                            conversable.sendMessage(plugin.messages["operation-cancelled"])
+                            conversable.sendMessage(plugin.messages.operationCancelled)
                         }
                     }
                 }
@@ -53,31 +55,31 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         if (!sender.hasPermission("rpkit.characters.command.character.set.age")) {
-            sender.sendMessage(plugin.messages["no-permission-character-set-age"])
+            sender.sendMessage(plugin.messages.noPermissionCharacterSetAge)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
+            sender.sendMessage(plugin.messages.noCharacterService)
             return true
         }
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true
         }
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
-            sender.sendMessage(plugin.messages["no-character"])
+            sender.sendMessage(plugin.messages.noCharacter)
             return true
         }
         if (args.isEmpty()) {
@@ -86,17 +88,22 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
         }
         try {
             val age = args[0].toInt()
-            if (age >= plugin.config.getInt("characters.min-age") && age <= plugin.config.getInt("characters.max-age")) {
+            val minAge = max(plugin.config.getInt("characters.min-age"), character.race?.minAge ?: Int.MIN_VALUE)
+            val maxAge = min(plugin.config.getInt("characters.max-age"), character.race?.maxAge ?: Int.MAX_VALUE)
+            if (age in minAge..maxAge) {
                 character.age = age
                 characterService.updateCharacter(character).thenAccept { updatedCharacter ->
-                    sender.sendMessage(plugin.messages["character-set-age-valid"])
+                    sender.sendMessage(plugin.messages.characterSetAgeValid)
                     updatedCharacter?.showCharacterCard(minecraftProfile)
                 }
             } else {
-                sender.sendMessage(plugin.messages["character-set-age-invalid-validation"])
+                sender.sendMessage(plugin.messages.characterSetAgeInvalidValidation.withParameters(
+                    minAge = minAge,
+                    maxAge = maxAge
+                ))
             }
         } catch (exception: NumberFormatException) {
-            sender.sendMessage(plugin.messages["character-set-age-invalid-number"])
+            sender.sendMessage(plugin.messages.characterSetAgeInvalidNumber)
         }
         return true
     }
@@ -104,7 +111,7 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
     private inner class AgePrompt : NumericPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages["character-set-age-prompt"]
+            return plugin.messages.characterSetAgePrompt
         }
 
         override fun isNumberValid(context: ConversationContext, input: Number): Boolean {
@@ -119,20 +126,26 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             if (minecraftProfile == null) return false
             val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             context.setSessionData("character", character)
-            return input.toInt() >= plugin.config.getInt("characters.min-age")
-                    && input.toInt() <= plugin.config.getInt("characters.max-age")
+            val minAge = max(plugin.config.getInt("characters.min-age"), character?.race?.minAge ?: Int.MIN_VALUE)
+            val maxAge = min(plugin.config.getInt("characters.max-age"), character?.race?.maxAge ?: Int.MAX_VALUE)
+            return input.toInt() in minAge..maxAge
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: Number): String {
-            if (context.getSessionData("minecraftProfileService") == null) return plugin.messages["no-minecraft-profile-service"]
-            if (context.getSessionData("characterService") == null) return plugin.messages["no-character-service"]
-            if (context.getSessionData("minecraftProfile") == null) return plugin.messages["no-minecraft-profile"]
-            if (context.getSessionData("character") == null) return plugin.messages["no-character"]
-            return plugin.messages["character-set-age-invalid-validation"]
+            if (context.getSessionData("minecraftProfileService") == null) return plugin.messages.noMinecraftProfileService
+            if (context.getSessionData("characterService") == null) return plugin.messages.noCharacterService
+            if (context.getSessionData("minecraftProfile") == null) return plugin.messages.noMinecraftProfile
+            val character = context.getSessionData("character") as? RPKCharacter ?: return plugin.messages.noCharacter
+            val minAge = max(plugin.config.getInt("characters.min-age"), character.race?.minAge ?: Int.MIN_VALUE)
+            val maxAge = min(plugin.config.getInt("characters.max-age"), character.race?.maxAge ?: Int.MAX_VALUE)
+            return plugin.messages.characterSetAgeInvalidValidation.withParameters(
+                minAge = minAge,
+                maxAge = maxAge
+            )
         }
 
         override fun getInputNotNumericText(context: ConversationContext, invalidInput: String): String {
-            return plugin.messages["character-set-age-invalid-number"]
+            return plugin.messages.characterSetAgeInvalidNumber
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: Number): Prompt {
@@ -155,7 +168,7 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages["character-set-age-valid"]
+            return plugin.messages.characterSetAgeValid
         }
 
     }

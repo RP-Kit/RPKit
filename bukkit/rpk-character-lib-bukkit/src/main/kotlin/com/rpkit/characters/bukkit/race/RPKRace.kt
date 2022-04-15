@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,5 +25,15 @@ interface RPKRace {
      * The name of the race.
      */
     val name: RPKRaceName
+
+    /**
+     * The minimum age for the race
+     */
+    val minAge: Int
+
+    /**
+     * The maximum age for the race
+     */
+    val maxAge: Int
 
 }
