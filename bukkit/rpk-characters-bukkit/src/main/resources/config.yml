@@ -50,6 +50,9 @@ races:
   Half-Orc:
     min-age: 0
     max-age: 60
+books:
+  change-author-on-sign: true
+  author-format: '${character}'
 caching:
   rpkit_character:
     id:
