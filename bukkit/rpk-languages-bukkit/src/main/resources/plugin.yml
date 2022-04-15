@@ -9,18 +9,19 @@ depend:
 - rpk-character-lib-bukkit
 - rpk-language-lib-bukkit
 commands:
-  listunderstandings:
-    description: Lists the language understanding of an active character of a player
-    usage: /<command> [player]
   language:
     description: |
       Base command for languages
       /language list - Lists available languages
-    usage: /language [list]
+      /language listunderstanding [player] - Lists understanding of all languages for a players active character
+      /language setunderstanding [player] [language] [understanding] - Sets understanding of a language for a players active character
+    usage: /language [list|listunderstanding|setunderstanding]
 permissions:
-  rpkit.languages.command.listunderstandings:
-    description: Lists the understanding of languages from a player
-    default: op
-  rpkit.language.command.language.list:
+  rpkit.languages.command.language.list:
     description: Allows listing languages
     default: op
+  rpkit.languages.command.language.listunderstanding:
+    description: Allows listing the understanding of all languages for a players active character
+    default: op
+  rpkit.languages.command.language.setunderstanding:
+    description: Allows setting the understanding of a language for a players active character
