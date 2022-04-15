@@ -1,7 +1,7 @@
 character-usage: '&cUsage: /character [set|card|switch|list|new|delete]'
 character-set-usage: '&cUsage: /character set [name|gender|age|race|description|dead]'
 character-set-age-prompt: '&fWhat age is your character? &7(Type cancel to cancel)'
-character-set-age-invalid-validation: '&cAge must be between 0 and 10000 inclusive.'
+character-set-age-invalid-validation: '&cAge must be between ${min_age} and ${max_age} inclusive.'
 character-set-age-invalid-number: '&cAge must be a number.'
 character-set-age-valid: '&aAge set.'
 character-set-dead-prompt: '&fIs your character dead? &7(Type cancel to cancel)'

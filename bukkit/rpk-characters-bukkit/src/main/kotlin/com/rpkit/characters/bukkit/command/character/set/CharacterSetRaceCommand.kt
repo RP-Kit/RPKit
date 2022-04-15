@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,12 +40,12 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
                 .withModality(true)
                 .withFirstPrompt(RacePrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages.notFromConsole)
                 .addConversationAbandonedListener { event ->
                     if (!event.gracefulExit()) {
                         val conversable = event.context.forWhom
                         if (conversable is Player) {
-                            conversable.sendMessage(plugin.messages["operation-cancelled"])
+                            conversable.sendMessage(plugin.messages.operationCancelled)
                         }
                     }
                 }
@@ -52,31 +53,31 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         if (!sender.hasPermission("rpkit.characters.command.character.set.race")) {
-            sender.sendMessage(plugin.messages["no-permission-character-set-race"])
+            sender.sendMessage(plugin.messages.noPermissionCharacterSetRace)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
+            sender.sendMessage(plugin.messages.noCharacterService)
             return true
         }
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true
         }
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
-            sender.sendMessage(plugin.messages["no-character"])
+            sender.sendMessage(plugin.messages.noCharacter)
             return true
         }
         if (args.isEmpty()) {
@@ -90,17 +91,17 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
         raceBuilder.append(args[args.size - 1])
         val raceService = Services[RPKRaceService::class.java]
         if (raceService == null) {
-            sender.sendMessage(plugin.messages["no-race-service"])
+            sender.sendMessage(plugin.messages.noRaceService)
             return true
         }
         val race = raceService.getRace(RPKRaceName(raceBuilder.toString()))
         if (race == null) {
-            sender.sendMessage(plugin.messages["character-set-race-invalid-race"])
+            sender.sendMessage(plugin.messages.characterSetRaceInvalidRace)
             return true
         }
         character.race = race
         characterService.updateCharacter(character).thenAccept { updatedCharacter ->
-            sender.sendMessage(plugin.messages["character-set-race-valid"])
+            sender.sendMessage(plugin.messages.characterSetRaceValid)
             updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
@@ -126,18 +127,16 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return plugin.messages["character-set-race-invalid-race"]
+            return plugin.messages.characterSetRaceInvalidRace
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val raceService = Services[RPKRaceService::class.java] ?: return plugin.messages["no-race-service"]
+            val raceService = Services[RPKRaceService::class.java] ?: return plugin.messages.noRaceService
             val raceListBuilder = StringBuilder()
             for (race in raceService.races) {
-                raceListBuilder.append(plugin.messages["race-list-item", mapOf(
-                    "race" to race.name.value
-                )]).append('\n')
+                raceListBuilder.append(plugin.messages.raceListItem.withParameters(race)).append('\n')
             }
-            return plugin.messages["character-set-race-prompt"] + "\n" + raceListBuilder.toString()
+            return plugin.messages.characterSetRacePrompt + "\n" + raceListBuilder.toString()
         }
 
     }
@@ -149,17 +148,17 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             if (conversable is Player) {
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
-                    conversable.sendMessage(plugin.messages["no-minecraft-profile-service"])
+                    conversable.sendMessage(plugin.messages.noMinecraftProfileService)
                     return END_OF_CONVERSATION
                 }
                 val characterService = Services[RPKCharacterService::class.java]
                 if (characterService == null) {
-                    conversable.sendMessage(plugin.messages["no-character-service"])
+                    conversable.sendMessage(plugin.messages.noCharacterService)
                     return END_OF_CONVERSATION
                 }
                 val raceService = Services[RPKRaceService::class.java]
                 if (raceService == null) {
-                    conversable.sendMessage(plugin.messages["no-race-service"])
+                    conversable.sendMessage(plugin.messages.noRaceService)
                     return END_OF_CONVERSATION
                 }
                 val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(context.forWhom as Player)
@@ -171,7 +170,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages["character-set-race-valid"]
+            return plugin.messages.characterSetRaceValid
         }
 
     }

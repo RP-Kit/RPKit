@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,16 @@ import com.rpkit.core.message.to
 import com.rpkit.players.bukkit.profile.RPKProfile
 
 class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
+
+    class CharacterSetAgeInvalidValidationMessage(private val message: ParameterizedMessage) {
+        fun withParameters(
+            minAge: Int,
+            maxAge: Int
+        ) = message.withParameters(
+            "min_age" to minAge.toString(),
+            "max_age" to maxAge.toString()
+        )
+    }
 
     class CharacterCardOwnerMessage(val messages: List<ParameterizedMessage>) {
         fun withParameters(
@@ -109,7 +119,8 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val characterUsage = get("character-usage")
     val characterSetUsage = get("character-set-usage")
     val characterSetAgePrompt = get("character-set-age-prompt")
-    val characterSetAgeInvalidValidation = get("character-set-age-invalid-validation")
+    val characterSetAgeInvalidValidation = getParameterized("character-set-age-invalid-validation")
+        .let(::CharacterSetAgeInvalidValidationMessage)
     val characterSetAgeInvalidNumber = get("character-set-age-invalid-number")
     val characterSetAgeValid = get("character-set-age-valid")
     val characterSetDeadPrompt = get("character-set-dead-prompt")

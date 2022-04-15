@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,7 +48,7 @@ class RPKCharacterImpl(
     name: String = plugin.config.getString("characters.defaults.name") ?: "",
     override var gender: String? = plugin.config.getString("characters.defaults.gender"),
     override var age: Int = plugin.config.getInt("characters.defaults.age"),
-    override var race: RPKRace? = plugin.config.getString("characters.defaults.race")
+    race: RPKRace? = plugin.config.getString("characters.defaults.race")
             ?.let { Services[RPKRaceService::class.java]?.getRace(RPKRaceName(it)) },
     description: String = plugin.config.getString("characters.defaults.description") ?: "",
     dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
@@ -81,6 +82,16 @@ class RPKCharacterImpl(
                 }
             }
         }
+
+    override var race = race
+        set(race) {
+            age = age.coerceIn(
+                race?.minAge ?: plugin.config.getInt("characters.min-age"),
+                race?.maxAge ?: plugin.config.getInt("characters.max-age")
+            )
+            field = race
+        }
+
     override var description = description
         set(description) {
             field = description
@@ -88,6 +99,7 @@ class RPKCharacterImpl(
                 field = field.substring(0, 1021) + "..."
             }
         }
+
     override var isDead = dead
 
     override fun showCharacterCard(minecraftProfile: RPKMinecraftProfile) {
