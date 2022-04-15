@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,4 +50,8 @@ internal class RPKCacheImpl<K, V>(private val capacity: Long) : RPKCache<K, V> {
     }
 
     override fun keys(): Set<K> = records.keys
+
+    override fun clear() {
+        records.clear()
+    }
 }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,12 +32,12 @@ import java.util.concurrent.CompletableFuture
 
 class RPKCharacterGroupTable(private val database: Database, private val plugin: RPKPermissionsBukkit) : Table {
 
-    private data class CharacterGroupCacheKey(
+    data class CharacterGroupCacheKey(
         val characterId: Int,
         val groupName: String
     )
 
-    private val cache = if (plugin.config.getBoolean("caching.rpkit_character_group.character_id.enabled")) {
+    val cache = if (plugin.config.getBoolean("caching.rpkit_character_group.character_id.enabled")) {
         database.cacheManager.createCache(
             "rpk-permissions-bukkit.rpkit_character_group.character_id",
             CharacterGroupCacheKey::class.java,

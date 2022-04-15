@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,6 +191,8 @@ class PermissionsMessages(plugin: RPKPermissionsBukkit) : BukkitMessages(plugin)
     val characterGroupSwitchPriorityInvalidGroupNotPresent = getParameterized("character-group-switch-priority-invalid-group-not-present").let(::CharacterGroupSwitchPriorityInvalidGroupNotPresentMessage)
     val characterGroupSwitchPriorityValid = getParameterized("character-group-switch-priority-valid").let(::CharacterGroupSwitchPriorityValidMessage)
     val characterGroupPrepareSwitchPriorityUsage = get("character-group-prepare-switch-priority")
+    val permissionsUsage = get("permissions-usage")
+    val permissionsReloadValid = get("permissions-reload-valid")
     val noProfile = get("no-profile")
     val noMinecraftProfileSelf = get("no-minecraft-profile-self")
     val noMinecraftProfileOther = get("no-minecraft-profile-other")
@@ -208,10 +210,12 @@ class PermissionsMessages(plugin: RPKPermissionsBukkit) : BukkitMessages(plugin)
     val noPermissionCharacterGroupRemoveGroup = getParameterized("no-permission-character-group-remove-group").let(::NoPermissionCharacterGroupRemoveGroupMessage)
     val noPermissionCharacterGroupView = get("no-permission-character-group-view")
     val noPermissionCharacterGroupSwitchPriority = get("no-permission-character-group-switch-priority")
+    val noPermissionPermissionsReload = get("no-permission-permissions-reload")
     val noProfileService = get("no-profile-service")
     val noMinecraftProfileService = get("no-minecraft-profile-service")
     val noCharacterService = get("no-character-service")
     val noGroupService = get("no-group-service")
+    val noPermissionsService = get("no-permissions-service")
     val notFromConsole = get("not-from-console")
 
 }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +17,7 @@
 package com.rpkit.permissions.bukkit.group
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.database.table.RPKCharacterGroupTable
@@ -24,11 +26,14 @@ import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupAssignCharacterEve
 import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupAssignProfileEvent
 import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupUnassignCharacterEvent
 import com.rpkit.permissions.bukkit.event.group.RPKBukkitGroupUnassignProfileEvent
+import com.rpkit.permissions.bukkit.permissions.RPKPermissionsService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -36,32 +41,46 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupService {
 
-    override val groups: List<RPKGroup> = plugin.config.getList("groups") as List<RPKGroupImpl>
+    override var groups: List<RPKGroup> = plugin.config.getList("groups") as List<RPKGroupImpl>
     private val profileGroups = ConcurrentHashMap<Int, List<RPKProfileGroup>>()
     private val characterGroups = ConcurrentHashMap<Int, List<RPKCharacterGroup>>()
+    private val groupPermissions = mutableListOf<Permission>()
 
     init {
+        initGroupPermissions()
+    }
+
+    private fun initGroupPermissions() {
         groups.forEach { group ->
             plugin.server.pluginManager.addPermission(Permission(
-                    "rpkit.permissions.command.group.add.${group.name.value}",
-                    "Allows adding the ${group.name.value} group to players",
-                    PermissionDefault.OP
-            ))
+                "rpkit.permissions.command.group.add.${group.name.value}",
+                "Allows adding the ${group.name.value} group to players",
+                PermissionDefault.OP
+            ).also { groupPermissions.add(it) })
             plugin.server.pluginManager.addPermission(Permission(
                 "rpkit.permissions.command.charactergroup.add.${group.name.value}",
                 "Allows adding the ${group.name.value} group to players",
                 PermissionDefault.OP
-            ))
+            ).also { groupPermissions.add(it) })
             plugin.server.pluginManager.addPermission(Permission(
-                    "rpkit.permissions.command.group.remove.${group.name.value}",
-                    "Allows removing the ${group.name.value} group from players",
-                    PermissionDefault.OP
-            ))
+                "rpkit.permissions.command.group.remove.${group.name.value}",
+                "Allows removing the ${group.name.value} group from players",
+                PermissionDefault.OP
+            ).also { groupPermissions.add(it) })
             plugin.server.pluginManager.addPermission(Permission(
                 "rpkit.permissions.command.charactergroup.remove.${group.name.value}",
                 "Allows removing the ${group.name.value} group from players",
                 PermissionDefault.OP
-            ))
+            ).also { groupPermissions.add(it) })
+        }
+    }
+
+    private fun removeGroupPermissions() {
+        val iterator = groupPermissions.iterator()
+        while (iterator.hasNext()) {
+            val permission = iterator.next()
+            plugin.server.pluginManager.removePermission(permission)
+            iterator.remove()
         }
     }
 
@@ -70,8 +89,8 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
     }
 
     override fun addGroup(profile: RPKProfile, group: RPKGroup, priority: Int): CompletableFuture<Void> {
-        val profileId = profile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        val profileId = profile.id ?: return completedFuture(null)
+        return runAsync {
             if (!profile.groups.join().contains(group)) {
                 val event = RPKBukkitGroupAssignProfileEvent(group, profile, priority, true)
                 plugin.server.pluginManager.callEvent(event)
@@ -103,7 +122,7 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
     }
 
     override fun addGroup(profile: RPKProfile, group: RPKGroup): CompletableFuture<Void> {
-        return CompletableFuture.runAsync {
+        return runAsync {
             addGroup(
                 profile,
                 group,
@@ -114,8 +133,8 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
     }
 
     override fun removeGroup(profile: RPKProfile, group: RPKGroup): CompletableFuture<Void> {
-        val profileId = profile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        val profileId = profile.id ?: return completedFuture(null)
+        return runAsync {
             val event = RPKBukkitGroupUnassignProfileEvent(group, profile, true)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
@@ -143,7 +162,7 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
 
     override fun getGroups(profile: RPKProfile): CompletableFuture<List<RPKGroup>> {
         val preloadedGroups = getPreloadedGroups(profile)
-        if (preloadedGroups != null) return CompletableFuture.completedFuture(preloadedGroups)
+        if (preloadedGroups != null) return completedFuture(preloadedGroups)
         return plugin.database.getTable(RPKProfileGroupTable::class.java).get(profile).thenApply { it.map(RPKProfileGroup::group) }
     }
 
@@ -153,8 +172,8 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
     }
 
     override fun loadGroups(profile: RPKProfile): CompletableFuture<List<RPKGroup>> {
-        val profileId = profile.id ?: return CompletableFuture.completedFuture(null)
-        if (profileGroups.containsKey(profileId.value)) return CompletableFuture.completedFuture(profileGroups[profileId.value]?.map(RPKProfileGroup::group))
+        val profileId = profile.id ?: return completedFuture(null)
+        if (profileGroups.containsKey(profileId.value)) return completedFuture(profileGroups[profileId.value]?.map(RPKProfileGroup::group))
         plugin.logger.info("Loading groups for profile ${profile.name + profile.discriminator} (${profileId.value})...")
         return CompletableFuture.supplyAsync {
             val profileGroups = plugin.database.getTable(RPKProfileGroupTable::class.java).get(profile).join()
@@ -176,7 +195,7 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
     }
 
     override fun setGroupPriority(profile: RPKProfile, group: RPKGroup, priority: Int): CompletableFuture<Void> {
-        return CompletableFuture.runAsync {
+        return runAsync {
             val profileGroupTable = plugin.database.getTable(RPKProfileGroupTable::class.java)
             val profileGroup = profileGroupTable[profile, group].join() ?: return@runAsync
             profileGroup.priority = priority
@@ -195,8 +214,8 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
     }
 
     override fun addGroup(character: RPKCharacter, group: RPKGroup, priority: Int): CompletableFuture<Void> {
-        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        val characterId = character.id ?: return completedFuture(null)
+        return runAsync {
             if (character.groups.join().contains(group)) return@runAsync
             val event = RPKBukkitGroupAssignCharacterEvent(group, character, priority, true)
             plugin.server.pluginManager.callEvent(event)
@@ -219,7 +238,7 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
     }
 
     override fun addGroup(character: RPKCharacter, group: RPKGroup): CompletableFuture<Void> {
-        return CompletableFuture.runAsync {
+        return runAsync {
             addGroup(
                 character,
                 group,
@@ -230,8 +249,8 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
     }
 
     override fun removeGroup(character: RPKCharacter, group: RPKGroup): CompletableFuture<Void> {
-        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        val characterId = character.id ?: return completedFuture(null)
+        return runAsync {
             val event = RPKBukkitGroupUnassignCharacterEvent(group, character, true)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
@@ -259,8 +278,8 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
     }
 
     override fun loadGroups(character: RPKCharacter): CompletableFuture<List<RPKGroup>> {
-        val characterId = character.id ?: return CompletableFuture.completedFuture(null)
-        if (characterGroups.containsKey(characterId.value)) return CompletableFuture.completedFuture(characterGroups[characterId.value]?.map(RPKCharacterGroup::group))
+        val characterId = character.id ?: return completedFuture(null)
+        if (characterGroups.containsKey(characterId.value)) return completedFuture(characterGroups[characterId.value]?.map(RPKCharacterGroup::group))
         plugin.logger.info("Loading groups for character ${character.name} (${characterId.value})...")
         return CompletableFuture.supplyAsync {
             val characterGroups = plugin.database.getTable(RPKCharacterGroupTable::class.java).get(character).join()
@@ -278,7 +297,7 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
 
     override fun getGroups(character: RPKCharacter): CompletableFuture<List<RPKGroup>> {
         val preloadedGroups = getPreloadedGroups(character)
-        if (preloadedGroups != null) return CompletableFuture.completedFuture(preloadedGroups)
+        if (preloadedGroups != null) return completedFuture(preloadedGroups)
         return plugin.database.getTable(RPKCharacterGroupTable::class.java).get(character).thenApply { it.map(RPKCharacterGroup::group) }
     }
 
@@ -295,6 +314,34 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
             characterGroupTable.update(characterGroup)
             character.minecraftProfile?.assignPermissions()
         }
+    }
+
+    fun reload(): CompletableFuture<Void> {
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return completedFuture(null)
+        val characterService = Services[RPKCharacterService::class.java] ?: return completedFuture(null)
+        Services[RPKPermissionsService::class.java] ?: return completedFuture(null)
+        plugin.database.getTable(RPKProfileGroupTable::class.java).cache?.clear()
+        plugin.database.getTable(RPKCharacterGroupTable::class.java).cache?.clear()
+        groups = plugin.config.getList("groups") as List<RPKGroupImpl>
+        removeGroupPermissions()
+        initGroupPermissions()
+        val futures = mutableListOf<CompletableFuture<Void>>()
+        for (player in plugin.server.onlinePlayers) {
+            futures.add(minecraftProfileService.getMinecraftProfile(player).thenAcceptAsync getMinecraftProfile@{ minecraftProfile ->
+                if (minecraftProfile == null) return@getMinecraftProfile
+                val profile = minecraftProfile.profile
+                if (profile is RPKProfile) {
+                    unloadGroups(profile)
+                    loadGroups(profile).join()
+                }
+                characterService.getActiveCharacter(minecraftProfile).thenAcceptAsync getActiveCharacter@{ character ->
+                    if (character == null) return@getActiveCharacter
+                    unloadGroups(character)
+                    loadGroups(character).join()
+                }.join()
+            })
+        }
+        return CompletableFuture.allOf(*futures.toTypedArray())
     }
 
 }
