@@ -37,8 +37,8 @@ dependencies {
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
     implementation project(":bukkit:rpk-selection-lib-bukkit")
-    implementation group: "com.sk89q.worldedit", name: "worldedit-bukkit", version: "7.2.2"
-    implementation group: "com.sk89q.worldedit", name: "worldedit-core", version: "7.2.2"
+    implementation group: "com.sk89q.worldedit", name: "worldedit-bukkit", version: "7.2.9"
+    implementation group: "com.sk89q.worldedit", name: "worldedit-core", version: "7.2.9"
 }
 
 processResources {
