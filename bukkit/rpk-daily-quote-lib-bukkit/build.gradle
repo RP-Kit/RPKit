@@ -54,6 +54,7 @@ shadowJar {
         include(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7"))
         include(dependency("org.jetbrains.kotlin:kotlin-reflect"))
         include(dependency("org.bstats:bstats-bukkit"))
+        include(dependency("org.bstats:bstats-base"))
     }
 
     relocate "kotlin", "com.rpkit.dailyquote.bukkit.shadow.lib.kotlin"

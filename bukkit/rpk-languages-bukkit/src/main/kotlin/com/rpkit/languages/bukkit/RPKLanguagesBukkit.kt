@@ -42,6 +42,7 @@ class RPKLanguagesBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         System.setProperty("com.rpkit.languages.bukkit.shadow.impl.org.jooq.no-logo", "true")
+        System.setProperty("com.rpkit.languages.bukkit.shadow.impl.org.jooq.no-tips", "true")
 
         Metrics(this, 6764)
         saveDefaultConfig()

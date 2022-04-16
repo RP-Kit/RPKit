@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,23 @@
 package com.rpkit.chat.bukkit.discord.command
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import net.dv8tion.jda.api.entities.TextChannel
+import net.dv8tion.jda.api.entities.MessageChannel
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.interactions.commands.OptionMapping
 import net.dv8tion.jda.api.utils.MarkdownSanitizer
 import org.bukkit.entity.Player
 
-class DiscordListCommand(private val plugin: RPKChatBukkit) : DiscordCommand("list") {
-    override fun execute(channel: TextChannel, sender: User, command: DiscordCommand, label: String, args: List<String>) {
-        channel
-            .sendMessage(
-                MarkdownSanitizer.escape("Online players: " +
-                    plugin.server.onlinePlayers.joinToString(", ", transform = Player::getName)))
-            .queue()
+class DiscordListCommand(private val plugin: RPKChatBukkit) : DiscordCommand("list", "Lists online players") {
+    override fun execute(
+        channel: MessageChannel,
+        sender: User,
+        command: DiscordCommand,
+        label: String,
+        args: List<OptionMapping>,
+        event: SlashCommandInteractionEvent
+    ) {
+        event.reply(MarkdownSanitizer.escape("Online players: " +
+                plugin.server.onlinePlayers.joinToString(", ", transform = Player::getName))).queue()
     }
 }

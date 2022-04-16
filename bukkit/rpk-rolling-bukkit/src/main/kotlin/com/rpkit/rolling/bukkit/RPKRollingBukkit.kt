@@ -27,6 +27,7 @@ class RPKRollingBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         System.setProperty("com.rpkit.rolling.bukkit.shadow.impl.org.jooq.no-logo", "true")
+        System.setProperty("com.rpkit.rolling.bukkit.shadow.impl.org.jooq.no-tips", "true")
 
         Metrics(this, 4410)
         saveDefaultConfig()
