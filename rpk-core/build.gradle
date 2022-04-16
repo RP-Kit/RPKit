@@ -32,6 +32,7 @@ dependencies {
     implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha7"
     implementation group: "com.zaxxer", name: "HikariCP", version: "5.0.1"
     implementation group: "org.flywaydb", name: "flyway-core", version: "8.5.8"
+    implementation group: "org.flywaydb", name: "flyway-mysql", version: "8.5.8"
     implementation group: "org.scijava", name: "parsington", version: "3.0.0"
 }
 
