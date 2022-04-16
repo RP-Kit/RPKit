@@ -14,3 +14,13 @@ commands:
       /notification view [id] - Views a notification
       /notification dismiss [id] - Dismisses a notification as read
     usage: /<command> [list|view|dismiss]
+permissions:
+  rpkit.notifications.command.notification.view:
+    description: Allows viewing notifications
+    default: true
+  rpkit.notifications.command.notification.list:
+    description: Allows listing notifications
+    default: true
+  rpkit.notifications.command.notification.dismiss:
+    description: Allows dismissing notifications
+    default: true
