@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,48 @@
 
 package com.rpkit.rolling.bukkit.messages
 
+import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.bukkit.message.BukkitMessages
+import com.rpkit.core.message.ParameterizedMessage
+import com.rpkit.core.message.to
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.rolling.bukkit.RPKRollingBukkit
 
-class RollingMessages(plugin: RPKRollingBukkit) : BukkitMessages(plugin)
+class RollingMessages(plugin: RPKRollingBukkit) : BukkitMessages(plugin) {
+    class RollMessage(private val message: ParameterizedMessage) {
+        fun withParameters(
+            character: RPKCharacter,
+            player: RPKMinecraftProfile,
+            roll: String,
+            dice: String
+        ) = message.withParameters(
+            "character" to character.name,
+            "player" to player.name,
+            "roll" to roll,
+            "dice" to dice
+        )
+    }
+
+    class PrivateRollMessage(private val message: ParameterizedMessage) {
+        fun withParameters(
+            roll: String,
+            dice: String
+        ) = message.withParameters(
+            "roll" to roll,
+            "dice" to dice
+        )
+    }
+
+    val roll = getParameterized("roll")
+        .let(::RollMessage)
+    val rollInvalidParse = get("roll-invalid-parse")
+    val rollUsage = get("roll-usage")
+    val privateRoll = getParameterized("private-roll")
+        .let(::PrivateRollMessage)
+    val privateRollUsage = get("private-roll-usage")
+    val notFromConsole = get("not-from-console")
+    val noCharacter = get("no-character")
+    val noMinecraftProfile = get("no-minecraft-profile")
+    val noMinecraftProfileService = get("no-minecraft-profile-service")
+    val noCharacterService=  get("no-character-service")
+}

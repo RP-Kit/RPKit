@@ -36,14 +36,16 @@ public class RpkitPermanentPurchaseRecord extends UpdatableRecordImpl<RpkitPerma
     }
 
     /**
-     * Setter for <code>rpkit_stores.rpkit_permanent_purchase.purchase_id</code>.
+     * Setter for
+     * <code>rpkit_stores.rpkit_permanent_purchase.purchase_id</code>.
      */
     public void setPurchaseId(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_stores.rpkit_permanent_purchase.purchase_id</code>.
+     * Getter for
+     * <code>rpkit_stores.rpkit_permanent_purchase.purchase_id</code>.
      */
     public Integer getPurchaseId() {
         return (Integer) get(1);

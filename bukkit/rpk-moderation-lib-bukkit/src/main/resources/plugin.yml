@@ -5,4 +5,4 @@ main: com.rpkit.moderation.bukkit.RPKModerationLibBukkit
 depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
-api-version: '1.16'
+api-version: '1.17'

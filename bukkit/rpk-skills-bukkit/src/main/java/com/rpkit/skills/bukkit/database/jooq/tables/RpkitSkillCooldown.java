@@ -55,7 +55,8 @@ public class RpkitSkillCooldown extends TableImpl<RpkitSkillCooldownRecord> {
     public final TableField<RpkitSkillCooldownRecord, String> SKILL_NAME = createField(DSL.name("skill_name"), SQLDataType.VARCHAR(256).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_skills.rpkit_skill_cooldown.cooldown_timestamp</code>.
+     * The column
+     * <code>rpkit_skills.rpkit_skill_cooldown.cooldown_timestamp</code>.
      */
     public final TableField<RpkitSkillCooldownRecord, LocalDateTime> COOLDOWN_TIMESTAMP = createField(DSL.name("cooldown_timestamp"), SQLDataType.LOCALDATETIME(0).nullable(false).defaultValue(DSL.field("current_timestamp()", SQLDataType.LOCALDATETIME)), this, "");
 
@@ -68,14 +69,16 @@ public class RpkitSkillCooldown extends TableImpl<RpkitSkillCooldownRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_skills.rpkit_skill_cooldown</code> table reference
+     * Create an aliased <code>rpkit_skills.rpkit_skill_cooldown</code> table
+     * reference
      */
     public RpkitSkillCooldown(String alias) {
         this(DSL.name(alias), RPKIT_SKILL_COOLDOWN);
     }
 
     /**
-     * Create an aliased <code>rpkit_skills.rpkit_skill_cooldown</code> table reference
+     * Create an aliased <code>rpkit_skills.rpkit_skill_cooldown</code> table
+     * reference
      */
     public RpkitSkillCooldown(Name alias) {
         this(alias, RPKIT_SKILL_COOLDOWN);
@@ -94,7 +97,7 @@ public class RpkitSkillCooldown extends TableImpl<RpkitSkillCooldownRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitSkills.RPKIT_SKILLS;
+        return aliased() ? null : RpkitSkills.RPKIT_SKILLS;
     }
 
     @Override

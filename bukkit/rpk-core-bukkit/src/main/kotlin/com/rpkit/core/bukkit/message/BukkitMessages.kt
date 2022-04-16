@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,7 @@ open class BukkitMessages(private val plugin: RPKBukkitPlugin) : Messages {
     }
 
     override fun getList(key: String, vars: Map<String, String>): List<String> {
+        if (!messagesConfig.contains(key)) return listOf(key)
         return messagesConfig.getStringList(key).map { message ->
             var updatedMessage = message
             vars.forEach { pair ->
@@ -96,10 +97,12 @@ open class BukkitMessages(private val plugin: RPKBukkitPlugin) : Messages {
     }
 
     override fun getList(key: String): List<String> {
+        if (!messagesConfig.contains(key)) return listOf(key)
         return messagesConfig.getStringList(key).map { ChatColor.translateAlternateColorCodes('&', it) }
     }
 
     override fun getParameterizedList(key: String): List<ParameterizedMessage> {
+        if (!messagesConfig.contains(key)) return listOf(ParameterizedMessage(key))
         return messagesConfig.getStringList(key)
             .map { ParameterizedMessage(ChatColor.translateAlternateColorCodes('&', it)) }
     }

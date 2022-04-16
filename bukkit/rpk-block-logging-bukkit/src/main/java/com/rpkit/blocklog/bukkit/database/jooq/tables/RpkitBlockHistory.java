@@ -7,13 +7,21 @@ package com.rpkit.blocklog.bukkit.database.jooq.tables;
 import com.rpkit.blocklog.bukkit.database.jooq.Keys;
 import com.rpkit.blocklog.bukkit.database.jooq.RpkitBlockLogging;
 import com.rpkit.blocklog.bukkit.database.jooq.tables.records.RpkitBlockHistoryRecord;
-import org.jooq.*;
+
+import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.Identity;
+import org.jooq.Name;
+import org.jooq.Record;
+import org.jooq.Row5;
+import org.jooq.Schema;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.TableOptions;
+import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
-
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -25,7 +33,8 @@ public class RpkitBlockHistory extends TableImpl<RpkitBlockHistoryRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_block_logging.rpkit_block_history</code>
+     * The reference instance of
+     * <code>rpkit_block_logging.rpkit_block_history</code>
      */
     public static final RpkitBlockHistory RPKIT_BLOCK_HISTORY = new RpkitBlockHistory();
 
@@ -71,21 +80,24 @@ public class RpkitBlockHistory extends TableImpl<RpkitBlockHistoryRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_block_logging.rpkit_block_history</code> table reference
+     * Create an aliased <code>rpkit_block_logging.rpkit_block_history</code>
+     * table reference
      */
     public RpkitBlockHistory(String alias) {
         this(DSL.name(alias), RPKIT_BLOCK_HISTORY);
     }
 
     /**
-     * Create an aliased <code>rpkit_block_logging.rpkit_block_history</code> table reference
+     * Create an aliased <code>rpkit_block_logging.rpkit_block_history</code>
+     * table reference
      */
     public RpkitBlockHistory(Name alias) {
         this(alias, RPKIT_BLOCK_HISTORY);
     }
 
     /**
-     * Create a <code>rpkit_block_logging.rpkit_block_history</code> table reference
+     * Create a <code>rpkit_block_logging.rpkit_block_history</code> table
+     * reference
      */
     public RpkitBlockHistory() {
         this(DSL.name("rpkit_block_history"), null);
@@ -97,7 +109,7 @@ public class RpkitBlockHistory extends TableImpl<RpkitBlockHistoryRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitBlockLogging.RPKIT_BLOCK_LOGGING;
+        return aliased() ? null : RpkitBlockLogging.RPKIT_BLOCK_LOGGING;
     }
 
     @Override
@@ -108,11 +120,6 @@ public class RpkitBlockHistory extends TableImpl<RpkitBlockHistoryRecord> {
     @Override
     public UniqueKey<RpkitBlockHistoryRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_BLOCK_HISTORY_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitBlockHistoryRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitBlockHistoryRecord>>asList(Keys.KEY_RPKIT_BLOCK_HISTORY_PRIMARY);
     }
 
     @Override

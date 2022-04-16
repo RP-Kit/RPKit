@@ -18,21 +18,19 @@ buildscript {
     
     repositories {
         mavenCentral()
-        jcenter()
         maven { url "https://plugins.gradle.org/m2/" }
     }
 }
 
 plugins {
     id "com.github.breadmoirai.github-release" version "2.2.12"
-    id "org.jetbrains.kotlin.jvm" version "1.4.30" apply false
+    id "org.jetbrains.kotlin.jvm" version "1.6.20" apply false
     id "maven-publish"
-    id "org.jetbrains.dokka" version "1.4.20" apply false
+    id "org.jetbrains.dokka" version "1.6.20" apply false
 }
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 allprojects {
@@ -40,7 +38,7 @@ allprojects {
     apply plugin: "maven-publish"
     apply plugin: "org.jetbrains.dokka"
     group = "com.rpkit"
-    version = "2.0.3"
+    version = "2.1.0"
 }
 
 subprojects {
@@ -49,21 +47,20 @@ subprojects {
         maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
         maven { url "https://ci.ender.zone/plugin/repository/everything/" }
         maven { url "https://repo.jenkins-ci.org/public/" }
-        maven { url "https://maven.sk89q.com/repo/" }
+        maven { url "https://maven.enginehub.org/repo/" }
         maven { url "https://repo.codemc.org/repository/maven-public" }
-        maven { url "https://dl.bintray.com/xafero-solutions/xafero-source/" }
         maven { url "https://jitpack.io" }
     }
 
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "16"
         }
     }
 
     compileTestKotlin {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "16"
         }
     }
 }

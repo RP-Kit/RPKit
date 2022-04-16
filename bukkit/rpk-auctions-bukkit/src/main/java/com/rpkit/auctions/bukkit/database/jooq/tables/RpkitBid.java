@@ -7,13 +7,21 @@ package com.rpkit.auctions.bukkit.database.jooq.tables;
 import com.rpkit.auctions.bukkit.database.jooq.Keys;
 import com.rpkit.auctions.bukkit.database.jooq.RpkitAuctions;
 import com.rpkit.auctions.bukkit.database.jooq.tables.records.RpkitBidRecord;
-import org.jooq.*;
+
+import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.Identity;
+import org.jooq.Name;
+import org.jooq.Record;
+import org.jooq.Row4;
+import org.jooq.Schema;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.TableOptions;
+import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
-
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -92,7 +100,7 @@ public class RpkitBid extends TableImpl<RpkitBidRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitAuctions.RPKIT_AUCTIONS;
+        return aliased() ? null : RpkitAuctions.RPKIT_AUCTIONS;
     }
 
     @Override
@@ -103,11 +111,6 @@ public class RpkitBid extends TableImpl<RpkitBidRecord> {
     @Override
     public UniqueKey<RpkitBidRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_BID_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitBidRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitBidRecord>>asList(Keys.KEY_RPKIT_BID_PRIMARY);
     }
 
     @Override

@@ -7,9 +7,6 @@ package com.rpkit.experience.bukkit.database.jooq.tables;
 import com.rpkit.experience.bukkit.database.jooq.Keys;
 import com.rpkit.experience.bukkit.database.jooq.tables.records.RpkitExperienceRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -65,14 +62,16 @@ public class RpkitExperience extends TableImpl<RpkitExperienceRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_experience.rpkit_experience</code> table reference
+     * Create an aliased <code>rpkit_experience.rpkit_experience</code> table
+     * reference
      */
     public RpkitExperience(String alias) {
         this(DSL.name(alias), RPKIT_EXPERIENCE_);
     }
 
     /**
-     * Create an aliased <code>rpkit_experience.rpkit_experience</code> table reference
+     * Create an aliased <code>rpkit_experience.rpkit_experience</code> table
+     * reference
      */
     public RpkitExperience(Name alias) {
         this(alias, RPKIT_EXPERIENCE_);
@@ -91,17 +90,12 @@ public class RpkitExperience extends TableImpl<RpkitExperienceRecord> {
 
     @Override
     public Schema getSchema() {
-        return com.rpkit.experience.bukkit.database.jooq.RpkitExperience.RPKIT_EXPERIENCE;
+        return aliased() ? null : com.rpkit.experience.bukkit.database.jooq.RpkitExperience.RPKIT_EXPERIENCE;
     }
 
     @Override
     public UniqueKey<RpkitExperienceRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_EXPERIENCE_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitExperienceRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitExperienceRecord>>asList(Keys.KEY_RPKIT_EXPERIENCE_PRIMARY);
     }
 
     @Override

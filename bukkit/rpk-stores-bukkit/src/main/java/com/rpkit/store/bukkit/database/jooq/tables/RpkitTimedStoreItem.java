@@ -8,9 +8,6 @@ import com.rpkit.store.bukkit.database.jooq.Keys;
 import com.rpkit.store.bukkit.database.jooq.RpkitStores;
 import com.rpkit.store.bukkit.database.jooq.tables.records.RpkitTimedStoreItemRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -36,7 +33,8 @@ public class RpkitTimedStoreItem extends TableImpl<RpkitTimedStoreItemRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_stores.rpkit_timed_store_item</code>
+     * The reference instance of
+     * <code>rpkit_stores.rpkit_timed_store_item</code>
      */
     public static final RpkitTimedStoreItem RPKIT_TIMED_STORE_ITEM = new RpkitTimedStoreItem();
 
@@ -54,7 +52,8 @@ public class RpkitTimedStoreItem extends TableImpl<RpkitTimedStoreItemRecord> {
     public final TableField<RpkitTimedStoreItemRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>rpkit_stores.rpkit_timed_store_item.store_item_id</code>.
+     * The column
+     * <code>rpkit_stores.rpkit_timed_store_item.store_item_id</code>.
      */
     public final TableField<RpkitTimedStoreItemRecord, Integer> STORE_ITEM_ID = createField(DSL.name("store_item_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -72,14 +71,16 @@ public class RpkitTimedStoreItem extends TableImpl<RpkitTimedStoreItemRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_timed_store_item</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_timed_store_item</code> table
+     * reference
      */
     public RpkitTimedStoreItem(String alias) {
         this(DSL.name(alias), RPKIT_TIMED_STORE_ITEM);
     }
 
     /**
-     * Create an aliased <code>rpkit_stores.rpkit_timed_store_item</code> table reference
+     * Create an aliased <code>rpkit_stores.rpkit_timed_store_item</code> table
+     * reference
      */
     public RpkitTimedStoreItem(Name alias) {
         this(alias, RPKIT_TIMED_STORE_ITEM);
@@ -98,7 +99,7 @@ public class RpkitTimedStoreItem extends TableImpl<RpkitTimedStoreItemRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitStores.RPKIT_STORES;
+        return aliased() ? null : RpkitStores.RPKIT_STORES;
     }
 
     @Override
@@ -109,11 +110,6 @@ public class RpkitTimedStoreItem extends TableImpl<RpkitTimedStoreItemRecord> {
     @Override
     public UniqueKey<RpkitTimedStoreItemRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_TIMED_STORE_ITEM_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitTimedStoreItemRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitTimedStoreItemRecord>>asList(Keys.KEY_RPKIT_TIMED_STORE_ITEM_PRIMARY);
     }
 
     @Override

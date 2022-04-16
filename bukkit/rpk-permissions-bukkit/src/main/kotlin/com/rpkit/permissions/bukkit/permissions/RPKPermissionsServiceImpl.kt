@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,20 +20,19 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
-import com.rpkit.permissions.bukkit.group.RPKGroup
-import com.rpkit.permissions.bukkit.group.RPKGroupService
-import com.rpkit.permissions.bukkit.group.groups
-import com.rpkit.permissions.bukkit.group.preloadedGroups
+import com.rpkit.permissions.bukkit.group.*
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.entity.Player
 import org.bukkit.permissions.PermissionAttachment
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.concurrent.ConcurrentHashMap
 
 class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKPermissionsService {
 
-    val defaultGroup = plugin.config.get("default-group") as RPKGroup
+    var defaultGroup = plugin.config.get("default-group") as RPKGroup
     private val permissionsAttachments = ConcurrentHashMap<Int, PermissionAttachment>()
 
     override fun hasPermission(group: RPKGroup, node: String): Boolean {
@@ -120,6 +120,7 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
                 assignGroupPermissions(minecraftProfile, group, assignedGroups)
             }
         }
+        bukkitPlayer.updateCommands()
     }
 
     private fun assignGroupPermissions(minecraftProfile: RPKMinecraftProfile, group: RPKGroup, assignedGroups: MutableList<RPKGroup>) {
@@ -155,5 +156,19 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
         }
     }
 
+    fun reload(): CompletableFuture<Void> {
+        defaultGroup = plugin.config.get("default-group") as RPKGroup
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return completedFuture(null)
+        val futures = mutableListOf<CompletableFuture<Void>>()
+        plugin.server.onlinePlayers.forEach { player ->
+            futures.add(minecraftProfileService.getMinecraftProfile(player).thenAccept { minecraftProfile ->
+                if (minecraftProfile == null) return@thenAccept
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    minecraftProfile.assignPermissions()
+                })
+            })
+        }
+        return CompletableFuture.allOf(*futures.toTypedArray())
+    }
 
 }

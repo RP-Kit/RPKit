@@ -19,6 +19,6 @@ import com.rpkit.core.expression.RPKFunction
 
 internal class LowerCaseFunction : RPKFunction {
     override fun invoke(vararg args: Any?): Any? {
-        return args[0].toString().toLowerCase()
+        return args[0].toString().lowercase()
     }
 }

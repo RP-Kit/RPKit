@@ -8,6 +8,7 @@ import com.rpkit.auctions.bukkit.database.jooq.tables.RpkitAuction;
 import com.rpkit.auctions.bukkit.database.jooq.tables.RpkitBid;
 import com.rpkit.auctions.bukkit.database.jooq.tables.records.RpkitAuctionRecord;
 import com.rpkit.auctions.bukkit.database.jooq.tables.records.RpkitBidRecord;
+
 import org.jooq.TableField;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
@@ -15,7 +16,7 @@ import org.jooq.impl.Internal;
 
 
 /**
- * A class modelling foreign key relationships and constraints of tables in 
+ * A class modelling foreign key relationships and constraints of tables in
  * rpkit_auctions.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })

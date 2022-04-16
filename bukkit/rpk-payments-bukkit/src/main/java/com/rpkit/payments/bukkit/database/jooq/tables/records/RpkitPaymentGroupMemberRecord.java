@@ -21,28 +21,32 @@ public class RpkitPaymentGroupMemberRecord extends TableRecordImpl<RpkitPaymentG
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_payments.rpkit_payment_group_member.payment_group_id</code>.
+     * Setter for
+     * <code>rpkit_payments.rpkit_payment_group_member.payment_group_id</code>.
      */
     public void setPaymentGroupId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_payments.rpkit_payment_group_member.payment_group_id</code>.
+     * Getter for
+     * <code>rpkit_payments.rpkit_payment_group_member.payment_group_id</code>.
      */
     public Integer getPaymentGroupId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_payments.rpkit_payment_group_member.character_id</code>.
+     * Setter for
+     * <code>rpkit_payments.rpkit_payment_group_member.character_id</code>.
      */
     public void setCharacterId(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_payments.rpkit_payment_group_member.character_id</code>.
+     * Getter for
+     * <code>rpkit_payments.rpkit_payment_group_member.character_id</code>.
      */
     public Integer getCharacterId() {
         return (Integer) get(1);

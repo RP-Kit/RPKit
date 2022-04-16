@@ -12,7 +12,7 @@ depend:
 - rpk-location-history-lib-bukkit
 - rpk-tracking-lib-bukkit
 - rpk-daily-quote-lib-bukkit
-api-version: '1.16'
+api-version: '1.17'
 commands:
   back:
     description: Teleports to the last location teleported to
@@ -70,6 +70,9 @@ commands:
   saveitem:
     description: Saves the item you are holding to YAML
     usage: /<command> [name]
+  showitem:
+    description: Shows your held item to a player
+    usage: /<command> [player]
   seen:
     description: Shows when a player was last seen
     usage: /<command> [player]
@@ -160,6 +163,9 @@ permissions:
   rpkit.essentials.command.saveitem:
     description: Allows you to save items to YAML
     default: op
+  rpkit.essentials.command.showitem:
+    description: Allows you to show others the item you are holding
+    default: true
   rpkit.essentials.command.seen:
     description: Allows you to see when a player was last seen online
     default: op

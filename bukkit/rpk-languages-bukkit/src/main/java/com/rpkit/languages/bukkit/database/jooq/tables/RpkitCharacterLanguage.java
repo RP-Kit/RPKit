@@ -30,7 +30,8 @@ public class RpkitCharacterLanguage extends TableImpl<RpkitCharacterLanguageReco
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_languages.rpkit_character_language</code>
+     * The reference instance of
+     * <code>rpkit_languages.rpkit_character_language</code>
      */
     public static final RpkitCharacterLanguage RPKIT_CHARACTER_LANGUAGE = new RpkitCharacterLanguage();
 
@@ -43,17 +44,20 @@ public class RpkitCharacterLanguage extends TableImpl<RpkitCharacterLanguageReco
     }
 
     /**
-     * The column <code>rpkit_languages.rpkit_character_language.character_id</code>.
+     * The column
+     * <code>rpkit_languages.rpkit_character_language.character_id</code>.
      */
     public final TableField<RpkitCharacterLanguageRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_languages.rpkit_character_language.language_name</code>.
+     * The column
+     * <code>rpkit_languages.rpkit_character_language.language_name</code>.
      */
     public final TableField<RpkitCharacterLanguageRecord, String> LANGUAGE_NAME = createField(DSL.name("language_name"), SQLDataType.VARCHAR(256).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_languages.rpkit_character_language.understanding</code>.
+     * The column
+     * <code>rpkit_languages.rpkit_character_language.understanding</code>.
      */
     public final TableField<RpkitCharacterLanguageRecord, Double> UNDERSTANDING = createField(DSL.name("understanding"), SQLDataType.DOUBLE.nullable(false), this, "");
 
@@ -66,21 +70,24 @@ public class RpkitCharacterLanguage extends TableImpl<RpkitCharacterLanguageReco
     }
 
     /**
-     * Create an aliased <code>rpkit_languages.rpkit_character_language</code> table reference
+     * Create an aliased <code>rpkit_languages.rpkit_character_language</code>
+     * table reference
      */
     public RpkitCharacterLanguage(String alias) {
         this(DSL.name(alias), RPKIT_CHARACTER_LANGUAGE);
     }
 
     /**
-     * Create an aliased <code>rpkit_languages.rpkit_character_language</code> table reference
+     * Create an aliased <code>rpkit_languages.rpkit_character_language</code>
+     * table reference
      */
     public RpkitCharacterLanguage(Name alias) {
         this(alias, RPKIT_CHARACTER_LANGUAGE);
     }
 
     /**
-     * Create a <code>rpkit_languages.rpkit_character_language</code> table reference
+     * Create a <code>rpkit_languages.rpkit_character_language</code> table
+     * reference
      */
     public RpkitCharacterLanguage() {
         this(DSL.name("rpkit_character_language"), null);
@@ -92,7 +99,7 @@ public class RpkitCharacterLanguage extends TableImpl<RpkitCharacterLanguageReco
 
     @Override
     public Schema getSchema() {
-        return RpkitLanguages.RPKIT_LANGUAGES;
+        return aliased() ? null : RpkitLanguages.RPKIT_LANGUAGES;
     }
 
     @Override

@@ -53,8 +53,9 @@ public class RpkitClasses extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitCharacterClass.RPKIT_CHARACTER_CLASS,
-            RpkitClassExperience.RPKIT_CLASS_EXPERIENCE);
+            RpkitClassExperience.RPKIT_CLASS_EXPERIENCE
+        );
     }
 }

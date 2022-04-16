@@ -8,9 +8,6 @@ import com.rpkit.locks.bukkit.database.jooq.Keys;
 import com.rpkit.locks.bukkit.database.jooq.RpkitLocks;
 import com.rpkit.locks.bukkit.database.jooq.tables.records.RpkitPlayerGettingKeyRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -35,7 +32,8 @@ public class RpkitPlayerGettingKey extends TableImpl<RpkitPlayerGettingKeyRecord
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_locks.rpkit_player_getting_key</code>
+     * The reference instance of
+     * <code>rpkit_locks.rpkit_player_getting_key</code>
      */
     public static final RpkitPlayerGettingKey RPKIT_PLAYER_GETTING_KEY = new RpkitPlayerGettingKey();
 
@@ -48,7 +46,8 @@ public class RpkitPlayerGettingKey extends TableImpl<RpkitPlayerGettingKeyRecord
     }
 
     /**
-     * The column <code>rpkit_locks.rpkit_player_getting_key.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_locks.rpkit_player_getting_key.minecraft_profile_id</code>.
      */
     public final TableField<RpkitPlayerGettingKeyRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -61,21 +60,24 @@ public class RpkitPlayerGettingKey extends TableImpl<RpkitPlayerGettingKeyRecord
     }
 
     /**
-     * Create an aliased <code>rpkit_locks.rpkit_player_getting_key</code> table reference
+     * Create an aliased <code>rpkit_locks.rpkit_player_getting_key</code> table
+     * reference
      */
     public RpkitPlayerGettingKey(String alias) {
         this(DSL.name(alias), RPKIT_PLAYER_GETTING_KEY);
     }
 
     /**
-     * Create an aliased <code>rpkit_locks.rpkit_player_getting_key</code> table reference
+     * Create an aliased <code>rpkit_locks.rpkit_player_getting_key</code> table
+     * reference
      */
     public RpkitPlayerGettingKey(Name alias) {
         this(alias, RPKIT_PLAYER_GETTING_KEY);
     }
 
     /**
-     * Create a <code>rpkit_locks.rpkit_player_getting_key</code> table reference
+     * Create a <code>rpkit_locks.rpkit_player_getting_key</code> table
+     * reference
      */
     public RpkitPlayerGettingKey() {
         this(DSL.name("rpkit_player_getting_key"), null);
@@ -87,17 +89,12 @@ public class RpkitPlayerGettingKey extends TableImpl<RpkitPlayerGettingKeyRecord
 
     @Override
     public Schema getSchema() {
-        return RpkitLocks.RPKIT_LOCKS;
+        return aliased() ? null : RpkitLocks.RPKIT_LOCKS;
     }
 
     @Override
     public UniqueKey<RpkitPlayerGettingKeyRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_PLAYER_GETTING_KEY_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitPlayerGettingKeyRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitPlayerGettingKeyRecord>>asList(Keys.KEY_RPKIT_PLAYER_GETTING_KEY_PRIMARY);
     }
 
     @Override

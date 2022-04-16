@@ -1,0 +1,7 @@
+name: rpk-notification-lib-bukkit
+author: alyphen
+version: @version@
+main: com.rpkit.notifications.bukkit.RPKNotificationLibBukkit
+api-version: '1.17'
+depend:
+- rpk-player-lib-bukkit

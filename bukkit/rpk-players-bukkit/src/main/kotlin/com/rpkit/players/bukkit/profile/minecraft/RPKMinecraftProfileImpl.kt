@@ -18,7 +18,7 @@ package com.rpkit.players.bukkit.profile.minecraft
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import net.md_5.bungee.api.chat.BaseComponent
 import org.bukkit.Bukkit
-import java.util.UUID
+import java.util.*
 
 class RPKMinecraftProfileImpl(
     override var id: RPKMinecraftProfileId? = null,
@@ -40,7 +40,7 @@ class RPKMinecraftProfileImpl(
     }
 
     override fun sendMessage(messages: Array<String>) {
-        Bukkit.getPlayer(minecraftUUID)?.sendMessage(messages)
+        Bukkit.getPlayer(minecraftUUID)?.sendMessage(*messages)
     }
 
     override fun hasPermission(permission: String): Boolean {

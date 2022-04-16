@@ -8,9 +8,6 @@ import com.rpkit.skills.bukkit.database.jooq.Keys;
 import com.rpkit.skills.bukkit.database.jooq.RpkitSkills;
 import com.rpkit.skills.bukkit.database.jooq.tables.records.RpkitSkillBindingRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -77,14 +74,16 @@ public class RpkitSkillBinding extends TableImpl<RpkitSkillBindingRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_skills.rpkit_skill_binding</code> table reference
+     * Create an aliased <code>rpkit_skills.rpkit_skill_binding</code> table
+     * reference
      */
     public RpkitSkillBinding(String alias) {
         this(DSL.name(alias), RPKIT_SKILL_BINDING);
     }
 
     /**
-     * Create an aliased <code>rpkit_skills.rpkit_skill_binding</code> table reference
+     * Create an aliased <code>rpkit_skills.rpkit_skill_binding</code> table
+     * reference
      */
     public RpkitSkillBinding(Name alias) {
         this(alias, RPKIT_SKILL_BINDING);
@@ -103,7 +102,7 @@ public class RpkitSkillBinding extends TableImpl<RpkitSkillBindingRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitSkills.RPKIT_SKILLS;
+        return aliased() ? null : RpkitSkills.RPKIT_SKILLS;
     }
 
     @Override
@@ -114,11 +113,6 @@ public class RpkitSkillBinding extends TableImpl<RpkitSkillBindingRecord> {
     @Override
     public UniqueKey<RpkitSkillBindingRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_SKILL_BINDING_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitSkillBindingRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitSkillBindingRecord>>asList(Keys.KEY_RPKIT_SKILL_BINDING_PRIMARY);
     }
 
     @Override

@@ -6,12 +6,19 @@ depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
-api-version: '1.16'
+api-version: '1.17'
 commands:
   roll:
     description: Rolls
     usage: /<command> [roll]
+  privateroll:
+    description: Rolls privately
+    usage: /<command> [roll]
+    aliases: [proll, rollscreen, dmroll]
 permissions:
   rpkit.rolling.command.roll:
     description: Allows rolling
     default: true
+  rpkit.rolling.command.privateroll:
+    description: Allows private rolls
+    default: op

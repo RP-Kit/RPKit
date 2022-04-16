@@ -22,5 +22,4 @@ interface RPKWarp {
 
     val name: RPKWarpName
     val location: RPKLocation
-
 }

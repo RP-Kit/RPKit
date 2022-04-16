@@ -81,7 +81,7 @@ class BindSkillCommand(private val plugin: RPKSkillsBukkit) : CommandExecutor {
             sender.sendMessage(
                 plugin.messages["bind-skill-valid", mapOf(
                     "character" to character.name,
-                    "item" to item.type.toString().toLowerCase().replace('_', ' '),
+                    "item" to item.type.toString().lowercase().replace('_', ' '),
                     "skill" to skill.name.value
                 )]
             )

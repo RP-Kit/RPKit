@@ -7,7 +7,7 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-permissions-lib-bukkit
-api-version: '1.16'
+api-version: '1.17'
 commands:
   group:
     description: Group management command
@@ -15,6 +15,9 @@ commands:
   charactergroup:
     description: Character group management command
     usage: /<command> [add|remove|view]
+  permissions:
+    description: Permissions management commands
+    usage: /<command> [reload]
 permissions:
   rpkit.permissions.command.group.list:
     description: Allows listing groups
@@ -36,4 +39,7 @@ permissions:
     default: op
   rpkit.permissions.command.charactergroup.view:
     description: Allows viewing a character's groups
+    default: op
+  rpkit.permissions.command.permissions.reload:
+    description: Allows reloading permissions
     default: op

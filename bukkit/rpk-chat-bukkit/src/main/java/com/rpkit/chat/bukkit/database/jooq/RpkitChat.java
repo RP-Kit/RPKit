@@ -83,13 +83,14 @@ public class RpkitChat extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitChatChannelMute.RPKIT_CHAT_CHANNEL_MUTE,
             RpkitChatChannelSpeaker.RPKIT_CHAT_CHANNEL_SPEAKER,
             RpkitChatGroup.RPKIT_CHAT_GROUP,
             RpkitChatGroupInvite.RPKIT_CHAT_GROUP_INVITE,
             RpkitChatGroupMember.RPKIT_CHAT_GROUP_MEMBER,
             RpkitLastUsedChatGroup.RPKIT_LAST_USED_CHAT_GROUP,
-            RpkitSnooper.RPKIT_SNOOPER);
+            RpkitSnooper.RPKIT_SNOOPER
+        );
     }
 }

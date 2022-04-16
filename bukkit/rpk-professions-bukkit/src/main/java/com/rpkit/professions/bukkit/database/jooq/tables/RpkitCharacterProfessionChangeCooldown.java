@@ -9,8 +9,6 @@ import com.rpkit.professions.bukkit.database.jooq.RpkitProfessions;
 import com.rpkit.professions.bukkit.database.jooq.tables.records.RpkitCharacterProfessionChangeCooldownRecord;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -36,7 +34,8 @@ public class RpkitCharacterProfessionChangeCooldown extends TableImpl<RpkitChara
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_professions.rpkit_character_profession_change_cooldown</code>
+     * The reference instance of
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown</code>
      */
     public static final RpkitCharacterProfessionChangeCooldown RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN = new RpkitCharacterProfessionChangeCooldown();
 
@@ -49,12 +48,14 @@ public class RpkitCharacterProfessionChangeCooldown extends TableImpl<RpkitChara
     }
 
     /**
-     * The column <code>rpkit_professions.rpkit_character_profession_change_cooldown.character_id</code>.
+     * The column
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown.character_id</code>.
      */
     public final TableField<RpkitCharacterProfessionChangeCooldownRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_professions.rpkit_character_profession_change_cooldown.cooldown_end_time</code>.
+     * The column
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown.cooldown_end_time</code>.
      */
     public final TableField<RpkitCharacterProfessionChangeCooldownRecord, LocalDateTime> COOLDOWN_END_TIME = createField(DSL.name("cooldown_end_time"), SQLDataType.LOCALDATETIME(0).nullable(false).defaultValue(DSL.field("current_timestamp()", SQLDataType.LOCALDATETIME)), this, "");
 
@@ -67,21 +68,27 @@ public class RpkitCharacterProfessionChangeCooldown extends TableImpl<RpkitChara
     }
 
     /**
-     * Create an aliased <code>rpkit_professions.rpkit_character_profession_change_cooldown</code> table reference
+     * Create an aliased
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown</code>
+     * table reference
      */
     public RpkitCharacterProfessionChangeCooldown(String alias) {
         this(DSL.name(alias), RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN);
     }
 
     /**
-     * Create an aliased <code>rpkit_professions.rpkit_character_profession_change_cooldown</code> table reference
+     * Create an aliased
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown</code>
+     * table reference
      */
     public RpkitCharacterProfessionChangeCooldown(Name alias) {
         this(alias, RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN);
     }
 
     /**
-     * Create a <code>rpkit_professions.rpkit_character_profession_change_cooldown</code> table reference
+     * Create a
+     * <code>rpkit_professions.rpkit_character_profession_change_cooldown</code>
+     * table reference
      */
     public RpkitCharacterProfessionChangeCooldown() {
         this(DSL.name("rpkit_character_profession_change_cooldown"), null);
@@ -93,17 +100,12 @@ public class RpkitCharacterProfessionChangeCooldown extends TableImpl<RpkitChara
 
     @Override
     public Schema getSchema() {
-        return RpkitProfessions.RPKIT_PROFESSIONS;
+        return aliased() ? null : RpkitProfessions.RPKIT_PROFESSIONS;
     }
 
     @Override
     public UniqueKey<RpkitCharacterProfessionChangeCooldownRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitCharacterProfessionChangeCooldownRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitCharacterProfessionChangeCooldownRecord>>asList(Keys.KEY_RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN_PRIMARY);
     }
 
     @Override

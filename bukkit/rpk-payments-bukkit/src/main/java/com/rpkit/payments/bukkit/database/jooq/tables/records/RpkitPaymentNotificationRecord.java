@@ -38,14 +38,16 @@ public class RpkitPaymentNotificationRecord extends UpdatableRecordImpl<RpkitPay
     }
 
     /**
-     * Setter for <code>rpkit_payments.rpkit_payment_notification.group_id</code>.
+     * Setter for
+     * <code>rpkit_payments.rpkit_payment_notification.group_id</code>.
      */
     public void setGroupId(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_payments.rpkit_payment_notification.group_id</code>.
+     * Getter for
+     * <code>rpkit_payments.rpkit_payment_notification.group_id</code>.
      */
     public Integer getGroupId() {
         return (Integer) get(1);
@@ -66,14 +68,16 @@ public class RpkitPaymentNotificationRecord extends UpdatableRecordImpl<RpkitPay
     }
 
     /**
-     * Setter for <code>rpkit_payments.rpkit_payment_notification.character_id</code>.
+     * Setter for
+     * <code>rpkit_payments.rpkit_payment_notification.character_id</code>.
      */
     public void setCharacterId(Integer value) {
         set(3, value);
     }
 
     /**
-     * Getter for <code>rpkit_payments.rpkit_payment_notification.character_id</code>.
+     * Getter for
+     * <code>rpkit_payments.rpkit_payment_notification.character_id</code>.
      */
     public Integer getCharacterId() {
         return (Integer) get(3);

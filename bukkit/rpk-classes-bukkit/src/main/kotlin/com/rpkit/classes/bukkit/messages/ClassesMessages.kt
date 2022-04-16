@@ -18,5 +18,15 @@ package com.rpkit.classes.bukkit.messages
 
 import com.rpkit.classes.bukkit.RPKClassesBukkit
 import com.rpkit.core.bukkit.message.BukkitMessages
+import com.rpkit.core.message.ParameterizedMessage
 
-class ClassesMessages(plugin: RPKClassesBukkit) : BukkitMessages(plugin)
+class ClassesMessages(plugin: RPKClassesBukkit) : BukkitMessages(plugin) {
+
+    class ClassSetInvalidAgeMessage(private val message: ParameterizedMessage) {
+        fun withParameters(maxAge: Int, minAge: Int) =
+            message.withParameters(mapOf("min_age" to minAge.toString(), "max_age" to maxAge.toString()))
+    }
+
+    val classSetInvalidAge = getParameterized("class-set-invalid-age")
+        .let(::ClassSetInvalidAgeMessage)
+}

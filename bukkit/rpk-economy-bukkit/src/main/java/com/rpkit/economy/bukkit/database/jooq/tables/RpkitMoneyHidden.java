@@ -8,9 +8,6 @@ import com.rpkit.economy.bukkit.database.jooq.Keys;
 import com.rpkit.economy.bukkit.database.jooq.RpkitEconomy;
 import com.rpkit.economy.bukkit.database.jooq.tables.records.RpkitMoneyHiddenRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -61,14 +58,16 @@ public class RpkitMoneyHidden extends TableImpl<RpkitMoneyHiddenRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_economy.rpkit_money_hidden</code> table reference
+     * Create an aliased <code>rpkit_economy.rpkit_money_hidden</code> table
+     * reference
      */
     public RpkitMoneyHidden(String alias) {
         this(DSL.name(alias), RPKIT_MONEY_HIDDEN);
     }
 
     /**
-     * Create an aliased <code>rpkit_economy.rpkit_money_hidden</code> table reference
+     * Create an aliased <code>rpkit_economy.rpkit_money_hidden</code> table
+     * reference
      */
     public RpkitMoneyHidden(Name alias) {
         this(alias, RPKIT_MONEY_HIDDEN);
@@ -87,17 +86,12 @@ public class RpkitMoneyHidden extends TableImpl<RpkitMoneyHiddenRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitEconomy.RPKIT_ECONOMY;
+        return aliased() ? null : RpkitEconomy.RPKIT_ECONOMY;
     }
 
     @Override
     public UniqueKey<RpkitMoneyHiddenRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_MONEY_HIDDEN_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitMoneyHiddenRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitMoneyHiddenRecord>>asList(Keys.KEY_RPKIT_MONEY_HIDDEN_PRIMARY);
     }
 
     @Override

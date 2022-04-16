@@ -53,8 +53,9 @@ public class RpkitPermissions extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitCharacterGroup.RPKIT_CHARACTER_GROUP,
-            RpkitProfileGroup.RPKIT_PROFILE_GROUP);
+            RpkitProfileGroup.RPKIT_PROFILE_GROUP
+        );
     }
 }

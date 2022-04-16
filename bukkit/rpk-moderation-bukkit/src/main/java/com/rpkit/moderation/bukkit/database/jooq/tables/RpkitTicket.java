@@ -9,8 +9,6 @@ import com.rpkit.moderation.bukkit.database.jooq.RpkitModeration;
 import com.rpkit.moderation.bukkit.database.jooq.tables.records.RpkitTicketRecord;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -67,37 +65,37 @@ public class RpkitTicket extends TableImpl<RpkitTicketRecord> {
     /**
      * The column <code>rpkit_moderation.rpkit_ticket.resolver_id</code>.
      */
-    public final TableField<RpkitTicketRecord, Integer> RESOLVER_ID = createField(DSL.name("resolver_id"), SQLDataType.INTEGER.defaultValue(DSL.inline("NULL", SQLDataType.INTEGER)), this, "");
+    public final TableField<RpkitTicketRecord, Integer> RESOLVER_ID = createField(DSL.name("resolver_id"), SQLDataType.INTEGER.defaultValue(DSL.field("NULL", SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_moderation.rpkit_ticket.world</code>.
      */
-    public final TableField<RpkitTicketRecord, String> WORLD = createField(DSL.name("world"), SQLDataType.VARCHAR(256).defaultValue(DSL.inline("NULL", SQLDataType.VARCHAR)), this, "");
+    public final TableField<RpkitTicketRecord, String> WORLD = createField(DSL.name("world"), SQLDataType.VARCHAR(256).defaultValue(DSL.field("NULL", SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>rpkit_moderation.rpkit_ticket.x</code>.
      */
-    public final TableField<RpkitTicketRecord, Double> X = createField(DSL.name("x"), SQLDataType.DOUBLE.defaultValue(DSL.inline("NULL", SQLDataType.DOUBLE)), this, "");
+    public final TableField<RpkitTicketRecord, Double> X = createField(DSL.name("x"), SQLDataType.DOUBLE.defaultValue(DSL.field("NULL", SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_moderation.rpkit_ticket.y</code>.
      */
-    public final TableField<RpkitTicketRecord, Double> Y = createField(DSL.name("y"), SQLDataType.DOUBLE.defaultValue(DSL.inline("NULL", SQLDataType.DOUBLE)), this, "");
+    public final TableField<RpkitTicketRecord, Double> Y = createField(DSL.name("y"), SQLDataType.DOUBLE.defaultValue(DSL.field("NULL", SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_moderation.rpkit_ticket.z</code>.
      */
-    public final TableField<RpkitTicketRecord, Double> Z = createField(DSL.name("z"), SQLDataType.DOUBLE.defaultValue(DSL.inline("NULL", SQLDataType.DOUBLE)), this, "");
+    public final TableField<RpkitTicketRecord, Double> Z = createField(DSL.name("z"), SQLDataType.DOUBLE.defaultValue(DSL.field("NULL", SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_moderation.rpkit_ticket.yaw</code>.
      */
-    public final TableField<RpkitTicketRecord, Double> YAW = createField(DSL.name("yaw"), SQLDataType.DOUBLE.defaultValue(DSL.inline("NULL", SQLDataType.DOUBLE)), this, "");
+    public final TableField<RpkitTicketRecord, Double> YAW = createField(DSL.name("yaw"), SQLDataType.DOUBLE.defaultValue(DSL.field("NULL", SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_moderation.rpkit_ticket.pitch</code>.
      */
-    public final TableField<RpkitTicketRecord, Double> PITCH = createField(DSL.name("pitch"), SQLDataType.DOUBLE.defaultValue(DSL.inline("NULL", SQLDataType.DOUBLE)), this, "");
+    public final TableField<RpkitTicketRecord, Double> PITCH = createField(DSL.name("pitch"), SQLDataType.DOUBLE.defaultValue(DSL.field("NULL", SQLDataType.DOUBLE)), this, "");
 
     /**
      * The column <code>rpkit_moderation.rpkit_ticket.open_date</code>.
@@ -107,7 +105,7 @@ public class RpkitTicket extends TableImpl<RpkitTicketRecord> {
     /**
      * The column <code>rpkit_moderation.rpkit_ticket.close_date</code>.
      */
-    public final TableField<RpkitTicketRecord, LocalDateTime> CLOSE_DATE = createField(DSL.name("close_date"), SQLDataType.LOCALDATETIME(0).defaultValue(DSL.inline("NULL", SQLDataType.LOCALDATETIME)), this, "");
+    public final TableField<RpkitTicketRecord, LocalDateTime> CLOSE_DATE = createField(DSL.name("close_date"), SQLDataType.LOCALDATETIME(0).defaultValue(DSL.field("NULL", SQLDataType.LOCALDATETIME)), this, "");
 
     /**
      * The column <code>rpkit_moderation.rpkit_ticket.closed</code>.
@@ -123,14 +121,16 @@ public class RpkitTicket extends TableImpl<RpkitTicketRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_moderation.rpkit_ticket</code> table reference
+     * Create an aliased <code>rpkit_moderation.rpkit_ticket</code> table
+     * reference
      */
     public RpkitTicket(String alias) {
         this(DSL.name(alias), RPKIT_TICKET);
     }
 
     /**
-     * Create an aliased <code>rpkit_moderation.rpkit_ticket</code> table reference
+     * Create an aliased <code>rpkit_moderation.rpkit_ticket</code> table
+     * reference
      */
     public RpkitTicket(Name alias) {
         this(alias, RPKIT_TICKET);
@@ -149,7 +149,7 @@ public class RpkitTicket extends TableImpl<RpkitTicketRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitModeration.RPKIT_MODERATION;
+        return aliased() ? null : RpkitModeration.RPKIT_MODERATION;
     }
 
     @Override
@@ -160,11 +160,6 @@ public class RpkitTicket extends TableImpl<RpkitTicketRecord> {
     @Override
     public UniqueKey<RpkitTicketRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_TICKET_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitTicketRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitTicketRecord>>asList(Keys.KEY_RPKIT_TICKET_PRIMARY);
     }
 
     @Override

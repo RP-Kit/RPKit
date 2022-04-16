@@ -8,9 +8,6 @@ import com.rpkit.essentials.bukkit.database.jooq.Keys;
 import com.rpkit.essentials.bukkit.database.jooq.RpkitEssentials;
 import com.rpkit.essentials.bukkit.database.jooq.tables.records.RpkitTrackingDisabledRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -35,7 +32,8 @@ public class RpkitTrackingDisabled extends TableImpl<RpkitTrackingDisabledRecord
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_essentials.rpkit_tracking_disabled</code>
+     * The reference instance of
+     * <code>rpkit_essentials.rpkit_tracking_disabled</code>
      */
     public static final RpkitTrackingDisabled RPKIT_TRACKING_DISABLED = new RpkitTrackingDisabled();
 
@@ -48,7 +46,8 @@ public class RpkitTrackingDisabled extends TableImpl<RpkitTrackingDisabledRecord
     }
 
     /**
-     * The column <code>rpkit_essentials.rpkit_tracking_disabled.character_id</code>.
+     * The column
+     * <code>rpkit_essentials.rpkit_tracking_disabled.character_id</code>.
      */
     public final TableField<RpkitTrackingDisabledRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -61,21 +60,24 @@ public class RpkitTrackingDisabled extends TableImpl<RpkitTrackingDisabledRecord
     }
 
     /**
-     * Create an aliased <code>rpkit_essentials.rpkit_tracking_disabled</code> table reference
+     * Create an aliased <code>rpkit_essentials.rpkit_tracking_disabled</code>
+     * table reference
      */
     public RpkitTrackingDisabled(String alias) {
         this(DSL.name(alias), RPKIT_TRACKING_DISABLED);
     }
 
     /**
-     * Create an aliased <code>rpkit_essentials.rpkit_tracking_disabled</code> table reference
+     * Create an aliased <code>rpkit_essentials.rpkit_tracking_disabled</code>
+     * table reference
      */
     public RpkitTrackingDisabled(Name alias) {
         this(alias, RPKIT_TRACKING_DISABLED);
     }
 
     /**
-     * Create a <code>rpkit_essentials.rpkit_tracking_disabled</code> table reference
+     * Create a <code>rpkit_essentials.rpkit_tracking_disabled</code> table
+     * reference
      */
     public RpkitTrackingDisabled() {
         this(DSL.name("rpkit_tracking_disabled"), null);
@@ -87,17 +89,12 @@ public class RpkitTrackingDisabled extends TableImpl<RpkitTrackingDisabledRecord
 
     @Override
     public Schema getSchema() {
-        return RpkitEssentials.RPKIT_ESSENTIALS;
+        return aliased() ? null : RpkitEssentials.RPKIT_ESSENTIALS;
     }
 
     @Override
     public UniqueKey<RpkitTrackingDisabledRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_TRACKING_DISABLED_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitTrackingDisabledRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitTrackingDisabledRecord>>asList(Keys.KEY_RPKIT_TRACKING_DISABLED_PRIMARY);
     }
 
     @Override

@@ -8,9 +8,6 @@ import com.rpkit.shops.bukkit.database.jooq.Keys;
 import com.rpkit.shops.bukkit.database.jooq.RpkitShops;
 import com.rpkit.shops.bukkit.database.jooq.tables.records.RpkitShopCountRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -66,14 +63,16 @@ public class RpkitShopCount extends TableImpl<RpkitShopCountRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_shops.rpkit_shop_count</code> table reference
+     * Create an aliased <code>rpkit_shops.rpkit_shop_count</code> table
+     * reference
      */
     public RpkitShopCount(String alias) {
         this(DSL.name(alias), RPKIT_SHOP_COUNT);
     }
 
     /**
-     * Create an aliased <code>rpkit_shops.rpkit_shop_count</code> table reference
+     * Create an aliased <code>rpkit_shops.rpkit_shop_count</code> table
+     * reference
      */
     public RpkitShopCount(Name alias) {
         this(alias, RPKIT_SHOP_COUNT);
@@ -92,17 +91,12 @@ public class RpkitShopCount extends TableImpl<RpkitShopCountRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitShops.RPKIT_SHOPS;
+        return aliased() ? null : RpkitShops.RPKIT_SHOPS;
     }
 
     @Override
     public UniqueKey<RpkitShopCountRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_SHOP_COUNT_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitShopCountRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitShopCountRecord>>asList(Keys.KEY_RPKIT_SHOP_COUNT_PRIMARY);
     }
 
     @Override

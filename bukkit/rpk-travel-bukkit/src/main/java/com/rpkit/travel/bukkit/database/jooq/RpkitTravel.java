@@ -47,7 +47,8 @@ public class RpkitTravel extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            RpkitWarp.RPKIT_WARP);
+        return Arrays.asList(
+            RpkitWarp.RPKIT_WARP
+        );
     }
 }

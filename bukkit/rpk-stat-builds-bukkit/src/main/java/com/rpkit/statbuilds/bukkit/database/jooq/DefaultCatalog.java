@@ -38,7 +38,8 @@ public class DefaultCatalog extends CatalogImpl {
 
     @Override
     public final List<Schema> getSchemas() {
-        return Arrays.<Schema>asList(
-            RpkitStatBuilds.RPKIT_STAT_BUILDS);
+        return Arrays.asList(
+            RpkitStatBuilds.RPKIT_STAT_BUILDS
+        );
     }
 }

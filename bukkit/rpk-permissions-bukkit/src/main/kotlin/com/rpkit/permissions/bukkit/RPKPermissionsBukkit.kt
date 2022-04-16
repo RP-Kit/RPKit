@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.rpkit.permissions.bukkit
 
+import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
@@ -24,6 +25,7 @@ import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.command.charactergroup.CharacterGroupCommand
 import com.rpkit.permissions.bukkit.command.group.GroupCommand
+import com.rpkit.permissions.bukkit.command.permissions.PermissionsCommand
 import com.rpkit.permissions.bukkit.database.table.RPKCharacterGroupTable
 import com.rpkit.permissions.bukkit.database.table.RPKProfileGroupTable
 import com.rpkit.permissions.bukkit.group.RPKGroupImpl
@@ -51,6 +53,7 @@ class RPKPermissionsBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         System.setProperty("com.rpkit.permissions.bukkit.shadow.impl.org.jooq.no-logo", "true")
+        System.setProperty("com.rpkit.permissions.bukkit.shadow.impl.org.jooq.no-tips", "true")
 
         Metrics(this, 4407)
         ConfigurationSerialization.registerClass(RPKGroupImpl::class.java, "RPKGroupImpl")
@@ -112,13 +115,14 @@ class RPKPermissionsBukkit : RPKBukkitPlugin() {
     fun registerCommands() {
         getCommand("group")?.setExecutor(GroupCommand(this))
         getCommand("charactergroup")?.setExecutor(CharacterGroupCommand(this))
+        getCommand("permissions")?.setExecutor(PermissionsCommand(this).toBukkit())
     }
 
     fun registerListeners() {
         registerListeners(
             PlayerJoinListener(),
             PlayerQuitListener(this),
-            RPKBukkitCharacterSwitchListener(),
+            RPKBukkitCharacterSwitchListener(this),
             AsyncPlayerPreLoginListener()
         )
     }

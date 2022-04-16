@@ -15,6 +15,7 @@
 
 package com.rpkit.travel.bukkit.warp
 
+import com.rpkit.core.bukkit.location.toBukkitLocation
 import com.rpkit.core.location.RPKLocation
 import com.rpkit.travel.bukkit.RPKTravelBukkit
 import com.rpkit.travel.bukkit.database.table.RPKWarpTable
@@ -24,6 +25,8 @@ import com.rpkit.warp.bukkit.event.warp.RPKBukkitWarpUpdateEvent
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import com.rpkit.warp.bukkit.warp.RPKWarpName
 import com.rpkit.warp.bukkit.warp.RPKWarpService
+import org.bukkit.permissions.Permission
+import org.bukkit.permissions.PermissionDefault
 import java.util.concurrent.CompletableFuture
 
 
@@ -41,6 +44,7 @@ class RPKWarpServiceImpl(override val plugin: RPKTravelBukkit) : RPKWarpService 
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
             plugin.database.getTable(RPKWarpTable::class.java).insert(event.warp).join()
+            this.addWarpPermission(warp)
         }
     }
 
@@ -64,6 +68,23 @@ class RPKWarpServiceImpl(override val plugin: RPKTravelBukkit) : RPKWarpService 
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
             plugin.database.getTable(RPKWarpTable::class.java).delete(event.warp).join()
+            this.removeWarpPermission(warp)
         }
+    }
+
+    private fun addWarpPermission(warp: RPKWarp) {
+        plugin.server.scheduler.runTask(plugin, Runnable {
+            val perm = "${plugin.permissions.parentWarpPermission}.${warp.name.value}"
+            plugin.server.pluginManager.addPermission(
+                Permission(perm, "Allows warping to '${warp.name.value}'", PermissionDefault.OP)
+            )
+        })
+    }
+
+    private fun removeWarpPermission(warp: RPKWarp) {
+        plugin.server.scheduler.runTask(plugin, Runnable {
+            val perm = "${plugin.permissions.parentWarpPermission}.${warp.name.value}"
+            plugin.server.pluginManager.removePermission(perm)
+        })
     }
 }

@@ -25,14 +25,15 @@ if (propertiesFile.exists()) {
 }
 
 dependencies {
-    implementation group: "mysql", name: "mysql-connector-java", version: "8.0.23"
-    implementation group: "org.xerial", name: "sqlite-jdbc", version: "3.34.0"
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.4.30"
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.4.30"
-    implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha1"
-    implementation group: "com.zaxxer", name: "HikariCP", version: "4.0.1"
-    implementation group: "org.flywaydb", name: "flyway-core", version: "7.5.2"
-    implementation group: "org.scijava", name: "parsington", version: "2.0.0"
+    implementation group: "mysql", name: "mysql-connector-java", version: "8.0.28"
+    implementation group: "org.xerial", name: "sqlite-jdbc", version: "3.36.0.3"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.6.20"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.6.20"
+    implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha7"
+    implementation group: "com.zaxxer", name: "HikariCP", version: "5.0.1"
+    implementation group: "org.flywaydb", name: "flyway-core", version: "8.5.8"
+    implementation group: "org.flywaydb", name: "flyway-mysql", version: "8.5.8"
+    implementation group: "org.scijava", name: "parsington", version: "3.0.0"
 }
 
 artifacts {

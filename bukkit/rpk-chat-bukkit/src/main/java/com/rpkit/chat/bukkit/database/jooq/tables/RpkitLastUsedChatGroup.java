@@ -30,7 +30,8 @@ public class RpkitLastUsedChatGroup extends TableImpl<RpkitLastUsedChatGroupReco
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_chat.rpkit_last_used_chat_group</code>
+     * The reference instance of
+     * <code>rpkit_chat.rpkit_last_used_chat_group</code>
      */
     public static final RpkitLastUsedChatGroup RPKIT_LAST_USED_CHAT_GROUP = new RpkitLastUsedChatGroup();
 
@@ -43,12 +44,14 @@ public class RpkitLastUsedChatGroup extends TableImpl<RpkitLastUsedChatGroupReco
     }
 
     /**
-     * The column <code>rpkit_chat.rpkit_last_used_chat_group.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_chat.rpkit_last_used_chat_group.minecraft_profile_id</code>.
      */
     public final TableField<RpkitLastUsedChatGroupRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_chat.rpkit_last_used_chat_group.chat_group_id</code>.
+     * The column
+     * <code>rpkit_chat.rpkit_last_used_chat_group.chat_group_id</code>.
      */
     public final TableField<RpkitLastUsedChatGroupRecord, Integer> CHAT_GROUP_ID = createField(DSL.name("chat_group_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -61,21 +64,24 @@ public class RpkitLastUsedChatGroup extends TableImpl<RpkitLastUsedChatGroupReco
     }
 
     /**
-     * Create an aliased <code>rpkit_chat.rpkit_last_used_chat_group</code> table reference
+     * Create an aliased <code>rpkit_chat.rpkit_last_used_chat_group</code>
+     * table reference
      */
     public RpkitLastUsedChatGroup(String alias) {
         this(DSL.name(alias), RPKIT_LAST_USED_CHAT_GROUP);
     }
 
     /**
-     * Create an aliased <code>rpkit_chat.rpkit_last_used_chat_group</code> table reference
+     * Create an aliased <code>rpkit_chat.rpkit_last_used_chat_group</code>
+     * table reference
      */
     public RpkitLastUsedChatGroup(Name alias) {
         this(alias, RPKIT_LAST_USED_CHAT_GROUP);
     }
 
     /**
-     * Create a <code>rpkit_chat.rpkit_last_used_chat_group</code> table reference
+     * Create a <code>rpkit_chat.rpkit_last_used_chat_group</code> table
+     * reference
      */
     public RpkitLastUsedChatGroup() {
         this(DSL.name("rpkit_last_used_chat_group"), null);
@@ -87,7 +93,7 @@ public class RpkitLastUsedChatGroup extends TableImpl<RpkitLastUsedChatGroupReco
 
     @Override
     public Schema getSchema() {
-        return RpkitChat.RPKIT_CHAT;
+        return aliased() ? null : RpkitChat.RPKIT_CHAT;
     }
 
     @Override

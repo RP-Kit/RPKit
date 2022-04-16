@@ -84,7 +84,7 @@ class TrackCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
                 if (itemRequirement != null && !bukkitPlayer.inventory.containsAtLeast(itemRequirement, itemRequirement.amount)) {
                     sender.sendMessage(plugin.messages["track-invalid-item", mapOf(
                         "amount" to itemRequirement.amount.toString(),
-                        "type" to itemRequirement.type.toString().toLowerCase().replace('_', ' ')
+                        "type" to itemRequirement.type.toString().lowercase().replace('_', ' ')
                     )])
                     return@Runnable
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.command.payment.PaymentCommand
-import com.rpkit.payments.bukkit.database.table.*
+import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupInviteTable
+import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupMemberTable
+import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupOwnerTable
+import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupTable
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupServiceImpl
-import com.rpkit.payments.bukkit.listener.PlayerJoinListener
 import com.rpkit.payments.bukkit.messages.PaymentsMessages
-import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationService
-import com.rpkit.payments.bukkit.notification.RPKPaymentNotificationServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -44,6 +44,7 @@ class RPKPaymentsBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         System.setProperty("com.rpkit.payments.bukkit.shadow.impl.org.jooq.no-logo", "true")
+        System.setProperty("com.rpkit.payments.bukkit.shadow.impl.org.jooq.no-tips", "true")
 
         Metrics(this, 4406)
         saveDefaultConfig()
@@ -94,25 +95,18 @@ class RPKPaymentsBukkit : RPKBukkitPlugin() {
         database.addTable(RPKPaymentGroupInviteTable(database))
         database.addTable(RPKPaymentGroupMemberTable(database))
         database.addTable(RPKPaymentGroupOwnerTable(database))
-        database.addTable(RPKPaymentNotificationTable(database, this))
 
         Services[RPKPaymentGroupService::class.java] = RPKPaymentGroupServiceImpl(this)
-        Services[RPKPaymentNotificationService::class.java] = RPKPaymentNotificationServiceImpl(this)
 
         // Keep payments accurate to 1 minute (60 seconds * 20 ticks)
         PaymentTask(this)
                 .runTaskTimer(this, 1200L, 1200L)
 
         registerCommands()
-        registerListeners()
     }
 
     fun registerCommands() {
         getCommand("payment")?.setExecutor(PaymentCommand(this))
-    }
-
-    fun registerListeners() {
-        registerListeners(PlayerJoinListener(this))
     }
 
 }

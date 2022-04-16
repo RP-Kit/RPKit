@@ -94,14 +94,16 @@ public class RpkitPaymentGroupRecord extends UpdatableRecordImpl<RpkitPaymentGro
     }
 
     /**
-     * Setter for <code>rpkit_payments.rpkit_payment_group.last_payment_time</code>.
+     * Setter for
+     * <code>rpkit_payments.rpkit_payment_group.last_payment_time</code>.
      */
     public void setLastPaymentTime(LocalDateTime value) {
         set(5, value);
     }
 
     /**
-     * Getter for <code>rpkit_payments.rpkit_payment_group.last_payment_time</code>.
+     * Getter for
+     * <code>rpkit_payments.rpkit_payment_group.last_payment_time</code>.
      */
     public LocalDateTime getLastPaymentTime() {
         return (LocalDateTime) get(5);

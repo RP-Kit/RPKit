@@ -61,9 +61,9 @@ class CharacterHideNameCommand(private val plugin: RPKCharactersBukkit) : Comman
             return true
         }
         character.isNameHidden = true
-        characterService.updateCharacter(character).thenRun {
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
             sender.sendMessage(plugin.messages["character-hide-name-valid"])
-            character.showCharacterCard(minecraftProfile)
+            updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
     }

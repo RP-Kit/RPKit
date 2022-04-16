@@ -30,7 +30,8 @@ public class RpkitCraftingExperience extends TableImpl<RpkitCraftingExperienceRe
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_crafting_skill.rpkit_crafting_experience</code>
+     * The reference instance of
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience</code>
      */
     public static final RpkitCraftingExperience RPKIT_CRAFTING_EXPERIENCE = new RpkitCraftingExperience();
 
@@ -43,22 +44,26 @@ public class RpkitCraftingExperience extends TableImpl<RpkitCraftingExperienceRe
     }
 
     /**
-     * The column <code>rpkit_crafting_skill.rpkit_crafting_experience.character_id</code>.
+     * The column
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.character_id</code>.
      */
     public final TableField<RpkitCraftingExperienceRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_crafting_skill.rpkit_crafting_experience.action</code>.
+     * The column
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.action</code>.
      */
     public final TableField<RpkitCraftingExperienceRecord, String> ACTION = createField(DSL.name("action"), SQLDataType.VARCHAR(8).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_crafting_skill.rpkit_crafting_experience.material</code>.
+     * The column
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.material</code>.
      */
     public final TableField<RpkitCraftingExperienceRecord, String> MATERIAL = createField(DSL.name("material"), SQLDataType.VARCHAR(256).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_crafting_skill.rpkit_crafting_experience.experience</code>.
+     * The column
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience.experience</code>.
      */
     public final TableField<RpkitCraftingExperienceRecord, Integer> EXPERIENCE = createField(DSL.name("experience"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -71,21 +76,26 @@ public class RpkitCraftingExperience extends TableImpl<RpkitCraftingExperienceRe
     }
 
     /**
-     * Create an aliased <code>rpkit_crafting_skill.rpkit_crafting_experience</code> table reference
+     * Create an aliased
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience</code> table
+     * reference
      */
     public RpkitCraftingExperience(String alias) {
         this(DSL.name(alias), RPKIT_CRAFTING_EXPERIENCE);
     }
 
     /**
-     * Create an aliased <code>rpkit_crafting_skill.rpkit_crafting_experience</code> table reference
+     * Create an aliased
+     * <code>rpkit_crafting_skill.rpkit_crafting_experience</code> table
+     * reference
      */
     public RpkitCraftingExperience(Name alias) {
         this(alias, RPKIT_CRAFTING_EXPERIENCE);
     }
 
     /**
-     * Create a <code>rpkit_crafting_skill.rpkit_crafting_experience</code> table reference
+     * Create a <code>rpkit_crafting_skill.rpkit_crafting_experience</code>
+     * table reference
      */
     public RpkitCraftingExperience() {
         this(DSL.name("rpkit_crafting_experience"), null);
@@ -97,7 +107,7 @@ public class RpkitCraftingExperience extends TableImpl<RpkitCraftingExperienceRe
 
     @Override
     public Schema getSchema() {
-        return RpkitCraftingSkill.RPKIT_CRAFTING_SKILL;
+        return aliased() ? null : RpkitCraftingSkill.RPKIT_CRAFTING_SKILL;
     }
 
     @Override

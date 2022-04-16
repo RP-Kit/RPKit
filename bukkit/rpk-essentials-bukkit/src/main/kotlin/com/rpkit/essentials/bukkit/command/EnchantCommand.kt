@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,11 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
             return true
         }
         if (sender.hasPermission("rpkit.essentials.command.enchant.unsafe")) {
-            val enchantment = Enchantment.getByKey(NamespacedKey.minecraft(args[0].toUpperCase()))
+            val enchantment = try {
+                Enchantment.getByKey(NamespacedKey.minecraft(args[0].lowercase()))
+            } catch (exception: Exception) {
+                null
+            }
             if (enchantment == null) {
                 sender.sendMessage(plugin.messages["enchant-invalid-enchantment"])
                 return true
@@ -55,7 +59,7 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                 sender.inventory.itemInMainHand.addUnsafeEnchantment(enchantment, level)
                 sender.sendMessage(plugin.messages["enchant-valid", mapOf(
                         "amount" to sender.inventory.itemInMainHand.amount.toString(),
-                        "type" to sender.inventory.itemInMainHand.type.toString().toLowerCase().replace('_', ' '),
+                        "type" to sender.inventory.itemInMainHand.type.toString().lowercase().replace('_', ' '),
                         "enchantment" to enchantment.key.key,
                         "level" to level.toString()
                 )])
@@ -63,7 +67,11 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                 sender.sendMessage(plugin.messages["enchant-invalid-level"])
             }
         } else {
-            val enchantment = Enchantment.getByKey(NamespacedKey.minecraft(args[0]))
+            val enchantment = try {
+                Enchantment.getByKey(NamespacedKey.minecraft(args[0].lowercase()))
+            } catch (exception: IllegalArgumentException) {
+                null
+            }
             if (enchantment == null) {
                 sender.sendMessage(plugin.messages["enchant-invalid-enchantment"])
                 return true
@@ -73,7 +81,7 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                 sender.inventory.itemInMainHand.addEnchantment(enchantment, Integer.parseInt(args[1]))
                 sender.sendMessage(plugin.messages["enchant-valid", mapOf(
                         "amount" to sender.inventory.itemInMainHand.amount.toString(),
-                        "type" to sender.inventory.itemInMainHand.type.toString().toLowerCase().replace('_', ' '),
+                        "type" to sender.inventory.itemInMainHand.type.toString().lowercase().replace('_', ' '),
                         "enchantment" to enchantment.key.key,
                         "level" to level.toString()
                 )])

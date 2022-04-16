@@ -112,7 +112,7 @@ public class RpkitWarp extends TableImpl<RpkitWarpRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitTravel.RPKIT_TRAVEL;
+        return aliased() ? null : RpkitTravel.RPKIT_TRAVEL;
     }
 
     @Override

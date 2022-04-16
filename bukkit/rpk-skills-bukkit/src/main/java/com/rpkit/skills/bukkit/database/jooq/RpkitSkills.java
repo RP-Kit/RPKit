@@ -53,8 +53,9 @@ public class RpkitSkills extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitSkillBinding.RPKIT_SKILL_BINDING,
-            RpkitSkillCooldown.RPKIT_SKILL_COOLDOWN);
+            RpkitSkillCooldown.RPKIT_SKILL_COOLDOWN
+        );
     }
 }

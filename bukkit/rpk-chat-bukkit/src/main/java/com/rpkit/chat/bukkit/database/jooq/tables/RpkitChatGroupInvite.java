@@ -48,7 +48,8 @@ public class RpkitChatGroupInvite extends TableImpl<RpkitChatGroupInviteRecord> 
     public final TableField<RpkitChatGroupInviteRecord, Integer> CHAT_GROUP_ID = createField(DSL.name("chat_group_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_chat.rpkit_chat_group_invite.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_chat.rpkit_chat_group_invite.minecraft_profile_id</code>.
      */
     public final TableField<RpkitChatGroupInviteRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -61,14 +62,16 @@ public class RpkitChatGroupInvite extends TableImpl<RpkitChatGroupInviteRecord> 
     }
 
     /**
-     * Create an aliased <code>rpkit_chat.rpkit_chat_group_invite</code> table reference
+     * Create an aliased <code>rpkit_chat.rpkit_chat_group_invite</code> table
+     * reference
      */
     public RpkitChatGroupInvite(String alias) {
         this(DSL.name(alias), RPKIT_CHAT_GROUP_INVITE);
     }
 
     /**
-     * Create an aliased <code>rpkit_chat.rpkit_chat_group_invite</code> table reference
+     * Create an aliased <code>rpkit_chat.rpkit_chat_group_invite</code> table
+     * reference
      */
     public RpkitChatGroupInvite(Name alias) {
         this(alias, RPKIT_CHAT_GROUP_INVITE);
@@ -87,7 +90,7 @@ public class RpkitChatGroupInvite extends TableImpl<RpkitChatGroupInviteRecord> 
 
     @Override
     public Schema getSchema() {
-        return RpkitChat.RPKIT_CHAT;
+        return aliased() ? null : RpkitChat.RPKIT_CHAT;
     }
 
     @Override

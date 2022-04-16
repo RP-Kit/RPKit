@@ -30,7 +30,8 @@ public class RpkitProfileGroup extends TableImpl<RpkitProfileGroupRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_permissions.rpkit_profile_group</code>
+     * The reference instance of
+     * <code>rpkit_permissions.rpkit_profile_group</code>
      */
     public static final RpkitProfileGroup RPKIT_PROFILE_GROUP = new RpkitProfileGroup();
 
@@ -66,21 +67,24 @@ public class RpkitProfileGroup extends TableImpl<RpkitProfileGroupRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_permissions.rpkit_profile_group</code> table reference
+     * Create an aliased <code>rpkit_permissions.rpkit_profile_group</code>
+     * table reference
      */
     public RpkitProfileGroup(String alias) {
         this(DSL.name(alias), RPKIT_PROFILE_GROUP);
     }
 
     /**
-     * Create an aliased <code>rpkit_permissions.rpkit_profile_group</code> table reference
+     * Create an aliased <code>rpkit_permissions.rpkit_profile_group</code>
+     * table reference
      */
     public RpkitProfileGroup(Name alias) {
         this(alias, RPKIT_PROFILE_GROUP);
     }
 
     /**
-     * Create a <code>rpkit_permissions.rpkit_profile_group</code> table reference
+     * Create a <code>rpkit_permissions.rpkit_profile_group</code> table
+     * reference
      */
     public RpkitProfileGroup() {
         this(DSL.name("rpkit_profile_group"), null);
@@ -92,7 +96,7 @@ public class RpkitProfileGroup extends TableImpl<RpkitProfileGroupRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitPermissions.RPKIT_PERMISSIONS;
+        return aliased() ? null : RpkitPermissions.RPKIT_PERMISSIONS;
     }
 
     @Override

@@ -5,6 +5,7 @@ package com.rpkit.chat.bukkit.database.jooq.tables.records;
 
 
 import com.rpkit.chat.bukkit.database.jooq.tables.RpkitChatChannelSpeaker;
+
 import org.jooq.Field;
 import org.jooq.Record2;
 import org.jooq.Row2;
@@ -20,28 +21,32 @@ public class RpkitChatChannelSpeakerRecord extends TableRecordImpl<RpkitChatChan
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_chat.rpkit_chat_channel_speaker.minecraft_profile_id</code>.
+     * Setter for
+     * <code>rpkit_chat.rpkit_chat_channel_speaker.minecraft_profile_id</code>.
      */
     public void setMinecraftProfileId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_chat.rpkit_chat_channel_speaker.minecraft_profile_id</code>.
+     * Getter for
+     * <code>rpkit_chat.rpkit_chat_channel_speaker.minecraft_profile_id</code>.
      */
     public Integer getMinecraftProfileId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_chat.rpkit_chat_channel_speaker.chat_channel_name</code>.
+     * Setter for
+     * <code>rpkit_chat.rpkit_chat_channel_speaker.chat_channel_name</code>.
      */
     public void setChatChannelName(String value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_chat.rpkit_chat_channel_speaker.chat_channel_name</code>.
+     * Getter for
+     * <code>rpkit_chat.rpkit_chat_channel_speaker.chat_channel_name</code>.
      */
     public String getChatChannelName() {
         return (String) get(1);

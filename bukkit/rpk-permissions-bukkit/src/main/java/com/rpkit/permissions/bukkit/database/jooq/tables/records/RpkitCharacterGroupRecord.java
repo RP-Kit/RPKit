@@ -21,28 +21,32 @@ public class RpkitCharacterGroupRecord extends TableRecordImpl<RpkitCharacterGro
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_permissions.rpkit_character_group.character_id</code>.
+     * Setter for
+     * <code>rpkit_permissions.rpkit_character_group.character_id</code>.
      */
     public void setCharacterId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_permissions.rpkit_character_group.character_id</code>.
+     * Getter for
+     * <code>rpkit_permissions.rpkit_character_group.character_id</code>.
      */
     public Integer getCharacterId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_permissions.rpkit_character_group.group_name</code>.
+     * Setter for
+     * <code>rpkit_permissions.rpkit_character_group.group_name</code>.
      */
     public void setGroupName(String value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_permissions.rpkit_character_group.group_name</code>.
+     * Getter for
+     * <code>rpkit_permissions.rpkit_character_group.group_name</code>.
      */
     public String getGroupName() {
         return (String) get(1);

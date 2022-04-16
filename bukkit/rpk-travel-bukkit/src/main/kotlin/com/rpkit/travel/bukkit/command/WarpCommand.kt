@@ -30,10 +30,6 @@ import org.bukkit.entity.Player
 class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (!sender.hasPermission("rpkit.travel.command.warp")) {
-            sender.sendMessage(plugin.messages.noPermissionWarp)
-            return true
-        }
         if (sender !is Player) {
             sender.sendMessage(plugin.messages.notFromConsole)
             return true
@@ -44,9 +40,14 @@ class WarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             return true
         }
         if (args.isNotEmpty()) {
-            warpService.getWarp(RPKWarpName(args[0].toLowerCase())).thenAcceptAsync { warp ->
+            warpService.getWarp(RPKWarpName(args[0].lowercase())).thenAcceptAsync { warp ->
                 if (warp == null) {
                     sender.sendMessage(plugin.messages.warpInvalidWarp)
+                    return@thenAcceptAsync
+                }
+                val perm = "${plugin.permissions.parentWarpPermission}.${warp.name.value}"
+                if (!(sender.hasPermission(plugin.permissions.parentWarpPermission) || sender.hasPermission(perm))) {
+                    sender.sendMessage(plugin.messages.noPermissionWarp)
                     return@thenAcceptAsync
                 }
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]

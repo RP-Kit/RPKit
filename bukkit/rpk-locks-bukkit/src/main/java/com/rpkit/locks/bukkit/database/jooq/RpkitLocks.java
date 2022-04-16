@@ -65,10 +65,11 @@ public class RpkitLocks extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitKeyring.RPKIT_KEYRING,
             RpkitLockedBlock.RPKIT_LOCKED_BLOCK,
             RpkitPlayerGettingKey.RPKIT_PLAYER_GETTING_KEY,
-            RpkitPlayerUnclaiming.RPKIT_PLAYER_UNCLAIMING);
+            RpkitPlayerUnclaiming.RPKIT_PLAYER_UNCLAIMING
+        );
     }
 }

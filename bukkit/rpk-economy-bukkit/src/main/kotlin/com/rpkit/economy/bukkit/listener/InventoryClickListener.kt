@@ -27,7 +27,7 @@ class InventoryClickListener : Listener {
 
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
-        if (event.view.title.toLowerCase().contains("wallet")) {
+        if (event.view.title.lowercase().contains("wallet")) {
             val currencyService = Services[RPKCurrencyService::class.java] ?: return
             val currency = currencyService.getCurrency(
                     RPKCurrencyName(event.view.title.substringAfterLast("[").substringBeforeLast("]"))

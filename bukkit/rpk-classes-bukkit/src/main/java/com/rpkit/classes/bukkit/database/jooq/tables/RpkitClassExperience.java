@@ -30,7 +30,8 @@ public class RpkitClassExperience extends TableImpl<RpkitClassExperienceRecord> 
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_classes.rpkit_class_experience</code>
+     * The reference instance of
+     * <code>rpkit_classes.rpkit_class_experience</code>
      */
     public static final RpkitClassExperience RPKIT_CLASS_EXPERIENCE = new RpkitClassExperience();
 
@@ -43,7 +44,8 @@ public class RpkitClassExperience extends TableImpl<RpkitClassExperienceRecord> 
     }
 
     /**
-     * The column <code>rpkit_classes.rpkit_class_experience.character_id</code>.
+     * The column
+     * <code>rpkit_classes.rpkit_class_experience.character_id</code>.
      */
     public final TableField<RpkitClassExperienceRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -66,21 +68,24 @@ public class RpkitClassExperience extends TableImpl<RpkitClassExperienceRecord> 
     }
 
     /**
-     * Create an aliased <code>rpkit_classes.rpkit_class_experience</code> table reference
+     * Create an aliased <code>rpkit_classes.rpkit_class_experience</code> table
+     * reference
      */
     public RpkitClassExperience(String alias) {
         this(DSL.name(alias), RPKIT_CLASS_EXPERIENCE);
     }
 
     /**
-     * Create an aliased <code>rpkit_classes.rpkit_class_experience</code> table reference
+     * Create an aliased <code>rpkit_classes.rpkit_class_experience</code> table
+     * reference
      */
     public RpkitClassExperience(Name alias) {
         this(alias, RPKIT_CLASS_EXPERIENCE);
     }
 
     /**
-     * Create a <code>rpkit_classes.rpkit_class_experience</code> table reference
+     * Create a <code>rpkit_classes.rpkit_class_experience</code> table
+     * reference
      */
     public RpkitClassExperience() {
         this(DSL.name("rpkit_class_experience"), null);
@@ -92,7 +97,7 @@ public class RpkitClassExperience extends TableImpl<RpkitClassExperienceRecord> 
 
     @Override
     public Schema getSchema() {
-        return RpkitClasses.RPKIT_CLASSES;
+        return aliased() ? null : RpkitClasses.RPKIT_CLASSES;
     }
 
     @Override

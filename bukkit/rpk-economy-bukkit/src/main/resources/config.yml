@@ -8,7 +8,7 @@ currencies:
     default-amount: 0
     item:
       ==: org.bukkit.inventory.ItemStack
-      v: 2586
+      v: 2730
       type: GOLD_NUGGET
       amount: 1
       meta:
@@ -24,7 +24,7 @@ currencies:
     default-amount: 0
     item:
       ==: org.bukkit.inventory.ItemStack
-      v: 2586
+      v: 2730
       type: IRON_NUGGET
       amount: 1
       meta:
@@ -40,7 +40,7 @@ currencies:
     default-amount: 100
     item:
       ==: org.bukkit.inventory.ItemStack
-      v: 2586
+      v: 2730
       type: GOLD_NUGGET
       amount: 64
       meta:

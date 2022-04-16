@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 plugins {
-    id "com.github.johnrengelman.shadow" version "6.1.0"
+    id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -29,10 +29,10 @@ if (propertiesFile.exists()) {
 }
 
 dependencies {
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.4.30"
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.4.30"
-    implementation group: "org.spigotmc", name: "spigot-api", version: "1.16.5-R0.1-SNAPSHOT"
-    implementation group: "org.bstats", name: "bstats-bukkit", version: "1.8"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.6.20"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.6.20"
+    implementation group: "org.spigotmc", name: "spigot-api", version: "1.17.1-R0.1-SNAPSHOT"
+    implementation group: "org.bstats", name: "bstats-bukkit", version: "3.0.0"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
@@ -55,6 +55,7 @@ shadowJar {
         include(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7"))
         include(dependency("org.jetbrains.kotlin:kotlin-reflect"))
         include(dependency("org.bstats:bstats-bukkit"))
+        include(dependency("org.bstats:bstats-base"))
     }
 
     relocate "kotlin", "com.rpkit.languages.bukkit.shadow.lib.kotlin"

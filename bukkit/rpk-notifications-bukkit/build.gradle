@@ -1,0 +1,109 @@
+/*
+ * Copyright 2021 Ren Binden
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+import org.apache.tools.ant.filters.ReplaceTokens
+
+def repoUserName = ""
+def repoPassword = ""
+def propertiesFile = new File("repo.properties")
+if (propertiesFile.exists()) {
+    def properties = new Properties()
+    properties.load(new FileInputStream(propertiesFile))
+    repoUserName = properties.getProperty("repo-username")
+    repoPassword = properties.getProperty("repo-password")
+}
+
+dependencies {
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.6.20"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.6.20"
+    implementation group: "org.spigotmc", name: "spigot-api", version: "1.17.1-R0.1-SNAPSHOT"
+    implementation group: "org.bstats", name: "bstats-bukkit", version: "3.0.0"
+    implementation group: "org.jooq", name: "jooq", version: "3.16.5"
+    implementation project(":rpk-core")
+    implementation project(":bukkit:rpk-core-bukkit")
+    implementation project(":bukkit:rpk-player-lib-bukkit")
+    implementation project(":bukkit:rpk-notification-lib-bukkit")
+    testImplementation group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: "1.6.1"
+    testImplementation group: "io.kotest", name: "kotest-runner-junit5-jvm", version: "5.2.3"
+    testImplementation group: "io.kotest", name: "kotest-framework-engine-jvm", version: "5.2.3"
+    testImplementation group: "io.kotest", name: "kotest-assertions-core-jvm", version: "5.2.3"
+    testImplementation group: "io.mockk", name: "mockk", version: "1.12.3"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+processResources {
+    filter ReplaceTokens, tokens: [
+            "version": version
+    ]
+}
+
+shadowJar {
+
+    dependencies {
+        include(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8"))
+        include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
+        include(dependency("org.jetbrains.kotlin:kotlin-stdlib-common"))
+        include(dependency("org.jetbrains:annotations"))
+        include(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7"))
+        include(dependency("org.jetbrains.kotlin:kotlin-reflect"))
+        include(dependency("org.bstats:bstats-bukkit"))
+        include(dependency("org.bstats:bstats-base"))
+        include(dependency("org.jooq:jooq"))
+        include(dependency("io.r2dbc:r2dbc-spi"))
+        include(dependency("org.reactivestreams:reactive-streams"))
+        include(dependency("javax.xml.bind:jaxb-api"))
+        include(dependency("javax.activation:javax.activation-api"))
+    }
+
+    relocate "kotlin", "com.rpkit.notifications.bukkit.shadow.impl.kotlin"
+    relocate "org.jetbrains", "com.rpkit.notifications.bukkit.shadow.impl.org.jetbrains"
+    relocate "org.intellij", "com.rpkit.notifications.bukkit.shadow.impl.org.intellij"
+    relocate "org.bstats", "com.rpkit.notifications.bukkit.shadow.impl.org.bstats"
+    relocate "org.jooq", "com.rpkit.notifications.bukkit.shadow.impl.org.jooq"
+    relocate "org.reactivestreams", "com.rpkit.notifications.bukkit.shadow.impl.org.reactivestreams"
+    relocate "javax.xml.bind", "com.rpkit.notifications.bukkit.shadow.impl.javax.xml.bind"
+    relocate "javax.activation", "com.rpkit.notifications.bukkit.shadow.impl.javax.activation"
+}
+
+artifacts {
+    archives shadowJar
+}
+
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username repoUserName
+                password repoPassword
+            }
+            url "https://repo.rpkit.com/repository/maven-releases/"
+        }
+    }
+    publications {
+        maven(MavenPublication) { publication ->
+            version = project(":bukkit:rpk-notifications-bukkit").version
+            artifactId = project(":bukkit:rpk-notifications-bukkit").name
+            groupId = project(":bukkit:rpk-notifications-bukkit").group
+
+            from project(":bukkit:rpk-notifications-bukkit").shadow.component(publication)
+        }
+    }
+}

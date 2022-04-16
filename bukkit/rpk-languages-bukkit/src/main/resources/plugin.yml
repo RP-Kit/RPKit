@@ -2,9 +2,26 @@ name: rpk-languages-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.languages.bukkit.RPKLanguagesBukkit
-api-version: '1.16'
+api-version: '1.17'
 depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-language-lib-bukkit
+commands:
+  language:
+    description: |
+      Base command for languages
+      /language list - Lists available languages
+      /language listunderstanding [player] - Lists understanding of all languages for a players active character
+      /language setunderstanding [player] [language] [understanding] - Sets understanding of a language for a players active character
+    usage: /language [list|listunderstanding|setunderstanding]
+permissions:
+  rpkit.languages.command.language.list:
+    description: Allows listing languages
+    default: op
+  rpkit.languages.command.language.listunderstanding:
+    description: Allows listing the understanding of all languages for a players active character
+    default: op
+  rpkit.languages.command.language.setunderstanding:
+    description: Allows setting the understanding of a language for a players active character

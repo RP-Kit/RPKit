@@ -20,7 +20,7 @@ class SpawnerCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                     if (block.type == Material.SPAWNER) {
                         val spawner = block.state as CreatureSpawner
                         try {
-                            val entityType = EntityType.valueOf(args[0].toUpperCase())
+                            val entityType = EntityType.valueOf(args[0].uppercase())
                             spawner.spawnedType = entityType
                             sender.sendMessage(plugin.messages["spawner-valid"])
                         } catch (exception: IllegalArgumentException) {

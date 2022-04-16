@@ -38,7 +38,7 @@ class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
-        if (!args.isNotEmpty()) {
+        if (args.isEmpty()) {
             sender.sendMessage(plugin.messages.setWarpUsage)
             return true
         }
@@ -52,7 +52,10 @@ class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
                 sender.sendMessage(plugin.messages.setWarpInvalidNameAlreadyInUse)
                 return@thenAccept
             }
-            val warp = RPKWarpImpl(name = RPKWarpName(args[0]), location = sender.location.toRPKLocation())
+            val warp = RPKWarpImpl(
+                name = RPKWarpName(args[0]),
+                location = sender.location.toRPKLocation(),
+            )
             warpService.addWarp(warp).thenRun {
                 sender.sendMessage(
                     plugin.messages.setWarpValid.withParameters(

@@ -61,9 +61,9 @@ class CharacterHideRaceCommand(private val plugin: RPKCharactersBukkit) : Comman
             return true
         }
         character.isRaceHidden = true
-        characterService.updateCharacter(character).thenRun {
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
             sender.sendMessage(plugin.messages["character-hide-race-valid"])
-            character.showCharacterCard(minecraftProfile)
+            updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
     }

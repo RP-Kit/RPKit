@@ -190,6 +190,6 @@ interface RPKCharacterService : Service {
      *
      * @param character The character to update
      */
-    fun updateCharacter(character: RPKCharacter): CompletableFuture<Void>
+    fun updateCharacter(character: RPKCharacter): CompletableFuture<RPKCharacter?>
 
 }

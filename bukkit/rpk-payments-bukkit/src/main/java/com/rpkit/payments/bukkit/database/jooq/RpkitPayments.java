@@ -71,11 +71,12 @@ public class RpkitPayments extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
+        return Arrays.asList(
             RpkitPaymentGroup.RPKIT_PAYMENT_GROUP,
             RpkitPaymentGroupInvite.RPKIT_PAYMENT_GROUP_INVITE,
             RpkitPaymentGroupMember.RPKIT_PAYMENT_GROUP_MEMBER,
             RpkitPaymentGroupOwner.RPKIT_PAYMENT_GROUP_OWNER,
-            RpkitPaymentNotification.RPKIT_PAYMENT_NOTIFICATION);
+            RpkitPaymentNotification.RPKIT_PAYMENT_NOTIFICATION
+        );
     }
 }

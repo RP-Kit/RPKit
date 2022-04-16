@@ -8,9 +8,6 @@ import com.rpkit.locks.bukkit.database.jooq.Keys;
 import com.rpkit.locks.bukkit.database.jooq.RpkitLocks;
 import com.rpkit.locks.bukkit.database.jooq.tables.records.RpkitPlayerUnclaimingRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -35,7 +32,8 @@ public class RpkitPlayerUnclaiming extends TableImpl<RpkitPlayerUnclaimingRecord
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_locks.rpkit_player_unclaiming</code>
+     * The reference instance of
+     * <code>rpkit_locks.rpkit_player_unclaiming</code>
      */
     public static final RpkitPlayerUnclaiming RPKIT_PLAYER_UNCLAIMING = new RpkitPlayerUnclaiming();
 
@@ -48,7 +46,8 @@ public class RpkitPlayerUnclaiming extends TableImpl<RpkitPlayerUnclaimingRecord
     }
 
     /**
-     * The column <code>rpkit_locks.rpkit_player_unclaiming.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_locks.rpkit_player_unclaiming.minecraft_profile_id</code>.
      */
     public final TableField<RpkitPlayerUnclaimingRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -61,14 +60,16 @@ public class RpkitPlayerUnclaiming extends TableImpl<RpkitPlayerUnclaimingRecord
     }
 
     /**
-     * Create an aliased <code>rpkit_locks.rpkit_player_unclaiming</code> table reference
+     * Create an aliased <code>rpkit_locks.rpkit_player_unclaiming</code> table
+     * reference
      */
     public RpkitPlayerUnclaiming(String alias) {
         this(DSL.name(alias), RPKIT_PLAYER_UNCLAIMING);
     }
 
     /**
-     * Create an aliased <code>rpkit_locks.rpkit_player_unclaiming</code> table reference
+     * Create an aliased <code>rpkit_locks.rpkit_player_unclaiming</code> table
+     * reference
      */
     public RpkitPlayerUnclaiming(Name alias) {
         this(alias, RPKIT_PLAYER_UNCLAIMING);
@@ -87,17 +88,12 @@ public class RpkitPlayerUnclaiming extends TableImpl<RpkitPlayerUnclaimingRecord
 
     @Override
     public Schema getSchema() {
-        return RpkitLocks.RPKIT_LOCKS;
+        return aliased() ? null : RpkitLocks.RPKIT_LOCKS;
     }
 
     @Override
     public UniqueKey<RpkitPlayerUnclaimingRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_PLAYER_UNCLAIMING_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitPlayerUnclaimingRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitPlayerUnclaimingRecord>>asList(Keys.KEY_RPKIT_PLAYER_UNCLAIMING_PRIMARY);
     }
 
     @Override

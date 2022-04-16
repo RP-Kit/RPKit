@@ -8,14 +8,25 @@ import com.rpkit.blocklog.bukkit.database.jooq.Indexes;
 import com.rpkit.blocklog.bukkit.database.jooq.Keys;
 import com.rpkit.blocklog.bukkit.database.jooq.RpkitBlockLogging;
 import com.rpkit.blocklog.bukkit.database.jooq.tables.records.FlywaySchemaHistoryBlockloggingRecord;
-import org.jooq.*;
-import org.jooq.impl.DSL;
-import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+
+import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.Index;
+import org.jooq.Name;
+import org.jooq.Record;
+import org.jooq.Row10;
+import org.jooq.Schema;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.TableOptions;
+import org.jooq.UniqueKey;
+import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
+import org.jooq.impl.TableImpl;
 
 
 /**
@@ -27,7 +38,8 @@ public class FlywaySchemaHistoryBlocklogging extends TableImpl<FlywaySchemaHisto
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_block_logging.flyway_schema_history_blocklogging</code>
+     * The reference instance of
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging</code>
      */
     public static final FlywaySchemaHistoryBlocklogging FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING = new FlywaySchemaHistoryBlocklogging();
 
@@ -40,52 +52,62 @@ public class FlywaySchemaHistoryBlocklogging extends TableImpl<FlywaySchemaHisto
     }
 
     /**
-     * The column <code>rpkit_block_logging.flyway_schema_history_blocklogging.installed_rank</code>.
+     * The column
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging.installed_rank</code>.
      */
     public final TableField<FlywaySchemaHistoryBlockloggingRecord, Integer> INSTALLED_RANK = createField(DSL.name("installed_rank"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_block_logging.flyway_schema_history_blocklogging.version</code>.
+     * The column
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging.version</code>.
      */
-    public final TableField<FlywaySchemaHistoryBlockloggingRecord, String> VERSION = createField(DSL.name("version"), SQLDataType.VARCHAR(50).defaultValue(DSL.inline("NULL", SQLDataType.VARCHAR)), this, "");
+    public final TableField<FlywaySchemaHistoryBlockloggingRecord, String> VERSION = createField(DSL.name("version"), SQLDataType.VARCHAR(50).defaultValue(DSL.field("NULL", SQLDataType.VARCHAR)), this, "");
 
     /**
-     * The column <code>rpkit_block_logging.flyway_schema_history_blocklogging.description</code>.
+     * The column
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging.description</code>.
      */
     public final TableField<FlywaySchemaHistoryBlockloggingRecord, String> DESCRIPTION = createField(DSL.name("description"), SQLDataType.VARCHAR(200).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_block_logging.flyway_schema_history_blocklogging.type</code>.
+     * The column
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging.type</code>.
      */
     public final TableField<FlywaySchemaHistoryBlockloggingRecord, String> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR(20).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_block_logging.flyway_schema_history_blocklogging.script</code>.
+     * The column
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging.script</code>.
      */
     public final TableField<FlywaySchemaHistoryBlockloggingRecord, String> SCRIPT = createField(DSL.name("script"), SQLDataType.VARCHAR(1000).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_block_logging.flyway_schema_history_blocklogging.checksum</code>.
+     * The column
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging.checksum</code>.
      */
-    public final TableField<FlywaySchemaHistoryBlockloggingRecord, Integer> CHECKSUM = createField(DSL.name("checksum"), SQLDataType.INTEGER.defaultValue(DSL.inline("NULL", SQLDataType.INTEGER)), this, "");
+    public final TableField<FlywaySchemaHistoryBlockloggingRecord, Integer> CHECKSUM = createField(DSL.name("checksum"), SQLDataType.INTEGER.defaultValue(DSL.field("NULL", SQLDataType.INTEGER)), this, "");
 
     /**
-     * The column <code>rpkit_block_logging.flyway_schema_history_blocklogging.installed_by</code>.
+     * The column
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging.installed_by</code>.
      */
     public final TableField<FlywaySchemaHistoryBlockloggingRecord, String> INSTALLED_BY = createField(DSL.name("installed_by"), SQLDataType.VARCHAR(100).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_block_logging.flyway_schema_history_blocklogging.installed_on</code>.
+     * The column
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging.installed_on</code>.
      */
     public final TableField<FlywaySchemaHistoryBlockloggingRecord, LocalDateTime> INSTALLED_ON = createField(DSL.name("installed_on"), SQLDataType.LOCALDATETIME(0).nullable(false).defaultValue(DSL.field("current_timestamp()", SQLDataType.LOCALDATETIME)), this, "");
 
     /**
-     * The column <code>rpkit_block_logging.flyway_schema_history_blocklogging.execution_time</code>.
+     * The column
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging.execution_time</code>.
      */
     public final TableField<FlywaySchemaHistoryBlockloggingRecord, Integer> EXECUTION_TIME = createField(DSL.name("execution_time"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_block_logging.flyway_schema_history_blocklogging.success</code>.
+     * The column
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging.success</code>.
      */
     public final TableField<FlywaySchemaHistoryBlockloggingRecord, Boolean> SUCCESS = createField(DSL.name("success"), SQLDataType.BOOLEAN.nullable(false), this, "");
 
@@ -98,21 +120,27 @@ public class FlywaySchemaHistoryBlocklogging extends TableImpl<FlywaySchemaHisto
     }
 
     /**
-     * Create an aliased <code>rpkit_block_logging.flyway_schema_history_blocklogging</code> table reference
+     * Create an aliased
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging</code> table
+     * reference
      */
     public FlywaySchemaHistoryBlocklogging(String alias) {
         this(DSL.name(alias), FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING);
     }
 
     /**
-     * Create an aliased <code>rpkit_block_logging.flyway_schema_history_blocklogging</code> table reference
+     * Create an aliased
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging</code> table
+     * reference
      */
     public FlywaySchemaHistoryBlocklogging(Name alias) {
         this(alias, FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING);
     }
 
     /**
-     * Create a <code>rpkit_block_logging.flyway_schema_history_blocklogging</code> table reference
+     * Create a
+     * <code>rpkit_block_logging.flyway_schema_history_blocklogging</code> table
+     * reference
      */
     public FlywaySchemaHistoryBlocklogging() {
         this(DSL.name("flyway_schema_history_blocklogging"), null);
@@ -124,22 +152,17 @@ public class FlywaySchemaHistoryBlocklogging extends TableImpl<FlywaySchemaHisto
 
     @Override
     public Schema getSchema() {
-        return RpkitBlockLogging.RPKIT_BLOCK_LOGGING;
+        return aliased() ? null : RpkitBlockLogging.RPKIT_BLOCK_LOGGING;
     }
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING_FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING_S_IDX);
+        return Arrays.asList(Indexes.FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING_FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING_S_IDX);
     }
 
     @Override
     public UniqueKey<FlywaySchemaHistoryBlockloggingRecord> getPrimaryKey() {
         return Keys.KEY_FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<FlywaySchemaHistoryBlockloggingRecord>> getKeys() {
-        return Arrays.<UniqueKey<FlywaySchemaHistoryBlockloggingRecord>>asList(Keys.KEY_FLYWAY_SCHEMA_HISTORY_BLOCKLOGGING_PRIMARY);
     }
 
     @Override

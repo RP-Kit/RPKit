@@ -40,7 +40,7 @@ class GroupCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["group-usage"])
             return true
         }
-        when (args[0].toLowerCase()) {
+        when (args[0].lowercase()) {
             "add" -> return groupAddCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
             "remove" -> return groupRemoveCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
             "list" -> return groupListCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())

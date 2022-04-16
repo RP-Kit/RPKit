@@ -61,9 +61,9 @@ class CharacterUnhideNameCommand(private val plugin: RPKCharactersBukkit) : Comm
             return true
         }
         character.isNameHidden = false
-        characterService.updateCharacter(character).thenRun {
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
             sender.sendMessage(plugin.messages["character-unhide-name-valid"])
-            character.showCharacterCard(minecraftProfile)
+            updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
     }

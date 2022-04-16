@@ -47,7 +47,8 @@ public class RpkitLanguages extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            RpkitCharacterLanguage.RPKIT_CHARACTER_LANGUAGE);
+        return Arrays.asList(
+            RpkitCharacterLanguage.RPKIT_CHARACTER_LANGUAGE
+        );
     }
 }

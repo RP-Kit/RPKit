@@ -30,7 +30,8 @@ public class RpkitPaymentGroupOwner extends TableImpl<RpkitPaymentGroupOwnerReco
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_payments.rpkit_payment_group_owner</code>
+     * The reference instance of
+     * <code>rpkit_payments.rpkit_payment_group_owner</code>
      */
     public static final RpkitPaymentGroupOwner RPKIT_PAYMENT_GROUP_OWNER = new RpkitPaymentGroupOwner();
 
@@ -43,12 +44,14 @@ public class RpkitPaymentGroupOwner extends TableImpl<RpkitPaymentGroupOwnerReco
     }
 
     /**
-     * The column <code>rpkit_payments.rpkit_payment_group_owner.payment_group_id</code>.
+     * The column
+     * <code>rpkit_payments.rpkit_payment_group_owner.payment_group_id</code>.
      */
     public final TableField<RpkitPaymentGroupOwnerRecord, Integer> PAYMENT_GROUP_ID = createField(DSL.name("payment_group_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_payments.rpkit_payment_group_owner.character_id</code>.
+     * The column
+     * <code>rpkit_payments.rpkit_payment_group_owner.character_id</code>.
      */
     public final TableField<RpkitPaymentGroupOwnerRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -61,21 +64,24 @@ public class RpkitPaymentGroupOwner extends TableImpl<RpkitPaymentGroupOwnerReco
     }
 
     /**
-     * Create an aliased <code>rpkit_payments.rpkit_payment_group_owner</code> table reference
+     * Create an aliased <code>rpkit_payments.rpkit_payment_group_owner</code>
+     * table reference
      */
     public RpkitPaymentGroupOwner(String alias) {
         this(DSL.name(alias), RPKIT_PAYMENT_GROUP_OWNER);
     }
 
     /**
-     * Create an aliased <code>rpkit_payments.rpkit_payment_group_owner</code> table reference
+     * Create an aliased <code>rpkit_payments.rpkit_payment_group_owner</code>
+     * table reference
      */
     public RpkitPaymentGroupOwner(Name alias) {
         this(alias, RPKIT_PAYMENT_GROUP_OWNER);
     }
 
     /**
-     * Create a <code>rpkit_payments.rpkit_payment_group_owner</code> table reference
+     * Create a <code>rpkit_payments.rpkit_payment_group_owner</code> table
+     * reference
      */
     public RpkitPaymentGroupOwner() {
         this(DSL.name("rpkit_payment_group_owner"), null);
@@ -87,7 +93,7 @@ public class RpkitPaymentGroupOwner extends TableImpl<RpkitPaymentGroupOwnerReco
 
     @Override
     public Schema getSchema() {
-        return RpkitPayments.RPKIT_PAYMENTS;
+        return aliased() ? null : RpkitPayments.RPKIT_PAYMENTS;
     }
 
     @Override

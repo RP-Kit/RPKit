@@ -21,28 +21,32 @@ public class RpkitMinecraftProfileLinkRequestRecord extends TableRecordImpl<Rpki
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>rpkit_players.rpkit_minecraft_profile_link_request.profile_id</code>.
+     * Setter for
+     * <code>rpkit_players.rpkit_minecraft_profile_link_request.profile_id</code>.
      */
     public void setProfileId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>rpkit_players.rpkit_minecraft_profile_link_request.profile_id</code>.
+     * Getter for
+     * <code>rpkit_players.rpkit_minecraft_profile_link_request.profile_id</code>.
      */
     public Integer getProfileId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>rpkit_players.rpkit_minecraft_profile_link_request.minecraft_profile_id</code>.
+     * Setter for
+     * <code>rpkit_players.rpkit_minecraft_profile_link_request.minecraft_profile_id</code>.
      */
     public void setMinecraftProfileId(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>rpkit_players.rpkit_minecraft_profile_link_request.minecraft_profile_id</code>.
+     * Getter for
+     * <code>rpkit_players.rpkit_minecraft_profile_link_request.minecraft_profile_id</code>.
      */
     public Integer getMinecraftProfileId() {
         return (Integer) get(1);

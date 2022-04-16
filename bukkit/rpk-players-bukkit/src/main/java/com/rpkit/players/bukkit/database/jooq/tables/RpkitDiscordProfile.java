@@ -8,9 +8,6 @@ import com.rpkit.players.bukkit.database.jooq.Keys;
 import com.rpkit.players.bukkit.database.jooq.RpkitPlayers;
 import com.rpkit.players.bukkit.database.jooq.tables.records.RpkitDiscordProfileRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
@@ -36,7 +33,8 @@ public class RpkitDiscordProfile extends TableImpl<RpkitDiscordProfileRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_players.rpkit_discord_profile</code>
+     * The reference instance of
+     * <code>rpkit_players.rpkit_discord_profile</code>
      */
     public static final RpkitDiscordProfile RPKIT_DISCORD_PROFILE = new RpkitDiscordProfile();
 
@@ -56,7 +54,7 @@ public class RpkitDiscordProfile extends TableImpl<RpkitDiscordProfileRecord> {
     /**
      * The column <code>rpkit_players.rpkit_discord_profile.profile_id</code>.
      */
-    public final TableField<RpkitDiscordProfileRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.defaultValue(DSL.inline("NULL", SQLDataType.INTEGER)), this, "");
+    public final TableField<RpkitDiscordProfileRecord, Integer> PROFILE_ID = createField(DSL.name("profile_id"), SQLDataType.INTEGER.defaultValue(DSL.field("NULL", SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>rpkit_players.rpkit_discord_profile.discord_id</code>.
@@ -72,14 +70,16 @@ public class RpkitDiscordProfile extends TableImpl<RpkitDiscordProfileRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_discord_profile</code> table reference
+     * Create an aliased <code>rpkit_players.rpkit_discord_profile</code> table
+     * reference
      */
     public RpkitDiscordProfile(String alias) {
         this(DSL.name(alias), RPKIT_DISCORD_PROFILE);
     }
 
     /**
-     * Create an aliased <code>rpkit_players.rpkit_discord_profile</code> table reference
+     * Create an aliased <code>rpkit_players.rpkit_discord_profile</code> table
+     * reference
      */
     public RpkitDiscordProfile(Name alias) {
         this(alias, RPKIT_DISCORD_PROFILE);
@@ -98,7 +98,7 @@ public class RpkitDiscordProfile extends TableImpl<RpkitDiscordProfileRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitPlayers.RPKIT_PLAYERS;
+        return aliased() ? null : RpkitPlayers.RPKIT_PLAYERS;
     }
 
     @Override
@@ -109,11 +109,6 @@ public class RpkitDiscordProfile extends TableImpl<RpkitDiscordProfileRecord> {
     @Override
     public UniqueKey<RpkitDiscordProfileRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_DISCORD_PROFILE_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitDiscordProfileRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitDiscordProfileRecord>>asList(Keys.KEY_RPKIT_DISCORD_PROFILE_PRIMARY);
     }
 
     @Override

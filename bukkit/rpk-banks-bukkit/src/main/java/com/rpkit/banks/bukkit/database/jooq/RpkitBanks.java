@@ -5,12 +5,13 @@ package com.rpkit.banks.bukkit.database.jooq;
 
 
 import com.rpkit.banks.bukkit.database.jooq.tables.RpkitBank;
-import org.jooq.Catalog;
-import org.jooq.Table;
-import org.jooq.impl.SchemaImpl;
 
 import java.util.Arrays;
 import java.util.List;
+
+import org.jooq.Catalog;
+import org.jooq.Table;
+import org.jooq.impl.SchemaImpl;
 
 
 /**
@@ -46,7 +47,8 @@ public class RpkitBanks extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            RpkitBank.RPKIT_BANK);
+        return Arrays.asList(
+            RpkitBank.RPKIT_BANK
+        );
     }
 }

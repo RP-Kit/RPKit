@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.store.bukkit.command.ClaimCommand
 import com.rpkit.store.bukkit.command.PurchaseCommand
 import com.rpkit.store.bukkit.command.PurchasesCommand
-import com.rpkit.store.bukkit.database.table.RPKConsumablePurchaseTable
-import com.rpkit.store.bukkit.database.table.RPKConsumableStoreItemTable
-import com.rpkit.store.bukkit.database.table.RPKPermanentPurchaseTable
-import com.rpkit.store.bukkit.database.table.RPKPermanentStoreItemTable
-import com.rpkit.store.bukkit.database.table.RPKPurchaseTable
-import com.rpkit.store.bukkit.database.table.RPKStoreItemTable
-import com.rpkit.store.bukkit.database.table.RPKTimedPurchaseTable
-import com.rpkit.store.bukkit.database.table.RPKTimedStoreItemTable
+import com.rpkit.store.bukkit.database.table.*
 import com.rpkit.store.bukkit.messages.StoresMessages
 import com.rpkit.store.bukkit.purchase.RPKPurchaseService
 import com.rpkit.store.bukkit.purchase.RPKPurchaseServiceImpl
@@ -50,6 +43,7 @@ class RPKStoresBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         System.setProperty("com.rpkit.store.bukkit.shadow.impl.org.jooq.no-logo", "true")
+        System.setProperty("com.rpkit.store.bukkit.shadow.impl.org.jooq.no-tips", "true")
 
         Metrics(this, 4421)
         saveDefaultConfig()

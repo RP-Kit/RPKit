@@ -61,9 +61,9 @@ class CharacterUnhideAgeCommand(private val plugin: RPKCharactersBukkit) : Comma
             return true
         }
         character.isAgeHidden = false
-        characterService.updateCharacter(character).thenRun {
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
             sender.sendMessage(plugin.messages["character-unhide-age-valid"])
-            character.showCharacterCard(minecraftProfile)
+            updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
     }

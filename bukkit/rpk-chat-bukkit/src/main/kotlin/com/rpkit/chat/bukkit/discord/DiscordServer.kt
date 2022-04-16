@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.ReadyEvent
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
-import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionAddEvent
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.requests.GatewayIntent.*
 import org.bukkit.ChatColor
@@ -40,16 +41,16 @@ class DiscordServer(
 ) : ListenerAdapter() {
 
     private val jda = JDABuilder.create(
-            plugin.config.getString("discord.token"),
-            listOf(
-                    GUILD_MEMBERS,
-                    GUILD_PRESENCES,
-                    GUILD_VOICE_STATES,
-                    GUILD_EMOJIS,
-                    GUILD_MESSAGES,
-                    DIRECT_MESSAGES,
-                    DIRECT_MESSAGE_REACTIONS
-            )
+        plugin.config.getString("discord.token"),
+        listOf(
+            GUILD_MEMBERS,
+            GUILD_PRESENCES,
+            GUILD_VOICE_STATES,
+            GUILD_EMOJIS,
+            GUILD_MESSAGES,
+            DIRECT_MESSAGES,
+            DIRECT_MESSAGE_REACTIONS
+        )
     ).build()
 
     private var ready = false
@@ -60,6 +61,9 @@ class DiscordServer(
 
     init {
         jda.addEventListener(this)
+        commands.forEach { (name, command) ->
+            jda.upsertCommand(name, command.description).queue()
+        }
     }
 
     override fun onReady(event: ReadyEvent) {
@@ -67,40 +71,29 @@ class DiscordServer(
         plugin.logger.info("Connected to Discord")
     }
 
-    override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
+    override fun onMessageReceived(event: MessageReceivedEvent) {
         val author = event.author
         if (author == jda.selfUser) return
         val message = event.message.contentStripped
-        if (message.startsWith("rpk!")) {
-            val messageParts = message.split(" ")
-            val commandName = messageParts[0].replaceFirst("rpk!", "")
-            val command = commands[commandName]
-            if (command != null) {
-                command.execute(event.channel, author, command, commandName, messageParts.drop(1))
-            } else {
-                event.channel.sendMessage("Invalid command: $commandName").queue()
-            }
-        } else {
-            val discordProfileService = Services[RPKDiscordProfileService::class.java] ?: return
-            discordProfileService.getDiscordProfile(DiscordUserId(author.idLong)).thenAccept { discordProfile ->
-                val profile = discordProfile.profile
-                val chatChannelService = Services[RPKChatChannelService::class.java] ?: return@thenAccept
-                val chatChannel = chatChannelService.getChatChannelFromDiscordChannel(DiscordChannel(event.channel.idLong))
-                chatChannel?.sendMessage(
-                    profile,
-                    null,
-                    message,
-                    chatChannel.directedPreFormatPipeline,
-                    chatChannel.format,
-                    chatChannel.directedPostFormatPipeline,
-                    chatChannel.undirectedPipeline.filter { it !is DiscordComponent },
-                    true
-                )
-            }
+        val discordProfileService = Services[RPKDiscordProfileService::class.java] ?: return
+        discordProfileService.getDiscordProfile(DiscordUserId(author.idLong)).thenAccept { discordProfile ->
+            val profile = discordProfile.profile
+            val chatChannelService = Services[RPKChatChannelService::class.java] ?: return@thenAccept
+            val chatChannel = chatChannelService.getChatChannelFromDiscordChannel(DiscordChannel(event.channel.idLong))
+            chatChannel?.sendMessage(
+                profile,
+                null,
+                message,
+                chatChannel.directedPreFormatPipeline,
+                chatChannel.format,
+                chatChannel.directedPostFormatPipeline,
+                chatChannel.undirectedPipeline.filter { it !is DiscordComponent },
+                true
+            )
         }
     }
 
-    override fun onPrivateMessageReactionAdd(event: PrivateMessageReactionAddEvent) {
+    override fun onMessageReactionAdd(event: MessageReactionAddEvent) {
         if (event.user == jda.selfUser) return
         if (event.reaction.reactionEmote.emoji != "\u2705") return
         val messageId = event.messageIdLong
@@ -114,7 +107,7 @@ class DiscordServer(
                 discordProfileService.updateDiscordProfile(discordProfile)
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@getDiscordProfile
                 user.openPrivateChannel().queue { privateChannel ->
-                    privateChannel.sendMessage("Your Discord profile has been successfully linked to ${profile.name}.").queue()
+                    privateChannel.sendMessage("Your Discord profile has been successfully linked to ${profile.name.value}.").queue()
                     minecraftProfileService.getMinecraftProfiles(profile).thenAccept { minecraftProfiles ->
                         minecraftProfiles
                             .filter { minecraftProfile -> minecraftProfile.isOnline }
@@ -126,6 +119,16 @@ class DiscordServer(
                     }
                 }
             }
+        }
+    }
+
+    override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
+        val commandName = event.name
+        val command = commands[commandName]
+        if (command != null) {
+            command.execute(event.channel, event.user, command, commandName, event.options, event)
+        } else {
+            event.channel.sendMessage("Invalid command: $commandName").queue()
         }
     }
 

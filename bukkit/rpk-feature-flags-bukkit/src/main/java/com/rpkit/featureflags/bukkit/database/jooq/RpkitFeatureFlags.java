@@ -47,7 +47,8 @@ public class RpkitFeatureFlags extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            RpkitProfileFeatureFlag.RPKIT_PROFILE_FEATURE_FLAG);
+        return Arrays.asList(
+            RpkitProfileFeatureFlag.RPKIT_PROFILE_FEATURE_FLAG
+        );
     }
 }

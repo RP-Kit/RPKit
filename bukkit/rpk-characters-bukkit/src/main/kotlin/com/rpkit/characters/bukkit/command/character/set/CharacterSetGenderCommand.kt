@@ -79,9 +79,9 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit) : Comma
             return true
         }
         character.gender = args.joinToString(" ")
-        characterService.updateCharacter(character).thenRun {
+        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
             sender.sendMessage(plugin.messages["character-set-gender-valid"])
-            character.showCharacterCard(minecraftProfile)
+            updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
     }

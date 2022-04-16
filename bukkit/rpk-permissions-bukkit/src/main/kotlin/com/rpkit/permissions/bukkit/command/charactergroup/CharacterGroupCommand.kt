@@ -36,7 +36,7 @@ class CharacterGroupCommand(private val plugin: RPKPermissionsBukkit) : CommandE
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty()) {
-            when (args[0].toLowerCase()) {
+            when (args[0].lowercase()) {
                 "add" -> return characterGroupAddCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
                 "remove" -> return characterGroupRemoveCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())
                 "view" -> return characterGroupViewCommand.onCommand(sender, command, label, args.drop(1).toTypedArray())

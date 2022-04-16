@@ -8,9 +8,6 @@ import com.rpkit.classes.bukkit.database.jooq.Keys;
 import com.rpkit.classes.bukkit.database.jooq.RpkitClasses;
 import com.rpkit.classes.bukkit.database.jooq.tables.records.RpkitCharacterClassRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -35,7 +32,8 @@ public class RpkitCharacterClass extends TableImpl<RpkitCharacterClassRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_classes.rpkit_character_class</code>
+     * The reference instance of
+     * <code>rpkit_classes.rpkit_character_class</code>
      */
     public static final RpkitCharacterClass RPKIT_CHARACTER_CLASS = new RpkitCharacterClass();
 
@@ -66,14 +64,16 @@ public class RpkitCharacterClass extends TableImpl<RpkitCharacterClassRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_classes.rpkit_character_class</code> table reference
+     * Create an aliased <code>rpkit_classes.rpkit_character_class</code> table
+     * reference
      */
     public RpkitCharacterClass(String alias) {
         this(DSL.name(alias), RPKIT_CHARACTER_CLASS);
     }
 
     /**
-     * Create an aliased <code>rpkit_classes.rpkit_character_class</code> table reference
+     * Create an aliased <code>rpkit_classes.rpkit_character_class</code> table
+     * reference
      */
     public RpkitCharacterClass(Name alias) {
         this(alias, RPKIT_CHARACTER_CLASS);
@@ -92,17 +92,12 @@ public class RpkitCharacterClass extends TableImpl<RpkitCharacterClassRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitClasses.RPKIT_CLASSES;
+        return aliased() ? null : RpkitClasses.RPKIT_CLASSES;
     }
 
     @Override
     public UniqueKey<RpkitCharacterClassRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_CHARACTER_CLASS_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitCharacterClassRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitCharacterClassRecord>>asList(Keys.KEY_RPKIT_CHARACTER_CLASS_PRIMARY);
     }
 
     @Override

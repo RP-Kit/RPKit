@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ class RPKCraftingSkillBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         System.setProperty("com.rpkit.craftingskill.bukkit.shadow.impl.org.jooq.no-logo", "true")
+        System.setProperty("com.rpkit.craftingskill.bukkit.shadow.impl.org.jooq.no-tips", "true")
 
         Metrics(this, 5350)
         saveDefaultConfig()

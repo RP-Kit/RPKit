@@ -30,7 +30,8 @@ public class RpkitCharacterStatPoints extends TableImpl<RpkitCharacterStatPoints
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>rpkit_stat_builds.rpkit_character_stat_points</code>
+     * The reference instance of
+     * <code>rpkit_stat_builds.rpkit_character_stat_points</code>
      */
     public static final RpkitCharacterStatPoints RPKIT_CHARACTER_STAT_POINTS = new RpkitCharacterStatPoints();
 
@@ -43,17 +44,20 @@ public class RpkitCharacterStatPoints extends TableImpl<RpkitCharacterStatPoints
     }
 
     /**
-     * The column <code>rpkit_stat_builds.rpkit_character_stat_points.character_id</code>.
+     * The column
+     * <code>rpkit_stat_builds.rpkit_character_stat_points.character_id</code>.
      */
     public final TableField<RpkitCharacterStatPointsRecord, Integer> CHARACTER_ID = createField(DSL.name("character_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_stat_builds.rpkit_character_stat_points.stat_attribute</code>.
+     * The column
+     * <code>rpkit_stat_builds.rpkit_character_stat_points.stat_attribute</code>.
      */
     public final TableField<RpkitCharacterStatPointsRecord, String> STAT_ATTRIBUTE = createField(DSL.name("stat_attribute"), SQLDataType.VARCHAR(256).nullable(false), this, "");
 
     /**
-     * The column <code>rpkit_stat_builds.rpkit_character_stat_points.points</code>.
+     * The column
+     * <code>rpkit_stat_builds.rpkit_character_stat_points.points</code>.
      */
     public final TableField<RpkitCharacterStatPointsRecord, Integer> POINTS = createField(DSL.name("points"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -66,21 +70,26 @@ public class RpkitCharacterStatPoints extends TableImpl<RpkitCharacterStatPoints
     }
 
     /**
-     * Create an aliased <code>rpkit_stat_builds.rpkit_character_stat_points</code> table reference
+     * Create an aliased
+     * <code>rpkit_stat_builds.rpkit_character_stat_points</code> table
+     * reference
      */
     public RpkitCharacterStatPoints(String alias) {
         this(DSL.name(alias), RPKIT_CHARACTER_STAT_POINTS);
     }
 
     /**
-     * Create an aliased <code>rpkit_stat_builds.rpkit_character_stat_points</code> table reference
+     * Create an aliased
+     * <code>rpkit_stat_builds.rpkit_character_stat_points</code> table
+     * reference
      */
     public RpkitCharacterStatPoints(Name alias) {
         this(alias, RPKIT_CHARACTER_STAT_POINTS);
     }
 
     /**
-     * Create a <code>rpkit_stat_builds.rpkit_character_stat_points</code> table reference
+     * Create a <code>rpkit_stat_builds.rpkit_character_stat_points</code> table
+     * reference
      */
     public RpkitCharacterStatPoints() {
         this(DSL.name("rpkit_character_stat_points"), null);
@@ -92,7 +101,7 @@ public class RpkitCharacterStatPoints extends TableImpl<RpkitCharacterStatPoints
 
     @Override
     public Schema getSchema() {
-        return RpkitStatBuilds.RPKIT_STAT_BUILDS;
+        return aliased() ? null : RpkitStatBuilds.RPKIT_STAT_BUILDS;
     }
 
     @Override

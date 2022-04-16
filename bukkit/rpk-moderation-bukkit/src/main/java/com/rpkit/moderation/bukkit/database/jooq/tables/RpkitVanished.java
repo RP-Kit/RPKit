@@ -8,9 +8,6 @@ import com.rpkit.moderation.bukkit.database.jooq.Keys;
 import com.rpkit.moderation.bukkit.database.jooq.RpkitModeration;
 import com.rpkit.moderation.bukkit.database.jooq.tables.records.RpkitVanishedRecord;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
@@ -48,7 +45,8 @@ public class RpkitVanished extends TableImpl<RpkitVanishedRecord> {
     }
 
     /**
-     * The column <code>rpkit_moderation.rpkit_vanished.minecraft_profile_id</code>.
+     * The column
+     * <code>rpkit_moderation.rpkit_vanished.minecraft_profile_id</code>.
      */
     public final TableField<RpkitVanishedRecord, Integer> MINECRAFT_PROFILE_ID = createField(DSL.name("minecraft_profile_id"), SQLDataType.INTEGER.nullable(false), this, "");
 
@@ -61,14 +59,16 @@ public class RpkitVanished extends TableImpl<RpkitVanishedRecord> {
     }
 
     /**
-     * Create an aliased <code>rpkit_moderation.rpkit_vanished</code> table reference
+     * Create an aliased <code>rpkit_moderation.rpkit_vanished</code> table
+     * reference
      */
     public RpkitVanished(String alias) {
         this(DSL.name(alias), RPKIT_VANISHED);
     }
 
     /**
-     * Create an aliased <code>rpkit_moderation.rpkit_vanished</code> table reference
+     * Create an aliased <code>rpkit_moderation.rpkit_vanished</code> table
+     * reference
      */
     public RpkitVanished(Name alias) {
         this(alias, RPKIT_VANISHED);
@@ -87,17 +87,12 @@ public class RpkitVanished extends TableImpl<RpkitVanishedRecord> {
 
     @Override
     public Schema getSchema() {
-        return RpkitModeration.RPKIT_MODERATION;
+        return aliased() ? null : RpkitModeration.RPKIT_MODERATION;
     }
 
     @Override
     public UniqueKey<RpkitVanishedRecord> getPrimaryKey() {
         return Keys.KEY_RPKIT_VANISHED_PRIMARY;
-    }
-
-    @Override
-    public List<UniqueKey<RpkitVanishedRecord>> getKeys() {
-        return Arrays.<UniqueKey<RpkitVanishedRecord>>asList(Keys.KEY_RPKIT_VANISHED_PRIMARY);
     }
 
     @Override

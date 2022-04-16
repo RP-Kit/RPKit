@@ -5,6 +5,7 @@ package com.rpkit.blocklog.bukkit.database.jooq.tables.records;
 
 
 import com.rpkit.blocklog.bukkit.database.jooq.tables.RpkitBlockHistory;
+
 import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.Record5;

@@ -50,14 +50,16 @@ public class RpkitMinecraftProfileRecord extends UpdatableRecordImpl<RpkitMinecr
     }
 
     /**
-     * Setter for <code>rpkit_players.rpkit_minecraft_profile.minecraft_uuid</code>.
+     * Setter for
+     * <code>rpkit_players.rpkit_minecraft_profile.minecraft_uuid</code>.
      */
     public void setMinecraftUuid(String value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>rpkit_players.rpkit_minecraft_profile.minecraft_uuid</code>.
+     * Getter for
+     * <code>rpkit_players.rpkit_minecraft_profile.minecraft_uuid</code>.
      */
     public String getMinecraftUuid() {
         return (String) get(2);
