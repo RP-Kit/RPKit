@@ -39,7 +39,7 @@ dependencies {
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
     implementation project(":bukkit:rpk-selection-lib-bukkit")
-    testImplementation group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: "1.5.2"
+    testImplementation group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: "1.6.1"
     testImplementation group: "io.kotest", name: "kotest-runner-junit5-jvm", version: "4.4.0"
     testImplementation group: "io.kotest", name: "kotest-framework-engine-jvm", version: "4.4.0"
     testImplementation group: "io.kotest", name: "kotest-assertions-core-jvm", version: "4.4.0"
