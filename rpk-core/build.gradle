@@ -30,7 +30,7 @@ dependencies {
     implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.6.20"
     implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.6.20"
     implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha7"
-    implementation group: "com.zaxxer", name: "HikariCP", version: "4.0.1"
+    implementation group: "com.zaxxer", name: "HikariCP", version: "5.0.1"
     implementation group: "org.flywaydb", name: "flyway-core", version: "7.5.2"
     implementation group: "org.scijava", name: "parsington", version: "3.0.0"
 }
