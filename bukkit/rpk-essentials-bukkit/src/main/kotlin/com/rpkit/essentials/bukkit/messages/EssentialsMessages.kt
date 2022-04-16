@@ -156,6 +156,14 @@ class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
         )
     }
 
+    class ItemMetaCustomModelDataValidMessage(private val message: ParameterizedMessage) {
+        fun withParameters(
+            customModelData: Int
+        ) = message.withParameters(
+            "custom_model_data" to customModelData.toString()
+        )
+    }
+
     class KitValidMessage(private val message: ParameterizedMessage) {
         fun withParameters(kit: RPKKit) = message.withParameters(
             "kit" to kit.name.value
@@ -375,12 +383,16 @@ class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
         .let(::ItemMetaSetNameValidMessage)
     val itemMetaAddLoreValid = getParameterized("item-meta-add-lore-valid")
         .let(::ItemMetaAddLoreValidMessage)
-    val itemMetaRemoveLoreValidMessage = getParameterized("item-meta-remove-lore-valid")
+    val itemMetaRemoveLoreValid = getParameterized("item-meta-remove-lore-valid")
         .let(::ItemMetaRemoveLoreValidMessage)
     val itemMetaRemoveLoreInvalidLoreItem = get("item-meta-remove-lore-invalid-lore-item")
     val itemMetaRemoveLoreInvalidLore = get("item-meta-remove-lore-invalid-lore")
     val itemMetaUsage = get("item-meta-usage")
     val itemMetaInvalidItem = get("item-meta-invalid-item")
+    val itemMetaFailedToCreate = get("item-meta-failed-to-create")
+    val itemMetaCustomModelDataInvalidCustomModelData = get("item-meta-custom-model-data-invalid-custom-model-data")
+    val itemMetaCustomModelDataValid = getParameterized("item-meta-custom-model-data-valid")
+        .let(::ItemMetaCustomModelDataValidMessage)
     val jumpValid = get("jump-valid")
     val jumpInvalidBlock = get("jump-invalid-block")
     val kitValid = getParameterized("kit-valid")
