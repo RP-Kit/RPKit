@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +19,9 @@ package com.rpkit.core.expression
 import org.scijava.parsington.Literals
 import org.scijava.parsington.Tokens
 import org.scijava.parsington.Variable
-import org.scijava.parsington.eval.DefaultEvaluator
+import org.scijava.parsington.eval.DefaultTreeEvaluator
 
-internal class RPKParsingtonEvaluator(private val functions: Map<String, RPKFunction>) : DefaultEvaluator() {
+internal class RPKParsingtonEvaluator(private val functions: Map<String, RPKFunction>) : DefaultTreeEvaluator() {
 
     override fun function(a: Any, b: Any): Any? {
         val element = listElement(a, b)
