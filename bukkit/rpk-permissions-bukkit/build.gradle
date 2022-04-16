@@ -40,9 +40,9 @@ dependencies {
     implementation project(":bukkit:rpk-character-lib-bukkit")
     implementation project(":bukkit:rpk-permissions-lib-bukkit")
     testImplementation group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: "1.6.1"
-    testImplementation group: "io.kotest", name: "kotest-runner-junit5-jvm", version: "4.4.0"
-    testImplementation group: "io.kotest", name: "kotest-framework-engine-jvm", version: "4.4.0"
-    testImplementation group: "io.kotest", name: "kotest-assertions-core-jvm", version: "4.4.0"
+    testImplementation group: "io.kotest", name: "kotest-runner-junit5-jvm", version: "5.2.3"
+    testImplementation group: "io.kotest", name: "kotest-framework-engine-jvm", version: "5.2.3"
+    testImplementation group: "io.kotest", name: "kotest-assertions-core-jvm", version: "5.2.3"
     testImplementation group: "io.mockk", name: "mockk", version: "1.12.0"
 }
 
