@@ -25,10 +25,9 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.util.regex.Pattern
 
-
-class RollCommand(private val plugin: RPKRollingBukkit) : CommandExecutor {
+class PrivateRollCommand(private val plugin: RPKRollingBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (!sender.hasPermission("rpkit.rolling.command.roll")) return true
+        if (!sender.hasPermission("rpkit.rolling.command.privateroll")) return true
         if (sender !is Player) {
             sender.sendMessage(plugin.messages.notFromConsole)
             return true
@@ -92,21 +91,14 @@ class RollCommand(private val plugin: RPKRollingBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages.noCharacter)
             return true
         }
-        val radius = plugin.config.getInt("rolls.radius")
         val parsedRoll = if (parsedRollBuilder.startsWith("+"))
             parsedRollBuilder.toString().drop(1)
         else
             parsedRollBuilder.toString()
-        sender.world.players
-                .filter { player -> player.location.distanceSquared(sender.location) <= radius * radius }
-                .forEach {
-                    it.sendMessage(plugin.messages.roll.withParameters(
-                        character = character,
-                        player = minecraftProfile,
-                        roll = total.toString(),
-                        dice = parsedRoll
-                    ))
-                }
+        sender.sendMessage(plugin.messages.privateRoll.withParameters(
+            roll = total.toString(),
+            dice = parsedRoll
+        ))
         return true
     }
 }
