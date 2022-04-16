@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,20 @@
 
 package com.rpkit.chat.bukkit.discord.command
 
-import net.dv8tion.jda.api.entities.TextChannel
+import net.dv8tion.jda.api.entities.MessageChannel
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.interactions.commands.OptionMapping
 
-abstract class DiscordCommand(val name: String) {
+abstract class DiscordCommand(val name: String, val description: String) {
 
     abstract fun execute(
-            channel: TextChannel,
-            sender: User,
-            command: DiscordCommand,
-            label: String,
-            args: List<String>
+        channel: MessageChannel,
+        sender: User,
+        command: DiscordCommand,
+        label: String,
+        args: List<OptionMapping>,
+        event: SlashCommandInteractionEvent
     )
 
 }

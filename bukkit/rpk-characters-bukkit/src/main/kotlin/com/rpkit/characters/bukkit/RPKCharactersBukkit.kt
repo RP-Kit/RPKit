@@ -60,6 +60,7 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         System.setProperty("com.rpkit.characters.bukkit.shadow.impl.org.jooq.no-logo", "true")
+        System.setProperty("com.rpkit.characters.bukkit.shadow.impl.org.jooq.no-tips", "true")
 
         Metrics(this, 4382)
         saveDefaultConfig()

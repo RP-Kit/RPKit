@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ class ProfileLinkDiscordCommand(private val plugin: RPKPlayersBukkit) : RPKComma
         return discordProfileService.getDiscordProfile(discordId).thenApply { discordProfile ->
             discordService.sendMessage(
                 discordProfile,
-                "There was a request to link this account to profile ${profile.name}. " +
+                "There was a request to link this account to profile ${profile.name.value}. " +
                         "Press tick to accept this request."
             ) { message ->
                 message.addReaction(DiscordReaction.unicode("\u2705"))

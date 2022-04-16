@@ -44,6 +44,7 @@ class RPKPaymentsBukkit : RPKBukkitPlugin() {
 
     override fun onEnable() {
         System.setProperty("com.rpkit.payments.bukkit.shadow.impl.org.jooq.no-logo", "true")
+        System.setProperty("com.rpkit.payments.bukkit.shadow.impl.org.jooq.no-tips", "true")
 
         Metrics(this, 4406)
         saveDefaultConfig()
