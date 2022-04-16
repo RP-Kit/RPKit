@@ -48,7 +48,7 @@ dependencies {
     testImplementation group: "io.kotest", name: "kotest-runner-junit5-jvm", version: "5.2.3"
     testImplementation group: "io.kotest", name: "kotest-framework-engine-jvm", version: "5.2.3"
     testImplementation group: "io.kotest", name: "kotest-assertions-core-jvm", version: "5.2.3"
-    testImplementation group: "io.mockk", name: "mockk", version: "1.12.0"
+    testImplementation group: "io.mockk", name: "mockk", version: "1.12.3"
 }
 
 test {
