@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,9 +63,13 @@ class InventoryClickListener(private val plugin: RPKProfessionsBukkit) : Listene
         val potentialQualities = professionLevels.entries
                 .mapNotNull { (profession, level) -> profession.getQualityFor(RPKCraftingAction.SMELT, material, level) }
         val quality = potentialQualities.maxByOrNull(RPKItemQuality::durabilityModifier)
-        val amount = professionLevels.entries
-            .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.SMELT, material, level) }
-            .maxOrNull() ?: plugin.config.getDouble("default.smelting.$material.amount", 1.0) * item.amount
+        val amount = professionLevels.entries.maxOfOrNull { (profession, level) ->
+            profession.getAmountFor(
+                RPKCraftingAction.SMELT,
+                material,
+                level
+            )
+        } ?: (plugin.config.getDouble("default.smelting.$material.amount", 1.0) * item.amount)
         if (quality != null) {
             item.addLore(quality.lore)
         }

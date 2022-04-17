@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,7 +96,7 @@ class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RP
     }
 
     override fun getMinecraftProfile(minecraftUUID: UUID): CompletableFuture<RPKMinecraftProfile?> {
-        return plugin.database.getTable(RPKMinecraftProfileTable::class.java).get(minecraftUUID)
+        return plugin.database.getTable(RPKMinecraftProfileTable::class.java)[minecraftUUID]
     }
 
     override fun getMinecraftProfiles(profile: RPKProfile): CompletableFuture<List<RPKMinecraftProfile>> {

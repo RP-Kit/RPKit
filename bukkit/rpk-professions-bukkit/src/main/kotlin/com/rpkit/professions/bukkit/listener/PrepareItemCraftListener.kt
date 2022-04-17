@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,9 +69,13 @@ class PrepareItemCraftListener(private val plugin: RPKProfessionsBukkit) : Liste
         }
         val professionLevels = professions
                 .associateWith { profession -> professionService.getPreloadedProfessionLevel(character, profession) ?: 1 }
-        val amount = professionLevels.entries
-            .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.CRAFT, material, level) }
-            .maxOrNull() ?: plugin.config.getDouble("default.crafting.$material.amount", 1.0)
+        val amount = professionLevels.entries.maxOfOrNull { (profession, level) ->
+            profession.getAmountFor(
+                RPKCraftingAction.CRAFT,
+                material,
+                level
+            )
+        } ?: plugin.config.getDouble("default.crafting.$material.amount", 1.0)
         val potentialQualities = professionLevels.entries
                 .mapNotNull { (profession, level) -> profession.getQualityFor(RPKCraftingAction.CRAFT, material, level) }
         val quality = potentialQualities.maxByOrNull(RPKItemQuality::durabilityModifier)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +70,7 @@ class InventoryClickListener(private val plugin: RPKCraftingSkillBukkit) : Liste
         event.currentItem = item
         val maxExperience = plugin.config.getConfigurationSection("smelting.$material")
             ?.getKeys(false)
-            ?.map(String::toInt)
-            ?.maxOrNull()
+            ?.maxOfOrNull(String::toInt)
             ?: 0
         if (maxExperience != 0 && craftingSkill < maxExperience) {
             val totalExperience = min(craftingSkill + item.amount, maxExperience)

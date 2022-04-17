@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +50,7 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         if (event.action != RIGHT_CLICK_BLOCK) return
-        val block = event.clickedBlock
-        if (block == null) return
+        val block = event.clickedBlock ?: return
         val state = block.state
         if (state !is Sign) return
         if (state.getLine(0) == "$GREEN[shop]") {
@@ -60,8 +60,7 @@ class PlayerInteractListener(val plugin: RPKShopsBukkit) : Listener {
             }
             if (state.getLine(1).startsWith("buy")) {
                 val chestBlock = block.getRelative(DOWN)
-                val chestState = chestBlock.state as? Chest
-                if (chestState == null) return
+                val chestState = chestBlock.state as? Chest ?: return
                 event.player.openInventory(chestState.blockInventory)
             } else if (state.getLine(1).startsWith("sell")) {
                 val amount = state.getLine(1).split(Regex("\\s+"))[1].toInt()

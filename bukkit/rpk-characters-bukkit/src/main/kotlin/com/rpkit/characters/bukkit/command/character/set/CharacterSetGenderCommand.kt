@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ class CharacterSetGenderCommand(private val plugin: RPKCharactersBukkit) : Comma
 
     private inner class GenderPrompt : StringPrompt() {
 
-        override fun acceptInput(context: ConversationContext, input: String?): Prompt? {
+        override fun acceptInput(context: ConversationContext, input: String?): Prompt {
             if (input == null) {
                 return GenderNotSetPrompt()
             }

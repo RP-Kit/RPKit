@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +16,6 @@
 
 package com.rpkit.blocklog.bukkit.block
 
-import org.bukkit.World
 import java.util.concurrent.CompletableFuture
 
 

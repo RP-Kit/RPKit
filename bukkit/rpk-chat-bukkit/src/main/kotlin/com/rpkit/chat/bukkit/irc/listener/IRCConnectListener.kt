@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ class IRCConnectListener : ListenerAdapter() {
         val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
         for (channel in chatChannelService.chatChannels) {
             val ircChannel = channel.undirectedPipeline
-                    .mapNotNull { component -> component as? IRCComponent }
-                    .firstOrNull()?.ircChannel
+                .firstNotNullOfOrNull { component -> component as? IRCComponent }
+                ?.ircChannel
             if (ircChannel != null) {
                 ircService.joinChannel(ircChannel)
             }

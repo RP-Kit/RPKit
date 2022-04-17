@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +19,7 @@ package com.rpkit.players.bukkit.web.minecraft
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.http4k.core.Body
-import org.http4k.format.Gson.auto;
+import org.http4k.format.Gson.auto
 import java.util.UUID
 
 data class MinecraftProfileResponse(

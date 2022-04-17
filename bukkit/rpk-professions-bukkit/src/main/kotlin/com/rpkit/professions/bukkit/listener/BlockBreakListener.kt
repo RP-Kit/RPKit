@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,9 +74,13 @@ class BlockBreakListener(private val plugin: RPKProfessionsBukkit) : Listener {
         val itemsToDrop = mutableListOf<ItemStack>()
         for (item in event.block.getDrops(event.player.inventory.itemInMainHand)) {
             val material = item.type
-            val amount = professionLevels.entries
-                .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.MINE, material, level) }
-                .maxOrNull() ?: plugin.config.getDouble("default.mining.$material.amount", 1.0)
+            val amount = professionLevels.entries.maxOfOrNull { (profession, level) ->
+                profession.getAmountFor(
+                    RPKCraftingAction.MINE,
+                    material,
+                    level
+                )
+            } ?: plugin.config.getDouble("default.mining.$material.amount", 1.0)
             val potentialQualities = professionLevels.entries
                     .mapNotNull { (profession, level) -> profession.getQualityFor(RPKCraftingAction.MINE, material, level) }
             val quality = potentialQualities.maxByOrNull(RPKItemQuality::durabilityModifier)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,8 +120,7 @@ class CraftItemListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
         }
         val maxExperience = plugin.config.getConfigurationSection("crafting.$itemType")
             ?.getKeys(false)
-            ?.map(String::toInt)
-            ?.maxOrNull()
+            ?.maxOfOrNull(String::toInt)
             ?: 0
         if (maxExperience != 0 && craftingExperience < maxExperience) {
             val totalExperience = min(craftingExperience + amountCrafted, maxExperience)

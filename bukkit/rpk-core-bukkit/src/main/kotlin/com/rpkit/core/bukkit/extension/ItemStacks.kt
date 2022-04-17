@@ -180,7 +180,7 @@ fun ItemStack.removeLore(lore: List<String>) {
  * Converts an [org.bukkit.inventory.ItemStack] to a Json string
  * for sending with [net.md_5.bungee.api.chat.BaseComponent]'s.
  *
- * @param itemStack the item to convert
+ * @receiver the item to convert
  * @return the Json string representation of the item
  */
 fun ItemStack.toNbtJson(): String? {
@@ -216,7 +216,7 @@ fun ItemStack.tagToNbtJson(): String? {
     // NMS Method to serialize a net.minecraft.server.ItemStack to a valid Json string
     val nmsItemStackClazz: Class<*> = ReflectionUtil.getNMSClass("world.item.ItemStack") ?: return null
     val nbtTagCompoundClazz: Class<*> = ReflectionUtil.getNMSClass("nbt.NBTTagCompound") ?: return null
-    val nmsGetTagMethod: Method = ReflectionUtil.getMethod(nmsItemStackClazz, "getTag") ?: return null
+    val nmsGetTagMethod: Method = ReflectionUtil.getMethod(nmsItemStackClazz, "t") ?: return null
     val nmsItemStackObj: Any? // This is the net.minecraft.server.ItemStack object received from the asNMSCopy method
     val itemTagAsJsonObject: Any? // This is the net.minecraft.server.ItemStack after being put through saveNmsItem method
     try {

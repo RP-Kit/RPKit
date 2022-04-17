@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ class LevelField(private val plugin: RPKExperienceBukkit) : CharacterCardField {
 
     override fun get(character: RPKCharacter): CompletableFuture<String> {
         val experienceService = Services[RPKExperienceService::class.java]
-        if (experienceService == null) return CompletableFuture.completedFuture(plugin.messages["no-experience-service"])
+            ?: return CompletableFuture.completedFuture(plugin.messages["no-experience-service"])
         return CompletableFuture.completedFuture(experienceService.getLevel(character).toString())
     }
 

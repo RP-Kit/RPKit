@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,8 +78,7 @@ class MoneyViewCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["no-profile"])
             return true
         }
-        val characterFuture: CompletableFuture<RPKCharacter?>
-        characterFuture = if (args.size > 1) {
+        val characterFuture: CompletableFuture<RPKCharacter?> = if (args.size > 1) {
             val nameBuilder = StringBuilder()
             for (i in 1..args.size - 2) {
                 nameBuilder.append(args[i]).append(' ')

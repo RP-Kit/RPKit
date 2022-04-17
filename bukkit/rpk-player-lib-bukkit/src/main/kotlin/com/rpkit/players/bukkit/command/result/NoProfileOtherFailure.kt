@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,5 +18,4 @@ package com.rpkit.players.bukkit.command.result
 
 import com.rpkit.core.command.result.CommandFailure
 
-class NoProfileOtherFailure : CommandFailure() {
-}
+class NoProfileOtherFailure : CommandFailure()
