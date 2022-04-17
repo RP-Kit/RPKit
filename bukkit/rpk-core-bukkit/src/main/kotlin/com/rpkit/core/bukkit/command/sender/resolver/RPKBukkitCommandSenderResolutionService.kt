@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import com.rpkit.core.bukkit.RPKCoreBukkit
 import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Service
 import org.bukkit.command.CommandSender
-import java.util.concurrent.CompletableFuture
 
 class RPKBukkitCommandSenderResolutionService(override val plugin: RPKCoreBukkit) : Service {
 
@@ -39,8 +38,7 @@ class RPKBukkitCommandSenderResolutionService(override val plugin: RPKCoreBukkit
     fun resolve(bukkitCommandSender: CommandSender): RPKCommandSender? {
         return resolvers
             .sortedBy(RPKBukkitCommandSenderResolver::priority)
-            .mapNotNull { resolver -> resolver.resolve(bukkitCommandSender) }
-            .firstOrNull()
+            .firstNotNullOfOrNull { resolver -> resolver.resolve(bukkitCommandSender) }
     }
 
 }

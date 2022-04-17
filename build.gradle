@@ -54,13 +54,13 @@ subprojects {
 
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "16"
+            jvmTarget = "17"
         }
     }
 
     compileTestKotlin {
         kotlinOptions {
-            jvmTarget = "16"
+            jvmTarget = "17"
         }
     }
 }

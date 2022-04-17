@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,13 +91,9 @@ class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatCha
             val event = RPKBukkitChatChannelSwitchEvent(minecraftProfile, oldChannel, channel, true)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@thenAcceptAsync
-            if (oldChannel != null) {
-                oldChannel.removeSpeaker(minecraftProfile).join()
-            }
+            oldChannel?.removeSpeaker(minecraftProfile)?.join()
             val chatChannel = event.chatChannel
-            if (chatChannel != null) {
-                chatChannel.addSpeaker(minecraftProfile).join()
-            }
+            chatChannel?.addSpeaker(minecraftProfile)?.join()
         }
     }
 

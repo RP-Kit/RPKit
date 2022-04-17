@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,8 +48,7 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
             val event = RPKBukkitStoreItemCreateEvent(storeItem, true)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
-            val eventStoreItem = event.storeItem
-            when (eventStoreItem) {
+            when (val eventStoreItem = event.storeItem) {
                 is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class.java)
                     .insert(eventStoreItem).join()
                 is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class.java)
@@ -116,8 +116,7 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
             val event = RPKBukkitStoreItemUpdateEvent(storeItem, true)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
-            val eventStoreItem = event.storeItem
-            when (eventStoreItem) {
+            when (val eventStoreItem = event.storeItem) {
                 is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class.java)
                     .update(eventStoreItem).join()
                 is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class.java)
@@ -133,8 +132,7 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
             val event = RPKBukkitStoreItemDeleteEvent(storeItem, true)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
-            val eventStoreItem = event.storeItem
-            when (eventStoreItem) {
+            when (val eventStoreItem = event.storeItem) {
                 is RPKConsumableStoreItem -> plugin.database.getTable(RPKConsumableStoreItemTable::class.java)
                     .delete(eventStoreItem).join()
                 is RPKPermanentStoreItem -> plugin.database.getTable(RPKPermanentStoreItemTable::class.java)

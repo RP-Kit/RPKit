@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,7 +95,7 @@ class RPKAuctionImpl(
             CompletableFuture.runAsync {
                 val highestBid = bids.join().maxByOrNull(RPKBid::amount)
                 if (highestBid != null) {
-                    if (highestBid.amount > noSellPrice ?: 0) {
+                    if (highestBid.amount > (noSellPrice ?: 0)) {
                         val character = highestBid.character
                         val economyService = Services[RPKEconomyService::class.java]
                         if (economyService != null) {
@@ -160,20 +161,18 @@ class RPKAuctionImpl(
             val bukkitOnlinePlayer = bukkitPlayer.player
             if (bukkitOnlinePlayer != null) {
                 val characterService = Services[RPKCharacterService::class.java]
-                if (characterService != null) {
-                    characterService.getActiveCharacter(minecraftProfile).thenAccept { activeCharacter ->
-                        if (activeCharacter == character) {
-                            plugin.server.scheduler.runTask(plugin, Runnable {
-                                bukkitOnlinePlayer.inventory.addItem(item).values.forEach { item ->
-                                    bukkitOnlinePlayer.world.dropItem(bukkitOnlinePlayer.location, item)
-                                }
-                            })
-                        } else {
-                            val inventoryContentsMutable = character.inventoryContents.toMutableList()
-                            inventoryContentsMutable.add(item)
-                            character.inventoryContents = inventoryContentsMutable.toTypedArray()
-                            characterService.updateCharacter(character)
-                        }
+                characterService?.getActiveCharacter(minecraftProfile)?.thenAccept { activeCharacter ->
+                    if (activeCharacter == character) {
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            bukkitOnlinePlayer.inventory.addItem(item).values.forEach { item ->
+                                bukkitOnlinePlayer.world.dropItem(bukkitOnlinePlayer.location, item)
+                            }
+                        })
+                    } else {
+                        val inventoryContentsMutable = character.inventoryContents.toMutableList()
+                        inventoryContentsMutable.add(item)
+                        character.inventoryContents = inventoryContentsMutable.toTypedArray()
+                        characterService.updateCharacter(character)
                     }
                 }
             } else {

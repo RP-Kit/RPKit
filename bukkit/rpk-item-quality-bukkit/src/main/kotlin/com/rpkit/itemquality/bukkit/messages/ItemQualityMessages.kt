@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,4 @@ package com.rpkit.itemquality.bukkit.messages
 import com.rpkit.core.bukkit.message.BukkitMessages
 import com.rpkit.itemquality.bukkit.RPKItemQualityBukkit
 
-class ItemQualityMessages(plugin: RPKItemQualityBukkit) : BukkitMessages(plugin) {
-
-}
+class ItemQualityMessages(plugin: RPKItemQualityBukkit) : BukkitMessages(plugin)

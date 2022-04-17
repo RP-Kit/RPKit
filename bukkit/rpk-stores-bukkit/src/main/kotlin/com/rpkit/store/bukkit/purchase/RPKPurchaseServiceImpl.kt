@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,8 +47,7 @@ class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchase
             val event = RPKBukkitPurchaseCreateEvent(purchase, true)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
-            val eventPurchase = event.purchase
-            when (eventPurchase) {
+            when (val eventPurchase = event.purchase) {
                 is RPKConsumablePurchase -> plugin.database.getTable(RPKConsumablePurchaseTable::class.java)
                     .insert(eventPurchase).join()
                 is RPKPermanentPurchase -> plugin.database.getTable(RPKPermanentPurchaseTable::class.java)
@@ -107,8 +107,7 @@ class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchase
             val event = RPKBukkitPurchaseUpdateEvent(purchase, true)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
-            val eventPurchase = event.purchase
-            when (eventPurchase) {
+            when (val eventPurchase = event.purchase) {
                 is RPKConsumablePurchase -> plugin.database.getTable(RPKConsumablePurchaseTable::class.java)
                     .update(eventPurchase).join()
                 is RPKPermanentPurchase -> plugin.database.getTable(RPKPermanentPurchaseTable::class.java)
@@ -124,8 +123,7 @@ class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchase
             val event = RPKBukkitPurchaseDeleteEvent(purchase, true)
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
-            val eventPurchase = event.purchase
-            when (eventPurchase) {
+            when (val eventPurchase = event.purchase) {
                 is RPKConsumablePurchase -> plugin.database.getTable(RPKConsumablePurchaseTable::class.java)
                     .delete(eventPurchase).join()
                 is RPKPermanentPurchase -> plugin.database.getTable(RPKPermanentPurchaseTable::class.java)

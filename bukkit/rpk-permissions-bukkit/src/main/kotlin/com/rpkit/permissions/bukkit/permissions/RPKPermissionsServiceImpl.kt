@@ -56,7 +56,7 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
 
     override fun hasPermission(profile: RPKProfile, node: String): CompletableFuture<Boolean> {
         var hasPermission = plugin.server.pluginManager.getPermission(node)?.default?.getValue(false) ?: false
-        val groupService = Services[RPKGroupService::class.java] ?: return CompletableFuture.completedFuture(hasPermission)
+        val groupService = Services[RPKGroupService::class.java] ?: return completedFuture(hasPermission)
         return groupService.getGroups(profile).thenApply { groups ->
             if (groups.isEmpty()) {
                 hasPermission = hasPermission(defaultGroup, node, hasPermission)

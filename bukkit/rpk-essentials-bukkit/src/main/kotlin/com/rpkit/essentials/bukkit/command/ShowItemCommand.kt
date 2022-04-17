@@ -43,7 +43,7 @@ class ShowItemCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
             sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
-        if (args.size < 1) {
+        if (args.isEmpty()) {
             sender.sendMessage(plugin.messages.showItemUsage)
             return true
         }

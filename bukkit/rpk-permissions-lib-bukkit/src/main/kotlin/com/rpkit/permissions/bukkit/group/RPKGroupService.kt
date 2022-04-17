@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -156,7 +157,7 @@ interface RPKGroupService : Service {
      * If the groups have not been loaded, returns null.
      * The groups must first be loaded with [loadGroups]. This should happen when an online player is playing this character.
      *
-     * @param profile The profile
+     * @param character The character
      * @return A list of preloaded groups assigned to the profile
      */
     fun getPreloadedGroups(character: RPKCharacter): List<RPKGroup>?

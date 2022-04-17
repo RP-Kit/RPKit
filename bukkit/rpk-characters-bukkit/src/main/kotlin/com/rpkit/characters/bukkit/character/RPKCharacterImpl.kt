@@ -238,7 +238,7 @@ class RPKCharacterImpl(
                                         hideFound = true
                                     }
                                 if (!hideFound) {
-                                    val textComponent = TextComponent(Character.toString(line[i]))
+                                    val textComponent = TextComponent(line[i].toString())
                                     if (chatColor != null) {
                                         textComponent.color = chatColor.asBungee()
                                     }

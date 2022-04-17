@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +25,7 @@ interface RPKRaceService : Service {
 
     /**
      * A collection of races currently managed by this race service.
-     * This is immutable, races must be added and removed using [addRace] and [removeRace].
+     * This is immutable.
      */
     val races: Collection<RPKRace>
 
