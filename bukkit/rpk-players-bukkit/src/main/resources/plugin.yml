@@ -8,7 +8,8 @@ depend:
 - rpk-player-lib-bukkit
 softdepend:
 - rpk-chat-lib-bukkit
-api-version: '1.17'
+- PlaceholderAPI
+api-version: '1.18'
 commands:
   profile:
     description: |

@@ -31,6 +31,7 @@ import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import com.rpkit.experience.bukkit.experience.RPKExperienceServiceImpl
 import com.rpkit.experience.bukkit.listener.*
 import com.rpkit.experience.bukkit.messages.ExperienceMessages
+import com.rpkit.experience.bukkit.placeholder.RPKExperiencePlaceholderExpansion
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -101,6 +102,10 @@ class RPKExperienceBukkit : RPKBukkitPlugin() {
 
         registerListeners()
         registerCommands()
+
+        if (server.pluginManager.getPlugin("PlaceholderAPI") != null) {
+            RPKExperiencePlaceholderExpansion(this).register()
+        }
     }
 
     private fun registerListeners() {

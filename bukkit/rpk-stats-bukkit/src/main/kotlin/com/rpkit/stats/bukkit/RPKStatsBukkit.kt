@@ -22,6 +22,7 @@ import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.stats.bukkit.command.stats.StatsCommand
 import com.rpkit.stats.bukkit.messages.StatsMessages
+import com.rpkit.stats.bukkit.placeholder.RPKStatsPlaceholderExpansion
 import com.rpkit.stats.bukkit.stat.*
 import org.bstats.bukkit.Metrics
 import org.bukkit.attribute.Attribute
@@ -134,6 +135,10 @@ class RPKStatsBukkit : RPKBukkitPlugin() {
         })
 
         registerCommands()
+
+        if (server.pluginManager.getPlugin("PlaceholderAPI") != null) {
+            RPKStatsPlaceholderExpansion(this).register()
+        }
     }
 
     private fun registerCommands() {

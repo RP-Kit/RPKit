@@ -38,6 +38,7 @@ import com.rpkit.permissions.bukkit.listener.RPKBukkitCharacterSwitchListener
 import com.rpkit.permissions.bukkit.messages.PermissionsMessages
 import com.rpkit.permissions.bukkit.permissions.RPKPermissionsService
 import com.rpkit.permissions.bukkit.permissions.RPKPermissionsServiceImpl
+import com.rpkit.permissions.bukkit.placeholder.RPKPermissionsPlaceholderExpansion
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
@@ -110,6 +111,10 @@ class RPKPermissionsBukkit : RPKBukkitPlugin() {
 
         registerCommands()
         registerListeners()
+
+        if (server.pluginManager.getPlugin("PlaceholderAPI") != null) {
+            RPKPermissionsPlaceholderExpansion(this).register()
+        }
     }
 
     fun registerCommands() {

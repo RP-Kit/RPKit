@@ -53,6 +53,11 @@ races:
 books:
   change-author-on-sign: true
   author-format: '${character}'
+# Create custom fields with PlaceholderAPI - these can be incorporated into character cards in messages.yml
+# e.g. ${mob_kills} could be included here if PlaceholderAPI is present
+placeholder-api:
+  fields:
+    mob_kills: '%statistic_mob_kills%' # Example - requires PlaceholderAPI and Statistic from the ecloud
 caching:
   rpkit_character:
     id:

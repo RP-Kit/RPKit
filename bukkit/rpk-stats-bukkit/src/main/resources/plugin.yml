@@ -7,7 +7,9 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-stat-lib-bukkit
-api-version: '1.17'
+softdepend:
+- PlaceholderAPI
+api-version: '1.18'
 commands:
   stats:
     description: Shows your stats
