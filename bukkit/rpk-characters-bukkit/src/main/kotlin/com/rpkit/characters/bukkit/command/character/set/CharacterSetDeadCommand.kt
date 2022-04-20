@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,7 +117,7 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
             val characterService = Services[RPKCharacterService::class.java] ?: return DeadSetPrompt()
             val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(conversable) ?: return DeadSetPrompt()
             val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return DeadSetPrompt()
-            if (input && conversable.hasPermission("rpkit.characters.command.character.set.dead.yes") || !input && conversable.hasPermission("rpkit.characters.command.character.set.dead.no")) {
+            return if (input && conversable.hasPermission("rpkit.characters.command.character.set.dead.yes") || !input && conversable.hasPermission("rpkit.characters.command.character.set.dead.no")) {
                 character.isDead = input
                 characterService.updateCharacter(character)
                 if (input) {
@@ -126,9 +127,9 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
                     conversable.removePotionEffect(PotionEffectType.BLINDNESS)
                     conversable.removePotionEffect(PotionEffectType.SLOW)
                 }
-                return DeadSetPrompt()
+                DeadSetPrompt()
             } else {
-                return DeadNotSetNoPermissionPrompt(input)
+                DeadNotSetNoPermissionPrompt(input)
             }
         }
 

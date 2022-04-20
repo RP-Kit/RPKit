@@ -37,15 +37,20 @@ import com.rpkit.essentials.bukkit.listener.PlayerTeleportListener
 import com.rpkit.essentials.bukkit.locationhistory.RPKLocationHistoryServiceImpl
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageService
 import com.rpkit.essentials.bukkit.messages.EssentialsMessages
-import com.rpkit.essentials.bukkit.time.TimeSlowRunnable
+import com.rpkit.essentials.bukkit.time.TimeRunnable
 import com.rpkit.essentials.bukkit.tracking.RPKTrackingServiceImpl
 import com.rpkit.kit.bukkit.kit.RPKKitService
 import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryService
 import com.rpkit.tracking.bukkit.tracking.RPKTrackingService
 import org.bstats.bukkit.Metrics
+import org.bukkit.GameRule.DO_DAYLIGHT_CYCLE
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import java.io.File
+import java.time.Duration
+import kotlin.math.max
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 
 class RPKEssentialsBukkit : RPKBukkitPlugin() {
@@ -113,7 +118,38 @@ class RPKEssentialsBukkit : RPKBukkitPlugin() {
         Services[RPKLogMessageService::class.java] = RPKLogMessageService(this)
         Services[RPKTrackingService::class.java] = RPKTrackingServiceImpl(this)
 
-        TimeSlowRunnable(this).runTaskTimer(this, 100L, 100L)
+        // Config migration from pre-2.2 time change settings
+        if (config.contains("time-slow-factor")) {
+            config.set("time.change-speed-enabled", true)
+            config.set("time.day-duration", Duration.ofSeconds((600 * config.getDouble("time-slow-factor")).roundToLong()).toString())
+            config.set("time.night-duration", Duration.ofSeconds((600 * config.getDouble("time-slow-factor")).roundToLong()).toString())
+            config.set("time-slow-factor", null)
+            saveConfig()
+        }
+
+        if (config.getBoolean("time.change-speed-enabled")) {
+            server.worlds.forEach { world ->
+                world.setGameRule(DO_DAYLIGHT_CYCLE, false)
+            }
+            val dayDuration = Duration.parse(config.getString("time.day-duration"))
+            val nightDuration = Duration.parse(config.getString("time.night-duration"))
+            val maxDuration = max(dayDuration.toSeconds(), nightDuration.toSeconds())
+            val tickInterval = if (maxDuration > 600) {
+                (maxDuration.toDouble() / 600.0).roundToInt() * 20
+            } else {
+                100
+            }
+            TimeRunnable(
+                this,
+                dayDuration,
+                nightDuration,
+                tickInterval
+            ).runTaskTimer(this, tickInterval.toLong(), tickInterval.toLong())
+        } else {
+            server.worlds.forEach { world ->
+                world.setGameRule(DO_DAYLIGHT_CYCLE, true)
+            }
+        }
 
         registerCommands()
         registerListeners()

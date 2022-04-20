@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +25,7 @@ interface RPKCurrencyService : Service {
 
     /**
      * A collection of all currencies currently managed by this currency service.
-     * The collection is immutable, to add or remove currencies, [addCurrency] or [removeCurrency] should be used.
+     * The collection is immutable.
      */
     val currencies: Collection<RPKCurrency>
 

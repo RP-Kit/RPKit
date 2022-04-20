@@ -10,7 +10,9 @@ depend:
 - rpk-skill-lib-bukkit
 - rpk-experience-lib-bukkit
 - rpk-class-lib-bukkit
-api-version: '1.17'
+softdepend:
+- PlaceholderAPI
+api-version: '1.18'
 commands:
   class:
     description: Class management command

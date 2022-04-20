@@ -8,4 +8,4 @@ depend:
 - rpk-character-lib-bukkit
 - rpk-economy-lib-bukkit
 softdepend: [Vault]
-api-version: '1.17'
+api-version: '1.18'

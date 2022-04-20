@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,8 +94,7 @@ class CraftingSkillCommand(private val plugin: RPKCraftingSkillBukkit) : Command
         val totalExperience = craftingSkillService.getPreloadedCraftingExperience(character, action, material)
         val maxExperience = plugin.config.getConfigurationSection("$actionConfigSectionName.$material")
             ?.getKeys(false)
-            ?.map(String::toInt)
-            ?.maxOrNull()
+            ?.maxOfOrNull(String::toInt)
             ?: 0
         sender.sendMessage(plugin.messages["crafting-skill-valid", mapOf(
                 "action" to action.toString().lowercase(),

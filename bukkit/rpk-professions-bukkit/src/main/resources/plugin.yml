@@ -8,7 +8,9 @@ depend:
 - rpk-character-lib-bukkit
 - rpk-item-quality-lib-bukkit
 - rpk-professions-lib-bukkit
-api-version: '1.17'
+softdepend:
+- PlaceholderAPI
+api-version: '1.18'
 commands:
   profession:
     description: |

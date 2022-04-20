@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,11 +44,10 @@ class InventoryCloseListener : Listener {
         val currency = currencyService.getCurrency(RPKCurrencyName(event.view.title.substringAfterLast("[").substringBeforeLast("]")))
                 ?: return
         val amount = event.inventory.contents
-                .filter { item ->
-                    item != null && item.isSimilar(currency.item)
-                }
-                .map { item -> item.amount }
-                .sum()
+            .filter { item ->
+                item != null && item.isSimilar(currency.item)
+            }
+            .sumOf { item -> item.amount }
         event.inventory.contents
                 .filter { item ->
                     item != null && !item.isSimilar(currency.item)

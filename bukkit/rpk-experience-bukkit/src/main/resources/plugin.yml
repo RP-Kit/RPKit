@@ -7,7 +7,9 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-experience-lib-bukkit
-api-version: '1.17'
+softdepend:
+- PlaceholderAPI
+api-version: '1.18'
 commands:
   experience:
     description: Experience command

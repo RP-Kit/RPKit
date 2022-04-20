@@ -38,7 +38,7 @@ allprojects {
     apply plugin: "maven-publish"
     apply plugin: "org.jetbrains.dokka"
     group = "com.rpkit"
-    version = "2.1.0"
+    version = "2.2.0"
 }
 
 subprojects {
@@ -50,17 +50,18 @@ subprojects {
         maven { url "https://maven.enginehub.org/repo/" }
         maven { url "https://repo.codemc.org/repository/maven-public" }
         maven { url "https://jitpack.io" }
+        maven { url "https://repo.extendedclip.com/content/repositories/placeholderapi/" }
     }
 
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "16"
+            jvmTarget = "17"
         }
     }
 
     compileTestKotlin {
         kotlinOptions {
-            jvmTarget = "16"
+            jvmTarget = "17"
         }
     }
 }

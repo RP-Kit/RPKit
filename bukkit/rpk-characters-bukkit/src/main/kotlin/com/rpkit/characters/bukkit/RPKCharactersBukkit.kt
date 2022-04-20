@@ -26,6 +26,7 @@ import com.rpkit.characters.bukkit.database.table.RPKNewCharacterCooldownTable
 import com.rpkit.characters.bukkit.listener.*
 import com.rpkit.characters.bukkit.messages.CharactersMessages
 import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownService
+import com.rpkit.characters.bukkit.placeholder.RPKCharactersPlaceholderExpansion
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.characters.bukkit.race.RPKRaceServiceImpl
 import com.rpkit.characters.bukkit.web.CharactersWebAPI
@@ -145,6 +146,21 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
                 name = "RPKit Characters Web API thread",
                 contextClassLoader = classLoader
             ) { CharactersWebAPI(this).start() }
+        }
+
+        if (server.pluginManager.getPlugin("PlaceholderAPI") != null) {
+            RPKCharactersPlaceholderExpansion(this).register()
+
+            config.getConfigurationSection("placeholder-api.fields")
+                ?.getKeys(false)
+                ?.forEach { key ->
+                    characterCardFieldService.characterCardFields.add(
+                        PlaceholderAPIField(
+                            this,
+                            key,
+                            config.getString("placeholder-api.fields.${key}") ?: "")
+                    )
+                }
         }
     }
 

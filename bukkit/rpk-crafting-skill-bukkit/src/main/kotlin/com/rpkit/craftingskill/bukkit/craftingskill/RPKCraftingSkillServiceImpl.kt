@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,8 +79,7 @@ class RPKCraftingSkillServiceImpl(override val plugin: RPKCraftingSkillBukkit) :
             }
             val maxExperience = plugin.config.getConfigurationSection("$actionConfigSectionName.$material")
                 ?.getKeys(false)
-                ?.map(String::toInt)
-                ?.maxOrNull()
+                ?.maxOfOrNull(String::toInt)
                 ?: 0
             if (maxExperience == 0) return@runAsync
             val craftingExperienceTable = plugin.database.getTable(RPKCraftingExperienceTable::class.java)
@@ -114,8 +114,7 @@ class RPKCraftingSkillServiceImpl(override val plugin: RPKCraftingSkillBukkit) :
     }
 
     override fun getQualityFor(action: RPKCraftingAction, material: Material, experience: Int): RPKItemQuality? {
-        val itemQualityService = Services[RPKItemQualityService::class.java]
-        if (itemQualityService == null) return null
+        val itemQualityService = Services[RPKItemQualityService::class.java] ?: return null
         val actionConfigSectionName = when (action) {
             CRAFT -> "crafting"
             SMELT -> "smelting"

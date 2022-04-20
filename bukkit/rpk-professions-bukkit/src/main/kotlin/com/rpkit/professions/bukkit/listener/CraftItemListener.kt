@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,9 +65,13 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit) : Listener {
             val professionLevels = professions
                     .associateWith { profession -> professionService.getPreloadedProfessionLevel(character, profession) ?: 1 }
             var amountCrafted = getAmountCrafted(event)
-            val amount = professionLevels.entries
-                .map { (profession, level) -> profession.getAmountFor(RPKCraftingAction.CRAFT, itemType, level) }
-                .maxOrNull() ?: plugin.config.getDouble("default.crafting.$itemType.amount", 1.0)
+            val amount = professionLevels.entries.maxOfOrNull { (profession, level) ->
+                profession.getAmountFor(
+                    RPKCraftingAction.CRAFT,
+                    itemType,
+                    level
+                )
+            } ?: plugin.config.getDouble("default.crafting.$itemType.amount", 1.0)
             if (amount > 1) {
                 amountCrafted *= amount.roundToInt()
             } else if (amount < 1) {

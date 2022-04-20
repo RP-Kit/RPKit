@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,9 +115,8 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return DescriptionSetPrompt()
             val characterService = Services[RPKCharacterService::class.java] ?: return DescriptionSetPrompt()
             val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(conversable)
-            if (minecraftProfile == null) return DescriptionSetPrompt()
-            val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
-            if (character == null) return DescriptionSetPrompt()
+                ?: return DescriptionSetPrompt()
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return DescriptionSetPrompt()
             character.description = context.getSessionData("description") as String
             characterService.updateCharacter(character)
             return DescriptionSetPrompt()
