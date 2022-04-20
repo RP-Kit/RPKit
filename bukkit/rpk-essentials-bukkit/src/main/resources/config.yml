@@ -10,7 +10,6 @@ track-command:
     ==: org.bukkit.inventory.ItemStack
     v: 2975
     type: COMPASS
-time-slow-factor: 4
 daily-messages:
 - '&7"Ye can''t crown a king with a bobble ''at"'
 - '&7"Let me check my wocket potch"'
@@ -36,6 +35,11 @@ kits:
   - ==: org.bukkit.inventory.ItemStack
     v: 2975
     type: EGG
+time:
+  change-speed-enabled: true
+  # Durations are ISO 8601 Period format: https://en.wikipedia.org/wiki/ISO_8601#Durations
+  day-duration: PT3H
+  night-duration: PT3H
 caching:
   rpkit_log_messages_enabled:
     minecraft_profile_id:
