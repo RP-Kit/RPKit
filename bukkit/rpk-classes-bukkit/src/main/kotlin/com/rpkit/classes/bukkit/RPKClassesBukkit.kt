@@ -29,6 +29,7 @@ import com.rpkit.classes.bukkit.listener.PlayerQuitListener
 import com.rpkit.classes.bukkit.listener.RPKCharacterSwitchListener
 import com.rpkit.classes.bukkit.listener.RPKCharacterUpdateListener
 import com.rpkit.classes.bukkit.messages.ClassesMessages
+import com.rpkit.classes.bukkit.placeholder.RPKClassesPlaceholderExpansion
 import com.rpkit.classes.bukkit.skillpoint.RPKSkillPointServiceImpl
 import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
@@ -136,6 +137,10 @@ class RPKClassesBukkit : RPKBukkitPlugin() {
 
         registerCommands()
         registerListeners()
+
+        if (server.pluginManager.getPlugin("PlaceholderAPI") != null) {
+            RPKClassesPlaceholderExpansion(this).register()
+        }
     }
 
     private fun registerCommands() {

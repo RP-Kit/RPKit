@@ -31,6 +31,7 @@ import com.rpkit.players.bukkit.listener.AsyncPlayerPreLoginListener
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
 import com.rpkit.players.bukkit.listener.PlayerQuitListener
 import com.rpkit.players.bukkit.messages.PlayersMessages
+import com.rpkit.players.bukkit.placeholder.RPKPlayersPlaceholderExpansion
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.RPKProfileServiceImpl
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
@@ -136,6 +137,10 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
                 name = "RPKit Players Web API thread",
                 contextClassLoader = classLoader
             ) { PlayersWebAPI(this).start() }
+        }
+
+        if (server.pluginManager.getPlugin("PlaceholderAPI") != null) {
+            RPKPlayersPlaceholderExpansion(this).register()
         }
     }
 

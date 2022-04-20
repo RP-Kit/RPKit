@@ -8,7 +8,9 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-economy-lib-bukkit
-api-version: '1.17'
+softdepend:
+- PlaceholderAPI
+api-version: '1.18'
 commands:
   money:
     description: Money management command

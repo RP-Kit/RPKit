@@ -31,6 +31,7 @@ import com.rpkit.professions.bukkit.database.table.RPKCharacterProfessionTable
 import com.rpkit.professions.bukkit.database.table.RPKProfessionHiddenTable
 import com.rpkit.professions.bukkit.listener.*
 import com.rpkit.professions.bukkit.messages.ProfessionsMessages
+import com.rpkit.professions.bukkit.placeholder.RPKProfessionsPlaceholderExpansion
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
 import com.rpkit.professions.bukkit.profession.RPKProfessionServiceImpl
 import org.bstats.bukkit.Metrics
@@ -104,6 +105,10 @@ class RPKProfessionsBukkit : RPKBukkitPlugin() {
 
         registerCommands()
         registerListeners()
+
+        if (server.pluginManager.getPlugin("PlaceholderAPI") != null) {
+            RPKProfessionsPlaceholderExpansion(this).register()
+        }
     }
 
     fun registerCommands() {
