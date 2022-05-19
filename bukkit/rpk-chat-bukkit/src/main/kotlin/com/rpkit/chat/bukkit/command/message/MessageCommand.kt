@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,62 +57,69 @@ class MessageCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
             return true
         }
         chatGroupService.getChatGroup(RPKChatGroupName(args[0])).thenAccept { chatGroup ->
-            if (chatGroup != null) {
-                if (!sender.hasPermission("rpkit.chat.command.chatgroup.message")) {
-                    sender.sendMessage(plugin.messages["no-permission-chat-group-message"])
-                    return@thenAccept
-                }
-                chatGroup.members.thenAccept getMembers@{ members ->
-                    if (members.none { memberMinecraftProfile ->
-                            memberMinecraftProfile.id == senderMinecraftProfile.id
-                        }) {
-                        sender.sendMessage(plugin.messages["chat-group-message-invalid-not-a-member"])
-                        return@getMembers
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                if (chatGroup != null) {
+                    if (!sender.hasPermission("rpkit.chat.command.chatgroup.message")) {
+                        sender.sendMessage(plugin.messages["no-permission-chat-group-message"])
+                        return@Runnable
                     }
-                    chatGroup.sendMessage(senderMinecraftProfile, args.drop(1).joinToString(" "))
-                }
-            } else {
-                if (plugin.server.getPlayer(args[0]) == null) {
-                    sender.sendMessage(plugin.messages["message-invalid-target"])
-                    return@thenAccept
-                }
-                if (!sender.hasPermission("rpkit.chat.command.message")) {
-                    sender.sendMessage(plugin.messages["no-permission-message"])
-                    return@thenAccept
-                }
-                val receiver = plugin.server.getPlayer(args[0])
-                if (receiver == null) {
-                    sender.sendMessage(plugin.messages["message-invalid-target"])
-                    return@thenAccept
-                }
-                val receiverMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(receiver)
-                if (receiverMinecraftProfile == null) {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                    return@thenAccept
-                }
-                if (receiverMinecraftProfile == senderMinecraftProfile) {
-                    sender.sendMessage(plugin.messages["message-invalid-self"])
-                    return@thenAccept
-                }
-                chatGroupService.getChatGroup(RPKChatGroupName("_pm_" + sender.name + "_" + receiver.name)).thenAccept { chatGroup1 ->
-                    chatGroupService.getChatGroup(RPKChatGroupName("_pm_" + receiver.name + "_" + sender.name)).thenAccept { chatGroup2 ->
-                        when {
-                            chatGroup1 != null -> CompletableFuture.completedFuture(chatGroup1)
-                            chatGroup2 != null -> CompletableFuture.completedFuture(chatGroup2)
-                            else -> {
-                                chatGroupService.createChatGroup(RPKChatGroupName("_pm_" + sender.getName() + "_" + receiver.name)).thenApply { createdGroup ->
-                                    createdGroup.addMember(senderMinecraftProfile)
-                                    createdGroup.addMember(receiverMinecraftProfile)
-                                    return@thenApply createdGroup
-                                }
-
-                            }
-                        }.thenAccept { pmGroup ->
-                            pmGroup.sendMessage(senderMinecraftProfile, args.drop(1).joinToString(" "))
+                    chatGroup.members.thenAccept getMembers@{ members ->
+                        if (members.none { memberMinecraftProfile ->
+                                memberMinecraftProfile.id == senderMinecraftProfile.id
+                            }) {
+                            sender.sendMessage(plugin.messages["chat-group-message-invalid-not-a-member"])
+                            return@getMembers
                         }
+                        chatGroup.sendMessage(senderMinecraftProfile, args.drop(1).joinToString(" "))
                     }
+                } else {
+                    if (plugin.server.getPlayer(args[0]) == null) {
+                        sender.sendMessage(plugin.messages["message-invalid-target"])
+                        return@Runnable
+                    }
+                    if (!sender.hasPermission("rpkit.chat.command.message")) {
+                        sender.sendMessage(plugin.messages["no-permission-message"])
+                        return@Runnable
+                    }
+                    val receiver = plugin.server.getPlayer(args[0])
+                    if (receiver == null) {
+                        sender.sendMessage(plugin.messages["message-invalid-target"])
+                        return@Runnable
+                    }
+                    val receiverMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(receiver)
+                    if (receiverMinecraftProfile == null) {
+                        sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                        return@Runnable
+                    }
+                    if (receiverMinecraftProfile == senderMinecraftProfile) {
+                        sender.sendMessage(plugin.messages["message-invalid-self"])
+                        return@Runnable
+                    }
+                    chatGroupService.getChatGroup(RPKChatGroupName("_pm_" + sender.name + "_" + receiver.name))
+                        .thenAccept { chatGroup1 ->
+                            chatGroupService.getChatGroup(RPKChatGroupName("_pm_" + receiver.name + "_" + sender.name))
+                                .thenAccept { chatGroup2 ->
+                                    when {
+                                        chatGroup1 != null -> CompletableFuture.completedFuture(chatGroup1)
+                                        chatGroup2 != null -> CompletableFuture.completedFuture(chatGroup2)
+                                        else -> {
+                                            chatGroupService.createChatGroup(RPKChatGroupName("_pm_" + sender.getName() + "_" + receiver.name))
+                                                .thenApplyAsync { createdGroup ->
+                                                    CompletableFuture.allOf(
+                                                        createdGroup.addMember(senderMinecraftProfile),
+                                                        createdGroup.addMember(receiverMinecraftProfile)
+                                                    ).join()
+                                                    return@thenApplyAsync createdGroup
+                                                }
+
+                                        }
+                                    }.thenAccept { pmGroup ->
+                                        pmGroup.sendMessage(senderMinecraftProfile, args.drop(1).joinToString(" "))
+                                    }
+                                }
+                        }
                 }
-            }
+            })
         }
         return true
     }
