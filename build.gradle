@@ -38,7 +38,7 @@ allprojects {
     apply plugin: "maven-publish"
     apply plugin: "org.jetbrains.dokka"
     group = "com.rpkit"
-    version = "2.1.1-SNAPSHOT"
+    version = "2.1.1"
 }
 
 subprojects {
