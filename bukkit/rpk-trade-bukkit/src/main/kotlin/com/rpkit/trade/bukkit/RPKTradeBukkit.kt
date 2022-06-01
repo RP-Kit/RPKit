@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,19 @@
 
 package com.rpkit.trade.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.trade.bukkit.listener.BlockBreakListener
 import com.rpkit.trade.bukkit.listener.PlayerInteractListener
 import com.rpkit.trade.bukkit.listener.SignChangeListener
 import com.rpkit.trade.bukkit.messages.TradeMessages
 import org.bstats.bukkit.Metrics
+import org.bukkit.plugin.java.JavaPlugin
 
 /**
  * RPK trade plugin default implementation.
  */
-class RPKTradeBukkit : RPKBukkitPlugin() {
+class RPKTradeBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var messages: TradeMessages
 

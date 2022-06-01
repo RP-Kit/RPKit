@@ -16,7 +16,7 @@
 
 package com.rpkit.store.bukkit.storeitem
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.database.table.RPKConsumableStoreItemTable
 import com.rpkit.store.bukkit.database.table.RPKPermanentStoreItemTable
@@ -31,7 +31,7 @@ import java.util.concurrent.CompletableFuture
 
 class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreItemService {
 
-    override fun getStoreItem(plugin: RPKBukkitPlugin, identifier: String): CompletableFuture<RPKStoreItem?> {
+    override fun getStoreItem(plugin: RPKPlugin, identifier: String): CompletableFuture<RPKStoreItem?> {
         return this.plugin.database.getTable(RPKStoreItemTable::class.java).get(plugin, identifier)
     }
 

@@ -17,11 +17,12 @@
 package com.rpkit.economy.bukkit
 
 import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.character.MoneyField
 import com.rpkit.economy.bukkit.command.currency.CurrencyCommand
@@ -38,12 +39,13 @@ import com.rpkit.economy.bukkit.listener.*
 import com.rpkit.economy.bukkit.messages.EconomyMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 /**
  * RPK economy plugin default implementation.
  */
-class RPKEconomyBukkit : RPKBukkitPlugin() {
+class RPKEconomyBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: EconomyMessages

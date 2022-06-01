@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package com.rpkit.tracking.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import org.bstats.bukkit.Metrics
+import org.bukkit.plugin.java.JavaPlugin
 
 
-class RPKTrackingLibBukkit : RPKBukkitPlugin() {
+class RPKTrackingLibBukkit : JavaPlugin(), RPKPlugin {
     override fun onEnable() {
         Metrics(this, 4422)
     }

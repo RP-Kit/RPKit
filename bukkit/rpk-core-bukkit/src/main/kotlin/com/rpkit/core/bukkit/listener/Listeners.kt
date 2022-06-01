@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.rpkit.kit.bukkit
+package com.rpkit.core.bukkit.listener
 
-import com.rpkit.core.plugin.RPKPlugin
-import org.bstats.bukkit.Metrics
-import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.event.Listener
+import org.bukkit.plugin.Plugin
 
-
-class RPKKitLibBukkit : JavaPlugin(), RPKPlugin {
-    override fun onEnable() {
-        Metrics(this, 4399)
+fun Plugin.registerListeners(vararg listeners: Listener) {
+    for (listener in listeners) {
+        server.pluginManager.registerEvents(listener, this)
     }
 }

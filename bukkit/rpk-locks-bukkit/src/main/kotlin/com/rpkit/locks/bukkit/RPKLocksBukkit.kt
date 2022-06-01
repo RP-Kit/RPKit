@@ -16,11 +16,12 @@
 
 package com.rpkit.locks.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.locks.bukkit.command.GetKeyCommand
 import com.rpkit.locks.bukkit.command.KeyringCommand
@@ -41,9 +42,10 @@ import org.bukkit.Material.IRON_INGOT
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ShapedRecipe
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
-class RPKLocksBukkit : RPKBukkitPlugin() {
+class RPKLocksBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: LocksMessages

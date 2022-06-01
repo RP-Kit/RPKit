@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package com.rpkit.banks.bukkit
 
 import com.rpkit.banks.bukkit.vault.RPKBanksVaultEconomy
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import net.milkbowl.vault.economy.Economy
 import org.bstats.bukkit.Metrics
 import org.bukkit.plugin.ServicePriority
+import org.bukkit.plugin.java.JavaPlugin
 
 /**
  * Class to allow bank lib to load as a plugin.
@@ -28,7 +29,7 @@ import org.bukkit.plugin.ServicePriority
  * With this plugin loaded, a Vault economy service is added for banks plugins on [ServicePriority.High].
  * If banks plugins wish to provide their own economy service, they should register on [ServicePriority.Highest]
  */
-class RPKBankLibBukkit : RPKBukkitPlugin() {
+class RPKBankLibBukkit : JavaPlugin(), RPKPlugin {
 
 
     override fun onEnable() {

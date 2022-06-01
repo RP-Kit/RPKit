@@ -27,20 +27,22 @@ import com.rpkit.auctions.bukkit.database.table.RPKBidTable
 import com.rpkit.auctions.bukkit.listener.PlayerInteractListener
 import com.rpkit.auctions.bukkit.listener.SignChangeListener
 import com.rpkit.auctions.bukkit.messages.AuctionsMessages
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 /**
  * RPK auctions plugin default implementation.
  */
-class RPKAuctionsBukkit : RPKBukkitPlugin() {
+class RPKAuctionsBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: AuctionsMessages

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package com.rpkit.shops.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import org.bstats.bukkit.Metrics
+import org.bukkit.plugin.java.JavaPlugin
 
 /**
  * Class to allow shop lib to load as a plugin.
  * This allows plugins requiring shops or implementing shops to depend on the plugin.
  */
-class RPKShopLibBukkit : RPKBukkitPlugin() {
+class RPKShopLibBukkit : JavaPlugin(), RPKPlugin {
 
     override fun onEnable() {
         Metrics(this, 4414)

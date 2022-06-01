@@ -16,11 +16,11 @@
 
 package com.rpkit.payments.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.command.payment.PaymentCommand
 import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupInviteTable
@@ -32,12 +32,13 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroupServiceImpl
 import com.rpkit.payments.bukkit.messages.PaymentsMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 /**
  * RPK payments plugin default implementation.
  */
-class RPKPaymentsBukkit : RPKBukkitPlugin() {
+class RPKPaymentsBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: PaymentsMessages

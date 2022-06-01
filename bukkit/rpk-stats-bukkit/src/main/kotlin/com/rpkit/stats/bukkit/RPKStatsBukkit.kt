@@ -18,7 +18,7 @@ package com.rpkit.stats.bukkit
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.stats.bukkit.command.stats.StatsCommand
 import com.rpkit.stats.bukkit.messages.StatsMessages
@@ -26,11 +26,12 @@ import com.rpkit.stats.bukkit.placeholder.RPKStatsPlaceholderExpansion
 import com.rpkit.stats.bukkit.stat.*
 import org.bstats.bukkit.Metrics
 import org.bukkit.attribute.Attribute
+import org.bukkit.plugin.java.JavaPlugin
 
 /**
  * RPK stats plugin default implementation.
  */
-class RPKStatsBukkit : RPKBukkitPlugin() {
+class RPKStatsBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var messages: StatsMessages
 
