@@ -52,23 +52,25 @@ import com.rpkit.chat.bukkit.prefix.RPKPrefixServiceImpl
 import com.rpkit.chat.bukkit.snooper.RPKSnooperService
 import com.rpkit.chat.bukkit.snooper.RPKSnooperServiceImpl
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 /**
  * RPK chat plugin default implementation.
  */
-class RPKChatBukkit : RPKBukkitPlugin() {
+class RPKChatBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: ChatMessages

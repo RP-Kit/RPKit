@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 package com.rpkit.chat.bukkit
 
 import com.rpkit.chat.bukkit.vault.RPKChatVaultChat
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import net.milkbowl.vault.chat.Chat
 import org.bstats.bukkit.Metrics
 import org.bukkit.plugin.ServicePriority
 import org.bukkit.plugin.ServicePriority.Normal
+import org.bukkit.plugin.java.JavaPlugin
 
 /**
  * Class to allow chat lib to load as a plugin.
@@ -30,7 +31,7 @@ import org.bukkit.plugin.ServicePriority.Normal
  * If chat plugins wish to provide their own chat service, they should register on [ServicePriority.High]
  * or [ServicePriority.Highest].
  */
-class RPKChatLibBukkit : RPKBukkitPlugin() {
+class RPKChatLibBukkit : JavaPlugin(), RPKPlugin {
 
     override fun onEnable() {
         Metrics(this, 4384)

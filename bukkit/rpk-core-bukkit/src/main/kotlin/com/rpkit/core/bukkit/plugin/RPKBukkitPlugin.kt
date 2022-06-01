@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,10 @@ import org.bukkit.plugin.java.JavaPlugin
  * Provides convenience methods for registering listeners, commands, database tables, and provides service services and
  * servlets.
  */
+@Deprecated("Extend JavaPlugin as normal and implement RPKPlugin where necessary. This class is no longer required.")
 abstract class RPKBukkitPlugin : JavaPlugin(), RPKPlugin {
 
+    @Deprecated(message = "Replace with extension, stop extending from RPKBukkitPlugin", replaceWith = ReplaceWith("registerListeners", "com.rpkit.core.bukkit.listener.registerListeners"))
     fun registerListeners(vararg listeners: Listener) {
         for (listener in listeners) {
             server.pluginManager.registerEvents(listener, this)

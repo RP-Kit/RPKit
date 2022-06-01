@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package com.rpkit.skills.bukkit.fireball
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkillService
-import org.bukkit.event.Listener
+import org.bukkit.plugin.java.JavaPlugin
 
-class RPKFireballSkillBukkit : RPKBukkitPlugin(), Listener {
+class RPKFireballSkillBukkit : JavaPlugin(), RPKPlugin {
 
     override fun onEnable() {
         saveDefaultConfig()

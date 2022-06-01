@@ -16,21 +16,22 @@
 
 package com.rpkit.featureflags.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.featureflags.bukkit.database.table.RPKProfileFeatureFlagTable
 import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlagService
 import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlagServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 
-class RPKFeatureFlagsBukkit : RPKBukkitPlugin() {
+class RPKFeatureFlagsBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
 

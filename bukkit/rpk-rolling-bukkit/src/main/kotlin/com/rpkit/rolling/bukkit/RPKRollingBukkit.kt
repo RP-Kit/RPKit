@@ -16,12 +16,13 @@
 
 package com.rpkit.rolling.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.rolling.bukkit.messages.RollingMessages
 import org.bstats.bukkit.Metrics
+import org.bukkit.plugin.java.JavaPlugin
 
 
-class RPKRollingBukkit : RPKBukkitPlugin() {
+class RPKRollingBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var messages: RollingMessages
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package com.rpkit.economy.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.economy.bukkit.vault.RPKEconomyVaultEconomy
 import net.milkbowl.vault.economy.Economy
 import org.bstats.bukkit.Metrics
 import org.bukkit.plugin.ServicePriority
+import org.bukkit.plugin.java.JavaPlugin
 
 /**
  * Class to allow economy lib to load as a plugin.
@@ -29,7 +30,7 @@ import org.bukkit.plugin.ServicePriority
  * If economy plugins wish to provide their own economy service, they should register on [ServicePriority.Highest] in
  * order to override bank implementation supplied in rpk-bank-lib
  */
-class RPKEconomyLibBukkit : RPKBukkitPlugin() {
+class RPKEconomyLibBukkit : JavaPlugin(), RPKPlugin {
 
     override fun onEnable() {
         Metrics(this, 4391)

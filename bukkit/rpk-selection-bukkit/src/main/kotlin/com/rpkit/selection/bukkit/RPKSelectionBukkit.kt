@@ -16,11 +16,12 @@
 
 package com.rpkit.selection.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.selection.bukkit.command.WandCommand
 import com.rpkit.selection.bukkit.database.table.RPKSelectionTable
@@ -30,10 +31,11 @@ import com.rpkit.selection.bukkit.selection.RPKSelectionService
 import com.rpkit.selection.bukkit.selection.RPKSelectionServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 
-class RPKSelectionBukkit : RPKBukkitPlugin() {
+class RPKSelectionBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: SelectionMessages

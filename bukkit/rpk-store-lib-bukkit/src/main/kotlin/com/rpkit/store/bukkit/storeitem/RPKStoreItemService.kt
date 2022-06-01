@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +16,7 @@
 
 package com.rpkit.store.bukkit.storeitem
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Service
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
@@ -31,7 +32,7 @@ interface RPKStoreItemService : Service {
      * @param plugin The plugin providing the store item
      * @param identifier The unique identifier of the store item
      */
-    fun getStoreItem(plugin: RPKBukkitPlugin, identifier: String): CompletableFuture<RPKStoreItem?>
+    fun getStoreItem(plugin: RPKPlugin, identifier: String): CompletableFuture<RPKStoreItem?>
 
     /**
      * Gets a store item by ID.

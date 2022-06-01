@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,24 +16,19 @@
 
 package com.rpkit.food.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.food.bukkit.expiry.RPKExpiryService
 import com.rpkit.food.bukkit.expiry.RPKExpiryServiceImpl
-import com.rpkit.food.bukkit.listener.EntityDeathListener
-import com.rpkit.food.bukkit.listener.EntityPickupItemListener
-import com.rpkit.food.bukkit.listener.FurnaceSmeltListener
-import com.rpkit.food.bukkit.listener.InventoryOpenListener
-import com.rpkit.food.bukkit.listener.PlayerFishListener
-import com.rpkit.food.bukkit.listener.PlayerItemConsumeListener
-import com.rpkit.food.bukkit.listener.PlayerJoinListener
-import com.rpkit.food.bukkit.listener.PrepareItemCraftListener
+import com.rpkit.food.bukkit.listener.*
 import org.bstats.bukkit.Metrics
+import org.bukkit.plugin.java.JavaPlugin
 
 /**
  * RPK food plugin default implementation.
  */
-class RPKFoodBukkit : RPKBukkitPlugin() {
+class RPKFoodBukkit : JavaPlugin(), RPKPlugin {
 
     override fun onEnable() {
         Metrics(this, 4397)

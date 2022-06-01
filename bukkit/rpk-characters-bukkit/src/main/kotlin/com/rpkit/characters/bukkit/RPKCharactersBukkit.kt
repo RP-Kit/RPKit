@@ -30,15 +30,17 @@ import com.rpkit.characters.bukkit.placeholder.RPKCharactersPlaceholderExpansion
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.characters.bukkit.race.RPKRaceServiceImpl
 import com.rpkit.characters.bukkit.web.CharactersWebAPI
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
@@ -49,7 +51,7 @@ import kotlin.text.Charsets.UTF_8
 /**
  * RPK characters plugin default implementation.
  */
-class RPKCharactersBukkit : RPKBukkitPlugin() {
+class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: CharactersMessages

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,19 +18,20 @@ package com.rpkit.core.bukkit
 
 import com.rpkit.core.bukkit.command.sender.resolver.RPKBukkitCommandSenderResolutionService
 import com.rpkit.core.bukkit.messages.CoreMessages
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.bukkit.service.BukkitServicesDelegate
 import com.rpkit.core.database.Database
 import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.expression.RPKExpressionServiceImpl
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
+import org.bukkit.plugin.java.JavaPlugin
 
 /**
  * RPK's core, Bukkit implementation.
  * Allows RPK to function on Bukkit.
  */
-class RPKCoreBukkit : RPKBukkitPlugin() {
+class RPKCoreBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var messages: CoreMessages
 

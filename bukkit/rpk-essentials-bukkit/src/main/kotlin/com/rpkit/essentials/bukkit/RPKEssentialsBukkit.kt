@@ -17,11 +17,12 @@
 package com.rpkit.essentials.bukkit
 
 import com.rpkit.core.bukkit.command.toBukkit
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.dailyquote.bukkit.dailyquote.RPKDailyQuoteService
 import com.rpkit.essentials.bukkit.command.*
@@ -46,6 +47,7 @@ import org.bstats.bukkit.Metrics
 import org.bukkit.GameRule.DO_DAYLIGHT_CYCLE
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.time.Duration
 import kotlin.math.max
@@ -53,7 +55,7 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 
-class RPKEssentialsBukkit : RPKBukkitPlugin() {
+class RPKEssentialsBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: EssentialsMessages

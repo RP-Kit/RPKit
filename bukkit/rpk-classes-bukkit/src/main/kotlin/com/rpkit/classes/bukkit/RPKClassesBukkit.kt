@@ -31,11 +31,12 @@ import com.rpkit.classes.bukkit.listener.RPKCharacterUpdateListener
 import com.rpkit.classes.bukkit.messages.ClassesMessages
 import com.rpkit.classes.bukkit.placeholder.RPKClassesPlaceholderExpansion
 import com.rpkit.classes.bukkit.skillpoint.RPKSkillPointServiceImpl
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkillPointService
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
@@ -43,10 +44,11 @@ import com.rpkit.stats.bukkit.stat.RPKStatVariableName
 import com.rpkit.stats.bukkit.stat.RPKStatVariableService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 
-class RPKClassesBukkit : RPKBukkitPlugin() {
+class RPKClassesBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: ClassesMessages
